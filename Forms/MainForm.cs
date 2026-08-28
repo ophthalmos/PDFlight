@@ -372,6 +372,7 @@ public partial class MainForm : Form
         settings.ReloadSharedLists(); // Ziel-/Zuletzt-Listen anderer Instanzen übernehmen
         var startFolder = settings.TargetFolders.FirstOrDefault(f => !string.IsNullOrEmpty(f) && Directory.Exists(f)) ?? string.Empty;
         var jumpToLastUsed = settings.JumpToLastUsed && settings.RecentFolders.Count > 0
+            && Directory.Exists(settings.RecentFolders[0]) // sonst meldet der Dialog bei jedem Öffnen einen fehlenden Pfad
             && !string.Equals(startFolder, settings.RecentFolders[0], StringComparison.OrdinalIgnoreCase);
 
         using FolderSelectForm dialog = new(startFolder, copy, jumpToLastUsed);
