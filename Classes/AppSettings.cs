@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace PDFLight.Classes;
 
-/// <summary>Programmeinstellungen, gespeichert als JSON unter %APPDATA%\PDFLight\settings.json.</summary>
+/// <summary>Programmeinstellungen, gespeichert als JSON unter %APPDATA%\PDFlight\settings.json.</summary>
 public class AppSettings
 {
     public const int MaxRecentFolders = 16;
@@ -26,7 +26,7 @@ public class AppSettings
     public int WindowHeight { get; set; }
     public bool WindowMaximized { get; set; }
 
-    private static string SettingsPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PDFLight", "settings.json");
+    private static string SettingsPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PDFlight", "settings.json");
 
     public static AppSettings Load()
     {

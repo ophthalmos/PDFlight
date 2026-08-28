@@ -7,4 +7,4 @@ obj/
 *.user
 
 # Installer-Ausgabe (wird aus dem Release-Build erzeugt)
-PDFLightSetup.exe
+PDFlightSetup.exe

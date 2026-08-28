@@ -196,7 +196,7 @@ public partial class MainForm : Form
     private void UpdateUiState()
     {
         var hasFile = currentFile != null;
-        Text = hasFile ? currentFile.Name + " – PDFLight" : "PDFLight";
+        Text = hasFile ? currentFile.Name + " – PDFlight" : "PDFlight";
         splitButtonMove.Enabled = btnCopy.Enabled = btnRename.Enabled = btnDelete.Enabled = btnShowInFolder.Enabled = ddbEdit.Enabled = btnEmail.Enabled = hasFile;
         foreach (var button in programIconButtons) { button.Enabled = hasFile; }
         if (hasFile)
@@ -699,7 +699,7 @@ public partial class MainForm : Form
 
     private void BackupForUndo()
     {
-        var folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PDFLight");
+        var folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PDFlight");
         Directory.CreateDirectory(folder);
         undoBackupFile = Path.Combine(folder, "undo.pdf");
         File.Copy(currentFile.FullName, undoBackupFile, true);
