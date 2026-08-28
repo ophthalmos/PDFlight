@@ -34,8 +34,7 @@ internal class PdfViewHost(WebView2 webView)
         core.Settings.IsGeneralAutofillEnabled = false;
         core.Settings.IsPasswordAutosaveEnabled = false;
         core.Settings.HiddenPdfToolbarItems = CoreWebView2PdfToolbarItems.Save | CoreWebView2PdfToolbarItems.SaveAs // Speichern übernimmt PDFlight selbst
-            | CoreWebView2PdfToolbarItems.FullScreen // der Chromium-Vollbildmodus ist im Host-Fenster kaum beendbar → PDFlight bietet stattdessen F11
-            | CoreWebView2PdfToolbarItems.Search; // Suche nur per Strg+F: so sieht die MainForm jedes Öffnen der Suchleiste und kann Esc zuerst ihr zuordnen
+            | CoreWebView2PdfToolbarItems.FullScreen; // der Chromium-Vollbildmodus ist im Host-Fenster kaum beendbar → PDFlight bietet stattdessen F11
         core.AddWebResourceRequestedFilter("https://" + VirtualHost + "/*", CoreWebView2WebResourceContext.All);
         core.WebResourceRequested += Core_WebResourceRequested;
         core.NavigationStarting += Core_NavigationStarting;

@@ -176,7 +176,7 @@ public partial class MainForm : Form
     private void LoadPdf(string path, int page = 0, bool addToRecent = false)
     {
         if (addToRecent) { previousFolder = null; } // bewusstes Öffnen beendet den Verschieben-Kontext fürs Blättern
-        viewerFindBarOpen = false; // das Neuladen des Dokuments schließt auch die Suchleiste des Viewers
+        viewerDialogOpen = false; // das Neuladen des Dokuments schließt auch offene Viewer-Dialoge
         try { viewHost.Load(path, page); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
@@ -1038,14 +1038,16 @@ public partial class MainForm : Form
 
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData) { return HandleShortcut(keyData) || base.ProcessCmdKey(ref msg, keyData); }
 
-    // Heuristik: Der Zustand der Chromium-Suchleiste ist nicht abfragbar, aber ihre einzigen Öffnungswege
-    // (Strg+F/F3; der Lupe-Button der Viewer-Toolbar ist ausgeblendet) laufen als Tasten hier durch.
-    private bool viewerFindBarOpen;
+    // Der Zustand der Viewer-Dialoge (Suchleiste, Seitenansicht, Drucken …) ist über die WebView2-API nicht
+    // abfragbar. Wird aber SICHER einer geöffnet — per Tastatur, die läuft hier durch —, setzt das nächste Esc
+    // das Beenden/Vollbild-Verlassen aus und geht stattdessen an Chromium, das den Dialog schließt.
+    // Per Maus geöffnete Viewer-Dialoge (Toolbar-Buttons) bleiben unsichtbar; dort beendet Esc wie gewohnt.
+    private bool viewerDialogOpen;
 
     private void WebView_KeyDown(object sender, KeyEventArgs e)
     {
-        if (e.KeyData is (Keys.Control | Keys.F) or Keys.F3) { viewerFindBarOpen = true; return; } // öffnet die Suchleiste — an Chromium durchreichen
-        if (e.KeyData == Keys.Escape && viewerFindBarOpen) { viewerFindBarOpen = false; return; }  // Esc schließt zuerst die Suchleiste, nicht das Programm/Vollbild
+        if (e.KeyData is (Keys.Control | Keys.F) or Keys.F3 or (Keys.Control | Keys.P)) { viewerDialogOpen = true; return; } // Suche bzw. Drucken — an Chromium durchreichen
+        if (e.KeyData == Keys.Escape && viewerDialogOpen) { viewerDialogOpen = false; return; }
         if (HandleShortcut(e.KeyData)) { e.Handled = true; }
     }
 
