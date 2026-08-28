@@ -20,7 +20,9 @@ Scan-Ordner zügig abzuarbeiten.
   per Strg+Klick. Die verschobene Datei bleibt — nun vom neuen Ort — angezeigt; existiert im
   Ziel bereits eine gleichnamige Datei, kann sie ersetzt oder ein freier Name (`name_1.pdf`)
   vergeben werden, und auf inhaltsgleiche Dateien im Zielordner weist PDFlight hin.
-  Nach dem Kopieren ist wählbar, ob Kopie oder Original angezeigt wird.
+  Nach dem Kopieren ist wählbar, ob Kopie oder Original angezeigt wird. Blättert man nach
+  einem Verschieben weiter (Alt+←/→), fragt PDFlight, ob im bisherigen oder im aktuellen
+  Ordner weitergearbeitet werden soll — ideal zum Abarbeiten eines Eingangsordners.
 - **Umbenennen**: großer Dialog mit der Dateiliste des Ordners als Namensvorlage,
   Umwandeln-Menü (Unterstriche, Bindestriche, Klein-/Titelschreibung, Umlaute ersetzen),
   Datums-Präfixen/-Suffixen und optionalem Zielordnerwechsel.

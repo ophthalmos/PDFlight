@@ -175,6 +175,7 @@ public partial class MainForm : Form
 
     private void LoadPdf(string path, int page = 0, bool addToRecent = false)
     {
+        if (addToRecent) { previousFolder = null; } // bewusstes Öffnen beendet den Verschieben-Kontext fürs Blättern
         try { viewHost.Load(path, page); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
@@ -292,14 +293,60 @@ public partial class MainForm : Form
     }
 
     /// <summary>Blättert zur nächsten/vorherigen PDF-Datei im Ordner (mit Umlauf, wie in PDFMover).</summary>
+    private string previousFolder; // Quellordner des letzten Verschiebens — fürs Blättern (Dialog wie in PDFMover)
+
     private void StepFile(int step)
     {
         if (currentFile == null) { return; }
-        var files = FileUtil.GetPdfFilesInFolder(currentFile.DirectoryName);
-        if (files.Count == 0) { return; }
-        var index = files.FindIndex(f => string.Equals(f, currentFile.FullName, StringComparison.OrdinalIgnoreCase));
-        index = index < 0 ? 0 : (index + step + files.Count) % files.Count;
-        if (!string.Equals(files[index], currentFile.FullName, StringComparison.OrdinalIgnoreCase)) { LoadPdf(files[index]); }
+        var folder = currentFile.DirectoryName;
+        // Nach einem Verschieben: im Zielordner weiterblättern oder zurück in den bisherigen Ordner? (wie in PDFMover)
+        if (previousFolder != null && Directory.Exists(previousFolder) && !string.Equals(previousFolder, folder, StringComparison.OrdinalIgnoreCase))
+        {
+            TaskDialogButton btnPrevious = new TaskDialogCommandLinkButton("Vorheriger Ordner:", previousFolder);
+            TaskDialogButton btnCurrent = new TaskDialogCommandLinkButton("Aktueller Ordner:", folder);
+            TaskDialogPage page = new()
+            {
+                Caption = Application.ProductName,
+                Heading = $"Sie möchten die {(step > 0 ? "nächste" : "vorherige")} Datei öffnen." + Environment.NewLine + "Welcher Ordner soll durchsucht werden?",
+                AllowCancel = true,
+                SizeToContent = true,
+                Buttons = { btnPrevious, btnCurrent },
+                DefaultButton = btnPrevious,
+                Footnote = "Wenn Sie abbrechen, wird der aktuelle Ordner verwendet."
+            };
+            var result = TaskDialog.ShowDialog(Handle, page);
+            if (result == btnPrevious)
+            {
+                var target = previousFolder;
+                previousFolder = null;
+                StepFileInFolder(target, step);
+                return;
+            }
+            if (result == btnCurrent) { previousFolder = null; } // bei Abbruch bleibt die Frage fürs nächste Blättern bestehen
+        }
+        StepFileInFolder(folder, step);
+    }
+
+    /// <summary>Blättert im angegebenen Ordner; liegt die aktuelle Datei dort nicht (mehr),
+    /// wird sie virtuell einsortiert, damit das Blättern an ihrer alten Position ansetzt.</summary>
+    private void StepFileInFolder(string folder, int step)
+    {
+        var files = FileUtil.GetPdfFilesInFolder(folder);
+        var reference = Path.Combine(folder, currentFile.Name);
+        var index = files.FindIndex(f => string.Equals(f, reference, StringComparison.OrdinalIgnoreCase));
+        if (index < 0)
+        {
+            if (files.Count == 0)
+            {
+                TaskDlg.MsgTaskDlg(Handle, "Der Ordner enthält keine PDF-Dateien.", folder, TaskDialogIcon.Information);
+                return;
+            }
+            files.Add(reference);
+            FileUtil.SortNatural(files);
+            index = files.FindIndex(f => string.Equals(f, reference, StringComparison.OrdinalIgnoreCase));
+        }
+        var next = (index + step + files.Count) % files.Count;
+        if (next != index && !string.Equals(files[next], currentFile.FullName, StringComparison.OrdinalIgnoreCase)) { LoadPdf(files[next]); }
     }
 
     /// <summary>Nach Verschieben/Löschen: nächste Datei an gleicher Position laden oder Anzeige leeren.</summary>
@@ -376,9 +423,11 @@ public partial class MainForm : Form
             }
             else
             {
+                var sourceFolder = currentFile.DirectoryName;
                 File.Move(currentFile.FullName, destination, true);
                 LoadPdf(destination); // die verschobene Datei bleibt angezeigt — nun vom neuen Ort (wie in PDFMover)
                 CheckForDuplicate(new FileInfo(destination));
+                previousFolder = sourceFolder; // beim nächsten Blättern die Rückkehr in den bisherigen Ordner anbieten
             }
             settings.AddRecentFolder(folder);
             settings.Save();
