@@ -24,6 +24,7 @@ internal static class ToolbarIcons
     public const char AllApps = '\uE71D';
     public const char FolderOpen = '\uE838';
     public const char Settings = '\uE713';
+    public const char Info = '\uE946';
 
     private const string FontName = "Segoe MDL2 Assets";
     private static readonly Dictionary<(char Glyph, int Size), Image> cache = [];

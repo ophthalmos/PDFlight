@@ -9,6 +9,7 @@
     <AssemblyVersion>0.1.0</AssemblyVersion>
     <FileVersion>0.1.0</FileVersion>
     <Version>0.1.0</Version>
+    <SourceRevisionId>build$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</SourceRevisionId><!-- Builddatum für den Über-Dialog (TaskDlg.GetBuildDate) -->
     <Product>PDFlight</Product>
     <RootNamespace>PDFLight</RootNamespace><!-- Namespaces im Code bleiben PDFLight; nur der sichtbare Name ist PDFlight -->
     <Authors>Wilhelm Happe</Authors>

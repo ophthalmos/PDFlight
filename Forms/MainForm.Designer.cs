@@ -59,6 +59,7 @@
             toolStripSeparator5 = new ToolStripSeparator();
             btnShowInFolder = new ToolStripButton();
             btnSettings = new ToolStripButton();
+            btnInfo = new ToolStripButton();
             statusStrip = new StatusStrip();
             statusIndex = new ToolStripStatusLabel();
             statusPath = new ToolStripStatusLabel();
@@ -84,7 +85,7 @@
             // toolStrip
             // 
             toolStrip.GripStyle = ToolStripGripStyle.Hidden;
-            toolStrip.Items.AddRange(new ToolStripItem[] { btnOpen, toolStripSeparator1, btnPrev, btnNext, btnPageUp, btnPageDown, toolStripSeparator2, splitButtonMove, btnCopy, toolStripSeparator3, btnRename, btnDelete, btnShowInFolder, toolStripSeparator8, btnEmail, toolStripSeparator4, ddbEdit, toolStripSeparator9, ddbPrograms, toolStripSeparator5, btnSettings });
+            toolStrip.Items.AddRange(new ToolStripItem[] { btnOpen, toolStripSeparator1, btnPrev, btnNext, btnPageUp, btnPageDown, toolStripSeparator2, splitButtonMove, btnCopy, toolStripSeparator3, btnRename, btnDelete, btnShowInFolder, toolStripSeparator8, btnEmail, toolStripSeparator4, ddbEdit, toolStripSeparator9, ddbPrograms, toolStripSeparator5, btnSettings, btnInfo });
             toolStrip.Location = new Point(0, 0);
             toolStrip.Name = "toolStrip";
             toolStrip.Size = new Size(984, 25);
@@ -316,7 +317,17 @@
             btnSettings.Text = "Einstellungen";
             btnSettings.ToolTipText = "Zielordner, Programme und Optionen verwalten";
             btnSettings.Click += BtnSettings_Click;
-            // 
+            //
+            // btnInfo
+            //
+            btnInfo.Alignment = ToolStripItemAlignment.Right;
+            btnInfo.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            btnInfo.Name = "btnInfo";
+            btnInfo.Size = new Size(32, 22);
+            btnInfo.Text = "Info";
+            btnInfo.ToolTipText = "Über PDFlight und Spenden (F1)";
+            btnInfo.Click += BtnInfo_Click;
+            //
             // statusStrip
             // 
             statusStrip.Items.AddRange(new ToolStripItem[] { statusIndex, statusPath, statusInfo });
@@ -412,6 +423,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripButton btnShowInFolder;
         private System.Windows.Forms.ToolStripButton btnSettings;
+        private System.Windows.Forms.ToolStripButton btnInfo;
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel statusIndex;
         private System.Windows.Forms.ToolStripStatusLabel statusPath;
