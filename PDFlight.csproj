@@ -15,7 +15,7 @@
     <Description>Schlanker PDF-Betrachter mit Dateiverwaltung</Description>
     <NeutralLanguage>de</NeutralLanguage>
     <SatelliteResourceLanguages>de</SatelliteResourceLanguages>
-    <ApplicationIcon>Resources\PDFlight.ico</ApplicationIcon>
+    <ApplicationIcon>PDFlight.ico</ApplicationIcon>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks><!-- für die Quellgeneratoren LibraryImport/GeneratedComInterface -->
   </PropertyGroup>
 
