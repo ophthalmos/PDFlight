@@ -17,7 +17,7 @@ public class AppSettings
     public bool ShowProgramIcons { get; set; } = true;    // Symbole der externen Programme zusätzlich in der Symbolleiste
     public bool ShowToolbarIcons { get; set; } = true;    // Symbole auf den Schaltflächen der Symbolleiste
     public bool LargeToolbarIcons { get; set; } = true;   // 24 statt 16 Pixel (vor DPI-Skalierung)
-    public bool CloseOnEscape { get; set; }               // Programm mit Esc beenden (wie in PDFMover)
+    public bool CloseOnEscape { get; set; }               // Programm mit 2× Esc beenden (Shift+Esc sofort)
     public bool ReopenLastFile { get; set; }              // zuletzt geöffnete Datei beim Start laden
     public string LastFile { get; set; } = string.Empty;  // Datei, die beim Beenden geöffnet war
     public int WindowX { get; set; } = -1;

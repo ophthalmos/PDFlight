@@ -390,7 +390,7 @@
             cbCloseOnEscape.Name = "cbCloseOnEscape";
             cbCloseOnEscape.Size = new System.Drawing.Size(200, 19);
             cbCloseOnEscape.TabIndex = 7;
-            cbCloseOnEscape.Text = "Programm mit &Esc beenden";
+            cbCloseOnEscape.Text = "Programm mit 2× &Esc beenden (Umschalt+Esc: sofort)";
             cbCloseOnEscape.UseVisualStyleBackColor = true;
             //
             // cbReopenLast

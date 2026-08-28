@@ -1025,8 +1025,9 @@ public partial class MainForm : Form
             case Keys.Left | Keys.Alt: StepFile(-1); return true;
             case Keys.F1: TaskDlg.AboutTaskDlg(Handle, Icon); return true;
             case Keys.F11: SetFullScreen(!isFullScreen); return true;
+            case Keys.Escape | Keys.Shift when settings.CloseOnEscape: Close(); return true; // Shift+Esc beendet sofort (wie in NetRadio)
             case Keys.Escape when isFullScreen: SetFullScreen(false); return true;
-            case Keys.Escape when settings.CloseOnEscape: Close(); return true; // wie in PDFMover (Option)
+            case Keys.Escape when settings.CloseOnEscape: return HandleEscapeToClose();
         }
         if ((keyData & (Keys.Control | Keys.Alt | Keys.Shift)) == Keys.Control)
         {
@@ -1034,6 +1035,19 @@ public partial class MainForm : Form
             if (key is >= Keys.D1 and <= Keys.D9) { LaunchProgramByIndex(key - Keys.D1); return true; } // Strg+1 … Strg+9: externe Programme
         }
         return false;
+    }
+
+    private DateTime lastEscape = DateTime.MinValue;
+
+    /// <summary>Beenden erst beim zweiten Esc kurz hintereinander: Das erste Esc wird nicht verschluckt und
+    /// schließt so einen eventuell offenen Viewer-Dialog (Suchleiste, Seitenansicht, Drucken) — deren Zustand
+    /// ist über die WebView2-API nicht abfragbar. Shift+Esc beendet sofort (s. HandleShortcut).</summary>
+    private bool HandleEscapeToClose()
+    {
+        var now = DateTime.UtcNow;
+        if ((now - lastEscape).TotalMilliseconds <= 1500) { Close(); return true; }
+        lastEscape = now;
+        return false; // das erste Esc geht an den Viewer
     }
 
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData) { return HandleShortcut(keyData) || base.ProcessCmdKey(ref msg, keyData); }
