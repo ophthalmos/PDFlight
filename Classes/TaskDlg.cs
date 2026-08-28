@@ -81,17 +81,23 @@ internal static class TaskDlg
         string webView2Runtime;
         try { webView2Runtime = CoreWebView2Environment.GetAvailableBrowserVersionString(); }
         catch (WebView2RuntimeNotFoundException) { webView2Runtime = "nicht gefunden"; }
-        var msg = "Schlanker PDF-Betrachter mit Dateiverwaltung —" + Environment.NewLine +
-            "ansehen, einsortieren, fertig." + Environment.NewLine + Environment.NewLine +
-            "Verwendete Komponenten:" + Environment.NewLine +
-            "WebView2-Runtime " + webView2Runtime + Environment.NewLine +
-            "WebView2-SDK " + typeof(CoreWebView2Environment).Assembly.GetName().Version + Environment.NewLine +
-            "PDFsharp " + typeof(PdfSharp.Pdf.PdfDocument).Assembly.GetName().Version?.ToString(3) + Environment.NewLine +
-            RuntimeInformation.FrameworkDescription;
+        var msg = "PDFlight ist ein PDF-Viewer, dessen Highlight die" + Environment.NewLine +
+            "integrierten Dateioperationen sind (Verschieben, Kopieren," + Environment.NewLine +
+            "Löschen, Umbenennen, Verschicken). Für häufig benutzte" + Environment.NewLine +
+            "Zielordner lässt sich eine Liste anlegen, so dass Dateien" + Environment.NewLine +
+            "blitzschnell verschoben werden können, ohne das Programm" + Environment.NewLine +
+            "zu verlassen. Darüber hinaus lassen sich Seiten aus dem" + Environment.NewLine +
+            "PDF entfernen, in eine neue Datei einfügen oder eine" + Environment.NewLine +
+            "andere PDF-Datei anhängen. Per Tastendruck (Alt+→) wird" + Environment.NewLine +
+            "die nächste Datei des aktuellen Ordners angezeigt." + Environment.NewLine + Environment.NewLine +
+            "Andere PDF-Programme lassen sich aus PDFlight heraus" + Environment.NewLine +
+            "starten – falls eine Funktion fehlen sollte.";
         TaskDialogButton paypalButton = new TaskDialogCommandLinkButton("Anerkennung spenden via PayPal");
         using var icon32 = icon == null ? null : new Icon(icon, 32, 32); // sonst nimmt der TaskDialog die 16-px-Variante des Fenster-Icons
         var indent = new string(' ', 14);
-        var foot = $"{indent}© {buildDate:yyyy} Wilhelm Happe\n{indent}Version {threeVersion} ({buildDate:d})";
+        var foot = $"{indent}© {buildDate:yyyy} Wilhelm Happe · Version {threeVersion} ({buildDate:d})" +
+            $"\n{indent}WebView2-Runtime {webView2Runtime} · SDK {typeof(CoreWebView2Environment).Assembly.GetName().Version}" +
+            $"\n{indent}PDFsharp {typeof(PdfSharp.Pdf.PdfDocument).Assembly.GetName().Version?.ToString(3)} · {RuntimeInformation.FrameworkDescription}";
         var initialPage = new TaskDialogPage()
         {
             Caption = "Über " + Application.ProductName,
