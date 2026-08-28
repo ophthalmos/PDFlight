@@ -31,6 +31,7 @@ namespace PDFLight.Forms
             labelFile = new System.Windows.Forms.Label();
             labelFileValue = new System.Windows.Forms.Label();
             labelInfoValue = new System.Windows.Forms.Label();
+            labelProducerValue = new System.Windows.Forms.Label();
             labelTitle = new System.Windows.Forms.Label();
             textBoxTitle = new System.Windows.Forms.TextBox();
             labelAuthor = new System.Windows.Forms.Label();
@@ -72,10 +73,20 @@ namespace PDFLight.Forms
             labelInfoValue.TabIndex = 2;
             labelInfoValue.Text = "…";
             //
+            // labelProducerValue
+            //
+            labelProducerValue.AutoEllipsis = true;
+            labelProducerValue.ForeColor = System.Drawing.SystemColors.GrayText;
+            labelProducerValue.Location = new System.Drawing.Point(90, 48);
+            labelProducerValue.Name = "labelProducerValue";
+            labelProducerValue.Size = new System.Drawing.Size(392, 15);
+            labelProducerValue.TabIndex = 13;
+            labelProducerValue.Text = "…";
+            //
             // labelTitle
             //
             labelTitle.AutoSize = true;
-            labelTitle.Location = new System.Drawing.Point(12, 68);
+            labelTitle.Location = new System.Drawing.Point(12, 88);
             labelTitle.Name = "labelTitle";
             labelTitle.Size = new System.Drawing.Size(33, 15);
             labelTitle.TabIndex = 3;
@@ -84,7 +95,7 @@ namespace PDFLight.Forms
             // textBoxTitle
             //
             textBoxTitle.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            textBoxTitle.Location = new System.Drawing.Point(90, 65);
+            textBoxTitle.Location = new System.Drawing.Point(90, 85);
             textBoxTitle.Name = "textBoxTitle";
             textBoxTitle.Size = new System.Drawing.Size(392, 23);
             textBoxTitle.TabIndex = 4;
@@ -92,7 +103,7 @@ namespace PDFLight.Forms
             // labelAuthor
             //
             labelAuthor.AutoSize = true;
-            labelAuthor.Location = new System.Drawing.Point(12, 97);
+            labelAuthor.Location = new System.Drawing.Point(12, 117);
             labelAuthor.Name = "labelAuthor";
             labelAuthor.Size = new System.Drawing.Size(46, 15);
             labelAuthor.TabIndex = 5;
@@ -101,7 +112,7 @@ namespace PDFLight.Forms
             // textBoxAuthor
             //
             textBoxAuthor.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            textBoxAuthor.Location = new System.Drawing.Point(90, 94);
+            textBoxAuthor.Location = new System.Drawing.Point(90, 114);
             textBoxAuthor.Name = "textBoxAuthor";
             textBoxAuthor.Size = new System.Drawing.Size(392, 23);
             textBoxAuthor.TabIndex = 6;
@@ -109,7 +120,7 @@ namespace PDFLight.Forms
             // labelSubject
             //
             labelSubject.AutoSize = true;
-            labelSubject.Location = new System.Drawing.Point(12, 126);
+            labelSubject.Location = new System.Drawing.Point(12, 146);
             labelSubject.Name = "labelSubject";
             labelSubject.Size = new System.Drawing.Size(48, 15);
             labelSubject.TabIndex = 7;
@@ -118,7 +129,7 @@ namespace PDFLight.Forms
             // textBoxSubject
             //
             textBoxSubject.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            textBoxSubject.Location = new System.Drawing.Point(90, 123);
+            textBoxSubject.Location = new System.Drawing.Point(90, 143);
             textBoxSubject.Name = "textBoxSubject";
             textBoxSubject.Size = new System.Drawing.Size(392, 23);
             textBoxSubject.TabIndex = 8;
@@ -126,7 +137,7 @@ namespace PDFLight.Forms
             // labelKeywords
             //
             labelKeywords.AutoSize = true;
-            labelKeywords.Location = new System.Drawing.Point(12, 155);
+            labelKeywords.Location = new System.Drawing.Point(12, 175);
             labelKeywords.Name = "labelKeywords";
             labelKeywords.Size = new System.Drawing.Size(72, 15);
             labelKeywords.TabIndex = 9;
@@ -135,7 +146,7 @@ namespace PDFLight.Forms
             // textBoxKeywords
             //
             textBoxKeywords.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            textBoxKeywords.Location = new System.Drawing.Point(90, 152);
+            textBoxKeywords.Location = new System.Drawing.Point(90, 172);
             textBoxKeywords.Name = "textBoxKeywords";
             textBoxKeywords.Size = new System.Drawing.Size(392, 23);
             textBoxKeywords.TabIndex = 10;
@@ -144,7 +155,7 @@ namespace PDFLight.Forms
             //
             buttonOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            buttonOK.Location = new System.Drawing.Point(286, 196);
+            buttonOK.Location = new System.Drawing.Point(286, 216);
             buttonOK.Name = "buttonOK";
             buttonOK.Size = new System.Drawing.Size(95, 27);
             buttonOK.TabIndex = 11;
@@ -155,7 +166,7 @@ namespace PDFLight.Forms
             //
             buttonCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            buttonCancel.Location = new System.Drawing.Point(387, 196);
+            buttonCancel.Location = new System.Drawing.Point(387, 216);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new System.Drawing.Size(95, 27);
             buttonCancel.TabIndex = 12;
@@ -168,7 +179,7 @@ namespace PDFLight.Forms
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             CancelButton = buttonCancel;
-            ClientSize = new System.Drawing.Size(494, 235);
+            ClientSize = new System.Drawing.Size(494, 255);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
             Controls.Add(textBoxKeywords);
@@ -179,6 +190,7 @@ namespace PDFLight.Forms
             Controls.Add(labelAuthor);
             Controls.Add(textBoxTitle);
             Controls.Add(labelTitle);
+            Controls.Add(labelProducerValue);
             Controls.Add(labelInfoValue);
             Controls.Add(labelFileValue);
             Controls.Add(labelFile);
@@ -198,6 +210,7 @@ namespace PDFLight.Forms
         private System.Windows.Forms.Label labelFile;
         private System.Windows.Forms.Label labelFileValue;
         private System.Windows.Forms.Label labelInfoValue;
+        private System.Windows.Forms.Label labelProducerValue;
         private System.Windows.Forms.Label labelTitle;
         private System.Windows.Forms.TextBox textBoxTitle;
         private System.Windows.Forms.Label labelAuthor;
