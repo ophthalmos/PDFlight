@@ -39,8 +39,16 @@ public partial class MainForm : Form
             Close();
             return;
         }
+        catch (Exception ex) when (ex is DllNotFoundException or InvalidOperationException or System.Runtime.InteropServices.COMException or IOException or UnauthorizedAccessException)
+        {
+            // z.B. beschädigte Installation oder gesperrter Datenordner — sauberer Dialog statt WinForms-Absturzfenster
+            TaskDlg.ErrTaskDlg(Handle, "Die PDF-Anzeige (WebView2) konnte nicht gestartet werden.", ex);
+            Close();
+            return;
+        }
         webView.KeyDown += WebView_KeyDown; // Tastenkürzel funktionieren auch, wenn der Viewer den Fokus hat
         viewHost.PdfFileDropped += (s, path) => LoadPdf(path, addToRecent: true); // Drop auf das Viewer-Areal
+        InitDropDownClickShield();
         EnableClassicDragDrop();
         EnsureProgramList();
         RebuildProgramIconButtons();
@@ -92,6 +100,52 @@ public partial class MainForm : Form
             }
         }
         if (settings.WindowMaximized) { WindowState = FormWindowState.Maximized; }
+    }
+
+    // ------------------------------------------------------------------ Menü-Schließen über dem WebView
+
+    /// <summary>Praktisch unsichtbares Fenster über dem Viewer: Chromium läuft in einem eigenen Prozess,
+    /// darum bekommt WinForms Klicks ins WebView nicht mit und offene Toolbar-Menüs blieben stehen.
+    /// Solange ein Menü offen ist, fängt dieses Schild den ersten Klick ab und schließt das Menü
+    /// (der Klick wird dabei wie bei Menüs üblich verschluckt).</summary>
+    private sealed class ClickShieldForm : Form
+    {
+        public ClickShieldForm()
+        {
+            FormBorderStyle = FormBorderStyle.None;
+            ShowInTaskbar = false;
+            StartPosition = FormStartPosition.Manual;
+            Opacity = 0.01; // bei 0 wären Klicks durchlässig
+        }
+
+        protected override bool ShowWithoutActivation => true; // darf dem Menü nicht den Fokus stehlen
+    }
+
+    private ClickShieldForm clickShield;
+    private ToolStripDropDownItem[] dropDownButtons;
+
+    private void InitDropDownClickShield()
+    {
+        clickShield = new ClickShieldForm();
+        clickShield.MouseDown += (s, e) => CloseToolStripDropDowns();
+        dropDownButtons = [btnOpen, splitButtonMove, ddbEdit, ddbPrograms];
+        foreach (var item in dropDownButtons)
+        {
+            item.DropDownOpened += (s, e) => ShowClickShield();
+            item.DropDownClosed += (s, e) => clickShield.Hide();
+        }
+    }
+
+    private void ShowClickShield()
+    {
+        clickShield.Bounds = new Rectangle(webView.PointToScreen(Point.Empty), webView.Size);
+        clickShield.Show(this); // liegt über dem WebView, aber unter dem (Topmost-)Menü
+    }
+
+    private void CloseToolStripDropDowns()
+    {
+        foreach (var item in dropDownButtons) { item.HideDropDown(); }
+        clickShield.Hide();
     }
 
     /// <summary>F11-Vollbild wie im Browser: randlos maximiert, Tool- und Statusleiste ausgeblendet; Esc oder F11 beendet.</summary>
