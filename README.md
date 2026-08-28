@@ -51,6 +51,7 @@ PDF-Datei des Ordners an. Ideal, um volle Eingangs- und Scan-Ordner zügig abzua
 | Strg+1 … Strg+9 | In externem Programm öffnen |
 | F11 / Esc | Vollbild ein / aus |
 | Esc | Programm beenden (abschaltbare Option) |
+| F1 | Über PDFlight (Versionen, Spenden) |
 
 ## Voraussetzungen
 
@@ -86,6 +87,12 @@ Release-Build die Datei `Installer.iss` kompilieren — sie nimmt die Dateien di
   quellgeneriertes COM (`GeneratedComInterface`); keine kommerziellen Abhängigkeiten.
 - Einstellungen: `%APPDATA%\PDFlight\settings.json`;
   WebView2-Daten und Undo-Sicherung: `%LOCALAPPDATA%\PDFlight\`.
+
+## Unterstützen
+
+PDFlight ist kostenlos und quelloffen. Wenn es Ihnen die Arbeit erleichtert, freut sich der
+Autor über eine [Spende via PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=S8DVXHKFC2CVS&source=url) —
+auch direkt aus dem Programm über den Info-Dialog (F1).
 
 ## Lizenz
 

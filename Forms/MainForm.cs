@@ -471,6 +471,7 @@ public partial class MainForm : Form
         Set(ddbPrograms, ToolbarIcons.AllApps);
         Set(btnShowInFolder, ToolbarIcons.FolderOpen);
         Set(btnSettings, ToolbarIcons.Settings);
+        Set(btnInfo, ToolbarIcons.Info, imageOnly: true);
         UpdateProgramIconVisibility(); // die Buttonbreiten haben sich geändert
     }
 
@@ -880,6 +881,7 @@ public partial class MainForm : Form
             case Keys.E | Keys.Control: EmailCurrent(); return true;
             case Keys.Right | Keys.Alt: StepFile(1); return true;   // Strg+Pfeile/±/0 gehören dem Viewer (Zoom & Co.)
             case Keys.Left | Keys.Alt: StepFile(-1); return true;
+            case Keys.F1: TaskDlg.AboutTaskDlg(Handle, Icon); return true;
             case Keys.F11: SetFullScreen(!isFullScreen); return true;
             case Keys.Escape when isFullScreen: SetFullScreen(false); return true;
             case Keys.Escape when settings.CloseOnEscape: Close(); return true; // wie in PDFMover (Option)
@@ -906,6 +908,7 @@ public partial class MainForm : Form
     private void BtnDelete_Click(object sender, EventArgs e) { DeleteCurrent(); }
     private void BtnShowInFolder_Click(object sender, EventArgs e) { ShowInFolder(); }
     private void BtnSettings_Click(object sender, EventArgs e) { OpenSettings(SettingsForm.TabGeneral); }
+    private void BtnInfo_Click(object sender, EventArgs e) { TaskDlg.AboutTaskDlg(Handle, Icon); }
     private void BtnPageUp_Click(object sender, EventArgs e) { SendPageKey("{PGUP}"); }
     private void BtnPageDown_Click(object sender, EventArgs e) { SendPageKey("{PGDN}"); }
     private void BtnEmail_Click(object sender, EventArgs e) { EmailCurrent(); }

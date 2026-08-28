@@ -1,8 +1,15 @@
-﻿namespace PDFLight.Classes;
+﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.Globalization;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using Microsoft.Web.WebView2.Core;
+
+namespace PDFLight.Classes;
 
 /// <summary>TaskDialog-Helfer als moderner Ersatz für MessageBox.
 /// MsgTaskDlg und ErrTaskDlg sind unverändert aus einem anderen Projekt des Autors übernommen;
-/// ConfirmTaskDlg und die ErrTaskDlg-Variante mit fachlicher Überschrift ergänzen sie im selben Stil.</summary>
+/// ConfirmTaskDlg, AboutTaskDlg und die ErrTaskDlg-Variante mit fachlicher Überschrift ergänzen sie im selben Stil.</summary>
 internal static class TaskDlg
 {
     public static void MsgTaskDlg(nint hwnd, string heading, string message, TaskDialogIcon icon = null)
@@ -62,5 +69,71 @@ internal static class TaskDlg
         TaskDialogPage page = new() { Caption = Application.ProductName, SizeToContent = true, Heading = heading, Text = message, Icon = icon ?? TaskDialogIcon.None, AllowCancel = true, Buttons = { TaskDialogButton.Yes, TaskDialogButton.No } };
         if (defaultNo) { page.DefaultButton = page.Buttons[1]; }
         return TaskDialog.ShowDialog(hwnd, page) == TaskDialogButton.Yes;
+    }
+
+    /// <summary>Über-Dialog mit den Versionen der verwendeten Komponenten und PayPal-Spendenlink
+    /// (Button-Details aus PDFMover übernommen).</summary>
+    public static void AboutTaskDlg(nint hwnd, Icon icon)
+    {
+        var curVersion = Assembly.GetExecutingAssembly().GetName().Version;
+        var threeVersion = curVersion?.ToString(3) ?? "unbekannt";
+        var buildDate = GetBuildDate();
+        string webView2Runtime;
+        try { webView2Runtime = CoreWebView2Environment.GetAvailableBrowserVersionString(); }
+        catch (WebView2RuntimeNotFoundException) { webView2Runtime = "nicht gefunden"; }
+        var msg = "Schlanker PDF-Betrachter mit Dateiverwaltung —" + Environment.NewLine +
+            "ansehen, einsortieren, fertig." + Environment.NewLine + Environment.NewLine +
+            "Verwendete Komponenten:" + Environment.NewLine +
+            "WebView2-Runtime " + webView2Runtime + Environment.NewLine +
+            "WebView2-SDK " + typeof(CoreWebView2Environment).Assembly.GetName().Version + Environment.NewLine +
+            "PDFsharp " + typeof(PdfSharp.Pdf.PdfDocument).Assembly.GetName().Version?.ToString(3) + Environment.NewLine +
+            RuntimeInformation.FrameworkDescription;
+        TaskDialogButton paypalButton = new TaskDialogCommandLinkButton("Anerkennung spenden via PayPal");
+        var indent = new string(' ', 14);
+        var foot = $"{indent}© {buildDate:yyyy} Wilhelm Happe\n{indent}Version {threeVersion} ({buildDate:d})";
+        var initialPage = new TaskDialogPage()
+        {
+            Caption = "Über " + Application.ProductName,
+            Heading = Application.ProductName,
+            Text = msg,
+            Icon = icon == null ? null : new TaskDialogIcon(icon),
+            AllowCancel = true,
+            SizeToContent = true,
+            Buttons = { paypalButton, TaskDialogButton.OK },
+            DefaultButton = TaskDialogButton.OK,
+            Footnote = foot
+        };
+        var result = TaskDialog.ShowDialog(hwnd, initialPage);
+        if (result == paypalButton) { StartLink(hwnd, "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=S8DVXHKFC2CVS&source=url"); }
+    }
+
+    internal static void StartLink(nint hwnd, string url)
+    {
+        try
+        {
+            if (Uri.TryCreate(url, UriKind.Absolute, out var uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            else { MsgTaskDlg(hwnd, "Ungültiger Link!", $"'{url}' ist keine gültige URL.", TaskDialogIcon.ShieldWarningYellowBar); }
+        }
+        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException) { ErrTaskDlg(hwnd, "Der Link konnte nicht geöffnet werden.", ex); }
+    }
+
+    private static DateTime GetBuildDate()
+    { // s. <SourceRevisionId>build$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</SourceRevisionId> in PDFlight.csproj
+        const string BuildVersionMetadataPrefix = "+build";
+        var attribute = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+        if (attribute?.InformationalVersion != null)
+        {
+            var value = attribute.InformationalVersion;
+            var index = value.IndexOf(BuildVersionMetadataPrefix, StringComparison.Ordinal);
+            if (index > 0)
+            {
+                value = value[(index + BuildVersionMetadataPrefix.Length)..];
+                if (DateTime.TryParseExact(value, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.None, out var result)) { return result; }
+            }
+        }
+        return File.GetLastWriteTime(Application.ExecutablePath);
     }
 }
