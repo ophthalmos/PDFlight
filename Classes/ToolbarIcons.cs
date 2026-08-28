@@ -47,13 +47,15 @@ internal static class ToolbarIcons
         Bitmap result = new(source.Width, source.Height);
         using var g = Graphics.FromImage(result);
         using ImageAttributes attributes = new();
+        // Luminanz auf 0,7 gestaucht und um 0,3 angehoben: Schwarz wird zu mittlerem Grau,
+        // Weiß bleibt Weiß — sonst gerieten satte Farben (Acrobat-Rot) fast schwarz
         attributes.SetColorMatrix(new ColorMatrix(
         [
-            [0.299f, 0.299f, 0.299f, 0f, 0f],
-            [0.587f, 0.587f, 0.587f, 0f, 0f],
-            [0.114f, 0.114f, 0.114f, 0f, 0f],
+            [0.209f, 0.209f, 0.209f, 0f, 0f],
+            [0.411f, 0.411f, 0.411f, 0f, 0f],
+            [0.080f, 0.080f, 0.080f, 0f, 0f],
             [0f, 0f, 0f, 1f, 0f],
-            [0f, 0f, 0f, 0f, 1f],
+            [0.3f, 0.3f, 0.3f, 0f, 1f],
         ]));
         g.DrawImage(source, new Rectangle(0, 0, source.Width, source.Height), 0, 0, source.Width, source.Height, GraphicsUnit.Pixel, attributes);
         return result;
