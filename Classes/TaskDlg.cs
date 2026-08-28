@@ -90,14 +90,13 @@ internal static class TaskDlg
         string webView2Runtime;
         try { webView2Runtime = CoreWebView2Environment.GetAvailableBrowserVersionString(); }
         catch (WebView2RuntimeNotFoundException) { webView2Runtime = "nicht gefunden"; }
-        var msg = "PDFlight ist ein PDF-Viewer, dessen Highlight die" + Environment.NewLine +
-            "integrierten Dateioperationen sind (Verschieben, Kopieren," + Environment.NewLine +
-            "Löschen, Umbenennen, Verschicken). Für häufig benutzte" + Environment.NewLine +
-            "Zielordner lässt sich eine Liste anlegen, so dass Dateien" + Environment.NewLine +
-            "blitzschnell verschoben werden können, ohne das Programm" + Environment.NewLine +
-            "zu verlassen. Darüber hinaus lassen sich Seiten aus dem" + Environment.NewLine +
-            "PDF entfernen, in eine neue Datei einfügen oder eine" + Environment.NewLine +
-            "andere PDF-Datei anhängen." + Environment.NewLine +
+        var msg = "PDFlight ist ein Viewer mit integrierten Dateioperationen" + Environment.NewLine +
+            "(Verschieben, Kopieren, Löschen, Umbenennen, Mailen)." + Environment.NewLine +
+            "Häufig benutzte Zielordner werden in einer Liste vorge-" + Environment.NewLine +
+            "halten. Dateien lassen sich blitzschnell verschieben, ohne" + Environment.NewLine +
+            "das Programm zu verlassen. Darüber hinaus lassen sich" + Environment.NewLine +
+            "Seiten aus dem PDF entfernen, in eine neue Datei einfügen" + Environment.NewLine +
+            "oder es kann eine andere PDF-Datei anhängt werden." + Environment.NewLine +
             "Andere PDF-Programme lassen sich aus PDFlight heraus" + Environment.NewLine +
             "starten – falls eine Funktion fehlen sollte.";
         TaskDialogButton paypalButton = new TaskDialogCommandLinkButton("Anerkennung spenden via PayPal");

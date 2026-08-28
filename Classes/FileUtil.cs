@@ -29,10 +29,16 @@ internal static class FileUtil
         try
         {
             List<string> files = [.. Directory.EnumerateFiles(folder, "*.pdf")];
-            files.Sort((a, b) => ShellInfo.CompareNatural(Path.GetFileName(a), Path.GetFileName(b)));
+            SortNatural(files);
             return files;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return []; }
+    }
+
+    /// <summary>Sortiert Dateipfade natürlich nach ihrem Dateinamen (wie im Explorer).</summary>
+    public static void SortNatural(List<string> files)
+    {
+        files.Sort((a, b) => ShellInfo.CompareNatural(Path.GetFileName(a), Path.GetFileName(b)));
     }
 
     /// <summary>Schlägt "name_1.pdf" usw. vor — den nächsten freien _n-Index im Zielordner (wie in PDFMover).</summary>
