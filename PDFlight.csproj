@@ -20,13 +20,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks><!-- für die Quellgeneratoren LibraryImport/GeneratedComInterface -->
   </PropertyGroup>
 
-  <!-- WebView2 referenziert ungefragt auch seine WPF-Assembly; sie wird nicht benötigt
-       und verursacht die MSB3277-Warnung (WindowsBase-Versionskonflikt). -->
-  <Target Name="RemoveWebView2WpfReference" BeforeTargets="ResolveAssemblyReferences">
-    <ItemGroup>
-      <Reference Remove="@(Reference)" Condition="'%(FileName)' == 'Microsoft.Web.WebView2.Wpf'" />
-    </ItemGroup>
-  </Target>
+  <!-- Die unerwünschte WPF-Referenz des WebView2-Pakets entfernt Directory.Build.targets. -->
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4191.47" />
