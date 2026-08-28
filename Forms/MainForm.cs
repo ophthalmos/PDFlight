@@ -881,7 +881,7 @@ public partial class MainForm : Form
         var number = 1;
         foreach (var exe in settings.ExternalPrograms.Take(ProgramFinder.MaxPrograms))
         {
-            var icon = GetProgramIcon(exe);
+            var icon = GetProgramIconGray(exe); // grau, damit sie sich den MDL2-Symbolen unterordnen; im Menü bleiben sie farbig
             if (icon != null)
             {
                 ToolStripButton button = new()
@@ -938,6 +938,18 @@ public partial class MainForm : Form
             }
             catch (Exception ex) when (ex is ArgumentException or IOException) { image = null; }
             programIcons[exePath] = image;
+        }
+        return image;
+    }
+
+    private readonly Dictionary<string, Image> programIconsGray = new(StringComparer.OrdinalIgnoreCase);
+
+    private Image GetProgramIconGray(string exePath)
+    {
+        if (!programIconsGray.TryGetValue(exePath, out var image))
+        {
+            image = ToolbarIcons.ToGrayscale(GetProgramIcon(exePath));
+            programIconsGray[exePath] = image;
         }
         return image;
     }

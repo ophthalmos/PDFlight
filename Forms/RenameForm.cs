@@ -56,8 +56,21 @@ public partial class RenameForm : Form
     private void RenameForm_Load(object sender, EventArgs e)
     {
         renameTextBox.Text = Path.GetFileNameWithoutExtension(fileInfo.Name);
+        InitFileIcons();
         FillList(SortedFiles());
         listView.Columns[0].Width = listView.ClientSize.Width - 4;
+    }
+
+    /// <summary>Explorer-Icon der PDF-Dateien für die Liste (wie in PDFMover); alle Einträge sind PDFs, ein Icon genügt.</summary>
+    private void InitFileIcons()
+    {
+        var (_, iconHandle) = ShellInfo.GetIcon(fileInfo.FullName);
+        if (iconHandle == IntPtr.Zero) { return; }
+        ImageList icons = new() { ImageSize = SystemInformation.SmallIconSize, ColorDepth = ColorDepth.Depth32Bit };
+        using (var icon = Icon.FromHandle(iconHandle)) { icons.Images.Add(icon); }
+        ShellInfo.FreeIcon(iconHandle);
+        listView.SmallImageList = icons;
+        Disposed += (s, e) => icons.Dispose(); // die ListView übernimmt die ImageList nicht in ihre Dispose-Kette
     }
 
     private void RenameForm_Shown(object sender, EventArgs e) { renameTextBox.Focus(); }
@@ -77,7 +90,7 @@ public partial class RenameForm : Form
     {
         listView.BeginUpdate();
         listView.Items.Clear();
-        foreach (var file in files) { listView.Items.Add(new ListViewItem(Path.GetFileName(file)) { Name = file }); }
+        foreach (var file in files) { listView.Items.Add(new ListViewItem(Path.GetFileName(file), 0) { Name = file }); }
         var current = listView.Items.Cast<ListViewItem>().FirstOrDefault(x => string.Equals(x.Name, fileInfo.FullName, StringComparison.OrdinalIgnoreCase));
         if (current != null)
         {
