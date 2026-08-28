@@ -40,20 +40,23 @@ public partial class MainForm : Form
             return;
         }
         webView.KeyDown += WebView_KeyDown; // Tastenkürzel funktionieren auch, wenn der Viewer den Fokus hat
-        viewHost.PdfFileDropped += (s, path) => LoadPdf(path); // Drop auf das Viewer-Areal
+        viewHost.PdfFileDropped += (s, path) => LoadPdf(path, addToRecent: true); // Drop auf das Viewer-Areal
         EnableClassicDragDrop();
         EnsureProgramList();
         RebuildProgramIconButtons();
         ApplyToolbarIcons();
         toolStrip.Resize += (s, args) => UpdateProgramIconVisibility();
 
-        if (!string.IsNullOrEmpty(startFile) && File.Exists(startFile)) { LoadPdf(startFile); }
+        if (!string.IsNullOrEmpty(startFile) && File.Exists(startFile)) { LoadPdf(startFile, addToRecent: true); }
+        else if (settings.ReopenLastFile && !string.IsNullOrEmpty(settings.LastFile) && File.Exists(settings.LastFile)) { LoadPdf(settings.LastFile); }
         else { UpdateUiState(); }
     }
 
     private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         SetFullScreen(false); // sonst würden randlose Vollbild-Maße gespeichert
+        settings.ReloadSharedLists(); // Listenänderungen anderer Instanzen nicht überschreiben
+        settings.LastFile = currentFile?.FullName ?? string.Empty;
         var bounds = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
         settings.WindowX = bounds.X;
         settings.WindowY = bounds.Y;
@@ -116,7 +119,7 @@ public partial class MainForm : Form
 
     // ------------------------------------------------------------------ Laden & Navigation
 
-    private void LoadPdf(string path, int page = 0)
+    private void LoadPdf(string path, int page = 0, bool addToRecent = false)
     {
         try { viewHost.Load(path, page); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -127,6 +130,12 @@ public partial class MainForm : Form
         currentFile = new FileInfo(path);
         loadedWriteTimeUtc = currentFile.LastWriteTimeUtc;
         currentPageCount = PdfEditService.TryGetPageCount(path);
+        if (addToRecent) // nur bei bewusstem Öffnen — nicht beim Blättern durch den Ordner
+        {
+            settings.ReloadSharedLists();
+            settings.AddRecentFile(currentFile.FullName);
+            settings.Save();
+        }
         UpdateUiState();
     }
 
@@ -160,7 +169,36 @@ public partial class MainForm : Form
     {
         using OpenFileDialog dialog = new() { Filter = "PDF-Dateien (*.pdf)|*.pdf", Title = "PDF-Datei öffnen" };
         if (currentFile != null) { dialog.InitialDirectory = currentFile.DirectoryName; }
-        if (dialog.ShowDialog(this) == DialogResult.OK) { LoadPdf(dialog.FileName); }
+        if (dialog.ShowDialog(this) == DialogResult.OK) { LoadPdf(dialog.FileName, addToRecent: true); }
+    }
+
+    /// <summary>Dropdown des Öffnen-Buttons: die zuletzt geöffneten Dateien.</summary>
+    private void BtnOpen_DropDownOpening(object sender, EventArgs e)
+    {
+        settings.ReloadSharedLists();
+        btnOpen.DropDownItems.Clear();
+        foreach (var file in settings.RecentFiles)
+        {
+            ToolStripMenuItem item = new(Path.GetFileName(file).Replace("&", "&&"))
+            {
+                Tag = file,
+                ToolTipText = file,
+                Enabled = File.Exists(file),
+            };
+            item.Click += (s, args) => LoadPdf((string)((ToolStripMenuItem)s).Tag, addToRecent: true);
+            btnOpen.DropDownItems.Add(item);
+        }
+        if (btnOpen.DropDownItems.Count == 0)
+        {
+            btnOpen.DropDownItems.Add(new ToolStripMenuItem("(keine zuletzt geöffneten Dateien)") { Enabled = false });
+        }
+        else
+        {
+            btnOpen.DropDownItems.Add(new ToolStripSeparator());
+            ToolStripMenuItem clear = new("Liste leeren");
+            clear.Click += (s, args) => { settings.RecentFiles.Clear(); settings.Save(); };
+            btnOpen.DropDownItems.Add(clear);
+        }
     }
 
     /// <summary>Klassisches Drag &amp; Drop für Formular, Tool- und Statusleiste;
@@ -230,6 +268,7 @@ public partial class MainForm : Form
     {
         if (currentFile == null) { return; }
         Cursor.Current = Cursors.WaitCursor;
+        settings.ReloadSharedLists(); // Ziel-/Zuletzt-Listen anderer Instanzen übernehmen
         var startFolder = settings.TargetFolders.FirstOrDefault(f => !string.IsNullOrEmpty(f) && Directory.Exists(f)) ?? string.Empty;
         var jumpToLastUsed = settings.JumpToLastUsed && settings.RecentFolders.Count > 0
             && !string.Equals(startFolder, settings.RecentFolders[0], StringComparison.OrdinalIgnoreCase);
@@ -286,6 +325,7 @@ public partial class MainForm : Form
                 File.Move(currentFile.FullName, destination, true);
                 LoadNextAfterRemoval(files, index);
             }
+            settings.ReloadSharedLists(); // parallel laufende Instanzen nicht überschreiben
             settings.AddRecentFolder(folder);
             settings.Save();
         }
@@ -307,6 +347,7 @@ public partial class MainForm : Form
 
     private void SplitButtonMove_DropDownOpening(object sender, EventArgs e)
     {
+        settings.ReloadSharedLists(); // Zielliste anderer Instanzen übernehmen
         splitButtonMove.DropDownItems.Clear();
         var targets = settings.TargetFolders.Where(f => !string.IsNullOrEmpty(f));
         if (settings.AlphabeticSort) { targets = targets.OrderBy(f => f, StringComparer.OrdinalIgnoreCase); }
@@ -328,6 +369,7 @@ public partial class MainForm : Form
 
     private void OpenSettings(int tabIndex)
     {
+        settings.ReloadSharedLists();
         using SettingsForm dialog = new(settings, tabIndex);
         if (dialog.ShowDialog(this) == DialogResult.OK)
         {
@@ -339,6 +381,8 @@ public partial class MainForm : Form
             settings.ShowProgramIcons = dialog.ShowProgramIcons;
             settings.ShowToolbarIcons = dialog.ShowToolbarIcons;
             settings.LargeToolbarIcons = dialog.LargeToolbarIcons;
+            settings.CloseOnEscape = dialog.CloseOnEscape;
+            settings.ReopenLastFile = dialog.ReopenLastFile;
             if (dialog.ClearRecentRequested) { settings.RecentFolders.Clear(); }
             settings.Save();
             RebuildProgramIconButtons();
@@ -642,6 +686,7 @@ public partial class MainForm : Form
 
     private void DdbPrograms_DropDownOpening(object sender, EventArgs e)
     {
+        settings.ReloadSharedLists();
         ddbPrograms.DropDownItems.Clear();
         var number = 1;
         foreach (var exe in settings.ExternalPrograms.Take(ProgramFinder.MaxPrograms))
@@ -786,6 +831,7 @@ public partial class MainForm : Form
             case Keys.Left | Keys.Alt: StepFile(-1); return true;
             case Keys.F11: SetFullScreen(!isFullScreen); return true;
             case Keys.Escape when isFullScreen: SetFullScreen(false); return true;
+            case Keys.Escape when settings.CloseOnEscape: Close(); return true; // wie in PDFMover (Option)
         }
         if ((keyData & (Keys.Control | Keys.Alt | Keys.Shift)) == Keys.Control)
         {

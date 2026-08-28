@@ -7,6 +7,8 @@ eine PDF-Datei öffnen (z. B. einen eingescannten Befund oder eine Rechnung), ku
 einem Klick in den richtigen Ordner **verschieben** — danach zeigt PDFLight automatisch die nächste
 PDF-Datei des Ordners an. Ideal, um volle Eingangs- und Scan-Ordner zügig abzuarbeiten.
 
+![PDFLight](docs/screenshot.png)
+
 ## Funktionen
 
 - **Anzeigen**: Chromium-PDF-Viewer (WebView2) mit Zoom, Textsuche, Drucken, Drehen der Ansicht
@@ -25,7 +27,10 @@ PDF-Datei des Ordners an. Ideal, um volle Eingangs- und Scan-Ordner zügig abzua
   Öffnen in installierten PDF-Programmen (Strg+1 … Strg+9, automatisch erkannt),
   „Öffnen mit“-Dialog, Anzeigen im Explorer.
 - **Aufräumen**: Löschen in den Papierkorb (Entf), Blättern durch alle PDFs des Ordners (Alt+←/→).
-- Drag & Drop, F11-Vollbild, zentraler Einstellungsdialog, Symbole aus der Windows-Symbolschrift.
+- Drag & Drop, F11-Vollbild, zentraler Einstellungsdialog, Symbole aus der Windows-Symbolschrift,
+  zuletzt geöffnete Dateien im Öffnen-Menü, optional „Programm mit Esc beenden“ und
+  „Zuletzt geöffnete Datei beim Start laden“. Laufen mehrere Instanzen gleichzeitig,
+  teilen sie sich Ziel- und Zuletzt-Listen.
 
 ## Tastenkürzel
 
@@ -45,6 +50,7 @@ PDF-Datei des Ordners an. Ideal, um volle Eingangs- und Scan-Ordner zügig abzua
 | Strg+E | Als E-Mail-Anhang senden |
 | Strg+1 … Strg+9 | In externem Programm öffnen |
 | F11 / Esc | Vollbild ein / aus |
+| Esc | Programm beenden (abschaltbare Option) |
 
 ## Voraussetzungen
 

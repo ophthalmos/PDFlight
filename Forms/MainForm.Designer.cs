@@ -1,4 +1,4 @@
-namespace PDFLight.Forms
+﻿namespace PDFLight.Forms
 {
     partial class MainForm
     {
@@ -31,7 +31,7 @@ namespace PDFLight.Forms
             var resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             webView = new Microsoft.Web.WebView2.WinForms.WebView2();
             toolStrip = new ToolStrip();
-            btnOpen = new ToolStripButton();
+            btnOpen = new ToolStripSplitButton();
             toolStripSeparator1 = new ToolStripSeparator();
             btnPrev = new ToolStripButton();
             btnNext = new ToolStripButton();
@@ -95,8 +95,9 @@ namespace PDFLight.Forms
             btnOpen.Name = "btnOpen";
             btnOpen.Size = new Size(55, 23);
             btnOpen.Text = "Öffnen";
-            btnOpen.ToolTipText = "PDF-Datei öffnen (Strg+O)";
-            btnOpen.Click += BtnOpen_Click;
+            btnOpen.ToolTipText = "PDF-Datei öffnen (Strg+O)\r\nPfeil: zuletzt geöffnete Dateien";
+            btnOpen.ButtonClick += BtnOpen_Click;
+            btnOpen.DropDownOpening += BtnOpen_DropDownOpening;
             // 
             // toolStripSeparator1
             // 
@@ -373,7 +374,7 @@ namespace PDFLight.Forms
 
         private Microsoft.Web.WebView2.WinForms.WebView2 webView;
         private System.Windows.Forms.ToolStrip toolStrip;
-        private System.Windows.Forms.ToolStripButton btnOpen;
+        private System.Windows.Forms.ToolStripSplitButton btnOpen;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripButton btnPrev;
         private System.Windows.Forms.ToolStripButton btnNext;
