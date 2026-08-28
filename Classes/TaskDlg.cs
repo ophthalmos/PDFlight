@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Net;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using Microsoft.Web.WebView2.Core;
 
 namespace PDFLight.Classes;
@@ -104,8 +103,8 @@ internal static class TaskDlg
         using var icon32 = icon == null ? null : new Icon(icon, 32, 32); // sonst nimmt der TaskDialog die 16-px-Variante des Fenster-Icons
         var indent = new string(' ', 14);
         var foot = $"{indent}© {buildDate:yyyy} Wilhelm Happe · Version {threeVersion} ({buildDate:d})" +
-            $"\n{indent}WebView2-Runtime {webView2Runtime} · SDK {typeof(CoreWebView2Environment).Assembly.GetName().Version}" +
-            $"\n{indent}PDFsharp {typeof(PdfSharp.Pdf.PdfDocument).Assembly.GetName().Version?.ToString(3)} · {RuntimeInformation.FrameworkDescription}";
+            $"\n{indent}WebView2-Runtime {webView2Runtime}" +
+            $"\n{indent}PDFsharp {typeof(PdfSharp.Pdf.PdfDocument).Assembly.GetName().Version?.ToString(3)}";
         var initialPage = new TaskDialogPage()
         {
             Caption = "Über " + Application.ProductName,
