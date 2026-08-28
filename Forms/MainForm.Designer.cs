@@ -74,9 +74,9 @@
             webView.CreationProperties = null;
             webView.DefaultBackgroundColor = Color.White;
             webView.Dock = DockStyle.Fill;
-            webView.Location = new Point(0, 26);
+            webView.Location = new Point(0, 25);
             webView.Name = "webView";
-            webView.Size = new Size(984, 699);
+            webView.Size = new Size(984, 702);
             webView.TabIndex = 0;
             webView.ZoomFactor = 1D;
             // 
@@ -86,14 +86,14 @@
             toolStrip.Items.AddRange(new ToolStripItem[] { btnOpen, toolStripSeparator1, btnPrev, btnNext, btnPageUp, btnPageDown, toolStripSeparator2, splitButtonMove, btnCopy, toolStripSeparator3, btnRename, btnDelete, toolStripSeparator8, btnEmail, toolStripSeparator4, ddbEdit, ddbPrograms, toolStripSeparator5, btnShowInFolder, btnSettings });
             toolStrip.Location = new Point(0, 0);
             toolStrip.Name = "toolStrip";
-            toolStrip.Size = new Size(984, 26);
+            toolStrip.Size = new Size(984, 25);
             toolStrip.TabIndex = 1;
             // 
             // btnOpen
             // 
             btnOpen.DisplayStyle = ToolStripItemDisplayStyle.Text;
             btnOpen.Name = "btnOpen";
-            btnOpen.Size = new Size(55, 23);
+            btnOpen.Size = new Size(60, 22);
             btnOpen.Text = "Öffnen";
             btnOpen.ToolTipText = "PDF-Datei öffnen (Strg+O)\r\nPfeil: zuletzt geöffnete Dateien";
             btnOpen.ButtonClick += BtnOpen_Click;
@@ -102,14 +102,14 @@
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(6, 26);
+            toolStripSeparator1.Size = new Size(6, 25);
             // 
             // btnPrev
             // 
             btnPrev.DisplayStyle = ToolStripItemDisplayStyle.Text;
             btnPrev.Enabled = false;
             btnPrev.Name = "btnPrev";
-            btnPrev.Size = new Size(25, 23);
+            btnPrev.Size = new Size(23, 22);
             btnPrev.Text = "◀";
             btnPrev.ToolTipText = "Vorherige PDF-Datei im Ordner (Alt+←)";
             btnPrev.Click += BtnPrev_Click;
@@ -119,7 +119,7 @@
             btnNext.DisplayStyle = ToolStripItemDisplayStyle.Text;
             btnNext.Enabled = false;
             btnNext.Name = "btnNext";
-            btnNext.Size = new Size(25, 23);
+            btnNext.Size = new Size(23, 22);
             btnNext.Text = "▶";
             btnNext.ToolTipText = "Nächste PDF-Datei im Ordner (Alt+→)";
             btnNext.Click += BtnNext_Click;
@@ -130,7 +130,7 @@
             btnPageUp.Enabled = false;
             btnPageUp.Margin = new Padding(8, 1, 0, 2);
             btnPageUp.Name = "btnPageUp";
-            btnPageUp.Size = new Size(25, 23);
+            btnPageUp.Size = new Size(23, 22);
             btnPageUp.Text = "▲";
             btnPageUp.ToolTipText = "Im Dokument zurückblättern (Bild ↑)";
             btnPageUp.Click += BtnPageUp_Click;
@@ -140,7 +140,7 @@
             btnPageDown.DisplayStyle = ToolStripItemDisplayStyle.Text;
             btnPageDown.Enabled = false;
             btnPageDown.Name = "btnPageDown";
-            btnPageDown.Size = new Size(25, 23);
+            btnPageDown.Size = new Size(23, 22);
             btnPageDown.Text = "▼";
             btnPageDown.ToolTipText = "Im Dokument vorblättern (Bild ↓)";
             btnPageDown.Click += BtnPageDown_Click;
@@ -148,14 +148,14 @@
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new Size(6, 26);
+            toolStripSeparator2.Size = new Size(6, 25);
             // 
             // splitButtonMove
             // 
             splitButtonMove.DisplayStyle = ToolStripItemDisplayStyle.Text;
             splitButtonMove.Enabled = false;
             splitButtonMove.Name = "splitButtonMove";
-            splitButtonMove.Size = new Size(98, 23);
+            splitButtonMove.Size = new Size(86, 22);
             splitButtonMove.Text = "Verschieben";
             splitButtonMove.ToolTipText = "In einen Ordner verschieben (Strg+M)\r\nStrg+Klick: direkt in den ersten Zielordner\r\nPfeil: Zielliste";
             splitButtonMove.ButtonClick += SplitButtonMove_ButtonClick;
@@ -166,7 +166,7 @@
             btnCopy.DisplayStyle = ToolStripItemDisplayStyle.Text;
             btnCopy.Enabled = false;
             btnCopy.Name = "btnCopy";
-            btnCopy.Size = new Size(67, 23);
+            btnCopy.Size = new Size(58, 22);
             btnCopy.Text = "Kopieren";
             btnCopy.ToolTipText = "In einen Ordner kopieren (Strg+K)";
             btnCopy.Click += BtnCopy_Click;
@@ -174,14 +174,14 @@
             // toolStripSeparator3
             // 
             toolStripSeparator3.Name = "toolStripSeparator3";
-            toolStripSeparator3.Size = new Size(6, 26);
+            toolStripSeparator3.Size = new Size(6, 25);
             // 
             // btnRename
             // 
             btnRename.DisplayStyle = ToolStripItemDisplayStyle.Text;
             btnRename.Enabled = false;
             btnRename.Name = "btnRename";
-            btnRename.Size = new Size(96, 23);
+            btnRename.Size = new Size(83, 22);
             btnRename.Text = "Umbenennen";
             btnRename.ToolTipText = "Datei umbenennen (F2)";
             btnRename.Click += BtnRename_Click;
@@ -191,7 +191,7 @@
             btnDelete.DisplayStyle = ToolStripItemDisplayStyle.Text;
             btnDelete.Enabled = false;
             btnDelete.Name = "btnDelete";
-            btnDelete.Size = new Size(63, 23);
+            btnDelete.Size = new Size(55, 22);
             btnDelete.Text = "Löschen";
             btnDelete.ToolTipText = "In den Papierkorb verschieben (Entf)";
             btnDelete.Click += BtnDelete_Click;
@@ -199,14 +199,14 @@
             // toolStripSeparator8
             // 
             toolStripSeparator8.Name = "toolStripSeparator8";
-            toolStripSeparator8.Size = new Size(6, 26);
+            toolStripSeparator8.Size = new Size(6, 25);
             // 
             // btnEmail
             // 
             btnEmail.DisplayStyle = ToolStripItemDisplayStyle.Text;
             btnEmail.Enabled = false;
             btnEmail.Name = "btnEmail";
-            btnEmail.Size = new Size(52, 23);
+            btnEmail.Size = new Size(45, 22);
             btnEmail.Text = "E-Mail";
             btnEmail.ToolTipText = "Neue E-Mail mit dieser Datei als Anhang (Strg+E)";
             btnEmail.Click += BtnEmail_Click;
@@ -214,7 +214,7 @@
             // toolStripSeparator4
             // 
             toolStripSeparator4.Name = "toolStripSeparator4";
-            toolStripSeparator4.Size = new Size(6, 26);
+            toolStripSeparator4.Size = new Size(6, 25);
             // 
             // ddbEdit
             // 
@@ -222,14 +222,14 @@
             ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuAppendPdf, mnuExtractPages, toolStripSeparator6, mnuUndo, toolStripSeparator7, mnuProperties });
             ddbEdit.Enabled = false;
             ddbEdit.Name = "ddbEdit";
-            ddbEdit.Size = new Size(87, 23);
+            ddbEdit.Size = new Size(76, 22);
             ddbEdit.Text = "Bearbeiten";
             // 
             // mnuDeletePages
             // 
             mnuDeletePages.Name = "mnuDeletePages";
             mnuDeletePages.ShortcutKeyDisplayString = "Strg+Entf";
-            mnuDeletePages.Size = new Size(304, 24);
+            mnuDeletePages.Size = new Size(267, 22);
             mnuDeletePages.Text = "Seiten löschen …";
             mnuDeletePages.Click += MnuDeletePages_Click;
             // 
@@ -237,48 +237,48 @@
             // 
             mnuRotatePages.Name = "mnuRotatePages";
             mnuRotatePages.ShortcutKeyDisplayString = "Strg+R";
-            mnuRotatePages.Size = new Size(304, 24);
+            mnuRotatePages.Size = new Size(267, 22);
             mnuRotatePages.Text = "Seiten drehen …";
             mnuRotatePages.Click += MnuRotatePages_Click;
             // 
             // mnuAppendPdf
             // 
             mnuAppendPdf.Name = "mnuAppendPdf";
-            mnuAppendPdf.Size = new Size(304, 24);
+            mnuAppendPdf.Size = new Size(267, 22);
             mnuAppendPdf.Text = "PDF-Datei anhängen …";
             mnuAppendPdf.Click += MnuAppendPdf_Click;
             // 
             // mnuExtractPages
             // 
             mnuExtractPages.Name = "mnuExtractPages";
-            mnuExtractPages.Size = new Size(304, 24);
+            mnuExtractPages.Size = new Size(267, 22);
             mnuExtractPages.Text = "Seiten als neue Datei extrahieren …";
             mnuExtractPages.Click += MnuExtractPages_Click;
             // 
             // toolStripSeparator6
             // 
             toolStripSeparator6.Name = "toolStripSeparator6";
-            toolStripSeparator6.Size = new Size(301, 6);
+            toolStripSeparator6.Size = new Size(264, 6);
             // 
             // mnuUndo
             // 
             mnuUndo.Enabled = false;
             mnuUndo.Name = "mnuUndo";
             mnuUndo.ShortcutKeyDisplayString = "Strg+Z";
-            mnuUndo.Size = new Size(304, 24);
+            mnuUndo.Size = new Size(267, 22);
             mnuUndo.Text = "Letzte Änderung rückgängig";
             mnuUndo.Click += MnuUndo_Click;
             // 
             // toolStripSeparator7
             // 
             toolStripSeparator7.Name = "toolStripSeparator7";
-            toolStripSeparator7.Size = new Size(301, 6);
+            toolStripSeparator7.Size = new Size(264, 6);
             // 
             // mnuProperties
             // 
             mnuProperties.Name = "mnuProperties";
             mnuProperties.ShortcutKeyDisplayString = "Strg+I";
-            mnuProperties.Size = new Size(304, 24);
+            mnuProperties.Size = new Size(267, 22);
             mnuProperties.Text = "Eigenschaften …";
             mnuProperties.Click += MnuProperties_Click;
             // 
@@ -286,7 +286,7 @@
             // 
             ddbPrograms.DisplayStyle = ToolStripItemDisplayStyle.Text;
             ddbPrograms.Name = "ddbPrograms";
-            ddbPrograms.Size = new Size(94, 23);
+            ddbPrograms.Size = new Size(83, 22);
             ddbPrograms.Text = "Programme";
             ddbPrograms.ToolTipText = "Datei in einem anderen Programm öffnen (Strg+1 … Strg+9)";
             ddbPrograms.DropDownOpening += DdbPrograms_DropDownOpening;
@@ -294,14 +294,14 @@
             // toolStripSeparator5
             // 
             toolStripSeparator5.Name = "toolStripSeparator5";
-            toolStripSeparator5.Size = new Size(6, 26);
+            toolStripSeparator5.Size = new Size(6, 25);
             // 
             // btnShowInFolder
             // 
             btnShowInFolder.DisplayStyle = ToolStripItemDisplayStyle.Text;
             btnShowInFolder.Enabled = false;
             btnShowInFolder.Name = "btnShowInFolder";
-            btnShowInFolder.Size = new Size(100, 23);
+            btnShowInFolder.Size = new Size(86, 22);
             btnShowInFolder.Text = "Ordner öffnen";
             btnShowInFolder.ToolTipText = "Datei im Explorer anzeigen";
             btnShowInFolder.Click += BtnShowInFolder_Click;
@@ -311,7 +311,7 @@
             btnSettings.Alignment = ToolStripItemAlignment.Right;
             btnSettings.DisplayStyle = ToolStripItemDisplayStyle.Text;
             btnSettings.Name = "btnSettings";
-            btnSettings.Size = new Size(94, 23);
+            btnSettings.Size = new Size(82, 22);
             btnSettings.Text = "Einstellungen";
             btnSettings.ToolTipText = "Zielordner, Programme und Optionen verwalten";
             btnSettings.Click += BtnSettings_Click;
@@ -319,22 +319,21 @@
             // statusStrip
             // 
             statusStrip.Items.AddRange(new ToolStripItem[] { statusIndex, statusPath, statusInfo });
-            statusStrip.Location = new Point(0, 725);
+            statusStrip.Location = new Point(0, 727);
             statusStrip.Name = "statusStrip";
-            statusStrip.Size = new Size(984, 24);
+            statusStrip.Size = new Size(984, 22);
             statusStrip.TabIndex = 2;
             // 
             // statusIndex
             // 
             statusIndex.Name = "statusIndex";
-            statusIndex.Size = new Size(24, 19);
+            statusIndex.Size = new Size(24, 17);
             statusIndex.Text = "0/0";
             // 
             // statusPath
             // 
-            statusPath.Font = new Font("Segoe UI", 10F);
             statusPath.Name = "statusPath";
-            statusPath.Size = new Size(945, 19);
+            statusPath.Size = new Size(914, 17);
             statusPath.Spring = true;
             statusPath.Text = "Keine Datei geöffnet";
             statusPath.TextAlign = ContentAlignment.MiddleLeft;
@@ -342,7 +341,7 @@
             // statusInfo
             // 
             statusInfo.Name = "statusInfo";
-            statusInfo.Size = new Size(0, 19);
+            statusInfo.Size = new Size(0, 17);
             // 
             // MainForm
             // 

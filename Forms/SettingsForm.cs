@@ -7,18 +7,15 @@ namespace PDFLight.Forms;
 /// Der Dialog arbeitet auf Kopien; erst OK übernimmt die Werte (über die öffentlichen Eigenschaften).</summary>
 public partial class SettingsForm : Form
 {
-    public const int TabTargets = 0;
-    public const int TabPrograms = 1;
-    public const int TabGeneral = 2;
+    public const int TabGeneral = 0;
+    public const int TabTargets = 1;
+    public const int TabPrograms = 2;
 
     [System.ComponentModel.Browsable(false), System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
     public List<string> TargetFolders => [.. listTargets.Items.Cast<string>()];
 
     [System.ComponentModel.Browsable(false), System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
     public List<string> ExternalPrograms => [.. listPrograms.Items.Cast<string>()];
-
-    [System.ComponentModel.Browsable(false)]
-    public bool AlphabeticSort => cbAlphabetic.Checked;
 
     [System.ComponentModel.Browsable(false)]
     public bool JumpToLastUsed => cbJumpLastUsed.Checked;
@@ -49,7 +46,6 @@ public partial class SettingsForm : Form
         InitializeComponent();
         listTargets.Items.AddRange([.. source.TargetFolders.Where(f => !string.IsNullOrEmpty(f))]);
         listPrograms.Items.AddRange([.. source.ExternalPrograms.Where(f => !string.IsNullOrEmpty(f))]);
-        cbAlphabetic.Checked = source.AlphabeticSort;
         cbJumpLastUsed.Checked = source.JumpToLastUsed;
         cbConfirmDelete.Checked = source.ConfirmDelete;
         cbShowProgramIcons.Checked = source.ShowProgramIcons;
@@ -134,6 +130,16 @@ public partial class SettingsForm : Form
         UpdateTargetButtons();
     }
 
+    private void BtnTargetSort_Click(object sender, EventArgs e)
+    {
+        var selected = listTargets.SelectedIndex >= 0 ? (string)listTargets.Items[listTargets.SelectedIndex] : null;
+        var sorted = listTargets.Items.Cast<string>().OrderBy(f => f, StringComparer.OrdinalIgnoreCase).ToArray();
+        listTargets.Items.Clear();
+        listTargets.Items.AddRange(sorted);
+        if (selected != null) { listTargets.SelectedIndex = Array.IndexOf(sorted, selected); }
+        UpdateTargetButtons();
+    }
+
     // ------------------------------------------------------------------ Programme
 
     private void ListPrograms_SelectedIndexChanged(object sender, EventArgs e) { UpdateProgramButtons(); }
@@ -167,6 +173,16 @@ public partial class SettingsForm : Form
         listPrograms.Items.Clear();
         listPrograms.Items.AddRange([.. ProgramFinder.DetectPrograms()]);
         if (listPrograms.Items.Count > 0) { listPrograms.SelectedIndex = 0; }
+        UpdateProgramButtons();
+    }
+
+    private void BtnProgramSort_Click(object sender, EventArgs e)
+    {
+        var selected = listPrograms.SelectedIndex >= 0 ? (string)listPrograms.Items[listPrograms.SelectedIndex] : null;
+        var sorted = listPrograms.Items.Cast<string>().OrderBy(ProgramFinder.GetDisplayName, StringComparer.OrdinalIgnoreCase).ToArray(); // nach Anzeigename, nicht nach Pfad
+        listPrograms.Items.Clear();
+        listPrograms.Items.AddRange(sorted);
+        if (selected != null) { listPrograms.SelectedIndex = Array.IndexOf(sorted, selected); }
         UpdateProgramButtons();
     }
 
