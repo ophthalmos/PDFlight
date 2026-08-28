@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text.Json;
 using Microsoft.Web.WebView2.Core;
 
 namespace PDFLight.Classes;
@@ -73,16 +72,13 @@ internal static class TaskDlg
         return TaskDialog.ShowDialog(hwnd, page) == TaskDialogButton.Yes;
     }
 
-    // Updatesuche über die GitHub-Releases-API: neueste Veröffentlichung samt Setup-Datei
-    private const string UpdateApiUrl = "https://api.github.com/repos/ophthalmos/PDFlight/releases/latest";
-    private const string ReleasesPageUrl = "https://github.com/ophthalmos/PDFlight/releases";
+    // Updatesuche über die XML-Datei auf der Webseite des Autors (wie bei den übrigen Programmen);
+    // erwartete Elemente unterhalb der Wurzel: <version>, <date>, <url64>
+    private const string UpdateXmlUrl = "https://www.netradio.info/download/pdflight.xml";
+    private const string WebsiteUrl = "https://www.netradio.info";
 
     private static readonly Lazy<HttpClient> httpClient = new(() =>
-    {
-        HttpClient client = new() { Timeout = TimeSpan.FromSeconds(15) };
-        client.DefaultRequestHeaders.UserAgent.ParseAdd("PDFlight"); // die GitHub-API verlangt einen User-Agent
-        return client;
-    });
+        new HttpClient() { Timeout = TimeSpan.FromSeconds(15) });
 
     /// <summary>Über-Dialog mit den Versionen der verwendeten Komponenten, PayPal-Spendenlink
     /// (Button-Details aus PDFMover übernommen) und manueller Updatesuche.</summary>
@@ -126,7 +122,7 @@ internal static class TaskDlg
 
         // Updatesuche: Klick lädt die neueste GitHub-Veröffentlichung und blättert im Dialog zur Ergebnisseite (wie in Adressen)
         TaskDialogButton downloadButton = new TaskDialogCommandLinkButton("PDFlightSetup.exe herunterladen",
-            "Das Setup wird im Browser heruntergeladen. Führen Sie es\naus, um die neue Version zu installieren.");
+            "PDFlightSetup.exe wird im Download-Ordner\ngespeichert. Führen Sie das Setupprogramm\naus, um die neueste Version zu installieren.");
         var updatePage = new TaskDialogPage()
         {
             Caption = "Über " + Application.ProductName,
@@ -137,7 +133,7 @@ internal static class TaskDlg
             SizeToContent = true,
             Buttons = { TaskDialogButton.Close }
         };
-        var urlString = ReleasesPageUrl; // Fallback: die Releases-Seite, falls kein Setup-Asset gefunden wird
+        var urlString = WebsiteUrl; // Fallback: die Webseite, falls die XML keinen Download-Link nennt
         updateButton.Click += async (sender, e) =>
         {
             updateButton.Enabled = false; // um doppelte Klicks zu verhindern
@@ -146,35 +142,23 @@ internal static class TaskDlg
             var failed = false;
             try
             {
-                var json = await httpClient.Value.GetStringAsync(UpdateApiUrl);
-                using var doc = JsonDocument.Parse(json);
-                var root = doc.RootElement;
-                var tag = root.GetProperty("tag_name").GetString() ?? string.Empty; // z.B. "v0.2.0"
-                if (Version.TryParse(tag.TrimStart('v', 'V'), out var parsed)) { updateVersion = parsed; }
-                if (root.TryGetProperty("published_at", out var published) && published.TryGetDateTime(out var publishedAt))
-                { dateString = publishedAt.ToLocalTime().ToString("d"); }
-                if (root.TryGetProperty("assets", out var assets))
-                {
-                    foreach (var asset in assets.EnumerateArray())
-                    {
-                        var name = asset.GetProperty("name").GetString();
-                        if (name != null && name.EndsWith("Setup.exe", StringComparison.OrdinalIgnoreCase))
-                        {
-                            urlString = asset.GetProperty("browser_download_url").GetString() ?? urlString;
-                            break;
-                        }
-                    }
-                }
+                await using var stream = await httpClient.Value.GetStreamAsync(UpdateXmlUrl);
+                var root = System.Xml.Linq.XDocument.Load(stream).Root; // Wurzelname egal — Load verkraftet auch die BOM
+                var versionString = root?.Element("version")?.Value;
+                if (Version.TryParse(versionString ?? string.Empty, out var parsed)) { updateVersion = parsed; }
+                dateString = root?.Element("date")?.Value ?? string.Empty;
+                var url64 = root?.Element("url64")?.Value;
+                if (!string.IsNullOrEmpty(url64)) { urlString = url64; }
             }
             catch (HttpRequestException ex)
             {
                 failed = true;
                 updatePage.Heading = "Die Update-Suche ist fehlgeschlagen.";
                 updatePage.Text = ex.StatusCode == HttpStatusCode.NotFound
-                    ? "Es wurden keine Veröffentlichungen gefunden."
+                    ? "Die Update-Informationen wurden nicht gefunden."
                     : (ex.StatusCode != null ? $"Status-Code: {ex.StatusCode}\n" : string.Empty) + ex.Message;
             }
-            catch (Exception ex) when (ex is TaskCanceledException or JsonException or KeyNotFoundException or InvalidOperationException)
+            catch (Exception ex) when (ex is TaskCanceledException or System.Xml.XmlException or InvalidOperationException)
             {
                 failed = true;
                 updatePage.Heading = "Die Update-Suche ist fehlgeschlagen.";
@@ -186,7 +170,7 @@ internal static class TaskDlg
             {
                 failed = true;
                 updatePage.Heading = "Die Update-Suche ist fehlgeschlagen.";
-                updatePage.Text = "Die Versionsangabe der Veröffentlichung konnte nicht gelesen werden.";
+                updatePage.Text = "Die Versionsangabe in der Update-Datei konnte nicht gelesen werden.";
             }
             if (failed) { updatePage.Icon = TaskDialogIcon.Error; }
             else if (curVersion != null && updateVersion.CompareTo(curVersion) > 0)
