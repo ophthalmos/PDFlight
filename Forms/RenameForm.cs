@@ -293,7 +293,7 @@ public partial class RenameForm : Form
     {
         if (Directory.Exists(directoryTextBox.Text))
         {
-            try { Process.Start(new ProcessStartInfo("explorer.exe", $"/e, /select,\"{Path.Combine(directoryTextBox.Text, fileInfo.Name)}\"")); }
+            try { ShellUtil.ShowInFileManager(Path.Combine(directoryTextBox.Text, fileInfo.Name)); }
             catch (Exception ex) when (ex is Win32Exception or InvalidOperationException) { TaskDlg.ErrTaskDlg(Handle, "Der Ordner konnte nicht geöffnet werden.", ex); }
         }
         else { TaskDlg.MsgTaskDlg(Handle, "Der angegebene Pfad existiert nicht.", null, TaskDialogIcon.Warning); }

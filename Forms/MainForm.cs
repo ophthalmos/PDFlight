@@ -599,7 +599,7 @@ public partial class MainForm : Form
     private void ShowInFolder()
     {
         if (currentFile == null) { return; }
-        Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{currentFile.FullName}\""));
+        ShellUtil.ShowInFileManager(currentFile.FullName);
     }
 
     private bool emailInProgress;
