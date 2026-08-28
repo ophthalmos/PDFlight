@@ -54,6 +54,8 @@
             cbShowProgramIcons = new System.Windows.Forms.CheckBox();
             cbToolbarIcons = new System.Windows.Forms.CheckBox();
             cbLargeIcons = new System.Windows.Forms.CheckBox();
+            cbCloseOnEscape = new System.Windows.Forms.CheckBox();
+            cbReopenLast = new System.Windows.Forms.CheckBox();
             btnClearRecent = new System.Windows.Forms.Button();
             buttonOK = new System.Windows.Forms.Button();
             buttonCancel = new System.Windows.Forms.Button();
@@ -290,6 +292,8 @@
             tabGeneral.Controls.Add(cbShowProgramIcons);
             tabGeneral.Controls.Add(cbToolbarIcons);
             tabGeneral.Controls.Add(cbLargeIcons);
+            tabGeneral.Controls.Add(cbCloseOnEscape);
+            tabGeneral.Controls.Add(cbReopenLast);
             tabGeneral.Controls.Add(btnClearRecent);
             tabGeneral.Location = new System.Drawing.Point(4, 24);
             tabGeneral.Name = "tabGeneral";
@@ -365,9 +369,29 @@
             cbLargeIcons.Text = "&Große Symbole in der Symbolleiste (24 statt 16 Pixel)";
             cbLargeIcons.UseVisualStyleBackColor = true;
             //
+            // cbCloseOnEscape
+            //
+            cbCloseOnEscape.AutoSize = true;
+            cbCloseOnEscape.Location = new System.Drawing.Point(16, 188);
+            cbCloseOnEscape.Name = "cbCloseOnEscape";
+            cbCloseOnEscape.Size = new System.Drawing.Size(200, 19);
+            cbCloseOnEscape.TabIndex = 7;
+            cbCloseOnEscape.Text = "Programm mit &Esc beenden";
+            cbCloseOnEscape.UseVisualStyleBackColor = true;
+            //
+            // cbReopenLast
+            //
+            cbReopenLast.AutoSize = true;
+            cbReopenLast.Location = new System.Drawing.Point(16, 216);
+            cbReopenLast.Name = "cbReopenLast";
+            cbReopenLast.Size = new System.Drawing.Size(260, 19);
+            cbReopenLast.TabIndex = 8;
+            cbReopenLast.Text = "Zuletzt geöffnete &Datei beim Start laden";
+            cbReopenLast.UseVisualStyleBackColor = true;
+            //
             // btnClearRecent
             //
-            btnClearRecent.Location = new System.Drawing.Point(16, 200);
+            btnClearRecent.Location = new System.Drawing.Point(16, 256);
             btnClearRecent.Name = "btnClearRecent";
             btnClearRecent.Size = new System.Drawing.Size(180, 27);
             btnClearRecent.TabIndex = 3;
@@ -450,6 +474,8 @@
         private System.Windows.Forms.CheckBox cbShowProgramIcons;
         private System.Windows.Forms.CheckBox cbToolbarIcons;
         private System.Windows.Forms.CheckBox cbLargeIcons;
+        private System.Windows.Forms.CheckBox cbCloseOnEscape;
+        private System.Windows.Forms.CheckBox cbReopenLast;
         private System.Windows.Forms.Button btnClearRecent;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
