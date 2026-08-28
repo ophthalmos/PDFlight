@@ -89,6 +89,7 @@ internal static class TaskDlg
             "PDFsharp " + typeof(PdfSharp.Pdf.PdfDocument).Assembly.GetName().Version?.ToString(3) + Environment.NewLine +
             RuntimeInformation.FrameworkDescription;
         TaskDialogButton paypalButton = new TaskDialogCommandLinkButton("Anerkennung spenden via PayPal");
+        using var icon32 = icon == null ? null : new Icon(icon, 32, 32); // sonst nimmt der TaskDialog die 16-px-Variante des Fenster-Icons
         var indent = new string(' ', 14);
         var foot = $"{indent}© {buildDate:yyyy} Wilhelm Happe\n{indent}Version {threeVersion} ({buildDate:d})";
         var initialPage = new TaskDialogPage()
@@ -96,7 +97,7 @@ internal static class TaskDlg
             Caption = "Über " + Application.ProductName,
             Heading = Application.ProductName,
             Text = msg,
-            Icon = icon == null ? null : new TaskDialogIcon(icon),
+            Icon = icon32 == null ? null : new TaskDialogIcon(icon32),
             AllowCancel = true,
             SizeToContent = true,
             Buttons = { paypalButton, TaskDialogButton.OK },

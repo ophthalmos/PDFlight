@@ -4,8 +4,9 @@ Schlanker PDF-Betrachter mit Dateiverwaltung für Windows — ansehen, einsortie
 
 PDFlight ist der bewusst abgespeckte Open-Source-Nachfolger von PDFMover. Der Kern-Arbeitsablauf:
 eine PDF-Datei öffnen (z. B. einen eingescannten Befund oder eine Rechnung), kurz prüfen und mit
-einem Klick in den richtigen Ordner **verschieben** — danach zeigt PDFlight automatisch die nächste
-PDF-Datei des Ordners an. Ideal, um volle Eingangs- und Scan-Ordner zügig abzuarbeiten.
+einem Klick in den richtigen Ordner **verschieben** — die Datei bleibt dabei angezeigt und wird
+vom neuen Ort weiterverwendet, z. B. zum Umbenennen. Ideal, um volle Eingangs- und
+Scan-Ordner zügig abzuarbeiten.
 
 ![PDFlight](docs/screenshot.png)
 
@@ -16,7 +17,10 @@ PDF-Datei des Ordners an. Ideal, um volle Eingangs- und Scan-Ordner zügig abzua
   **nie gesperrt** — sie kann jederzeit verschoben, umbenannt oder extern bearbeitet werden.
 - **Einsortieren**: Verschieben/Kopieren über einen Ordnerdialog mit Explorer-Ordnerbaum,
   Zielordnerliste, Zuletzt-Liste und Verlauf; Schnell-Verschieben in den ersten Zielordner
-  per Strg+Klick; nach dem Verschieben wird automatisch die nächste PDF geladen.
+  per Strg+Klick. Die verschobene Datei bleibt — nun vom neuen Ort — angezeigt; existiert im
+  Ziel bereits eine gleichnamige Datei, kann sie ersetzt oder ein freier Name (`name_1.pdf`)
+  vergeben werden, und auf inhaltsgleiche Dateien im Zielordner weist PDFlight hin.
+  Nach dem Kopieren ist wählbar, ob Kopie oder Original angezeigt wird.
 - **Umbenennen**: großer Dialog mit der Dateiliste des Ordners als Namensvorlage,
   Umwandeln-Menü (Unterstriche, Bindestriche, Klein-/Titelschreibung, Umlaute ersetzen),
   Datums-Präfixen/-Suffixen und optionalem Zielordnerwechsel.
