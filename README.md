@@ -53,6 +53,7 @@ Scan-Ordner zügig abzuarbeiten.
 | Strg+R | Seiten drehen |
 | Strg+Z | Letzte Dokumentänderung rückgängig |
 | Strg+I | Dokumenteigenschaften |
+| Alt+Enter | Windows-Dateieigenschaften (wie im Explorer) |
 | Strg+E | Als E-Mail-Anhang senden |
 | Strg+1 … Strg+9 | In externem Programm öffnen |
 | F11 / Esc | Vollbild ein / aus |

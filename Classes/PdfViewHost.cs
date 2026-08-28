@@ -10,6 +10,10 @@ namespace PDFLight.Classes;
 /// umbenannt oder gelöscht werden kann. Die Kapselung erlaubt später einen Wechsel auf
 /// PDF.js, ohne dass das Hauptformular angepasst werden muss.
 /// </summary>
+// Hinweis: Der "Dateieigenschaften"-Eintrag im "…"-Menü der Viewer-Toolbar ist erweiterungsinterne
+// Chromium-UI und von außen nicht auslösbar (in den per ContextMenuRequested abfangbaren Kontextmenüs
+// kommt er nicht vor — geprüft für Seite, Rand und Toolbar). Alt+Enter zeigt darum die
+// Windows-Dateieigenschaften (ShellUtil.ShowFileProperties), wie im Explorer.
 internal class PdfViewHost(WebView2 webView)
 {
     private const string VirtualHost = "pdflight.doc";

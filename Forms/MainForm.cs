@@ -1020,6 +1020,7 @@ public partial class MainForm : Form
             case Keys.R | Keys.Control: RotatePagesDialog(); return true;
             case Keys.Z | Keys.Control when undoTargetFile != null: UndoLastChange(); return true;
             case Keys.I | Keys.Control: ShowProperties(); return true;
+            case Keys.Enter | Keys.Alt when currentFile != null: ShellUtil.ShowFileProperties(currentFile.FullName); return true; // Windows-Dateieigenschaften, wie im Explorer
             case Keys.E | Keys.Control: EmailCurrent(); return true;
             case Keys.Right | Keys.Alt: StepFile(1); return true;   // Strg+Pfeile/±/0 gehören dem Viewer (Zoom & Co.)
             case Keys.Left | Keys.Alt: StepFile(-1); return true;
