@@ -24,7 +24,7 @@ internal class PdfViewHost(WebView2 webView)
     public async Task InitializeAsync()
     {
         // Eigener Datenordner, damit das Programm auch aus einem schreibgeschützten Installationsordner läuft
-        var dataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PDFLight", "WebView2");
+        var dataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PDFlight", "WebView2");
         var environment = await CoreWebView2Environment.CreateAsync(null, dataFolder);
         await webView.EnsureCoreWebView2Async(environment);
 
@@ -33,8 +33,8 @@ internal class PdfViewHost(WebView2 webView)
         core.Settings.IsStatusBarEnabled = false;
         core.Settings.IsGeneralAutofillEnabled = false;
         core.Settings.IsPasswordAutosaveEnabled = false;
-        core.Settings.HiddenPdfToolbarItems = CoreWebView2PdfToolbarItems.Save | CoreWebView2PdfToolbarItems.SaveAs // Speichern übernimmt PDFLight selbst
-            | CoreWebView2PdfToolbarItems.FullScreen; // der Chromium-Vollbildmodus ist im Host-Fenster kaum beendbar → PDFLight bietet stattdessen F11
+        core.Settings.HiddenPdfToolbarItems = CoreWebView2PdfToolbarItems.Save | CoreWebView2PdfToolbarItems.SaveAs // Speichern übernimmt PDFlight selbst
+            | CoreWebView2PdfToolbarItems.FullScreen; // der Chromium-Vollbildmodus ist im Host-Fenster kaum beendbar → PDFlight bietet stattdessen F11
         core.AddWebResourceRequestedFilter("https://" + VirtualHost + "/*", CoreWebView2WebResourceContext.All);
         core.WebResourceRequested += Core_WebResourceRequested;
         core.NavigationStarting += Core_NavigationStarting;
@@ -133,7 +133,7 @@ internal class PdfViewHost(WebView2 webView)
     private void ShowEmptyPage()
     {
         webView.CoreWebView2.NavigateToString("""
-            <!doctype html><html lang="de"><head><meta charset="utf-8"><title>PDFLight</title></head>
+            <!doctype html><html lang="de"><head><meta charset="utf-8"><title>PDFlight</title></head>
             <body style="margin:0;font-family:'Segoe UI',sans-serif;background:#f3f3f3;color:#666;
                          display:flex;align-items:center;justify-content:center;height:100vh">
               <div id="hint" style="text-align:center;border:3px dashed transparent;border-radius:16px;padding:40px">

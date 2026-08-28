@@ -9,12 +9,13 @@
     <AssemblyVersion>0.1.0</AssemblyVersion>
     <FileVersion>0.1.0</FileVersion>
     <Version>0.1.0</Version>
-    <Product>PDFLight</Product>
+    <Product>PDFlight</Product>
+    <RootNamespace>PDFLight</RootNamespace><!-- Namespaces im Code bleiben PDFLight; nur der sichtbare Name ist PDFlight -->
     <Authors>Wilhelm Happe</Authors>
     <Description>Schlanker PDF-Betrachter mit Dateiverwaltung</Description>
     <NeutralLanguage>de</NeutralLanguage>
     <SatelliteResourceLanguages>de</SatelliteResourceLanguages>
-    <ApplicationIcon>Resources\PDFLight.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\PDFlight.ico</ApplicationIcon>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks><!-- für die Quellgeneratoren LibraryImport/GeneratedComInterface -->
   </PropertyGroup>
 

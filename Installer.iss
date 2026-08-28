@@ -1,5 +1,5 @@
 ; ============================================================================
-; PDFLight – Inno-Setup-Skript
+; PDFlight – Inno-Setup-Skript
 ;
 ; Quelle ist der normale Release-Ordner: In Visual Studio einfach die
 ; Release-Konfiguration bauen, dann dieses Skript kompilieren.
@@ -10,7 +10,7 @@
 ;   - WebView2-Runtime (auf Windows 10/11 in der Regel vorhanden; das Setup warnt, falls sie fehlt).
 ; ============================================================================
 
-#define appName "PDFLight"
+#define appName "PDFlight"
 #define appVersion "0.1.0"
 #define releaseDir "bin\Release\net10.0-windows"
 
@@ -30,7 +30,7 @@ DefaultGroupName={#appName}
 ChangesAssociations=yes
 DisableWelcomePage=yes
 DisableReadyPage=yes
-SetupIconFile=Resources\PDFLight.ico
+SetupIconFile=Resources\PDFlight.ico
 UninstallDisplayIcon={app}\{#appName}.exe
 OutputDir=.
 OutputBaseFilename={#appName}Setup
@@ -65,7 +65,7 @@ Name: "{group}\{#appName}"; Filename: "{app}\{#appName}.exe"
 Name: "{autodesktop}\{#appName}"; Filename: "{app}\{#appName}.exe"; Tasks: desktopicon
 
 [Registry]
-; ProgID, damit PDFLight im "Öffnen mit"-Dialog erscheint (Standard-App bleibt Sache des Benutzers)
+; ProgID, damit PDFlight im "Öffnen mit"-Dialog erscheint (Standard-App bleibt Sache des Benutzers)
 Root: HKLM; Subkey: "Software\Classes\{#appName}.Document"; ValueType: string; ValueData: "PDF-Datei"; Flags: uninsdeletekey; Tasks: fileassoc
 Root: HKLM; Subkey: "Software\Classes\{#appName}.Document\DefaultIcon"; ValueType: string; ValueData: "{app}\{#appName}.exe,0"; Tasks: fileassoc
 Root: HKLM; Subkey: "Software\Classes\{#appName}.Document\shell\open\command"; ValueType: string; ValueData: """{app}\{#appName}.exe"" ""%1"""; Tasks: fileassoc
@@ -75,8 +75,8 @@ Root: HKLM; Subkey: "Software\Classes\Applications\{#appName}.exe\shell\open\com
 [Run]
 Filename: "{app}\{#appName}.exe"; Description: "{cm:Run}"; Flags: nowait postinstall skipifsilent
 
-; Hinweis: Die Benutzereinstellungen (%APPDATA%\PDFLight\settings.json) und der
-; WebView2-Datenordner (%LOCALAPPDATA%\PDFLight) bleiben bei der Deinstallation erhalten.
+; Hinweis: Die Benutzereinstellungen (%APPDATA%\PDFlight\settings.json) und der
+; WebView2-Datenordner (%LOCALAPPDATA%\PDFlight) bleiben bei der Deinstallation erhalten.
 
 [Code]
 function InitializeSetup(): Boolean;

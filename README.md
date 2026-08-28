@@ -1,13 +1,13 @@
-# PDFLight
+# PDFlight
 
 Schlanker PDF-Betrachter mit Dateiverwaltung für Windows — ansehen, einsortieren, fertig.
 
-PDFLight ist der bewusst abgespeckte Open-Source-Nachfolger von PDFMover. Der Kern-Arbeitsablauf:
+PDFlight ist der bewusst abgespeckte Open-Source-Nachfolger von PDFMover. Der Kern-Arbeitsablauf:
 eine PDF-Datei öffnen (z. B. einen eingescannten Befund oder eine Rechnung), kurz prüfen und mit
-einem Klick in den richtigen Ordner **verschieben** — danach zeigt PDFLight automatisch die nächste
+einem Klick in den richtigen Ordner **verschieben** — danach zeigt PDFlight automatisch die nächste
 PDF-Datei des Ordners an. Ideal, um volle Eingangs- und Scan-Ordner zügig abzuarbeiten.
 
-![PDFLight](docs/screenshot.png)
+![PDFlight](docs/screenshot.png)
 
 ## Funktionen
 
@@ -65,12 +65,12 @@ PDF-Datei des Ordners an. Ideal, um volle Eingangs- und Scan-Ordner zügig abzua
 Visual Studio 2022 oder neuer mit .NET-10-SDK:
 
 ```
-dotnet build PDFLight.csproj -c Release
+dotnet build PDFlight.csproj -c Release
 ```
 
 Für das Setup zusätzlich [Inno Setup 6](https://jrsoftware.org/isinfo.php): nach dem
 Release-Build die Datei `Installer.iss` kompilieren — sie nimmt die Dateien direkt aus
-`bin\Release\net10.0-windows` und erzeugt `PDFLightSetup.exe`.
+`bin\Release\net10.0-windows` und erzeugt `PDFlightSetup.exe`.
 
 ## Technik
 
@@ -84,8 +84,8 @@ Release-Build die Datei `Installer.iss` kompilieren — sie nimmt die Dateien di
   (`SHGetFileInfo`) und natürlicher Sortierung (`StrCmpLogicalW`) — `Controls/`.
 - Sämtliches Interop läuft über quellgenerierte P/Invokes (`LibraryImport`) und
   quellgeneriertes COM (`GeneratedComInterface`); keine kommerziellen Abhängigkeiten.
-- Einstellungen: `%APPDATA%\PDFLight\settings.json`;
-  WebView2-Daten und Undo-Sicherung: `%LOCALAPPDATA%\PDFLight\`.
+- Einstellungen: `%APPDATA%\PDFlight\settings.json`;
+  WebView2-Daten und Undo-Sicherung: `%LOCALAPPDATA%\PDFlight\`.
 
 ## Lizenz
 

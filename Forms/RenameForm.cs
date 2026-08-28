@@ -244,8 +244,8 @@ public partial class RenameForm : Form
     private void OpenMenuItem_Click(object sender, EventArgs e)
     {
         if (listView.SelectedItems.Count == 0) { return; }
-        try { Process.Start(new ProcessStartInfo(Application.ExecutablePath, $"\"{listView.SelectedItems[0].Name}\"") { UseShellExecute = false }); } // neue PDFLight-Instanz
-        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException) { TaskDlg.ErrTaskDlg(Handle, "PDFLight konnte nicht gestartet werden.", ex); }
+        try { Process.Start(new ProcessStartInfo(Application.ExecutablePath, $"\"{listView.SelectedItems[0].Name}\"") { UseShellExecute = false }); } // neue PDFlight-Instanz
+        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException) { TaskDlg.ErrTaskDlg(Handle, "PDFlight konnte nicht gestartet werden.", ex); }
     }
 
     private void DeleteMenuItem_Click(object sender, EventArgs e)

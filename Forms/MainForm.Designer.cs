@@ -63,6 +63,7 @@
             statusIndex = new ToolStripStatusLabel();
             statusPath = new ToolStripStatusLabel();
             statusInfo = new ToolStripStatusLabel();
+            toolStripSeparator9 = new ToolStripSeparator();
             ((System.ComponentModel.ISupportInitialize)webView).BeginInit();
             toolStrip.SuspendLayout();
             statusStrip.SuspendLayout();
@@ -83,7 +84,7 @@
             // toolStrip
             // 
             toolStrip.GripStyle = ToolStripGripStyle.Hidden;
-            toolStrip.Items.AddRange(new ToolStripItem[] { btnOpen, toolStripSeparator1, btnPrev, btnNext, btnPageUp, btnPageDown, toolStripSeparator2, splitButtonMove, btnCopy, toolStripSeparator3, btnRename, btnDelete, toolStripSeparator8, btnEmail, toolStripSeparator4, ddbEdit, ddbPrograms, toolStripSeparator5, btnShowInFolder, btnSettings });
+            toolStrip.Items.AddRange(new ToolStripItem[] { btnOpen, toolStripSeparator1, btnPrev, btnNext, btnPageUp, btnPageDown, toolStripSeparator2, splitButtonMove, btnCopy, toolStripSeparator3, btnRename, btnDelete, btnShowInFolder, toolStripSeparator8, btnEmail, toolStripSeparator4, ddbEdit, toolStripSeparator9, ddbPrograms, toolStripSeparator5, btnSettings });
             toolStrip.Location = new Point(0, 0);
             toolStrip.Name = "toolStrip";
             toolStrip.Size = new Size(984, 25);
@@ -326,22 +327,32 @@
             // 
             // statusIndex
             // 
+            statusIndex.BorderSides = ToolStripStatusLabelBorderSides.Right;
+            statusIndex.BorderStyle = Border3DStyle.Etched;
             statusIndex.Name = "statusIndex";
-            statusIndex.Size = new Size(24, 17);
+            statusIndex.Size = new Size(28, 17);
             statusIndex.Text = "0/0";
             // 
             // statusPath
             // 
             statusPath.Name = "statusPath";
-            statusPath.Size = new Size(914, 17);
+            statusPath.Padding = new Padding(4, 0, 4, 0);
+            statusPath.Size = new Size(941, 17);
             statusPath.Spring = true;
             statusPath.Text = "Keine Datei geöffnet";
             statusPath.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // statusInfo
             // 
+            statusInfo.BorderSides = ToolStripStatusLabelBorderSides.Left;
+            statusInfo.BorderStyle = Border3DStyle.Etched;
             statusInfo.Name = "statusInfo";
-            statusInfo.Size = new Size(0, 17);
+            statusInfo.Size = new Size(4, 17);
+            // 
+            // toolStripSeparator9
+            // 
+            toolStripSeparator9.Name = "toolStripSeparator9";
+            toolStripSeparator9.Size = new Size(6, 25);
             // 
             // MainForm
             // 
@@ -356,7 +367,7 @@
             MinimumSize = new Size(600, 448);
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "PDFLight";
+            Text = "PDFlight";
             Activated += MainForm_Activated;
             FormClosing += MainForm_FormClosing;
             Shown += MainForm_Shown;
@@ -405,5 +416,6 @@
         private System.Windows.Forms.ToolStripStatusLabel statusIndex;
         private System.Windows.Forms.ToolStripStatusLabel statusPath;
         private System.Windows.Forms.ToolStripStatusLabel statusInfo;
+        private ToolStripSeparator toolStripSeparator9;
     }
 }
