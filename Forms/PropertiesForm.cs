@@ -29,5 +29,11 @@ internal partial class PropertiesForm : Form
         textBoxKeywords.Text = info.Keywords;
         labelFileValue.Text = file.Name;
         labelInfoValue.Text = $"{info.PageCount} Seiten   ·   PDF {info.Version}   ·   {file.Length / 1024.0:N0} KB   ·   geändert {file.LastWriteTime:g}";
+        var origin = new[]
+        {
+            string.IsNullOrWhiteSpace(info.Creator) ? null : "Anwendung: " + info.Creator.Trim(),
+            string.IsNullOrWhiteSpace(info.Producer) ? null : "PDF-Produzent: " + info.Producer.Trim(),
+        };
+        labelProducerValue.Text = string.Join("   ·   ", origin.Where(s => s != null));
     }
 }

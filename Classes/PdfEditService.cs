@@ -3,7 +3,7 @@ using PdfSharp.Pdf.IO;
 
 namespace PDFLight.Classes;
 
-internal record PdfInfo(string Title, string Author, string Subject, string Keywords, int PageCount, string Version);
+internal record PdfInfo(string Title, string Author, string Subject, string Keywords, int PageCount, string Version, string Creator, string Producer);
 
 /// <summary>Dokumentoperationen mit PDFsharp. Alle Methoden arbeiten direkt auf der Datei;
 /// die Anzeige bleibt davon unberührt, weil der Viewer aus dem Speicher liest.</summary>
@@ -65,7 +65,7 @@ internal static class PdfEditService
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import); // Import = lesender Zugriff (ReadOnly ist in PDFsharp 6 nicht implementiert)
         var v = document.Version; // z.B. 14 → "1.4"
         return new PdfInfo(document.Info.Title, document.Info.Author, document.Info.Subject, document.Info.Keywords,
-            document.PageCount, $"{v / 10}.{v % 10}");
+            document.PageCount, $"{v / 10}.{v % 10}", document.Info.Creator, document.Info.Producer);
     }
 
     public static void WriteInfo(string path, string title, string author, string subject, string keywords)
