@@ -133,7 +133,7 @@ namespace PDFLight.Forms
             shellHistory.Dock = DockStyle.None;
             shellHistory.GripStyle = ToolStripGripStyle.Hidden;
             shellHistory.LayoutStyle = ToolStripLayoutStyle.Flow;
-            shellHistory.Location = new Point(11, 583);
+            shellHistory.Location = new Point(11, 578);
             shellHistory.MaximumSize = new Size(72, 28);
             shellHistory.Name = "shellHistory";
             shellHistory.Size = new Size(70, 22);
