@@ -18,7 +18,7 @@ public partial class RenameForm : Form
     public string NewName => renameTextBox.Text;
     public string NewFolder => directoryTextBox.Text;
 
-    private FileInfo fileInfo;
+    private readonly FileInfo fileInfo;
     private bool selectAllDone;
     private bool dateOrderDescending = true;
     private bool nameOrderDescending;

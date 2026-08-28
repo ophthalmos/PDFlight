@@ -396,7 +396,7 @@ public partial class MainForm : Form
         FileInfo destInfo = new(destination);
         var suggestion = FileUtil.SuggestAdditionalFileName(destInfo);
         TaskDialogButton btnReplace = new TaskDialogCommandLinkButton("&Ersetzen",
-            $"Die vorhandene Datei ersetzen\nin {destInfo.DirectoryName}: {destInfo.Length / 1024} KB, {destInfo.LastWriteTime.ToShortDateString()}");
+            $"Die vorhandene Datei ersetzen\nin {destInfo.DirectoryName}: {destInfo.Length / 1024} KB, {destInfo.LastWriteTime:d}");
         TaskDialogButton btnRename = new TaskDialogCommandLinkButton("&Umbenennen", "Eine neue Datei erstellen:\n" + suggestion?.Name);
         var page = new TaskDialogPage()
         {
@@ -447,7 +447,7 @@ public partial class MainForm : Form
             Icon = TaskDialogIcon.Warning,
             Caption = movedFile.DirectoryName,
             Heading = "Folgende Datei scheint identisch zu sein.",
-            Text = $"{duplicate.Name} ({duplicate.Length / 1024} KB, {duplicate.LastWriteTime.ToShortDateString()})",
+            Text = $"{duplicate.Name} ({duplicate.Length / 1024} KB, {duplicate.LastWriteTime:d})",
             AllowCancel = true,
             SizeToContent = true,
             Buttons = { btnOpenExisting, btnDeleteCurrent, TaskDialogButton.Ignore },

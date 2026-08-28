@@ -29,55 +29,55 @@ namespace PDFLight.Forms
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            labelName = new System.Windows.Forms.Label();
-            renameTextBox = new System.Windows.Forms.TextBox();
-            btnTransform = new System.Windows.Forms.Button();
-            btnDate = new System.Windows.Forms.Button();
-            btnTransformMenu = new System.Windows.Forms.ContextMenuStrip(components);
-            underscoreMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            hyphensMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            lowercaseMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            firstLetterMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            removeDiacriticMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            btnDateMenu = new System.Windows.Forms.ContextMenuStrip(components);
-            directoryTextBox = new System.Windows.Forms.TextBox();
-            folderOpenButton = new System.Windows.Forms.Button();
-            otherFolderButton = new System.Windows.Forms.Button();
-            labelList = new System.Windows.Forms.Label();
-            toolStripSort = new System.Windows.Forms.ToolStrip();
-            alphabeticSortButton = new System.Windows.Forms.ToolStripButton();
-            dateSortButton = new System.Windows.Forms.ToolStripButton();
-            listView = new System.Windows.Forms.ListView();
-            columnName = new System.Windows.Forms.ColumnHeader();
-            contextMenuListView = new System.Windows.Forms.ContextMenuStrip(components);
-            acceptMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            renameMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            openMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            deleteMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            propertiesMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            labelHint = new System.Windows.Forms.Label();
-            btnOK = new System.Windows.Forms.Button();
-            btnCancel = new System.Windows.Forms.Button();
+            labelName = new Label();
+            renameTextBox = new TextBox();
+            btnTransform = new Button();
+            btnDate = new Button();
+            btnTransformMenu = new ContextMenuStrip(components);
+            underscoreMenuItem = new ToolStripMenuItem();
+            hyphensMenuItem = new ToolStripMenuItem();
+            lowercaseMenuItem = new ToolStripMenuItem();
+            firstLetterMenuItem = new ToolStripMenuItem();
+            removeDiacriticMenuItem = new ToolStripMenuItem();
+            btnDateMenu = new ContextMenuStrip(components);
+            directoryTextBox = new TextBox();
+            folderOpenButton = new Button();
+            otherFolderButton = new Button();
+            labelList = new Label();
+            toolStripSort = new ToolStrip();
+            alphabeticSortButton = new ToolStripButton();
+            dateSortButton = new ToolStripButton();
+            listView = new ListView();
+            columnName = new ColumnHeader();
+            contextMenuListView = new ContextMenuStrip(components);
+            acceptMenuItem = new ToolStripMenuItem();
+            renameMenuItem = new ToolStripMenuItem();
+            openMenuItem = new ToolStripMenuItem();
+            deleteMenuItem = new ToolStripMenuItem();
+            propertiesMenuItem = new ToolStripMenuItem();
+            labelHint = new Label();
+            btnOK = new Button();
+            btnCancel = new Button();
             btnTransformMenu.SuspendLayout();
             toolStripSort.SuspendLayout();
             contextMenuListView.SuspendLayout();
             SuspendLayout();
-            //
+            // 
             // labelName
-            //
+            // 
             labelName.AutoSize = true;
-            labelName.Location = new System.Drawing.Point(12, 12);
+            labelName.Location = new Point(12, 12);
             labelName.Name = "labelName";
-            labelName.Size = new System.Drawing.Size(103, 15);
+            labelName.Size = new Size(102, 15);
             labelName.TabIndex = 0;
             labelName.Text = "&Neuer Dateiname:";
-            //
+            // 
             // renameTextBox
-            //
-            renameTextBox.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            renameTextBox.Location = new System.Drawing.Point(12, 33);
+            // 
+            renameTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            renameTextBox.Location = new Point(12, 39);
             renameTextBox.Name = "renameTextBox";
-            renameTextBox.Size = new System.Drawing.Size(510, 23);
+            renameTextBox.Size = new Size(360, 23);
             renameTextBox.TabIndex = 1;
             renameTextBox.Click += RenameTextBox_Click;
             renameTextBox.TextChanged += RenameTextBox_TextChanged;
@@ -85,257 +85,258 @@ namespace PDFLight.Forms
             renameTextBox.KeyDown += RenameTextBox_KeyDown;
             renameTextBox.KeyPress += RenameTextBox_KeyPress;
             renameTextBox.Leave += RenameTextBox_Leave;
-            //
+            // 
             // btnTransform
-            //
-            btnTransform.Location = new System.Drawing.Point(12, 64);
+            // 
+            btnTransform.Location = new Point(257, 6);
             btnTransform.Name = "btnTransform";
-            btnTransform.Size = new System.Drawing.Size(115, 27);
+            btnTransform.Size = new Size(115, 27);
             btnTransform.TabIndex = 2;
             btnTransform.Text = "&Umwandeln  ▾";
             btnTransform.UseVisualStyleBackColor = true;
             btnTransform.Click += BtnTransform_Click;
-            //
+            // 
             // btnDate
-            //
-            btnDate.Location = new System.Drawing.Point(137, 64);
+            // 
+            btnDate.Location = new Point(136, 6);
             btnDate.Name = "btnDate";
-            btnDate.Size = new System.Drawing.Size(115, 27);
+            btnDate.Size = new Size(115, 27);
             btnDate.TabIndex = 3;
             btnDate.Text = "&Datum  ▾";
             btnDate.UseVisualStyleBackColor = true;
             btnDate.Click += BtnDate_Click;
-            //
+            // 
             // btnTransformMenu
-            //
-            btnTransformMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { underscoreMenuItem, hyphensMenuItem, lowercaseMenuItem, firstLetterMenuItem, removeDiacriticMenuItem });
+            // 
+            btnTransformMenu.Items.AddRange(new ToolStripItem[] { underscoreMenuItem, hyphensMenuItem, lowercaseMenuItem, firstLetterMenuItem, removeDiacriticMenuItem });
             btnTransformMenu.Name = "btnTransformMenu";
-            btnTransformMenu.Size = new System.Drawing.Size(230, 114);
-            //
+            btnTransformMenu.Size = new Size(224, 114);
+            // 
             // underscoreMenuItem
-            //
+            // 
             underscoreMenuItem.Name = "underscoreMenuItem";
-            underscoreMenuItem.Size = new System.Drawing.Size(229, 22);
+            underscoreMenuItem.Size = new Size(223, 22);
             underscoreMenuItem.Text = "Leerzeichen → Unterstriche";
             underscoreMenuItem.Click += UnderscoreMenuItem_Click;
-            //
+            // 
             // hyphensMenuItem
-            //
+            // 
             hyphensMenuItem.Name = "hyphensMenuItem";
-            hyphensMenuItem.Size = new System.Drawing.Size(229, 22);
+            hyphensMenuItem.Size = new Size(223, 22);
             hyphensMenuItem.Text = "Leerzeichen → Bindestriche";
             hyphensMenuItem.Click += HyphensMenuItem_Click;
-            //
+            // 
             // lowercaseMenuItem
-            //
+            // 
             lowercaseMenuItem.Name = "lowercaseMenuItem";
-            lowercaseMenuItem.Size = new System.Drawing.Size(229, 22);
+            lowercaseMenuItem.Size = new Size(223, 22);
             lowercaseMenuItem.Text = "alles kleinschreiben";
             lowercaseMenuItem.Click += LowercaseMenuItem_Click;
-            //
+            // 
             // firstLetterMenuItem
-            //
+            // 
             firstLetterMenuItem.Name = "firstLetterMenuItem";
-            firstLetterMenuItem.Size = new System.Drawing.Size(229, 22);
+            firstLetterMenuItem.Size = new Size(223, 22);
             firstLetterMenuItem.Text = "Wortanfänge großschreiben";
             firstLetterMenuItem.Click += FirstLetterMenuItem_Click;
-            //
+            // 
             // removeDiacriticMenuItem
-            //
+            // 
             removeDiacriticMenuItem.Name = "removeDiacriticMenuItem";
-            removeDiacriticMenuItem.Size = new System.Drawing.Size(229, 22);
+            removeDiacriticMenuItem.Size = new Size(223, 22);
             removeDiacriticMenuItem.Text = "Umlaute && Akzente ersetzen";
             removeDiacriticMenuItem.Click += RemoveDiacriticMenuItem_Click;
-            //
+            // 
             // btnDateMenu
-            //
+            // 
             btnDateMenu.Name = "btnDateMenu";
-            btnDateMenu.Size = new System.Drawing.Size(140, 4);
+            btnDateMenu.Size = new Size(61, 4);
             btnDateMenu.ItemClicked += BtnDateMenu_ItemClicked;
-            //
+            // 
             // directoryTextBox
-            //
-            directoryTextBox.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            directoryTextBox.Location = new System.Drawing.Point(12, 103);
+            // 
+            directoryTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            directoryTextBox.Location = new Point(12, 73);
             directoryTextBox.Name = "directoryTextBox";
             directoryTextBox.ReadOnly = true;
-            directoryTextBox.Size = new System.Drawing.Size(438, 23);
+            directoryTextBox.Size = new Size(304, 23);
             directoryTextBox.TabIndex = 4;
-            //
+            // 
             // folderOpenButton
-            //
-            folderOpenButton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            folderOpenButton.Location = new System.Drawing.Point(456, 102);
+            // 
+            folderOpenButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            folderOpenButton.Location = new Point(316, 73);
             folderOpenButton.Name = "folderOpenButton";
-            folderOpenButton.Size = new System.Drawing.Size(30, 25);
+            folderOpenButton.Size = new Size(30, 25);
             folderOpenButton.TabIndex = 5;
             folderOpenButton.Text = "📂";
             folderOpenButton.UseVisualStyleBackColor = true;
             folderOpenButton.Click += FolderButton_Click;
-            //
+            // 
             // otherFolderButton
-            //
-            otherFolderButton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            otherFolderButton.Location = new System.Drawing.Point(492, 102);
+            // 
+            otherFolderButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            otherFolderButton.Location = new Point(342, 73);
             otherFolderButton.Name = "otherFolderButton";
-            otherFolderButton.Size = new System.Drawing.Size(30, 25);
+            otherFolderButton.Size = new Size(30, 25);
             otherFolderButton.TabIndex = 6;
             otherFolderButton.Text = "…";
             otherFolderButton.UseVisualStyleBackColor = true;
             otherFolderButton.Click += OtherFolderButton_Click;
-            //
+            // 
             // labelList
-            //
+            // 
             labelList.AutoSize = true;
-            labelList.Location = new System.Drawing.Point(12, 140);
+            labelList.Location = new Point(12, 117);
             labelList.Name = "labelList";
-            labelList.Size = new System.Drawing.Size(133, 15);
+            labelList.Size = new Size(133, 15);
             labelList.TabIndex = 7;
             labelList.Text = "PDF-Dateien im Ordner:";
-            //
+            // 
             // toolStripSort
-            //
-            toolStripSort.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            toolStripSort.Dock = System.Windows.Forms.DockStyle.None;
-            toolStripSort.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
-            toolStripSort.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { alphabeticSortButton, dateSortButton });
-            toolStripSort.Location = new System.Drawing.Point(410, 134);
+            // 
+            toolStripSort.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            toolStripSort.Dock = DockStyle.None;
+            toolStripSort.GripStyle = ToolStripGripStyle.Hidden;
+            toolStripSort.Items.AddRange(new ToolStripItem[] { alphabeticSortButton, dateSortButton });
+            toolStripSort.Location = new Point(290, 111);
             toolStripSort.Name = "toolStripSort";
-            toolStripSort.Size = new System.Drawing.Size(112, 25);
+            toolStripSort.Size = new Size(82, 25);
             toolStripSort.TabIndex = 8;
-            //
+            // 
             // alphabeticSortButton
-            //
+            // 
             alphabeticSortButton.Checked = true;
-            alphabeticSortButton.CheckState = System.Windows.Forms.CheckState.Checked;
-            alphabeticSortButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            alphabeticSortButton.CheckState = CheckState.Checked;
+            alphabeticSortButton.DisplayStyle = ToolStripItemDisplayStyle.Text;
             alphabeticSortButton.Name = "alphabeticSortButton";
-            alphabeticSortButton.Size = new System.Drawing.Size(34, 22);
+            alphabeticSortButton.Size = new Size(32, 22);
             alphabeticSortButton.Text = "A–Z";
             alphabeticSortButton.ToolTipText = "Alphabetisch sortieren (F5)";
             alphabeticSortButton.Click += AlphabeticSortButton_Click;
-            //
+            // 
             // dateSortButton
-            //
-            dateSortButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            // 
+            dateSortButton.DisplayStyle = ToolStripItemDisplayStyle.Text;
             dateSortButton.Name = "dateSortButton";
-            dateSortButton.Size = new System.Drawing.Size(46, 22);
+            dateSortButton.Size = new Size(47, 22);
             dateSortButton.Text = "Datum";
             dateSortButton.ToolTipText = "Nach Änderungsdatum sortieren (F6)";
             dateSortButton.Click += DateSortButton_Click;
-            //
+            // 
             // listView
-            //
-            listView.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            listView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] { columnName });
+            // 
+            listView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            listView.Columns.AddRange(new ColumnHeader[] { columnName });
             listView.ContextMenuStrip = contextMenuListView;
             listView.FullRowSelect = true;
-            listView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
+            listView.HeaderStyle = ColumnHeaderStyle.None;
             listView.LabelEdit = true;
-            listView.Location = new System.Drawing.Point(12, 162);
+            listView.Location = new Point(12, 139);
             listView.MultiSelect = false;
             listView.Name = "listView";
             listView.ShowItemToolTips = true;
-            listView.Size = new System.Drawing.Size(510, 330);
+            listView.Size = new Size(360, 253);
             listView.TabIndex = 9;
             listView.UseCompatibleStateImageBehavior = false;
-            listView.View = System.Windows.Forms.View.Details;
+            listView.View = View.Details;
             listView.AfterLabelEdit += ListView_AfterLabelEdit;
             listView.BeforeLabelEdit += ListView_BeforeLabelEdit;
             listView.KeyDown += ListView_KeyDown;
             listView.MouseDoubleClick += ListView_MouseDoubleClick;
-            //
+            // 
             // columnName
-            //
+            // 
             columnName.Text = "";
             columnName.Width = 480;
-            //
+            // 
             // contextMenuListView
-            //
-            contextMenuListView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { acceptMenuItem, renameMenuItem, openMenuItem, deleteMenuItem, propertiesMenuItem });
+            // 
+            contextMenuListView.Items.AddRange(new ToolStripItem[] { acceptMenuItem, renameMenuItem, openMenuItem, deleteMenuItem, propertiesMenuItem });
             contextMenuListView.Name = "contextMenuListView";
-            contextMenuListView.Size = new System.Drawing.Size(240, 114);
+            contextMenuListView.Size = new Size(282, 114);
             contextMenuListView.Opening += ContextMenuListView_Opening;
-            //
+            // 
             // acceptMenuItem
-            //
+            // 
             acceptMenuItem.Name = "acceptMenuItem";
             acceptMenuItem.ShortcutKeyDisplayString = "Eingabe";
-            acceptMenuItem.Size = new System.Drawing.Size(239, 22);
+            acceptMenuItem.Size = new Size(281, 22);
             acceptMenuItem.Text = "Namen übernehmen";
             acceptMenuItem.Click += AcceptMenuItem_Click;
-            //
+            // 
             // renameMenuItem
-            //
+            // 
             renameMenuItem.Name = "renameMenuItem";
             renameMenuItem.ShortcutKeyDisplayString = "F2";
-            renameMenuItem.Size = new System.Drawing.Size(239, 22);
+            renameMenuItem.Size = new Size(281, 22);
             renameMenuItem.Text = "Umbenennen";
             renameMenuItem.Click += RenameMenuItem_Click;
-            //
+            // 
             // openMenuItem
-            //
+            // 
             openMenuItem.Name = "openMenuItem";
             openMenuItem.ShortcutKeyDisplayString = "Strg+Eingabe";
-            openMenuItem.Size = new System.Drawing.Size(239, 22);
+            openMenuItem.Size = new Size(281, 22);
             openMenuItem.Text = "In neuem Fenster öffnen";
             openMenuItem.Click += OpenMenuItem_Click;
-            //
+            // 
             // deleteMenuItem
-            //
+            // 
             deleteMenuItem.Name = "deleteMenuItem";
             deleteMenuItem.ShortcutKeyDisplayString = "Entf";
-            deleteMenuItem.Size = new System.Drawing.Size(239, 22);
+            deleteMenuItem.Size = new Size(281, 22);
             deleteMenuItem.Text = "In den Papierkorb";
             deleteMenuItem.Click += DeleteMenuItem_Click;
-            //
+            // 
             // propertiesMenuItem
-            //
+            // 
             propertiesMenuItem.Name = "propertiesMenuItem";
-            propertiesMenuItem.Size = new System.Drawing.Size(239, 22);
+            propertiesMenuItem.Size = new Size(281, 22);
             propertiesMenuItem.Text = "Eigenschaften";
             propertiesMenuItem.Click += PropertiesMenuItem_Click;
-            //
+            // 
             // labelHint
-            //
-            labelHint.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            labelHint.ForeColor = System.Drawing.SystemColors.GrayText;
-            labelHint.Location = new System.Drawing.Point(12, 500);
+            // 
+            labelHint.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            labelHint.AutoSize = true;
+            labelHint.ForeColor = SystemColors.GrayText;
+            labelHint.Location = new Point(12, 395);
             labelHint.Name = "labelHint";
-            labelHint.Size = new System.Drawing.Size(510, 32);
+            labelHint.Size = new Size(349, 15);
             labelHint.TabIndex = 10;
-            labelHint.Text = "Doppelklick oder Eingabe übernimmt einen Namen aus der Liste  ·  F2: Listeneintrag umbenennen\r\nF4: anderer Zielordner  ·  F5/F6: Sortierung  ·  Strg+Eingabe: sofort umbenennen";
-            //
+            labelHint.Text = "Doppelklick oder Eingabe übernimmt einen Namen aus der Liste.";
+            // 
             // btnOK
-            //
-            btnOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
+            // 
+            btnOK.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnOK.DialogResult = DialogResult.OK;
             btnOK.Enabled = false;
-            btnOK.Location = new System.Drawing.Point(296, 540);
+            btnOK.Location = new Point(136, 422);
             btnOK.Name = "btnOK";
-            btnOK.Size = new System.Drawing.Size(115, 27);
+            btnOK.Size = new Size(115, 27);
             btnOK.TabIndex = 11;
             btnOK.Text = "Umbenennen";
             btnOK.UseVisualStyleBackColor = true;
-            //
+            // 
             // btnCancel
-            //
-            btnCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            btnCancel.Location = new System.Drawing.Point(417, 540);
+            // 
+            btnCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnCancel.DialogResult = DialogResult.Cancel;
+            btnCancel.Location = new Point(257, 422);
             btnCancel.Name = "btnCancel";
-            btnCancel.Size = new System.Drawing.Size(105, 27);
+            btnCancel.Size = new Size(115, 27);
             btnCancel.TabIndex = 12;
             btnCancel.Text = "Abbrechen";
             btnCancel.UseVisualStyleBackColor = true;
-            //
+            // 
             // RenameForm
-            //
+            // 
             AcceptButton = btnOK;
-            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
             CancelButton = btnCancel;
-            ClientSize = new System.Drawing.Size(534, 579);
+            ClientSize = new Size(384, 461);
             Controls.Add(btnCancel);
             Controls.Add(btnOK);
             Controls.Add(labelHint);
@@ -349,12 +350,11 @@ namespace PDFLight.Forms
             Controls.Add(btnTransform);
             Controls.Add(renameTextBox);
             Controls.Add(labelName);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
             MinimizeBox = false;
-            MinimumSize = new System.Drawing.Size(480, 480);
             Name = "RenameForm";
             ShowInTaskbar = false;
-            SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
-            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            StartPosition = FormStartPosition.CenterParent;
             Text = "Datei umbenennen";
             FormClosing += RenameForm_FormClosing;
             Load += RenameForm_Load;

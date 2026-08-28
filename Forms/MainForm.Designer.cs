@@ -333,6 +333,7 @@
             statusStrip.Items.AddRange(new ToolStripItem[] { statusIndex, statusPath, statusInfo });
             statusStrip.Location = new Point(0, 727);
             statusStrip.Name = "statusStrip";
+            statusStrip.ShowItemToolTips = true;
             statusStrip.Size = new Size(984, 22);
             statusStrip.TabIndex = 2;
             // 
@@ -343,6 +344,7 @@
             statusIndex.Name = "statusIndex";
             statusIndex.Size = new Size(28, 17);
             statusIndex.Text = "0/0";
+            statusIndex.ToolTipText = "Position der angezeigten Datei unter den PDF-Dateien des Ordners\r\n(mit Alt+← / Alt+→ blättern)";
             // 
             // statusPath
             // 
@@ -359,6 +361,7 @@
             statusInfo.BorderStyle = Border3DStyle.Etched;
             statusInfo.Name = "statusInfo";
             statusInfo.Size = new Size(4, 17);
+            statusInfo.ToolTipText = "Seitenzahl, Dateigröße und Änderungsdatum der angezeigten Datei";
             // 
             // toolStripSeparator9
             // 
