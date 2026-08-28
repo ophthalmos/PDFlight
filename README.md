@@ -83,4 +83,4 @@ Release-Build die Datei `Installer.iss` kompilieren — sie nimmt die Dateien di
 
 ## Lizenz
 
-Noch nicht festgelegt.
+[MIT](LICENSE) — © 2026 Wilhelm Happe.
