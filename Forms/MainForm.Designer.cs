@@ -305,7 +305,7 @@
             btnShowInFolder.Name = "btnShowInFolder";
             btnShowInFolder.Size = new Size(86, 22);
             btnShowInFolder.Text = "Ordner öffnen";
-            btnShowInFolder.ToolTipText = "Datei im Explorer anzeigen";
+            btnShowInFolder.ToolTipText = "Datei im Dateimanager anzeigen";
             btnShowInFolder.Click += BtnShowInFolder_Click;
             // 
             // btnSettings

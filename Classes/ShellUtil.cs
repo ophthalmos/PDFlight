@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace PDFLight.Classes;
@@ -5,6 +6,16 @@ namespace PDFLight.Classes;
 /// <summary>Zeigt den Windows-Eigenschaften-Dialog einer Datei (portiert aus PDFMover NativeMethods).</summary>
 internal static partial class ShellUtil
 {
+    /// <summary>Zeigt die Datei im Dateimanager an — in Directory Opus, falls installiert, sonst im Explorer (wie in PDFMover).</summary>
+    public static void ShowInFileManager(string filePath)
+    {
+        var dopus = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"GPSoftware\Directory Opus\dopusrt.exe");
+        var startInfo = File.Exists(dopus)
+            ? new ProcessStartInfo(dopus, $"/cmd Go \"{filePath}\"")
+            : new ProcessStartInfo("explorer.exe", $"/e, /select,\"{filePath}\"");
+        Process.Start(startInfo);
+    }
+
     private const int SW_SHOW = 5;
     private const uint SEE_MASK_INVOKEIDLIST = 12;
 

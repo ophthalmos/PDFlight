@@ -29,7 +29,7 @@ Scan-Ordner zügig abzuarbeiten.
   bearbeiten — mit einstufigem Rückgängig (Strg+Z).
 - **Weitergeben**: E-Mail mit der Datei als Anhang über das Standard-Mailprogramm (Strg+E),
   Öffnen in installierten PDF-Programmen (Strg+1 … Strg+9, automatisch erkannt),
-  „Öffnen mit“-Dialog, Anzeigen im Explorer.
+  „Öffnen mit“-Dialog, Anzeigen im Dateimanager (Directory Opus, falls installiert, sonst Explorer).
 - **Aufräumen**: Löschen in den Papierkorb (Entf), Blättern durch alle PDFs des Ordners (Alt+←/→).
 - Drag & Drop, F11-Vollbild, zentraler Einstellungsdialog, Symbole aus der Windows-Symbolschrift,
   zuletzt geöffnete Dateien im Öffnen-Menü, optional „Programm mit Esc beenden“ und
