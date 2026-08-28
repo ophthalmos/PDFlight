@@ -276,7 +276,6 @@ public partial class MainForm : Form
         using FolderSelectForm dialog = new(startFolder, copy, jumpToLastUsed);
         if (settings.RecentFolders.Count > 0) { dialog.RecentComboBox.Items.AddRange([.. settings.RecentFolders]); }
         dialog.TargetComboBox.Items.AddRange([.. settings.TargetFolders.Where(f => !string.IsNullOrEmpty(f))]);
-        dialog.TargetComboBox.Sorted = settings.AlphabeticSort;
         dialog.ShellTreePath = startFolder;
 
         if (dialog.ShowDialog(this) == DialogResult.OK)
@@ -349,8 +348,7 @@ public partial class MainForm : Form
     {
         settings.ReloadSharedLists(); // Zielliste anderer Instanzen übernehmen
         splitButtonMove.DropDownItems.Clear();
-        var targets = settings.TargetFolders.Where(f => !string.IsNullOrEmpty(f));
-        if (settings.AlphabeticSort) { targets = targets.OrderBy(f => f, StringComparer.OrdinalIgnoreCase); }
+        var targets = settings.TargetFolders.Where(f => !string.IsNullOrEmpty(f)); // Reihenfolge = Zielliste (sortierbar in den Einstellungen)
         foreach (var folder in targets)
         {
             ToolStripMenuItem item = new(folder.Replace("&", "&&")) { Enabled = Directory.Exists(folder), Tag = folder };
@@ -375,7 +373,6 @@ public partial class MainForm : Form
         {
             settings.TargetFolders = dialog.TargetFolders;
             settings.ExternalPrograms = dialog.ExternalPrograms;
-            settings.AlphabeticSort = dialog.AlphabeticSort;
             settings.JumpToLastUsed = dialog.JumpToLastUsed;
             settings.ConfirmDelete = dialog.ConfirmDelete;
             settings.ShowProgramIcons = dialog.ShowProgramIcons;
@@ -395,8 +392,8 @@ public partial class MainForm : Form
     {
         var edge = LogicalToDeviceUnits(settings.LargeToolbarIcons ? 24 : 16); // DPI-gerecht; gilt auch für die Programm-Icons
         toolStrip.ImageScalingSize = new Size(edge, edge);
-        var fontSize = settings.LargeToolbarIcons ? 10f : 9f; // größere Symbole → größere Schrift im ganzen Fenster
-        if (Math.Abs(Font.Size - fontSize) > 0.1f) { Font = new Font(Font.FontFamily, fontSize); } // vererbt sich auf Tool- und Statusleiste
+        var fontSize = settings.LargeToolbarIcons ? 10f : 9f; // größere Symbole → größere Schrift in der Symbolleiste
+        if (Math.Abs(toolStrip.Font.Size - fontSize) > 0.1f) { toolStrip.Font = new Font(toolStrip.Font.FontFamily, fontSize); } // ToolStrip erbt die Form-Schrift nicht → direkt setzen
         var showIcons = settings.ShowToolbarIcons && ToolbarIcons.FontAvailable;
         var size = toolStrip.ImageScalingSize;
         void Set(ToolStripItem item, char glyph, bool imageOnly = false)
@@ -854,7 +851,7 @@ public partial class MainForm : Form
     private void BtnRename_Click(object sender, EventArgs e) { RenameCurrent(); }
     private void BtnDelete_Click(object sender, EventArgs e) { DeleteCurrent(); }
     private void BtnShowInFolder_Click(object sender, EventArgs e) { ShowInFolder(); }
-    private void BtnSettings_Click(object sender, EventArgs e) { OpenSettings(SettingsForm.TabTargets); }
+    private void BtnSettings_Click(object sender, EventArgs e) { OpenSettings(SettingsForm.TabGeneral); }
     private void BtnPageUp_Click(object sender, EventArgs e) { SendPageKey("{PGUP}"); }
     private void BtnPageDown_Click(object sender, EventArgs e) { SendPageKey("{PGDN}"); }
     private void BtnEmail_Click(object sender, EventArgs e) { EmailCurrent(); }

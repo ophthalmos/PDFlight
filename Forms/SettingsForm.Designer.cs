@@ -36,6 +36,7 @@
             btnTargetUp = new System.Windows.Forms.Button();
             btnTargetDown = new System.Windows.Forms.Button();
             btnTargetRemoveMissing = new System.Windows.Forms.Button();
+            btnTargetSort = new System.Windows.Forms.Button();
             labelTargetStatus = new System.Windows.Forms.Label();
             labelTargetHint = new System.Windows.Forms.Label();
             tabPrograms = new System.Windows.Forms.TabPage();
@@ -45,10 +46,10 @@
             btnProgramUp = new System.Windows.Forms.Button();
             btnProgramDown = new System.Windows.Forms.Button();
             btnProgramDetect = new System.Windows.Forms.Button();
+            btnProgramSort = new System.Windows.Forms.Button();
             labelProgramStatus = new System.Windows.Forms.Label();
             labelProgramHint = new System.Windows.Forms.Label();
             tabGeneral = new System.Windows.Forms.TabPage();
-            cbAlphabetic = new System.Windows.Forms.CheckBox();
             cbJumpLastUsed = new System.Windows.Forms.CheckBox();
             cbConfirmDelete = new System.Windows.Forms.CheckBox();
             cbShowProgramIcons = new System.Windows.Forms.CheckBox();
@@ -68,9 +69,9 @@
             // tabControl
             //
             tabControl.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            tabControl.Controls.Add(tabGeneral);
             tabControl.Controls.Add(tabTargets);
             tabControl.Controls.Add(tabPrograms);
-            tabControl.Controls.Add(tabGeneral);
             tabControl.Location = new System.Drawing.Point(12, 12);
             tabControl.Name = "tabControl";
             tabControl.SelectedIndex = 0;
@@ -85,6 +86,7 @@
             tabTargets.Controls.Add(btnTargetUp);
             tabTargets.Controls.Add(btnTargetDown);
             tabTargets.Controls.Add(btnTargetRemoveMissing);
+            tabTargets.Controls.Add(btnTargetSort);
             tabTargets.Controls.Add(labelTargetStatus);
             tabTargets.Controls.Add(labelTargetHint);
             tabTargets.Location = new System.Drawing.Point(4, 24);
@@ -163,6 +165,17 @@
             btnTargetRemoveMissing.UseVisualStyleBackColor = true;
             btnTargetRemoveMissing.Click += BtnTargetRemoveMissing_Click;
             //
+            // btnTargetSort
+            //
+            btnTargetSort.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            btnTargetSort.Location = new System.Drawing.Point(456, 193);
+            btnTargetSort.Name = "btnTargetSort";
+            btnTargetSort.Size = new System.Drawing.Size(138, 27);
+            btnTargetSort.TabIndex = 8;
+            btnTargetSort.Text = "&Alphabetisch sortieren";
+            btnTargetSort.UseVisualStyleBackColor = true;
+            btnTargetSort.Click += BtnTargetSort_Click;
+            //
             // labelTargetStatus
             //
             labelTargetStatus.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
@@ -190,6 +203,7 @@
             tabPrograms.Controls.Add(btnProgramUp);
             tabPrograms.Controls.Add(btnProgramDown);
             tabPrograms.Controls.Add(btnProgramDetect);
+            tabPrograms.Controls.Add(btnProgramSort);
             tabPrograms.Controls.Add(labelProgramStatus);
             tabPrograms.Controls.Add(labelProgramHint);
             tabPrograms.Location = new System.Drawing.Point(4, 24);
@@ -266,6 +280,17 @@
             btnProgramDetect.UseVisualStyleBackColor = true;
             btnProgramDetect.Click += BtnProgramDetect_Click;
             //
+            // btnProgramSort
+            //
+            btnProgramSort.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            btnProgramSort.Location = new System.Drawing.Point(456, 193);
+            btnProgramSort.Name = "btnProgramSort";
+            btnProgramSort.Size = new System.Drawing.Size(138, 27);
+            btnProgramSort.TabIndex = 8;
+            btnProgramSort.Text = "&Alphabetisch sortieren";
+            btnProgramSort.UseVisualStyleBackColor = true;
+            btnProgramSort.Click += BtnProgramSort_Click;
+            //
             // labelProgramStatus
             //
             labelProgramStatus.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
@@ -286,7 +311,6 @@
             //
             // tabGeneral
             //
-            tabGeneral.Controls.Add(cbAlphabetic);
             tabGeneral.Controls.Add(cbJumpLastUsed);
             tabGeneral.Controls.Add(cbConfirmDelete);
             tabGeneral.Controls.Add(cbShowProgramIcons);
@@ -303,20 +327,10 @@
             tabGeneral.Text = "Allgemein";
             tabGeneral.UseVisualStyleBackColor = true;
             //
-            // cbAlphabetic
-            //
-            cbAlphabetic.AutoSize = true;
-            cbAlphabetic.Location = new System.Drawing.Point(16, 20);
-            cbAlphabetic.Name = "cbAlphabetic";
-            cbAlphabetic.Size = new System.Drawing.Size(230, 19);
-            cbAlphabetic.TabIndex = 0;
-            cbAlphabetic.Text = "&Zielliste alphabetisch sortiert anzeigen";
-            cbAlphabetic.UseVisualStyleBackColor = true;
-            //
             // cbJumpLastUsed
             //
             cbJumpLastUsed.AutoSize = true;
-            cbJumpLastUsed.Location = new System.Drawing.Point(16, 48);
+            cbJumpLastUsed.Location = new System.Drawing.Point(16, 20);
             cbJumpLastUsed.Name = "cbJumpLastUsed";
             cbJumpLastUsed.Size = new System.Drawing.Size(320, 19);
             cbJumpLastUsed.TabIndex = 1;
@@ -326,7 +340,7 @@
             // cbConfirmDelete
             //
             cbConfirmDelete.AutoSize = true;
-            cbConfirmDelete.Location = new System.Drawing.Point(16, 76);
+            cbConfirmDelete.Location = new System.Drawing.Point(16, 48);
             cbConfirmDelete.Name = "cbConfirmDelete";
             cbConfirmDelete.Size = new System.Drawing.Size(310, 19);
             cbConfirmDelete.TabIndex = 2;
@@ -338,7 +352,7 @@
             cbShowProgramIcons.AutoSize = true;
             cbShowProgramIcons.Checked = true;
             cbShowProgramIcons.CheckState = System.Windows.Forms.CheckState.Checked;
-            cbShowProgramIcons.Location = new System.Drawing.Point(16, 104);
+            cbShowProgramIcons.Location = new System.Drawing.Point(16, 76);
             cbShowProgramIcons.Name = "cbShowProgramIcons";
             cbShowProgramIcons.Size = new System.Drawing.Size(330, 19);
             cbShowProgramIcons.TabIndex = 4;
@@ -350,7 +364,7 @@
             cbToolbarIcons.AutoSize = true;
             cbToolbarIcons.Checked = true;
             cbToolbarIcons.CheckState = System.Windows.Forms.CheckState.Checked;
-            cbToolbarIcons.Location = new System.Drawing.Point(16, 132);
+            cbToolbarIcons.Location = new System.Drawing.Point(16, 104);
             cbToolbarIcons.Name = "cbToolbarIcons";
             cbToolbarIcons.Size = new System.Drawing.Size(320, 19);
             cbToolbarIcons.TabIndex = 5;
@@ -362,7 +376,7 @@
             cbLargeIcons.AutoSize = true;
             cbLargeIcons.Checked = true;
             cbLargeIcons.CheckState = System.Windows.Forms.CheckState.Checked;
-            cbLargeIcons.Location = new System.Drawing.Point(16, 160);
+            cbLargeIcons.Location = new System.Drawing.Point(16, 132);
             cbLargeIcons.Name = "cbLargeIcons";
             cbLargeIcons.Size = new System.Drawing.Size(280, 19);
             cbLargeIcons.TabIndex = 6;
@@ -372,7 +386,7 @@
             // cbCloseOnEscape
             //
             cbCloseOnEscape.AutoSize = true;
-            cbCloseOnEscape.Location = new System.Drawing.Point(16, 188);
+            cbCloseOnEscape.Location = new System.Drawing.Point(16, 160);
             cbCloseOnEscape.Name = "cbCloseOnEscape";
             cbCloseOnEscape.Size = new System.Drawing.Size(200, 19);
             cbCloseOnEscape.TabIndex = 7;
@@ -382,7 +396,7 @@
             // cbReopenLast
             //
             cbReopenLast.AutoSize = true;
-            cbReopenLast.Location = new System.Drawing.Point(16, 216);
+            cbReopenLast.Location = new System.Drawing.Point(16, 188);
             cbReopenLast.Name = "cbReopenLast";
             cbReopenLast.Size = new System.Drawing.Size(260, 19);
             cbReopenLast.TabIndex = 8;
@@ -391,7 +405,7 @@
             //
             // btnClearRecent
             //
-            btnClearRecent.Location = new System.Drawing.Point(16, 256);
+            btnClearRecent.Location = new System.Drawing.Point(16, 228);
             btnClearRecent.Name = "btnClearRecent";
             btnClearRecent.Size = new System.Drawing.Size(180, 27);
             btnClearRecent.TabIndex = 3;
@@ -456,6 +470,7 @@
         private System.Windows.Forms.Button btnTargetUp;
         private System.Windows.Forms.Button btnTargetDown;
         private System.Windows.Forms.Button btnTargetRemoveMissing;
+        private System.Windows.Forms.Button btnTargetSort;
         private System.Windows.Forms.Label labelTargetStatus;
         private System.Windows.Forms.Label labelTargetHint;
         private System.Windows.Forms.TabPage tabPrograms;
@@ -465,10 +480,10 @@
         private System.Windows.Forms.Button btnProgramUp;
         private System.Windows.Forms.Button btnProgramDown;
         private System.Windows.Forms.Button btnProgramDetect;
+        private System.Windows.Forms.Button btnProgramSort;
         private System.Windows.Forms.Label labelProgramStatus;
         private System.Windows.Forms.Label labelProgramHint;
         private System.Windows.Forms.TabPage tabGeneral;
-        private System.Windows.Forms.CheckBox cbAlphabetic;
         private System.Windows.Forms.CheckBox cbJumpLastUsed;
         private System.Windows.Forms.CheckBox cbConfirmDelete;
         private System.Windows.Forms.CheckBox cbShowProgramIcons;
