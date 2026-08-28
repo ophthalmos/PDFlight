@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Drawing.Imaging;
 using System.Drawing.Text;
 
 namespace PDFLight.Classes;
@@ -36,6 +37,26 @@ internal static class ToolbarIcons
     {
         using Font font = new(FontName, 10f);
         return string.Equals(font.Name, FontName, StringComparison.OrdinalIgnoreCase); // GDI fällt sonst stumm auf eine Standardschrift zurück
+    }
+
+    /// <summary>Graustufen-Kopie eines Bildes — für die Programm-Symbole in der Symbolleiste,
+    /// damit sie sich den einfarbigen MDL2-Symbolen unterordnen (im Menü bleiben sie farbig).</summary>
+    public static Image ToGrayscale(Image source)
+    {
+        if (source == null) { return null; }
+        Bitmap result = new(source.Width, source.Height);
+        using var g = Graphics.FromImage(result);
+        using ImageAttributes attributes = new();
+        attributes.SetColorMatrix(new ColorMatrix(
+        [
+            [0.299f, 0.299f, 0.299f, 0f, 0f],
+            [0.587f, 0.587f, 0.587f, 0f, 0f],
+            [0.114f, 0.114f, 0.114f, 0f, 0f],
+            [0f, 0f, 0f, 1f, 0f],
+            [0f, 0f, 0f, 0f, 1f],
+        ]));
+        g.DrawImage(source, new Rectangle(0, 0, source.Width, source.Height), 0, 0, source.Width, source.Height, GraphicsUnit.Pixel, attributes);
+        return result;
     }
 
     public static Image Get(char glyph, Size size)

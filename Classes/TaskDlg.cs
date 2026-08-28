@@ -88,8 +88,7 @@ internal static class TaskDlg
             "blitzschnell verschoben werden können, ohne das Programm" + Environment.NewLine +
             "zu verlassen. Darüber hinaus lassen sich Seiten aus dem" + Environment.NewLine +
             "PDF entfernen, in eine neue Datei einfügen oder eine" + Environment.NewLine +
-            "andere PDF-Datei anhängen. Per Tastendruck (Alt+→) wird" + Environment.NewLine +
-            "die nächste Datei des aktuellen Ordners angezeigt." + Environment.NewLine + Environment.NewLine +
+            "andere PDF-Datei anhängen." + Environment.NewLine +
             "Andere PDF-Programme lassen sich aus PDFlight heraus" + Environment.NewLine +
             "starten – falls eine Funktion fehlen sollte.";
         TaskDialogButton paypalButton = new TaskDialogCommandLinkButton("Anerkennung spenden via PayPal");
