@@ -95,9 +95,7 @@ internal static class TaskDlg
             "halten. Dateien lassen sich blitzschnell verschieben, ohne" + Environment.NewLine +
             "das Programm zu verlassen. Darüber hinaus lassen sich" + Environment.NewLine +
             "Seiten aus dem PDF entfernen, in eine neue Datei einfügen" + Environment.NewLine +
-            "oder es kann eine andere PDF-Datei anhängt werden." + Environment.NewLine +
-            "Andere PDF-Programme lassen sich aus PDFlight heraus" + Environment.NewLine +
-            "starten – falls eine Funktion fehlen sollte.";
+            "oder es kann eine andere PDF-Datei anhängt werden.";
         TaskDialogButton paypalButton = new TaskDialogCommandLinkButton("Anerkennung spenden via PayPal");
         TaskDialogButton updateButton = new TaskDialogCommandLinkButton("Jetzt nach einem Update suchen") { AllowCloseDialog = false };
         using var icon32 = icon == null ? null : new Icon(icon, 32, 32); // sonst nimmt der TaskDialog die 16-px-Variante des Fenster-Icons
