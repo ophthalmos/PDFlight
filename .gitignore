@@ -1,0 +1,10 @@
+# Build-Ausgaben
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+
+# Installer-Ausgabe (wird aus dem Release-Build erzeugt)
+PDFLightSetup.exe
