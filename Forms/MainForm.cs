@@ -362,29 +362,108 @@ public partial class MainForm : Form
         var destination = Path.Combine(folder, currentFile.Name);
         if (File.Exists(destination))
         {
-            if (!TaskDlg.ConfirmTaskDlg(Handle, "Vorhandene Datei ersetzen?", "Im Zielordner existiert bereits eine Datei mit diesem Namen.", TaskDialogIcon.Warning)) { return; }
+            destination = AskReplaceOrRename(destination); // Ersetzen / name_n anlegen / Abbrechen (wie in PDFMover)
+            if (destination == null) { return; }
         }
         try
         {
+            settings.ReloadSharedLists(); // parallel laufende Instanzen nicht überschreiben
             if (copy)
             {
                 File.Copy(currentFile.FullName, destination, true);
                 statusPath.Text = "Kopiert nach: " + destination;
+                AskWhichFileToShow(destination);
             }
             else
             {
-                var files = FileUtil.GetPdfFilesInFolder(currentFile.DirectoryName);
-                var index = files.FindIndex(f => string.Equals(f, currentFile.FullName, StringComparison.OrdinalIgnoreCase));
                 File.Move(currentFile.FullName, destination, true);
-                LoadNextAfterRemoval(files, index);
+                LoadPdf(destination); // die verschobene Datei bleibt angezeigt — nun vom neuen Ort (wie in PDFMover)
+                CheckForDuplicate(new FileInfo(destination));
             }
-            settings.ReloadSharedLists(); // parallel laufende Instanzen nicht überschreiben
             settings.AddRecentFolder(folder);
             settings.Save();
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             TaskDlg.ErrTaskDlg(Handle, (copy ? "Kopieren" : "Verschieben") + " fehlgeschlagen.", ex);
+        }
+    }
+
+    /// <summary>Zieldatei existiert bereits: Ersetzen, unter freiem name_n-Namen anlegen oder abbrechen (Dialog wie in PDFMover).
+    /// Liefert den zu verwendenden Zielpfad oder null bei Abbruch.</summary>
+    private string AskReplaceOrRename(string destination)
+    {
+        FileInfo destInfo = new(destination);
+        var suggestion = FileUtil.SuggestAdditionalFileName(destInfo);
+        TaskDialogButton btnReplace = new TaskDialogCommandLinkButton("&Ersetzen",
+            $"Die vorhandene Datei ersetzen\nin {destInfo.DirectoryName}: {destInfo.Length / 1024} KB, {destInfo.LastWriteTime.ToShortDateString()}");
+        TaskDialogButton btnRename = new TaskDialogCommandLinkButton("&Umbenennen", "Eine neue Datei erstellen:\n" + suggestion?.Name);
+        var page = new TaskDialogPage()
+        {
+            Caption = currentFile.DirectoryName,
+            Heading = "Im Ziel ist bereits eine Datei mit diesem Namen vorhanden.",
+            Text = destInfo.Name,
+            AllowCancel = true,
+            SizeToContent = true,
+            Buttons = { btnReplace, TaskDialogButton.Cancel },
+            DefaultButton = btnReplace
+        };
+        if (suggestion != null) { page.Buttons.Insert(1, btnRename); }
+        var result = TaskDialog.ShowDialog(Handle, page);
+        if (result == btnReplace) { return destination; }
+        if (result == btnRename) { return suggestion.FullName; }
+        return null;
+    }
+
+    /// <summary>Nach dem Kopieren: Dateikopie oder Originaldatei weiter anzeigen? (Dialog wie in PDFMover)</summary>
+    private void AskWhichFileToShow(string copiedFile)
+    {
+        TaskDialogButton btnCopy = new TaskDialogCommandLinkButton("Dateikopie:", copiedFile);
+        TaskDialogButton btnSource = new TaskDialogCommandLinkButton("Originaldatei:", currentFile.FullName);
+        var page = new TaskDialogPage()
+        {
+            Caption = Application.ProductName,
+            Heading = "Welche Datei soll geöffnet werden?",
+            AllowCancel = true,
+            SizeToContent = true,
+            Buttons = { btnCopy, btnSource, TaskDialogButton.Cancel },
+            DefaultButton = btnCopy
+        };
+        var result = TaskDialog.ShowDialog(Handle, page);
+        if (result == btnCopy) { LoadPdf(copiedFile, addToRecent: true); }
+        else if (result == btnSource) { settings.AddRecentFile(copiedFile); } // Kopie in die Zuletzt-Liste; das Original bleibt angezeigt
+    }
+
+    /// <summary>Nach dem Verschieben: liegt im Zielordner bereits eine inhaltsgleiche Datei? (wie in PDFMover;
+    /// statt einer neuen Instanz wird die vorhandene Datei im selben Fenster angezeigt)</summary>
+    private void CheckForDuplicate(FileInfo movedFile)
+    {
+        var duplicate = FileUtil.FindDuplicateInFolder(movedFile, movedFile.DirectoryName);
+        if (duplicate == null) { return; }
+        TaskDialogButton btnOpenExisting = new TaskDialogCommandLinkButton("Vorhandene Datei öffnen", duplicate.Name);
+        TaskDialogButton btnDeleteCurrent = new TaskDialogCommandLinkButton("Aktuelle Datei löschen", movedFile.Name);
+        var page = new TaskDialogPage()
+        {
+            Icon = TaskDialogIcon.Warning,
+            Caption = movedFile.DirectoryName,
+            Heading = "Folgende Datei scheint identisch zu sein.",
+            Text = $"{duplicate.Name} ({duplicate.Length / 1024} KB, {duplicate.LastWriteTime.ToShortDateString()})",
+            AllowCancel = true,
+            SizeToContent = true,
+            Buttons = { btnOpenExisting, btnDeleteCurrent, TaskDialogButton.Ignore },
+            DefaultButton = btnOpenExisting
+        };
+        var result = TaskDialog.ShowDialog(Handle, page);
+        if (result == btnOpenExisting) { LoadPdf(duplicate.FullName); }
+        else if (result == btnDeleteCurrent)
+        {
+            try
+            {
+                FileSystem.DeleteFile(movedFile.FullName, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                LoadPdf(duplicate.FullName); // das Duplikat bleibt übrig und wird angezeigt
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { TaskDlg.ErrTaskDlg(Handle, "Löschen fehlgeschlagen.", ex); }
         }
     }
 
