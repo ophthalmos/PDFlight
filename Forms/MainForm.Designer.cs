@@ -226,6 +226,7 @@
             ddbEdit.Name = "ddbEdit";
             ddbEdit.Size = new Size(76, 22);
             ddbEdit.Text = "Bearbeiten";
+            ddbEdit.ToolTipText = "Dokument bearbeiten: Seiten löschen/drehen, PDF anhängen,\r\nSeiten extrahieren, Eigenschaften (Tastenkürzel im Menü)";
             // 
             // mnuDeletePages
             // 

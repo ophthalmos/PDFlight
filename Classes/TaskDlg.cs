@@ -113,7 +113,32 @@ internal static class TaskDlg
             SizeToContent = true,
             Buttons = { paypalButton, updateButton, TaskDialogButton.OK },
             DefaultButton = TaskDialogButton.OK,
-            Footnote = foot
+            Footnote = foot,
+            Expander = new TaskDialogExpander()
+            {
+                Text = "Strg+O – PDF-Datei öffnen\n" +
+                    "Alt+← / Alt+→ – vorherige / nächste Datei des Ordners\n" +
+                    "Bild ↑ / Bild ↓ – im Dokument blättern\n" +
+                    "Strg+M – verschieben (Strg+Klick: erster Zielordner)\n" +
+                    "Strg+K – kopieren\n" +
+                    "F2 – umbenennen\n" +
+                    "Entf – in den Papierkorb\n" +
+                    "Strg+Entf – Seiten löschen\n" +
+                    "Strg+R – Seiten drehen\n" +
+                    "Strg+Z – Dokumentänderung rückgängig\n" +
+                    "Strg+I – Dokumenteigenschaften\n" +
+                    "Alt+Enter – Windows-Dateieigenschaften\n" +
+                    "Strg+E – als E-Mail-Anhang senden\n" +
+                    "Strg+1 … 9 – in externem Programm öffnen\n" +
+                    "Strg+F – im Dokument suchen\n" +
+                    "Strg+P – drucken\n" +
+                    "F11 – Vollbild ein/aus\n" +
+                    "2× Esc bzw. Umschalt+Esc – Programm beenden (Option)\n" +
+                    "F1 – dieser Dialog",
+                CollapsedButtonText = "Tastenkürzel anzeigen",
+                ExpandedButtonText = "Tastenkürzel ausblenden",
+                Position = TaskDialogExpanderPosition.AfterFootnote
+            }
         };
 
         // Updatesuche: Klick lädt die neueste GitHub-Veröffentlichung und blättert im Dialog zur Ergebnisseite (wie in Adressen)
