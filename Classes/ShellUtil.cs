@@ -10,11 +10,51 @@ internal static partial class ShellUtil
     public static void ShowInFileManager(string filePath)
     {
         var dopus = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"GPSoftware\Directory Opus\dopusrt.exe");
-        var startInfo = File.Exists(dopus)
-            ? new ProcessStartInfo(dopus, $"/cmd Go \"{filePath}\"")
-            : new ProcessStartInfo("explorer.exe", $"/e, /select,\"{filePath}\"");
-        Process.Start(startInfo);
+        if (File.Exists(dopus))
+        {
+            Process.Start(new ProcessStartInfo(dopus, $"/cmd Go \"{filePath}\""));
+            BringDopusListerToFront();
+        }
+        else { Process.Start(new ProcessStartInfo("explorer.exe", $"/e, /select,\"{filePath}\"")); }
     }
+
+    /// <summary>dopusrt reicht den Befehl nur an den laufenden Opus-Prozess weiter — ein bereits offenes
+    /// Lister-Fenster bliebe sonst im Hintergrund. Kurz warten, bis ein Lister existiert (bei Bedarf
+    /// öffnet Opus erst einen), dann aktivieren; das darf PDFlight, solange es selbst den Fokus hat.</summary>
+    private static void BringDopusListerToFront()
+    {
+        Task.Run(() =>
+        {
+            for (var i = 0; i < 20; i++)
+            {
+                var lister = FindWindow("dopus.lister", null);
+                if (lister != IntPtr.Zero)
+                {
+                    if (IsIconic(lister)) { ShowWindow(lister, SW_RESTORE); }
+                    SetForegroundWindow(lister);
+                    return;
+                }
+                Thread.Sleep(100);
+            }
+        });
+    }
+
+    private const int SW_RESTORE = 9;
+
+    [LibraryImport("user32.dll", EntryPoint = "FindWindowW", StringMarshalling = StringMarshalling.Utf16)]
+    private static partial IntPtr FindWindow(string className, string windowName);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool SetForegroundWindow(IntPtr hWnd);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool IsIconic(IntPtr hWnd);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
     private const int SW_SHOW = 5;
     private const uint SEE_MASK_INVOKEIDLIST = 12;
