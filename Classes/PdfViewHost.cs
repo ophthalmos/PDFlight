@@ -144,6 +144,39 @@ internal partial class PdfViewHost(WebView2 webView)
         if (IsReady) { webView.CoreWebView2.ShowPrintUI(CoreWebView2PrintDialogKind.Browser); }
     }
 
+    /// <summary>Dreht die Viewer-Ansicht um 90° (nur Anzeige, die Datei bleibt unverändert): drückt den
+    /// Drehen-Button der Viewer-Toolbar per UI Automation. Dessen Kürzel Strg+] ist auf deutschen
+    /// Tastaturen unerreichbar, und über die WebView2-API bzw. das DevTools-Protokoll ist der Viewer
+    /// (ein isoliertes Gast-Dokument) nicht ansprechbar — der Automation-Baum schon, mit den gleichen
+    /// Regeln wie bei der Seitenabfrage: Hintergrund-Task am Chromium-Kindfenster.</summary>
+    public void RotateView(bool clockwise)
+    {
+        if (!IsReady || currentBytes == null) { return; }
+        var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
+        if (chromium == IntPtr.Zero) { return; }
+        var clicks = clockwise ? 1 : 3; // der Viewer kennt nur rechtsherum — dreimal rechts ist einmal links
+        _ = Task.Run(() => InvokeRotateButton(chromium, clicks));
+    }
+
+    private static void InvokeRotateButton(IntPtr chromiumHandle, int clicks)
+    {
+        try
+        {
+            var root = System.Windows.Automation.AutomationElement.FromHandle(chromiumHandle);
+            var button = root.FindFirst(System.Windows.Automation.TreeScope.Descendants, // die HTML-id des Buttons wird zur AutomationId — sprachunabhängig
+                new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.AutomationIdProperty, "rotate"));
+            if (button != null && button.TryGetCurrentPattern(System.Windows.Automation.InvokePattern.Pattern, out var pattern))
+            {
+                for (var i = 0; i < clicks; i++) { ((System.Windows.Automation.InvokePattern)pattern).Invoke(); }
+            }
+        }
+        catch (Exception ex) when (ex is System.Windows.Automation.ElementNotAvailableException
+            or System.Runtime.InteropServices.COMException or InvalidOperationException)
+        {
+            // reine Komfortfunktion — schlägt der Klick fehl, bleibt die Ansicht einfach ungedreht
+        }
+    }
+
     // ------------------------------------------------------------------ Aktuelle Seite per UI Automation
 
     /// <summary>Aktuelle Seite laut dem Seitenzahl-Feld der Viewer-Toolbar, per UI Automation gelesen —
