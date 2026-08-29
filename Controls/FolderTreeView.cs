@@ -91,7 +91,7 @@ internal class FolderTreeView : TreeView
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
             {
                 e.CancelEdit = true;
-                PDFLight.Classes.TaskDlg.ErrTaskDlg(Handle, "Der Ordner konnte nicht umbenannt werden.", ex);
+                PDFLight.Classes.TaskDlg.ErrTaskDlg(Handle, PDFLight.Classes.Lng.T("Der Ordner konnte nicht umbenannt werden."), ex);
             }
         }
         base.OnAfterLabelEdit(e);

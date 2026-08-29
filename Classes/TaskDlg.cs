@@ -31,8 +31,8 @@ internal static class TaskDlg
             Expander = new TaskDialogExpander()
             {
                 Text = error.ToString(),
-                CollapsedButtonText = "Technische Details anzeigen",
-                ExpandedButtonText = "Details ausblenden",
+                CollapsedButtonText = Lng.T("Technische Details anzeigen"),
+                ExpandedButtonText = Lng.T("Details ausblenden"),
                 Position = TaskDialogExpanderPosition.AfterFootnote
             }
         };
@@ -54,8 +54,8 @@ internal static class TaskDlg
             Expander = new TaskDialogExpander()
             {
                 Text = error.ToString(),
-                CollapsedButtonText = "Technische Details anzeigen",
-                ExpandedButtonText = "Details ausblenden",
+                CollapsedButtonText = Lng.T("Technische Details anzeigen"),
+                ExpandedButtonText = Lng.T("Details ausblenden"),
                 Position = TaskDialogExpanderPosition.AfterFootnote
             }
         };
@@ -105,20 +105,21 @@ internal static class TaskDlg
     public static void AboutTaskDlg(nint hwnd, Icon icon)
     {
         var curVersion = Assembly.GetExecutingAssembly().GetName().Version;
-        var threeVersion = curVersion?.ToString(3) ?? "unbekannt";
+        var threeVersion = curVersion?.ToString(3) ?? Lng.T("unbekannt");
         var buildDate = GetBuildDate();
         string webView2Runtime;
         try { webView2Runtime = CoreWebView2Environment.GetAvailableBrowserVersionString(); }
-        catch (WebView2RuntimeNotFoundException) { webView2Runtime = "nicht gefunden"; }
-        var msg = "PDFlight ist ein Viewer mit integrierten Dateioperationen" + Environment.NewLine +
+        catch (WebView2RuntimeNotFoundException) { webView2Runtime = Lng.T("nicht gefunden"); }
+        var msg = Lng.T("About.Text",
+            "PDFlight ist ein Viewer mit integrierten Dateioperationen" + Environment.NewLine +
             "(Verschieben, Kopieren, Löschen, Umbenennen, Mailen)." + Environment.NewLine +
             "Häufig benutzte Zielordner werden in einer Liste vorge-" + Environment.NewLine +
             "halten. Dateien lassen sich blitzschnell verschieben, ohne" + Environment.NewLine +
             "das Programm zu verlassen. Darüber hinaus lassen sich" + Environment.NewLine +
             "Seiten aus dem PDF entfernen, in eine neue Datei einfügen" + Environment.NewLine +
-            "oder es kann eine andere PDF-Datei anhängt werden.";
-        TaskDialogButton paypalButton = new TaskDialogCommandLinkButton("Anerkennung spenden via PayPal");
-        TaskDialogButton updateButton = new TaskDialogCommandLinkButton("Jetzt nach einem Update suchen") { AllowCloseDialog = false };
+            "oder es kann eine andere PDF-Datei anhängt werden.");
+        TaskDialogButton paypalButton = new TaskDialogCommandLinkButton(Lng.T("Anerkennung spenden via PayPal"));
+        TaskDialogButton updateButton = new TaskDialogCommandLinkButton(Lng.T("Jetzt nach einem Update suchen")) { AllowCloseDialog = false };
         using var icon32 = icon == null ? null : new Icon(icon, 32, 32); // sonst nimmt der TaskDialog die 16-px-Variante des Fenster-Icons
         var indent = new string(' ', 14);
         var foot = $"{indent}© {buildDate:yyyy} Wilhelm Happe · Version {threeVersion} ({buildDate:d})" +
@@ -126,7 +127,7 @@ internal static class TaskDlg
             $"\n{indent}PDFsharp {typeof(PdfSharp.Pdf.PdfDocument).Assembly.GetName().Version?.ToString(3)}";
         var initialPage = new TaskDialogPage()
         {
-            Caption = "Über " + Application.ProductName,
+            Caption = Lng.T("Über") + " " + Application.ProductName,
             Heading = Application.ProductName,
             Text = msg,
             Icon = icon32 == null ? null : new TaskDialogIcon(icon32),
@@ -138,19 +139,19 @@ internal static class TaskDlg
             Expander = new TaskDialogExpander()
             {
                 Text = BuildShortcutTable(),
-                CollapsedButtonText = "Tastenkürzel anzeigen",
-                ExpandedButtonText = "Tastenkürzel ausblenden",
+                CollapsedButtonText = Lng.T("Tastenkürzel anzeigen"),
+                ExpandedButtonText = Lng.T("Tastenkürzel ausblenden"),
                 Position = TaskDialogExpanderPosition.AfterFootnote
             }
         };
 
         // Updatesuche: Klick lädt die neueste GitHub-Veröffentlichung und blättert im Dialog zur Ergebnisseite (wie in Adressen)
-        TaskDialogButton downloadButton = new TaskDialogCommandLinkButton("PDFlightSetup.exe herunterladen",
-            "PDFlightSetup.exe wird im Download-Ordner\ngespeichert. Führen Sie das Setupprogramm\naus, um die neueste Version zu installieren.");
+        TaskDialogButton downloadButton = new TaskDialogCommandLinkButton(Lng.T("PDFlightSetup.exe herunterladen"),
+            Lng.T("Download.Detail", "PDFlightSetup.exe wird im Download-Ordner\ngespeichert. Führen Sie das Setupprogramm\naus, um die neueste Version zu installieren."));
         var updatePage = new TaskDialogPage()
         {
-            Caption = "Über " + Application.ProductName,
-            Heading = Application.ProductName + " ist auf dem neuesten Stand.",
+            Caption = Lng.T("Über") + " " + Application.ProductName,
+            Heading = string.Format(Lng.T("{0} ist auf dem neuesten Stand."), Application.ProductName),
             Text = $"Version {threeVersion} (64-Bit)",
             Icon = TaskDialogIcon.Information,
             AllowCancel = true,
@@ -177,30 +178,30 @@ internal static class TaskDlg
             catch (HttpRequestException ex)
             {
                 failed = true;
-                updatePage.Heading = "Die Update-Suche ist fehlgeschlagen.";
+                updatePage.Heading = Lng.T("Die Update-Suche ist fehlgeschlagen.");
                 updatePage.Text = ex.StatusCode == HttpStatusCode.NotFound
-                    ? "Die Update-Informationen wurden nicht gefunden."
+                    ? Lng.T("Die Update-Informationen wurden nicht gefunden.")
                     : (ex.StatusCode != null ? $"Status-Code: {ex.StatusCode}\n" : string.Empty) + ex.Message;
             }
             catch (Exception ex) when (ex is TaskCanceledException or System.Xml.XmlException or InvalidOperationException)
             {
                 failed = true;
-                updatePage.Heading = "Die Update-Suche ist fehlgeschlagen.";
+                updatePage.Heading = Lng.T("Die Update-Suche ist fehlgeschlagen.");
                 updatePage.Text = ex is TaskCanceledException
-                    ? "Zeitüberschreitung — bitte prüfen Sie die Internetverbindung."
+                    ? Lng.T("Zeitüberschreitung — bitte prüfen Sie die Internetverbindung.")
                     : ex.Message;
             }
             if (!failed && updateVersion == null)
             {
                 failed = true;
-                updatePage.Heading = "Die Update-Suche ist fehlgeschlagen.";
-                updatePage.Text = "Die Versionsangabe in der Update-Datei konnte nicht gelesen werden.";
+                updatePage.Heading = Lng.T("Die Update-Suche ist fehlgeschlagen.");
+                updatePage.Text = Lng.T("Die Versionsangabe in der Update-Datei konnte nicht gelesen werden.");
             }
             if (failed) { updatePage.Icon = TaskDialogIcon.Error; }
             else if (curVersion != null && updateVersion.CompareTo(curVersion) > 0)
             {
-                updatePage.Heading = "Es steht ein Update zur Verfügung!";
-                updatePage.Text = "Version " + updateVersion + (dateString.Length > 0 ? " vom " + dateString : string.Empty);
+                updatePage.Heading = Lng.T("Es steht ein Update zur Verfügung!");
+                updatePage.Text = "Version " + updateVersion + (dateString.Length > 0 ? " " + Lng.T("vom") + " " + dateString : string.Empty);
                 updatePage.Buttons.Add(downloadButton);
             }
             initialPage.Navigate(updatePage);
@@ -219,8 +220,9 @@ internal static class TaskDlg
         using Font font = new("Segoe UI", 9f);
         int Width(string s) => TextRenderer.MeasureText(s + "|", font, Size.Empty, TextFormatFlags.NoPadding).Width; // Sentinel, damit Leerzeichen am Ende mitzählen
         var sentinel = Width(string.Empty);
-        var column = rows.Max(r => Width(r.Key) - sentinel) + 14;
-        var lines = rows.Select(r =>
+        var translated = rows.Select(r => (Key: Lng.T(r.Key), Text: Lng.T(r.Text))).ToArray(); // zentral übersetzen (Strg -> Ctrl usw.)
+        var column = translated.Max(r => Width(r.Key) - sentinel) + 14;
+        var lines = translated.Select(r =>
         {
             var key = r.Key;
             while (Width(key) - sentinel < column) { key += '\u00A0'; } // geschützte Leerzeichen werden nicht getrimmt
@@ -237,8 +239,8 @@ internal static class TaskDlg
             ("Strg+Umschalt+← / →", "vorherige / nächste Datei des Ordners"),
             ("Bild ↑ / Bild ↓", "im Dokument blättern"),
             ("Strg+M", "verschieben (Strg+Klick: erster Zielordner)"),
-            ("Strg+K", "kopieren"),
-            ("F2", "umbenennen"),
+            ("Strg+K", "Datei kopieren"),
+            ("F2", "Datei umbenennen"),
             ("Strg+Umschalt+Entf", "Datei in den Papierkorb"),
             ("Strg+Entf", "Seiten löschen"),
             ("Strg+R", "Seiten drehen"),
@@ -264,9 +266,9 @@ internal static class TaskDlg
             {
                 Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
             }
-            else { MsgTaskDlg(hwnd, "Ungültiger Link!", $"'{url}' ist keine gültige URL.", TaskDialogIcon.ShieldWarningYellowBar); }
+            else { MsgTaskDlg(hwnd, Lng.T("Ungültiger Link!"), string.Format(Lng.T("'{0}' ist keine gültige URL."), url), TaskDialogIcon.ShieldWarningYellowBar); }
         }
-        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException) { ErrTaskDlg(hwnd, "Der Link konnte nicht geöffnet werden.", ex); }
+        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException) { ErrTaskDlg(hwnd, Lng.T("Der Link konnte nicht geöffnet werden."), ex); }
     }
 
     private static DateTime GetBuildDate()

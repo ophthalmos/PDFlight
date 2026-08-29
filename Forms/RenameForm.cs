@@ -27,6 +27,9 @@ public partial class RenameForm : Form
     public RenameForm(FileInfo currentFile)
     {
         InitializeComponent();
+        Lng.Apply(this);
+        Lng.Apply(btnTransformMenu); // Kontextmenüs hängen nicht im Control-Baum
+        Lng.Apply(contextMenuListView);
         fileInfo = currentFile;
         directoryTextBox.Text = fileInfo.DirectoryName;
         listView.PreviewKeyDown += (sender, e) => { if (e.KeyCode == Keys.Enter) { e.IsInputKey = true; } }; // Enter in der Liste übernimmt den Namen statt OK
@@ -232,7 +235,7 @@ public partial class RenameForm : Form
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
         {
-            TaskDlg.ErrTaskDlg(Handle, "Umbenennen fehlgeschlagen.", ex);
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Umbenennen fehlgeschlagen."), ex);
             e.CancelEdit = true;
         }
     }
@@ -258,21 +261,21 @@ public partial class RenameForm : Form
     {
         if (listView.SelectedItems.Count == 0) { return; }
         try { Process.Start(new ProcessStartInfo(Application.ExecutablePath, $"\"{listView.SelectedItems[0].Name}\"") { UseShellExecute = false }); } // neue PDFlight-Instanz
-        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException) { TaskDlg.ErrTaskDlg(Handle, "PDFlight konnte nicht gestartet werden.", ex); }
+        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException) { TaskDlg.ErrTaskDlg(Handle, Lng.T("PDFlight konnte nicht gestartet werden."), ex); }
     }
 
     private void DeleteMenuItem_Click(object sender, EventArgs e)
     {
         if (listView.SelectedItems.Count == 0
             || string.Equals(listView.SelectedItems[0].Name, fileInfo.FullName, StringComparison.OrdinalIgnoreCase)) { return; }
-        if (!TaskDlg.ConfirmTaskDlg(Handle, "In den Papierkorb verschieben?", listView.SelectedItems[0].Text)) { return; }
+        if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("In den Papierkorb verschieben?"), listView.SelectedItems[0].Text)) { return; }
         try
         {
             FileSystem.DeleteFile(listView.SelectedItems[0].Name, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
             listView.SelectedItems[0].Remove();
         }
         catch (OperationCanceledException) { }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { TaskDlg.ErrTaskDlg(Handle, "Löschen fehlgeschlagen.", ex); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { TaskDlg.ErrTaskDlg(Handle, Lng.T("Löschen fehlgeschlagen."), ex); }
     }
 
     private void PropertiesMenuItem_Click(object sender, EventArgs e)
@@ -296,7 +299,7 @@ public partial class RenameForm : Form
         if (dateSortButton.Checked) { dateOrderDescending = !dateOrderDescending; }
         dateSortButton.Checked = true;
         alphabeticSortButton.Checked = false;
-        dateSortButton.ToolTipText = dateOrderDescending ? "Änderungsdatum (neu → alt)" : "Änderungsdatum (alt → neu)";
+        dateSortButton.ToolTipText = dateOrderDescending ? Lng.T("Änderungsdatum (neu → alt)") : Lng.T("Änderungsdatum (alt → neu)");
         FillList(SortedFiles());
     }
 
@@ -307,14 +310,14 @@ public partial class RenameForm : Form
         if (Directory.Exists(directoryTextBox.Text))
         {
             try { ShellUtil.ShowInFileManager(Path.Combine(directoryTextBox.Text, fileInfo.Name)); }
-            catch (Exception ex) when (ex is Win32Exception or InvalidOperationException) { TaskDlg.ErrTaskDlg(Handle, "Der Ordner konnte nicht geöffnet werden.", ex); }
+            catch (Exception ex) when (ex is Win32Exception or InvalidOperationException) { TaskDlg.ErrTaskDlg(Handle, Lng.T("Der Ordner konnte nicht geöffnet werden."), ex); }
         }
-        else { TaskDlg.MsgTaskDlg(Handle, "Der angegebene Pfad existiert nicht.", null, TaskDialogIcon.Warning); }
+        else { TaskDlg.MsgTaskDlg(Handle, Lng.T("Der angegebene Pfad existiert nicht."), null, TaskDialogIcon.Warning); }
     }
 
     private void OtherFolderButton_Click(object sender, EventArgs e)
     {
-        using FolderBrowserDialog dialog = new() { Description = "Zielordner für die umbenannte Datei", UseDescriptionForTitle = true, InitialDirectory = directoryTextBox.Text };
+        using FolderBrowserDialog dialog = new() { Description = Lng.T("Zielordner für die umbenannte Datei"), UseDescriptionForTitle = true, InitialDirectory = directoryTextBox.Text };
         if (dialog.ShowDialog(this) == DialogResult.OK && !string.IsNullOrEmpty(dialog.SelectedPath) && !dialog.SelectedPath.Equals(fileInfo.DirectoryName, StringComparison.OrdinalIgnoreCase))
         {
             directoryTextBox.Text = dialog.SelectedPath;
@@ -331,7 +334,7 @@ public partial class RenameForm : Form
         var fileName = renameTextBox.Text.Trim();
         if (fileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
         {
-            TaskDlg.MsgTaskDlg(Handle, "Der Name enthält ungültige Zeichen.", "Diese werden entfernt …", TaskDialogIcon.Information);
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Der Name enthält ungültige Zeichen."), Lng.T("Diese werden entfernt …"), TaskDialogIcon.Information);
             renameTextBox.Text = Path.GetInvalidFileNameChars().Aggregate(fileName, (current, c) => current.Replace(c.ToString(), string.Empty));
             e.Cancel = true;
             return;
@@ -347,12 +350,12 @@ public partial class RenameForm : Form
         renameTextBox.Text = Path.GetFileName(newPath); // ab hier inklusive Erweiterung (NewName)
         if (!newPath.Equals(fileInfo.FullName, StringComparison.OrdinalIgnoreCase) && File.Exists(newPath))
         {
-            if (TaskDlg.ConfirmTaskDlg(Handle, "Vorhandene Datei ersetzen?", "Eine Datei gleichen Namens ist bereits vorhanden. Sie wird in den Papierkorb verschoben.", TaskDialogIcon.Warning, defaultNo: true))
+            if (TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Vorhandene Datei ersetzen?"), Lng.T("Eine Datei gleichen Namens ist bereits vorhanden. Sie wird in den Papierkorb verschoben."), TaskDialogIcon.Warning, defaultNo: true))
             {
                 try { FileSystem.DeleteFile(newPath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin); }
                 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or OperationCanceledException)
                 {
-                    TaskDlg.ErrTaskDlg(Handle, "Die vorhandene Datei konnte nicht ersetzt werden.", ex);
+                    TaskDlg.ErrTaskDlg(Handle, Lng.T("Die vorhandene Datei konnte nicht ersetzt werden."), ex);
                     e.Cancel = true;
                 }
             }

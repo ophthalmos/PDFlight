@@ -17,11 +17,12 @@ public partial class PageRangeForm : Form
     public PageRangeForm(string title, int pageCount, bool emptyMeansAll, bool showRotation, string defaultRange = null)
     {
         InitializeComponent();
+        Lng.Apply(this);
         this.pageCount = pageCount;
         this.emptyMeansAll = emptyMeansAll;
-        Text = title;
-        labelPrompt.Text = $"&Seiten (1–{pageCount}):";
-        labelHint.Text = "z.B.  3   oder   2-5, 8" + (emptyMeansAll ? "   —   leer = alle Seiten" : string.Empty);
+        Text = title; // kommt bereits übersetzt vom Aufrufer
+        labelPrompt.Text = string.Format(Lng.T("&Seiten (1–{0}):"), pageCount);
+        labelHint.Text = Lng.T("z.B.  3   oder   2-5, 8") + (emptyMeansAll ? "   —   " + Lng.T("leer = alle Seiten") : string.Empty);
         if (!string.IsNullOrEmpty(defaultRange))
         {
             textBoxPages.Text = defaultRange; // z.B. die aktuelle Seite des Viewers
@@ -45,7 +46,7 @@ public partial class PageRangeForm : Form
         var pages = PdfEditService.ParsePageRange(input, pageCount);
         if (pages == null)
         {
-            TaskDlg.MsgTaskDlg(Handle, "Ungültige Seitenangabe", $"Bitte geben Sie gültige Seiten zwischen 1 und {pageCount} an," + Environment.NewLine + "z.B.  3  oder  2-5, 8", TaskDialogIcon.Warning);
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Ungültige Seitenangabe"), string.Format(Lng.T("Bitte geben Sie gültige Seiten zwischen 1 und {0} an,"), pageCount) + Environment.NewLine + Lng.T("z.B.  3  oder  2-5, 8"), TaskDialogIcon.Warning);
             DialogResult = DialogResult.None; // Dialog offen halten
             textBoxPages.SelectAll();
             textBoxPages.Focus();

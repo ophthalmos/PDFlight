@@ -31,6 +31,15 @@ internal static class Lng
         catch (MissingManifestResourceException) { return german; }
     }
 
+    /// <summary>Für mehrzeilige Texte: Nachschlag über einen expliziten Schlüssel, denn Zeilenumbrüche
+    /// taugen nicht als resx-Schlüssel (XML-Attribut-Normalisierung).</summary>
+    public static string T(string key, string german)
+    {
+        if (culture == null) { return german; }
+        try { return resources.GetString(key, culture) ?? german; }
+        catch (MissingManifestResourceException) { return german; }
+    }
+
     /// <summary>Übersetzt alle Texte eines Formulars samt Menüs und Tooltips —
     /// einmal direkt nach InitializeComponent aufrufen.</summary>
     public static void Apply(Control root)
@@ -38,6 +47,13 @@ internal static class Lng
         if (culture == null) { return; }
         root.Text = T(root.Text);
         TranslateChildren(root);
+    }
+
+    /// <summary>Übersetzt ein einzelnes Menü (Kontextmenüs hängen nicht im Control-Baum des Formulars).</summary>
+    public static void Apply(ToolStrip strip)
+    {
+        if (culture == null) { return; }
+        foreach (ToolStripItem item in strip.Items) { TranslateItem(item); }
     }
 
     private static void TranslateChildren(Control parent)
@@ -57,6 +73,7 @@ internal static class Lng
     {
         item.Text = T(item.Text);
         item.ToolTipText = T(item.ToolTipText);
+        if (item is ToolStripMenuItem menuItem) { menuItem.ShortcutKeyDisplayString = T(menuItem.ShortcutKeyDisplayString); } // Strg → Ctrl
         if (item is ToolStripDropDownItem dropDown)
         {
             foreach (ToolStripItem child in dropDown.DropDownItems) { TranslateItem(child); }

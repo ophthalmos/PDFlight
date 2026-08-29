@@ -28,6 +28,7 @@ public partial class FolderSelectForm : Form
     public FolderSelectForm(string startFolder, bool copyMode, bool jumpToLastUsed)
     {
         InitializeComponent();
+        Lng.Apply(this);
         this.copyMode = copyMode;
         this.jumpToLastUsed = jumpToLastUsed;
         shellTreeView.ItemHeight = 20;
@@ -42,13 +43,13 @@ public partial class FolderSelectForm : Form
         shellHistory.DropDownAnchor = pathEdit.HistoryButton; // Verlaufsmenü klappt unter dem ▼-Button des Pfadfelds auf
         pathEdit.HistoryButtonClick += (sender, e) => shellHistory.ShowDropDown();
         btnNewFolder.Click += ButtonNewFolder_Clicked;
-        toolTip.SetToolTip(btnNewFolder, "Neuer Ordner (Strg+N)");
+        toolTip.SetToolTip(btnNewFolder, Lng.T("Neuer Ordner (Strg+N)"));
     }
 
     private void FolderSelectForm_Load(object sender, EventArgs e)
     {
-        if (copyMode) { Text = "KOPIEREN: Wählen Sie einen Ordner ..."; buttonOK.Text = "Kopieren"; }
-        else { Text = "VERSCHIEBEN: Wählen Sie einen Ordner ..."; buttonOK.Text = "Verschieben"; }
+        if (copyMode) { Text = Lng.T("KOPIEREN: Wählen Sie einen Ordner ..."); buttonOK.Text = Lng.T("Kopieren"); }
+        else { Text = Lng.T("VERSCHIEBEN: Wählen Sie einen Ordner ..."); buttonOK.Text = Lng.T("Verschieben"); }
 
         cbAdd2Folderlist.Checked = comboBoxTarget.SelectedIndex != -1;
         cbAdd2Folderlist.Enabled = comboBoxTarget.SelectedIndex == -1;
@@ -117,10 +118,10 @@ public partial class FolderSelectForm : Form
 
     private void ButtonNewFolder_Clicked(object sender, EventArgs e)
     {
-        try { shellTreeView.CreateDir(NewFolderName, true); }
+        try { shellTreeView.CreateDir(Lng.T(NewFolderName), true); }
         catch (Exception ex) when (ex is UnauthorizedAccessException or InvalidOperationException or IOException)
         {
-            TaskDlg.ErrTaskDlg(Handle, "Der Ordner konnte nicht erstellt werden.", ex);
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Der Ordner konnte nicht erstellt werden."), ex);
         }
     }
 
@@ -134,7 +135,7 @@ public partial class FolderSelectForm : Form
         if (Directory.Exists(path)) { shellTreeView.SelectedPath = path; }
         else
         {
-            TaskDlg.MsgTaskDlg(Handle, MsgDirectoryNotExist, path, TaskDialogIcon.Warning);
+            TaskDlg.MsgTaskDlg(Handle, Lng.T(MsgDirectoryNotExist), path, TaskDialogIcon.Warning);
             comboBox.Items.Remove(path); // nur für diesen Dialog; die gespeicherten Listen bereinigt das Hauptfenster
         }
     }
@@ -224,7 +225,7 @@ public partial class FolderSelectForm : Form
             }
             catch (Exception ex) when (ex is UnauthorizedAccessException or InvalidOperationException or IOException or ArgumentException or NotSupportedException)
             {
-                TaskDlg.ErrTaskDlg(Handle, "Der Ordner konnte nicht erstellt werden.", ex);
+                TaskDlg.ErrTaskDlg(Handle, Lng.T("Der Ordner konnte nicht erstellt werden."), ex);
                 pathEdit.TextBox.Clear();
                 e.Cancel = true;
             }
@@ -256,7 +257,7 @@ public partial class FolderSelectForm : Form
             ("Strg+N", "Neuen Ordner anlegen."),
             ("Strg+Eingabe", "Auswahl übernehmen."),
         ]);
-        TaskDlg.MsgTaskDlg(Handle, "Tastenkürzel", text);
+        TaskDlg.MsgTaskDlg(Handle, Lng.T("Tastenkürzel"), text);
     }
 
     private void PasteFromClipboard()
