@@ -267,6 +267,7 @@ internal static partial class ShellInfo
     private const uint SHGFI_DISPLAYNAME = 0x200;
     private const uint SHGFI_SYSICONINDEX = 0x4000;
     private const uint SHGFI_SMALLICON = 0x1;
+    private const uint SHGFI_USEFILEATTRIBUTES = 0x10;
 
     // Blittable Variante (feste Zeichenpuffer statt Strings), damit der LibraryImport-Quellgenerator sie marshallen kann
     [StructLayout(LayoutKind.Sequential)]
@@ -298,6 +299,30 @@ internal static partial class ShellInfo
     }
 
     public static void FreeIcon(IntPtr hIcon) { _ = DestroyIcon(hIcon); }
+
+    private static readonly Dictionary<string, Image> typeIconCache = [];
+
+    /// <summary>Kleines Explorer-Icon für einen Dateityp (z.B. ".pdf") oder — bei extension null —
+    /// für Ordner. Generisch über die Dateiattribute, also ohne Plattenzugriff; Bilder werden geteilt
+    /// und dürfen deshalb nicht freigegeben werden. Null, wenn die Shell kein Icon liefert.</summary>
+    public static Image GetTypeIcon(string extension)
+    {
+        var key = extension ?? "<ordner>";
+        if (typeIconCache.TryGetValue(key, out var cached)) { return cached; }
+        SHFILEINFO info = default;
+        var attributes = extension == null ? 0x10u /*DIRECTORY*/ : 0x80u /*NORMAL*/;
+        var result = SHGetFileInfo(extension == null ? "ordner" : "datei" + extension, attributes,
+            ref info, (uint)Marshal.SizeOf<SHFILEINFO>(), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES);
+        Image image = null;
+        if (result != IntPtr.Zero && info.hIcon != IntPtr.Zero)
+        {
+            using var icon = Icon.FromHandle(info.hIcon);
+            image = icon.ToBitmap(); // eigene Kopie — das Handle kann danach weg
+            FreeIcon(info.hIcon);
+        }
+        typeIconCache[key] = image;
+        return image;
+    }
 
     /// <summary>Explorer-Anzeigename, z.B. "Lokaler Datenträger (C:)"; bei Fehlern der Pfad selbst.</summary>
     public static unsafe string GetDisplayName(string path)
