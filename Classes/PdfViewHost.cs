@@ -138,6 +138,12 @@ internal partial class PdfViewHost(WebView2 webView)
         if (IsReady) { ShowEmptyPage(); }
     }
 
+    /// <summary>Öffnet die Druckvorschau des Viewers — dieselbe wie bei Strg+P.</summary>
+    public void ShowPrintDialog()
+    {
+        if (IsReady) { webView.CoreWebView2.ShowPrintUI(CoreWebView2PrintDialogKind.Browser); }
+    }
+
     // ------------------------------------------------------------------ Aktuelle Seite per UI Automation
 
     /// <summary>Aktuelle Seite laut dem Seitenzahl-Feld der Viewer-Toolbar, per UI Automation gelesen —

@@ -251,7 +251,7 @@ internal static class TaskDlg
             ("Strg+E", "als E-Mail-Anhang senden"),
             ("Strg+1 … 9", "in externem Programm öffnen"),
             ("Strg+F", "im Dokument suchen"),
-            ("Strg+P", "drucken"),
+            ("Strg+P", "Dokument drucken"),
             ("F11", "Vollbild ein/aus"),
             ("2× Esc / Umschalt+Esc", "Programm beenden (Option)"),
             ("F1", "dieser Dialog"),

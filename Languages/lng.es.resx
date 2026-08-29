@@ -190,6 +190,8 @@ en un documento completo (1, 2, 3 …).
 Ambos archivos deben tener el mismo número de páginas.</value></data>
   <data name="Kennwort entfernen …" xml:space="preserve"><value>Quitar la contraseña…</value></data>
   <data name="Kennwort vergeben …" xml:space="preserve"><value>Establecer contraseña…</value></data>
+  <data name="Drucken" xml:space="preserve"><value>Imprimir</value></data>
+  <data name="Datei drucken (Strg+P)" xml:space="preserve"><value>Imprimir el archivo (Ctrl+P)</value></data>
   <data name="Kennwort vergeben" xml:space="preserve"><value>Establecer contraseña</value></data>
   <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Repetir:</value></data>
   <data name="Bitte geben Sie ein Kennwort ein." xml:space="preserve"><value>Escriba una contraseña.</value></data>
@@ -261,7 +263,7 @@ para instalar la última versión.</value></data>
   <data name="als E-Mail-Anhang senden" xml:space="preserve"><value>enviar como adjunto de correo</value></data>
   <data name="in externem Programm öffnen" xml:space="preserve"><value>abrir en programa externo</value></data>
   <data name="im Dokument suchen" xml:space="preserve"><value>buscar en el documento</value></data>
-  <data name="drucken" xml:space="preserve"><value>imprimir</value></data>
+  <data name="Dokument drucken" xml:space="preserve"><value>imprimir el documento</value></data>
   <data name="Vollbild ein/aus" xml:space="preserve"><value>pantalla completa sí/no</value></data>
   <data name="Programm beenden (Option)" xml:space="preserve"><value>cerrar el programa (opción)</value></data>
   <data name="dieser Dialog" xml:space="preserve"><value>este diálogo</value></data>
