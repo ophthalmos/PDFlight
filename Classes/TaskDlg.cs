@@ -245,6 +245,8 @@ internal static class TaskDlg
             ("Strg+Entf", "Seiten löschen"),
             ("Strg+R", "Seiten drehen"),
             ("Strg+Umschalt+R / L", "Ansicht drehen (ändert die Datei nicht)"),
+            ("Strg+Umschalt+I", "Inhalte-Leiste ein-/ausblenden"),
+            ("Strg+Umschalt+B", "Seite an Fensterbreite anpassen"),
             ("Strg+X", "Seiten als neue Datei extrahieren"),
             ("Strg+Z", "Dokumentänderung rückgängig"),
             ("Strg+I", "Dokumenteigenschaften"),

@@ -1206,6 +1206,8 @@ public partial class MainForm : Form
             // BeginInvoke: die UIA-Abfrage nicht im Chromium-Tastatur-Callback starten (s. Strg+Entf)
             case Keys.R | Keys.Control | Keys.Shift: BeginInvoke(() => viewHost.RotateView(clockwise: true)); return true;
             case Keys.L | Keys.Control | Keys.Shift: BeginInvoke(() => viewHost.RotateView(clockwise: false)); return true;
+            case Keys.I | Keys.Control | Keys.Shift: BeginInvoke(viewHost.ToggleContents); return true; // Inhalte-Leiste
+            case Keys.B | Keys.Control | Keys.Shift: BeginInvoke(viewHost.FitToWidth); return true;     // Breite (Viewer-Kürzel Strg+\ ist auf deutschen Tastaturen unerreichbar)
             case Keys.Z | Keys.Control when undoTargetFile != null: UndoLastChange(); return true;
             case Keys.I | Keys.Control: ShowProperties(); return true;
             case Keys.Enter | Keys.Alt when currentFile != null: ShellUtil.ShowFileProperties(currentFile.FullName); return true; // Windows-Dateieigenschaften, wie im Explorer

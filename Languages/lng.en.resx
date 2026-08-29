@@ -111,6 +111,10 @@ extract pages, properties (shortcuts in the menu)</value></data>
   <data name="Strg+Umschalt+← / →" xml:space="preserve"><value>Ctrl+Shift+← / →</value></data>
   <data name="Strg+Umschalt+R / L" xml:space="preserve"><value>Ctrl+Shift+R / L</value></data>
   <data name="Ansicht drehen (ändert die Datei nicht)" xml:space="preserve"><value>Rotate view (does not change the file)</value></data>
+  <data name="Strg+Umschalt+I" xml:space="preserve"><value>Ctrl+Shift+I</value></data>
+  <data name="Strg+Umschalt+B" xml:space="preserve"><value>Ctrl+Shift+B</value></data>
+  <data name="Inhalte-Leiste ein-/ausblenden" xml:space="preserve"><value>Show/hide the contents pane</value></data>
+  <data name="Seite an Fensterbreite anpassen" xml:space="preserve"><value>Fit the page to the window width</value></data>
   <data name="Strg+1 … 9" xml:space="preserve"><value>Ctrl+1 … 9</value></data>
   <data name="Bild ↑ / Bild ↓" xml:space="preserve"><value>PgUp / PgDn</value></data>
   <data name="2× Esc / Umschalt+Esc" xml:space="preserve"><value>2× Esc / Shift+Esc</value></data>
