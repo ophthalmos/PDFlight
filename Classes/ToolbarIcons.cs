@@ -26,6 +26,14 @@ internal static class ToolbarIcons
     public const char Settings = '\uE713';
     public const char Info = '\uE946';
     public const char Eye = '\uE7B3';          // RedEye: Kennwort sichtbar machen
+    public const char Rotate = '\uE7AD';       // Bearbeiten-Menü: Seiten drehen
+    public const char Attach = '\uE723';       // PDF-Datei anhängen
+    public const char Interleave = '\uE8AB';   // Switch: Rückseiten-Scan verzahnen
+    public const char Page = '\uE7C3';         // Seiten extrahieren
+    public const char Undo = '\uE7A7';
+    public const char Lock = '\uE72E';         // Kennwort vergeben
+    public const char Unlock = '\uE785';       // Kennwort entfernen
+    public const char Clear = '\uE894';        // Liste leeren
 
     private const string FontName = "Segoe MDL2 Assets";
     private static readonly Dictionary<(char Glyph, int Size), Image> cache = [];

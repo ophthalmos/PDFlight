@@ -2,6 +2,7 @@
 using Microsoft.VisualBasic.FileIO;
 using Microsoft.Web.WebView2.Core;
 using PDFLight.Classes;
+using PDFLight.Controls;
 
 namespace PDFLight.Forms;
 
@@ -248,6 +249,7 @@ public partial class MainForm : Form
                 Tag = file,
                 ToolTipText = file,
                 Enabled = File.Exists(file),
+                Image = ShellInfo.GetTypeIcon(".pdf"),
             };
             item.Click += (s, args) => LoadPdf((string)((ToolStripMenuItem)s).Tag, addToRecent: true);
             btnOpen.DropDownItems.Add(item);
@@ -259,7 +261,7 @@ public partial class MainForm : Form
         else
         {
             btnOpen.DropDownItems.Add(new ToolStripSeparator());
-            ToolStripMenuItem clear = new(Lng.T("Liste leeren"));
+            ToolStripMenuItem clear = new(Lng.T("Liste leeren")) { Image = MenuIcon(ToolbarIcons.Clear) };
             clear.Click += (s, args) => { settings.RecentFiles.Clear(); settings.Save(); };
             btnOpen.DropDownItems.Add(clear);
         }
@@ -546,7 +548,7 @@ public partial class MainForm : Form
         var targets = settings.TargetFolders.Where(f => !string.IsNullOrEmpty(f)); // Reihenfolge = Zielliste (sortierbar in den Einstellungen)
         foreach (var folder in targets)
         {
-            ToolStripMenuItem item = new(folder.Replace("&", "&&")) { Enabled = Directory.Exists(folder), Tag = folder };
+            ToolStripMenuItem item = new(folder.Replace("&", "&&")) { Enabled = Directory.Exists(folder), Tag = folder, Image = ShellInfo.GetTypeIcon(null) };
             item.Click += (s, args) => MoveOrCopyTo((string)((ToolStripMenuItem)s).Tag, copy: false);
             splitButtonMove.DropDownItems.Add(item);
         }
@@ -555,7 +557,7 @@ public partial class MainForm : Form
             splitButtonMove.DropDownItems.Add(new ToolStripMenuItem(Lng.T("(Zielliste ist leer)")) { Enabled = false });
         }
         splitButtonMove.DropDownItems.Add(new ToolStripSeparator());
-        ToolStripMenuItem editList = new(Lng.T("Zielliste bearbeiten …"));
+        ToolStripMenuItem editList = new(Lng.T("Zielliste bearbeiten …")) { Image = MenuIcon(ToolbarIcons.Edit) };
         editList.Click += (s, args) => OpenSettings(SettingsForm.TabTargets);
         splitButtonMove.DropDownItems.Add(editList);
     }
@@ -618,7 +620,24 @@ public partial class MainForm : Form
         Set(btnShowInFolder, ToolbarIcons.FolderOpen);
         Set(btnSettings, ToolbarIcons.Settings);
         Set(btnInfo, ToolbarIcons.Info, imageOnly: true);
+        mnuDeletePages.Image = MenuIcon(ToolbarIcons.Delete); // Bearbeiten-Menü (Menüsymbole bleiben 16 px)
+        mnuRotatePages.Image = MenuIcon(ToolbarIcons.Rotate);
+        mnuAppendPdf.Image = MenuIcon(ToolbarIcons.Attach);
+        mnuDuplex.Image = MenuIcon(ToolbarIcons.Interleave);
+        mnuExtractPages.Image = MenuIcon(ToolbarIcons.Page);
+        mnuUndo.Image = MenuIcon(ToolbarIcons.Undo);
+        mnuSetPassword.Image = MenuIcon(ToolbarIcons.Lock);
+        mnuRemovePassword.Image = MenuIcon(ToolbarIcons.Unlock);
+        mnuProperties.Image = MenuIcon(ToolbarIcons.Info);
         UpdateProgramIconVisibility(); // die Buttonbreiten haben sich geändert
+    }
+
+    /// <summary>16-px-Symbol für Menüeinträge; null, wenn Symbole abgeschaltet sind.</summary>
+    private Image MenuIcon(char glyph)
+    {
+        return settings.ShowToolbarIcons && ToolbarIcons.FontAvailable
+            ? ToolbarIcons.Get(glyph, LogicalToDeviceUnits(new Size(16, 16)))
+            : null;
     }
 
     // ------------------------------------------------------------------ Umbenennen / Löschen / Explorer
