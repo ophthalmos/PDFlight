@@ -190,6 +190,14 @@ into one complete document (1, 2, 3 …).
 
 Both files must have the same number of pages.</value></data>
   <data name="Kennwort entfernen …" xml:space="preserve"><value>Remove password…</value></data>
+  <data name="Kennwort vergeben …" xml:space="preserve"><value>Set password…</value></data>
+  <data name="Kennwort vergeben" xml:space="preserve"><value>Set password</value></data>
+  <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Repeat:</value></data>
+  <data name="Bitte geben Sie ein Kennwort ein." xml:space="preserve"><value>Please enter a password.</value></data>
+  <data name="Die Kennwörter stimmen nicht überein." xml:space="preserve"><value>The passwords do not match.</value></data>
+  <data name="Die Datei ist bereits verschlüsselt." xml:space="preserve"><value>The file is already encrypted.</value></data>
+  <data name="Vergeben des Kennworts" xml:space="preserve"><value>Setting the password</value></data>
+  <data name="Die Datei ist jetzt mit AES-256 verschlüsselt." xml:space="preserve"><value>The file is now encrypted with AES-256.</value></data>
   <data name="Kennwort erforderlich" xml:space="preserve"><value>Password required</value></data>
   <data name="&amp;Kennwort:" xml:space="preserve"><value>&amp;Password:</value></data>
   <data name="Die Datei ist nicht verschlüsselt." xml:space="preserve"><value>The file is not encrypted.</value></data>

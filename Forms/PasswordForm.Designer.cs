@@ -31,6 +31,8 @@ namespace PDFLight.Forms
             labelFileValue = new System.Windows.Forms.Label();
             labelPassword = new System.Windows.Forms.Label();
             textBoxPassword = new System.Windows.Forms.TextBox();
+            labelRepeat = new System.Windows.Forms.Label();
+            textBoxRepeat = new System.Windows.Forms.TextBox();
             buttonOK = new System.Windows.Forms.Button();
             buttonCancel = new System.Windows.Forms.Button();
             SuspendLayout();
@@ -63,6 +65,24 @@ namespace PDFLight.Forms
             textBoxPassword.TabIndex = 2;
             textBoxPassword.UseSystemPasswordChar = true;
             //
+            // labelRepeat
+            //
+            labelRepeat.AutoSize = true;
+            labelRepeat.Location = new System.Drawing.Point(12, 83);
+            labelRepeat.Name = "labelRepeat";
+            labelRepeat.Size = new System.Drawing.Size(79, 15);
+            labelRepeat.TabIndex = 5;
+            labelRepeat.Text = "&Wiederholen:";
+            //
+            // textBoxRepeat
+            //
+            textBoxRepeat.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            textBoxRepeat.Location = new System.Drawing.Point(100, 80);
+            textBoxRepeat.Name = "textBoxRepeat";
+            textBoxRepeat.Size = new System.Drawing.Size(312, 23);
+            textBoxRepeat.TabIndex = 6;
+            textBoxRepeat.UseSystemPasswordChar = true;
+            //
             // buttonOK
             //
             buttonOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
@@ -73,6 +93,7 @@ namespace PDFLight.Forms
             buttonOK.TabIndex = 3;
             buttonOK.Text = "OK";
             buttonOK.UseVisualStyleBackColor = true;
+            buttonOK.Click += ButtonOK_Click;
             //
             // buttonCancel
             //
@@ -94,6 +115,8 @@ namespace PDFLight.Forms
             ClientSize = new System.Drawing.Size(424, 129);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
+            Controls.Add(textBoxRepeat);
+            Controls.Add(labelRepeat);
             Controls.Add(textBoxPassword);
             Controls.Add(labelPassword);
             Controls.Add(labelFileValue);
@@ -113,6 +136,8 @@ namespace PDFLight.Forms
         private System.Windows.Forms.Label labelFileValue;
         private System.Windows.Forms.Label labelPassword;
         private System.Windows.Forms.TextBox textBoxPassword;
+        private System.Windows.Forms.Label labelRepeat;
+        private System.Windows.Forms.TextBox textBoxRepeat;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
     }
