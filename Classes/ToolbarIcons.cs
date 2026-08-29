@@ -14,8 +14,6 @@ internal static class ToolbarIcons
     public const char OpenFile = '\uE8E5';
     public const char Previous = '\uE76B';     // ChevronLeft
     public const char Next = '\uE76C';         // ChevronRight
-    public const char PageUp = '\uE70E';       // ChevronUp
-    public const char PageDown = '\uE70D';     // ChevronDown
     public const char MoveToFolder = '\uE8DE';
     public const char Copy = '\uE8C8';
     public const char Rename = '\uE8AC';

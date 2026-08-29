@@ -35,8 +35,6 @@
             toolStripSeparator1 = new ToolStripSeparator();
             btnPrev = new ToolStripButton();
             btnNext = new ToolStripButton();
-            btnPageUp = new ToolStripButton();
-            btnPageDown = new ToolStripButton();
             toolStripSeparator2 = new ToolStripSeparator();
             splitButtonMove = new ToolStripSplitButton();
             btnCopy = new ToolStripButton();
@@ -85,7 +83,7 @@
             // toolStrip
             // 
             toolStrip.GripStyle = ToolStripGripStyle.Hidden;
-            toolStrip.Items.AddRange(new ToolStripItem[] { btnOpen, toolStripSeparator1, btnPrev, btnNext, btnPageUp, btnPageDown, toolStripSeparator2, splitButtonMove, btnCopy, toolStripSeparator3, btnRename, btnDelete, btnShowInFolder, toolStripSeparator8, btnEmail, toolStripSeparator4, ddbEdit, toolStripSeparator9, ddbPrograms, toolStripSeparator5, btnSettings, btnInfo });
+            toolStrip.Items.AddRange(new ToolStripItem[] { btnOpen, toolStripSeparator1, btnPrev, btnNext, toolStripSeparator2, splitButtonMove, btnCopy, toolStripSeparator3, btnRename, btnDelete, btnShowInFolder, toolStripSeparator8, btnEmail, toolStripSeparator4, ddbEdit, toolStripSeparator9, ddbPrograms, toolStripSeparator5, btnSettings, btnInfo });
             toolStrip.Location = new Point(0, 0);
             toolStrip.Name = "toolStrip";
             toolStrip.Size = new Size(984, 25);
@@ -113,7 +111,7 @@
             btnPrev.Name = "btnPrev";
             btnPrev.Size = new Size(23, 22);
             btnPrev.Text = "◀";
-            btnPrev.ToolTipText = "Vorherige PDF-Datei im Ordner (Alt+←)";
+            btnPrev.ToolTipText = "Vorherige PDF-Datei im Ordner (Strg+Umschalt+←)";
             btnPrev.Click += BtnPrev_Click;
             // 
             // btnNext
@@ -123,29 +121,8 @@
             btnNext.Name = "btnNext";
             btnNext.Size = new Size(23, 22);
             btnNext.Text = "▶";
-            btnNext.ToolTipText = "Nächste PDF-Datei im Ordner (Alt+→)";
+            btnNext.ToolTipText = "Nächste PDF-Datei im Ordner (Strg+Umschalt+→)";
             btnNext.Click += BtnNext_Click;
-            // 
-            // btnPageUp
-            // 
-            btnPageUp.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            btnPageUp.Enabled = false;
-            btnPageUp.Margin = new Padding(8, 1, 0, 2);
-            btnPageUp.Name = "btnPageUp";
-            btnPageUp.Size = new Size(23, 22);
-            btnPageUp.Text = "▲";
-            btnPageUp.ToolTipText = "Im Dokument zurückblättern (Bild ↑)";
-            btnPageUp.Click += BtnPageUp_Click;
-            // 
-            // btnPageDown
-            // 
-            btnPageDown.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            btnPageDown.Enabled = false;
-            btnPageDown.Name = "btnPageDown";
-            btnPageDown.Size = new Size(23, 22);
-            btnPageDown.Text = "▼";
-            btnPageDown.ToolTipText = "Im Dokument vorblättern (Bild ↓)";
-            btnPageDown.Click += BtnPageDown_Click;
             // 
             // toolStripSeparator2
             // 
@@ -345,7 +322,7 @@
             statusIndex.Name = "statusIndex";
             statusIndex.Size = new Size(28, 17);
             statusIndex.Text = "0/0";
-            statusIndex.ToolTipText = "Position der angezeigten Datei unter den PDF-Dateien des Ordners\r\n(mit Alt+← / Alt+→ blättern)";
+            statusIndex.ToolTipText = "Position der angezeigten Datei unter den PDF-Dateien des Ordners\r\n(mit Strg+Umschalt+← / → blättern)";
             // 
             // statusPath
             // 
@@ -403,8 +380,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripButton btnPrev;
         private System.Windows.Forms.ToolStripButton btnNext;
-        private System.Windows.Forms.ToolStripButton btnPageUp;
-        private System.Windows.Forms.ToolStripButton btnPageDown;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripSplitButton splitButtonMove;
         private System.Windows.Forms.ToolStripButton btnCopy;

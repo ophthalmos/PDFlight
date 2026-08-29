@@ -21,7 +21,7 @@ Scan-Ordner zügig abzuarbeiten.
   Ziel bereits eine gleichnamige Datei, kann sie ersetzt oder ein freier Name (`name_1.pdf`)
   vergeben werden, und auf inhaltsgleiche Dateien im Zielordner weist PDFlight hin.
   Nach dem Kopieren ist wählbar, ob Kopie oder Original angezeigt wird. Blättert man nach
-  einem Verschieben weiter (Alt+←/→), fragt PDFlight, ob im bisherigen oder im aktuellen
+  einem Verschieben weiter (Strg+Umschalt+←/→), fragt PDFlight, ob im bisherigen oder im aktuellen
   Ordner weitergearbeitet werden soll — ideal zum Abarbeiten eines Eingangsordners.
 - **Umbenennen**: großer Dialog mit der Dateiliste des Ordners als Namensvorlage,
   Umwandeln-Menü (Unterstriche, Bindestriche, Klein-/Titelschreibung, Umlaute ersetzen),
@@ -32,7 +32,7 @@ Scan-Ordner zügig abzuarbeiten.
 - **Weitergeben**: E-Mail mit der Datei als Anhang über das Standard-Mailprogramm (Strg+E),
   Öffnen in installierten PDF-Programmen (Strg+1 … Strg+9, automatisch erkannt),
   „Öffnen mit“-Dialog, Anzeigen im Dateimanager (Directory Opus, falls installiert, sonst Explorer).
-- **Aufräumen**: Löschen in den Papierkorb (Entf), Blättern durch alle PDFs des Ordners (Alt+←/→).
+- **Aufräumen**: Löschen in den Papierkorb (Entf), Blättern durch alle PDFs des Ordners (Strg+Umschalt+←/→).
 - Drag & Drop, F11-Vollbild, zentraler Einstellungsdialog, Symbole aus der Windows-Symbolschrift,
   zuletzt geöffnete Dateien im Öffnen-Menü, optional „Programm mit Esc beenden“ und
   „Zuletzt geöffnete Datei beim Start laden“. Laufen mehrere Instanzen gleichzeitig,
@@ -43,7 +43,7 @@ Scan-Ordner zügig abzuarbeiten.
 | Kürzel | Funktion |
 |---|---|
 | Strg+O | PDF-Datei öffnen |
-| Alt+← / Alt+→ | Vorherige / nächste PDF-Datei im Ordner |
+| Strg+Umschalt+← / → | Vorherige / nächste PDF-Datei im Ordner |
 | Bild ↑ / Bild ↓ | Im Dokument blättern |
 | Strg+M | Verschieben (Ordnerdialog) |
 | Strg+K | Kopieren (Ordnerdialog) |

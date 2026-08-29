@@ -210,14 +210,13 @@ public partial class MainForm : Form
             var pages = currentPageCount > 0 ? currentPageCount + (currentPageCount == 1 ? " Seite   " : " Seiten   ") : string.Empty;
             statusInfo.Text = $"{pages}{currentFile.Length / 1024.0:N0} KB   {currentFile.LastWriteTime:g}";
             btnPrev.Enabled = btnNext.Enabled = files.Count > 1;
-            btnPageUp.Enabled = btnPageDown.Enabled = true;
         }
         else
         {
             statusIndex.Text = "0/0";
             statusPath.Text = "Keine Datei geöffnet";
             statusInfo.Text = string.Empty;
-            btnPrev.Enabled = btnNext.Enabled = btnPageUp.Enabled = btnPageDown.Enabled = false;
+            btnPrev.Enabled = btnNext.Enabled = false;
         }
     }
 
@@ -593,8 +592,6 @@ public partial class MainForm : Form
         Set(btnOpen, ToolbarIcons.OpenFile);
         Set(btnPrev, ToolbarIcons.Previous, imageOnly: true);
         Set(btnNext, ToolbarIcons.Next, imageOnly: true);
-        Set(btnPageUp, ToolbarIcons.PageUp, imageOnly: true);
-        Set(btnPageDown, ToolbarIcons.PageDown, imageOnly: true);
         Set(splitButtonMove, ToolbarIcons.MoveToFolder);
         Set(btnCopy, ToolbarIcons.Copy);
         Set(btnRename, ToolbarIcons.Rename);
@@ -688,14 +685,6 @@ public partial class MainForm : Form
             emailInProgress = false;
             if (currentFile != null) { statusPath.Text = currentFile.FullName; }
         }
-    }
-
-    /// <summary>Blättert im Dokument (der Chromium-Viewer reagiert auf Bild↑/Bild↓; eigene Buttons hat seine Leiste nicht).</summary>
-    private void SendPageKey(string key)
-    {
-        if (currentFile == null) { return; }
-        webView.Focus();
-        SendKeys.Send(key);
     }
 
     // ------------------------------------------------------------------ Seitenoperationen (PDFsharp)
@@ -1027,8 +1016,8 @@ public partial class MainForm : Form
             case Keys.I | Keys.Control: ShowProperties(); return true;
             case Keys.Enter | Keys.Alt when currentFile != null: ShellUtil.ShowFileProperties(currentFile.FullName); return true; // Windows-Dateieigenschaften, wie im Explorer
             case Keys.E | Keys.Control: EmailCurrent(); return true;
-            case Keys.Right | Keys.Alt: StepFile(1); return true;   // Strg+Pfeile/±/0 gehören dem Viewer (Zoom & Co.)
-            case Keys.Left | Keys.Alt: StepFile(-1); return true;
+            case Keys.Right | Keys.Control | Keys.Shift: StepFile(1); return true;   // Strg+Pfeile ohne Umschalt gehören dem Viewer (Zoom & Co.)
+            case Keys.Left | Keys.Control | Keys.Shift: StepFile(-1); return true;
             case Keys.F1: TaskDlg.AboutTaskDlg(Handle, Icon); return true;
             case Keys.F11: SetFullScreen(!isFullScreen); return true;
             case Keys.Escape | Keys.Shift when settings.CloseOnEscape: Close(); return true; // Shift+Esc beendet sofort (wie in NetRadio)
@@ -1111,14 +1100,6 @@ public partial class MainForm : Form
     private void BtnInfo_Click(object sender, EventArgs e)
     {
         TaskDlg.AboutTaskDlg(Handle, Icon);
-    }
-    private void BtnPageUp_Click(object sender, EventArgs e)
-    {
-        SendPageKey("{PGUP}");
-    }
-    private void BtnPageDown_Click(object sender, EventArgs e)
-    {
-        SendPageKey("{PGDN}");
     }
     private void BtnEmail_Click(object sender, EventArgs e)
     {
