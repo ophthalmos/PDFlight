@@ -116,25 +116,7 @@ internal static class TaskDlg
             Footnote = foot,
             Expander = new TaskDialogExpander()
             {
-                Text = "Strg+O – PDF-Datei öffnen\n" +
-                    "Alt+← / Alt+→ – vorherige / nächste Datei des Ordners\n" +
-                    "Bild ↑ / Bild ↓ – im Dokument blättern\n" +
-                    "Strg+M – verschieben (Strg+Klick: erster Zielordner)\n" +
-                    "Strg+K – kopieren\n" +
-                    "F2 – umbenennen\n" +
-                    "Entf – in den Papierkorb\n" +
-                    "Strg+Entf – Seiten löschen\n" +
-                    "Strg+R – Seiten drehen\n" +
-                    "Strg+Z – Dokumentänderung rückgängig\n" +
-                    "Strg+I – Dokumenteigenschaften\n" +
-                    "Alt+Enter – Windows-Dateieigenschaften\n" +
-                    "Strg+E – als E-Mail-Anhang senden\n" +
-                    "Strg+1 … 9 – in externem Programm öffnen\n" +
-                    "Strg+F – im Dokument suchen\n" +
-                    "Strg+P – drucken\n" +
-                    "F11 – Vollbild ein/aus\n" +
-                    "2× Esc bzw. Umschalt+Esc – Programm beenden (Option)\n" +
-                    "F1 – dieser Dialog",
+                Text = BuildShortcutTable(),
                 CollapsedButtonText = "Tastenkürzel anzeigen",
                 ExpandedButtonText = "Tastenkürzel ausblenden",
                 Position = TaskDialogExpanderPosition.AfterFootnote
@@ -206,6 +188,46 @@ internal static class TaskDlg
         var result = TaskDialog.ShowDialog(hwnd, initialPage);
         if (result == paypalButton) { StartLink(hwnd, "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=S8DVXHKFC2CVS&source=url"); }
         else if (result == downloadButton) { StartLink(hwnd, urlString); }
+    }
+
+    /// <summary>Zweispaltige Kürzel-Übersicht: TaskDialog-Text kennt keine Tabulatoren, darum wird jedes
+    /// Kürzel mit geschützten Leerzeichen aufgefüllt, bis es die gemessene Spaltenbreite erreicht —
+    /// gemessen mit derselben Schrift, in der der TaskDialog seinen Text setzt (Segoe UI 9 pt).</summary>
+    private static string BuildShortcutTable()
+    {
+        (string Key, string Text)[] rows =
+        [
+            ("Strg+O", "PDF-Datei öffnen"),
+            ("Alt+← / Alt+→", "vorherige / nächste Datei des Ordners"),
+            ("Bild ↑ / Bild ↓", "im Dokument blättern"),
+            ("Strg+M", "verschieben (Strg+Klick: erster Zielordner)"),
+            ("Strg+K", "kopieren"),
+            ("F2", "umbenennen"),
+            ("Entf", "in den Papierkorb"),
+            ("Strg+Entf", "Seiten löschen"),
+            ("Strg+R", "Seiten drehen"),
+            ("Strg+Z", "Dokumentänderung rückgängig"),
+            ("Strg+I", "Dokumenteigenschaften"),
+            ("Alt+Enter", "Windows-Dateieigenschaften"),
+            ("Strg+E", "als E-Mail-Anhang senden"),
+            ("Strg+1 … 9", "in externem Programm öffnen"),
+            ("Strg+F", "im Dokument suchen"),
+            ("Strg+P", "drucken"),
+            ("F11", "Vollbild ein/aus"),
+            ("2× Esc / Umschalt+Esc", "Programm beenden (Option)"),
+            ("F1", "dieser Dialog"),
+        ];
+        using Font font = new("Segoe UI", 9f);
+        int Width(string s) => TextRenderer.MeasureText(s + "|", font, Size.Empty, TextFormatFlags.NoPadding).Width; // Sentinel, damit Leerzeichen am Ende mitzählen
+        var sentinel = Width(string.Empty);
+        var column = rows.Max(r => Width(r.Key) - sentinel) + 14;
+        var lines = rows.Select(r =>
+        {
+            var key = r.Key;
+            while (Width(key) - sentinel < column) { key += '\u00A0'; } // geschützte Leerzeichen werden nicht getrimmt
+            return key + r.Text;
+        });
+        return string.Join("\n", lines);
     }
 
     internal static void StartLink(nint hwnd, string url)

@@ -272,7 +272,10 @@ public partial class MainForm : Form
         statusStrip.DragDrop += HandleDragDrop;
     }
 
-    private void HandleDragEnter(object sender, DragEventArgs e) { e.Effect = GetDroppedPdf(e) != null ? DragDropEffects.Copy : DragDropEffects.None; }
+    private void HandleDragEnter(object sender, DragEventArgs e)
+    {
+        e.Effect = GetDroppedPdf(e) != null ? DragDropEffects.Copy : DragDropEffects.None;
+    }
 
     private void HandleDragDrop(object sender, DragEventArgs e)
     {
@@ -1012,9 +1015,11 @@ public partial class MainForm : Form
         switch (keyData)
         {
             case Keys.O | Keys.Control: OpenFile(); return true;
+            case Keys.F4:
             case Keys.M | Keys.Control: MoveCopyDialog(copy: false); return true;
             case Keys.K | Keys.Control: MoveCopyDialog(copy: true); return true;
-            case Keys.F2: RenameCurrent(); return true;
+            case Keys.F2:
+            case Keys.U | Keys.Control: RenameCurrent(); return true;
             case Keys.Delete | Keys.Control: DeletePagesDialog(); return true;
             case Keys.Delete when currentFile != null: DeleteCurrent(); return true;
             case Keys.R | Keys.Control: RotatePagesDialog(); return true;
@@ -1051,7 +1056,10 @@ public partial class MainForm : Form
         return false; // das erste Esc geht an den Viewer
     }
 
-    protected override bool ProcessCmdKey(ref Message msg, Keys keyData) { return HandleShortcut(keyData) || base.ProcessCmdKey(ref msg, keyData); }
+    protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+    {
+        return HandleShortcut(keyData) || base.ProcessCmdKey(ref msg, keyData);
+    }
 
     // Der Zustand der Viewer-Dialoge (Suchleiste, Seitenansicht, Drucken …) ist über die WebView2-API nicht
     // abfragbar. Wird aber SICHER einer geöffnet — per Tastatur, die läuft hier durch —, setzt das nächste Esc
@@ -1068,22 +1076,76 @@ public partial class MainForm : Form
 
     // ------------------------------------------------------------------ Toolbar-Klicks
 
-    private void BtnOpen_Click(object sender, EventArgs e) { OpenFile(); }
-    private void BtnPrev_Click(object sender, EventArgs e) { StepFile(-1); }
-    private void BtnNext_Click(object sender, EventArgs e) { StepFile(1); }
-    private void BtnCopy_Click(object sender, EventArgs e) { MoveCopyDialog(copy: true); }
-    private void BtnRename_Click(object sender, EventArgs e) { RenameCurrent(); }
-    private void BtnDelete_Click(object sender, EventArgs e) { DeleteCurrent(); }
-    private void BtnShowInFolder_Click(object sender, EventArgs e) { ShowInFolder(); }
-    private void BtnSettings_Click(object sender, EventArgs e) { OpenSettings(SettingsForm.TabGeneral); }
-    private void BtnInfo_Click(object sender, EventArgs e) { TaskDlg.AboutTaskDlg(Handle, Icon); }
-    private void BtnPageUp_Click(object sender, EventArgs e) { SendPageKey("{PGUP}"); }
-    private void BtnPageDown_Click(object sender, EventArgs e) { SendPageKey("{PGDN}"); }
-    private void BtnEmail_Click(object sender, EventArgs e) { EmailCurrent(); }
-    private void MnuDeletePages_Click(object sender, EventArgs e) { DeletePagesDialog(); }
-    private void MnuRotatePages_Click(object sender, EventArgs e) { RotatePagesDialog(); }
-    private void MnuAppendPdf_Click(object sender, EventArgs e) { AppendPdfDialog(); }
-    private void MnuExtractPages_Click(object sender, EventArgs e) { ExtractPagesDialog(); }
-    private void MnuUndo_Click(object sender, EventArgs e) { UndoLastChange(); }
-    private void MnuProperties_Click(object sender, EventArgs e) { ShowProperties(); }
+    private void BtnOpen_Click(object sender, EventArgs e)
+    {
+        OpenFile();
+    }
+    private void BtnPrev_Click(object sender, EventArgs e)
+    {
+        StepFile(-1);
+    }
+    private void BtnNext_Click(object sender, EventArgs e)
+    {
+        StepFile(1);
+    }
+    private void BtnCopy_Click(object sender, EventArgs e)
+    {
+        MoveCopyDialog(copy: true);
+    }
+    private void BtnRename_Click(object sender, EventArgs e)
+    {
+        RenameCurrent();
+    }
+    private void BtnDelete_Click(object sender, EventArgs e)
+    {
+        DeleteCurrent();
+    }
+    private void BtnShowInFolder_Click(object sender, EventArgs e)
+    {
+        ShowInFolder();
+    }
+    private void BtnSettings_Click(object sender, EventArgs e)
+    {
+        OpenSettings(SettingsForm.TabGeneral);
+    }
+    private void BtnInfo_Click(object sender, EventArgs e)
+    {
+        TaskDlg.AboutTaskDlg(Handle, Icon);
+    }
+    private void BtnPageUp_Click(object sender, EventArgs e)
+    {
+        SendPageKey("{PGUP}");
+    }
+    private void BtnPageDown_Click(object sender, EventArgs e)
+    {
+        SendPageKey("{PGDN}");
+    }
+    private void BtnEmail_Click(object sender, EventArgs e)
+    {
+        EmailCurrent();
+    }
+    private void MnuDeletePages_Click(object sender, EventArgs e)
+    {
+        DeletePagesDialog();
+    }
+    private void MnuRotatePages_Click(object sender, EventArgs e)
+    {
+        RotatePagesDialog();
+    }
+    private void MnuAppendPdf_Click(object sender, EventArgs e)
+    {
+        AppendPdfDialog();
+    }
+    private void MnuExtractPages_Click(object sender, EventArgs e)
+    {
+        ExtractPagesDialog();
+    }
+    private void MnuUndo_Click(object sender, EventArgs e)
+    {
+        UndoLastChange();
+    }
+    private void MnuProperties_Click(object sender, EventArgs e)
+    {
+        ShowProperties();
+    }
 }
