@@ -14,7 +14,7 @@ namespace PDFLight.Classes;
 // Chromium-UI und von außen nicht auslösbar (in den per ContextMenuRequested abfangbaren Kontextmenüs
 // kommt er nicht vor — geprüft für Seite, Rand und Toolbar). Alt+Enter zeigt darum die
 // Windows-Dateieigenschaften (ShellUtil.ShowFileProperties), wie im Explorer.
-internal class PdfViewHost(WebView2 webView)
+internal partial class PdfViewHost(WebView2 webView)
 {
     private const string VirtualHost = "pdflight.doc";
     private readonly WebView2 webView = webView;
@@ -48,6 +48,7 @@ internal class PdfViewHost(WebView2 webView)
 
         IsReady = true;
         ShowEmptyPage();
+        WarmUpAutomation(); // Chromiums Accessibility-Baum schon jetzt aktivieren, nicht erst beim ersten Strg+Entf
     }
 
     /// <summary>Drop auf die Leerseite: deren Skript meldet die Dateien per postMessageWithAdditionalObjects mit echten Pfaden.</summary>
@@ -134,34 +135,73 @@ internal class PdfViewHost(WebView2 webView)
         if (IsReady) { ShowEmptyPage(); }
     }
 
+    // ------------------------------------------------------------------ Aktuelle Seite per UI Automation
+
     /// <summary>Aktuelle Seite laut dem Seitenzahl-Feld der Viewer-Toolbar, per UI Automation gelesen —
     /// die WebView2-API selbst verrät die Seite nicht, aber Chromium exponiert seine Oberfläche als
-    /// Automation-Baum. 0, wenn das Feld nicht gefunden oder nicht gelesen werden kann.</summary>
+    /// Automation-Baum. 0, wenn das Feld nicht (rechtzeitig) gelesen werden kann.
+    /// Die Abfrage läuft mit Zeitbudget im Hintergrund und setzt am Chromium-Kindfenster an: Es gehört
+    /// einem fremden Thread — eine Abfrage am eigenen WebView-Fenster würde den wartenden UI-Thread
+    /// per WM_GETOBJECT anfragen und sich damit selbst blockieren.</summary>
     public int TryGetCurrentPage()
     {
         if (webView.CoreWebView2 == null) { return 0; }
+        var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
+        if (chromium == IntPtr.Zero) { return 0; }
+        var task = Task.Run(() => ReadPageNumber(chromium));
+        return task.Wait(TimeSpan.FromMilliseconds(1500)) ? task.Result : 0; // lieber ohne Vorbelegung als eingefroren
+    }
+
+    private static int ReadPageNumber(IntPtr chromiumHandle)
+    {
         try
         {
-            var root = System.Windows.Automation.AutomationElement.FromHandle(webView.Handle);
-            var edits = root.FindAll(System.Windows.Automation.TreeScope.Descendants,
+            var root = System.Windows.Automation.AutomationElement.FromHandle(chromiumHandle);
+            // FindFirst bricht beim ersten Treffer ab; die Toolbar steht im Baum vor dem Dokumentinhalt
+            var edit = root.FindFirst(System.Windows.Automation.TreeScope.Descendants, new System.Windows.Automation.AndCondition(
+                new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.Edit),
+                new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.NameProperty, "Seitenzahl")));
+            edit ??= root.FindFirst(System.Windows.Automation.TreeScope.Descendants, // zur Sicherheit, falls das Feld einmal anders heißt
                 new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.Edit));
-            var fallback = 0;
-            foreach (System.Windows.Automation.AutomationElement edit in edits)
+            if (edit != null && edit.TryGetCurrentPattern(System.Windows.Automation.ValuePattern.Pattern, out var pattern)
+                && int.TryParse(((System.Windows.Automation.ValuePattern)pattern).Current.Value, out var page) && page >= 1)
             {
-                if (edit.TryGetCurrentPattern(System.Windows.Automation.ValuePattern.Pattern, out var pattern)
-                    && int.TryParse(((System.Windows.Automation.ValuePattern)pattern).Current.Value, out var page) && page >= 1)
-                {
-                    if (edit.Current.Name == "Seitenzahl") { return page; } // das Toolbar-Feld heißt so (Programm ist nur Deutsch)
-                    if (fallback == 0) { fallback = page; } // zur Sicherheit: irgendein numerisches Edit (z.B. bei künftiger Umbenennung)
-                }
+                return page;
             }
-            return fallback;
         }
-        catch (Exception ex) when (ex is System.Windows.Automation.ElementNotAvailableException or System.Runtime.InteropServices.COMException or InvalidOperationException)
-        {
-            return 0;
-        }
+        catch (Exception ex) when (ex is System.Windows.Automation.ElementNotAvailableException or System.Runtime.InteropServices.COMException or InvalidOperationException) { }
+        return 0;
     }
+
+    /// <summary>Stößt Chromiums Accessibility-Modus einmalig an (bleibt danach aktiv), damit die erste
+    /// echte Seitenabfrage nicht auf den Aufbau des kompletten Baums warten muss.</summary>
+    private void WarmUpAutomation()
+    {
+        var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
+        if (chromium == IntPtr.Zero) { return; }
+        _ = Task.Run(() => ReadPageNumber(chromium));
+    }
+
+    /// <summary>Sucht das Chromium-Eingabefenster unterhalb des WebView-Handles.</summary>
+    private static unsafe IntPtr FindDescendant(IntPtr parent, string className, int depth)
+    {
+        if (depth == 0) { return IntPtr.Zero; }
+        var buffer = stackalloc char[64]; // vor der Schleife — CA2014
+        for (var child = FindWindowEx(parent, IntPtr.Zero, null, null); child != IntPtr.Zero; child = FindWindowEx(parent, child, null, null))
+        {
+            var length = GetClassName(child, buffer, 64);
+            if (string.Equals(new string(buffer, 0, length), className, StringComparison.Ordinal)) { return child; }
+            var descendant = FindDescendant(child, className, depth - 1);
+            if (descendant != IntPtr.Zero) { return descendant; }
+        }
+        return IntPtr.Zero;
+    }
+
+    [System.Runtime.InteropServices.LibraryImport("user32.dll", EntryPoint = "FindWindowExW", StringMarshalling = System.Runtime.InteropServices.StringMarshalling.Utf16)]
+    private static partial IntPtr FindWindowEx(IntPtr parent, IntPtr after, string className, string windowName);
+
+    [System.Runtime.InteropServices.LibraryImport("user32.dll", EntryPoint = "GetClassNameW")]
+    private static unsafe partial int GetClassName(IntPtr hWnd, char* buffer, int maxCount);
 
     private void ShowEmptyPage()
     {
