@@ -101,7 +101,17 @@ Filename: "{app}\{#appName}.exe"; Description: "{cm:Run}"; Flags: nowait postins
 ; Hinweis: Die Benutzereinstellungen (%APPDATA%\PDFlight\settings.json) und der
 ; WebView2-Datenordner (%LOCALAPPDATA%\PDFlight) bleiben bei der Deinstallation erhalten.
 
+[UninstallDelete]
+Type: files; Name: "{app}\language.default"
+
 [Code]
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  { Sprachwahl des Setups für PDFlight hinterlegen; das Programm übernimmt sie einmalig beim Start }
+  if CurStep = ssPostInstall then
+    SaveStringToFile(ExpandConstant('{app}\language.default'), ActiveLanguage, False);
+end;
+
 function InitializeSetup(): Boolean;
 var
   WebView2Version: String;
