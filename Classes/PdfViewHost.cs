@@ -134,6 +134,35 @@ internal class PdfViewHost(WebView2 webView)
         if (IsReady) { ShowEmptyPage(); }
     }
 
+    /// <summary>Aktuelle Seite laut dem Seitenzahl-Feld der Viewer-Toolbar, per UI Automation gelesen —
+    /// die WebView2-API selbst verrät die Seite nicht, aber Chromium exponiert seine Oberfläche als
+    /// Automation-Baum. 0, wenn das Feld nicht gefunden oder nicht gelesen werden kann.</summary>
+    public int TryGetCurrentPage()
+    {
+        if (webView.CoreWebView2 == null) { return 0; }
+        try
+        {
+            var root = System.Windows.Automation.AutomationElement.FromHandle(webView.Handle);
+            var edits = root.FindAll(System.Windows.Automation.TreeScope.Descendants,
+                new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.Edit));
+            var fallback = 0;
+            foreach (System.Windows.Automation.AutomationElement edit in edits)
+            {
+                if (edit.TryGetCurrentPattern(System.Windows.Automation.ValuePattern.Pattern, out var pattern)
+                    && int.TryParse(((System.Windows.Automation.ValuePattern)pattern).Current.Value, out var page) && page >= 1)
+                {
+                    if (edit.Current.Name == "Seitenzahl") { return page; } // das Toolbar-Feld heißt so (Programm ist nur Deutsch)
+                    if (fallback == 0) { fallback = page; } // zur Sicherheit: irgendein numerisches Edit (z.B. bei künftiger Umbenennung)
+                }
+            }
+            return fallback;
+        }
+        catch (Exception ex) when (ex is System.Windows.Automation.ElementNotAvailableException or System.Runtime.InteropServices.COMException or InvalidOperationException)
+        {
+            return 0;
+        }
+    }
+
     private void ShowEmptyPage()
     {
         webView.CoreWebView2.NavigateToString("""

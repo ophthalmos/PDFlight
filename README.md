@@ -84,7 +84,9 @@ Release-Build die Datei `Installer.iss` kompilieren — sie nimmt die Dateien di
 
 - **Anzeige**: nativer WebView2/Chromium-PDF-Viewer. Das Dokument wird über ein virtuelles
   Host-Schema aus dem Speicher serviert (`Classes/PdfViewHost.cs`), Drag & Drop auf den Viewer
-  wird über das Abfangen der ausgelösten `file://`-Navigation umgeleitet.
+  wird über das Abfangen der ausgelösten `file://`-Navigation umgeleitet. Die aktuelle Seite
+  (Vorbelegung im Seiten-löschen-Dialog) liest PDFlight per UI Automation aus dem
+  Seitenzahl-Feld der Viewer-Symbolleiste — die WebView2-API selbst bietet dafür nichts.
 - **Bearbeitung**: [PDFsharp](https://www.pdfsharp.net/) (MIT) — `Classes/PdfEditService.cs`.
 - **E-Mail**: SendMail-DropTarget der Windows-Shell (respektiert die „.mapimail“-Zuordnung,
   der von SumatraPDF bekannte Weg), mit Simple-MAPI-Fallback — `Classes/MailSender.cs`.

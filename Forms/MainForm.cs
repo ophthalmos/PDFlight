@@ -721,7 +721,8 @@ public partial class MainForm : Form
             TaskDlg.MsgTaskDlg(Handle, "Die Datei hat nur eine Seite.", "Zum Löschen der ganzen Datei benutzen Sie den Papierkorb (Entf).", TaskDialogIcon.Information);
             return;
         }
-        using PageRangeForm dialog = new("Seiten löschen", currentPageCount, emptyMeansAll: false, showRotation: false);
+        using PageRangeForm dialog = new("Seiten löschen", currentPageCount, emptyMeansAll: false, showRotation: false,
+            defaultPage: viewHost.TryGetCurrentPage()); // meist soll die gerade angezeigte Seite gelöscht werden
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         var pages = dialog.SelectedPages;
         if (pages.Count >= currentPageCount)

@@ -14,7 +14,7 @@ public partial class PageRangeForm : Form
     /// <summary>+90 (rechts), -90 (links) oder 180 Grad — nur relevant, wenn der Dialog mit Drehoptionen angezeigt wird.</summary>
     public int RotationDelta => radioLeft.Checked ? -90 : radioTurn.Checked ? 180 : 90;
 
-    public PageRangeForm(string title, int pageCount, bool emptyMeansAll, bool showRotation)
+    public PageRangeForm(string title, int pageCount, bool emptyMeansAll, bool showRotation, int defaultPage = 0)
     {
         InitializeComponent();
         this.pageCount = pageCount;
@@ -22,6 +22,11 @@ public partial class PageRangeForm : Form
         Text = title;
         labelPrompt.Text = $"&Seiten (1–{pageCount}):";
         labelHint.Text = "z.B.  3   oder   2-5, 8" + (emptyMeansAll ? "   —   leer = alle Seiten" : string.Empty);
+        if (defaultPage >= 1 && defaultPage <= pageCount)
+        {
+            textBoxPages.Text = defaultPage.ToString(); // z.B. die aktuelle Seite des Viewers
+            textBoxPages.SelectAll(); // Tippen ersetzt den Vorschlag sofort
+        }
         if (!showRotation)
         {
             groupRotation.Visible = false;
