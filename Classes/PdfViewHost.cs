@@ -151,29 +151,59 @@ internal partial class PdfViewHost(WebView2 webView)
     /// Regeln wie bei der Seitenabfrage: Hintergrund-Task am Chromium-Kindfenster.</summary>
     public void RotateView(bool clockwise)
     {
+        InvokeViewerButton("rotate", clockwise ? 1 : 3); // der Viewer kennt nur rechtsherum — dreimal rechts ist einmal links
+    }
+
+    /// <summary>Blendet die Inhalte-Leiste am linken Rand ein oder aus.</summary>
+    public void ToggleContents()
+    {
+        InvokeViewerButton("contents", 1);
+    }
+
+    /// <summary>Passt die Seite an die Fensterbreite an (bzw. zurück auf ganze Seite — der Button wechselt).</summary>
+    public void FitToWidth()
+    {
+        InvokeViewerButton("pagefit", 1);
+    }
+
+    /// <summary>Drückt einen Button der Viewer-Toolbar per UI Automation, adressiert über die HTML-id
+    /// (wird zur sprachunabhängigen AutomationId). Gleiche Regeln wie die Seitenabfrage:
+    /// Hintergrund-Task am Chromium-Kindfenster.</summary>
+    private void InvokeViewerButton(string automationId, int clicks)
+    {
         if (!IsReady || currentBytes == null) { return; }
         var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
         if (chromium == IntPtr.Zero) { return; }
-        var clicks = clockwise ? 1 : 3; // der Viewer kennt nur rechtsherum — dreimal rechts ist einmal links
-        _ = Task.Run(() => InvokeRotateButton(chromium, clicks));
+        _ = Task.Run(() => InvokeButton(chromium, automationId, clicks));
     }
 
-    private static void InvokeRotateButton(IntPtr chromiumHandle, int clicks)
+    private static void InvokeButton(IntPtr chromiumHandle, string automationId, int clicks)
     {
         try
         {
             var root = System.Windows.Automation.AutomationElement.FromHandle(chromiumHandle);
-            var button = root.FindFirst(System.Windows.Automation.TreeScope.Descendants, // die HTML-id des Buttons wird zur AutomationId — sprachunabhängig
-                new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.AutomationIdProperty, "rotate"));
-            if (button != null && button.TryGetCurrentPattern(System.Windows.Automation.InvokePattern.Pattern, out var pattern))
+            var button = root.FindFirst(System.Windows.Automation.TreeScope.Descendants,
+                new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.AutomationIdProperty, automationId));
+            if (button == null) { return; }
+            for (var i = 0; i < clicks; i++)
             {
-                for (var i = 0; i < clicks; i++) { ((System.Windows.Automation.InvokePattern)pattern).Invoke(); }
+                if (button.TryGetCurrentPattern(System.Windows.Automation.InvokePattern.Pattern, out var invoke))
+                {
+                    ((System.Windows.Automation.InvokePattern)invoke).Invoke();
+                }
+                else if (button.TryGetCurrentPattern(System.Windows.Automation.ExpandCollapsePattern.Pattern, out var expand))
+                {
+                    // der Inhalte-Button ist ein Auf-/Zuklapper — je nach Zustand öffnen oder schließen
+                    var pattern = (System.Windows.Automation.ExpandCollapsePattern)expand;
+                    if (pattern.Current.ExpandCollapseState == System.Windows.Automation.ExpandCollapseState.Expanded) { pattern.Collapse(); }
+                    else { pattern.Expand(); }
+                }
             }
         }
         catch (Exception ex) when (ex is System.Windows.Automation.ElementNotAvailableException
             or System.Runtime.InteropServices.COMException or InvalidOperationException)
         {
-            // reine Komfortfunktion — schlägt der Klick fehl, bleibt die Ansicht einfach ungedreht
+            // reine Komfortfunktionen — schlägt der Klick fehl, ändert sich die Ansicht einfach nicht
         }
     }
 
