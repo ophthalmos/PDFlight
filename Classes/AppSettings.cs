@@ -19,7 +19,8 @@ public class AppSettings
     public bool LargeToolbarIcons { get; set; } = true;   // 24 statt 16 Pixel (vor DPI-Skalierung)
     public bool CloseOnEscape { get; set; }               // Programm mit 2× Esc beenden (Shift+Esc sofort)
     public bool ReopenLastFile { get; set; }              // zuletzt geöffnete Datei beim Start laden
-    public string Language { get; set; } = "de";          // "de" oder "en"; weitere Sprachen als Languages\lng.<code>.resx
+    public string Language { get; set; } = "de";          // Kultur-Code; Sprachen liegen als Languages\lng.<code>.resx bereit
+    public string InstallerLanguage { get; set; } = string.Empty; // zuletzt übernommene Setup-Sprachwahl (s. ApplyInstallerLanguage)
     public string LastFile { get; set; } = string.Empty;  // Datei, die beim Beenden geöffnet war
     public int WindowX { get; set; } = -1;
     public int WindowY { get; set; } = -1;
@@ -35,11 +36,33 @@ public class AppSettings
         {
             if (File.Exists(SettingsPath))
             {
-                return JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(SettingsPath)) ?? new AppSettings();
+                return ApplyInstallerLanguage(JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(SettingsPath)) ?? new AppSettings());
             }
         }
         catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException) { } // defekte Datei → Standardwerte
-        return new AppSettings();
+        return ApplyInstallerLanguage(new AppSettings());
+    }
+
+    /// <summary>Übernimmt die Sprachwahl des Installers (Datei language.default neben der EXE) genau einmal
+    /// pro Installation: Erst wenn eine (Neu-)Installation eine andere Wahl hinterlegt, überschreibt sie die
+    /// Programmsprache — eine spätere Umstellung im Einstellungsdialog bleibt bis dahin erhalten.</summary>
+    private static AppSettings ApplyInstallerLanguage(AppSettings settings)
+    {
+        try
+        {
+            var marker = Path.Combine(AppContext.BaseDirectory, "language.default");
+            if (File.Exists(marker))
+            {
+                var code = File.ReadAllText(marker).Trim();
+                if (code.Length == 2 && code != settings.InstallerLanguage)
+                {
+                    settings.InstallerLanguage = code; // wird beim nächsten Save festgehalten
+                    settings.Language = code;
+                }
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+        return settings;
     }
 
     private static readonly JsonSerializerOptions SerializerOptions = new() { WriteIndented = true }; // gecacht (CA1869)
