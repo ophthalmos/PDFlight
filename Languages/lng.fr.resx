@@ -114,6 +114,8 @@ extraire des pages, propriétés (raccourcis dans le menu)</value></data>
   <data name="Strg+Umschalt+B" xml:space="preserve"><value>Ctrl+Maj+B</value></data>
   <data name="Inhalte-Leiste ein-/ausblenden" xml:space="preserve"><value>Afficher/masquer le volet de contenu</value></data>
   <data name="Seite an Fensterbreite anpassen" xml:space="preserve"><value>Ajuster la page à la largeur de la fenêtre</value></data>
+  <data name="Textcursor-Navigation ein/aus (Markieren per Tastatur)" xml:space="preserve"><value>Navigation au curseur de texte (sélection au clavier)</value></data>
+  <data name="Gehe zu Seite (Zahl tippen + Enter)" xml:space="preserve"><value>Aller à la page (saisir le numéro + Entrée)</value></data>
   <data name="Strg+1 … 9" xml:space="preserve"><value>Ctrl+1 … 9</value></data>
   <data name="Bild ↑ / Bild ↓" xml:space="preserve"><value>Pg.préc / Pg.suiv</value></data>
   <data name="2× Esc / Umschalt+Esc" xml:space="preserve"><value>2× Échap / Maj+Échap</value></data>

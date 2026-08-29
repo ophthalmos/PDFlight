@@ -114,6 +114,8 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
   <data name="Strg+Umschalt+B" xml:space="preserve"><value>Ctrl+Mayús+B</value></data>
   <data name="Inhalte-Leiste ein-/ausblenden" xml:space="preserve"><value>Mostrar/ocultar el panel de contenido</value></data>
   <data name="Seite an Fensterbreite anpassen" xml:space="preserve"><value>Ajustar la página al ancho de la ventana</value></data>
+  <data name="Textcursor-Navigation ein/aus (Markieren per Tastatur)" xml:space="preserve"><value>Navegación con cursor de texto (seleccionar con el teclado)</value></data>
+  <data name="Gehe zu Seite (Zahl tippen + Enter)" xml:space="preserve"><value>Ir a la página (escribir el número + Entrar)</value></data>
   <data name="Strg+1 … 9" xml:space="preserve"><value>Ctrl+1 … 9</value></data>
   <data name="Bild ↑ / Bild ↓" xml:space="preserve"><value>RePág / AvPág</value></data>
   <data name="2× Esc / Umschalt+Esc" xml:space="preserve"><value>2× Esc / Mayús+Esc</value></data>
