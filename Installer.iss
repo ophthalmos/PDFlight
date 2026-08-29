@@ -42,16 +42,39 @@ SetupMutex={#appName}_SetupMutex
 WizardStyle=modern
 
 [Languages]
+; Das Setup wählt die Sprache automatisch nach der Windows-Sprache; erste = Rückfall
+Name: en; MessagesFile: "compiler:Default.isl"
 Name: de; MessagesFile: "compiler:Languages\German.isl"
+Name: fr; MessagesFile: "compiler:Languages\French.isl"
+Name: es; MessagesFile: "compiler:Languages\Spanish.isl"
 
 [Messages]
+en.ConfirmUninstall=Are you sure you want to remove %1 and all of its components? You do not need to uninstall before an update.
 de.ConfirmUninstall=Sind Sie sicher, dass Sie %1 und alle zugehörigen Komponenten entfernen möchten? Vor einem Update ist keine Deinstallation erforderlich.
+fr.ConfirmUninstall=Voulez-vous vraiment supprimer %1 et tous ses composants ? Une désinstallation n'est pas nécessaire avant une mise à jour.
+es.ConfirmUninstall=¿Seguro que desea quitar %1 y todos sus componentes? No es necesario desinstalar antes de una actualización.
 
 [CustomMessages]
+en.Run=Launch {#appName}
+en.DesktopIcon=Create a desktop shortcut
+en.FileAssoc=Offer {#appName} in the "Open with" menu for PDF files
+en.WebView2Missing=The Microsoft WebView2 runtime was not found.%n%n{#appName} needs it to display PDFs. Please download it from:%nhttps://developer.microsoft.com/microsoft-edge/webview2/%n%nSetup will continue anyway.
+en.PdfDocument=PDF file
 de.Run={#appName} starten
 de.DesktopIcon=Verknüpfung auf dem Desktop anlegen
 de.FileAssoc={#appName} im "Öffnen mit"-Menü für PDF-Dateien anbieten
 de.WebView2Missing=Die Microsoft-WebView2-Runtime wurde nicht gefunden.%n%n{#appName} benötigt sie für die PDF-Anzeige. Bitte laden Sie sie herunter von:%nhttps://developer.microsoft.com/microsoft-edge/webview2/%n%nDie Installation wird trotzdem fortgesetzt.
+de.PdfDocument=PDF-Datei
+fr.Run=Lancer {#appName}
+fr.DesktopIcon=Créer un raccourci sur le Bureau
+fr.FileAssoc=Proposer {#appName} dans le menu « Ouvrir avec » pour les fichiers PDF
+fr.WebView2Missing=Le runtime Microsoft WebView2 est introuvable.%n%n{#appName} en a besoin pour afficher les PDF. Veuillez le télécharger depuis :%nhttps://developer.microsoft.com/microsoft-edge/webview2/%n%nL'installation continue malgré tout.
+fr.PdfDocument=Fichier PDF
+es.Run=Iniciar {#appName}
+es.DesktopIcon=Crear un acceso directo en el escritorio
+es.FileAssoc=Ofrecer {#appName} en el menú "Abrir con" para archivos PDF
+es.WebView2Missing=No se encontró el runtime de Microsoft WebView2.%n%n{#appName} lo necesita para mostrar PDF. Descárguelo desde:%nhttps://developer.microsoft.com/microsoft-edge/webview2/%n%nLa instalación continuará de todos modos.
+es.PdfDocument=Archivo PDF
 
 [Tasks]
 Name: desktopicon; Description: "{cm:DesktopIcon}"; Flags: unchecked
@@ -66,7 +89,7 @@ Name: "{autodesktop}\{#appName}"; Filename: "{app}\{#appName}.exe"; Tasks: deskt
 
 [Registry]
 ; ProgID, damit PDFlight im "Öffnen mit"-Dialog erscheint (Standard-App bleibt Sache des Benutzers)
-Root: HKLM; Subkey: "Software\Classes\{#appName}.Document"; ValueType: string; ValueData: "PDF-Datei"; Flags: uninsdeletekey; Tasks: fileassoc
+Root: HKLM; Subkey: "Software\Classes\{#appName}.Document"; ValueType: string; ValueData: "{cm:PdfDocument}"; Flags: uninsdeletekey; Tasks: fileassoc
 Root: HKLM; Subkey: "Software\Classes\{#appName}.Document\DefaultIcon"; ValueType: string; ValueData: "{app}\{#appName}.exe,0"; Tasks: fileassoc
 Root: HKLM; Subkey: "Software\Classes\{#appName}.Document\shell\open\command"; ValueType: string; ValueData: """{app}\{#appName}.exe"" ""%1"""; Tasks: fileassoc
 Root: HKLM; Subkey: "Software\Classes\.pdf\OpenWithProgids"; ValueType: string; ValueName: "{#appName}.Document"; ValueData: ""; Flags: uninsdeletevalue; Tasks: fileassoc
