@@ -197,6 +197,8 @@ Les deux fichiers doivent avoir le même nombre de pages.</value></data>
 Le mot de passe sera demandé à chaque ouverture du fichier.
 Sans lui, le fichier ne pourra plus être affiché.</value></data>
   <data name="Kennwort anzeigen" xml:space="preserve"><value>Afficher le mot de passe</value></data>
+  <data name="Drehen.Info" xml:space="preserve"><value>La rotation est enregistrée durablement dans le fichier.
+Le bouton de rotation de l'afficheur, lui, ne change que l'affichage.</value></data>
   <data name="Kennwort verbergen" xml:space="preserve"><value>Masquer le mot de passe</value></data>
   <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Répéter :</value></data>
   <data name="Bitte geben Sie ein Kennwort ein." xml:space="preserve"><value>Veuillez saisir un mot de passe.</value></data>

@@ -884,7 +884,10 @@ public partial class MainForm : Form
     {
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
-        using PageRangeForm dialog = new(Lng.T("Seiten drehen"), currentPageCount, emptyMeansAll: true, showRotation: true);
+        using PageRangeForm dialog = new(Lng.T("Seiten drehen"), currentPageCount, emptyMeansAll: true, showRotation: true,
+            infoText: Lng.T("Drehen.Info",
+                "Die Drehung wird dauerhaft in der Datei gespeichert." + Environment.NewLine +
+                "Die Drehen-Schaltfläche des Viewers ändert dagegen nur die Ansicht."));
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         var pages = dialog.SelectedPages;
         if (RunPdfEdit(() => PdfEditService.RotatePages(currentFile.FullName, pages, dialog.RotationDelta), Lng.T("Seiten drehen")))
