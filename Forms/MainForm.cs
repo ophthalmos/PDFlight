@@ -633,8 +633,17 @@ public partial class MainForm : Form
     private void DeleteCurrent()
     {
         if (currentFile == null) { return; }
-        if (settings.ConfirmDelete
-            && !TaskDlg.ConfirmTaskDlg(Handle, "In den Papierkorb verschieben?", currentFile.Name)) { return; }
+        if (settings.ConfirmDelete)
+        {
+            var alwaysAsk = true;
+            if (!TaskDlg.ConfirmTaskDlg(Handle, "In den Papierkorb verschieben?", currentFile.Name, "Immer fragen", ref alwaysAsk)) { return; }
+            if (!alwaysAsk)
+            {
+                settings.ConfirmDelete = false; // wieder aktivierbar im Einstellungsdialog ("Vor dem Verschieben in den Papierkorb nachfragen")
+                settings.ReloadSharedLists();
+                settings.Save();
+            }
+        }
         var files = FileUtil.GetPdfFilesInFolder(currentFile.DirectoryName);
         var index = files.FindIndex(f => string.Equals(f, currentFile.FullName, StringComparison.OrdinalIgnoreCase));
         try { FileSystem.DeleteFile(currentFile.FullName, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin); }
@@ -718,7 +727,7 @@ public partial class MainForm : Form
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
         if (currentPageCount == 1)
         {
-            TaskDlg.MsgTaskDlg(Handle, "Die Datei hat nur eine Seite.", "Zum Löschen der ganzen Datei benutzen Sie den Papierkorb (Entf).", TaskDialogIcon.Information);
+            TaskDlg.MsgTaskDlg(Handle, "Die Datei hat nur eine Seite.", "Zum Löschen der ganzen Datei benutzen Sie den Papierkorb (Strg+Umschalt+Entf).", TaskDialogIcon.Information);
             return;
         }
         var currentPage = ClampedCurrentPage();
@@ -1026,7 +1035,7 @@ public partial class MainForm : Form
             case Keys.F2:
             case Keys.U | Keys.Control: RenameCurrent(); return true;
             case Keys.Delete | Keys.Control: DeletePagesDialog(); return true;
-            case Keys.Delete when currentFile != null: DeleteCurrent(); return true;
+            case Keys.Delete | Keys.Control | Keys.Shift when currentFile != null: DeleteCurrent(); return true;
             case Keys.R | Keys.Control: RotatePagesDialog(); return true;
             case Keys.Z | Keys.Control when undoTargetFile != null: UndoLastChange(); return true;
             case Keys.I | Keys.Control: ShowProperties(); return true;

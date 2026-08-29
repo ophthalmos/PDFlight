@@ -71,6 +71,27 @@ internal static class TaskDlg
         return TaskDialog.ShowDialog(hwnd, page) == TaskDialogButton.Yes;
     }
 
+    /// <summary>Ja/Nein-Frage mit Kontrollkästchen (z.B. "Immer fragen"); verificationChecked
+    /// gibt den Anfangszustand vor und liefert den Endzustand zurück.</summary>
+    public static bool ConfirmTaskDlg(nint hwnd, string heading, string message, string verificationText, ref bool verificationChecked, TaskDialogIcon icon = null, bool defaultNo = false)
+    {
+        TaskDialogPage page = new()
+        {
+            Caption = Application.ProductName,
+            SizeToContent = true,
+            Heading = heading,
+            Text = message,
+            Icon = icon ?? TaskDialogIcon.None,
+            AllowCancel = true,
+            Buttons = { TaskDialogButton.Yes, TaskDialogButton.No },
+            Verification = new TaskDialogVerificationCheckBox(verificationText) { Checked = verificationChecked }
+        };
+        if (defaultNo) { page.DefaultButton = page.Buttons[1]; }
+        var confirmed = TaskDialog.ShowDialog(hwnd, page) == TaskDialogButton.Yes;
+        verificationChecked = page.Verification.Checked;
+        return confirmed;
+    }
+
     // Updatesuche über die XML-Datei auf der Webseite des Autors (wie bei den übrigen Programmen);
     // erwartete Elemente unterhalb der Wurzel: <version>, <date>, <url64>
     private const string UpdateXmlUrl = "https://www.netradio.info/download/pdflight.xml";
@@ -203,7 +224,7 @@ internal static class TaskDlg
             ("Strg+M", "verschieben (Strg+Klick: erster Zielordner)"),
             ("Strg+K", "kopieren"),
             ("F2", "umbenennen"),
-            ("Entf", "in den Papierkorb"),
+            ("Strg+Umschalt+Entf", "Datei in den Papierkorb"),
             ("Strg+Entf", "Seiten löschen"),
             ("Strg+R", "Seiten drehen"),
             ("Strg+Z", "Dokumentänderung rückgängig"),

@@ -172,7 +172,7 @@
             btnDelete.Name = "btnDelete";
             btnDelete.Size = new Size(55, 22);
             btnDelete.Text = "Löschen";
-            btnDelete.ToolTipText = "In den Papierkorb verschieben (Entf)";
+            btnDelete.ToolTipText = "In den Papierkorb verschieben (Strg+Umschalt+Entf)";
             btnDelete.Click += BtnDelete_Click;
             // 
             // toolStripSeparator8

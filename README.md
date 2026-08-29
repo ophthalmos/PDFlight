@@ -32,7 +32,8 @@ Scan-Ordner zügig abzuarbeiten.
 - **Weitergeben**: E-Mail mit der Datei als Anhang über das Standard-Mailprogramm (Strg+E),
   Öffnen in installierten PDF-Programmen (Strg+1 … Strg+9, automatisch erkannt),
   „Öffnen mit“-Dialog, Anzeigen im Dateimanager (Directory Opus, falls installiert, sonst Explorer).
-- **Aufräumen**: Löschen in den Papierkorb (Entf), Blättern durch alle PDFs des Ordners (Strg+Umschalt+←/→).
+- **Aufräumen**: Löschen in den Papierkorb (Strg+Umschalt+Entf, Sicherheitsabfrage abschaltbar),
+  Blättern durch alle PDFs des Ordners (Strg+Umschalt+←/→).
 - Drag & Drop, F11-Vollbild, zentraler Einstellungsdialog, Symbole aus der Windows-Symbolschrift,
   zuletzt geöffnete Dateien im Öffnen-Menü, optional „Programm mit Esc beenden“ und
   „Zuletzt geöffnete Datei beim Start laden“. Laufen mehrere Instanzen gleichzeitig,
@@ -48,7 +49,7 @@ Scan-Ordner zügig abzuarbeiten.
 | Strg+M | Verschieben (Ordnerdialog) |
 | Strg+K | Kopieren (Ordnerdialog) |
 | F2 | Umbenennen |
-| Entf | In den Papierkorb |
+| Strg+Umschalt+Entf | Datei in den Papierkorb |
 | Strg+Entf | Seiten löschen |
 | Strg+R | Seiten drehen |
 | Strg+Z | Letzte Dokumentänderung rückgängig |
