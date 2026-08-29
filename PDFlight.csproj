@@ -1,4 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project>
+  <!-- SDK-Importe explizit statt über das Sdk-Attribut, damit die Reference-Bereinigung
+       unten NACH den SDK-/NuGet-Targets ausgewertet werden kann (ersetzt Directory.Build.targets) -->
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -20,11 +23,19 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks><!-- für die Quellgeneratoren LibraryImport/GeneratedComInterface -->
   </PropertyGroup>
 
-  <!-- Die unerwünschte WPF-Referenz des WebView2-Pakets entfernt Directory.Build.targets. -->
-
   <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4191.47" />
     <PackageReference Include="PDFsharp" Version="6.2.4" />
+  </ItemGroup>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+  <!-- WebView2 referenziert ungefragt auch seine WPF-Assembly; sie wird nicht benötigt und
+       verursachte die MSB3277-Warnung (WindowsBase-Versionskonflikt). Das Entfernen muss nach
+       den NuGet-Targets des Pakets stehen — ein Entfernen erst im Build ließe Visual Studio
+       über einen nicht auflösbaren Referenzpfad klagen. -->
+  <ItemGroup>
+    <Reference Remove="@(Reference->WithMetadataValue('Filename', 'Microsoft.Web.WebView2.Wpf'))" />
   </ItemGroup>
 
 </Project>

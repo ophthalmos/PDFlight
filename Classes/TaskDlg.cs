@@ -198,7 +198,7 @@ internal static class TaskDlg
         (string Key, string Text)[] rows =
         [
             ("Strg+O", "PDF-Datei öffnen"),
-            ("Alt+← / Alt+→", "vorherige / nächste Datei des Ordners"),
+            ("Strg+Umschalt+← / →", "vorherige / nächste Datei des Ordners"),
             ("Bild ↑ / Bild ↓", "im Dokument blättern"),
             ("Strg+M", "verschieben (Strg+Klick: erster Zielordner)"),
             ("Strg+K", "kopieren"),
