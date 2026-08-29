@@ -204,7 +204,7 @@ Sin ella, el archivo ya no podrá mostrarse.</value></data>
   <data name="Die Datei ist bereits verschlüsselt." xml:space="preserve"><value>El archivo ya está cifrado.</value></data>
   <data name="Vergeben des Kennworts" xml:space="preserve"><value>Establecer la contraseña</value></data>
   <data name="Die Datei ist jetzt mit AES-256 verschlüsselt." xml:space="preserve"><value>El archivo ahora está cifrado con AES-256.</value></data>
-  <data name="Kennwort erforderlich" xml:space="preserve"><value>Se requiere contraseña</value></data>
+  <data name="Benutzer-Kennwort entfernen" xml:space="preserve"><value>Quitar la contraseña de usuario</value></data>
   <data name="&amp;Kennwort:" xml:space="preserve"><value>&amp;Contraseña:</value></data>
   <data name="Die Datei ist nicht verschlüsselt." xml:space="preserve"><value>El archivo no está cifrado.</value></data>
   <data name="Das Kennwort ist falsch." xml:space="preserve"><value>La contraseña es incorrecta.</value></data>
