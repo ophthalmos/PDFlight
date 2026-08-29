@@ -205,7 +205,7 @@ Without it, the file can no longer be displayed.</value></data>
   <data name="Die Datei ist bereits verschlüsselt." xml:space="preserve"><value>The file is already encrypted.</value></data>
   <data name="Vergeben des Kennworts" xml:space="preserve"><value>Setting the password</value></data>
   <data name="Die Datei ist jetzt mit AES-256 verschlüsselt." xml:space="preserve"><value>The file is now encrypted with AES-256.</value></data>
-  <data name="Kennwort erforderlich" xml:space="preserve"><value>Password required</value></data>
+  <data name="Benutzer-Kennwort entfernen" xml:space="preserve"><value>Remove user password</value></data>
   <data name="&amp;Kennwort:" xml:space="preserve"><value>&amp;Password:</value></data>
   <data name="Die Datei ist nicht verschlüsselt." xml:space="preserve"><value>The file is not encrypted.</value></data>
   <data name="Das Kennwort ist falsch." xml:space="preserve"><value>The password is incorrect.</value></data>
