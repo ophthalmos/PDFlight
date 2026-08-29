@@ -224,21 +224,27 @@ internal partial class PdfViewHost(WebView2 webView)
         return task.Wait(TimeSpan.FromMilliseconds(1500)) ? task.Result : 0; // lieber ohne Vorbelegung als eingefroren
     }
 
+    /// <summary>Das Seitenzahl-Feld der Viewer-Toolbar; null, wenn es (noch) nicht im Baum steht.</summary>
+    private static System.Windows.Automation.AutomationElement FindPageNumberEdit(IntPtr chromiumHandle)
+    {
+        var root = System.Windows.Automation.AutomationElement.FromHandle(chromiumHandle);
+        // FindFirst bricht beim ersten Treffer ab; die Toolbar steht im Baum vor dem Dokumentinhalt
+        var edit = root.FindFirst(System.Windows.Automation.TreeScope.Descendants, new System.Windows.Automation.AndCondition(
+            new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.Edit),
+            new System.Windows.Automation.OrCondition( // Feldname je nach Viewer-Sprache (de/en/fr/es)
+                new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.NameProperty, "Seitenzahl"),
+                new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.NameProperty, "Page number"),
+                new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.NameProperty, "Numéro de page"),
+                new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.NameProperty, "Número de página"))));
+        return edit ?? root.FindFirst(System.Windows.Automation.TreeScope.Descendants, // zur Sicherheit, falls das Feld einmal anders heißt
+            new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.Edit));
+    }
+
     private static int ReadPageNumber(IntPtr chromiumHandle)
     {
         try
         {
-            var root = System.Windows.Automation.AutomationElement.FromHandle(chromiumHandle);
-            // FindFirst bricht beim ersten Treffer ab; die Toolbar steht im Baum vor dem Dokumentinhalt
-            var edit = root.FindFirst(System.Windows.Automation.TreeScope.Descendants, new System.Windows.Automation.AndCondition(
-                new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.Edit),
-                new System.Windows.Automation.OrCondition( // Feldname je nach Viewer-Sprache (de/en/fr/es)
-                    new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.NameProperty, "Seitenzahl"),
-                    new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.NameProperty, "Page number"),
-                    new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.NameProperty, "Numéro de page"),
-                    new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.NameProperty, "Número de página"))));
-            edit ??= root.FindFirst(System.Windows.Automation.TreeScope.Descendants, // zur Sicherheit, falls das Feld einmal anders heißt
-                new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.Edit));
+            var edit = FindPageNumberEdit(chromiumHandle);
             if (edit != null && edit.TryGetCurrentPattern(System.Windows.Automation.ValuePattern.Pattern, out var pattern)
                 && int.TryParse(((System.Windows.Automation.ValuePattern)pattern).Current.Value, out var page) && page >= 1)
             {
@@ -247,6 +253,32 @@ internal partial class PdfViewHost(WebView2 webView)
         }
         catch (Exception ex) when (ex is System.Windows.Automation.ElementNotAvailableException or System.Runtime.InteropServices.COMException or InvalidOperationException) { }
         return 0;
+    }
+
+    /// <summary>„Gehe zu Seite": setzt den Eingabefokus in das Seitenzahl-Feld der Viewer-Toolbar —
+    /// Zahl eintippen und Enter springt (die native Sprungfunktion des Viewers).</summary>
+    public void FocusPageField()
+    {
+        if (!IsReady || currentBytes == null) { return; }
+        var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
+        if (chromium == IntPtr.Zero) { return; }
+        webView.Focus(); // Windows-Fokus zum Viewer, sonst landet die Eingabe woanders
+        _ = Task.Run(() =>
+        {
+            try
+            {
+                var edit = FindPageNumberEdit(chromium);
+                if (edit == null) { return; }
+                edit.SetFocus();
+                if (edit.TryGetCurrentPattern(System.Windows.Automation.TextPattern.Pattern, out var text))
+                {
+                    // vorhandene Seitenzahl markieren, damit die getippte Zahl sie ersetzt statt anzuhängen
+                    ((System.Windows.Automation.TextPattern)text).DocumentRange.Select();
+                }
+            }
+            catch (Exception ex) when (ex is System.Windows.Automation.ElementNotAvailableException
+                or System.Runtime.InteropServices.COMException or InvalidOperationException) { }
+        });
     }
 
     /// <summary>Stößt Chromiums Accessibility-Modus einmalig an (bleibt danach aktiv), damit die erste
