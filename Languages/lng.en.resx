@@ -45,4 +45,267 @@
   <data name="Programme (*.exe)|*.exe" xml:space="preserve"><value>Programs (*.exe)|*.exe</value></data>
   <data name="Programm hinzufügen" xml:space="preserve"><value>Add program</value></data>
   <data name="Abbrechen" xml:space="preserve"><value>Cancel</value></data>
+  <data name="&amp;Abbrechen" xml:space="preserve"><value>&amp;Cancel</value></data>
+  <data name="Jetzt neu starten?" xml:space="preserve"><value>Restart now?</value></data>
+
+  <!-- MainForm: Symbolleiste und Menüs -->
+  <data name="Öffnen" xml:space="preserve"><value>Open</value></data>
+  <data name="Verschieben" xml:space="preserve"><value>Move</value></data>
+  <data name="Kopieren" xml:space="preserve"><value>Copy</value></data>
+  <data name="Umbenennen" xml:space="preserve"><value>Rename</value></data>
+  <data name="Löschen" xml:space="preserve"><value>Delete</value></data>
+  <data name="Ordner öffnen" xml:space="preserve"><value>Open folder</value></data>
+  <data name="Bearbeiten" xml:space="preserve"><value>Edit</value></data>
+  <data name="Seiten löschen …" xml:space="preserve"><value>Delete pages…</value></data>
+  <data name="Seiten drehen …" xml:space="preserve"><value>Rotate pages…</value></data>
+  <data name="PDF-Datei anhängen …" xml:space="preserve"><value>Append PDF file…</value></data>
+  <data name="Seiten extrahieren …" xml:space="preserve"><value>Extract pages…</value></data>
+  <data name="Änderung rückgängig" xml:space="preserve"><value>Undo change</value></data>
+  <data name="Eigenschaften …" xml:space="preserve"><value>Properties…</value></data>
+  <data name="Eigenschaften" xml:space="preserve"><value>Properties</value></data>
+  <data name="Öffnen mit …" xml:space="preserve"><value>Open with…</value></data>
+  <data name="Programme verwalten …" xml:space="preserve"><value>Manage programs…</value></data>
+  <data name="(keine Programme gefunden)" xml:space="preserve"><value>(no programs found)</value></data>
+  <data name="(keine zuletzt geöffneten Dateien)" xml:space="preserve"><value>(no recently opened files)</value></data>
+  <data name="Liste leeren" xml:space="preserve"><value>Clear list</value></data>
+  <data name="(Zielliste ist leer)" xml:space="preserve"><value>(target list is empty)</value></data>
+  <data name="Zielliste bearbeiten …" xml:space="preserve"><value>Edit target list…</value></data>
+  <data name="Keine Datei geöffnet" xml:space="preserve"><value>No file open</value></data>
+  <data name="Seite" xml:space="preserve"><value>page</value></data>
+  <data name="Seiten" xml:space="preserve"><value>pages</value></data>
+
+  <!-- MainForm: Tooltips und Kürzel-Anzeigen -->
+  <data name="Vorherige PDF-Datei im Ordner (Strg+Umschalt+←)" xml:space="preserve"><value>Previous PDF file in the folder (Ctrl+Shift+←)</value></data>
+  <data name="Nächste PDF-Datei im Ordner (Strg+Umschalt+→)" xml:space="preserve"><value>Next PDF file in the folder (Ctrl+Shift+→)</value></data>
+  <data name="In einen Ordner kopieren (Strg+K)" xml:space="preserve"><value>Copy to a folder (Ctrl+K)</value></data>
+  <data name="Datei umbenennen (F2)" xml:space="preserve"><value>Rename file (F2)</value></data>
+  <data name="In den Papierkorb verschieben (Strg+Umschalt+Entf)" xml:space="preserve"><value>Move to the Recycle Bin (Ctrl+Shift+Del)</value></data>
+  <data name="Datei im Dateimanager anzeigen" xml:space="preserve"><value>Show file in file manager</value></data>
+  <data name="Neue E-Mail mit dieser Datei als Anhang (Strg+E)" xml:space="preserve"><value>New e-mail with this file attached (Ctrl+E)</value></data>
+  <data name="Datei in einem anderen Programm öffnen (Strg+1 … Strg+9)" xml:space="preserve"><value>Open file in another program (Ctrl+1 … Ctrl+9)</value></data>
+  <data name="Zielordner, Programme und Optionen verwalten" xml:space="preserve"><value>Manage target folders, programs and options</value></data>
+  <data name="Über PDFlight und Spenden (F1)" xml:space="preserve"><value>About PDFlight and donations (F1)</value></data>
+  <data name="Seitenzahl, Dateigröße und Änderungsdatum der angezeigten Datei" xml:space="preserve"><value>Page count, file size and modification date of the displayed file</value></data>
+  <data name="Tooltip.Open" xml:space="preserve"><value>Open PDF file (Ctrl+O)
+Arrow: recently opened files</value></data>
+  <data name="Tooltip.Move" xml:space="preserve"><value>Move to a folder (Ctrl+M)
+Ctrl+click: directly to the first target folder
+Arrow: target list</value></data>
+  <data name="Tooltip.Edit" xml:space="preserve"><value>Edit document: delete/rotate pages, append PDF,
+extract pages, properties (shortcuts in the menu)</value></data>
+  <data name="Tooltip.StatusIndex" xml:space="preserve"><value>Position of the displayed file among the folder's PDF files
+(browse with Ctrl+Shift+← / →)</value></data>
+  <data name="Strg+" xml:space="preserve"><value>Ctrl+</value></data>
+  <data name="Strg+O" xml:space="preserve"><value>Ctrl+O</value></data>
+  <data name="Strg+M" xml:space="preserve"><value>Ctrl+M</value></data>
+  <data name="Strg+K" xml:space="preserve"><value>Ctrl+K</value></data>
+  <data name="Strg+E" xml:space="preserve"><value>Ctrl+E</value></data>
+  <data name="Strg+F" xml:space="preserve"><value>Ctrl+F</value></data>
+  <data name="Strg+P" xml:space="preserve"><value>Ctrl+P</value></data>
+  <data name="Strg+R" xml:space="preserve"><value>Ctrl+R</value></data>
+  <data name="Strg+Z" xml:space="preserve"><value>Ctrl+Z</value></data>
+  <data name="Strg+I" xml:space="preserve"><value>Ctrl+I</value></data>
+  <data name="Strg+X" xml:space="preserve"><value>Ctrl+X</value></data>
+  <data name="Strg+Entf" xml:space="preserve"><value>Ctrl+Del</value></data>
+  <data name="Strg+Umschalt+Entf" xml:space="preserve"><value>Ctrl+Shift+Del</value></data>
+  <data name="Strg+Umschalt+← / →" xml:space="preserve"><value>Ctrl+Shift+← / →</value></data>
+  <data name="Strg+1 … 9" xml:space="preserve"><value>Ctrl+1 … 9</value></data>
+  <data name="Bild ↑ / Bild ↓" xml:space="preserve"><value>PgUp / PgDn</value></data>
+  <data name="2× Esc / Umschalt+Esc" xml:space="preserve"><value>2× Esc / Shift+Esc</value></data>
+  <data name="Strg+Eingabe" xml:space="preserve"><value>Ctrl+Enter</value></data>
+  <data name="Eingabe" xml:space="preserve"><value>Enter</value></data>
+  <data name="Entf" xml:space="preserve"><value>Del</value></data>
+
+  <!-- MainForm: Meldungen und Dialoge -->
+  <data name="Die WebView2-Runtime ist nicht installiert." xml:space="preserve"><value>The WebView2 runtime is not installed.</value></data>
+  <data name="Bitte installieren Sie sie über:" xml:space="preserve"><value>Please install it from:</value></data>
+  <data name="Die PDF-Anzeige (WebView2) konnte nicht gestartet werden." xml:space="preserve"><value>The PDF display (WebView2) could not be started.</value></data>
+  <data name="Die Datei konnte nicht geladen werden." xml:space="preserve"><value>The file could not be loaded.</value></data>
+  <data name="PDF-Dateien (*.pdf)|*.pdf" xml:space="preserve"><value>PDF files (*.pdf)|*.pdf</value></data>
+  <data name="PDF-Datei öffnen" xml:space="preserve"><value>Open PDF file</value></data>
+  <data name="Vorheriger Ordner:" xml:space="preserve"><value>Previous folder:</value></data>
+  <data name="Aktueller Ordner:" xml:space="preserve"><value>Current folder:</value></data>
+  <data name="Sie möchten die {0} Datei öffnen." xml:space="preserve"><value>You want to open the {0} file.</value></data>
+  <data name="nächste" xml:space="preserve"><value>next</value></data>
+  <data name="vorherige" xml:space="preserve"><value>previous</value></data>
+  <data name="Welcher Ordner soll durchsucht werden?" xml:space="preserve"><value>Which folder should be searched?</value></data>
+  <data name="Wenn Sie abbrechen, wird der aktuelle Ordner verwendet." xml:space="preserve"><value>If you cancel, the current folder is used.</value></data>
+  <data name="Der Ordner enthält keine PDF-Dateien." xml:space="preserve"><value>The folder contains no PDF files.</value></data>
+  <data name="Der Ordner enthält keine weiteren PDF-Dateien." xml:space="preserve"><value>The folder contains no further PDF files.</value></data>
+  <data name="Der Zielordner existiert nicht." xml:space="preserve"><value>The target folder does not exist.</value></data>
+  <data name="Die Datei befindet sich bereits in diesem Ordner." xml:space="preserve"><value>The file is already in this folder.</value></data>
+  <data name="Kopiert nach:" xml:space="preserve"><value>Copied to:</value></data>
+  <data name="Kopieren fehlgeschlagen." xml:space="preserve"><value>Copying failed.</value></data>
+  <data name="Verschieben fehlgeschlagen." xml:space="preserve"><value>Moving failed.</value></data>
+  <data name="&amp;Ersetzen" xml:space="preserve"><value>&amp;Replace</value></data>
+  <data name="Die vorhandene Datei ersetzen" xml:space="preserve"><value>Replace the existing file</value></data>
+  <data name="&amp;Umbenennen" xml:space="preserve"><value>Re&amp;name</value></data>
+  <data name="Eine neue Datei erstellen:" xml:space="preserve"><value>Create a new file:</value></data>
+  <data name="Im Ziel ist bereits eine Datei mit diesem Namen vorhanden." xml:space="preserve"><value>The destination already contains a file with this name.</value></data>
+  <data name="Dateikopie:" xml:space="preserve"><value>File copy:</value></data>
+  <data name="Originaldatei:" xml:space="preserve"><value>Original file:</value></data>
+  <data name="Welche Datei soll geöffnet werden?" xml:space="preserve"><value>Which file should be opened?</value></data>
+  <data name="Vorhandene Datei öffnen" xml:space="preserve"><value>Open existing file</value></data>
+  <data name="Aktuelle Datei löschen" xml:space="preserve"><value>Delete current file</value></data>
+  <data name="Folgende Datei scheint identisch zu sein." xml:space="preserve"><value>The following file appears to be identical.</value></data>
+  <data name="Löschen fehlgeschlagen." xml:space="preserve"><value>Deleting failed.</value></data>
+  <data name="Umbenennen fehlgeschlagen." xml:space="preserve"><value>Renaming failed.</value></data>
+  <data name="In den Papierkorb verschieben?" xml:space="preserve"><value>Move to the Recycle Bin?</value></data>
+  <data name="Immer fragen" xml:space="preserve"><value>Always ask</value></data>
+  <data name="E-Mail wird erstellt (MAPI) …" xml:space="preserve"><value>Creating e-mail (MAPI)…</value></data>
+  <data name="Die E-Mail konnte nicht erstellt werden." xml:space="preserve"><value>The e-mail could not be created.</value></data>
+  <data name="{0} fehlgeschlagen." xml:space="preserve"><value>{0} failed.</value></data>
+  <data name="Die Datei kann nicht bearbeitet werden." xml:space="preserve"><value>The file cannot be edited.</value></data>
+  <data name="Möglicherweise ist sie verschlüsselt oder beschädigt." xml:space="preserve"><value>It may be encrypted or damaged.</value></data>
+  <data name="Die Datei hat nur eine Seite." xml:space="preserve"><value>The file has only one page.</value></data>
+  <data name="Zum Löschen der ganzen Datei benutzen Sie den Papierkorb (Strg+Umschalt+Entf)." xml:space="preserve"><value>To delete the whole file, use the Recycle Bin (Ctrl+Shift+Del).</value></data>
+  <data name="Seiten löschen" xml:space="preserve"><value>Delete pages</value></data>
+  <data name="Mindestens eine Seite muss erhalten bleiben." xml:space="preserve"><value>At least one page must remain.</value></data>
+  <data name="Seite {0} wurde gelöscht." xml:space="preserve"><value>Page {0} was deleted.</value></data>
+  <data name="{0} Seiten wurden gelöscht." xml:space="preserve"><value>{0} pages were deleted.</value></data>
+  <data name="Seiten drehen" xml:space="preserve"><value>Rotate pages</value></data>
+  <data name="Alle Seiten wurden gedreht." xml:space="preserve"><value>All pages were rotated.</value></data>
+  <data name="Seite {0} wurde gedreht." xml:space="preserve"><value>Page {0} was rotated.</value></data>
+  <data name="{0} Seiten wurden gedreht." xml:space="preserve"><value>{0} pages were rotated.</value></data>
+  <data name="PDF-Datei anhängen" xml:space="preserve"><value>Append PDF file</value></data>
+  <data name="Die Datei kann nicht an sich selbst angehängt werden." xml:space="preserve"><value>The file cannot be appended to itself.</value></data>
+  <data name="Anhängen" xml:space="preserve"><value>Appending</value></data>
+  <data name="&quot;{0}&quot; wurde angehängt." xml:space="preserve"><value>"{0}" was appended.</value></data>
+  <data name="Seiten extrahieren" xml:space="preserve"><value>Extract pages</value></data>
+  <data name="Auszug speichern" xml:space="preserve"><value>Save excerpt</value></data>
+  <data name="{0} – Auszug.pdf" xml:space="preserve"><value>{0} – excerpt.pdf</value></data>
+  <data name="Der Auszug kann die geöffnete Datei nicht überschreiben." xml:space="preserve"><value>The excerpt cannot overwrite the open file.</value></data>
+  <data name="Auszug gespeichert:" xml:space="preserve"><value>Excerpt saved:</value></data>
+  <data name="Extrahieren fehlgeschlagen." xml:space="preserve"><value>Extracting failed.</value></data>
+  <data name="Speichern der Eigenschaften" xml:space="preserve"><value>Saving the properties</value></data>
+  <data name="Die Dokumenteigenschaften wurden gespeichert." xml:space="preserve"><value>The document properties were saved.</value></data>
+  <data name="Rückgängig fehlgeschlagen." xml:space="preserve"><value>Undo failed.</value></data>
+  <data name="Die letzte Änderung wurde rückgängig gemacht." xml:space="preserve"><value>The last change was undone.</value></data>
+  <data name="Das Programm konnte nicht gestartet werden." xml:space="preserve"><value>The program could not be started.</value></data>
+
+  <!-- Über-Dialog und Updatesuche -->
+  <data name="unbekannt" xml:space="preserve"><value>unknown</value></data>
+  <data name="nicht gefunden" xml:space="preserve"><value>not found</value></data>
+  <data name="Über" xml:space="preserve"><value>About</value></data>
+  <data name="About.Text" xml:space="preserve"><value>PDFlight is a viewer with integrated file operations
+(move, copy, delete, rename, mail).
+Frequently used target folders are kept in a list, so
+files can be moved in a flash without leaving the
+program. In addition, pages can be removed from the
+PDF or extracted to a new file, and another PDF file
+can be appended.</value></data>
+  <data name="Anerkennung spenden via PayPal" xml:space="preserve"><value>Donate appreciation via PayPal</value></data>
+  <data name="Jetzt nach einem Update suchen" xml:space="preserve"><value>Check for an update now</value></data>
+  <data name="Tastenkürzel anzeigen" xml:space="preserve"><value>Show keyboard shortcuts</value></data>
+  <data name="Tastenkürzel ausblenden" xml:space="preserve"><value>Hide keyboard shortcuts</value></data>
+  <data name="Tastenkürzel" xml:space="preserve"><value>Keyboard shortcuts</value></data>
+  <data name="PDFlightSetup.exe herunterladen" xml:space="preserve"><value>Download PDFlightSetup.exe</value></data>
+  <data name="Download.Detail" xml:space="preserve"><value>PDFlightSetup.exe is saved to your Downloads
+folder. Run the setup program to install
+the latest version.</value></data>
+  <data name="{0} ist auf dem neuesten Stand." xml:space="preserve"><value>{0} is up to date.</value></data>
+  <data name="Die Update-Suche ist fehlgeschlagen." xml:space="preserve"><value>The update check failed.</value></data>
+  <data name="Die Update-Informationen wurden nicht gefunden." xml:space="preserve"><value>The update information was not found.</value></data>
+  <data name="Zeitüberschreitung — bitte prüfen Sie die Internetverbindung." xml:space="preserve"><value>Timeout — please check your internet connection.</value></data>
+  <data name="Die Versionsangabe in der Update-Datei konnte nicht gelesen werden." xml:space="preserve"><value>The version in the update file could not be read.</value></data>
+  <data name="Es steht ein Update zur Verfügung!" xml:space="preserve"><value>An update is available!</value></data>
+  <data name="vom" xml:space="preserve"><value>dated</value></data>
+  <data name="Technische Details anzeigen" xml:space="preserve"><value>Show technical details</value></data>
+  <data name="Details ausblenden" xml:space="preserve"><value>Hide details</value></data>
+  <data name="Ungültiger Link!" xml:space="preserve"><value>Invalid link!</value></data>
+  <data name="'{0}' ist keine gültige URL." xml:space="preserve"><value>'{0}' is not a valid URL.</value></data>
+  <data name="Der Link konnte nicht geöffnet werden." xml:space="preserve"><value>The link could not be opened.</value></data>
+  <data name="vorherige / nächste Datei des Ordners" xml:space="preserve"><value>previous / next file of the folder</value></data>
+  <data name="im Dokument blättern" xml:space="preserve"><value>scroll through the document</value></data>
+  <data name="verschieben (Strg+Klick: erster Zielordner)" xml:space="preserve"><value>move (Ctrl+click: first target folder)</value></data>
+  <data name="Datei kopieren" xml:space="preserve"><value>copy file</value></data>
+  <data name="Datei umbenennen" xml:space="preserve"><value>rename file</value></data>
+  <data name="Datei in den Papierkorb" xml:space="preserve"><value>file to the Recycle Bin</value></data>
+  <data name="Seiten als neue Datei extrahieren" xml:space="preserve"><value>extract pages to a new file</value></data>
+  <data name="Dokumentänderung rückgängig" xml:space="preserve"><value>undo document change</value></data>
+  <data name="Dokumenteigenschaften" xml:space="preserve"><value>Document properties</value></data>
+  <data name="Windows-Dateieigenschaften" xml:space="preserve"><value>Windows file properties</value></data>
+  <data name="als E-Mail-Anhang senden" xml:space="preserve"><value>send as e-mail attachment</value></data>
+  <data name="in externem Programm öffnen" xml:space="preserve"><value>open in external program</value></data>
+  <data name="im Dokument suchen" xml:space="preserve"><value>search in the document</value></data>
+  <data name="drucken" xml:space="preserve"><value>print</value></data>
+  <data name="Vollbild ein/aus" xml:space="preserve"><value>full screen on/off</value></data>
+  <data name="Programm beenden (Option)" xml:space="preserve"><value>close program (option)</value></data>
+  <data name="dieser Dialog" xml:space="preserve"><value>this dialog</value></data>
+
+  <!-- Umbenennen-Dialog -->
+  <data name="&amp;Neuer Dateiname:" xml:space="preserve"><value>&amp;New file name:</value></data>
+  <data name="&amp;Umwandeln  ▾" xml:space="preserve"><value>&amp;Transform  ▾</value></data>
+  <data name="&amp;Datum  ▾" xml:space="preserve"><value>&amp;Date  ▾</value></data>
+  <data name="Leerzeichen → Unterstriche" xml:space="preserve"><value>Spaces → underscores</value></data>
+  <data name="Leerzeichen → Bindestriche" xml:space="preserve"><value>Spaces → hyphens</value></data>
+  <data name="alles kleinschreiben" xml:space="preserve"><value>all lowercase</value></data>
+  <data name="Wortanfänge großschreiben" xml:space="preserve"><value>Capitalize Each Word</value></data>
+  <data name="Umlaute &amp;&amp; Akzente ersetzen" xml:space="preserve"><value>Replace umlauts &amp;&amp; accents</value></data>
+  <data name="PDF-Dateien im Ordner:" xml:space="preserve"><value>PDF files in the folder:</value></data>
+  <data name="Alphabetisch sortieren (F5)" xml:space="preserve"><value>Sort alphabetically (F5)</value></data>
+  <data name="Datum" xml:space="preserve"><value>Date</value></data>
+  <data name="Nach Änderungsdatum sortieren (F6)" xml:space="preserve"><value>Sort by modification date (F6)</value></data>
+  <data name="Änderungsdatum (neu → alt)" xml:space="preserve"><value>Modification date (new → old)</value></data>
+  <data name="Änderungsdatum (alt → neu)" xml:space="preserve"><value>Modification date (old → new)</value></data>
+  <data name="Namen übernehmen" xml:space="preserve"><value>Apply name</value></data>
+  <data name="In neuem Fenster öffnen" xml:space="preserve"><value>Open in new window</value></data>
+  <data name="In den Papierkorb" xml:space="preserve"><value>To the Recycle Bin</value></data>
+  <data name="Doppelklick oder Eingabe übernimmt einen Namen aus der Liste." xml:space="preserve"><value>Double-click or Enter applies a name from the list.</value></data>
+  <data name="Der Name enthält ungültige Zeichen." xml:space="preserve"><value>The name contains invalid characters.</value></data>
+  <data name="Diese werden entfernt …" xml:space="preserve"><value>They will be removed…</value></data>
+  <data name="Vorhandene Datei ersetzen?" xml:space="preserve"><value>Replace existing file?</value></data>
+  <data name="Eine Datei gleichen Namens ist bereits vorhanden. Sie wird in den Papierkorb verschoben." xml:space="preserve"><value>A file with the same name already exists. It will be moved to the Recycle Bin.</value></data>
+  <data name="Die vorhandene Datei konnte nicht ersetzt werden." xml:space="preserve"><value>The existing file could not be replaced.</value></data>
+  <data name="PDFlight konnte nicht gestartet werden." xml:space="preserve"><value>PDFlight could not be started.</value></data>
+  <data name="Zielordner für die umbenannte Datei" xml:space="preserve"><value>Target folder for the renamed file</value></data>
+  <data name="Der Ordner konnte nicht geöffnet werden." xml:space="preserve"><value>The folder could not be opened.</value></data>
+  <data name="Der angegebene Pfad existiert nicht." xml:space="preserve"><value>The specified path does not exist.</value></data>
+
+  <!-- Ordnerdialog -->
+  <data name="&amp;Zielliste:" xml:space="preserve"><value>&amp;Target list:</value></data>
+  <data name="Zuletzt:" xml:space="preserve"><value>Recent:</value></data>
+  <data name="KOPIEREN: Wählen Sie einen Ordner ..." xml:space="preserve"><value>COPY: Select a folder ...</value></data>
+  <data name="VERSCHIEBEN: Wählen Sie einen Ordner ..." xml:space="preserve"><value>MOVE: Select a folder ...</value></data>
+  <data name="Neuer Ordner (Strg+N)" xml:space="preserve"><value>New folder (Ctrl+N)</value></data>
+  <data name="Neuer Ordner" xml:space="preserve"><value>New folder</value></data>
+  <data name="Der Ordner konnte nicht erstellt werden." xml:space="preserve"><value>The folder could not be created.</value></data>
+  <data name="Der Ordner konnte nicht umbenannt werden." xml:space="preserve"><value>The folder could not be renamed.</value></data>
+  <data name="Strg+Links" xml:space="preserve"><value>Ctrl+Left</value></data>
+  <data name="Strg+Rechts" xml:space="preserve"><value>Ctrl+Right</value></data>
+  <data name="Strg+Unten" xml:space="preserve"><value>Ctrl+Down</value></data>
+  <data name="Strg+Oben" xml:space="preserve"><value>Ctrl+Up</value></data>
+  <data name="Strg+H" xml:space="preserve"><value>Ctrl+H</value></data>
+  <data name="Strg+L" xml:space="preserve"><value>Ctrl+L</value></data>
+  <data name="Strg+N" xml:space="preserve"><value>Ctrl+N</value></data>
+  <data name="Einen Schritt zurück im Verlauf." xml:space="preserve"><value>One step back in history.</value></data>
+  <data name="Einen Schritt vor im Verlauf." xml:space="preserve"><value>One step forward in history.</value></data>
+  <data name="Verlaufsliste anzeigen." xml:space="preserve"><value>Show history list.</value></data>
+  <data name="In den übergeordneten Ordner wechseln." xml:space="preserve"><value>Go to the parent folder.</value></data>
+  <data name="Versteckte Ordner ein-/ausblenden." xml:space="preserve"><value>Show or hide hidden folders.</value></data>
+  <data name="Zum zuletzt verwendeten Ordner springen." xml:space="preserve"><value>Jump to the most recently used folder.</value></data>
+  <data name="Neuen Ordner anlegen." xml:space="preserve"><value>Create a new folder.</value></data>
+  <data name="Auswahl übernehmen." xml:space="preserve"><value>Apply selection.</value></data>
+
+  <!-- Seitenbereich-Dialog -->
+  <data name="&amp;Seiten (1–{0}):" xml:space="preserve"><value>&amp;Pages (1–{0}):</value></data>
+  <data name="z.B.  3   oder   2-5, 8" xml:space="preserve"><value>e.g.  3   or   2-5, 8</value></data>
+  <data name="leer = alle Seiten" xml:space="preserve"><value>empty = all pages</value></data>
+  <data name="Drehung" xml:space="preserve"><value>Rotation</value></data>
+  <data name="90° &amp;rechts" xml:space="preserve"><value>90° &amp;right</value></data>
+  <data name="90° &amp;links" xml:space="preserve"><value>90° &amp;left</value></data>
+  <data name="Ungültige Seitenangabe" xml:space="preserve"><value>Invalid page specification</value></data>
+  <data name="Bitte geben Sie gültige Seiten zwischen 1 und {0} an," xml:space="preserve"><value>Please enter valid pages between 1 and {0},</value></data>
+  <data name="z.B.  3  oder  2-5, 8" xml:space="preserve"><value>e.g.  3  or  2-5, 8</value></data>
+
+  <!-- Dokumenteigenschaften-Dialog -->
+  <data name="Datei:" xml:space="preserve"><value>File:</value></data>
+  <data name="&amp;Titel:" xml:space="preserve"><value>&amp;Title:</value></data>
+  <data name="&amp;Autor:" xml:space="preserve"><value>&amp;Author:</value></data>
+  <data name="&amp;Betreff:" xml:space="preserve"><value>Su&amp;bject:</value></data>
+  <data name="&amp;Stichwörter:" xml:space="preserve"><value>&amp;Keywords:</value></data>
+  <data name="Speichern" xml:space="preserve"><value>Save</value></data>
+  <data name="geändert" xml:space="preserve"><value>modified</value></data>
+  <data name="Anwendung:" xml:space="preserve"><value>Application:</value></data>
+  <data name="PDF-Produzent:" xml:space="preserve"><value>PDF producer:</value></data>
 </root>

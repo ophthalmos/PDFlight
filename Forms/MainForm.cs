@@ -28,6 +28,11 @@ public partial class MainForm : Form
         settings = AppSettings.Load();
         Lng.Initialize(settings.Language); // vor PdfViewHost (Viewer-Sprache) und vor allen Dialogen
         Lng.Apply(this);
+        // Mehrzeilige Tooltips brauchen explizite Schlüssel (Zeilenumbrüche taugen nicht als resx-Schlüssel)
+        btnOpen.ToolTipText = Lng.T("Tooltip.Open", btnOpen.ToolTipText);
+        splitButtonMove.ToolTipText = Lng.T("Tooltip.Move", splitButtonMove.ToolTipText);
+        ddbEdit.ToolTipText = Lng.T("Tooltip.Edit", ddbEdit.ToolTipText);
+        statusIndex.ToolTipText = Lng.T("Tooltip.StatusIndex", statusIndex.ToolTipText);
         viewHost = new PdfViewHost(webView);
         RestoreWindowBounds();
     }
@@ -37,14 +42,14 @@ public partial class MainForm : Form
         try { await viewHost.InitializeAsync(); }
         catch (WebView2RuntimeNotFoundException)
         {
-            TaskDlg.MsgTaskDlg(Handle, "Die WebView2-Runtime ist nicht installiert.", "Bitte installieren Sie sie über:" + Environment.NewLine + "https://developer.microsoft.com/microsoft-edge/webview2/", TaskDialogIcon.Error);
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die WebView2-Runtime ist nicht installiert."), Lng.T("Bitte installieren Sie sie über:") + Environment.NewLine + "https://developer.microsoft.com/microsoft-edge/webview2/", TaskDialogIcon.Error);
             Close();
             return;
         }
         catch (Exception ex) when (ex is DllNotFoundException or InvalidOperationException or System.Runtime.InteropServices.COMException or IOException or UnauthorizedAccessException)
         {
             // z.B. beschädigte Installation oder gesperrter Datenordner — sauberer Dialog statt WinForms-Absturzfenster
-            TaskDlg.ErrTaskDlg(Handle, "Die PDF-Anzeige (WebView2) konnte nicht gestartet werden.", ex);
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Die PDF-Anzeige (WebView2) konnte nicht gestartet werden."), ex);
             Close();
             return;
         }
@@ -182,7 +187,7 @@ public partial class MainForm : Form
         try { viewHost.Load(path, page); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            TaskDlg.ErrTaskDlg(Handle, "Die Datei konnte nicht geladen werden.", ex);
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Die Datei konnte nicht geladen werden."), ex);
             return;
         }
         currentFile = new FileInfo(path);
@@ -209,14 +214,14 @@ public partial class MainForm : Form
             var index = files.FindIndex(f => string.Equals(f, currentFile.FullName, StringComparison.OrdinalIgnoreCase));
             statusIndex.Text = (index >= 0 ? (index + 1).ToString() : "–") + "/" + files.Count;
             statusPath.Text = currentFile.FullName;
-            var pages = currentPageCount > 0 ? currentPageCount + (currentPageCount == 1 ? " Seite   " : " Seiten   ") : string.Empty;
+            var pages = currentPageCount > 0 ? currentPageCount + " " + (currentPageCount == 1 ? Lng.T("Seite") : Lng.T("Seiten")) + "   " : string.Empty;
             statusInfo.Text = $"{pages}{currentFile.Length / 1024.0:N0} KB   {currentFile.LastWriteTime:g}";
             btnPrev.Enabled = btnNext.Enabled = files.Count > 1;
         }
         else
         {
             statusIndex.Text = "0/0";
-            statusPath.Text = "Keine Datei geöffnet";
+            statusPath.Text = Lng.T("Keine Datei geöffnet");
             statusInfo.Text = string.Empty;
             btnPrev.Enabled = btnNext.Enabled = false;
         }
@@ -224,7 +229,7 @@ public partial class MainForm : Form
 
     private void OpenFile()
     {
-        using OpenFileDialog dialog = new() { Filter = "PDF-Dateien (*.pdf)|*.pdf", Title = "PDF-Datei öffnen" };
+        using OpenFileDialog dialog = new() { Filter = Lng.T("PDF-Dateien (*.pdf)|*.pdf"), Title = Lng.T("PDF-Datei öffnen") };
         if (currentFile != null) { dialog.InitialDirectory = currentFile.DirectoryName; }
         if (dialog.ShowDialog(this) == DialogResult.OK) { LoadPdf(dialog.FileName, addToRecent: true); }
     }
@@ -247,12 +252,12 @@ public partial class MainForm : Form
         }
         if (btnOpen.DropDownItems.Count == 0)
         {
-            btnOpen.DropDownItems.Add(new ToolStripMenuItem("(keine zuletzt geöffneten Dateien)") { Enabled = false });
+            btnOpen.DropDownItems.Add(new ToolStripMenuItem(Lng.T("(keine zuletzt geöffneten Dateien)")) { Enabled = false });
         }
         else
         {
             btnOpen.DropDownItems.Add(new ToolStripSeparator());
-            ToolStripMenuItem clear = new("Liste leeren");
+            ToolStripMenuItem clear = new(Lng.T("Liste leeren"));
             clear.Click += (s, args) => { settings.RecentFiles.Clear(); settings.Save(); };
             btnOpen.DropDownItems.Add(clear);
         }
@@ -307,17 +312,17 @@ public partial class MainForm : Form
         // Nach einem Verschieben: im Zielordner weiterblättern oder zurück in den bisherigen Ordner? (wie in PDFMover)
         if (previousFolder != null && Directory.Exists(previousFolder) && !string.Equals(previousFolder, folder, StringComparison.OrdinalIgnoreCase))
         {
-            TaskDialogButton btnPrevious = new TaskDialogCommandLinkButton("Vorheriger Ordner:", previousFolder);
-            TaskDialogButton btnCurrent = new TaskDialogCommandLinkButton("Aktueller Ordner:", folder);
+            TaskDialogButton btnPrevious = new TaskDialogCommandLinkButton(Lng.T("Vorheriger Ordner:"), previousFolder);
+            TaskDialogButton btnCurrent = new TaskDialogCommandLinkButton(Lng.T("Aktueller Ordner:"), folder);
             TaskDialogPage page = new()
             {
                 Caption = Application.ProductName,
-                Heading = $"Sie möchten die {(step > 0 ? "nächste" : "vorherige")} Datei öffnen." + Environment.NewLine + "Welcher Ordner soll durchsucht werden?",
+                Heading = string.Format(Lng.T("Sie möchten die {0} Datei öffnen."), step > 0 ? Lng.T("nächste") : Lng.T("vorherige")) + Environment.NewLine + Lng.T("Welcher Ordner soll durchsucht werden?"),
                 AllowCancel = true,
                 SizeToContent = true,
                 Buttons = { btnPrevious, btnCurrent },
                 DefaultButton = btnPrevious,
-                Footnote = "Wenn Sie abbrechen, wird der aktuelle Ordner verwendet."
+                Footnote = Lng.T("Wenn Sie abbrechen, wird der aktuelle Ordner verwendet.")
             };
             var result = TaskDialog.ShowDialog(Handle, page);
             if (result == btnPrevious)
@@ -343,7 +348,7 @@ public partial class MainForm : Form
         {
             if (files.Count == 0)
             {
-                TaskDlg.MsgTaskDlg(Handle, "Der Ordner enthält keine PDF-Dateien.", folder, TaskDialogIcon.Information);
+                TaskDlg.MsgTaskDlg(Handle, Lng.T("Der Ordner enthält keine PDF-Dateien."), folder, TaskDialogIcon.Information);
                 return;
             }
             files.Add(reference);
@@ -363,7 +368,7 @@ public partial class MainForm : Form
             currentFile = null;
             viewHost.CloseDocument();
             UpdateUiState();
-            statusPath.Text = "Der Ordner enthält keine weiteren PDF-Dateien.";
+            statusPath.Text = Lng.T("Der Ordner enthält keine weiteren PDF-Dateien.");
         }
         else { LoadPdf(files[removedIndex % files.Count]); }
     }
@@ -404,12 +409,12 @@ public partial class MainForm : Form
         if (currentFile == null) { return; }
         if (!Directory.Exists(folder))
         {
-            TaskDlg.MsgTaskDlg(Handle, "Der Zielordner existiert nicht.", folder, TaskDialogIcon.Warning);
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Der Zielordner existiert nicht."), folder, TaskDialogIcon.Warning);
             return;
         }
         if (string.Equals(Path.TrimEndingDirectorySeparator(folder), currentFile.DirectoryName, StringComparison.OrdinalIgnoreCase))
         {
-            TaskDlg.MsgTaskDlg(Handle, "Die Datei befindet sich bereits in diesem Ordner.", null, TaskDialogIcon.Information);
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei befindet sich bereits in diesem Ordner."), null, TaskDialogIcon.Information);
             return;
         }
         var destination = Path.Combine(folder, currentFile.Name);
@@ -424,7 +429,7 @@ public partial class MainForm : Form
             if (copy)
             {
                 File.Copy(currentFile.FullName, destination, true);
-                statusPath.Text = "Kopiert nach: " + destination;
+                statusPath.Text = Lng.T("Kopiert nach:") + " " + destination;
                 AskWhichFileToShow(destination);
             }
             else
@@ -440,7 +445,7 @@ public partial class MainForm : Form
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            TaskDlg.ErrTaskDlg(Handle, (copy ? "Kopieren" : "Verschieben") + " fehlgeschlagen.", ex);
+            TaskDlg.ErrTaskDlg(Handle, copy ? Lng.T("Kopieren fehlgeschlagen.") : Lng.T("Verschieben fehlgeschlagen."), ex);
         }
     }
 
@@ -450,13 +455,13 @@ public partial class MainForm : Form
     {
         FileInfo destInfo = new(destination);
         var suggestion = FileUtil.SuggestAdditionalFileName(destInfo);
-        TaskDialogButton btnReplace = new TaskDialogCommandLinkButton("&Ersetzen",
-            $"Die vorhandene Datei ersetzen\nin {destInfo.DirectoryName}: {destInfo.Length / 1024} KB, {destInfo.LastWriteTime:d}");
-        TaskDialogButton btnRename = new TaskDialogCommandLinkButton("&Umbenennen", "Eine neue Datei erstellen:\n" + suggestion?.Name);
+        TaskDialogButton btnReplace = new TaskDialogCommandLinkButton(Lng.T("&Ersetzen"),
+            Lng.T("Die vorhandene Datei ersetzen") + $"\n{Lng.T("in")} {destInfo.DirectoryName}: {destInfo.Length / 1024} KB, {destInfo.LastWriteTime:d}");
+        TaskDialogButton btnRename = new TaskDialogCommandLinkButton(Lng.T("&Umbenennen"), Lng.T("Eine neue Datei erstellen:") + "\n" + suggestion?.Name);
         var page = new TaskDialogPage()
         {
             Caption = currentFile.DirectoryName,
-            Heading = "Im Ziel ist bereits eine Datei mit diesem Namen vorhanden.",
+            Heading = Lng.T("Im Ziel ist bereits eine Datei mit diesem Namen vorhanden."),
             Text = destInfo.Name,
             AllowCancel = true,
             SizeToContent = true,
@@ -473,12 +478,12 @@ public partial class MainForm : Form
     /// <summary>Nach dem Kopieren: Dateikopie oder Originaldatei weiter anzeigen? (Dialog wie in PDFMover)</summary>
     private void AskWhichFileToShow(string copiedFile)
     {
-        TaskDialogButton btnCopy = new TaskDialogCommandLinkButton("Dateikopie:", copiedFile);
-        TaskDialogButton btnSource = new TaskDialogCommandLinkButton("Originaldatei:", currentFile.FullName);
+        TaskDialogButton btnCopy = new TaskDialogCommandLinkButton(Lng.T("Dateikopie:"), copiedFile);
+        TaskDialogButton btnSource = new TaskDialogCommandLinkButton(Lng.T("Originaldatei:"), currentFile.FullName);
         var page = new TaskDialogPage()
         {
             Caption = Application.ProductName,
-            Heading = "Welche Datei soll geöffnet werden?",
+            Heading = Lng.T("Welche Datei soll geöffnet werden?"),
             AllowCancel = true,
             SizeToContent = true,
             Buttons = { btnCopy, btnSource, TaskDialogButton.Cancel },
@@ -495,13 +500,13 @@ public partial class MainForm : Form
     {
         var duplicate = FileUtil.FindDuplicateInFolder(movedFile, movedFile.DirectoryName);
         if (duplicate == null) { return; }
-        TaskDialogButton btnOpenExisting = new TaskDialogCommandLinkButton("Vorhandene Datei öffnen", duplicate.Name);
-        TaskDialogButton btnDeleteCurrent = new TaskDialogCommandLinkButton("Aktuelle Datei löschen", movedFile.Name);
+        TaskDialogButton btnOpenExisting = new TaskDialogCommandLinkButton(Lng.T("Vorhandene Datei öffnen"), duplicate.Name);
+        TaskDialogButton btnDeleteCurrent = new TaskDialogCommandLinkButton(Lng.T("Aktuelle Datei löschen"), movedFile.Name);
         var page = new TaskDialogPage()
         {
             Icon = TaskDialogIcon.Warning,
             Caption = movedFile.DirectoryName,
-            Heading = "Folgende Datei scheint identisch zu sein.",
+            Heading = Lng.T("Folgende Datei scheint identisch zu sein."),
             Text = $"{duplicate.Name} ({duplicate.Length / 1024} KB, {duplicate.LastWriteTime:d})",
             AllowCancel = true,
             SizeToContent = true,
@@ -518,7 +523,7 @@ public partial class MainForm : Form
                 LoadPdf(duplicate.FullName); // das Duplikat bleibt übrig und wird angezeigt
             }
             catch (OperationCanceledException) { }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { TaskDlg.ErrTaskDlg(Handle, "Löschen fehlgeschlagen.", ex); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { TaskDlg.ErrTaskDlg(Handle, Lng.T("Löschen fehlgeschlagen."), ex); }
         }
     }
 
@@ -545,10 +550,10 @@ public partial class MainForm : Form
         }
         if (splitButtonMove.DropDownItems.Count == 0)
         {
-            splitButtonMove.DropDownItems.Add(new ToolStripMenuItem("(Zielliste ist leer)") { Enabled = false });
+            splitButtonMove.DropDownItems.Add(new ToolStripMenuItem(Lng.T("(Zielliste ist leer)")) { Enabled = false });
         }
         splitButtonMove.DropDownItems.Add(new ToolStripSeparator());
-        ToolStripMenuItem editList = new("Zielliste bearbeiten …");
+        ToolStripMenuItem editList = new(Lng.T("Zielliste bearbeiten …"));
         editList.Click += (s, args) => OpenSettings(SettingsForm.TabTargets);
         splitButtonMove.DropDownItems.Add(editList);
     }
@@ -572,7 +577,10 @@ public partial class MainForm : Form
             settings.Language = dialog.Language;
             if (dialog.ClearRecentRequested) { settings.RecentFolders.Clear(); }
             settings.Save();
-            if (languageChanged) { TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Sprachänderung wird nach einem Neustart des Programms wirksam."), null, TaskDialogIcon.Information); }
+            if (languageChanged && TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Die Sprachänderung wird nach einem Neustart des Programms wirksam."), Lng.T("Jetzt neu starten?")))
+            {
+                Application.Restart(); // löst FormClosing aus, die Einstellungen sind also gespeichert
+            }
             RebuildProgramIconButtons();
             ApplyToolbarIcons();
         }
@@ -631,7 +639,7 @@ public partial class MainForm : Form
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            TaskDlg.ErrTaskDlg(Handle, "Umbenennen fehlgeschlagen.", ex);
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Umbenennen fehlgeschlagen."), ex);
         }
     }
 
@@ -641,7 +649,7 @@ public partial class MainForm : Form
         if (settings.ConfirmDelete)
         {
             var alwaysAsk = true;
-            if (!TaskDlg.ConfirmTaskDlg(Handle, "In den Papierkorb verschieben?", currentFile.Name, "Immer fragen", ref alwaysAsk)) { return; }
+            if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("In den Papierkorb verschieben?"), currentFile.Name, Lng.T("Immer fragen"), ref alwaysAsk)) { return; }
             if (!alwaysAsk)
             {
                 settings.ConfirmDelete = false; // wieder aktivierbar im Einstellungsdialog ("Vor dem Verschieben in den Papierkorb nachfragen")
@@ -655,7 +663,7 @@ public partial class MainForm : Form
         catch (OperationCanceledException) { return; } // im Systemdialog abgebrochen
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            TaskDlg.ErrTaskDlg(Handle, "Löschen fehlgeschlagen.", ex);
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Löschen fehlgeschlagen."), ex);
             return;
         }
         LoadNextAfterRemoval(files, index);
@@ -686,11 +694,11 @@ public partial class MainForm : Form
             }
             catch (Exception ex) when (MailSender.IsComFailure(ex))
             {
-                statusPath.Text = "E-Mail wird erstellt (MAPI) …";
+                statusPath.Text = Lng.T("E-Mail wird erstellt (MAPI) …");
                 var error = await Task.Run(() => MapiMailer.SendWithAttachment(path, subject));
                 if (error != null)
                 {
-                    TaskDlg.MsgTaskDlg(Handle, "Die E-Mail konnte nicht erstellt werden.", error, TaskDialogIcon.Warning);
+                    TaskDlg.MsgTaskDlg(Handle, Lng.T("Die E-Mail konnte nicht erstellt werden."), error, TaskDialogIcon.Warning);
                 }
             }
         }
@@ -715,7 +723,7 @@ public partial class MainForm : Form
         }
         catch (Exception ex) when (PdfEditService.IsPdfReadError(ex))
         {
-            TaskDlg.ErrTaskDlg(Handle, actionName + " fehlgeschlagen.", ex);
+            TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), actionName), ex);
             return false;
         }
         finally { Cursor.Current = Cursors.Default; }
@@ -723,7 +731,7 @@ public partial class MainForm : Form
 
     private void ShowNotEditableMessage()
     {
-        TaskDlg.MsgTaskDlg(Handle, "Die Datei kann nicht bearbeitet werden.", "Möglicherweise ist sie verschlüsselt oder beschädigt.", TaskDialogIcon.Warning);
+        TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei kann nicht bearbeitet werden."), Lng.T("Möglicherweise ist sie verschlüsselt oder beschädigt."), TaskDialogIcon.Warning);
     }
 
     private void DeletePagesDialog()
@@ -732,24 +740,24 @@ public partial class MainForm : Form
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
         if (currentPageCount == 1)
         {
-            TaskDlg.MsgTaskDlg(Handle, "Die Datei hat nur eine Seite.", "Zum Löschen der ganzen Datei benutzen Sie den Papierkorb (Strg+Umschalt+Entf).", TaskDialogIcon.Information);
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei hat nur eine Seite."), Lng.T("Zum Löschen der ganzen Datei benutzen Sie den Papierkorb (Strg+Umschalt+Entf)."), TaskDialogIcon.Information);
             return;
         }
         var currentPage = ClampedCurrentPage();
-        using PageRangeForm dialog = new("Seiten löschen", currentPageCount, emptyMeansAll: false, showRotation: false,
+        using PageRangeForm dialog = new(Lng.T("Seiten löschen"), currentPageCount, emptyMeansAll: false, showRotation: false,
             defaultRange: currentPage > 0 ? currentPage.ToString() : null); // meist soll die gerade angezeigte Seite gelöscht werden
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         var pages = dialog.SelectedPages;
         if (pages.Count >= currentPageCount)
         {
-            TaskDlg.MsgTaskDlg(Handle, "Mindestens eine Seite muss erhalten bleiben.", null, TaskDialogIcon.Warning);
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Mindestens eine Seite muss erhalten bleiben."), null, TaskDialogIcon.Warning);
             return;
         }
         var remaining = currentPageCount - pages.Count;
-        if (RunPdfEdit(() => PdfEditService.DeletePages(currentFile.FullName, pages), "Seiten löschen"))
+        if (RunPdfEdit(() => PdfEditService.DeletePages(currentFile.FullName, pages), Lng.T("Seiten löschen")))
         {
             LoadPdf(currentFile.FullName, Math.Min(pages[0], remaining));
-            statusPath.Text = pages.Count == 1 ? $"Seite {pages[0]} wurde gelöscht." : $"{pages.Count} Seiten wurden gelöscht.";
+            statusPath.Text = pages.Count == 1 ? string.Format(Lng.T("Seite {0} wurde gelöscht."), pages[0]) : string.Format(Lng.T("{0} Seiten wurden gelöscht."), pages.Count);
         }
     }
 
@@ -764,13 +772,14 @@ public partial class MainForm : Form
     {
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
-        using PageRangeForm dialog = new("Seiten drehen", currentPageCount, emptyMeansAll: true, showRotation: true);
+        using PageRangeForm dialog = new(Lng.T("Seiten drehen"), currentPageCount, emptyMeansAll: true, showRotation: true);
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         var pages = dialog.SelectedPages;
-        if (RunPdfEdit(() => PdfEditService.RotatePages(currentFile.FullName, pages, dialog.RotationDelta), "Seiten drehen"))
+        if (RunPdfEdit(() => PdfEditService.RotatePages(currentFile.FullName, pages, dialog.RotationDelta), Lng.T("Seiten drehen")))
         {
             LoadPdf(currentFile.FullName, pages.Count == currentPageCount ? 0 : pages[0]);
-            statusPath.Text = pages.Count == currentPageCount ? "Alle Seiten wurden gedreht." : (pages.Count == 1 ? $"Seite {pages[0]} wurde gedreht." : $"{pages.Count} Seiten wurden gedreht.");
+            statusPath.Text = pages.Count == currentPageCount ? Lng.T("Alle Seiten wurden gedreht.")
+                : (pages.Count == 1 ? string.Format(Lng.T("Seite {0} wurde gedreht."), pages[0]) : string.Format(Lng.T("{0} Seiten wurden gedreht."), pages.Count));
         }
     }
 
@@ -778,18 +787,18 @@ public partial class MainForm : Form
     {
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
-        using OpenFileDialog dialog = new() { Filter = "PDF-Dateien (*.pdf)|*.pdf", Title = "PDF-Datei anhängen", InitialDirectory = currentFile.DirectoryName };
+        using OpenFileDialog dialog = new() { Filter = Lng.T("PDF-Dateien (*.pdf)|*.pdf"), Title = Lng.T("PDF-Datei anhängen"), InitialDirectory = currentFile.DirectoryName };
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         if (string.Equals(dialog.FileName, currentFile.FullName, StringComparison.OrdinalIgnoreCase))
         {
-            TaskDlg.MsgTaskDlg(Handle, "Die Datei kann nicht an sich selbst angehängt werden.", null, TaskDialogIcon.Warning);
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei kann nicht an sich selbst angehängt werden."), null, TaskDialogIcon.Warning);
             return;
         }
         var firstNewPage = currentPageCount + 1;
-        if (RunPdfEdit(() => PdfEditService.AppendPdf(currentFile.FullName, dialog.FileName), "Anhängen"))
+        if (RunPdfEdit(() => PdfEditService.AppendPdf(currentFile.FullName, dialog.FileName), Lng.T("Anhängen")))
         {
             LoadPdf(currentFile.FullName, firstNewPage);
-            statusPath.Text = $"\"{Path.GetFileName(dialog.FileName)}\" wurde angehängt.";
+            statusPath.Text = string.Format(Lng.T("\"{0}\" wurde angehängt."), Path.GetFileName(dialog.FileName));
         }
     }
 
@@ -798,7 +807,7 @@ public partial class MainForm : Form
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
         var currentPage = ClampedCurrentPage();
-        using PageRangeForm rangeDialog = new("Seiten extrahieren", currentPageCount, emptyMeansAll: false, showRotation: false,
+        using PageRangeForm rangeDialog = new(Lng.T("Seiten extrahieren"), currentPageCount, emptyMeansAll: false, showRotation: false,
             defaultRange: currentPage switch // Vorschlag: aktuelle bis letzte Seite
             {
                 0 => null,
@@ -808,26 +817,26 @@ public partial class MainForm : Form
         if (rangeDialog.ShowDialog(this) != DialogResult.OK) { return; }
         using SaveFileDialog saveDialog = new()
         {
-            Filter = "PDF-Dateien (*.pdf)|*.pdf",
-            Title = "Auszug speichern",
+            Filter = Lng.T("PDF-Dateien (*.pdf)|*.pdf"),
+            Title = Lng.T("Auszug speichern"),
             InitialDirectory = currentFile.DirectoryName,
-            FileName = Path.GetFileNameWithoutExtension(currentFile.Name) + " – Auszug.pdf",
+            FileName = string.Format(Lng.T("{0} – Auszug.pdf"), Path.GetFileNameWithoutExtension(currentFile.Name)),
         };
         if (saveDialog.ShowDialog(this) != DialogResult.OK) { return; }
         if (string.Equals(saveDialog.FileName, currentFile.FullName, StringComparison.OrdinalIgnoreCase))
         {
-            TaskDlg.MsgTaskDlg(Handle, "Der Auszug kann die geöffnete Datei nicht überschreiben.", null, TaskDialogIcon.Warning);
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Der Auszug kann die geöffnete Datei nicht überschreiben."), null, TaskDialogIcon.Warning);
             return;
         }
         try
         {
             Cursor.Current = Cursors.WaitCursor;
             PdfEditService.ExtractPages(currentFile.FullName, saveDialog.FileName, rangeDialog.SelectedPages);
-            statusPath.Text = "Auszug gespeichert: " + saveDialog.FileName;
+            statusPath.Text = Lng.T("Auszug gespeichert:") + " " + saveDialog.FileName;
         }
         catch (Exception ex) when (PdfEditService.IsPdfReadError(ex))
         {
-            TaskDlg.ErrTaskDlg(Handle, "Extrahieren fehlgeschlagen.", ex);
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Extrahieren fehlgeschlagen."), ex);
         }
         finally { Cursor.Current = Cursors.Default; }
     }
@@ -842,10 +851,10 @@ public partial class MainForm : Form
         using PropertiesForm dialog = new(info, currentFile);
         if (dialog.ShowDialog(this) == DialogResult.OK && dialog.InfoChanged)
         {
-            if (RunPdfEdit(() => PdfEditService.WriteInfo(currentFile.FullName, dialog.DocTitle, dialog.DocAuthor, dialog.DocSubject, dialog.DocKeywords), "Speichern der Eigenschaften"))
+            if (RunPdfEdit(() => PdfEditService.WriteInfo(currentFile.FullName, dialog.DocTitle, dialog.DocAuthor, dialog.DocSubject, dialog.DocKeywords), Lng.T("Speichern der Eigenschaften")))
             {
                 LoadPdf(currentFile.FullName);
-                statusPath.Text = "Die Dokumenteigenschaften wurden gespeichert.";
+                statusPath.Text = Lng.T("Die Dokumenteigenschaften wurden gespeichert.");
             }
         }
     }
@@ -866,14 +875,14 @@ public partial class MainForm : Form
         try { File.Copy(undoBackupFile, undoTargetFile, true); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            TaskDlg.ErrTaskDlg(Handle, "Rückgängig fehlgeschlagen.", ex);
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Rückgängig fehlgeschlagen."), ex);
             return;
         }
         var file = undoTargetFile;
         undoTargetFile = null;
         mnuUndo.Enabled = false;
         LoadPdf(file);
-        statusPath.Text = "Die letzte Änderung wurde rückgängig gemacht.";
+        statusPath.Text = Lng.T("Die letzte Änderung wurde rückgängig gemacht.");
     }
 
     // ------------------------------------------------------------------ Externe Programme
@@ -899,7 +908,7 @@ public partial class MainForm : Form
             {
                 Tag = exe,
                 Image = GetProgramIcon(exe),
-                ShortcutKeyDisplayString = "Strg+" + number,
+                ShortcutKeyDisplayString = Lng.T("Strg+") + number,
                 ToolTipText = exe,
                 Enabled = currentFile != null,
             };
@@ -909,14 +918,14 @@ public partial class MainForm : Form
         }
         if (ddbPrograms.DropDownItems.Count == 0)
         {
-            ddbPrograms.DropDownItems.Add(new ToolStripMenuItem("(keine Programme gefunden)") { Enabled = false });
+            ddbPrograms.DropDownItems.Add(new ToolStripMenuItem(Lng.T("(keine Programme gefunden)")) { Enabled = false });
         }
         ddbPrograms.DropDownItems.Add(new ToolStripSeparator());
-        ToolStripMenuItem openWith = new("Öffnen mit …") { Enabled = currentFile != null };
+        ToolStripMenuItem openWith = new(Lng.T("Öffnen mit …")) { Enabled = currentFile != null };
         openWith.Click += (s, args) => OpenWithDialog();
         ddbPrograms.DropDownItems.Add(openWith);
         ddbPrograms.DropDownItems.Add(new ToolStripSeparator());
-        ToolStripMenuItem managePrograms = new("Programme verwalten …");
+        ToolStripMenuItem managePrograms = new(Lng.T("Programme verwalten …"));
         managePrograms.Click += (s, args) => OpenSettings(SettingsForm.TabPrograms);
         ddbPrograms.DropDownItems.Add(managePrograms);
     }
@@ -927,7 +936,7 @@ public partial class MainForm : Form
         try { Process.Start(new ProcessStartInfo(exePath, $"\"{currentFile.FullName}\"") { UseShellExecute = false }); }
         catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException or FileNotFoundException)
         {
-            TaskDlg.ErrTaskDlg(Handle, "Das Programm konnte nicht gestartet werden.", ex);
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Das Programm konnte nicht gestartet werden."), ex);
         }
     }
 
@@ -963,7 +972,7 @@ public partial class MainForm : Form
                     Image = icon,
                     Overflow = ToolStripItemOverflow.Never, // bei schmalem Fenster ausblenden statt ins Überlaufmenü
                     Tag = exe,
-                    ToolTipText = ProgramFinder.GetDisplayName(exe) + " (Strg+" + number + ")",
+                    ToolTipText = ProgramFinder.GetDisplayName(exe) + " (" + Lng.T("Strg+") + number + ")",
                     Enabled = currentFile != null,
                 };
                 button.Click += (s, e) => LaunchExternalProgram((string)((ToolStripItem)s).Tag);
