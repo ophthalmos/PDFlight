@@ -39,6 +39,8 @@
             cbCloseOnEscape = new CheckBox();
             cbReopenLast = new CheckBox();
             btnClearRecent = new Button();
+            labelLanguage = new Label();
+            comboLanguage = new ComboBox();
             tabTargets = new TabPage();
             listTargets = new ListBox();
             btnTargetAdd = new Button();
@@ -89,6 +91,8 @@
             tabGeneral.Controls.Add(cbCloseOnEscape);
             tabGeneral.Controls.Add(cbReopenLast);
             tabGeneral.Controls.Add(btnClearRecent);
+            tabGeneral.Controls.Add(labelLanguage);
+            tabGeneral.Controls.Add(comboLanguage);
             tabGeneral.Location = new Point(4, 24);
             tabGeneral.Name = "tabGeneral";
             tabGeneral.Padding = new Padding(3);
@@ -182,6 +186,23 @@
             btnClearRecent.Text = "Zuletzt-Liste &leeren";
             btnClearRecent.UseVisualStyleBackColor = true;
             btnClearRecent.Click += BtnClearRecent_Click;
+            //
+            // labelLanguage
+            //
+            labelLanguage.AutoSize = true;
+            labelLanguage.Location = new Point(16, 284);
+            labelLanguage.Name = "labelLanguage";
+            labelLanguage.Size = new Size(115, 15);
+            labelLanguage.TabIndex = 9;
+            labelLanguage.Text = "Sprache / &Language:";
+            //
+            // comboLanguage
+            //
+            comboLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboLanguage.Location = new Point(150, 280);
+            comboLanguage.Name = "comboLanguage";
+            comboLanguage.Size = new Size(140, 23);
+            comboLanguage.TabIndex = 10;
             // 
             // tabTargets
             // 
@@ -487,6 +508,8 @@
         private System.Windows.Forms.TabPage tabGeneral;
         private System.Windows.Forms.CheckBox cbJumpLastUsed;
         private System.Windows.Forms.CheckBox cbConfirmDelete;
+        private System.Windows.Forms.Label labelLanguage;
+        private System.Windows.Forms.ComboBox comboLanguage;
         private System.Windows.Forms.CheckBox cbShowProgramIcons;
         private System.Windows.Forms.CheckBox cbToolbarIcons;
         private System.Windows.Forms.CheckBox cbLargeIcons;

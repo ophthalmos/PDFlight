@@ -19,6 +19,7 @@ public class AppSettings
     public bool LargeToolbarIcons { get; set; } = true;   // 24 statt 16 Pixel (vor DPI-Skalierung)
     public bool CloseOnEscape { get; set; }               // Programm mit 2× Esc beenden (Shift+Esc sofort)
     public bool ReopenLastFile { get; set; }              // zuletzt geöffnete Datei beim Start laden
+    public string Language { get; set; } = "de";          // "de" oder "en"; weitere Sprachen als Languages\lng.<code>.resx
     public string LastFile { get; set; } = string.Empty;  // Datei, die beim Beenden geöffnet war
     public int WindowX { get; set; } = -1;
     public int WindowY { get; set; } = -1;
