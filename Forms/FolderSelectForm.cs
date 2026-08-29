@@ -245,14 +245,17 @@ public partial class FolderSelectForm : Form
 
     private void ShowHelpMsgBox()
     {
-        const string text = "Strg+Links  \tEinen Schritt zurück im Verlauf.\r\n" +
-            "Strg+Rechts\tEinen Schritt vor im Verlauf.\r\n" +
-            "Strg+Unten\tVerlaufsliste anzeigen.\r\n" +
-            "Strg+Oben  \tIn den übergeordneten Ordner wechseln.\r\n" +
-            "Strg+H     \tVersteckte Ordner ein-/ausblenden.\r\n" +
-            "Strg+L     \tZum zuletzt verwendeten Ordner springen.\r\n" +
-            "Strg+N     \tNeuen Ordner anlegen.\r\n" +
-            "Strg+Eingabe\tAuswahl übernehmen.";
+        var text = TaskDlg.AlignShortcutColumns( // bündige Spalten wie in der Kürzel-Übersicht des Über-Dialogs
+        [
+            ("Strg+Links", "Einen Schritt zurück im Verlauf."),
+            ("Strg+Rechts", "Einen Schritt vor im Verlauf."),
+            ("Strg+Unten", "Verlaufsliste anzeigen."),
+            ("Strg+Oben", "In den übergeordneten Ordner wechseln."),
+            ("Strg+H", "Versteckte Ordner ein-/ausblenden."),
+            ("Strg+L", "Zum zuletzt verwendeten Ordner springen."),
+            ("Strg+N", "Neuen Ordner anlegen."),
+            ("Strg+Eingabe", "Auswahl übernehmen."),
+        ]);
         TaskDlg.MsgTaskDlg(Handle, "Tastenkürzel", text);
     }
 
