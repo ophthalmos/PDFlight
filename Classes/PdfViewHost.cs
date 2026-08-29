@@ -29,7 +29,8 @@ internal partial class PdfViewHost(WebView2 webView)
     {
         // Eigener Datenordner, damit das Programm auch aus einem schreibgeschützten Installationsordner läuft
         var dataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PDFlight", "WebView2");
-        var environment = await CoreWebView2Environment.CreateAsync(null, dataFolder);
+        var options = new CoreWebView2EnvironmentOptions { Language = Lng.CultureCode }; // Viewer-Oberfläche in der Programmsprache
+        var environment = await CoreWebView2Environment.CreateAsync(null, dataFolder, options);
         await webView.EnsureCoreWebView2Async(environment);
 
         var core = webView.CoreWebView2;
@@ -160,7 +161,9 @@ internal partial class PdfViewHost(WebView2 webView)
             // FindFirst bricht beim ersten Treffer ab; die Toolbar steht im Baum vor dem Dokumentinhalt
             var edit = root.FindFirst(System.Windows.Automation.TreeScope.Descendants, new System.Windows.Automation.AndCondition(
                 new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.Edit),
-                new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.NameProperty, "Seitenzahl")));
+                new System.Windows.Automation.OrCondition( // Feldname je nach Viewer-Sprache
+                    new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.NameProperty, "Seitenzahl"),
+                    new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.NameProperty, "Page number"))));
             edit ??= root.FindFirst(System.Windows.Automation.TreeScope.Descendants, // zur Sicherheit, falls das Feld einmal anders heißt
                 new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.Edit));
             if (edit != null && edit.TryGetCurrentPattern(System.Windows.Automation.ValuePattern.Pattern, out var pattern)

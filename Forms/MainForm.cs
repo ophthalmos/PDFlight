@@ -26,6 +26,8 @@ public partial class MainForm : Form
         catch (Exception ex) when (ex is ArgumentException or IOException) { }
         this.startFile = startFile;
         settings = AppSettings.Load();
+        Lng.Initialize(settings.Language); // vor PdfViewHost (Viewer-Sprache) und vor allen Dialogen
+        Lng.Apply(this);
         viewHost = new PdfViewHost(webView);
         RestoreWindowBounds();
     }
@@ -566,8 +568,11 @@ public partial class MainForm : Form
             settings.LargeToolbarIcons = dialog.LargeToolbarIcons;
             settings.CloseOnEscape = dialog.CloseOnEscape;
             settings.ReopenLastFile = dialog.ReopenLastFile;
+            var languageChanged = dialog.Language != settings.Language;
+            settings.Language = dialog.Language;
             if (dialog.ClearRecentRequested) { settings.RecentFolders.Clear(); }
             settings.Save();
+            if (languageChanged) { TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Sprachänderung wird nach einem Neustart des Programms wirksam."), null, TaskDialogIcon.Information); }
             RebuildProgramIconButtons();
             ApplyToolbarIcons();
         }

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- Englische Übersetzungen. Der Schlüssel ("name") ist der deutsche Originaltext. -->
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- SettingsForm (Muster-Formular) -->
+  <data name="Einstellungen" xml:space="preserve"><value>Settings</value></data>
+  <data name="Allgemein" xml:space="preserve"><value>General</value></data>
+  <data name="Ordnerdialog springt zum zuletzt &amp;verwendeten Ordner" xml:space="preserve"><value>Folder dialog jumps to the most recently &amp;used folder</value></data>
+  <data name="Vor dem Verschieben in den &amp;Papierkorb nachfragen" xml:space="preserve"><value>Ask before moving to the &amp;Recycle Bin</value></data>
+  <data name="Programm&amp;symbole zusätzlich in der Symbolleiste anzeigen" xml:space="preserve"><value>Also &amp;show program icons on the toolbar</value></data>
+  <data name="Symbole auf den Schal&amp;tflächen der Symbolleiste anzeigen" xml:space="preserve"><value>Show icons on &amp;toolbar buttons</value></data>
+  <data name="&amp;Große Symbole in der Symbolleiste (24 statt 16 Pixel)" xml:space="preserve"><value>Lar&amp;ge toolbar icons (24 instead of 16 pixels)</value></data>
+  <data name="Programm mit 2× &amp;Esc beenden (Umschalt+Esc: sofort)" xml:space="preserve"><value>Close program with double &amp;Esc (Shift+Esc: immediately)</value></data>
+  <data name="Zuletzt geöffnete &amp;Datei beim Start laden" xml:space="preserve"><value>Load most recently opened &amp;file at startup</value></data>
+  <data name="Zuletzt-Liste &amp;leeren" xml:space="preserve"><value>C&amp;lear recent list</value></data>
+  <data name="Zuletzt-Liste wird geleert" xml:space="preserve"><value>Recent list will be cleared</value></data>
+  <data name="Die Liste der zuletzt verwendeten Ordner leeren?" xml:space="preserve"><value>Clear the list of recently used folders?</value></data>
+  <data name="Sprache / &amp;Language:" xml:space="preserve"><value>Sprache / &amp;Language:</value></data>
+  <data name="Die Sprachänderung wird nach einem Neustart des Programms wirksam." xml:space="preserve"><value>The language change takes effect after restarting the program.</value></data>
+  <data name="Zielordner" xml:space="preserve"><value>Target folders</value></data>
+  <data name="&amp;Hinzufügen …" xml:space="preserve"><value>&amp;Add…</value></data>
+  <data name="&amp;Entfernen" xml:space="preserve"><value>R&amp;emove</value></data>
+  <data name="Nach &amp;oben" xml:space="preserve"><value>Move &amp;up</value></data>
+  <data name="Nach &amp;unten" xml:space="preserve"><value>Move dow&amp;n</value></data>
+  <data name="&amp;Fehlende entfernen" xml:space="preserve"><value>Remove &amp;missing</value></data>
+  <data name="&amp;Alphabetisch sortieren" xml:space="preserve"><value>Sort &amp;alphabetically</value></data>
+  <data name="Der erste Ordner ist das Ziel für das Schnell-Verschieben (Strg+Klick auf &quot;Verschieben&quot;)." xml:space="preserve"><value>The first folder is the target for quick move (Ctrl+click on "Move").</value></data>
+  <data name="Der markierte Ordner existiert nicht mehr." xml:space="preserve"><value>The selected folder no longer exists.</value></data>
+  <data name="Ordner zur Zielliste hinzufügen" xml:space="preserve"><value>Add folder to target list</value></data>
+  <data name="Programme" xml:space="preserve"><value>Programs</value></data>
+  <data name="Neu e&amp;rkennen" xml:space="preserve"><value>&amp;Detect again</value></data>
+  <data name="Die Reihenfolge bestimmt die Tastenkürzel Strg+1 bis Strg+9 im Programme-Menü." xml:space="preserve"><value>The order determines the shortcuts Ctrl+1 to Ctrl+9 in the Programs menu.</value></data>
+  <data name="Programme (*.exe)|*.exe" xml:space="preserve"><value>Programs (*.exe)|*.exe</value></data>
+  <data name="Programm hinzufügen" xml:space="preserve"><value>Add program</value></data>
+  <data name="Abbrechen" xml:space="preserve"><value>Cancel</value></data>
+</root>

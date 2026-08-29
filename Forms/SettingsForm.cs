@@ -41,9 +41,17 @@ public partial class SettingsForm : Form
     [System.ComponentModel.Browsable(false), System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
     public bool ClearRecentRequested { get; private set; }
 
+    private static readonly (string Name, string Code)[] Languages = [("Deutsch", "de"), ("English", "en")];
+
+    [System.ComponentModel.Browsable(false)]
+    public string Language => Languages[Math.Max(0, comboLanguage.SelectedIndex)].Code;
+
     public SettingsForm(AppSettings source, int initialTab)
     {
         InitializeComponent();
+        Lng.Apply(this); // übersetzt alle Designer-Texte, falls nicht Deutsch eingestellt ist
+        comboLanguage.Items.AddRange([.. Languages.Select(l => (object)l.Name)]);
+        comboLanguage.SelectedIndex = Math.Max(0, Array.FindIndex(Languages, l => l.Code == source.Language));
         listTargets.Items.AddRange([.. source.TargetFolders.Where(f => !string.IsNullOrEmpty(f))]);
         listPrograms.Items.AddRange([.. source.ExternalPrograms.Where(f => !string.IsNullOrEmpty(f))]);
         cbJumpLastUsed.Checked = source.JumpToLastUsed;
@@ -90,7 +98,7 @@ public partial class SettingsForm : Form
         btnTargetUp.Enabled = index > 0;
         btnTargetDown.Enabled = index >= 0 && index < listTargets.Items.Count - 1;
         btnTargetRemoveMissing.Enabled = listTargets.Items.Cast<string>().Any(f => !Directory.Exists(f));
-        labelTargetStatus.Text = index >= 0 && !Directory.Exists((string)listTargets.Items[index]) ? "Der markierte Ordner existiert nicht mehr." : string.Empty;
+        labelTargetStatus.Text = index >= 0 && !Directory.Exists((string)listTargets.Items[index]) ? Lng.T("Der markierte Ordner existiert nicht mehr.") : string.Empty;
     }
 
     /// <summary>Nicht mehr existierende Ordner werden rot dargestellt.</summary>
@@ -107,7 +115,7 @@ public partial class SettingsForm : Form
 
     private void BtnTargetAdd_Click(object sender, EventArgs e)
     {
-        using FolderBrowserDialog dialog = new() { Description = "Ordner zur Zielliste hinzufügen", UseDescriptionForTitle = true, ShowNewFolderButton = true };
+        using FolderBrowserDialog dialog = new() { Description = Lng.T("Ordner zur Zielliste hinzufügen"), UseDescriptionForTitle = true, ShowNewFolderButton = true };
         if (listTargets.SelectedIndex >= 0) { dialog.InitialDirectory = (string)listTargets.Items[listTargets.SelectedIndex]; }
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         var existing = listTargets.Items.Cast<string>().ToList().FindIndex(f => string.Equals(f, dialog.SelectedPath, StringComparison.OrdinalIgnoreCase));
@@ -155,7 +163,7 @@ public partial class SettingsForm : Form
 
     private void BtnProgramAdd_Click(object sender, EventArgs e)
     {
-        using OpenFileDialog dialog = new() { Filter = "Programme (*.exe)|*.exe", Title = "Programm hinzufügen" };
+        using OpenFileDialog dialog = new() { Filter = Lng.T("Programme (*.exe)|*.exe"), Title = Lng.T("Programm hinzufügen") };
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         var existing = listPrograms.Items.Cast<string>().ToList().FindIndex(f => string.Equals(f, dialog.FileName, StringComparison.OrdinalIgnoreCase));
         listPrograms.SelectedIndex = existing >= 0 ? existing : listPrograms.Items.Add(dialog.FileName);
@@ -190,11 +198,11 @@ public partial class SettingsForm : Form
 
     private void BtnClearRecent_Click(object sender, EventArgs e)
     {
-        if (TaskDlg.ConfirmTaskDlg(Handle, "Die Liste der zuletzt verwendeten Ordner leeren?", null))
+        if (TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Die Liste der zuletzt verwendeten Ordner leeren?"), null))
         {
             ClearRecentRequested = true;
             btnClearRecent.Enabled = false;
-            btnClearRecent.Text = "Zuletzt-Liste wird geleert";
+            btnClearRecent.Text = Lng.T("Zuletzt-Liste wird geleert");
         }
     }
 }

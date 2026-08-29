@@ -19,7 +19,7 @@
     <Authors>Wilhelm Happe</Authors>
     <Description>Schlanker PDF-Betrachter mit Dateiverwaltung</Description>
     <NeutralLanguage>de</NeutralLanguage>
-    <SatelliteResourceLanguages>de</SatelliteResourceLanguages>
+    <SatelliteResourceLanguages>de;en</SatelliteResourceLanguages>
     <ApplicationIcon>PDFlight.ico</ApplicationIcon>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks><!-- für die Quellgeneratoren LibraryImport/GeneratedComInterface -->
   </PropertyGroup>
