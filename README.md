@@ -52,6 +52,7 @@ Scan-Ordner zügig abzuarbeiten.
 | Strg+Umschalt+Entf | Datei in den Papierkorb |
 | Strg+Entf | Seiten löschen |
 | Strg+R | Seiten drehen |
+| Strg+X | Seiten als neue Datei extrahieren |
 | Strg+Z | Letzte Dokumentänderung rückgängig |
 | Strg+I | Dokumenteigenschaften |
 | Alt+Enter | Windows-Dateieigenschaften (wie im Explorer) |
