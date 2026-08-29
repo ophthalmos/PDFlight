@@ -18,7 +18,17 @@ public partial class PasswordForm : Form
         {
             Text = "Kennwort vergeben";
             buttonOK.DialogResult = DialogResult.None; // erst nach Prüfung schließen
-            Height += textBoxRepeat.Height + 10;
+            labelInfo.Text = Lng.T("Kennwort.Info",
+                "Die Datei wird mit AES-256 (PDF 2.0) verschlüsselt." + Environment.NewLine +
+                "Das Benutzer-Kennwort wird künftig bei jedem Öffnen abgefragt —" + Environment.NewLine +
+                "ohne Kennwort lässt sich die Datei nicht mehr anzeigen.");
+            labelInfo.Visible = true;
+            var shift = labelInfo.Height + 10; // Eingabezeilen unter den Erklärtext rücken
+            labelPassword.Top += shift;
+            textBoxPassword.Top += shift;
+            labelRepeat.Top += shift;
+            textBoxRepeat.Top += shift;
+            Height += textBoxRepeat.Height + 10 + shift;
         }
         else
         {
