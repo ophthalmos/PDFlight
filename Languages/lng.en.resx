@@ -182,7 +182,13 @@ extract pages, properties (shortcuts in the menu)</value></data>
   <data name="Rückgängig fehlgeschlagen." xml:space="preserve"><value>Undo failed.</value></data>
   <data name="Die letzte Änderung wurde rückgängig gemacht." xml:space="preserve"><value>The last change was undone.</value></data>
   <data name="Das Programm konnte nicht gestartet werden." xml:space="preserve"><value>The program could not be started.</value></data>
-  <data name="Duplex zusammenführen …" xml:space="preserve"><value>Merge duplex…</value></data>
+  <data name="Rückseiten-Scan einfügen …" xml:space="preserve"><value>Insert back-page scan…</value></data>
+  <data name="Rückseiten-Scan einfügen" xml:space="preserve"><value>Insert back-page scan</value></data>
+  <data name="Duplex.Intro" xml:space="preserve"><value>For scanners without a duplex unit: the displayed file contains the front pages (1, 3, 5 …).
+In the next step, select the file with the back pages — it will be interleaved with the front pages
+into one complete document (1, 2, 3 …).
+
+Both files must have the same number of pages.</value></data>
   <data name="Kennwort entfernen …" xml:space="preserve"><value>Remove password…</value></data>
   <data name="Kennwort erforderlich" xml:space="preserve"><value>Password required</value></data>
   <data name="&amp;Kennwort:" xml:space="preserve"><value>&amp;Password:</value></data>
@@ -200,7 +206,7 @@ extract pages, properties (shortcuts in the menu)</value></data>
   <data name="Der Stapel wurde zum Scannen gewendet — letzte Rückseite zuerst (Standard)." xml:space="preserve"><value>The stack was flipped for scanning — last back page first (standard).</value></data>
   <data name="In gleicher Reihenfolge" xml:space="preserve"><value>In the same order</value></data>
   <data name="Die Rückseiten wurden von vorn nach hinten gescannt." xml:space="preserve"><value>The back pages were scanned front to back.</value></data>
-  <data name="Duplex-Zusammenführung" xml:space="preserve"><value>Duplex merge</value></data>
+  <data name="Einfügen der Rückseiten" xml:space="preserve"><value>Inserting the back pages</value></data>
   <data name="Die Rückseiten aus &quot;{0}&quot; wurden eingefügt." xml:space="preserve"><value>The back pages from "{0}" were merged in.</value></data>
 
   <!-- Über-Dialog und Updatesuche -->

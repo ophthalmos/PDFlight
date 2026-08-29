@@ -181,7 +181,13 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
   <data name="Rückgängig fehlgeschlagen." xml:space="preserve"><value>Error al deshacer.</value></data>
   <data name="Die letzte Änderung wurde rückgängig gemacht." xml:space="preserve"><value>Se deshizo el último cambio.</value></data>
   <data name="Das Programm konnte nicht gestartet werden." xml:space="preserve"><value>No se pudo iniciar el programa.</value></data>
-  <data name="Duplex zusammenführen …" xml:space="preserve"><value>Combinar dúplex…</value></data>
+  <data name="Rückseiten-Scan einfügen …" xml:space="preserve"><value>Insertar escaneo de caras traseras…</value></data>
+  <data name="Rückseiten-Scan einfügen" xml:space="preserve"><value>Insertar escaneo de caras traseras</value></data>
+  <data name="Duplex.Intro" xml:space="preserve"><value>Para escáneres sin unidad dúplex: el archivo mostrado contiene las caras delanteras (1, 3, 5 …).
+En el siguiente paso, elija el archivo con las caras traseras: se intercalará con las delanteras
+en un documento completo (1, 2, 3 …).
+
+Ambos archivos deben tener el mismo número de páginas.</value></data>
   <data name="Kennwort entfernen …" xml:space="preserve"><value>Quitar la contraseña…</value></data>
   <data name="Kennwort erforderlich" xml:space="preserve"><value>Se requiere contraseña</value></data>
   <data name="&amp;Kennwort:" xml:space="preserve"><value>&amp;Contraseña:</value></data>
@@ -199,7 +205,7 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
   <data name="Der Stapel wurde zum Scannen gewendet — letzte Rückseite zuerst (Standard)." xml:space="preserve"><value>La pila se giró para escanear: última cara trasera primero (estándar).</value></data>
   <data name="In gleicher Reihenfolge" xml:space="preserve"><value>En el mismo orden</value></data>
   <data name="Die Rückseiten wurden von vorn nach hinten gescannt." xml:space="preserve"><value>Las caras traseras se escanearon de principio a fin.</value></data>
-  <data name="Duplex-Zusammenführung" xml:space="preserve"><value>Combinación dúplex</value></data>
+  <data name="Einfügen der Rückseiten" xml:space="preserve"><value>Inserción de las caras traseras</value></data>
   <data name="Die Rückseiten aus &quot;{0}&quot; wurden eingefügt." xml:space="preserve"><value>Se insertaron las caras traseras de "{0}".</value></data>
 
   <!-- Über-Dialog und Updatesuche -->

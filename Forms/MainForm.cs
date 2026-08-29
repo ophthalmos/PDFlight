@@ -739,11 +739,27 @@ public partial class MainForm : Form
         }
     }
 
-    /// <summary>Duplex-Zusammenführung: Rückseiten aus einer zweiten Datei hinter die Seiten der aktuellen verzahnen.</summary>
+    /// <summary>Rückseiten-Scan einfügen (Duplex-Zusammenführung): Rückseiten aus einer zweiten Datei
+    /// hinter die Seiten der aktuellen verzahnen — für Scanner ohne Duplex-Einheit.</summary>
     private void MergeDuplexDialog()
     {
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
+        TaskDialogPage intro = new() // erklärt den Zweck, bevor der Dateidialog erscheint
+        {
+            Caption = Application.ProductName,
+            Heading = Lng.T("Rückseiten-Scan einfügen"),
+            Text = Lng.T("Duplex.Intro",
+                "Für Scanner ohne Duplex-Einheit: Die angezeigte Datei enthält die Vorderseiten (1, 3, 5 …)." + Environment.NewLine +
+                "Wählen Sie im nächsten Schritt die Datei mit den Rückseiten — sie wird mit den Vorderseiten" + Environment.NewLine +
+                "zu einem vollständigen Dokument verzahnt (1, 2, 3 …)." + Environment.NewLine + Environment.NewLine +
+                "Beide Dateien müssen gleich viele Seiten haben."),
+            Icon = TaskDialogIcon.Information,
+            AllowCancel = true,
+            SizeToContent = true,
+            Buttons = { TaskDialogButton.OK, TaskDialogButton.Cancel }
+        };
+        if (TaskDialog.ShowDialog(Handle, intro) != TaskDialogButton.OK) { return; }
         using OpenFileDialog dialog = new() { Filter = Lng.T("PDF-Dateien (*.pdf)|*.pdf"), Title = Lng.T("Datei mit den Rückseiten wählen"), InitialDirectory = currentFile.DirectoryName };
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         if (string.Equals(dialog.FileName, currentFile.FullName, StringComparison.OrdinalIgnoreCase))
@@ -774,7 +790,7 @@ public partial class MainForm : Form
         var result = TaskDialog.ShowDialog(Handle, page);
         if (result != btnReversed && result != btnSame) { return; }
         var backFile = dialog.FileName;
-        if (RunPdfEdit(() => PdfEditService.MergeDuplex(currentFile.FullName, backFile, result == btnReversed), Lng.T("Duplex-Zusammenführung")))
+        if (RunPdfEdit(() => PdfEditService.MergeDuplex(currentFile.FullName, backFile, result == btnReversed), Lng.T("Einfügen der Rückseiten")))
         {
             LoadPdf(currentFile.FullName);
             statusPath.Text = string.Format(Lng.T("Die Rückseiten aus \"{0}\" wurden eingefügt."), Path.GetFileName(backFile));
