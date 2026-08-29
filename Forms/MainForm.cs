@@ -207,6 +207,8 @@ public partial class MainForm : Form
         var hasFile = currentFile != null;
         Text = hasFile ? currentFile.Name + " – PDFlight" : "PDFlight";
         splitButtonMove.Enabled = btnCopy.Enabled = btnRename.Enabled = btnDelete.Enabled = btnShowInFolder.Enabled = ddbEdit.Enabled = btnPrint.Enabled = btnEmail.Enabled = hasFile;
+        mnuSetPassword.Enabled = currentPageCount > 0;                // nur ohne bestehenden Kennwortschutz
+        mnuRemovePassword.Enabled = hasFile && currentPageCount <= 0; // nur bei geschützter (oder unlesbarer) Datei
         foreach (var button in programIconButtons) { button.Enabled = hasFile; }
         if (hasFile)
         {
