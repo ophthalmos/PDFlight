@@ -28,6 +28,7 @@ namespace PDFLight.Forms
         /// </summary>
         private void InitializeComponent()
         {
+            labelInfo = new System.Windows.Forms.Label();
             labelPrompt = new System.Windows.Forms.Label();
             textBoxPages = new System.Windows.Forms.TextBox();
             labelHint = new System.Windows.Forms.Label();
@@ -39,6 +40,15 @@ namespace PDFLight.Forms
             buttonCancel = new System.Windows.Forms.Button();
             groupRotation.SuspendLayout();
             SuspendLayout();
+            //
+            // labelInfo
+            //
+            labelInfo.AutoSize = true;
+            labelInfo.Location = new System.Drawing.Point(12, 12);
+            labelInfo.Name = "labelInfo";
+            labelInfo.Size = new System.Drawing.Size(300, 30);
+            labelInfo.TabIndex = 6;
+            labelInfo.Visible = false;
             //
             // labelPrompt
             //
@@ -148,6 +158,7 @@ namespace PDFLight.Forms
             Controls.Add(labelHint);
             Controls.Add(textBoxPages);
             Controls.Add(labelPrompt);
+            Controls.Add(labelInfo);
             FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -163,6 +174,7 @@ namespace PDFLight.Forms
 
         #endregion
 
+        private System.Windows.Forms.Label labelInfo;
         private System.Windows.Forms.Label labelPrompt;
         private System.Windows.Forms.TextBox textBoxPages;
         private System.Windows.Forms.Label labelHint;

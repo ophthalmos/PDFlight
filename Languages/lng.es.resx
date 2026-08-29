@@ -197,6 +197,8 @@ Ambos archivos deben tener el mismo número de páginas.</value></data>
 La contraseña se pedirá cada vez que se abra el archivo.
 Sin ella, el archivo ya no podrá mostrarse.</value></data>
   <data name="Kennwort anzeigen" xml:space="preserve"><value>Mostrar la contraseña</value></data>
+  <data name="Drehen.Info" xml:space="preserve"><value>La rotación se guarda de forma permanente en el archivo.
+El botón de girar del visor, en cambio, solo cambia la vista.</value></data>
   <data name="Kennwort verbergen" xml:space="preserve"><value>Ocultar la contraseña</value></data>
   <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Repetir:</value></data>
   <data name="Bitte geben Sie ein Kennwort ein." xml:space="preserve"><value>Escriba una contraseña.</value></data>
