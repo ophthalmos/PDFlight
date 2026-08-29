@@ -244,7 +244,7 @@
             //
             mnuDuplex.Name = "mnuDuplex";
             mnuDuplex.Size = new Size(267, 22);
-            mnuDuplex.Text = "Duplex zusammenführen …";
+            mnuDuplex.Text = "Rückseiten-Scan einfügen …";
             mnuDuplex.Click += MnuDuplex_Click;
             //
             // mnuRemovePassword
