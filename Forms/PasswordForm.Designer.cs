@@ -29,6 +29,7 @@ namespace PDFLight.Forms
         private void InitializeComponent()
         {
             labelFileValue = new System.Windows.Forms.Label();
+            labelInfo = new System.Windows.Forms.Label();
             labelPassword = new System.Windows.Forms.Label();
             textBoxPassword = new System.Windows.Forms.TextBox();
             labelRepeat = new System.Windows.Forms.Label();
@@ -46,6 +47,15 @@ namespace PDFLight.Forms
             labelFileValue.Size = new System.Drawing.Size(400, 15);
             labelFileValue.TabIndex = 0;
             labelFileValue.Text = "datei.pdf";
+            //
+            // labelInfo
+            //
+            labelInfo.AutoSize = true;
+            labelInfo.Location = new System.Drawing.Point(12, 38);
+            labelInfo.Name = "labelInfo";
+            labelInfo.Size = new System.Drawing.Size(400, 45);
+            labelInfo.TabIndex = 7;
+            labelInfo.Visible = false;
             //
             // labelPassword
             //
@@ -119,6 +129,7 @@ namespace PDFLight.Forms
             Controls.Add(labelRepeat);
             Controls.Add(textBoxPassword);
             Controls.Add(labelPassword);
+            Controls.Add(labelInfo);
             Controls.Add(labelFileValue);
             FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             MaximizeBox = false;
@@ -134,6 +145,7 @@ namespace PDFLight.Forms
         #endregion
 
         private System.Windows.Forms.Label labelFileValue;
+        private System.Windows.Forms.Label labelInfo;
         private System.Windows.Forms.Label labelPassword;
         private System.Windows.Forms.TextBox textBoxPassword;
         private System.Windows.Forms.Label labelRepeat;

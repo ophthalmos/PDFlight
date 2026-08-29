@@ -193,6 +193,9 @@ Les deux fichiers doivent avoir le même nombre de pages.</value></data>
   <data name="Drucken" xml:space="preserve"><value>Imprimer</value></data>
   <data name="Datei drucken (Strg+P)" xml:space="preserve"><value>Imprimer le fichier (Ctrl+P)</value></data>
   <data name="Kennwort vergeben" xml:space="preserve"><value>Définir un mot de passe</value></data>
+  <data name="Kennwort.Info" xml:space="preserve"><value>Le fichier sera chiffré en AES-256 (PDF 2.0).
+Le mot de passe utilisateur sera demandé à chaque ouverture —
+sans lui, le fichier ne pourra plus être affiché.</value></data>
   <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Répéter :</value></data>
   <data name="Bitte geben Sie ein Kennwort ein." xml:space="preserve"><value>Veuillez saisir un mot de passe.</value></data>
   <data name="Die Kennwörter stimmen nicht überein." xml:space="preserve"><value>Les mots de passe ne correspondent pas.</value></data>
