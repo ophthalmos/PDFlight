@@ -71,7 +71,7 @@ namespace PDFLight.Forms
             labelRepeat.Location = new System.Drawing.Point(12, 83);
             labelRepeat.Name = "labelRepeat";
             labelRepeat.Size = new System.Drawing.Size(79, 15);
-            labelRepeat.TabIndex = 5;
+            labelRepeat.TabIndex = 3;
             labelRepeat.Text = "&Wiederholen:";
             //
             // textBoxRepeat
@@ -80,7 +80,7 @@ namespace PDFLight.Forms
             textBoxRepeat.Location = new System.Drawing.Point(100, 80);
             textBoxRepeat.Name = "textBoxRepeat";
             textBoxRepeat.Size = new System.Drawing.Size(312, 23);
-            textBoxRepeat.TabIndex = 6;
+            textBoxRepeat.TabIndex = 4;
             textBoxRepeat.UseSystemPasswordChar = true;
             //
             // buttonOK
@@ -90,7 +90,7 @@ namespace PDFLight.Forms
             buttonOK.Location = new System.Drawing.Point(216, 90);
             buttonOK.Name = "buttonOK";
             buttonOK.Size = new System.Drawing.Size(95, 27);
-            buttonOK.TabIndex = 3;
+            buttonOK.TabIndex = 5;
             buttonOK.Text = "OK";
             buttonOK.UseVisualStyleBackColor = true;
             buttonOK.Click += ButtonOK_Click;
@@ -102,7 +102,7 @@ namespace PDFLight.Forms
             buttonCancel.Location = new System.Drawing.Point(317, 90);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new System.Drawing.Size(95, 27);
-            buttonCancel.TabIndex = 4;
+            buttonCancel.TabIndex = 6;
             buttonCancel.Text = "Abbrechen";
             buttonCancel.UseVisualStyleBackColor = true;
             //
