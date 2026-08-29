@@ -108,6 +108,8 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
   <data name="Strg+Entf" xml:space="preserve"><value>Ctrl+Supr</value></data>
   <data name="Strg+Umschalt+Entf" xml:space="preserve"><value>Ctrl+Mayús+Supr</value></data>
   <data name="Strg+Umschalt+← / →" xml:space="preserve"><value>Ctrl+Mayús+← / →</value></data>
+  <data name="Strg+Umschalt+R / L" xml:space="preserve"><value>Ctrl+Mayús+R / L</value></data>
+  <data name="Ansicht drehen (ändert die Datei nicht)" xml:space="preserve"><value>Girar la vista (no cambia el archivo)</value></data>
   <data name="Strg+1 … 9" xml:space="preserve"><value>Ctrl+1 … 9</value></data>
   <data name="Bild ↑ / Bild ↓" xml:space="preserve"><value>RePág / AvPág</value></data>
   <data name="2× Esc / Umschalt+Esc" xml:space="preserve"><value>2× Esc / Mayús+Esc</value></data>

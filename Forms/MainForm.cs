@@ -1202,6 +1202,10 @@ public partial class MainForm : Form
             case Keys.X | Keys.Control: BeginInvoke(ExtractPagesDialog); return true; // eXtrahieren; nutzt ebenfalls die UIA-Seitenabfrage
             case Keys.Delete | Keys.Control | Keys.Shift when currentFile != null: DeleteCurrent(); return true;
             case Keys.R | Keys.Control: RotatePagesDialog(); return true;
+            // Ansicht drehen (das Viewer-Kürzel Strg+] ist auf deutschen Tastaturen unerreichbar);
+            // BeginInvoke: die UIA-Abfrage nicht im Chromium-Tastatur-Callback starten (s. Strg+Entf)
+            case Keys.R | Keys.Control | Keys.Shift: BeginInvoke(() => viewHost.RotateView(clockwise: true)); return true;
+            case Keys.L | Keys.Control | Keys.Shift: BeginInvoke(() => viewHost.RotateView(clockwise: false)); return true;
             case Keys.Z | Keys.Control when undoTargetFile != null: UndoLastChange(); return true;
             case Keys.I | Keys.Control: ShowProperties(); return true;
             case Keys.Enter | Keys.Alt when currentFile != null: ShellUtil.ShowFileProperties(currentFile.FullName); return true; // Windows-Dateieigenschaften, wie im Explorer
