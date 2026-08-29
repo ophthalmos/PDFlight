@@ -302,23 +302,33 @@ internal static partial class ShellInfo
 
     private static readonly Dictionary<string, Image> typeIconCache = [];
 
-    /// <summary>Kleines Explorer-Icon für einen Dateityp (z.B. ".pdf") oder — bei extension null —
-    /// für Ordner. Generisch über die Dateiattribute, also ohne Plattenzugriff; Bilder werden geteilt
-    /// und dürfen deshalb nicht freigegeben werden. Null, wenn die Shell kein Icon liefert.</summary>
-    public static Image GetTypeIcon(string extension)
+    /// <summary>Explorer-Icon für einen Dateityp (z.B. ".pdf") oder — bei extension null — für Ordner,
+    /// skaliert auf edge Pixel. Generisch über die Dateiattribute, also ohne Plattenzugriff; Bilder werden
+    /// geteilt und dürfen deshalb nicht freigegeben werden. Null, wenn die Shell kein Icon liefert.</summary>
+    public static Image GetTypeIcon(string extension, int edge)
     {
-        var key = extension ?? "<ordner>";
+        var key = (extension ?? "<ordner>") + "|" + edge;
         if (typeIconCache.TryGetValue(key, out var cached)) { return cached; }
         SHFILEINFO info = default;
         var attributes = extension == null ? 0x10u /*DIRECTORY*/ : 0x80u /*NORMAL*/;
+        var sizeFlag = edge > 20 ? 0u /*SHGFI_LARGEICON: 32 px, herunterskaliert schärfer als 16 px hochgezogen*/ : SHGFI_SMALLICON;
         var result = SHGetFileInfo(extension == null ? "ordner" : "datei" + extension, attributes,
-            ref info, (uint)Marshal.SizeOf<SHFILEINFO>(), SHGFI_ICON | SHGFI_SMALLICON | SHGFI_USEFILEATTRIBUTES);
+            ref info, (uint)Marshal.SizeOf<SHFILEINFO>(), SHGFI_ICON | sizeFlag | SHGFI_USEFILEATTRIBUTES);
         Image image = null;
         if (result != IntPtr.Zero && info.hIcon != IntPtr.Zero)
         {
             using var icon = Icon.FromHandle(info.hIcon);
             image = icon.ToBitmap(); // eigene Kopie — das Handle kann danach weg
             FreeIcon(info.hIcon);
+            if (image.Width != edge)
+            {
+                Bitmap scaled = new(edge, edge);
+                using var g = Graphics.FromImage(scaled);
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.DrawImage(image, 0, 0, edge, edge);
+                image.Dispose();
+                image = scaled;
+            }
         }
         typeIconCache[key] = image;
         return image;

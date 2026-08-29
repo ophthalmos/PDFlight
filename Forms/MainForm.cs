@@ -249,7 +249,7 @@ public partial class MainForm : Form
                 Tag = file,
                 ToolTipText = file,
                 Enabled = File.Exists(file),
-                Image = ShellInfo.GetTypeIcon(".pdf"),
+                Image = ShellInfo.GetTypeIcon(".pdf", toolStrip.ImageScalingSize.Width),
             };
             item.Click += (s, args) => LoadPdf((string)((ToolStripMenuItem)s).Tag, addToRecent: true);
             btnOpen.DropDownItems.Add(item);
@@ -548,7 +548,7 @@ public partial class MainForm : Form
         var targets = settings.TargetFolders.Where(f => !string.IsNullOrEmpty(f)); // Reihenfolge = Zielliste (sortierbar in den Einstellungen)
         foreach (var folder in targets)
         {
-            ToolStripMenuItem item = new(folder.Replace("&", "&&")) { Enabled = Directory.Exists(folder), Tag = folder, Image = ShellInfo.GetTypeIcon(null) };
+            ToolStripMenuItem item = new(folder.Replace("&", "&&")) { Enabled = Directory.Exists(folder), Tag = folder, Image = ShellInfo.GetTypeIcon(null, toolStrip.ImageScalingSize.Width) };
             item.Click += (s, args) => MoveOrCopyTo((string)((ToolStripMenuItem)s).Tag, copy: false);
             splitButtonMove.DropDownItems.Add(item);
         }
@@ -632,11 +632,12 @@ public partial class MainForm : Form
         UpdateProgramIconVisibility(); // die Buttonbreiten haben sich geändert
     }
 
-    /// <summary>16-px-Symbol für Menüeinträge; null, wenn Symbole abgeschaltet sind.</summary>
+    /// <summary>Symbol für Menüeinträge in der Skalierungsgröße der Symbolleiste (die Menüs
+    /// erben sie) — sonst zieht WinForms kleinere Bilder unscharf hoch. Null bei abgeschalteten Symbolen.</summary>
     private Image MenuIcon(char glyph)
     {
         return settings.ShowToolbarIcons && ToolbarIcons.FontAvailable
-            ? ToolbarIcons.Get(glyph, LogicalToDeviceUnits(new Size(16, 16)))
+            ? ToolbarIcons.Get(glyph, toolStrip.ImageScalingSize)
             : null;
     }
 
