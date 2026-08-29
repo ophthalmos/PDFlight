@@ -721,8 +721,9 @@ public partial class MainForm : Form
             TaskDlg.MsgTaskDlg(Handle, "Die Datei hat nur eine Seite.", "Zum Löschen der ganzen Datei benutzen Sie den Papierkorb (Entf).", TaskDialogIcon.Information);
             return;
         }
+        var currentPage = ClampedCurrentPage();
         using PageRangeForm dialog = new("Seiten löschen", currentPageCount, emptyMeansAll: false, showRotation: false,
-            defaultPage: viewHost.TryGetCurrentPage()); // meist soll die gerade angezeigte Seite gelöscht werden
+            defaultRange: currentPage > 0 ? currentPage.ToString() : null); // meist soll die gerade angezeigte Seite gelöscht werden
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         var pages = dialog.SelectedPages;
         if (pages.Count >= currentPageCount)
@@ -736,6 +737,13 @@ public partial class MainForm : Form
             LoadPdf(currentFile.FullName, Math.Min(pages[0], remaining));
             statusPath.Text = pages.Count == 1 ? $"Seite {pages[0]} wurde gelöscht." : $"{pages.Count} Seiten wurden gelöscht.";
         }
+    }
+
+    /// <summary>Aktuelle Seite des Viewers, auf die bekannte Seitenzahl begrenzt; 0 = unbekannt.</summary>
+    private int ClampedCurrentPage()
+    {
+        var page = viewHost.TryGetCurrentPage();
+        return page >= 1 && page <= currentPageCount ? page : 0;
     }
 
     private void RotatePagesDialog()
@@ -775,7 +783,14 @@ public partial class MainForm : Form
     {
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
-        using PageRangeForm rangeDialog = new("Seiten extrahieren", currentPageCount, emptyMeansAll: false, showRotation: false);
+        var currentPage = ClampedCurrentPage();
+        using PageRangeForm rangeDialog = new("Seiten extrahieren", currentPageCount, emptyMeansAll: false, showRotation: false,
+            defaultRange: currentPage switch // Vorschlag: aktuelle bis letzte Seite
+            {
+                0 => null,
+                _ when currentPage == currentPageCount => currentPage.ToString(),
+                _ => $"{currentPage}-{currentPageCount}",
+            });
         if (rangeDialog.ShowDialog(this) != DialogResult.OK) { return; }
         using SaveFileDialog saveDialog = new()
         {
