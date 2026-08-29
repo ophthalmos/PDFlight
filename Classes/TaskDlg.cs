@@ -211,12 +211,27 @@ internal static class TaskDlg
         else if (result == downloadButton) { StartLink(hwnd, urlString); }
     }
 
-    /// <summary>Zweispaltige Kürzel-Übersicht: TaskDialog-Text kennt keine Tabulatoren, darum wird jedes
-    /// Kürzel mit geschützten Leerzeichen aufgefüllt, bis es die gemessene Spaltenbreite erreicht —
-    /// gemessen mit derselben Schrift, in der der TaskDialog seinen Text setzt (Segoe UI 9 pt).</summary>
+    /// <summary>Richtet zweispaltige Kürzel-Listen bündig aus: TaskDialog-Text kennt keine Tabulatoren,
+    /// darum wird jedes Kürzel mit geschützten Leerzeichen aufgefüllt, bis es die gemessene Spaltenbreite
+    /// erreicht — gemessen mit derselben Schrift, in der der TaskDialog seinen Text setzt (Segoe UI 9 pt).</summary>
+    public static string AlignShortcutColumns((string Key, string Text)[] rows)
+    {
+        using Font font = new("Segoe UI", 9f);
+        int Width(string s) => TextRenderer.MeasureText(s + "|", font, Size.Empty, TextFormatFlags.NoPadding).Width; // Sentinel, damit Leerzeichen am Ende mitzählen
+        var sentinel = Width(string.Empty);
+        var column = rows.Max(r => Width(r.Key) - sentinel) + 14;
+        var lines = rows.Select(r =>
+        {
+            var key = r.Key;
+            while (Width(key) - sentinel < column) { key += '\u00A0'; } // geschützte Leerzeichen werden nicht getrimmt
+            return key + r.Text;
+        });
+        return string.Join("\n", lines);
+    }
+
     private static string BuildShortcutTable()
     {
-        (string Key, string Text)[] rows =
+        return AlignShortcutColumns(
         [
             ("Strg+O", "PDF-Datei öffnen"),
             ("Strg+Umschalt+← / →", "vorherige / nächste Datei des Ordners"),
@@ -237,18 +252,7 @@ internal static class TaskDlg
             ("F11", "Vollbild ein/aus"),
             ("2× Esc / Umschalt+Esc", "Programm beenden (Option)"),
             ("F1", "dieser Dialog"),
-        ];
-        using Font font = new("Segoe UI", 9f);
-        int Width(string s) => TextRenderer.MeasureText(s + "|", font, Size.Empty, TextFormatFlags.NoPadding).Width; // Sentinel, damit Leerzeichen am Ende mitzählen
-        var sentinel = Width(string.Empty);
-        var column = rows.Max(r => Width(r.Key) - sentinel) + 14;
-        var lines = rows.Select(r =>
-        {
-            var key = r.Key;
-            while (Width(key) - sentinel < column) { key += '\u00A0'; } // geschützte Leerzeichen werden nicht getrimmt
-            return key + r.Text;
-        });
-        return string.Join("\n", lines);
+        ]);
     }
 
     internal static void StartLink(nint hwnd, string url)
