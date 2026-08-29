@@ -1037,6 +1037,7 @@ public partial class MainForm : Form
             // erst nach der Rückkehr aus dem Chromium-Tastatur-Callback: solange der läuft, wartet Chromium
             // auf unsere Antwort und kann die UIA-Seitenabfrage nicht bedienen (sie liefe in den Timeout)
             case Keys.Delete | Keys.Control: BeginInvoke(DeletePagesDialog); return true;
+            case Keys.X | Keys.Control: BeginInvoke(ExtractPagesDialog); return true; // eXtrahieren; nutzt ebenfalls die UIA-Seitenabfrage
             case Keys.Delete | Keys.Control | Keys.Shift when currentFile != null: DeleteCurrent(); return true;
             case Keys.R | Keys.Control: RotatePagesDialog(); return true;
             case Keys.Z | Keys.Control when undoTargetFile != null: UndoLastChange(); return true;

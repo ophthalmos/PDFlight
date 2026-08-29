@@ -231,6 +231,7 @@
             // mnuExtractPages
             // 
             mnuExtractPages.Name = "mnuExtractPages";
+            mnuExtractPages.ShortcutKeyDisplayString = "Strg+X";
             mnuExtractPages.Size = new Size(267, 22);
             mnuExtractPages.Text = "Seiten als neue Datei extrahieren …";
             mnuExtractPages.Click += MnuExtractPages_Click;
