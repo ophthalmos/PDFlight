@@ -1,9 +1,6 @@
 ; ============================================================================
 ; PDFlight – Inno-Setup-Skript
 ;
-; Quelle ist der normale Release-Ordner: In Visual Studio einfach die
-; Release-Konfiguration bauen, dann dieses Skript kompilieren.
-;
 ; Voraussetzungen auf dem Zielrechner:
 ;   - .NET Desktop Runtime 10 (x64) — fehlt sie, zeigt Windows beim ersten
 ;     Start selbst einen Dialog mit Download-Link, daher keine Prüfung hier.

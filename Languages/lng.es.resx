@@ -181,6 +181,26 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
   <data name="Rückgängig fehlgeschlagen." xml:space="preserve"><value>Error al deshacer.</value></data>
   <data name="Die letzte Änderung wurde rückgängig gemacht." xml:space="preserve"><value>Se deshizo el último cambio.</value></data>
   <data name="Das Programm konnte nicht gestartet werden." xml:space="preserve"><value>No se pudo iniciar el programa.</value></data>
+  <data name="Duplex zusammenführen …" xml:space="preserve"><value>Combinar dúplex…</value></data>
+  <data name="Kennwort entfernen …" xml:space="preserve"><value>Quitar la contraseña…</value></data>
+  <data name="Kennwort erforderlich" xml:space="preserve"><value>Se requiere contraseña</value></data>
+  <data name="&amp;Kennwort:" xml:space="preserve"><value>&amp;Contraseña:</value></data>
+  <data name="Die Datei ist nicht verschlüsselt." xml:space="preserve"><value>El archivo no está cifrado.</value></data>
+  <data name="Das Kennwort ist falsch." xml:space="preserve"><value>La contraseña es incorrecta.</value></data>
+  <data name="Entfernen des Kennworts" xml:space="preserve"><value>Quitar la contraseña</value></data>
+  <data name="Das Kennwort wurde entfernt." xml:space="preserve"><value>Se quitó la contraseña.</value></data>
+  <data name="Ein Kennwortschutz lässt sich über Bearbeiten → &quot;Kennwort entfernen&quot; aufheben." xml:space="preserve"><value>La protección con contraseña se puede quitar en Editar → "Quitar la contraseña".</value></data>
+  <data name="Datei mit den Rückseiten wählen" xml:space="preserve"><value>Elegir el archivo con las caras traseras</value></data>
+  <data name="Bitte wählen Sie eine andere Datei als die angezeigte." xml:space="preserve"><value>Elija un archivo distinto del mostrado.</value></data>
+  <data name="Die Seitenzahlen passen nicht zusammen." xml:space="preserve"><value>Los números de páginas no coinciden.</value></data>
+  <data name="Vorderseiten: {0}, Rückseiten: {1}" xml:space="preserve"><value>Caras delanteras: {0}, caras traseras: {1}</value></data>
+  <data name="In welcher Reihenfolge liegen die Rückseiten vor?" xml:space="preserve"><value>¿En qué orden están las caras traseras?</value></data>
+  <data name="In umgekehrter Reihenfolge" xml:space="preserve"><value>En orden inverso</value></data>
+  <data name="Der Stapel wurde zum Scannen gewendet — letzte Rückseite zuerst (Standard)." xml:space="preserve"><value>La pila se giró para escanear: última cara trasera primero (estándar).</value></data>
+  <data name="In gleicher Reihenfolge" xml:space="preserve"><value>En el mismo orden</value></data>
+  <data name="Die Rückseiten wurden von vorn nach hinten gescannt." xml:space="preserve"><value>Las caras traseras se escanearon de principio a fin.</value></data>
+  <data name="Duplex-Zusammenführung" xml:space="preserve"><value>Combinación dúplex</value></data>
+  <data name="Die Rückseiten aus &quot;{0}&quot; wurden eingefügt." xml:space="preserve"><value>Se insertaron las caras traseras de "{0}".</value></data>
 
   <!-- Über-Dialog und Updatesuche -->
   <data name="unbekannt" xml:space="preserve"><value>desconocida</value></data>
