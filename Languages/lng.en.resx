@@ -193,10 +193,12 @@ Both files must have the same number of pages.</value></data>
   <data name="Kennwort vergeben …" xml:space="preserve"><value>Set password…</value></data>
   <data name="Drucken" xml:space="preserve"><value>Print</value></data>
   <data name="Datei drucken (Strg+P)" xml:space="preserve"><value>Print file (Ctrl+P)</value></data>
-  <data name="Kennwort vergeben" xml:space="preserve"><value>Set password</value></data>
+  <data name="Benutzer-Kennwort vergeben" xml:space="preserve"><value>Set user password</value></data>
   <data name="Kennwort.Info" xml:space="preserve"><value>The file will be encrypted with AES-256 (PDF 2.0).
-The user password will be required each time the file is opened —
-without it, the file can no longer be displayed.</value></data>
+The password will be required each time the file is opened.
+Without it, the file can no longer be displayed.</value></data>
+  <data name="Kennwort anzeigen" xml:space="preserve"><value>Show password</value></data>
+  <data name="Kennwort verbergen" xml:space="preserve"><value>Hide password</value></data>
   <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Repeat:</value></data>
   <data name="Bitte geben Sie ein Kennwort ein." xml:space="preserve"><value>Please enter a password.</value></data>
   <data name="Die Kennwörter stimmen nicht überein." xml:space="preserve"><value>The passwords do not match.</value></data>

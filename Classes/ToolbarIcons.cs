@@ -25,6 +25,7 @@ internal static class ToolbarIcons
     public const char FolderOpen = '\uE838';
     public const char Settings = '\uE713';
     public const char Info = '\uE946';
+    public const char Eye = '\uE7B3';          // RedEye: Kennwort sichtbar machen
 
     private const string FontName = "Segoe MDL2 Assets";
     private static readonly Dictionary<(char Glyph, int Size), Image> cache = [];
