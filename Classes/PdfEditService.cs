@@ -60,6 +60,59 @@ internal static class PdfEditService
         destination.Save(destinationPath);
     }
 
+    /// <summary>True, wenn sich die Datei mit dem Kennwort öffnen lässt (null/leer = ohne Kennwort).</summary>
+    public static bool CanOpen(string path, string password)
+    {
+        try
+        {
+            using var document = string.IsNullOrEmpty(password)
+                ? PdfReader.Open(path, PdfDocumentOpenMode.Import)
+                : PdfReader.Open(path, password, PdfDocumentOpenMode.Import);
+            return true;
+        }
+        catch (Exception ex) when (IsPdfReadError(ex)) { return false; }
+    }
+
+    /// <summary>Speichert die Datei ohne Kennwortschutz neu: Seiten und Metadaten werden in ein
+    /// unverschlüsseltes Dokument übernommen — unabhängig vom Verschlüsselungsverfahren der Quelle.</summary>
+    public static void RemovePassword(string path, string password)
+    {
+        var bytes = File.ReadAllBytes(path); // Quelle in den Speicher, damit dieselbe Datei überschrieben werden kann
+        using MemoryStream stream = new(bytes);
+        using var source = PdfReader.Open(stream, password, PdfDocumentOpenMode.Import);
+        using PdfDocument target = new();
+        foreach (var page in source.Pages) { target.AddPage(page); }
+        CopyInfo(source, target);
+        target.Save(path);
+    }
+
+    /// <summary>Duplex-Zusammenführung: verzahnt hinter jede Seite der Datei die passende Rückseite aus
+    /// backPath (bei backsReversed von hinten gezählt — der übliche Fall, wenn der Stapel zum Scannen
+    /// gewendet wurde). Beide Dateien müssen gleich viele Seiten haben (prüft der Aufrufer).</summary>
+    public static void MergeDuplex(string path, string backPath, bool backsReversed)
+    {
+        var bytes = File.ReadAllBytes(path);
+        using MemoryStream stream = new(bytes);
+        using var fronts = PdfReader.Open(stream, PdfDocumentOpenMode.Import);
+        using var backs = PdfReader.Open(backPath, PdfDocumentOpenMode.Import);
+        using PdfDocument target = new();
+        for (var i = 0; i < fronts.PageCount; i++)
+        {
+            target.AddPage(fronts.Pages[i]);
+            target.AddPage(backs.Pages[backsReversed ? backs.PageCount - 1 - i : i]);
+        }
+        CopyInfo(fronts, target);
+        target.Save(path);
+    }
+
+    private static void CopyInfo(PdfDocument source, PdfDocument target)
+    {
+        target.Info.Title = source.Info.Title;
+        target.Info.Author = source.Info.Author;
+        target.Info.Subject = source.Info.Subject;
+        target.Info.Keywords = source.Info.Keywords;
+    }
+
     public static PdfInfo ReadInfo(string path)
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import); // Import = lesender Zugriff (ReadOnly ist in PDFsharp 6 nicht implementiert)

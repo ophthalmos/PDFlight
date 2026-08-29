@@ -711,6 +711,76 @@ public partial class MainForm : Form
 
     // ------------------------------------------------------------------ Seitenoperationen (PDFsharp)
 
+    /// <summary>Entfernt den Kennwortschutz der aktuellen Datei (fragt das Kennwort ab, mit Undo-Sicherung).</summary>
+    private void RemovePasswordDialog()
+    {
+        if (currentFile == null) { return; }
+        if (PdfEditService.CanOpen(currentFile.FullName, null))
+        {
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei ist nicht verschlüsselt."), null, TaskDialogIcon.Information);
+            return;
+        }
+        while (true)
+        {
+            using PasswordForm dialog = new(currentFile.Name);
+            if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
+            var password = dialog.Password;
+            if (!PdfEditService.CanOpen(currentFile.FullName, password))
+            {
+                TaskDlg.MsgTaskDlg(Handle, Lng.T("Das Kennwort ist falsch."), null, TaskDialogIcon.Warning);
+                continue; // erneut fragen
+            }
+            if (RunPdfEdit(() => PdfEditService.RemovePassword(currentFile.FullName, password), Lng.T("Entfernen des Kennworts")))
+            {
+                LoadPdf(currentFile.FullName); // jetzt sind auch Seitenzahl und Bearbeitung verfügbar
+                statusPath.Text = Lng.T("Das Kennwort wurde entfernt.");
+            }
+            return;
+        }
+    }
+
+    /// <summary>Duplex-Zusammenführung: Rückseiten aus einer zweiten Datei hinter die Seiten der aktuellen verzahnen.</summary>
+    private void MergeDuplexDialog()
+    {
+        if (currentFile == null) { return; }
+        if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
+        using OpenFileDialog dialog = new() { Filter = Lng.T("PDF-Dateien (*.pdf)|*.pdf"), Title = Lng.T("Datei mit den Rückseiten wählen"), InitialDirectory = currentFile.DirectoryName };
+        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
+        if (string.Equals(dialog.FileName, currentFile.FullName, StringComparison.OrdinalIgnoreCase))
+        {
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Bitte wählen Sie eine andere Datei als die angezeigte."), null, TaskDialogIcon.Warning);
+            return;
+        }
+        var backCount = PdfEditService.TryGetPageCount(dialog.FileName);
+        if (backCount != currentPageCount)
+        {
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Seitenzahlen passen nicht zusammen."),
+                string.Format(Lng.T("Vorderseiten: {0}, Rückseiten: {1}"), currentPageCount, backCount < 0 ? "?" : backCount), TaskDialogIcon.Warning);
+            return;
+        }
+        TaskDialogButton btnReversed = new TaskDialogCommandLinkButton(Lng.T("In umgekehrter Reihenfolge"),
+            Lng.T("Der Stapel wurde zum Scannen gewendet — letzte Rückseite zuerst (Standard)."));
+        TaskDialogButton btnSame = new TaskDialogCommandLinkButton(Lng.T("In gleicher Reihenfolge"),
+            Lng.T("Die Rückseiten wurden von vorn nach hinten gescannt."));
+        TaskDialogPage page = new()
+        {
+            Caption = Application.ProductName,
+            Heading = Lng.T("In welcher Reihenfolge liegen die Rückseiten vor?"),
+            AllowCancel = true,
+            SizeToContent = true,
+            Buttons = { btnReversed, btnSame, TaskDialogButton.Cancel },
+            DefaultButton = btnReversed
+        };
+        var result = TaskDialog.ShowDialog(Handle, page);
+        if (result != btnReversed && result != btnSame) { return; }
+        var backFile = dialog.FileName;
+        if (RunPdfEdit(() => PdfEditService.MergeDuplex(currentFile.FullName, backFile, result == btnReversed), Lng.T("Duplex-Zusammenführung")))
+        {
+            LoadPdf(currentFile.FullName);
+            statusPath.Text = string.Format(Lng.T("Die Rückseiten aus \"{0}\" wurden eingefügt."), Path.GetFileName(backFile));
+        }
+    }
+
     /// <summary>Führt eine Dokumentänderung mit vorheriger Undo-Sicherung aus; false bei Fehler.</summary>
     private bool RunPdfEdit(Action edit, string actionName)
     {
@@ -731,7 +801,9 @@ public partial class MainForm : Form
 
     private void ShowNotEditableMessage()
     {
-        TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei kann nicht bearbeitet werden."), Lng.T("Möglicherweise ist sie verschlüsselt oder beschädigt."), TaskDialogIcon.Warning);
+        TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei kann nicht bearbeitet werden."),
+            Lng.T("Möglicherweise ist sie verschlüsselt oder beschädigt.") + Environment.NewLine
+            + Lng.T("Ein Kennwortschutz lässt sich über Bearbeiten → \"Kennwort entfernen\" aufheben."), TaskDialogIcon.Warning);
     }
 
     private void DeletePagesDialog()
@@ -1162,6 +1234,14 @@ public partial class MainForm : Form
     private void MnuExtractPages_Click(object sender, EventArgs e)
     {
         ExtractPagesDialog();
+    }
+    private void MnuDuplex_Click(object sender, EventArgs e)
+    {
+        MergeDuplexDialog();
+    }
+    private void MnuRemovePassword_Click(object sender, EventArgs e)
+    {
+        RemovePasswordDialog();
     }
     private void MnuUndo_Click(object sender, EventArgs e)
     {

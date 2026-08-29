@@ -49,6 +49,8 @@
             mnuDeletePages = new ToolStripMenuItem();
             mnuRotatePages = new ToolStripMenuItem();
             mnuAppendPdf = new ToolStripMenuItem();
+            mnuDuplex = new ToolStripMenuItem();
+            mnuRemovePassword = new ToolStripMenuItem();
             mnuExtractPages = new ToolStripMenuItem();
             toolStripSeparator6 = new ToolStripSeparator();
             mnuUndo = new ToolStripMenuItem();
@@ -208,7 +210,7 @@
             // ddbEdit
             // 
             ddbEdit.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuAppendPdf, mnuExtractPages, toolStripSeparator6, mnuUndo, toolStripSeparator7, mnuProperties });
+            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuAppendPdf, mnuDuplex, mnuExtractPages, toolStripSeparator6, mnuUndo, toolStripSeparator7, mnuProperties, mnuRemovePassword });
             ddbEdit.Enabled = false;
             ddbEdit.Name = "ddbEdit";
             ddbEdit.Size = new Size(76, 22);
@@ -237,6 +239,20 @@
             mnuAppendPdf.Size = new Size(233, 22);
             mnuAppendPdf.Text = "PDF-Datei anhängen …";
             mnuAppendPdf.Click += MnuAppendPdf_Click;
+            //
+            // mnuDuplex
+            //
+            mnuDuplex.Name = "mnuDuplex";
+            mnuDuplex.Size = new Size(267, 22);
+            mnuDuplex.Text = "Duplex zusammenführen …";
+            mnuDuplex.Click += MnuDuplex_Click;
+            //
+            // mnuRemovePassword
+            //
+            mnuRemovePassword.Name = "mnuRemovePassword";
+            mnuRemovePassword.Size = new Size(267, 22);
+            mnuRemovePassword.Text = "Kennwort entfernen …";
+            mnuRemovePassword.Click += MnuRemovePassword_Click;
             // 
             // mnuExtractPages
             // 
@@ -394,6 +410,8 @@
         private System.Windows.Forms.ToolStripMenuItem mnuDeletePages;
         private System.Windows.Forms.ToolStripMenuItem mnuRotatePages;
         private System.Windows.Forms.ToolStripMenuItem mnuAppendPdf;
+        private System.Windows.Forms.ToolStripMenuItem mnuDuplex;
+        private System.Windows.Forms.ToolStripMenuItem mnuRemovePassword;
         private System.Windows.Forms.ToolStripMenuItem mnuExtractPages;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripMenuItem mnuUndo;

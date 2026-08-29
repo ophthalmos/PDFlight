@@ -182,6 +182,26 @@ extract pages, properties (shortcuts in the menu)</value></data>
   <data name="Rückgängig fehlgeschlagen." xml:space="preserve"><value>Undo failed.</value></data>
   <data name="Die letzte Änderung wurde rückgängig gemacht." xml:space="preserve"><value>The last change was undone.</value></data>
   <data name="Das Programm konnte nicht gestartet werden." xml:space="preserve"><value>The program could not be started.</value></data>
+  <data name="Duplex zusammenführen …" xml:space="preserve"><value>Merge duplex…</value></data>
+  <data name="Kennwort entfernen …" xml:space="preserve"><value>Remove password…</value></data>
+  <data name="Kennwort erforderlich" xml:space="preserve"><value>Password required</value></data>
+  <data name="&amp;Kennwort:" xml:space="preserve"><value>&amp;Password:</value></data>
+  <data name="Die Datei ist nicht verschlüsselt." xml:space="preserve"><value>The file is not encrypted.</value></data>
+  <data name="Das Kennwort ist falsch." xml:space="preserve"><value>The password is incorrect.</value></data>
+  <data name="Entfernen des Kennworts" xml:space="preserve"><value>Removing the password</value></data>
+  <data name="Das Kennwort wurde entfernt." xml:space="preserve"><value>The password was removed.</value></data>
+  <data name="Ein Kennwortschutz lässt sich über Bearbeiten → &quot;Kennwort entfernen&quot; aufheben." xml:space="preserve"><value>Password protection can be removed via Edit → "Remove password".</value></data>
+  <data name="Datei mit den Rückseiten wählen" xml:space="preserve"><value>Select the file with the back pages</value></data>
+  <data name="Bitte wählen Sie eine andere Datei als die angezeigte." xml:space="preserve"><value>Please select a different file than the one displayed.</value></data>
+  <data name="Die Seitenzahlen passen nicht zusammen." xml:space="preserve"><value>The page counts do not match.</value></data>
+  <data name="Vorderseiten: {0}, Rückseiten: {1}" xml:space="preserve"><value>Front pages: {0}, back pages: {1}</value></data>
+  <data name="In welcher Reihenfolge liegen die Rückseiten vor?" xml:space="preserve"><value>In what order are the back pages?</value></data>
+  <data name="In umgekehrter Reihenfolge" xml:space="preserve"><value>In reverse order</value></data>
+  <data name="Der Stapel wurde zum Scannen gewendet — letzte Rückseite zuerst (Standard)." xml:space="preserve"><value>The stack was flipped for scanning — last back page first (standard).</value></data>
+  <data name="In gleicher Reihenfolge" xml:space="preserve"><value>In the same order</value></data>
+  <data name="Die Rückseiten wurden von vorn nach hinten gescannt." xml:space="preserve"><value>The back pages were scanned front to back.</value></data>
+  <data name="Duplex-Zusammenführung" xml:space="preserve"><value>Duplex merge</value></data>
+  <data name="Die Rückseiten aus &quot;{0}&quot; wurden eingefügt." xml:space="preserve"><value>The back pages from "{0}" were merged in.</value></data>
 
   <!-- Über-Dialog und Updatesuche -->
   <data name="unbekannt" xml:space="preserve"><value>unknown</value></data>
