@@ -609,6 +609,7 @@ public partial class MainForm : Form
         Set(btnCopy, ToolbarIcons.Copy);
         Set(btnRename, ToolbarIcons.Rename);
         Set(btnDelete, ToolbarIcons.Delete);
+        Set(btnPrint, ToolbarIcons.Print);
         Set(btnEmail, ToolbarIcons.Mail);
         Set(ddbEdit, ToolbarIcons.Edit);
         Set(ddbPrograms, ToolbarIcons.AllApps);

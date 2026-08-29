@@ -18,6 +18,7 @@ internal static class ToolbarIcons
     public const char Copy = '\uE8C8';
     public const char Rename = '\uE8AC';
     public const char Delete = '\uE74D';
+    public const char Print = '\uE749';
     public const char Mail = '\uE715';
     public const char Edit = '\uE70F';
     public const char AllApps = '\uE71D';
