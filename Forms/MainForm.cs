@@ -206,7 +206,7 @@ public partial class MainForm : Form
     {
         var hasFile = currentFile != null;
         Text = hasFile ? currentFile.Name + " – PDFlight" : "PDFlight";
-        splitButtonMove.Enabled = btnCopy.Enabled = btnRename.Enabled = btnDelete.Enabled = btnShowInFolder.Enabled = ddbEdit.Enabled = btnEmail.Enabled = hasFile;
+        splitButtonMove.Enabled = btnCopy.Enabled = btnRename.Enabled = btnDelete.Enabled = btnShowInFolder.Enabled = ddbEdit.Enabled = btnPrint.Enabled = btnEmail.Enabled = hasFile;
         foreach (var button in programIconButtons) { button.Enabled = hasFile; }
         if (hasFile)
         {
@@ -1251,6 +1251,10 @@ public partial class MainForm : Form
     private void BtnInfo_Click(object sender, EventArgs e)
     {
         TaskDlg.AboutTaskDlg(Handle, Icon);
+    }
+    private void BtnPrint_Click(object sender, EventArgs e)
+    {
+        viewHost.ShowPrintDialog();
     }
     private void BtnEmail_Click(object sender, EventArgs e)
     {

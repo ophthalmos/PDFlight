@@ -43,6 +43,7 @@
             btnDelete = new ToolStripButton();
             btnShowInFolder = new ToolStripButton();
             toolStripSeparator8 = new ToolStripSeparator();
+            btnPrint = new ToolStripButton();
             btnEmail = new ToolStripButton();
             toolStripSeparator4 = new ToolStripSeparator();
             ddbEdit = new ToolStripDropDownButton();
@@ -50,13 +51,13 @@
             mnuRotatePages = new ToolStripMenuItem();
             mnuAppendPdf = new ToolStripMenuItem();
             mnuDuplex = new ToolStripMenuItem();
-            mnuSetPassword = new ToolStripMenuItem();
-            mnuRemovePassword = new ToolStripMenuItem();
             mnuExtractPages = new ToolStripMenuItem();
             toolStripSeparator6 = new ToolStripSeparator();
             mnuUndo = new ToolStripMenuItem();
             toolStripSeparator7 = new ToolStripSeparator();
             mnuProperties = new ToolStripMenuItem();
+            mnuSetPassword = new ToolStripMenuItem();
+            mnuRemovePassword = new ToolStripMenuItem();
             toolStripSeparator9 = new ToolStripSeparator();
             ddbPrograms = new ToolStripDropDownButton();
             toolStripSeparator5 = new ToolStripSeparator();
@@ -66,6 +67,7 @@
             statusIndex = new ToolStripStatusLabel();
             statusPath = new ToolStripStatusLabel();
             statusInfo = new ToolStripStatusLabel();
+            toolStripSeparator10 = new ToolStripSeparator();
             ((System.ComponentModel.ISupportInitialize)webView).BeginInit();
             toolStrip.SuspendLayout();
             statusStrip.SuspendLayout();
@@ -86,7 +88,7 @@
             // toolStrip
             // 
             toolStrip.GripStyle = ToolStripGripStyle.Hidden;
-            toolStrip.Items.AddRange(new ToolStripItem[] { btnOpen, toolStripSeparator1, btnPrev, btnNext, toolStripSeparator2, splitButtonMove, btnCopy, toolStripSeparator3, btnRename, btnDelete, btnShowInFolder, toolStripSeparator8, btnEmail, toolStripSeparator4, ddbEdit, toolStripSeparator9, ddbPrograms, toolStripSeparator5, btnSettings, btnInfo });
+            toolStrip.Items.AddRange(new ToolStripItem[] { btnOpen, toolStripSeparator1, btnPrev, btnNext, toolStripSeparator2, splitButtonMove, btnCopy, toolStripSeparator3, btnRename, btnDelete, btnShowInFolder, toolStripSeparator8, btnPrint, btnEmail, toolStripSeparator4, ddbEdit, toolStripSeparator9, ddbPrograms, toolStripSeparator5, btnSettings, btnInfo });
             toolStrip.Location = new Point(0, 0);
             toolStrip.Name = "toolStrip";
             toolStrip.Size = new Size(984, 25);
@@ -192,9 +194,19 @@
             // 
             toolStripSeparator8.Name = "toolStripSeparator8";
             toolStripSeparator8.Size = new Size(6, 25);
-            // 
+            //
+            // btnPrint
+            //
+            btnPrint.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            btnPrint.Enabled = false;
+            btnPrint.Name = "btnPrint";
+            btnPrint.Size = new Size(56, 22);
+            btnPrint.Text = "Drucken";
+            btnPrint.ToolTipText = "Datei drucken (Strg+P)";
+            btnPrint.Click += BtnPrint_Click;
+            //
             // btnEmail
-            // 
+            //
             btnEmail.DisplayStyle = ToolStripItemDisplayStyle.Text;
             btnEmail.Enabled = false;
             btnEmail.Name = "btnEmail";
@@ -211,7 +223,7 @@
             // ddbEdit
             // 
             ddbEdit.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuAppendPdf, mnuDuplex, mnuExtractPages, toolStripSeparator6, mnuUndo, toolStripSeparator7, mnuProperties, mnuSetPassword, mnuRemovePassword });
+            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuAppendPdf, mnuDuplex, mnuExtractPages, toolStripSeparator6, mnuUndo, toolStripSeparator7, mnuSetPassword, mnuRemovePassword, toolStripSeparator10, mnuProperties });
             ddbEdit.Enabled = false;
             ddbEdit.Name = "ddbEdit";
             ddbEdit.Size = new Size(76, 22);
@@ -240,27 +252,13 @@
             mnuAppendPdf.Size = new Size(233, 22);
             mnuAppendPdf.Text = "PDF-Datei anhängen …";
             mnuAppendPdf.Click += MnuAppendPdf_Click;
-            //
+            // 
             // mnuDuplex
-            //
+            // 
             mnuDuplex.Name = "mnuDuplex";
-            mnuDuplex.Size = new Size(267, 22);
+            mnuDuplex.Size = new Size(233, 22);
             mnuDuplex.Text = "Rückseiten-Scan einfügen …";
             mnuDuplex.Click += MnuDuplex_Click;
-            //
-            // mnuSetPassword
-            //
-            mnuSetPassword.Name = "mnuSetPassword";
-            mnuSetPassword.Size = new Size(267, 22);
-            mnuSetPassword.Text = "Kennwort vergeben …";
-            mnuSetPassword.Click += MnuSetPassword_Click;
-            //
-            // mnuRemovePassword
-            //
-            mnuRemovePassword.Name = "mnuRemovePassword";
-            mnuRemovePassword.Size = new Size(267, 22);
-            mnuRemovePassword.Text = "Kennwort entfernen …";
-            mnuRemovePassword.Click += MnuRemovePassword_Click;
             // 
             // mnuExtractPages
             // 
@@ -296,6 +294,20 @@
             mnuProperties.Size = new Size(233, 22);
             mnuProperties.Text = "Eigenschaften …";
             mnuProperties.Click += MnuProperties_Click;
+            // 
+            // mnuSetPassword
+            // 
+            mnuSetPassword.Name = "mnuSetPassword";
+            mnuSetPassword.Size = new Size(233, 22);
+            mnuSetPassword.Text = "Kennwort vergeben …";
+            mnuSetPassword.Click += MnuSetPassword_Click;
+            // 
+            // mnuRemovePassword
+            // 
+            mnuRemovePassword.Name = "mnuRemovePassword";
+            mnuRemovePassword.Size = new Size(233, 22);
+            mnuRemovePassword.Text = "Kennwort entfernen …";
+            mnuRemovePassword.Click += MnuRemovePassword_Click;
             // 
             // toolStripSeparator9
             // 
@@ -371,6 +383,11 @@
             statusInfo.Size = new Size(4, 19);
             statusInfo.ToolTipText = "Seitenzahl, Dateigröße und Änderungsdatum der angezeigten Datei";
             // 
+            // toolStripSeparator10
+            // 
+            toolStripSeparator10.Name = "toolStripSeparator10";
+            toolStripSeparator10.Size = new Size(230, 6);
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
@@ -429,6 +446,7 @@
         private System.Windows.Forms.ToolStripDropDownButton ddbPrograms;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripButton btnShowInFolder;
+        private System.Windows.Forms.ToolStripButton btnPrint;
         private System.Windows.Forms.ToolStripButton btnSettings;
         private System.Windows.Forms.ToolStripButton btnInfo;
         private System.Windows.Forms.StatusStrip statusStrip;
@@ -436,5 +454,6 @@
         private System.Windows.Forms.ToolStripStatusLabel statusPath;
         private System.Windows.Forms.ToolStripStatusLabel statusInfo;
         private ToolStripSeparator toolStripSeparator9;
+        private ToolStripSeparator toolStripSeparator10;
     }
 }
