@@ -189,6 +189,14 @@ pour former un document complet (1, 2, 3 …).
 
 Les deux fichiers doivent avoir le même nombre de pages.</value></data>
   <data name="Kennwort entfernen …" xml:space="preserve"><value>Supprimer le mot de passe…</value></data>
+  <data name="Kennwort vergeben …" xml:space="preserve"><value>Définir un mot de passe…</value></data>
+  <data name="Kennwort vergeben" xml:space="preserve"><value>Définir un mot de passe</value></data>
+  <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Répéter :</value></data>
+  <data name="Bitte geben Sie ein Kennwort ein." xml:space="preserve"><value>Veuillez saisir un mot de passe.</value></data>
+  <data name="Die Kennwörter stimmen nicht überein." xml:space="preserve"><value>Les mots de passe ne correspondent pas.</value></data>
+  <data name="Die Datei ist bereits verschlüsselt." xml:space="preserve"><value>Le fichier est déjà chiffré.</value></data>
+  <data name="Vergeben des Kennworts" xml:space="preserve"><value>Définition du mot de passe</value></data>
+  <data name="Die Datei ist jetzt mit AES-256 verschlüsselt." xml:space="preserve"><value>Le fichier est maintenant chiffré en AES-256.</value></data>
   <data name="Kennwort erforderlich" xml:space="preserve"><value>Mot de passe requis</value></data>
   <data name="&amp;Kennwort:" xml:space="preserve"><value>&amp;Mot de passe :</value></data>
   <data name="Die Datei ist nicht verschlüsselt." xml:space="preserve"><value>Le fichier n'est pas chiffré.</value></data>

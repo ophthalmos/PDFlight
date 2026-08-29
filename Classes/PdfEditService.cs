@@ -86,6 +86,21 @@ internal static class PdfEditService
         target.Save(path);
     }
 
+    /// <summary>Verschlüsselt die Datei mit AES-256 (PDF 2.0) und dem angegebenen Benutzer-Kennwort.
+    /// Wie beim Entfernen wird die Datei aus einer Speicherkopie neu aufgebaut.</summary>
+    public static void SetPassword(string path, string password)
+    {
+        var bytes = File.ReadAllBytes(path);
+        using MemoryStream stream = new(bytes);
+        using var source = PdfReader.Open(stream, PdfDocumentOpenMode.Import);
+        using PdfDocument target = new();
+        foreach (var page in source.Pages) { target.AddPage(page); }
+        CopyInfo(source, target);
+        target.SecuritySettings.UserPassword = password;
+        target.SecurityHandler.SetEncryptionToV5(); // AES-256, PDF 2.0
+        target.Save(path);
+    }
+
     /// <summary>Duplex-Zusammenführung: verzahnt hinter jede Seite der Datei die passende Rückseite aus
     /// backPath (bei backsReversed von hinten gezählt — der übliche Fall, wenn der Stapel zum Scannen
     /// gewendet wurde). Beide Dateien müssen gleich viele Seiten haben (prüft der Aufrufer).</summary>

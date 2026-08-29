@@ -189,6 +189,14 @@ en un documento completo (1, 2, 3 …).
 
 Ambos archivos deben tener el mismo número de páginas.</value></data>
   <data name="Kennwort entfernen …" xml:space="preserve"><value>Quitar la contraseña…</value></data>
+  <data name="Kennwort vergeben …" xml:space="preserve"><value>Establecer contraseña…</value></data>
+  <data name="Kennwort vergeben" xml:space="preserve"><value>Establecer contraseña</value></data>
+  <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Repetir:</value></data>
+  <data name="Bitte geben Sie ein Kennwort ein." xml:space="preserve"><value>Escriba una contraseña.</value></data>
+  <data name="Die Kennwörter stimmen nicht überein." xml:space="preserve"><value>Las contraseñas no coinciden.</value></data>
+  <data name="Die Datei ist bereits verschlüsselt." xml:space="preserve"><value>El archivo ya está cifrado.</value></data>
+  <data name="Vergeben des Kennworts" xml:space="preserve"><value>Establecer la contraseña</value></data>
+  <data name="Die Datei ist jetzt mit AES-256 verschlüsselt." xml:space="preserve"><value>El archivo ahora está cifrado con AES-256.</value></data>
   <data name="Kennwort erforderlich" xml:space="preserve"><value>Se requiere contraseña</value></data>
   <data name="&amp;Kennwort:" xml:space="preserve"><value>&amp;Contraseña:</value></data>
   <data name="Die Datei ist nicht verschlüsselt." xml:space="preserve"><value>El archivo no está cifrado.</value></data>

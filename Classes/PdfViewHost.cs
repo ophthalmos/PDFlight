@@ -27,8 +27,10 @@ internal partial class PdfViewHost(WebView2 webView)
 
     public async Task InitializeAsync()
     {
-        // Eigener Datenordner, damit das Programm auch aus einem schreibgeschützten Installationsordner läuft
-        var dataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PDFlight", "WebView2");
+        // Eigener Datenordner, damit das Programm auch aus einem schreibgeschützten Installationsordner läuft.
+        // Je Sprache getrennt: Alle Prozesse am selben Ordner müssen identische Optionen verwenden, sonst
+        // scheitert die Initialisierung (z.B. alte Instanz läuft nach einem Sprachwechsel noch).
+        var dataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PDFlight", "WebView2." + Lng.CultureCode);
         var options = new CoreWebView2EnvironmentOptions { Language = Lng.CultureCode }; // Viewer-Oberfläche in der Programmsprache
         var environment = await CoreWebView2Environment.CreateAsync(null, dataFolder, options);
         await webView.EnsureCoreWebView2Async(environment);

@@ -50,6 +50,7 @@
             mnuRotatePages = new ToolStripMenuItem();
             mnuAppendPdf = new ToolStripMenuItem();
             mnuDuplex = new ToolStripMenuItem();
+            mnuSetPassword = new ToolStripMenuItem();
             mnuRemovePassword = new ToolStripMenuItem();
             mnuExtractPages = new ToolStripMenuItem();
             toolStripSeparator6 = new ToolStripSeparator();
@@ -210,7 +211,7 @@
             // ddbEdit
             // 
             ddbEdit.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuAppendPdf, mnuDuplex, mnuExtractPages, toolStripSeparator6, mnuUndo, toolStripSeparator7, mnuProperties, mnuRemovePassword });
+            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuAppendPdf, mnuDuplex, mnuExtractPages, toolStripSeparator6, mnuUndo, toolStripSeparator7, mnuProperties, mnuSetPassword, mnuRemovePassword });
             ddbEdit.Enabled = false;
             ddbEdit.Name = "ddbEdit";
             ddbEdit.Size = new Size(76, 22);
@@ -246,6 +247,13 @@
             mnuDuplex.Size = new Size(267, 22);
             mnuDuplex.Text = "Rückseiten-Scan einfügen …";
             mnuDuplex.Click += MnuDuplex_Click;
+            //
+            // mnuSetPassword
+            //
+            mnuSetPassword.Name = "mnuSetPassword";
+            mnuSetPassword.Size = new Size(267, 22);
+            mnuSetPassword.Text = "Kennwort vergeben …";
+            mnuSetPassword.Click += MnuSetPassword_Click;
             //
             // mnuRemovePassword
             //
@@ -411,6 +419,7 @@
         private System.Windows.Forms.ToolStripMenuItem mnuRotatePages;
         private System.Windows.Forms.ToolStripMenuItem mnuAppendPdf;
         private System.Windows.Forms.ToolStripMenuItem mnuDuplex;
+        private System.Windows.Forms.ToolStripMenuItem mnuSetPassword;
         private System.Windows.Forms.ToolStripMenuItem mnuRemovePassword;
         private System.Windows.Forms.ToolStripMenuItem mnuExtractPages;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;

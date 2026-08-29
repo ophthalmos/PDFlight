@@ -711,6 +711,27 @@ public partial class MainForm : Form
 
     // ------------------------------------------------------------------ Seitenoperationen (PDFsharp)
 
+    /// <summary>Verschlüsselt die aktuelle Datei mit AES-256 (PDF 2.0) und einem
+    /// Benutzer-Kennwort (Abfrage mit Wiederholungsfeld, mit Undo-Sicherung).</summary>
+    private void SetPasswordDialog()
+    {
+        if (currentFile == null) { return; }
+        if (!PdfEditService.CanOpen(currentFile.FullName, null))
+        {
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei ist bereits verschlüsselt."),
+                Lng.T("Ein Kennwortschutz lässt sich über Bearbeiten → \"Kennwort entfernen\" aufheben."), TaskDialogIcon.Information);
+            return;
+        }
+        using PasswordForm dialog = new(currentFile.Name, confirm: true);
+        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
+        var password = dialog.Password;
+        if (RunPdfEdit(() => PdfEditService.SetPassword(currentFile.FullName, password), Lng.T("Vergeben des Kennworts")))
+        {
+            LoadPdf(currentFile.FullName); // der Viewer fragt nun selbst nach dem Kennwort
+            statusPath.Text = Lng.T("Die Datei ist jetzt mit AES-256 verschlüsselt.");
+        }
+    }
+
     /// <summary>Entfernt den Kennwortschutz der aktuellen Datei (fragt das Kennwort ab, mit Undo-Sicherung).</summary>
     private void RemovePasswordDialog()
     {
@@ -1254,6 +1275,10 @@ public partial class MainForm : Form
     private void MnuDuplex_Click(object sender, EventArgs e)
     {
         MergeDuplexDialog();
+    }
+    private void MnuSetPassword_Click(object sender, EventArgs e)
+    {
+        SetPasswordDialog();
     }
     private void MnuRemovePassword_Click(object sender, EventArgs e)
     {
