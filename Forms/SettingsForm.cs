@@ -41,7 +41,7 @@ public partial class SettingsForm : Form
     [System.ComponentModel.Browsable(false), System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
     public bool ClearRecentRequested { get; private set; }
 
-    private static readonly (string Name, string Code)[] Languages = [("Deutsch", "de"), ("English", "en")];
+    private static readonly (string Name, string Code)[] Languages = [("Deutsch", "de"), ("English", "en"), ("Français", "fr"), ("Español", "es")];
 
     [System.ComponentModel.Browsable(false)]
     public string Language => Languages[Math.Max(0, comboLanguage.SelectedIndex)].Code;

@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- Spanische Übersetzungen. Der Schlüssel ("name") ist der deutsche Originaltext. -->
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Einstellungsdialog -->
+  <data name="Einstellungen" xml:space="preserve"><value>Configuración</value></data>
+  <data name="Allgemein" xml:space="preserve"><value>General</value></data>
+  <data name="Ordnerdialog springt zum zuletzt &amp;verwendeten Ordner" xml:space="preserve"><value>El diálogo de carpetas salta a la última carpeta &amp;utilizada</value></data>
+  <data name="Vor dem Verschieben in den &amp;Papierkorb nachfragen" xml:space="preserve"><value>Preguntar antes de mover a la &amp;papelera</value></data>
+  <data name="Programm&amp;symbole zusätzlich in der Symbolleiste anzeigen" xml:space="preserve"><value>Mostrar también los iconos de programa&amp;s en la barra de herramientas</value></data>
+  <data name="Symbole auf den Schal&amp;tflächen der Symbolleiste anzeigen" xml:space="preserve"><value>Mostrar iconos en los bo&amp;tones de la barra de herramientas</value></data>
+  <data name="&amp;Große Symbole in der Symbolleiste (24 statt 16 Pixel)" xml:space="preserve"><value>Iconos &amp;grandes en la barra de herramientas (24 en lugar de 16 píxeles)</value></data>
+  <data name="Programm mit 2× &amp;Esc beenden (Umschalt+Esc: sofort)" xml:space="preserve"><value>Cerrar el programa con 2× &amp;Esc (Mayús+Esc: inmediatamente)</value></data>
+  <data name="Zuletzt geöffnete &amp;Datei beim Start laden" xml:space="preserve"><value>Cargar el último &amp;archivo abierto al iniciar</value></data>
+  <data name="Zuletzt-Liste &amp;leeren" xml:space="preserve"><value>&amp;Vaciar la lista de recientes</value></data>
+  <data name="Zuletzt-Liste wird geleert" xml:space="preserve"><value>La lista de recientes se vaciará</value></data>
+  <data name="Die Liste der zuletzt verwendeten Ordner leeren?" xml:space="preserve"><value>¿Vaciar la lista de carpetas usadas recientemente?</value></data>
+  <data name="Die Sprachänderung wird nach einem Neustart des Programms wirksam." xml:space="preserve"><value>El cambio de idioma tendrá efecto tras reiniciar el programa.</value></data>
+  <data name="Jetzt neu starten?" xml:space="preserve"><value>¿Reiniciar ahora?</value></data>
+  <data name="Zielordner" xml:space="preserve"><value>Carpetas de destino</value></data>
+  <data name="&amp;Hinzufügen …" xml:space="preserve"><value>&amp;Agregar…</value></data>
+  <data name="&amp;Entfernen" xml:space="preserve"><value>&amp;Quitar</value></data>
+  <data name="Nach &amp;oben" xml:space="preserve"><value>S&amp;ubir</value></data>
+  <data name="Nach &amp;unten" xml:space="preserve"><value>&amp;Bajar</value></data>
+  <data name="&amp;Fehlende entfernen" xml:space="preserve"><value>Quitar los &amp;faltantes</value></data>
+  <data name="&amp;Alphabetisch sortieren" xml:space="preserve"><value>Ordenar &amp;alfabéticamente</value></data>
+  <data name="Der erste Ordner ist das Ziel für das Schnell-Verschieben (Strg+Klick auf &quot;Verschieben&quot;)." xml:space="preserve"><value>La primera carpeta es el destino del movimiento rápido (Ctrl+clic en "Mover").</value></data>
+  <data name="Der markierte Ordner existiert nicht mehr." xml:space="preserve"><value>La carpeta seleccionada ya no existe.</value></data>
+  <data name="Ordner zur Zielliste hinzufügen" xml:space="preserve"><value>Agregar carpeta a la lista de destinos</value></data>
+  <data name="Programme" xml:space="preserve"><value>Programas</value></data>
+  <data name="Neu e&amp;rkennen" xml:space="preserve"><value>&amp;Detectar de nuevo</value></data>
+  <data name="Die Reihenfolge bestimmt die Tastenkürzel Strg+1 bis Strg+9 im Programme-Menü." xml:space="preserve"><value>El orden determina los atajos Ctrl+1 a Ctrl+9 en el menú Programas.</value></data>
+  <data name="Programme (*.exe)|*.exe" xml:space="preserve"><value>Programas (*.exe)|*.exe</value></data>
+  <data name="Programm hinzufügen" xml:space="preserve"><value>Agregar programa</value></data>
+  <data name="Abbrechen" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="&amp;Abbrechen" xml:space="preserve"><value>&amp;Cancelar</value></data>
+
+  <!-- MainForm: Symbolleiste und Menüs -->
+  <data name="Öffnen" xml:space="preserve"><value>Abrir</value></data>
+  <data name="Verschieben" xml:space="preserve"><value>Mover</value></data>
+  <data name="Kopieren" xml:space="preserve"><value>Copiar</value></data>
+  <data name="Umbenennen" xml:space="preserve"><value>Renombrar</value></data>
+  <data name="Löschen" xml:space="preserve"><value>Eliminar</value></data>
+  <data name="Ordner öffnen" xml:space="preserve"><value>Abrir carpeta</value></data>
+  <data name="Bearbeiten" xml:space="preserve"><value>Editar</value></data>
+  <data name="Seiten löschen …" xml:space="preserve"><value>Eliminar páginas…</value></data>
+  <data name="Seiten drehen …" xml:space="preserve"><value>Girar páginas…</value></data>
+  <data name="PDF-Datei anhängen …" xml:space="preserve"><value>Anexar archivo PDF…</value></data>
+  <data name="Seiten extrahieren …" xml:space="preserve"><value>Extraer páginas…</value></data>
+  <data name="Änderung rückgängig" xml:space="preserve"><value>Deshacer cambio</value></data>
+  <data name="Eigenschaften …" xml:space="preserve"><value>Propiedades…</value></data>
+  <data name="Eigenschaften" xml:space="preserve"><value>Propiedades</value></data>
+  <data name="Öffnen mit …" xml:space="preserve"><value>Abrir con…</value></data>
+  <data name="Programme verwalten …" xml:space="preserve"><value>Administrar programas…</value></data>
+  <data name="(keine Programme gefunden)" xml:space="preserve"><value>(no se encontraron programas)</value></data>
+  <data name="(keine zuletzt geöffneten Dateien)" xml:space="preserve"><value>(no hay archivos recientes)</value></data>
+  <data name="Liste leeren" xml:space="preserve"><value>Vaciar lista</value></data>
+  <data name="(Zielliste ist leer)" xml:space="preserve"><value>(la lista de destinos está vacía)</value></data>
+  <data name="Zielliste bearbeiten …" xml:space="preserve"><value>Editar lista de destinos…</value></data>
+  <data name="Keine Datei geöffnet" xml:space="preserve"><value>Ningún archivo abierto</value></data>
+  <data name="Seite" xml:space="preserve"><value>página</value></data>
+  <data name="Seiten" xml:space="preserve"><value>páginas</value></data>
+
+  <!-- MainForm: Tooltips und Kürzel-Anzeigen -->
+  <data name="Vorherige PDF-Datei im Ordner (Strg+Umschalt+←)" xml:space="preserve"><value>Archivo PDF anterior de la carpeta (Ctrl+Mayús+←)</value></data>
+  <data name="Nächste PDF-Datei im Ordner (Strg+Umschalt+→)" xml:space="preserve"><value>Archivo PDF siguiente de la carpeta (Ctrl+Mayús+→)</value></data>
+  <data name="In einen Ordner kopieren (Strg+K)" xml:space="preserve"><value>Copiar a una carpeta (Ctrl+K)</value></data>
+  <data name="Datei umbenennen (F2)" xml:space="preserve"><value>Renombrar archivo (F2)</value></data>
+  <data name="In den Papierkorb verschieben (Strg+Umschalt+Entf)" xml:space="preserve"><value>Mover a la papelera (Ctrl+Mayús+Supr)</value></data>
+  <data name="Datei im Dateimanager anzeigen" xml:space="preserve"><value>Mostrar archivo en el administrador de archivos</value></data>
+  <data name="Neue E-Mail mit dieser Datei als Anhang (Strg+E)" xml:space="preserve"><value>Nuevo correo con este archivo adjunto (Ctrl+E)</value></data>
+  <data name="Datei in einem anderen Programm öffnen (Strg+1 … Strg+9)" xml:space="preserve"><value>Abrir archivo en otro programa (Ctrl+1 … Ctrl+9)</value></data>
+  <data name="Zielordner, Programme und Optionen verwalten" xml:space="preserve"><value>Administrar carpetas de destino, programas y opciones</value></data>
+  <data name="Über PDFlight und Spenden (F1)" xml:space="preserve"><value>Acerca de PDFlight y donaciones (F1)</value></data>
+  <data name="Seitenzahl, Dateigröße und Änderungsdatum der angezeigten Datei" xml:space="preserve"><value>Número de páginas, tamaño y fecha de modificación del archivo mostrado</value></data>
+  <data name="Tooltip.Open" xml:space="preserve"><value>Abrir archivo PDF (Ctrl+O)
+Flecha: archivos recientes</value></data>
+  <data name="Tooltip.Move" xml:space="preserve"><value>Mover a una carpeta (Ctrl+M)
+Ctrl+clic: directamente a la primera carpeta de destino
+Flecha: lista de destinos</value></data>
+  <data name="Tooltip.Edit" xml:space="preserve"><value>Editar documento: eliminar/girar páginas, anexar PDF,
+extraer páginas, propiedades (atajos en el menú)</value></data>
+  <data name="Tooltip.StatusIndex" xml:space="preserve"><value>Posición del archivo mostrado entre los archivos PDF de la carpeta
+(navegar con Ctrl+Mayús+← / →)</value></data>
+  <data name="Strg+" xml:space="preserve"><value>Ctrl+</value></data>
+  <data name="Strg+O" xml:space="preserve"><value>Ctrl+O</value></data>
+  <data name="Strg+M" xml:space="preserve"><value>Ctrl+M</value></data>
+  <data name="Strg+K" xml:space="preserve"><value>Ctrl+K</value></data>
+  <data name="Strg+E" xml:space="preserve"><value>Ctrl+E</value></data>
+  <data name="Strg+F" xml:space="preserve"><value>Ctrl+F</value></data>
+  <data name="Strg+P" xml:space="preserve"><value>Ctrl+P</value></data>
+  <data name="Strg+R" xml:space="preserve"><value>Ctrl+R</value></data>
+  <data name="Strg+Z" xml:space="preserve"><value>Ctrl+Z</value></data>
+  <data name="Strg+I" xml:space="preserve"><value>Ctrl+I</value></data>
+  <data name="Strg+X" xml:space="preserve"><value>Ctrl+X</value></data>
+  <data name="Strg+Entf" xml:space="preserve"><value>Ctrl+Supr</value></data>
+  <data name="Strg+Umschalt+Entf" xml:space="preserve"><value>Ctrl+Mayús+Supr</value></data>
+  <data name="Strg+Umschalt+← / →" xml:space="preserve"><value>Ctrl+Mayús+← / →</value></data>
+  <data name="Strg+1 … 9" xml:space="preserve"><value>Ctrl+1 … 9</value></data>
+  <data name="Bild ↑ / Bild ↓" xml:space="preserve"><value>RePág / AvPág</value></data>
+  <data name="2× Esc / Umschalt+Esc" xml:space="preserve"><value>2× Esc / Mayús+Esc</value></data>
+  <data name="Strg+Eingabe" xml:space="preserve"><value>Ctrl+Entrar</value></data>
+  <data name="Eingabe" xml:space="preserve"><value>Entrar</value></data>
+  <data name="Entf" xml:space="preserve"><value>Supr</value></data>
+
+  <!-- MainForm: Meldungen und Dialoge -->
+  <data name="Die WebView2-Runtime ist nicht installiert." xml:space="preserve"><value>El runtime de WebView2 no está instalado.</value></data>
+  <data name="Bitte installieren Sie sie über:" xml:space="preserve"><value>Instálelo desde:</value></data>
+  <data name="Die PDF-Anzeige (WebView2) konnte nicht gestartet werden." xml:space="preserve"><value>No se pudo iniciar el visor PDF (WebView2).</value></data>
+  <data name="Die Datei konnte nicht geladen werden." xml:space="preserve"><value>No se pudo cargar el archivo.</value></data>
+  <data name="PDF-Dateien (*.pdf)|*.pdf" xml:space="preserve"><value>Archivos PDF (*.pdf)|*.pdf</value></data>
+  <data name="PDF-Datei öffnen" xml:space="preserve"><value>Abrir archivo PDF</value></data>
+  <data name="Vorheriger Ordner:" xml:space="preserve"><value>Carpeta anterior:</value></data>
+  <data name="Aktueller Ordner:" xml:space="preserve"><value>Carpeta actual:</value></data>
+  <data name="Sie möchten die {0} Datei öffnen." xml:space="preserve"><value>Quiere abrir el archivo {0}.</value></data>
+  <data name="nächste" xml:space="preserve"><value>siguiente</value></data>
+  <data name="vorherige" xml:space="preserve"><value>anterior</value></data>
+  <data name="Welcher Ordner soll durchsucht werden?" xml:space="preserve"><value>¿Qué carpeta se debe examinar?</value></data>
+  <data name="Wenn Sie abbrechen, wird der aktuelle Ordner verwendet." xml:space="preserve"><value>Si cancela, se usará la carpeta actual.</value></data>
+  <data name="Der Ordner enthält keine PDF-Dateien." xml:space="preserve"><value>La carpeta no contiene archivos PDF.</value></data>
+  <data name="Der Ordner enthält keine weiteren PDF-Dateien." xml:space="preserve"><value>La carpeta no contiene más archivos PDF.</value></data>
+  <data name="Der Zielordner existiert nicht." xml:space="preserve"><value>La carpeta de destino no existe.</value></data>
+  <data name="Die Datei befindet sich bereits in diesem Ordner." xml:space="preserve"><value>El archivo ya está en esta carpeta.</value></data>
+  <data name="Kopiert nach:" xml:space="preserve"><value>Copiado a:</value></data>
+  <data name="Kopieren fehlgeschlagen." xml:space="preserve"><value>Error al copiar.</value></data>
+  <data name="Verschieben fehlgeschlagen." xml:space="preserve"><value>Error al mover.</value></data>
+  <data name="&amp;Ersetzen" xml:space="preserve"><value>&amp;Reemplazar</value></data>
+  <data name="Die vorhandene Datei ersetzen" xml:space="preserve"><value>Reemplazar el archivo existente</value></data>
+  <data name="&amp;Umbenennen" xml:space="preserve"><value>Re&amp;nombrar</value></data>
+  <data name="Eine neue Datei erstellen:" xml:space="preserve"><value>Crear un archivo nuevo:</value></data>
+  <data name="Im Ziel ist bereits eine Datei mit diesem Namen vorhanden." xml:space="preserve"><value>El destino ya contiene un archivo con este nombre.</value></data>
+  <data name="Dateikopie:" xml:space="preserve"><value>Copia del archivo:</value></data>
+  <data name="Originaldatei:" xml:space="preserve"><value>Archivo original:</value></data>
+  <data name="Welche Datei soll geöffnet werden?" xml:space="preserve"><value>¿Qué archivo se debe abrir?</value></data>
+  <data name="Vorhandene Datei öffnen" xml:space="preserve"><value>Abrir archivo existente</value></data>
+  <data name="Aktuelle Datei löschen" xml:space="preserve"><value>Eliminar archivo actual</value></data>
+  <data name="Folgende Datei scheint identisch zu sein." xml:space="preserve"><value>El siguiente archivo parece idéntico.</value></data>
+  <data name="Löschen fehlgeschlagen." xml:space="preserve"><value>Error al eliminar.</value></data>
+  <data name="Umbenennen fehlgeschlagen." xml:space="preserve"><value>Error al renombrar.</value></data>
+  <data name="In den Papierkorb verschieben?" xml:space="preserve"><value>¿Mover a la papelera?</value></data>
+  <data name="Immer fragen" xml:space="preserve"><value>Preguntar siempre</value></data>
+  <data name="E-Mail wird erstellt (MAPI) …" xml:space="preserve"><value>Creando correo (MAPI)…</value></data>
+  <data name="Die E-Mail konnte nicht erstellt werden." xml:space="preserve"><value>No se pudo crear el correo.</value></data>
+  <data name="{0} fehlgeschlagen." xml:space="preserve"><value>Error: {0}.</value></data>
+  <data name="Die Datei kann nicht bearbeitet werden." xml:space="preserve"><value>El archivo no se puede editar.</value></data>
+  <data name="Möglicherweise ist sie verschlüsselt oder beschädigt." xml:space="preserve"><value>Puede estar cifrado o dañado.</value></data>
+  <data name="Die Datei hat nur eine Seite." xml:space="preserve"><value>El archivo tiene solo una página.</value></data>
+  <data name="Zum Löschen der ganzen Datei benutzen Sie den Papierkorb (Strg+Umschalt+Entf)." xml:space="preserve"><value>Para eliminar el archivo completo, use la papelera (Ctrl+Mayús+Supr).</value></data>
+  <data name="Seiten löschen" xml:space="preserve"><value>Eliminar páginas</value></data>
+  <data name="Mindestens eine Seite muss erhalten bleiben." xml:space="preserve"><value>Debe conservarse al menos una página.</value></data>
+  <data name="Seite {0} wurde gelöscht." xml:space="preserve"><value>Se eliminó la página {0}.</value></data>
+  <data name="{0} Seiten wurden gelöscht." xml:space="preserve"><value>Se eliminaron {0} páginas.</value></data>
+  <data name="Seiten drehen" xml:space="preserve"><value>Girar páginas</value></data>
+  <data name="Alle Seiten wurden gedreht." xml:space="preserve"><value>Se giraron todas las páginas.</value></data>
+  <data name="Seite {0} wurde gedreht." xml:space="preserve"><value>Se giró la página {0}.</value></data>
+  <data name="{0} Seiten wurden gedreht." xml:space="preserve"><value>Se giraron {0} páginas.</value></data>
+  <data name="PDF-Datei anhängen" xml:space="preserve"><value>Anexar archivo PDF</value></data>
+  <data name="Die Datei kann nicht an sich selbst angehängt werden." xml:space="preserve"><value>El archivo no se puede anexar a sí mismo.</value></data>
+  <data name="Anhängen" xml:space="preserve"><value>Anexar</value></data>
+  <data name="&quot;{0}&quot; wurde angehängt." xml:space="preserve"><value>"{0}" se anexó.</value></data>
+  <data name="Seiten extrahieren" xml:space="preserve"><value>Extraer páginas</value></data>
+  <data name="Auszug speichern" xml:space="preserve"><value>Guardar extracto</value></data>
+  <data name="{0} – Auszug.pdf" xml:space="preserve"><value>{0} – extracto.pdf</value></data>
+  <data name="Der Auszug kann die geöffnete Datei nicht überschreiben." xml:space="preserve"><value>El extracto no puede sobrescribir el archivo abierto.</value></data>
+  <data name="Auszug gespeichert:" xml:space="preserve"><value>Extracto guardado:</value></data>
+  <data name="Extrahieren fehlgeschlagen." xml:space="preserve"><value>Error al extraer.</value></data>
+  <data name="Speichern der Eigenschaften" xml:space="preserve"><value>Guardar las propiedades</value></data>
+  <data name="Die Dokumenteigenschaften wurden gespeichert." xml:space="preserve"><value>Se guardaron las propiedades del documento.</value></data>
+  <data name="Rückgängig fehlgeschlagen." xml:space="preserve"><value>Error al deshacer.</value></data>
+  <data name="Die letzte Änderung wurde rückgängig gemacht." xml:space="preserve"><value>Se deshizo el último cambio.</value></data>
+  <data name="Das Programm konnte nicht gestartet werden." xml:space="preserve"><value>No se pudo iniciar el programa.</value></data>
+
+  <!-- Über-Dialog und Updatesuche -->
+  <data name="unbekannt" xml:space="preserve"><value>desconocida</value></data>
+  <data name="nicht gefunden" xml:space="preserve"><value>no encontrado</value></data>
+  <data name="Über" xml:space="preserve"><value>Acerca de</value></data>
+  <data name="About.Text" xml:space="preserve"><value>PDFlight es un visor con operaciones de archivo
+integradas (mover, copiar, eliminar, renombrar, enviar).
+Las carpetas de destino frecuentes se guardan en una
+lista, de modo que los archivos se mueven en un instante
+sin salir del programa. Además, se pueden quitar páginas
+del PDF o extraerlas a un archivo nuevo, y se puede
+anexar otro archivo PDF.</value></data>
+  <data name="Anerkennung spenden via PayPal" xml:space="preserve"><value>Donar mediante PayPal</value></data>
+  <data name="Jetzt nach einem Update suchen" xml:space="preserve"><value>Buscar una actualización ahora</value></data>
+  <data name="Tastenkürzel anzeigen" xml:space="preserve"><value>Mostrar atajos de teclado</value></data>
+  <data name="Tastenkürzel ausblenden" xml:space="preserve"><value>Ocultar atajos de teclado</value></data>
+  <data name="Tastenkürzel" xml:space="preserve"><value>Atajos de teclado</value></data>
+  <data name="PDFlightSetup.exe herunterladen" xml:space="preserve"><value>Descargar PDFlightSetup.exe</value></data>
+  <data name="Download.Detail" xml:space="preserve"><value>PDFlightSetup.exe se guardará en la carpeta de
+Descargas. Ejecute el programa de instalación
+para instalar la última versión.</value></data>
+  <data name="{0} ist auf dem neuesten Stand." xml:space="preserve"><value>{0} está actualizado.</value></data>
+  <data name="Die Update-Suche ist fehlgeschlagen." xml:space="preserve"><value>La búsqueda de actualización falló.</value></data>
+  <data name="Die Update-Informationen wurden nicht gefunden." xml:space="preserve"><value>No se encontró la información de actualización.</value></data>
+  <data name="Zeitüberschreitung — bitte prüfen Sie die Internetverbindung." xml:space="preserve"><value>Tiempo de espera agotado: compruebe su conexión a Internet.</value></data>
+  <data name="Die Versionsangabe in der Update-Datei konnte nicht gelesen werden." xml:space="preserve"><value>No se pudo leer la versión del archivo de actualización.</value></data>
+  <data name="Es steht ein Update zur Verfügung!" xml:space="preserve"><value>¡Hay una actualización disponible!</value></data>
+  <data name="vom" xml:space="preserve"><value>del</value></data>
+  <data name="Technische Details anzeigen" xml:space="preserve"><value>Mostrar detalles técnicos</value></data>
+  <data name="Details ausblenden" xml:space="preserve"><value>Ocultar detalles</value></data>
+  <data name="Ungültiger Link!" xml:space="preserve"><value>¡Enlace no válido!</value></data>
+  <data name="'{0}' ist keine gültige URL." xml:space="preserve"><value>'{0}' no es una URL válida.</value></data>
+  <data name="Der Link konnte nicht geöffnet werden." xml:space="preserve"><value>No se pudo abrir el enlace.</value></data>
+  <data name="vorherige / nächste Datei des Ordners" xml:space="preserve"><value>archivo anterior / siguiente de la carpeta</value></data>
+  <data name="im Dokument blättern" xml:space="preserve"><value>desplazarse por el documento</value></data>
+  <data name="verschieben (Strg+Klick: erster Zielordner)" xml:space="preserve"><value>mover (Ctrl+clic: primera carpeta de destino)</value></data>
+  <data name="Datei kopieren" xml:space="preserve"><value>copiar archivo</value></data>
+  <data name="Datei umbenennen" xml:space="preserve"><value>renombrar archivo</value></data>
+  <data name="Datei in den Papierkorb" xml:space="preserve"><value>archivo a la papelera</value></data>
+  <data name="Seiten als neue Datei extrahieren" xml:space="preserve"><value>extraer páginas a un archivo nuevo</value></data>
+  <data name="Dokumentänderung rückgängig" xml:space="preserve"><value>deshacer cambio del documento</value></data>
+  <data name="Dokumenteigenschaften" xml:space="preserve"><value>Propiedades del documento</value></data>
+  <data name="Windows-Dateieigenschaften" xml:space="preserve"><value>Propiedades de archivo de Windows</value></data>
+  <data name="als E-Mail-Anhang senden" xml:space="preserve"><value>enviar como adjunto de correo</value></data>
+  <data name="in externem Programm öffnen" xml:space="preserve"><value>abrir en programa externo</value></data>
+  <data name="im Dokument suchen" xml:space="preserve"><value>buscar en el documento</value></data>
+  <data name="drucken" xml:space="preserve"><value>imprimir</value></data>
+  <data name="Vollbild ein/aus" xml:space="preserve"><value>pantalla completa sí/no</value></data>
+  <data name="Programm beenden (Option)" xml:space="preserve"><value>cerrar el programa (opción)</value></data>
+  <data name="dieser Dialog" xml:space="preserve"><value>este diálogo</value></data>
+
+  <!-- Umbenennen-Dialog -->
+  <data name="&amp;Neuer Dateiname:" xml:space="preserve"><value>&amp;Nuevo nombre de archivo:</value></data>
+  <data name="&amp;Umwandeln  ▾" xml:space="preserve"><value>&amp;Transformar  ▾</value></data>
+  <data name="&amp;Datum  ▾" xml:space="preserve"><value>&amp;Fecha  ▾</value></data>
+  <data name="Leerzeichen → Unterstriche" xml:space="preserve"><value>Espacios → guiones bajos</value></data>
+  <data name="Leerzeichen → Bindestriche" xml:space="preserve"><value>Espacios → guiones</value></data>
+  <data name="alles kleinschreiben" xml:space="preserve"><value>todo en minúsculas</value></data>
+  <data name="Wortanfänge großschreiben" xml:space="preserve"><value>Mayúscula En Cada Palabra</value></data>
+  <data name="Umlaute &amp;&amp; Akzente ersetzen" xml:space="preserve"><value>Reemplazar diéresis &amp;&amp; acentos</value></data>
+  <data name="PDF-Dateien im Ordner:" xml:space="preserve"><value>Archivos PDF en la carpeta:</value></data>
+  <data name="Alphabetisch sortieren (F5)" xml:space="preserve"><value>Ordenar alfabéticamente (F5)</value></data>
+  <data name="Datum" xml:space="preserve"><value>Fecha</value></data>
+  <data name="Nach Änderungsdatum sortieren (F6)" xml:space="preserve"><value>Ordenar por fecha de modificación (F6)</value></data>
+  <data name="Änderungsdatum (neu → alt)" xml:space="preserve"><value>Fecha de modificación (nuevo → antiguo)</value></data>
+  <data name="Änderungsdatum (alt → neu)" xml:space="preserve"><value>Fecha de modificación (antiguo → nuevo)</value></data>
+  <data name="Namen übernehmen" xml:space="preserve"><value>Aplicar nombre</value></data>
+  <data name="In neuem Fenster öffnen" xml:space="preserve"><value>Abrir en ventana nueva</value></data>
+  <data name="In den Papierkorb" xml:space="preserve"><value>A la papelera</value></data>
+  <data name="Doppelklick oder Eingabe übernimmt einen Namen aus der Liste." xml:space="preserve"><value>Doble clic o Entrar aplica un nombre de la lista.</value></data>
+  <data name="Der Name enthält ungültige Zeichen." xml:space="preserve"><value>El nombre contiene caracteres no válidos.</value></data>
+  <data name="Diese werden entfernt …" xml:space="preserve"><value>Se eliminarán…</value></data>
+  <data name="Vorhandene Datei ersetzen?" xml:space="preserve"><value>¿Reemplazar el archivo existente?</value></data>
+  <data name="Eine Datei gleichen Namens ist bereits vorhanden. Sie wird in den Papierkorb verschoben." xml:space="preserve"><value>Ya existe un archivo con el mismo nombre. Se moverá a la papelera.</value></data>
+  <data name="Die vorhandene Datei konnte nicht ersetzt werden." xml:space="preserve"><value>No se pudo reemplazar el archivo existente.</value></data>
+  <data name="PDFlight konnte nicht gestartet werden." xml:space="preserve"><value>No se pudo iniciar PDFlight.</value></data>
+  <data name="Zielordner für die umbenannte Datei" xml:space="preserve"><value>Carpeta de destino para el archivo renombrado</value></data>
+  <data name="Der Ordner konnte nicht geöffnet werden." xml:space="preserve"><value>No se pudo abrir la carpeta.</value></data>
+  <data name="Der angegebene Pfad existiert nicht." xml:space="preserve"><value>La ruta indicada no existe.</value></data>
+
+  <!-- Ordnerdialog -->
+  <data name="&amp;Zielliste:" xml:space="preserve"><value>Lista de &amp;destinos:</value></data>
+  <data name="Zuletzt:" xml:space="preserve"><value>Recientes:</value></data>
+  <data name="KOPIEREN: Wählen Sie einen Ordner ..." xml:space="preserve"><value>COPIAR: Elija una carpeta ...</value></data>
+  <data name="VERSCHIEBEN: Wählen Sie einen Ordner ..." xml:space="preserve"><value>MOVER: Elija una carpeta ...</value></data>
+  <data name="Neuer Ordner (Strg+N)" xml:space="preserve"><value>Nueva carpeta (Ctrl+N)</value></data>
+  <data name="Neuer Ordner" xml:space="preserve"><value>Nueva carpeta</value></data>
+  <data name="Der Ordner konnte nicht erstellt werden." xml:space="preserve"><value>No se pudo crear la carpeta.</value></data>
+  <data name="Der Ordner konnte nicht umbenannt werden." xml:space="preserve"><value>No se pudo renombrar la carpeta.</value></data>
+  <data name="Strg+H" xml:space="preserve"><value>Ctrl+H</value></data>
+  <data name="Strg+L" xml:space="preserve"><value>Ctrl+L</value></data>
+  <data name="Strg+N" xml:space="preserve"><value>Ctrl+N</value></data>
+  <data name="Strg+Links" xml:space="preserve"><value>Ctrl+Izquierda</value></data>
+  <data name="Strg+Rechts" xml:space="preserve"><value>Ctrl+Derecha</value></data>
+  <data name="Strg+Unten" xml:space="preserve"><value>Ctrl+Abajo</value></data>
+  <data name="Strg+Oben" xml:space="preserve"><value>Ctrl+Arriba</value></data>
+  <data name="Einen Schritt zurück im Verlauf." xml:space="preserve"><value>Un paso atrás en el historial.</value></data>
+  <data name="Einen Schritt vor im Verlauf." xml:space="preserve"><value>Un paso adelante en el historial.</value></data>
+  <data name="Verlaufsliste anzeigen." xml:space="preserve"><value>Mostrar el historial.</value></data>
+  <data name="In den übergeordneten Ordner wechseln." xml:space="preserve"><value>Ir a la carpeta superior.</value></data>
+  <data name="Versteckte Ordner ein-/ausblenden." xml:space="preserve"><value>Mostrar u ocultar carpetas ocultas.</value></data>
+  <data name="Zum zuletzt verwendeten Ordner springen." xml:space="preserve"><value>Ir a la última carpeta usada.</value></data>
+  <data name="Neuen Ordner anlegen." xml:space="preserve"><value>Crear una carpeta nueva.</value></data>
+  <data name="Auswahl übernehmen." xml:space="preserve"><value>Aplicar la selección.</value></data>
+
+  <!-- Seitenbereich-Dialog -->
+  <data name="&amp;Seiten (1–{0}):" xml:space="preserve"><value>&amp;Páginas (1–{0}):</value></data>
+  <data name="z.B.  3   oder   2-5, 8" xml:space="preserve"><value>p.ej.  3   o   2-5, 8</value></data>
+  <data name="leer = alle Seiten" xml:space="preserve"><value>vacío = todas las páginas</value></data>
+  <data name="Drehung" xml:space="preserve"><value>Rotación</value></data>
+  <data name="90° &amp;rechts" xml:space="preserve"><value>90° a la &amp;derecha</value></data>
+  <data name="90° &amp;links" xml:space="preserve"><value>90° a la &amp;izquierda</value></data>
+  <data name="Ungültige Seitenangabe" xml:space="preserve"><value>Especificación de páginas no válida</value></data>
+  <data name="Bitte geben Sie gültige Seiten zwischen 1 und {0} an," xml:space="preserve"><value>Indique páginas válidas entre 1 y {0},</value></data>
+  <data name="z.B.  3  oder  2-5, 8" xml:space="preserve"><value>p.ej.  3  o  2-5, 8</value></data>
+
+  <!-- Dokumenteigenschaften-Dialog -->
+  <data name="Datei:" xml:space="preserve"><value>Archivo:</value></data>
+  <data name="&amp;Titel:" xml:space="preserve"><value>&amp;Título:</value></data>
+  <data name="&amp;Autor:" xml:space="preserve"><value>&amp;Autor:</value></data>
+  <data name="&amp;Betreff:" xml:space="preserve"><value>A&amp;sunto:</value></data>
+  <data name="&amp;Stichwörter:" xml:space="preserve"><value>&amp;Palabras clave:</value></data>
+  <data name="Speichern" xml:space="preserve"><value>Guardar</value></data>
+  <data name="geändert" xml:space="preserve"><value>modificado</value></data>
+  <data name="Anwendung:" xml:space="preserve"><value>Aplicación:</value></data>
+  <data name="PDF-Produzent:" xml:space="preserve"><value>Productor de PDF:</value></data>
+</root>
