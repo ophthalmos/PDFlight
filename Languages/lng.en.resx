@@ -112,7 +112,7 @@ extract pages, properties (shortcuts in the menu)</value></data>
   <data name="Strg+I" xml:space="preserve"><value>Ctrl+I</value></data>
   <data name="Strg+X" xml:space="preserve"><value>Ctrl+X</value></data>
   <data name="Strg+Entf" xml:space="preserve"><value>Ctrl+Del</value></data>
-  <data name="Strg+Umschalt+K" xml:space="preserve"><value>Ctrl+Shift+K</value></data>
+  <data name="Strg+Umschalt+C" xml:space="preserve"><value>Ctrl+Shift+C</value></data>
   <data name="Dateipfad in die Zwischenablage kopieren" xml:space="preserve"><value>copy file path to the clipboard</value></data>
   <data name="Der Dateipfad wurde in die Zwischenablage kopiert." xml:space="preserve"><value>The file path was copied to the clipboard.</value></data>
   <data name="Kopieren in die Zwischenablage fehlgeschlagen." xml:space="preserve"><value>Copying to the clipboard failed.</value></data>

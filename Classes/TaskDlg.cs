@@ -247,7 +247,7 @@ internal static class TaskDlg
         ("Strg+Z", "Dokumentänderung rückgängig machen", null),
         ("Strg+I", "Dokumenteigenschaften", null),
         ("Alt+Enter", "Windows-Dateieigenschaften", null),
-        ("Strg+Umschalt+K", "Dateipfad in die Zwischenablage kopieren", null),
+        ("Strg+Umschalt+C", "Dateipfad in die Zwischenablage kopieren", null),
         ("Strg+E", "als E-Mail-Anhang senden", null),
         ("Strg+1 … 9", "in externem Programm öffnen", null),
         ("Strg+,", "Einstellungen öffnen", null),
