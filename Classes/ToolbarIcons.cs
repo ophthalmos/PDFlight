@@ -34,6 +34,8 @@ internal static class ToolbarIcons
     public const char Lock = '\uE72E';         // Kennwort vergeben
     public const char Unlock = '\uE785';       // Kennwort entfernen
     public const char Clear = '\uE894';        // Liste leeren
+    public const char Keyboard = '\uE765';     // Tastenkürzel-Menüpunkt
+    public const char UpdateSearch = '\uE777'; // UpdateRestore: nach Updates suchen
 
     private const string FontName = "Segoe MDL2 Assets";
     private static readonly Dictionary<(char Glyph, int Size), Image> cache = [];

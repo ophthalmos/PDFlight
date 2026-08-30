@@ -62,7 +62,11 @@
             ddbPrograms = new ToolStripDropDownButton();
             toolStripSeparator5 = new ToolStripSeparator();
             btnSettings = new ToolStripButton();
-            btnInfo = new ToolStripButton();
+            ddbInfo = new ToolStripDropDownButton();
+            mnuShortcuts = new ToolStripMenuItem();
+            mnuCheckUpdate = new ToolStripMenuItem();
+            toolStripSeparator11 = new ToolStripSeparator();
+            mnuAbout = new ToolStripMenuItem();
             statusStrip = new StatusStrip();
             statusIndex = new ToolStripStatusLabel();
             statusPath = new ToolStripStatusLabel();
@@ -88,7 +92,7 @@
             // toolStrip
             // 
             toolStrip.GripStyle = ToolStripGripStyle.Hidden;
-            toolStrip.Items.AddRange(new ToolStripItem[] { btnOpen, toolStripSeparator1, btnPrev, btnNext, toolStripSeparator2, splitButtonMove, btnCopy, toolStripSeparator3, btnRename, btnDelete, btnShowInFolder, toolStripSeparator8, btnPrint, btnEmail, toolStripSeparator4, ddbEdit, toolStripSeparator9, ddbPrograms, toolStripSeparator5, btnSettings, btnInfo });
+            toolStrip.Items.AddRange(new ToolStripItem[] { btnOpen, toolStripSeparator1, btnPrev, btnNext, toolStripSeparator2, splitButtonMove, btnCopy, toolStripSeparator3, btnRename, btnDelete, btnShowInFolder, toolStripSeparator8, btnPrint, btnEmail, toolStripSeparator4, ddbEdit, toolStripSeparator9, ddbPrograms, toolStripSeparator5, btnSettings, ddbInfo });
             toolStrip.Location = new Point(0, 0);
             toolStrip.Name = "toolStrip";
             toolStrip.Size = new Size(984, 25);
@@ -338,15 +342,42 @@
             btnSettings.ToolTipText = "Zielordner, Programme und Optionen verwalten";
             btnSettings.Click += BtnSettings_Click;
             // 
-            // btnInfo
-            // 
-            btnInfo.Alignment = ToolStripItemAlignment.Right;
-            btnInfo.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            btnInfo.Name = "btnInfo";
-            btnInfo.Size = new Size(32, 22);
-            btnInfo.Text = "Info";
-            btnInfo.ToolTipText = "Über PDFlight und Spenden (F1)";
-            btnInfo.Click += BtnInfo_Click;
+            // ddbInfo
+            //
+            ddbInfo.Alignment = ToolStripItemAlignment.Right;
+            ddbInfo.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            ddbInfo.DropDownItems.AddRange(new ToolStripItem[] { mnuShortcuts, mnuCheckUpdate, toolStripSeparator11, mnuAbout });
+            ddbInfo.Name = "ddbInfo";
+            ddbInfo.Size = new Size(32, 22);
+            ddbInfo.Text = "Info";
+            ddbInfo.ToolTipText = "Tastenkürzel, Updates und Über PDFlight";
+            //
+            // mnuShortcuts
+            //
+            mnuShortcuts.Name = "mnuShortcuts";
+            mnuShortcuts.ShortcutKeyDisplayString = "F1";
+            mnuShortcuts.Size = new Size(233, 22);
+            mnuShortcuts.Text = "Tastenkürzel …";
+            mnuShortcuts.Click += MnuShortcuts_Click;
+            //
+            // mnuCheckUpdate
+            //
+            mnuCheckUpdate.Name = "mnuCheckUpdate";
+            mnuCheckUpdate.Size = new Size(233, 22);
+            mnuCheckUpdate.Text = "Nach Updates suchen …";
+            mnuCheckUpdate.Click += MnuCheckUpdate_Click;
+            //
+            // toolStripSeparator11
+            //
+            toolStripSeparator11.Name = "toolStripSeparator11";
+            toolStripSeparator11.Size = new Size(230, 6);
+            //
+            // mnuAbout
+            //
+            mnuAbout.Name = "mnuAbout";
+            mnuAbout.Size = new Size(233, 22);
+            mnuAbout.Text = "Über PDFlight …";
+            mnuAbout.Click += MnuAbout_Click;
             // 
             // statusStrip
             // 
@@ -448,7 +479,11 @@
         private System.Windows.Forms.ToolStripButton btnShowInFolder;
         private System.Windows.Forms.ToolStripButton btnPrint;
         private System.Windows.Forms.ToolStripButton btnSettings;
-        private System.Windows.Forms.ToolStripButton btnInfo;
+        private System.Windows.Forms.ToolStripDropDownButton ddbInfo;
+        private System.Windows.Forms.ToolStripMenuItem mnuShortcuts;
+        private System.Windows.Forms.ToolStripMenuItem mnuCheckUpdate;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator11;
+        private System.Windows.Forms.ToolStripMenuItem mnuAbout;
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel statusIndex;
         private System.Windows.Forms.ToolStripStatusLabel statusPath;
