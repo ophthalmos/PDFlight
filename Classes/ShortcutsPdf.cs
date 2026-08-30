@@ -31,14 +31,16 @@ internal static partial class ShortcutsPdf
 
         var page = document.AddPage();
         var gfx = XGraphics.FromPdfPage(page);
+        DrawPageBackground(gfx, page);
         var width = page.Width.Point - 2 * Margin;
         var y = Margin;
-        DrawAppIcon(gfx, page.Width.Point - Margin); // Programm-Icon rechts auf Höhe der Überschrift
+        var iconHeight = DrawAppIcon(gfx, page.Width.Point - Margin); // Programm-Icon rechts oben, 128 px unskaliert
         gfx.DrawString(Application.ProductName + " – " + Lng.T("Tastenkürzel"), titleFont, XBrushes.Black, Margin, y + 17);
         y += 26;
         var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3);
         gfx.DrawString("Version " + version + " – " + DateTime.Now.ToString("d", System.Globalization.CultureInfo.GetCultureInfo(Lng.CultureCode)), subFont, detailBrush, Margin, y + 9);
         y += 30;
+        y = Math.Max(y, Margin - 4 + iconHeight + 14); // die Kürzelzeilen beginnen unterhalb des Icons
 
         foreach (var (key, text, detail) in TaskDlg.ShortcutRows)
         {
@@ -51,6 +53,7 @@ internal static partial class ShortcutsPdf
                 gfx.Dispose();
                 page = document.AddPage();
                 gfx = XGraphics.FromPdfPage(page);
+                DrawPageBackground(gfx, page);
                 y = Margin;
             }
             gfx.DrawString(Lng.T(key), keyFont, XBrushes.Black, Margin, y + 11);
@@ -71,11 +74,18 @@ internal static partial class ShortcutsPdf
         return path;
     }
 
-    /// <summary>Zeichnet das 128-px-Programm-Icon (aus der EXE extrahiert) rechtsbündig neben die
-    /// Überschrift; ohne Icon erscheint die Übersicht einfach ohne Grafik.</summary>
+    /// <summary>Dezent hellblauer Seitenhintergrund.</summary>
+    private static void DrawPageBackground(XGraphics gfx, PdfSharp.Pdf.PdfPage page)
+    {
+        gfx.DrawRectangle(new XSolidBrush(XColor.FromArgb(0xF1, 0xF6, 0xFB)), 0, 0, page.Width.Point, page.Height.Point);
+    }
+
     internal static string IconDiag = "nicht aufgerufen"; // nur für die Test-Diagnose
 
-    private static void DrawAppIcon(XGraphics gfx, double rightEdge)
+    /// <summary>Zeichnet das 128-px-Programm-Icon (aus der EXE extrahiert) rechts oben in seiner
+    /// natürlichen Größe — unskaliert, damit PDFsharp keine Unschärfe hineinrechnet. Liefert die
+    /// gezeichnete Höhe in Punkt (0 ohne Icon).</summary>
+    private static double DrawAppIcon(XGraphics gfx, double rightEdge)
     {
         // Quelle ist die PDFlight-EXE neben der Programm-Assembly (identisch mit ExecutablePath,
         // wenn PDFlight selbst läuft — aber auch aus Test-Treibern heraus korrekt)
@@ -83,19 +93,22 @@ internal static partial class ShortcutsPdf
         if (!File.Exists(iconSource)) { iconSource = Application.ExecutablePath; }
         var hr = SHDefExtractIcon(iconSource, 0, 0, out var hIcon, out var hIconSmall, 128);
         if (hIconSmall != 0) { _ = DestroyIcon(hIconSmall); }
-        if (hr != 0 || hIcon == 0) { IconDiag = $"hr={hr} hIcon={hIcon}"; return; }
+        if (hr != 0 || hIcon == 0) { IconDiag = $"hr={hr} hIcon={hIcon}"; return 0; }
         try
         {
             using var icon = Icon.FromHandle(hIcon);
             using var bitmap = icon.ToBitmap();
             using var image = XImage.FromGdiPlusImage(bitmap);
-            const double edge = 42; // Druckgröße in Punkt
-            gfx.DrawImage(image, rightEdge - edge, Margin - 4, edge, edge);
+            // ohne Zielmaße zeichnet PDFsharp in der natürlichen Punktgröße des Bildes
+            // (128 px bei 96 dpi = 96 pt) — pixelgenau, keine Skalierungsunschärfe
+            gfx.DrawImage(image, rightEdge - image.PointWidth, Margin - 4);
             IconDiag = "gezeichnet";
+            return image.PointHeight;
         }
         catch (Exception ex) when (ex is ArgumentException or InvalidOperationException or System.Runtime.InteropServices.ExternalException)
         {
             IconDiag = ex.GetType().Name + ": " + ex.Message;
+            return 0;
         }
         finally { _ = DestroyIcon(hIcon); }
     }
