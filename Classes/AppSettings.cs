@@ -19,7 +19,6 @@ public class AppSettings
     public bool LargeToolbarIcons { get; set; } = true;   // 24 statt 16 Pixel (vor DPI-Skalierung)
     public bool CloseOnEscape { get; set; }               // Programm mit 2× Esc beenden (Shift+Esc sofort)
     public bool ReopenLastFile { get; set; }              // zuletzt geöffnete Datei beim Start laden
-    public bool TwoPageLayout { get; set; }               // zweiseitige Viewer-Ansicht nach jedem Dokumentladen einstellen
     public string Language { get; set; } = "de";          // Kultur-Code; Sprachen liegen als Languages\lng.<code>.resx bereit
     public string InstallerLanguage { get; set; } = string.Empty; // zuletzt übernommene Setup-Sprachwahl (s. ApplyInstallerLanguage)
     public string LastFile { get; set; } = string.Empty;  // Datei, die beim Beenden geöffnet war
