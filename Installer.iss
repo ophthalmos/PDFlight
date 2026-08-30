@@ -38,6 +38,8 @@ DirExistsWarning=no
 CloseApplications=yes
 SetupMutex={#appName}_SetupMutex
 WizardStyle=modern
+; HKCU wird bewusst benutzt (nur Deinstallations-Vormerkung der ProgID, die das Programm selbst schreibt)
+UsedUserAreasWarning=no
 
 [Languages]
 ; Das Setup wählt die Sprache automatisch nach der Windows-Sprache; erste = Rückfall
