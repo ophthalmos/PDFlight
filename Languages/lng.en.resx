@@ -43,6 +43,9 @@
   <data name="Neu e&amp;rkennen" xml:space="preserve"><value>&amp;Detect again</value></data>
   <data name="Die Reihenfolge bestimmt die Tastenkürzel Strg+1 bis Strg+9 im Programme-Menü." xml:space="preserve"><value>The order determines the shortcuts Ctrl+1 to Ctrl+9 in the Programs menu.</value></data>
   <data name="Programme (*.exe)|*.exe" xml:space="preserve"><value>Programs (*.exe)|*.exe</value></data>
+  <data name="Individuelle Programmeinträge gefunden" xml:space="preserve"><value>Custom program entries found</value></data>
+  <data name="Diese Programme kennt die automatische Erkennung nicht:" xml:space="preserve"><value>These programs are not part of the automatic detection:</value></data>
+  <data name="Sollen sie aus der Liste entfernt werden?" xml:space="preserve"><value>Should they be removed from the list?</value></data>
   <data name="Programm hinzufügen" xml:space="preserve"><value>Add program</value></data>
   <data name="Abbrechen" xml:space="preserve"><value>Cancel</value></data>
   <data name="&amp;Abbrechen" xml:space="preserve"><value>&amp;Cancel</value></data>

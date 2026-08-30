@@ -178,8 +178,21 @@ public partial class SettingsForm : Form
 
     private void BtnProgramDetect_Click(object sender, EventArgs e)
     {
+        var detected = ProgramFinder.DetectPrograms();
+        // von Hand hinzugefügte Einträge nicht ungefragt verwerfen
+        var custom = listPrograms.Items.Cast<string>()
+            .Where(p => !detected.Any(d => string.Equals(d, p, StringComparison.OrdinalIgnoreCase))).ToList();
+        if (custom.Count > 0)
+        {
+            var names = string.Join(Environment.NewLine, custom.Select(ProgramFinder.GetDisplayName));
+            var remove = TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Individuelle Programmeinträge gefunden"),
+                Lng.T("Diese Programme kennt die automatische Erkennung nicht:") + Environment.NewLine + names
+                + Environment.NewLine + Environment.NewLine + Lng.T("Sollen sie aus der Liste entfernt werden?"),
+                TaskDialogIcon.Warning, defaultNo: true); // Esc/Nein behält sie
+            if (!remove) { detected.AddRange(custom); }
+        }
         listPrograms.Items.Clear();
-        listPrograms.Items.AddRange([.. ProgramFinder.DetectPrograms()]);
+        listPrograms.Items.AddRange([.. detected]);
         if (listPrograms.Items.Count > 0) { listPrograms.SelectedIndex = 0; }
         UpdateProgramButtons();
     }
