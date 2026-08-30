@@ -119,7 +119,6 @@ internal static class TaskDlg
             "Seiten aus dem PDF entfernen, in eine neue Datei einfügen" + Environment.NewLine +
             "oder es kann eine andere PDF-Datei anhängt werden.");
         TaskDialogButton paypalButton = new TaskDialogCommandLinkButton(Lng.T("Anerkennung spenden via PayPal"));
-        TaskDialogButton updateButton = new TaskDialogCommandLinkButton(Lng.T("Jetzt nach einem Update suchen")) { AllowCloseDialog = false };
         using var icon32 = icon == null ? null : new Icon(icon, 32, 32); // sonst nimmt der TaskDialog die 16-px-Variante des Fenster-Icons
         var indent = new string(' ', 14);
         var foot = $"{indent}© {buildDate:yyyy} Wilhelm Happe · Version {threeVersion} ({buildDate:d})" +
@@ -133,24 +132,26 @@ internal static class TaskDlg
             Icon = icon32 == null ? null : new TaskDialogIcon(icon32),
             AllowCancel = true,
             SizeToContent = true,
-            Buttons = { paypalButton, updateButton, TaskDialogButton.OK },
+            Buttons = { paypalButton, TaskDialogButton.OK },
             DefaultButton = TaskDialogButton.OK,
-            Footnote = foot,
-            Expander = new TaskDialogExpander()
-            {
-                Text = BuildShortcutTable(),
-                CollapsedButtonText = Lng.T("Tastenkürzel anzeigen"),
-                ExpandedButtonText = Lng.T("Tastenkürzel ausblenden"),
-                Position = TaskDialogExpanderPosition.AfterFootnote
-            }
+            Footnote = foot
         };
 
-        // Updatesuche: Klick lädt die neueste GitHub-Veröffentlichung und blättert im Dialog zur Ergebnisseite (wie in Adressen)
+        var result = TaskDialog.ShowDialog(hwnd, initialPage);
+        if (result == paypalButton) { StartLink(hwnd, "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=S8DVXHKFC2CVS&source=url"); }
+    }
+
+    /// <summary>Manuelle Updatesuche (Info-Menü): lädt die XML-Datei von der Webseite des Autors
+    /// und zeigt das Ergebnis; bei einem Update mit Download-Schaltfläche.</summary>
+    public static async Task UpdateTaskDlg(nint hwnd)
+    {
+        var curVersion = Assembly.GetExecutingAssembly().GetName().Version;
+        var threeVersion = curVersion?.ToString(3) ?? Lng.T("unbekannt");
         TaskDialogButton downloadButton = new TaskDialogCommandLinkButton(Lng.T("PDFlightSetup.exe herunterladen"),
             Lng.T("Download.Detail", "PDFlightSetup.exe wird im Download-Ordner\ngespeichert. Führen Sie das Setupprogramm\naus, um die neueste Version zu installieren."));
         var updatePage = new TaskDialogPage()
         {
-            Caption = Lng.T("Über") + " " + Application.ProductName,
+            Caption = Application.ProductName,
             Heading = string.Format(Lng.T("{0} ist auf dem neuesten Stand."), Application.ProductName),
             Text = $"Version {threeVersion} (64-Bit)",
             Icon = TaskDialogIcon.Information,
@@ -159,57 +160,51 @@ internal static class TaskDlg
             Buttons = { TaskDialogButton.Close }
         };
         var urlString = WebsiteUrl; // Fallback: die Webseite, falls die XML keinen Download-Link nennt
-        updateButton.Click += async (sender, e) =>
+        Version updateVersion = null;
+        var dateString = string.Empty;
+        var failed = false;
+        Cursor.Current = Cursors.WaitCursor; // die Abfrage dauert im Normalfall unter einer Sekunde
+        try
         {
-            updateButton.Enabled = false; // um doppelte Klicks zu verhindern
-            Version updateVersion = null;
-            var dateString = string.Empty;
-            var failed = false;
-            try
-            {
-                await using var stream = await httpClient.Value.GetStreamAsync(UpdateXmlUrl);
-                var root = System.Xml.Linq.XDocument.Load(stream).Root; // Wurzelname egal — Load verkraftet auch die BOM
-                var versionString = root?.Element("version")?.Value;
-                if (Version.TryParse(versionString ?? string.Empty, out var parsed)) { updateVersion = parsed; }
-                dateString = root?.Element("date")?.Value ?? string.Empty;
-                var url64 = root?.Element("url64")?.Value;
-                if (!string.IsNullOrEmpty(url64)) { urlString = url64; }
-            }
-            catch (HttpRequestException ex)
-            {
-                failed = true;
-                updatePage.Heading = Lng.T("Die Update-Suche ist fehlgeschlagen.");
-                updatePage.Text = ex.StatusCode == HttpStatusCode.NotFound
-                    ? Lng.T("Die Update-Informationen wurden nicht gefunden.")
-                    : (ex.StatusCode != null ? $"Status-Code: {ex.StatusCode}\n" : string.Empty) + ex.Message;
-            }
-            catch (Exception ex) when (ex is TaskCanceledException or System.Xml.XmlException or InvalidOperationException)
-            {
-                failed = true;
-                updatePage.Heading = Lng.T("Die Update-Suche ist fehlgeschlagen.");
-                updatePage.Text = ex is TaskCanceledException
-                    ? Lng.T("Zeitüberschreitung — bitte prüfen Sie die Internetverbindung.")
-                    : ex.Message;
-            }
-            if (!failed && updateVersion == null)
-            {
-                failed = true;
-                updatePage.Heading = Lng.T("Die Update-Suche ist fehlgeschlagen.");
-                updatePage.Text = Lng.T("Die Versionsangabe in der Update-Datei konnte nicht gelesen werden.");
-            }
-            if (failed) { updatePage.Icon = TaskDialogIcon.Error; }
-            else if (curVersion != null && updateVersion.CompareTo(curVersion) > 0)
-            {
-                updatePage.Heading = Lng.T("Es steht ein Update zur Verfügung!");
-                updatePage.Text = "Version " + updateVersion + (dateString.Length > 0 ? " " + Lng.T("vom") + " " + dateString : string.Empty);
-                updatePage.Buttons.Add(downloadButton);
-            }
-            initialPage.Navigate(updatePage);
-        };
-
-        var result = TaskDialog.ShowDialog(hwnd, initialPage);
-        if (result == paypalButton) { StartLink(hwnd, "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=S8DVXHKFC2CVS&source=url"); }
-        else if (result == downloadButton) { StartLink(hwnd, urlString); }
+            await using var stream = await httpClient.Value.GetStreamAsync(UpdateXmlUrl);
+            var root = System.Xml.Linq.XDocument.Load(stream).Root; // Wurzelname egal — Load verkraftet auch die BOM
+            var versionString = root?.Element("version")?.Value;
+            if (Version.TryParse(versionString ?? string.Empty, out var parsed)) { updateVersion = parsed; }
+            dateString = root?.Element("date")?.Value ?? string.Empty;
+            var url64 = root?.Element("url64")?.Value;
+            if (!string.IsNullOrEmpty(url64)) { urlString = url64; }
+        }
+        catch (HttpRequestException ex)
+        {
+            failed = true;
+            updatePage.Heading = Lng.T("Die Update-Suche ist fehlgeschlagen.");
+            updatePage.Text = ex.StatusCode == HttpStatusCode.NotFound
+                ? Lng.T("Die Update-Informationen wurden nicht gefunden.")
+                : (ex.StatusCode != null ? $"Status-Code: {ex.StatusCode}\n" : string.Empty) + ex.Message;
+        }
+        catch (Exception ex) when (ex is TaskCanceledException or System.Xml.XmlException or InvalidOperationException)
+        {
+            failed = true;
+            updatePage.Heading = Lng.T("Die Update-Suche ist fehlgeschlagen.");
+            updatePage.Text = ex is TaskCanceledException
+                ? Lng.T("Zeitüberschreitung — bitte prüfen Sie die Internetverbindung.")
+                : ex.Message;
+        }
+        finally { Cursor.Current = Cursors.Default; }
+        if (!failed && updateVersion == null)
+        {
+            failed = true;
+            updatePage.Heading = Lng.T("Die Update-Suche ist fehlgeschlagen.");
+            updatePage.Text = Lng.T("Die Versionsangabe in der Update-Datei konnte nicht gelesen werden.");
+        }
+        if (failed) { updatePage.Icon = TaskDialogIcon.Error; }
+        else if (curVersion != null && updateVersion.CompareTo(curVersion) > 0)
+        {
+            updatePage.Heading = Lng.T("Es steht ein Update zur Verfügung!");
+            updatePage.Text = "Version " + updateVersion + (dateString.Length > 0 ? " " + Lng.T("vom") + " " + dateString : string.Empty);
+            updatePage.Buttons.Add(downloadButton);
+        }
+        if (TaskDialog.ShowDialog(hwnd, updatePage) == downloadButton) { StartLink(hwnd, urlString); }
     }
 
     /// <summary>Richtet zweispaltige Kürzel-Listen bündig aus: TaskDialog-Text kennt keine Tabulatoren,
@@ -231,36 +226,90 @@ internal static class TaskDlg
         return string.Join("\n", lines);
     }
 
+    /// <summary>Alle Tastenkürzel: Kürzel, Kurztext (Dialog-Tabelle) und ausführliche Erklärung (PDF-Übersicht).</summary>
+    public static readonly (string Key, string Text, string Detail)[] ShortcutRows =
+    [
+        ("Strg+O", "PDF-Datei öffnen",
+            "Öffnet den Dateiauswahl-Dialog. Der Pfeil neben der Schaltfläche listet die zuletzt geöffneten Dateien."),
+        ("Strg+Umschalt+← / →", "vorherige / nächste Datei des Ordners",
+            "Wechselt zur vorherigen bzw. nächsten PDF-Datei im Ordner der angezeigten Datei — ideal zum Abarbeiten eines Scan-Ordners."),
+        ("Bild ↑ / Bild ↓", "im Dokument blättern",
+            "Blättert innerhalb des Dokuments seitenweise vor und zurück."),
+        ("Strg+M", "verschieben (Strg+Klick: erster Zielordner)",
+            "Verschiebt die Datei in einen Ordner der Zielliste. Strg+Klick auf die Schaltfläche verschiebt sofort in den ersten Zielordner, der Pfeil öffnet die Liste."),
+        ("Strg+K", "Datei kopieren",
+            "Kopiert die Datei in einen wählbaren Ordner; die angezeigte Datei bleibt unverändert."),
+        ("F2", "Datei umbenennen",
+            "Benennt die Datei um. Der Dialog bietet Bausteine wie das Datum sowie eine gespeicherte Namensliste an."),
+        ("Strg+Umschalt+Entf", "Datei in den Papierkorb",
+            "Verschiebt die Datei in den Papierkorb. Die Sicherheitsabfrage lässt sich in den Einstellungen abschalten."),
+        ("Strg+Entf", "Seiten löschen",
+            "Löscht die angegebenen Seiten dauerhaft aus dem Dokument — rückgängig mit Strg+Z."),
+        ("Strg+R", "Seiten drehen",
+            "Dreht die angegebenen Seiten dauerhaft um 90° oder 180°; die Änderung wird sofort in der Datei gespeichert."),
+        ("Strg+Umschalt+R / L", "Ansicht drehen (ändert die Datei nicht)",
+            "Dreht nur die Bildschirmansicht rechts- bzw. linksherum. Die Datei bleibt unverändert; beim Neuladen ist die Drehung weg."),
+        ("Strg+Umschalt+I", "Inhalte-Leiste ein-/ausblenden",
+            "Öffnet oder schließt die Leiste mit den Miniaturansichten am linken Rand."),
+        ("Strg+Umschalt+B", "Seite an Fensterbreite anpassen",
+            "Wechselt zwischen den Zoomstufen „an Fensterbreite“ und „ganze Seite sichtbar“."),
+        ("Strg+G", "Gehe zu Seite (Zahl tippen + Enter)",
+            "Setzt den Cursor in das Seitenzahl-Feld der Viewer-Leiste. Seitenzahl eintippen und mit Enter springen."),
+        ("Strg+X", "Seiten als neue Datei extrahieren",
+            "Speichert die angegebenen Seiten als neue PDF-Datei; das Original bleibt unverändert."),
+        ("Strg+Z", "Dokumentänderung rückgängig",
+            "Macht die letzte Dokumentänderung rückgängig — etwa Seiten löschen/drehen, Anhängen oder eine Kennwort-Änderung."),
+        ("Strg+I", "Dokumenteigenschaften",
+            "Zeigt Titel, Autor, Betreff und Stichwörter (editierbar) sowie PDF-Version und erzeugendes Programm."),
+        ("Alt+Enter", "Windows-Dateieigenschaften",
+            "Öffnet das Eigenschaften-Fenster der Datei, wie man es aus dem Windows-Explorer kennt."),
+        ("Strg+E", "als E-Mail-Anhang senden",
+            "Erstellt im Standard-Mailprogramm eine neue E-Mail mit der Datei als Anhang."),
+        ("Strg+1 … 9", "in externem Programm öffnen",
+            "Öffnet die Datei im jeweiligen Programm der Programme-Liste (Reihenfolge wie im Menü)."),
+        ("Strg+F", "im Dokument suchen",
+            "Öffnet die Suchleiste des Viewers; F3 springt zum nächsten Treffer, Esc schließt die Leiste."),
+        ("Strg+P", "Dokument drucken",
+            "Öffnet die Druckvorschau mit allen Druckoptionen."),
+        ("F7", "Textcursor-Navigation ein/aus (Markieren per Tastatur)",
+            "Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert — Markieren ganz ohne Maus."),
+        ("F11", "Vollbild ein/aus",
+            "Schaltet die Vollbild-Anzeige um; auch Esc beendet das Vollbild."),
+        ("2× Esc / Umschalt+Esc", "Programm beenden (Option)",
+            "Beendet das Programm, wenn die Option in den Einstellungen aktiv ist. Das erste Esc schließt zunächst eine offene Viewer-Leiste, Umschalt+Esc beendet sofort."),
+        ("F1", "dieser Dialog",
+            "Öffnet diese Kürzel-Übersicht."),
+    ];
+
     private static string BuildShortcutTable()
     {
-        return AlignShortcutColumns(
-        [
-            ("Strg+O", "PDF-Datei öffnen"),
-            ("Strg+Umschalt+← / →", "vorherige / nächste Datei des Ordners"),
-            ("Bild ↑ / Bild ↓", "im Dokument blättern"),
-            ("Strg+M", "verschieben (Strg+Klick: erster Zielordner)"),
-            ("Strg+K", "Datei kopieren"),
-            ("F2", "Datei umbenennen"),
-            ("Strg+Umschalt+Entf", "Datei in den Papierkorb"),
-            ("Strg+Entf", "Seiten löschen"),
-            ("Strg+R", "Seiten drehen"),
-            ("Strg+Umschalt+R / L", "Ansicht drehen (ändert die Datei nicht)"),
-            ("Strg+Umschalt+I", "Inhalte-Leiste ein-/ausblenden"),
-            ("Strg+Umschalt+B", "Seite an Fensterbreite anpassen"),
-            ("Strg+G", "Gehe zu Seite (Zahl tippen + Enter)"),
-            ("Strg+X", "Seiten als neue Datei extrahieren"),
-            ("Strg+Z", "Dokumentänderung rückgängig"),
-            ("Strg+I", "Dokumenteigenschaften"),
-            ("Alt+Enter", "Windows-Dateieigenschaften"),
-            ("Strg+E", "als E-Mail-Anhang senden"),
-            ("Strg+1 … 9", "in externem Programm öffnen"),
-            ("Strg+F", "im Dokument suchen"),
-            ("Strg+P", "Dokument drucken"),
-            ("F7", "Textcursor-Navigation ein/aus (Markieren per Tastatur)"),
-            ("F11", "Vollbild ein/aus"),
-            ("2× Esc / Umschalt+Esc", "Programm beenden (Option)"),
-            ("F1", "dieser Dialog"),
-        ]);
+        return AlignShortcutColumns([.. ShortcutRows.Select(r => (r.Key, r.Text))]);
+    }
+
+    /// <summary>Eigener Kürzel-Dialog (F1 und Info-Menü); openPdf zeigt die erstellte PDF-Übersicht an.</summary>
+    public static void ShortcutsTaskDlg(nint hwnd, Action<string> openPdf)
+    {
+        TaskDialogButton pdfButton = new TaskDialogCommandLinkButton(Lng.T("Als PDF anzeigen"),
+            Lng.T("Shortcut.PdfDetail", "Erstellt eine druckbare Übersicht mit Erklärungen im" + Environment.NewLine +
+                "Downloads-Ordner und zeigt sie in PDFlight an."));
+        var page = new TaskDialogPage()
+        {
+            Caption = Application.ProductName,
+            Heading = Lng.T("Tastenkürzel"),
+            Text = BuildShortcutTable(),
+            AllowCancel = true,
+            SizeToContent = true,
+            Buttons = { pdfButton, TaskDialogButton.Close },
+            DefaultButton = TaskDialogButton.Close
+        };
+        if (TaskDialog.ShowDialog(hwnd, page) == pdfButton)
+        {
+            try { openPdf(ShortcutsPdf.Create()); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or PdfSharp.PdfSharpException)
+            {
+                ErrTaskDlg(hwnd, Lng.T("Die PDF-Übersicht konnte nicht erstellt werden."), ex);
+            }
+        }
     }
 
     internal static void StartLink(nint hwnd, string url)
