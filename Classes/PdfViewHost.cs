@@ -183,44 +183,46 @@ internal partial class PdfViewHost(WebView2 webView)
     /// klappt das Seitenansicht-Menü per UIA auf und wählt den jeweils anderen Eintrag.</summary>
     public void ToggleLayout()
     {
-        if (!IsReady || currentBytes == null) { return; }
-        var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
-        if (chromium == IntPtr.Zero) { return; }
-        twoPageActive = !twoPageActive;
-        var wantTwoPages = twoPageActive;
-        _ = Task.Run(() => SelectLayout(chromium, wantTwoPages));
+        RunSelectLayout(!twoPageActive, initialDelay: 0);
     }
 
     /// <summary>Stellt (verzögert, mit Wiederholungen) das zweiseitige Layout ein — nach dem Laden
     /// eines Dokuments, wenn TwoPageDefault gesetzt ist.</summary>
     private void ApplyTwoPageLayoutSoon()
     {
+        RunSelectLayout(twoPages: true, initialDelay: 700); // der Viewer baut seine Toolbar erst nach der Navigation auf
+    }
+
+    private void RunSelectLayout(bool twoPages, int initialDelay)
+    {
+        if (!IsReady || currentBytes == null) { return; }
         var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
         if (chromium == IntPtr.Zero) { return; }
-        twoPageActive = true;
         _ = Task.Run(() =>
         {
-            System.Threading.Thread.Sleep(700); // der Viewer baut seine Toolbar erst nach der Navigation auf
-            SelectLayout(chromium, twoPage: true);
+            if (initialDelay > 0) { System.Threading.Thread.Sleep(initialDelay); }
+            // Zustand erst nach dem vollzogenen Klick übernehmen — sonst geriete die eigene
+            // Buchführung aus dem Tritt, wenn der Klick fehlschlägt (z.B. Baum noch nicht bereit)
+            if (SelectLayout(chromium, twoPages)) { twoPageActive = twoPages; }
         });
     }
 
     internal static string LayoutDiag = "nicht aufgerufen"; // nur für die Test-Diagnose
 
-    private static void SelectLayout(IntPtr chromiumHandle, bool twoPage)
+    private static bool SelectLayout(IntPtr chromiumHandle, bool twoPage)
     {
         try
         {
             LayoutDiag = "gestartet";
             var root = System.Windows.Automation.AutomationElement.FromHandle(chromiumHandle);
             System.Windows.Automation.AutomationElement layouts = null;
-            for (var i = 0; i < 10 && layouts == null; i++) // nach dem Laden braucht die Toolbar einen Moment
+            for (var i = 0; i < 40 && layouts == null; i++) // beim Kaltstart braucht Chromiums Accessibility-Baum mehrere Sekunden
             {
                 layouts = root.FindFirst(System.Windows.Automation.TreeScope.Descendants,
                     new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.AutomationIdProperty, "layouts"));
                 if (layouts == null) { System.Threading.Thread.Sleep(200); }
             }
-            if (layouts == null) { return; }
+            if (layouts == null) { LayoutDiag = "layouts-Button nicht gefunden"; return false; }
             // Dieses Menü lässt sich nur wie von Menschenhand bedienen: UIA-Invoke/Select verpuffen,
             // Tastatur-Auswahlen werden beim Schließen wieder verworfen (Vorschau-Semantik), und auch
             // ExpandCollapse zickt beim zweiten Mal. Also beide Schritte als echte Mausklicks —
@@ -228,25 +230,29 @@ internal partial class PdfViewHost(WebView2 webView)
             _ = GetCursorPos(out var before);
             try
             {
-                ClickCenter(layouts.Current.BoundingRectangle); // Menü öffnen
-                System.Threading.Thread.Sleep(500);             // bis die Einträge bedienbar sind
+                // direkt nach einem Dokumentladen reagiert die frische Toolbar noch nicht immer auf
+                // den ersten Klick — deshalb das Öffnen bei Bedarf wiederholen
                 System.Windows.Automation.AutomationElement target = null;
-                for (var i = 0; i < 10 && target == null; i++)  // die Radio-Einträge existieren erst im offenen Menü
+                for (var attempt = 0; attempt < 3 && target == null; attempt++)
                 {
-                    target = FindLayoutRadio(root, twoPage ? "id1" : "id0");
-                    if (target == null) { System.Threading.Thread.Sleep(200); }
+                    ClickCenter(layouts.Current.BoundingRectangle); // Menü öffnen
+                    System.Threading.Thread.Sleep(500);             // bis die Einträge bedienbar sind
+                    for (var i = 0; i < 6 && target == null; i++)   // die Radio-Einträge existieren erst im offenen Menü
+                    {
+                        target = FindLayoutRadio(root, twoPage ? "id1" : "id0");
+                        if (target == null) { System.Threading.Thread.Sleep(200); }
+                    }
                 }
-                if (target != null)
-                {
-                    ClickCenter(target.Current.BoundingRectangle); // übernimmt die Auswahl
-                    System.Threading.Thread.Sleep(250);
-                    // das Menü bleibt nach der Auswahl mitunter offen — ein Klick auf die leere
-                    // Toolbar-Fläche daneben schließt es, ohne etwas auszulösen
-                    var buttonRect = layouts.Current.BoundingRectangle;
-                    ClickCenter(new System.Windows.Rect(buttonRect.Right + 30, buttonRect.Y, buttonRect.Height, buttonRect.Height));
-                    System.Threading.Thread.Sleep(100);
-                    LayoutDiag = "Klick auf " + (twoPage ? "id1" : "id0");
-                }
+                if (target == null) { LayoutDiag = "Menüeintrag nicht gefunden"; return false; }
+                ClickCenter(target.Current.BoundingRectangle); // übernimmt die Auswahl
+                System.Threading.Thread.Sleep(250);
+                // das Menü bleibt nach der Auswahl mitunter offen — ein Klick auf die leere
+                // Toolbar-Fläche daneben schließt es, ohne etwas auszulösen
+                var buttonRect = layouts.Current.BoundingRectangle;
+                ClickCenter(new System.Windows.Rect(buttonRect.Right + 30, buttonRect.Y, buttonRect.Height, buttonRect.Height));
+                System.Threading.Thread.Sleep(100);
+                LayoutDiag = "Klick auf " + (twoPage ? "id1" : "id0");
+                return true;
             }
             finally { _ = SetCursorPos(before.X, before.Y); }
         }
@@ -254,7 +260,7 @@ internal partial class PdfViewHost(WebView2 webView)
             or System.Runtime.InteropServices.COMException or InvalidOperationException)
         {
             LayoutDiag = ex.GetType().Name + ": " + ex.Message;
-            // reine Komfortfunktion — schlägt sie fehl, bleibt einfach das bisherige Layout
+            return false; // reine Komfortfunktion — schlägt sie fehl, bleibt einfach das bisherige Layout
         }
     }
 
