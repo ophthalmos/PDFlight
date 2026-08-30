@@ -101,7 +101,7 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
 (navegar con Ctrl+Mayús+← / →)</value></data>
   <data name="Strg+" xml:space="preserve"><value>Ctrl+</value></data>
   <data name="Strg+O" xml:space="preserve"><value>Ctrl+O</value></data>
-  <data name="Strg+M" xml:space="preserve"><value>Ctrl+M</value></data>
+  <data name="Strg+M / F4" xml:space="preserve"><value>Ctrl+M / F4</value></data>
   <data name="Strg+K" xml:space="preserve"><value>Ctrl+K</value></data>
   <data name="Strg+E" xml:space="preserve"><value>Ctrl+E</value></data>
   <data name="Strg+F" xml:space="preserve"><value>Ctrl+F</value></data>

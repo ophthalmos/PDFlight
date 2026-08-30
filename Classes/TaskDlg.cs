@@ -232,7 +232,7 @@ internal static class TaskDlg
         ("Strg+O", "PDF-Datei öffnen", null),
         ("Strg+Umschalt+← / →", "vorherige / nächste Datei des Ordners anzeigen", null),
         ("Bild ↑ / Bild ↓", "im Dokument blättern", null),
-        ("Strg+M", "verschieben (Strg+Klick: erster Zielordner)", null),
+        ("Strg+M / F4", "verschieben (Strg+Klick: erster Zielordner)", null),
         ("Strg+K", "Datei kopieren", null),
         ("F2", "Datei umbenennen", null),
         ("Strg+Umschalt+Entf", "Datei in den Papierkorb verschieben", null),
