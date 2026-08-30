@@ -148,7 +148,7 @@ internal static class TaskDlg
         var curVersion = Assembly.GetExecutingAssembly().GetName().Version;
         var threeVersion = curVersion?.ToString(3) ?? Lng.T("unbekannt");
         TaskDialogButton downloadButton = new TaskDialogCommandLinkButton(Lng.T("PDFlightSetup.exe herunterladen"),
-            Lng.T("Download.Detail", "PDFlightSetup.exe wird im Download-Ordner\ngespeichert. Führen Sie das Setupprogramm\naus, um die neueste Version zu installieren."));
+            Lng.T("Download.Detail", "PDFlightSetup.exe wird im Download-Ordner\ngespeichert. Führe das Setupprogramm aus,\num die neueste Version zu installieren."));
         var updatePage = new TaskDialogPage()
         {
             Caption = Application.ProductName,
@@ -187,7 +187,7 @@ internal static class TaskDlg
             failed = true;
             updatePage.Heading = Lng.T("Die Update-Suche ist fehlgeschlagen.");
             updatePage.Text = ex is TaskCanceledException
-                ? Lng.T("Zeitüberschreitung — bitte prüfen Sie die Internetverbindung.")
+                ? Lng.T("Zeitüberschreitung — bitte prüfe die Internetverbindung.")
                 : ex.Message;
         }
         finally { Cursor.Current = Cursors.Default; }
@@ -277,38 +277,52 @@ internal static class TaskDlg
             "Schaltet die Vollbild-Anzeige um; auch Esc beendet das Vollbild."),
         ("2× Esc / Umschalt+Esc", "Programm beenden (Option)",
             "Beendet das Programm, wenn die Option in den Einstellungen aktiv ist. Das erste Esc schließt zunächst eine offene Viewer-Leiste, Umschalt+Esc beendet sofort."),
-        ("F1", "dieser Dialog",
-            "Öffnet diese Kürzel-Übersicht."),
+        ("F1", "diese Kürzel-Übersicht",
+            "Erstellt diese PDF-Übersicht im Downloads-Ordner und zeigt sie in einem eigenen PDFlight-Fenster an."),
     ];
 
-    private static string BuildShortcutTable()
+    /// <summary>Kürzel-Übersicht (F1 und Info-Menü): erstellt die PDF-Übersicht im Downloads-Ordner und
+    /// zeigt sie in einer neuen PDFlight-Instanz an — das aktuelle Dokument bleibt ungestört. Existiert
+    /// die Datei schon, fragt ein Dialog, ob sie geöffnet oder neu erstellt werden soll.</summary>
+    public static void ShowShortcutsPdf(nint hwnd)
     {
-        return AlignShortcutColumns([.. ShortcutRows.Select(r => (r.Key, r.Text))]);
+        var path = ShortcutsPdf.DefaultPath;
+        if (File.Exists(path))
+        {
+            TaskDialogButton openButton = new TaskDialogCommandLinkButton(Lng.T("Vorhandene öffnen"));
+            TaskDialogButton recreateButton = new TaskDialogCommandLinkButton(Lng.T("Neu erstellen"),
+                Lng.T("z.B. nach einem Update oder Sprachwechsel"));
+            var page = new TaskDialogPage()
+            {
+                Caption = Application.ProductName,
+                Heading = Lng.T("Die Kürzel-Übersicht ist bereits vorhanden."),
+                Text = path,
+                Icon = TaskDialogIcon.Information,
+                AllowCancel = true,
+                SizeToContent = true,
+                Buttons = { openButton, recreateButton, TaskDialogButton.Cancel },
+                DefaultButton = openButton
+            };
+            var result = TaskDialog.ShowDialog(hwnd, page);
+            if (result != openButton && result != recreateButton) { return; }
+            if (result == openButton) { OpenInNewInstance(hwnd, path); return; }
+        }
+        try
+        {
+            OpenInNewInstance(hwnd, ShortcutsPdf.Create());
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or PdfSharp.PdfSharpException)
+        {
+            ErrTaskDlg(hwnd, Lng.T("Die PDF-Übersicht konnte nicht erstellt werden."), ex);
+        }
     }
 
-    /// <summary>Eigener Kürzel-Dialog (F1 und Info-Menü); openPdf zeigt die erstellte PDF-Übersicht an.</summary>
-    public static void ShortcutsTaskDlg(nint hwnd, Action<string> openPdf)
+    private static void OpenInNewInstance(nint hwnd, string path)
     {
-        TaskDialogButton pdfButton = new TaskDialogCommandLinkButton(Lng.T("Als PDF anzeigen"),
-            Lng.T("Shortcut.PdfDetail", "Erstellt eine druckbare Übersicht mit Erklärungen im" + Environment.NewLine +
-                "Downloads-Ordner und zeigt sie in PDFlight an."));
-        var page = new TaskDialogPage()
+        try { Process.Start(Application.ExecutablePath, [path]); }
+        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
         {
-            Caption = Application.ProductName,
-            Heading = Lng.T("Tastenkürzel"),
-            Text = BuildShortcutTable(),
-            AllowCancel = true,
-            SizeToContent = true,
-            Buttons = { pdfButton, TaskDialogButton.Close },
-            DefaultButton = TaskDialogButton.Close
-        };
-        if (TaskDialog.ShowDialog(hwnd, page) == pdfButton)
-        {
-            try { openPdf(ShortcutsPdf.Create()); }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or PdfSharp.PdfSharpException)
-            {
-                ErrTaskDlg(hwnd, Lng.T("Die PDF-Übersicht konnte nicht erstellt werden."), ex);
-            }
+            ErrTaskDlg(hwnd, Lng.T("Das Programm konnte nicht gestartet werden."), ex);
         }
     }
 

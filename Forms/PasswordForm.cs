@@ -48,7 +48,7 @@ public partial class PasswordForm : Form
         if (!confirm) { return; } // DialogResult.OK schließt das Formular selbst
         if (textBoxPassword.Text.Length == 0)
         {
-            TaskDlg.MsgTaskDlg(Handle, Lng.T("Bitte geben Sie ein Kennwort ein."), null, TaskDialogIcon.Warning);
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Bitte gib ein Kennwort ein."), null, TaskDialogIcon.Warning);
             return;
         }
         if (textBoxPassword.Text != textBoxRepeat.Text)

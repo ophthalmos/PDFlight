@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- Englische Übersetzungen. Der Schlüssel ("name") ist der deutsche Originaltext. -->
   <resheader name="resmimetype">
@@ -126,18 +126,18 @@ extract pages, properties (shortcuts in the menu)</value></data>
 
   <!-- MainForm: Meldungen und Dialoge -->
   <data name="Die WebView2-Runtime ist nicht installiert." xml:space="preserve"><value>The WebView2 runtime is not installed.</value></data>
-  <data name="Bitte installieren Sie sie über:" xml:space="preserve"><value>Please install it from:</value></data>
+  <data name="Bitte installiere sie über:" xml:space="preserve"><value>Please install it from:</value></data>
   <data name="Die PDF-Anzeige (WebView2) konnte nicht gestartet werden." xml:space="preserve"><value>The PDF display (WebView2) could not be started.</value></data>
   <data name="Die Datei konnte nicht geladen werden." xml:space="preserve"><value>The file could not be loaded.</value></data>
   <data name="PDF-Dateien (*.pdf)|*.pdf" xml:space="preserve"><value>PDF files (*.pdf)|*.pdf</value></data>
   <data name="PDF-Datei öffnen" xml:space="preserve"><value>Open PDF file</value></data>
   <data name="Vorheriger Ordner:" xml:space="preserve"><value>Previous folder:</value></data>
   <data name="Aktueller Ordner:" xml:space="preserve"><value>Current folder:</value></data>
-  <data name="Sie möchten die {0} Datei öffnen." xml:space="preserve"><value>You want to open the {0} file.</value></data>
+  <data name="Du möchtest die {0} Datei öffnen." xml:space="preserve"><value>You want to open the {0} file.</value></data>
   <data name="nächste" xml:space="preserve"><value>next</value></data>
   <data name="vorherige" xml:space="preserve"><value>previous</value></data>
   <data name="Welcher Ordner soll durchsucht werden?" xml:space="preserve"><value>Which folder should be searched?</value></data>
-  <data name="Wenn Sie abbrechen, wird der aktuelle Ordner verwendet." xml:space="preserve"><value>If you cancel, the current folder is used.</value></data>
+  <data name="Wenn du abbrichst, wird der aktuelle Ordner verwendet." xml:space="preserve"><value>If you cancel, the current folder is used.</value></data>
   <data name="Der Ordner enthält keine PDF-Dateien." xml:space="preserve"><value>The folder contains no PDF files.</value></data>
   <data name="Der Ordner enthält keine weiteren PDF-Dateien." xml:space="preserve"><value>The folder contains no further PDF files.</value></data>
   <data name="Der Zielordner existiert nicht." xml:space="preserve"><value>The target folder does not exist.</value></data>
@@ -166,7 +166,7 @@ extract pages, properties (shortcuts in the menu)</value></data>
   <data name="Die Datei kann nicht bearbeitet werden." xml:space="preserve"><value>The file cannot be edited.</value></data>
   <data name="Möglicherweise ist sie verschlüsselt oder beschädigt." xml:space="preserve"><value>It may be encrypted or damaged.</value></data>
   <data name="Die Datei hat nur eine Seite." xml:space="preserve"><value>The file has only one page.</value></data>
-  <data name="Zum Löschen der ganzen Datei benutzen Sie den Papierkorb (Strg+Umschalt+Entf)." xml:space="preserve"><value>To delete the whole file, use the Recycle Bin (Ctrl+Shift+Del).</value></data>
+  <data name="Zum Löschen der ganzen Datei benutze den Papierkorb (Strg+Umschalt+Entf)." xml:space="preserve"><value>To delete the whole file, use the Recycle Bin (Ctrl+Shift+Del).</value></data>
   <data name="Seiten löschen" xml:space="preserve"><value>Delete pages</value></data>
   <data name="Mindestens eine Seite muss erhalten bleiben." xml:space="preserve"><value>At least one page must remain.</value></data>
   <data name="Seite {0} wurde gelöscht." xml:space="preserve"><value>Page {0} was deleted.</value></data>
@@ -210,7 +210,7 @@ Without it, the file can no longer be displayed.</value></data>
 The viewer's rotate button, by contrast, only changes the view.</value></data>
   <data name="Kennwort verbergen" xml:space="preserve"><value>Hide password</value></data>
   <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Repeat:</value></data>
-  <data name="Bitte geben Sie ein Kennwort ein." xml:space="preserve"><value>Please enter a password.</value></data>
+  <data name="Bitte gib ein Kennwort ein." xml:space="preserve"><value>Please enter a password.</value></data>
   <data name="Die Kennwörter stimmen nicht überein." xml:space="preserve"><value>The passwords do not match.</value></data>
   <data name="Die Datei ist bereits verschlüsselt." xml:space="preserve"><value>The file is already encrypted.</value></data>
   <data name="Vergeben des Kennworts" xml:space="preserve"><value>Setting the password</value></data>
@@ -223,7 +223,7 @@ The viewer's rotate button, by contrast, only changes the view.</value></data>
   <data name="Das Kennwort wurde entfernt." xml:space="preserve"><value>The password was removed.</value></data>
   <data name="Ein Kennwortschutz lässt sich über Bearbeiten → &quot;Kennwort entfernen&quot; aufheben." xml:space="preserve"><value>Password protection can be removed via Edit → "Remove password".</value></data>
   <data name="Datei mit den Rückseiten wählen" xml:space="preserve"><value>Select the file with the back pages</value></data>
-  <data name="Bitte wählen Sie eine andere Datei als die angezeigte." xml:space="preserve"><value>Please select a different file than the one displayed.</value></data>
+  <data name="Bitte wähle eine andere Datei als die angezeigte." xml:space="preserve"><value>Please select a different file than the one displayed.</value></data>
   <data name="Die Seitenzahlen passen nicht zusammen." xml:space="preserve"><value>The page counts do not match.</value></data>
   <data name="Vorderseiten: {0}, Rückseiten: {1}" xml:space="preserve"><value>Front pages: {0}, back pages: {1}</value></data>
   <data name="In welcher Reihenfolge liegen die Rückseiten vor?" xml:space="preserve"><value>In what order are the back pages?</value></data>
@@ -250,9 +250,10 @@ can be appended.</value></data>
   <data name="Nach Updates suchen …" xml:space="preserve"><value>Check for updates…</value></data>
   <data name="Über PDFlight …" xml:space="preserve"><value>About PDFlight…</value></data>
   <data name="Tastenkürzel, Updates und Über PDFlight" xml:space="preserve"><value>Keyboard shortcuts, updates and About PDFlight</value></data>
-  <data name="Als PDF anzeigen" xml:space="preserve"><value>Show as PDF</value></data>
-  <data name="Shortcut.PdfDetail" xml:space="preserve"><value>Creates a printable overview with explanations in the
-Downloads folder and shows it in PDFlight.</value></data>
+  <data name="Vorhandene öffnen" xml:space="preserve"><value>Open existing</value></data>
+  <data name="Neu erstellen" xml:space="preserve"><value>Create new</value></data>
+  <data name="z.B. nach einem Update oder Sprachwechsel" xml:space="preserve"><value>e.g. after an update or language change</value></data>
+  <data name="Die Kürzel-Übersicht ist bereits vorhanden." xml:space="preserve"><value>The shortcut overview already exists.</value></data>
   <data name="Die PDF-Übersicht konnte nicht erstellt werden." xml:space="preserve"><value>The PDF overview could not be created.</value></data>
   <data name="PDFlight-Tastenkürzel" xml:space="preserve"><value>PDFlight keyboard shortcuts</value></data>
   <data name="Öffnet den Dateiauswahl-Dialog. Der Pfeil neben der Schaltfläche listet die zuletzt geöffneten Dateien." xml:space="preserve"><value>Opens the file selection dialog. The arrow next to the button lists the recently opened files.</value></data>
@@ -279,7 +280,7 @@ Downloads folder and shows it in PDFlight.</value></data>
   <data name="Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert — Markieren ganz ohne Maus." xml:space="preserve"><value>Places a text cursor in the document: arrow keys move it, Shift+arrows select text, Ctrl+C copies — selecting entirely without a mouse.</value></data>
   <data name="Schaltet die Vollbild-Anzeige um; auch Esc beendet das Vollbild." xml:space="preserve"><value>Toggles full-screen display; Esc also leaves full screen.</value></data>
   <data name="Beendet das Programm, wenn die Option in den Einstellungen aktiv ist. Das erste Esc schließt zunächst eine offene Viewer-Leiste, Umschalt+Esc beendet sofort." xml:space="preserve"><value>Closes the program if the option is enabled in the settings. The first Esc first closes an open viewer bar; Shift+Esc closes immediately.</value></data>
-  <data name="Öffnet diese Kürzel-Übersicht." xml:space="preserve"><value>Opens this shortcut overview.</value></data>
+  <data name="Erstellt diese PDF-Übersicht im Downloads-Ordner und zeigt sie in einem eigenen PDFlight-Fenster an." xml:space="preserve"><value>Creates this PDF overview in the Downloads folder and shows it in a separate PDFlight window.</value></data>
   <data name="Tastenkürzel" xml:space="preserve"><value>Keyboard shortcuts</value></data>
   <data name="PDFlightSetup.exe herunterladen" xml:space="preserve"><value>Download PDFlightSetup.exe</value></data>
   <data name="Download.Detail" xml:space="preserve"><value>PDFlightSetup.exe is saved to your Downloads
@@ -288,7 +289,7 @@ the latest version.</value></data>
   <data name="{0} ist auf dem neuesten Stand." xml:space="preserve"><value>{0} is up to date.</value></data>
   <data name="Die Update-Suche ist fehlgeschlagen." xml:space="preserve"><value>The update check failed.</value></data>
   <data name="Die Update-Informationen wurden nicht gefunden." xml:space="preserve"><value>The update information was not found.</value></data>
-  <data name="Zeitüberschreitung — bitte prüfen Sie die Internetverbindung." xml:space="preserve"><value>Timeout — please check your internet connection.</value></data>
+  <data name="Zeitüberschreitung — bitte prüfe die Internetverbindung." xml:space="preserve"><value>Timeout — please check your internet connection.</value></data>
   <data name="Die Versionsangabe in der Update-Datei konnte nicht gelesen werden." xml:space="preserve"><value>The version in the update file could not be read.</value></data>
   <data name="Es steht ein Update zur Verfügung!" xml:space="preserve"><value>An update is available!</value></data>
   <data name="vom" xml:space="preserve"><value>dated</value></data>
@@ -313,7 +314,7 @@ the latest version.</value></data>
   <data name="Dokument drucken" xml:space="preserve"><value>print document</value></data>
   <data name="Vollbild ein/aus" xml:space="preserve"><value>full screen on/off</value></data>
   <data name="Programm beenden (Option)" xml:space="preserve"><value>close program (option)</value></data>
-  <data name="dieser Dialog" xml:space="preserve"><value>this dialog</value></data>
+  <data name="diese Kürzel-Übersicht" xml:space="preserve"><value>this shortcut overview</value></data>
 
   <!-- Umbenennen-Dialog -->
   <data name="&amp;Neuer Dateiname:" xml:space="preserve"><value>&amp;New file name:</value></data>
@@ -347,8 +348,8 @@ the latest version.</value></data>
   <!-- Ordnerdialog -->
   <data name="&amp;Zielliste:" xml:space="preserve"><value>&amp;Target list:</value></data>
   <data name="Zuletzt:" xml:space="preserve"><value>Recent:</value></data>
-  <data name="KOPIEREN: Wählen Sie einen Ordner ..." xml:space="preserve"><value>COPY: Select a folder ...</value></data>
-  <data name="VERSCHIEBEN: Wählen Sie einen Ordner ..." xml:space="preserve"><value>MOVE: Select a folder ...</value></data>
+  <data name="KOPIEREN: Wähle einen Ordner ..." xml:space="preserve"><value>COPY: Select a folder ...</value></data>
+  <data name="VERSCHIEBEN: Wähle einen Ordner ..." xml:space="preserve"><value>MOVE: Select a folder ...</value></data>
   <data name="Neuer Ordner (Strg+N)" xml:space="preserve"><value>New folder (Ctrl+N)</value></data>
   <data name="Neuer Ordner" xml:space="preserve"><value>New folder</value></data>
   <data name="Der Ordner konnte nicht erstellt werden." xml:space="preserve"><value>The folder could not be created.</value></data>
@@ -377,7 +378,7 @@ the latest version.</value></data>
   <data name="90° &amp;rechts" xml:space="preserve"><value>90° &amp;right</value></data>
   <data name="90° &amp;links" xml:space="preserve"><value>90° &amp;left</value></data>
   <data name="Ungültige Seitenangabe" xml:space="preserve"><value>Invalid page specification</value></data>
-  <data name="Bitte geben Sie gültige Seiten zwischen 1 und {0} an," xml:space="preserve"><value>Please enter valid pages between 1 and {0},</value></data>
+  <data name="Bitte gib gültige Seiten zwischen 1 und {0} an," xml:space="preserve"><value>Please enter valid pages between 1 and {0},</value></data>
   <data name="z.B.  3  oder  2-5, 8" xml:space="preserve"><value>e.g.  3  or  2-5, 8</value></data>
 
   <!-- Dokumenteigenschaften-Dialog -->

@@ -320,7 +320,7 @@ internal partial class PdfViewHost(WebView2 webView)
               <div id="hint" style="text-align:center;border:3px dashed transparent;border-radius:16px;padding:40px">
                 <div style="font-size:56px">&#128196;</div>
                 <h2 style="font-weight:600;margin:8px 0 4px">Kein Dokument ge&ouml;ffnet</h2>
-                <p>&Ouml;ffnen Sie eine PDF-Datei &uuml;ber die Symbolleiste (Strg+O)<br>oder ziehen Sie sie einfach hierher.</p>
+                <p>&Ouml;ffne eine PDF-Datei &uuml;ber die Symbolleiste (Strg+O)<br>oder ziehe sie einfach hierher.</p>
               </div>
               <script>
                 const hint = document.getElementById('hint');

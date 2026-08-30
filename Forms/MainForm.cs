@@ -56,7 +56,7 @@ public partial class MainForm : Form
         try { await viewHost.InitializeAsync(); }
         catch (WebView2RuntimeNotFoundException)
         {
-            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die WebView2-Runtime ist nicht installiert."), Lng.T("Bitte installieren Sie sie über:") + Environment.NewLine + "https://developer.microsoft.com/microsoft-edge/webview2/", TaskDialogIcon.Error);
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die WebView2-Runtime ist nicht installiert."), Lng.T("Bitte installiere sie über:") + Environment.NewLine + "https://developer.microsoft.com/microsoft-edge/webview2/", TaskDialogIcon.Error);
             Close();
             return;
         }
@@ -334,12 +334,12 @@ public partial class MainForm : Form
             TaskDialogPage page = new()
             {
                 Caption = Application.ProductName,
-                Heading = string.Format(Lng.T("Sie möchten die {0} Datei öffnen."), step > 0 ? Lng.T("nächste") : Lng.T("vorherige")) + Environment.NewLine + Lng.T("Welcher Ordner soll durchsucht werden?"),
+                Heading = string.Format(Lng.T("Du möchtest die {0} Datei öffnen."), step > 0 ? Lng.T("nächste") : Lng.T("vorherige")) + Environment.NewLine + Lng.T("Welcher Ordner soll durchsucht werden?"),
                 AllowCancel = true,
                 SizeToContent = true,
                 Buttons = { btnPrevious, btnCurrent },
                 DefaultButton = btnPrevious,
-                Footnote = Lng.T("Wenn Sie abbrechen, wird der aktuelle Ordner verwendet.")
+                Footnote = Lng.T("Wenn du abbrichst, wird der aktuelle Ordner verwendet.")
             };
             var result = TaskDialog.ShowDialog(Handle, page);
             if (result == btnPrevious)
@@ -750,12 +750,6 @@ public partial class MainForm : Form
 
     // ------------------------------------------------------------------ Seitenoperationen (PDFsharp)
 
-    /// <summary>Kürzel-Übersicht (F1 und Info-Menü); „Als PDF anzeigen" öffnet die erstellte Datei gleich in PDFlight.</summary>
-    private void ShowShortcutsDialog()
-    {
-        TaskDlg.ShortcutsTaskDlg(Handle, path => LoadPdf(path, addToRecent: true));
-    }
-
     /// <summary>Verschlüsselt die aktuelle Datei mit AES-256 (PDF 2.0) und einem
     /// Benutzer-Kennwort (Abfrage mit Wiederholungsfeld, mit Undo-Sicherung).</summary>
     private void SetPasswordDialog()
@@ -817,7 +811,7 @@ public partial class MainForm : Form
             Heading = Lng.T("Rückseiten-Scan einfügen"),
             Text = Lng.T("Duplex.Intro",
                 "Für Scanner ohne Duplex-Einheit: Die angezeigte Datei enthält die Vorderseiten (1, 3, 5 …)." + Environment.NewLine +
-                "Wählen Sie im nächsten Schritt die Datei mit den Rückseiten — sie wird mit den Vorderseiten" + Environment.NewLine +
+                "Wähle im nächsten Schritt die Datei mit den Rückseiten — sie wird mit den Vorderseiten" + Environment.NewLine +
                 "zu einem vollständigen Dokument verzahnt (1, 2, 3 …)." + Environment.NewLine + Environment.NewLine +
                 "Beide Dateien müssen gleich viele Seiten haben."),
             Icon = TaskDialogIcon.Information,
@@ -830,7 +824,7 @@ public partial class MainForm : Form
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         if (string.Equals(dialog.FileName, currentFile.FullName, StringComparison.OrdinalIgnoreCase))
         {
-            TaskDlg.MsgTaskDlg(Handle, Lng.T("Bitte wählen Sie eine andere Datei als die angezeigte."), null, TaskDialogIcon.Warning);
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Bitte wähle eine andere Datei als die angezeigte."), null, TaskDialogIcon.Warning);
             return;
         }
         var backCount = PdfEditService.TryGetPageCount(dialog.FileName);
@@ -894,7 +888,7 @@ public partial class MainForm : Form
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
         if (currentPageCount == 1)
         {
-            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei hat nur eine Seite."), Lng.T("Zum Löschen der ganzen Datei benutzen Sie den Papierkorb (Strg+Umschalt+Entf)."), TaskDialogIcon.Information);
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei hat nur eine Seite."), Lng.T("Zum Löschen der ganzen Datei benutze den Papierkorb (Strg+Umschalt+Entf)."), TaskDialogIcon.Information);
             return;
         }
         var currentPage = ClampedCurrentPage();
@@ -1224,7 +1218,7 @@ public partial class MainForm : Form
             case Keys.E | Keys.Control: EmailCurrent(); return true;
             case Keys.Right | Keys.Control | Keys.Shift: StepFile(1); return true;   // Strg+Pfeile ohne Umschalt gehören dem Viewer (Zoom & Co.)
             case Keys.Left | Keys.Control | Keys.Shift: StepFile(-1); return true;
-            case Keys.F1: ShowShortcutsDialog(); return true;
+            case Keys.F1: TaskDlg.ShowShortcutsPdf(Handle); return true;
             case Keys.F11: SetFullScreen(!isFullScreen); return true;
             case Keys.Escape | Keys.Shift when settings.CloseOnEscape: Close(); return true; // Shift+Esc beendet sofort (wie in NetRadio)
             case Keys.Escape when isFullScreen: SetFullScreen(false); return true;
@@ -1305,7 +1299,7 @@ public partial class MainForm : Form
     }
     private void MnuShortcuts_Click(object sender, EventArgs e)
     {
-        ShowShortcutsDialog();
+        TaskDlg.ShowShortcutsPdf(Handle);
     }
     private async void MnuCheckUpdate_Click(object sender, EventArgs e)
     {

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- Französische Übersetzungen. Der Schlüssel ("name") ist der deutsche Originaltext. -->
   <resheader name="resmimetype">
@@ -125,18 +125,18 @@ extraire des pages, propriétés (raccourcis dans le menu)</value></data>
 
   <!-- MainForm: Meldungen und Dialoge -->
   <data name="Die WebView2-Runtime ist nicht installiert." xml:space="preserve"><value>Le runtime WebView2 n'est pas installé.</value></data>
-  <data name="Bitte installieren Sie sie über:" xml:space="preserve"><value>Veuillez l'installer depuis :</value></data>
+  <data name="Bitte installiere sie über:" xml:space="preserve"><value>Veuillez l'installer depuis :</value></data>
   <data name="Die PDF-Anzeige (WebView2) konnte nicht gestartet werden." xml:space="preserve"><value>L'affichage PDF (WebView2) n'a pas pu démarrer.</value></data>
   <data name="Die Datei konnte nicht geladen werden." xml:space="preserve"><value>Le fichier n'a pas pu être chargé.</value></data>
   <data name="PDF-Dateien (*.pdf)|*.pdf" xml:space="preserve"><value>Fichiers PDF (*.pdf)|*.pdf</value></data>
   <data name="PDF-Datei öffnen" xml:space="preserve"><value>Ouvrir un fichier PDF</value></data>
   <data name="Vorheriger Ordner:" xml:space="preserve"><value>Dossier précédent :</value></data>
   <data name="Aktueller Ordner:" xml:space="preserve"><value>Dossier actuel :</value></data>
-  <data name="Sie möchten die {0} Datei öffnen." xml:space="preserve"><value>Vous voulez ouvrir le fichier {0}.</value></data>
+  <data name="Du möchtest die {0} Datei öffnen." xml:space="preserve"><value>Vous voulez ouvrir le fichier {0}.</value></data>
   <data name="nächste" xml:space="preserve"><value>suivant</value></data>
   <data name="vorherige" xml:space="preserve"><value>précédent</value></data>
   <data name="Welcher Ordner soll durchsucht werden?" xml:space="preserve"><value>Quel dossier faut-il parcourir ?</value></data>
-  <data name="Wenn Sie abbrechen, wird der aktuelle Ordner verwendet." xml:space="preserve"><value>Si vous annulez, le dossier actuel sera utilisé.</value></data>
+  <data name="Wenn du abbrichst, wird der aktuelle Ordner verwendet." xml:space="preserve"><value>Si vous annulez, le dossier actuel sera utilisé.</value></data>
   <data name="Der Ordner enthält keine PDF-Dateien." xml:space="preserve"><value>Le dossier ne contient aucun fichier PDF.</value></data>
   <data name="Der Ordner enthält keine weiteren PDF-Dateien." xml:space="preserve"><value>Le dossier ne contient pas d'autres fichiers PDF.</value></data>
   <data name="Der Zielordner existiert nicht." xml:space="preserve"><value>Le dossier cible n'existe pas.</value></data>
@@ -165,7 +165,7 @@ extraire des pages, propriétés (raccourcis dans le menu)</value></data>
   <data name="Die Datei kann nicht bearbeitet werden." xml:space="preserve"><value>Le fichier ne peut pas être modifié.</value></data>
   <data name="Möglicherweise ist sie verschlüsselt oder beschädigt." xml:space="preserve"><value>Il est peut-être chiffré ou endommagé.</value></data>
   <data name="Die Datei hat nur eine Seite." xml:space="preserve"><value>Le fichier n'a qu'une seule page.</value></data>
-  <data name="Zum Löschen der ganzen Datei benutzen Sie den Papierkorb (Strg+Umschalt+Entf)." xml:space="preserve"><value>Pour supprimer le fichier entier, utilisez la corbeille (Ctrl+Maj+Suppr).</value></data>
+  <data name="Zum Löschen der ganzen Datei benutze den Papierkorb (Strg+Umschalt+Entf)." xml:space="preserve"><value>Pour supprimer le fichier entier, utilisez la corbeille (Ctrl+Maj+Suppr).</value></data>
   <data name="Seiten löschen" xml:space="preserve"><value>Supprimer des pages</value></data>
   <data name="Mindestens eine Seite muss erhalten bleiben." xml:space="preserve"><value>Au moins une page doit être conservée.</value></data>
   <data name="Seite {0} wurde gelöscht." xml:space="preserve"><value>La page {0} a été supprimée.</value></data>
@@ -209,7 +209,7 @@ Sans lui, le fichier ne pourra plus être affiché.</value></data>
 Le bouton de rotation de l'afficheur, lui, ne change que l'affichage.</value></data>
   <data name="Kennwort verbergen" xml:space="preserve"><value>Masquer le mot de passe</value></data>
   <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Répéter :</value></data>
-  <data name="Bitte geben Sie ein Kennwort ein." xml:space="preserve"><value>Veuillez saisir un mot de passe.</value></data>
+  <data name="Bitte gib ein Kennwort ein." xml:space="preserve"><value>Veuillez saisir un mot de passe.</value></data>
   <data name="Die Kennwörter stimmen nicht überein." xml:space="preserve"><value>Les mots de passe ne correspondent pas.</value></data>
   <data name="Die Datei ist bereits verschlüsselt." xml:space="preserve"><value>Le fichier est déjà chiffré.</value></data>
   <data name="Vergeben des Kennworts" xml:space="preserve"><value>Définition du mot de passe</value></data>
@@ -222,7 +222,7 @@ Le bouton de rotation de l'afficheur, lui, ne change que l'affichage.</value></d
   <data name="Das Kennwort wurde entfernt." xml:space="preserve"><value>Le mot de passe a été supprimé.</value></data>
   <data name="Ein Kennwortschutz lässt sich über Bearbeiten → &quot;Kennwort entfernen&quot; aufheben." xml:space="preserve"><value>Une protection par mot de passe peut être levée via Édition → « Supprimer le mot de passe ».</value></data>
   <data name="Datei mit den Rückseiten wählen" xml:space="preserve"><value>Choisir le fichier des versos</value></data>
-  <data name="Bitte wählen Sie eine andere Datei als die angezeigte." xml:space="preserve"><value>Veuillez choisir un fichier différent de celui affiché.</value></data>
+  <data name="Bitte wähle eine andere Datei als die angezeigte." xml:space="preserve"><value>Veuillez choisir un fichier différent de celui affiché.</value></data>
   <data name="Die Seitenzahlen passen nicht zusammen." xml:space="preserve"><value>Les nombres de pages ne correspondent pas.</value></data>
   <data name="Vorderseiten: {0}, Rückseiten: {1}" xml:space="preserve"><value>Rectos : {0}, versos : {1}</value></data>
   <data name="In welcher Reihenfolge liegen die Rückseiten vor?" xml:space="preserve"><value>Dans quel ordre sont les versos ?</value></data>
@@ -249,9 +249,10 @@ un autre fichier PDF peut être annexé.</value></data>
   <data name="Nach Updates suchen …" xml:space="preserve"><value>Rechercher des mises à jour…</value></data>
   <data name="Über PDFlight …" xml:space="preserve"><value>À propos de PDFlight…</value></data>
   <data name="Tastenkürzel, Updates und Über PDFlight" xml:space="preserve"><value>Raccourcis clavier, mises à jour et À propos de PDFlight</value></data>
-  <data name="Als PDF anzeigen" xml:space="preserve"><value>Afficher en PDF</value></data>
-  <data name="Shortcut.PdfDetail" xml:space="preserve"><value>Crée un aperçu imprimable avec explications dans le
-dossier Téléchargements et l'affiche dans PDFlight.</value></data>
+  <data name="Vorhandene öffnen" xml:space="preserve"><value>Ouvrir l'existant</value></data>
+  <data name="Neu erstellen" xml:space="preserve"><value>Créer à nouveau</value></data>
+  <data name="z.B. nach einem Update oder Sprachwechsel" xml:space="preserve"><value>p. ex. après une mise à jour ou un changement de langue</value></data>
+  <data name="Die Kürzel-Übersicht ist bereits vorhanden." xml:space="preserve"><value>L'aperçu des raccourcis existe déjà.</value></data>
   <data name="Die PDF-Übersicht konnte nicht erstellt werden." xml:space="preserve"><value>L'aperçu PDF n'a pas pu être créé.</value></data>
   <data name="PDFlight-Tastenkürzel" xml:space="preserve"><value>Raccourcis-clavier-PDFlight</value></data>
   <data name="Öffnet den Dateiauswahl-Dialog. Der Pfeil neben der Schaltfläche listet die zuletzt geöffneten Dateien." xml:space="preserve"><value>Ouvre la boîte de sélection de fichier. La flèche à côté du bouton liste les fichiers récemment ouverts.</value></data>
@@ -278,7 +279,7 @@ dossier Téléchargements et l'affiche dans PDFlight.</value></data>
   <data name="Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert — Markieren ganz ohne Maus." xml:space="preserve"><value>Place un curseur de texte dans le document : les flèches le déplacent, Maj+flèches sélectionnent, Ctrl+C copie — sélectionner sans souris.</value></data>
   <data name="Schaltet die Vollbild-Anzeige um; auch Esc beendet das Vollbild." xml:space="preserve"><value>Bascule l'affichage plein écran ; Échap quitte aussi le plein écran.</value></data>
   <data name="Beendet das Programm, wenn die Option in den Einstellungen aktiv ist. Das erste Esc schließt zunächst eine offene Viewer-Leiste, Umschalt+Esc beendet sofort." xml:space="preserve"><value>Quitte le programme si l'option est activée dans les paramètres. Le premier Échap ferme d'abord une barre ouverte de l'afficheur ; Maj+Échap quitte immédiatement.</value></data>
-  <data name="Öffnet diese Kürzel-Übersicht." xml:space="preserve"><value>Ouvre cet aperçu des raccourcis.</value></data>
+  <data name="Erstellt diese PDF-Übersicht im Downloads-Ordner und zeigt sie in einem eigenen PDFlight-Fenster an." xml:space="preserve"><value>Crée cet aperçu PDF dans le dossier Téléchargements et l'affiche dans une fenêtre PDFlight séparée.</value></data>
   <data name="Tastenkürzel" xml:space="preserve"><value>Raccourcis clavier</value></data>
   <data name="PDFlightSetup.exe herunterladen" xml:space="preserve"><value>Télécharger PDFlightSetup.exe</value></data>
   <data name="Download.Detail" xml:space="preserve"><value>PDFlightSetup.exe sera enregistré dans le dossier
@@ -287,7 +288,7 @@ d'installation pour installer la dernière version.</value></data>
   <data name="{0} ist auf dem neuesten Stand." xml:space="preserve"><value>{0} est à jour.</value></data>
   <data name="Die Update-Suche ist fehlgeschlagen." xml:space="preserve"><value>La recherche de mise à jour a échoué.</value></data>
   <data name="Die Update-Informationen wurden nicht gefunden." xml:space="preserve"><value>Les informations de mise à jour sont introuvables.</value></data>
-  <data name="Zeitüberschreitung — bitte prüfen Sie die Internetverbindung." xml:space="preserve"><value>Délai dépassé — veuillez vérifier votre connexion Internet.</value></data>
+  <data name="Zeitüberschreitung — bitte prüfe die Internetverbindung." xml:space="preserve"><value>Délai dépassé — veuillez vérifier votre connexion Internet.</value></data>
   <data name="Die Versionsangabe in der Update-Datei konnte nicht gelesen werden." xml:space="preserve"><value>Le numéro de version du fichier de mise à jour n'a pas pu être lu.</value></data>
   <data name="Es steht ein Update zur Verfügung!" xml:space="preserve"><value>Une mise à jour est disponible !</value></data>
   <data name="vom" xml:space="preserve"><value>du</value></data>
@@ -312,7 +313,7 @@ d'installation pour installer la dernière version.</value></data>
   <data name="Dokument drucken" xml:space="preserve"><value>imprimer le document</value></data>
   <data name="Vollbild ein/aus" xml:space="preserve"><value>plein écran activé/désactivé</value></data>
   <data name="Programm beenden (Option)" xml:space="preserve"><value>quitter le programme (option)</value></data>
-  <data name="dieser Dialog" xml:space="preserve"><value>cette boîte de dialogue</value></data>
+  <data name="diese Kürzel-Übersicht" xml:space="preserve"><value>cet aperçu des raccourcis</value></data>
 
   <!-- Umbenennen-Dialog -->
   <data name="&amp;Neuer Dateiname:" xml:space="preserve"><value>&amp;Nouveau nom de fichier :</value></data>
@@ -346,8 +347,8 @@ d'installation pour installer la dernière version.</value></data>
   <!-- Ordnerdialog -->
   <data name="&amp;Zielliste:" xml:space="preserve"><value>Liste des &amp;cibles :</value></data>
   <data name="Zuletzt:" xml:space="preserve"><value>Récents :</value></data>
-  <data name="KOPIEREN: Wählen Sie einen Ordner ..." xml:space="preserve"><value>COPIER : Choisissez un dossier ...</value></data>
-  <data name="VERSCHIEBEN: Wählen Sie einen Ordner ..." xml:space="preserve"><value>DÉPLACER : Choisissez un dossier ...</value></data>
+  <data name="KOPIEREN: Wähle einen Ordner ..." xml:space="preserve"><value>COPIER : Choisissez un dossier ...</value></data>
+  <data name="VERSCHIEBEN: Wähle einen Ordner ..." xml:space="preserve"><value>DÉPLACER : Choisissez un dossier ...</value></data>
   <data name="Neuer Ordner (Strg+N)" xml:space="preserve"><value>Nouveau dossier (Ctrl+N)</value></data>
   <data name="Neuer Ordner" xml:space="preserve"><value>Nouveau dossier</value></data>
   <data name="Der Ordner konnte nicht erstellt werden." xml:space="preserve"><value>Le dossier n'a pas pu être créé.</value></data>
@@ -376,7 +377,7 @@ d'installation pour installer la dernière version.</value></data>
   <data name="90° &amp;rechts" xml:space="preserve"><value>90° à &amp;droite</value></data>
   <data name="90° &amp;links" xml:space="preserve"><value>90° à &amp;gauche</value></data>
   <data name="Ungültige Seitenangabe" xml:space="preserve"><value>Indication de pages non valide</value></data>
-  <data name="Bitte geben Sie gültige Seiten zwischen 1 und {0} an," xml:space="preserve"><value>Veuillez indiquer des pages valides entre 1 et {0},</value></data>
+  <data name="Bitte gib gültige Seiten zwischen 1 und {0} an," xml:space="preserve"><value>Veuillez indiquer des pages valides entre 1 et {0},</value></data>
   <data name="z.B.  3  oder  2-5, 8" xml:space="preserve"><value>p.ex.  3  ou  2-5, 8</value></data>
 
   <!-- Dokumenteigenschaften-Dialog -->

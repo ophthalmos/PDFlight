@@ -1,4 +1,4 @@
-namespace PDFLight.Forms
+﻿namespace PDFLight.Forms
 {
     partial class FolderSelectForm
     {
@@ -188,7 +188,7 @@ namespace PDFLight.Forms
             ShowInTaskbar = false;
             SizeGripStyle = SizeGripStyle.Show;
             StartPosition = FormStartPosition.CenterParent;
-            Text = "VERSCHIEBEN: Wählen Sie einen Ordner ...";
+            Text = "VERSCHIEBEN: Wähle einen Ordner ...";
             HelpButtonClicked += FolderSelectForm_HelpButtonClicked;
             FormClosing += FolderSelectForm_FormClosing;
             Load += FolderSelectForm_Load;

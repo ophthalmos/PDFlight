@@ -12,10 +12,13 @@ internal static partial class ShortcutsPdf
     private const double Margin = 50;      // Seitenränder in Punkt
     private const double DetailIndent = 150; // Einzug der Kurztext-/Erklärungsspalte
 
+    /// <summary>Der Standard-Ablageort der Übersicht: Downloads-Ordner, Dateiname in der Programmsprache.</summary>
+    public static string DefaultPath => Path.Combine(GetDownloadsPath(), Lng.T("PDFlight-Tastenkürzel") + ".pdf");
+
     /// <summary>Schreibt die Übersicht in den angegebenen Ordner (null = Downloads) und liefert den Dateipfad.</summary>
     public static string Create(string directory = null)
     {
-        var path = Path.Combine(directory ?? GetDownloadsPath(), Lng.T("PDFlight-Tastenkürzel") + ".pdf");
+        var path = directory == null ? DefaultPath : Path.Combine(directory, Lng.T("PDFlight-Tastenkürzel") + ".pdf");
         using PdfDocument document = new();
         document.Info.Title = Application.ProductName + " – " + Lng.T("Tastenkürzel");
         document.Info.Author = Application.ProductName;
@@ -30,6 +33,7 @@ internal static partial class ShortcutsPdf
         var gfx = XGraphics.FromPdfPage(page);
         var width = page.Width.Point - 2 * Margin;
         var y = Margin;
+        DrawAppIcon(gfx, page.Width.Point - Margin); // Programm-Icon rechts auf Höhe der Überschrift
         gfx.DrawString(Application.ProductName + " – " + Lng.T("Tastenkürzel"), titleFont, XBrushes.Black, Margin, y + 17);
         y += 26;
         var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3);
@@ -61,6 +65,42 @@ internal static partial class ShortcutsPdf
         document.Save(path);
         return path;
     }
+
+    /// <summary>Zeichnet das 128-px-Programm-Icon (aus der EXE extrahiert) rechtsbündig neben die
+    /// Überschrift; ohne Icon erscheint die Übersicht einfach ohne Grafik.</summary>
+    internal static string IconDiag = "nicht aufgerufen"; // nur für die Test-Diagnose
+
+    private static void DrawAppIcon(XGraphics gfx, double rightEdge)
+    {
+        // Quelle ist die PDFlight-EXE neben der Programm-Assembly (identisch mit ExecutablePath,
+        // wenn PDFlight selbst läuft — aber auch aus Test-Treibern heraus korrekt)
+        var iconSource = Path.ChangeExtension(typeof(ShortcutsPdf).Assembly.Location, ".exe");
+        if (!File.Exists(iconSource)) { iconSource = Application.ExecutablePath; }
+        var hr = SHDefExtractIcon(iconSource, 0, 0, out var hIcon, out var hIconSmall, 128);
+        if (hIconSmall != 0) { _ = DestroyIcon(hIconSmall); }
+        if (hr != 0 || hIcon == 0) { IconDiag = $"hr={hr} hIcon={hIcon}"; return; }
+        try
+        {
+            using var icon = Icon.FromHandle(hIcon);
+            using var bitmap = icon.ToBitmap();
+            using var image = XImage.FromGdiPlusImage(bitmap);
+            const double edge = 42; // Druckgröße in Punkt
+            gfx.DrawImage(image, rightEdge - edge, Margin - 4, edge, edge);
+            IconDiag = "gezeichnet";
+        }
+        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException or System.Runtime.InteropServices.ExternalException)
+        {
+            IconDiag = ex.GetType().Name + ": " + ex.Message;
+        }
+        finally { _ = DestroyIcon(hIcon); }
+    }
+
+    [LibraryImport("shell32.dll", EntryPoint = "SHDefExtractIconW", StringMarshalling = StringMarshalling.Utf16)]
+    private static partial int SHDefExtractIcon(string iconFile, int iconIndex, uint flags, out nint hIconLarge, out nint hIconSmall, uint iconSize);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool DestroyIcon(nint hIcon);
 
     /// <summary>Einfacher Zeilenumbruch: bricht text an Wortgrenzen auf maxWidth Punkt um.</summary>
     private static List<string> Wrap(XGraphics gfx, string text, XFont font, double maxWidth)
