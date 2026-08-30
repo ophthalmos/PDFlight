@@ -111,7 +111,7 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
   <data name="Strg+I" xml:space="preserve"><value>Ctrl+I</value></data>
   <data name="Strg+X" xml:space="preserve"><value>Ctrl+X</value></data>
   <data name="Strg+Entf" xml:space="preserve"><value>Ctrl+Supr</value></data>
-  <data name="Strg+Umschalt+C" xml:space="preserve"><value>Ctrl+Mayús+C</value></data>
+  <data name="Strg+Umschalt+K" xml:space="preserve"><value>Ctrl+Mayús+K</value></data>
   <data name="Dateipfad in die Zwischenablage kopieren" xml:space="preserve"><value>copiar la ruta del archivo al portapapeles</value></data>
   <data name="Der Dateipfad wurde in die Zwischenablage kopiert." xml:space="preserve"><value>La ruta del archivo se copió al portapapeles.</value></data>
   <data name="Kopieren in die Zwischenablage fehlgeschlagen." xml:space="preserve"><value>Error al copiar al portapapeles.</value></data>

@@ -1217,7 +1217,7 @@ public partial class MainForm : Form
             case Keys.I | Keys.Control: ShowProperties(); return true;
             case Keys.Oemcomma | Keys.Control: OpenSettings(SettingsForm.TabGeneral); return true; // Strg+, wie in vielen Editoren
             case Keys.Enter | Keys.Alt when currentFile != null: ShellUtil.ShowFileProperties(currentFile.FullName); return true; // Windows-Dateieigenschaften, wie im Explorer
-            case Keys.C | Keys.Control | Keys.Shift when currentFile != null: CopyPathToClipboard(); return true; // wie im Windows-11-Explorer
+            case Keys.K | Keys.Control | Keys.Shift when currentFile != null: CopyPathToClipboard(); return true; // Strg+Umschalt+C wäre Explorer-üblich, ist aber vom AutoHotkey-Skript des Autors belegt
             case Keys.E | Keys.Control: EmailCurrent(); return true;
             case Keys.Right | Keys.Control | Keys.Shift: StepFile(1); return true;   // Strg+Pfeile ohne Umschalt gehören dem Viewer (Zoom & Co.)
             case Keys.Left | Keys.Control | Keys.Shift: StepFile(-1); return true;
