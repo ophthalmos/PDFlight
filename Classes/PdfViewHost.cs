@@ -45,11 +45,7 @@ internal partial class PdfViewHost(WebView2 webView)
         core.AddWebResourceRequestedFilter("https://" + VirtualHost + "/*", CoreWebView2WebResourceContext.All);
         core.WebResourceRequested += Core_WebResourceRequested;
         core.NavigationStarting += Core_NavigationStarting;
-        core.NavigationCompleted += (s, e) =>
-        {
-            twoPageActive = false; // jedes Dokumentladen startet im einseitigen Viewer-Standard
-            if (TwoPageDefault && currentBytes != null && e.IsSuccess) { ApplyTwoPageLayoutSoon(); }
-        };
+        core.NavigationCompleted += (s, e) => twoPageActive = false; // jedes Dokumentladen startet im einseitigen Viewer-Standard
         core.NewWindowRequested += Core_NewWindowRequested;
         core.WebMessageReceived += Core_WebMessageReceived; // Drop-Meldungen der Leerseite
         webView.AllowExternalDrop = true; // Drops aufs Dokument landen als file://-Navigation in Core_NavigationStarting
@@ -171,10 +167,6 @@ internal partial class PdfViewHost(WebView2 webView)
         InvokeViewerButton("pagefit", 1);
     }
 
-    /// <summary>Bei true stellt der Viewer nach jedem Dokumentladen das zweiseitige Layout ein
-    /// (Einstellung „Zweiseitige Ansicht beim Öffnen").</summary>
-    public bool TwoPageDefault { get; set; }
-
     // Der Viewer verrät sein aktuelles Layout nicht zuverlässig (IsSelected der Radio-Einträge ist
     // nicht belastbar) — deshalb führt PDFlight den Zustand selbst; jedes Dokumentladen setzt ihn zurück.
     private bool twoPageActive;
@@ -183,27 +175,15 @@ internal partial class PdfViewHost(WebView2 webView)
     /// klappt das Seitenansicht-Menü per UIA auf und wählt den jeweils anderen Eintrag.</summary>
     public void ToggleLayout()
     {
-        RunSelectLayout(!twoPageActive, initialDelay: 0);
-    }
-
-    /// <summary>Stellt (verzögert, mit Wiederholungen) das zweiseitige Layout ein — nach dem Laden
-    /// eines Dokuments, wenn TwoPageDefault gesetzt ist.</summary>
-    private void ApplyTwoPageLayoutSoon()
-    {
-        RunSelectLayout(twoPages: true, initialDelay: 700); // der Viewer baut seine Toolbar erst nach der Navigation auf
-    }
-
-    private void RunSelectLayout(bool twoPages, int initialDelay)
-    {
         if (!IsReady || currentBytes == null) { return; }
         var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
         if (chromium == IntPtr.Zero) { return; }
+        var wantTwoPages = !twoPageActive;
         _ = Task.Run(() =>
         {
-            if (initialDelay > 0) { System.Threading.Thread.Sleep(initialDelay); }
             // Zustand erst nach dem vollzogenen Klick übernehmen — sonst geriete die eigene
             // Buchführung aus dem Tritt, wenn der Klick fehlschlägt (z.B. Baum noch nicht bereit)
-            if (SelectLayout(chromium, twoPages)) { twoPageActive = twoPages; }
+            if (SelectLayout(chromium, wantTwoPages)) { twoPageActive = wantTwoPages; }
         });
     }
 

@@ -113,7 +113,6 @@ extraire des pages, propriétés (raccourcis dans le menu)</value></data>
   <data name="Strg+Umschalt+I" xml:space="preserve"><value>Ctrl+Maj+I</value></data>
   <data name="Strg+Umschalt+A" xml:space="preserve"><value>Ctrl+Maj+A</value></data>
   <data name="ein-/zweiseitiges Layout umschalten" xml:space="preserve"><value>basculer entre une et deux pages</value></data>
-  <data name="&amp;Zweiseitige Ansicht beim Öffnen" xml:space="preserve"><value>&amp;Vue sur deux pages à l'ouverture</value></data>
   <data name="Strg+Umschalt+B" xml:space="preserve"><value>Ctrl+Maj+B</value></data>
   <data name="Inhalte-Leiste ein-/ausblenden" xml:space="preserve"><value>Afficher/masquer le volet de contenu</value></data>
   <data name="Seite an Fensterbreite anpassen" xml:space="preserve"><value>Ajuster la page à la largeur de la fenêtre</value></data>

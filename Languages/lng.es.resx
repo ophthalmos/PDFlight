@@ -113,7 +113,6 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
   <data name="Strg+Umschalt+I" xml:space="preserve"><value>Ctrl+Mayús+I</value></data>
   <data name="Strg+Umschalt+A" xml:space="preserve"><value>Ctrl+Mayús+A</value></data>
   <data name="ein-/zweiseitiges Layout umschalten" xml:space="preserve"><value>alternar diseño de una/dos páginas</value></data>
-  <data name="&amp;Zweiseitige Ansicht beim Öffnen" xml:space="preserve"><value>Vista de &amp;dos páginas al abrir</value></data>
   <data name="Strg+Umschalt+B" xml:space="preserve"><value>Ctrl+Mayús+B</value></data>
   <data name="Inhalte-Leiste ein-/ausblenden" xml:space="preserve"><value>Mostrar/ocultar el panel de contenido</value></data>
   <data name="Seite an Fensterbreite anpassen" xml:space="preserve"><value>Ajustar la página al ancho de la ventana</value></data>
