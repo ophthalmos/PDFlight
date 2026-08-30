@@ -228,7 +228,7 @@ public partial class MainForm : Form
         {
             var files = FileUtil.GetPdfFilesInFolder(currentFile.DirectoryName);
             var index = files.FindIndex(f => string.Equals(f, currentFile.FullName, StringComparison.OrdinalIgnoreCase));
-            statusIndex.Text = (index >= 0 ? (index + 1).ToString() : "–") + "/" + files.Count;
+            statusIndex.Text = Lng.T("Datei") + " " + (index >= 0 ? (index + 1).ToString() : "–") + "/" + files.Count;
             statusPath.Text = currentFile.FullName;
             var pages = currentPageCount > 0 ? currentPageCount + " " + (currentPageCount == 1 ? Lng.T("Seite") : Lng.T("Seiten")) + "   " : string.Empty;
             statusInfo.Text = $"{pages}{currentFile.Length / 1024.0:N0} KB   {currentFile.LastWriteTime:g}";
@@ -236,7 +236,7 @@ public partial class MainForm : Form
         }
         else
         {
-            statusIndex.Text = "0/0";
+            statusIndex.Text = Lng.T("Datei") + " 0/0";
             statusPath.Text = Lng.T("Keine Datei geöffnet");
             statusInfo.Text = string.Empty;
             btnPrev.Enabled = btnNext.Enabled = false;
@@ -1212,7 +1212,7 @@ public partial class MainForm : Form
             case Keys.G | Keys.Control: BeginInvoke(viewHost.FocusPageField); return true;              // Gehe zu Seite (Zahl + Enter)
             case Keys.I | Keys.Control | Keys.Shift: BeginInvoke(viewHost.ToggleContents); return true; // Inhalte-Leiste
             case Keys.B | Keys.Control | Keys.Shift: BeginInvoke(viewHost.FitToWidth); return true;     // Breite (Viewer-Kürzel Strg+\ ist auf deutschen Tastaturen unerreichbar)
-            case Keys.A | Keys.Control | Keys.Shift: BeginInvoke(viewHost.ToggleLayout); return true;   // Ansicht: ein-/zweiseitiges Layout
+            case Keys.Space | Keys.Control: BeginInvoke(viewHost.ToggleLayout); return true;            // ein-/zweiseitiges Layout
             case Keys.Z | Keys.Control when undoTargetFile != null: UndoLastChange(); return true;
             case Keys.I | Keys.Control: ShowProperties(); return true;
             case Keys.Enter | Keys.Alt when currentFile != null: ShellUtil.ShowFileProperties(currentFile.FullName); return true; // Windows-Dateieigenschaften, wie im Explorer

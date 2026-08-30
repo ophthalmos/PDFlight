@@ -241,7 +241,7 @@ internal static class TaskDlg
         ("Strg+Umschalt+R / L", "Ansicht drehen (ändert die Datei nicht)", null),
         ("Strg+Umschalt+I", "Inhalte-Leiste ein-/ausblenden", null),
         ("Strg+Umschalt+B", "Seite an Fensterbreite anpassen", null),
-        ("Strg+Umschalt+A", "ein-/zweiseitiges Layout umschalten", null),
+        ("Strg+Leertaste", "ein-/zweiseitiges Layout umschalten", null),
         ("Strg+G", "Gehe zu Seite (Zahl tippen + Enter)", null),
         ("Strg+X", "Seiten als neue Datei extrahieren", null),
         ("Strg+Z", "Dokumentänderung rückgängig machen", null),
