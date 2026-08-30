@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- Spanische Übersetzungen. Der Schlüssel ("name") ist der deutsche Originaltext. -->
   <resheader name="resmimetype">
@@ -125,18 +125,18 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
 
   <!-- MainForm: Meldungen und Dialoge -->
   <data name="Die WebView2-Runtime ist nicht installiert." xml:space="preserve"><value>El runtime de WebView2 no está instalado.</value></data>
-  <data name="Bitte installieren Sie sie über:" xml:space="preserve"><value>Instálelo desde:</value></data>
+  <data name="Bitte installiere sie über:" xml:space="preserve"><value>Instálelo desde:</value></data>
   <data name="Die PDF-Anzeige (WebView2) konnte nicht gestartet werden." xml:space="preserve"><value>No se pudo iniciar el visor PDF (WebView2).</value></data>
   <data name="Die Datei konnte nicht geladen werden." xml:space="preserve"><value>No se pudo cargar el archivo.</value></data>
   <data name="PDF-Dateien (*.pdf)|*.pdf" xml:space="preserve"><value>Archivos PDF (*.pdf)|*.pdf</value></data>
   <data name="PDF-Datei öffnen" xml:space="preserve"><value>Abrir archivo PDF</value></data>
   <data name="Vorheriger Ordner:" xml:space="preserve"><value>Carpeta anterior:</value></data>
   <data name="Aktueller Ordner:" xml:space="preserve"><value>Carpeta actual:</value></data>
-  <data name="Sie möchten die {0} Datei öffnen." xml:space="preserve"><value>Quiere abrir el archivo {0}.</value></data>
+  <data name="Du möchtest die {0} Datei öffnen." xml:space="preserve"><value>Quiere abrir el archivo {0}.</value></data>
   <data name="nächste" xml:space="preserve"><value>siguiente</value></data>
   <data name="vorherige" xml:space="preserve"><value>anterior</value></data>
   <data name="Welcher Ordner soll durchsucht werden?" xml:space="preserve"><value>¿Qué carpeta se debe examinar?</value></data>
-  <data name="Wenn Sie abbrechen, wird der aktuelle Ordner verwendet." xml:space="preserve"><value>Si cancela, se usará la carpeta actual.</value></data>
+  <data name="Wenn du abbrichst, wird der aktuelle Ordner verwendet." xml:space="preserve"><value>Si cancela, se usará la carpeta actual.</value></data>
   <data name="Der Ordner enthält keine PDF-Dateien." xml:space="preserve"><value>La carpeta no contiene archivos PDF.</value></data>
   <data name="Der Ordner enthält keine weiteren PDF-Dateien." xml:space="preserve"><value>La carpeta no contiene más archivos PDF.</value></data>
   <data name="Der Zielordner existiert nicht." xml:space="preserve"><value>La carpeta de destino no existe.</value></data>
@@ -165,7 +165,7 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
   <data name="Die Datei kann nicht bearbeitet werden." xml:space="preserve"><value>El archivo no se puede editar.</value></data>
   <data name="Möglicherweise ist sie verschlüsselt oder beschädigt." xml:space="preserve"><value>Puede estar cifrado o dañado.</value></data>
   <data name="Die Datei hat nur eine Seite." xml:space="preserve"><value>El archivo tiene solo una página.</value></data>
-  <data name="Zum Löschen der ganzen Datei benutzen Sie den Papierkorb (Strg+Umschalt+Entf)." xml:space="preserve"><value>Para eliminar el archivo completo, use la papelera (Ctrl+Mayús+Supr).</value></data>
+  <data name="Zum Löschen der ganzen Datei benutze den Papierkorb (Strg+Umschalt+Entf)." xml:space="preserve"><value>Para eliminar el archivo completo, use la papelera (Ctrl+Mayús+Supr).</value></data>
   <data name="Seiten löschen" xml:space="preserve"><value>Eliminar páginas</value></data>
   <data name="Mindestens eine Seite muss erhalten bleiben." xml:space="preserve"><value>Debe conservarse al menos una página.</value></data>
   <data name="Seite {0} wurde gelöscht." xml:space="preserve"><value>Se eliminó la página {0}.</value></data>
@@ -209,7 +209,7 @@ Sin ella, el archivo ya no podrá mostrarse.</value></data>
 El botón de girar del visor, en cambio, solo cambia la vista.</value></data>
   <data name="Kennwort verbergen" xml:space="preserve"><value>Ocultar la contraseña</value></data>
   <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Repetir:</value></data>
-  <data name="Bitte geben Sie ein Kennwort ein." xml:space="preserve"><value>Escriba una contraseña.</value></data>
+  <data name="Bitte gib ein Kennwort ein." xml:space="preserve"><value>Escriba una contraseña.</value></data>
   <data name="Die Kennwörter stimmen nicht überein." xml:space="preserve"><value>Las contraseñas no coinciden.</value></data>
   <data name="Die Datei ist bereits verschlüsselt." xml:space="preserve"><value>El archivo ya está cifrado.</value></data>
   <data name="Vergeben des Kennworts" xml:space="preserve"><value>Establecer la contraseña</value></data>
@@ -222,7 +222,7 @@ El botón de girar del visor, en cambio, solo cambia la vista.</value></data>
   <data name="Das Kennwort wurde entfernt." xml:space="preserve"><value>Se quitó la contraseña.</value></data>
   <data name="Ein Kennwortschutz lässt sich über Bearbeiten → &quot;Kennwort entfernen&quot; aufheben." xml:space="preserve"><value>La protección con contraseña se puede quitar en Editar → "Quitar la contraseña".</value></data>
   <data name="Datei mit den Rückseiten wählen" xml:space="preserve"><value>Elegir el archivo con las caras traseras</value></data>
-  <data name="Bitte wählen Sie eine andere Datei als die angezeigte." xml:space="preserve"><value>Elija un archivo distinto del mostrado.</value></data>
+  <data name="Bitte wähle eine andere Datei als die angezeigte." xml:space="preserve"><value>Elija un archivo distinto del mostrado.</value></data>
   <data name="Die Seitenzahlen passen nicht zusammen." xml:space="preserve"><value>Los números de páginas no coinciden.</value></data>
   <data name="Vorderseiten: {0}, Rückseiten: {1}" xml:space="preserve"><value>Caras delanteras: {0}, caras traseras: {1}</value></data>
   <data name="In welcher Reihenfolge liegen die Rückseiten vor?" xml:space="preserve"><value>¿En qué orden están las caras traseras?</value></data>
@@ -249,9 +249,10 @@ anexar otro archivo PDF.</value></data>
   <data name="Nach Updates suchen …" xml:space="preserve"><value>Buscar actualizaciones…</value></data>
   <data name="Über PDFlight …" xml:space="preserve"><value>Acerca de PDFlight…</value></data>
   <data name="Tastenkürzel, Updates und Über PDFlight" xml:space="preserve"><value>Atajos de teclado, actualizaciones y Acerca de PDFlight</value></data>
-  <data name="Als PDF anzeigen" xml:space="preserve"><value>Mostrar como PDF</value></data>
-  <data name="Shortcut.PdfDetail" xml:space="preserve"><value>Crea un resumen imprimible con explicaciones en la
-carpeta Descargas y lo muestra en PDFlight.</value></data>
+  <data name="Vorhandene öffnen" xml:space="preserve"><value>Abrir el existente</value></data>
+  <data name="Neu erstellen" xml:space="preserve"><value>Crear de nuevo</value></data>
+  <data name="z.B. nach einem Update oder Sprachwechsel" xml:space="preserve"><value>p. ej., tras una actualización o un cambio de idioma</value></data>
+  <data name="Die Kürzel-Übersicht ist bereits vorhanden." xml:space="preserve"><value>El resumen de atajos ya existe.</value></data>
   <data name="Die PDF-Übersicht konnte nicht erstellt werden." xml:space="preserve"><value>No se pudo crear el resumen en PDF.</value></data>
   <data name="PDFlight-Tastenkürzel" xml:space="preserve"><value>Atajos-de-teclado-PDFlight</value></data>
   <data name="Öffnet den Dateiauswahl-Dialog. Der Pfeil neben der Schaltfläche listet die zuletzt geöffneten Dateien." xml:space="preserve"><value>Abre el diálogo de selección de archivo. La flecha junto al botón muestra los archivos abiertos recientemente.</value></data>
@@ -278,7 +279,7 @@ carpeta Descargas y lo muestra en PDFlight.</value></data>
   <data name="Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert — Markieren ganz ohne Maus." xml:space="preserve"><value>Coloca un cursor de texto en el documento: las flechas lo mueven, Mayús+flechas seleccionan, Ctrl+C copia; seleccionar sin ratón.</value></data>
   <data name="Schaltet die Vollbild-Anzeige um; auch Esc beendet das Vollbild." xml:space="preserve"><value>Activa o desactiva la pantalla completa; Esc también la cierra.</value></data>
   <data name="Beendet das Programm, wenn die Option in den Einstellungen aktiv ist. Das erste Esc schließt zunächst eine offene Viewer-Leiste, Umschalt+Esc beendet sofort." xml:space="preserve"><value>Cierra el programa si la opción está activada en la configuración. El primer Esc cierra antes una barra abierta del visor; Mayús+Esc cierra de inmediato.</value></data>
-  <data name="Öffnet diese Kürzel-Übersicht." xml:space="preserve"><value>Abre este resumen de atajos.</value></data>
+  <data name="Erstellt diese PDF-Übersicht im Downloads-Ordner und zeigt sie in einem eigenen PDFlight-Fenster an." xml:space="preserve"><value>Crea este resumen PDF en la carpeta Descargas y lo muestra en una ventana de PDFlight aparte.</value></data>
   <data name="Tastenkürzel" xml:space="preserve"><value>Atajos de teclado</value></data>
   <data name="PDFlightSetup.exe herunterladen" xml:space="preserve"><value>Descargar PDFlightSetup.exe</value></data>
   <data name="Download.Detail" xml:space="preserve"><value>PDFlightSetup.exe se guardará en la carpeta de
@@ -287,7 +288,7 @@ para instalar la última versión.</value></data>
   <data name="{0} ist auf dem neuesten Stand." xml:space="preserve"><value>{0} está actualizado.</value></data>
   <data name="Die Update-Suche ist fehlgeschlagen." xml:space="preserve"><value>La búsqueda de actualización falló.</value></data>
   <data name="Die Update-Informationen wurden nicht gefunden." xml:space="preserve"><value>No se encontró la información de actualización.</value></data>
-  <data name="Zeitüberschreitung — bitte prüfen Sie die Internetverbindung." xml:space="preserve"><value>Tiempo de espera agotado: compruebe su conexión a Internet.</value></data>
+  <data name="Zeitüberschreitung — bitte prüfe die Internetverbindung." xml:space="preserve"><value>Tiempo de espera agotado: compruebe su conexión a Internet.</value></data>
   <data name="Die Versionsangabe in der Update-Datei konnte nicht gelesen werden." xml:space="preserve"><value>No se pudo leer la versión del archivo de actualización.</value></data>
   <data name="Es steht ein Update zur Verfügung!" xml:space="preserve"><value>¡Hay una actualización disponible!</value></data>
   <data name="vom" xml:space="preserve"><value>del</value></data>
@@ -312,7 +313,7 @@ para instalar la última versión.</value></data>
   <data name="Dokument drucken" xml:space="preserve"><value>imprimir el documento</value></data>
   <data name="Vollbild ein/aus" xml:space="preserve"><value>pantalla completa sí/no</value></data>
   <data name="Programm beenden (Option)" xml:space="preserve"><value>cerrar el programa (opción)</value></data>
-  <data name="dieser Dialog" xml:space="preserve"><value>este diálogo</value></data>
+  <data name="diese Kürzel-Übersicht" xml:space="preserve"><value>este resumen de atajos</value></data>
 
   <!-- Umbenennen-Dialog -->
   <data name="&amp;Neuer Dateiname:" xml:space="preserve"><value>&amp;Nuevo nombre de archivo:</value></data>
@@ -346,8 +347,8 @@ para instalar la última versión.</value></data>
   <!-- Ordnerdialog -->
   <data name="&amp;Zielliste:" xml:space="preserve"><value>Lista de &amp;destinos:</value></data>
   <data name="Zuletzt:" xml:space="preserve"><value>Recientes:</value></data>
-  <data name="KOPIEREN: Wählen Sie einen Ordner ..." xml:space="preserve"><value>COPIAR: Elija una carpeta ...</value></data>
-  <data name="VERSCHIEBEN: Wählen Sie einen Ordner ..." xml:space="preserve"><value>MOVER: Elija una carpeta ...</value></data>
+  <data name="KOPIEREN: Wähle einen Ordner ..." xml:space="preserve"><value>COPIAR: Elija una carpeta ...</value></data>
+  <data name="VERSCHIEBEN: Wähle einen Ordner ..." xml:space="preserve"><value>MOVER: Elija una carpeta ...</value></data>
   <data name="Neuer Ordner (Strg+N)" xml:space="preserve"><value>Nueva carpeta (Ctrl+N)</value></data>
   <data name="Neuer Ordner" xml:space="preserve"><value>Nueva carpeta</value></data>
   <data name="Der Ordner konnte nicht erstellt werden." xml:space="preserve"><value>No se pudo crear la carpeta.</value></data>
@@ -376,7 +377,7 @@ para instalar la última versión.</value></data>
   <data name="90° &amp;rechts" xml:space="preserve"><value>90° a la &amp;derecha</value></data>
   <data name="90° &amp;links" xml:space="preserve"><value>90° a la &amp;izquierda</value></data>
   <data name="Ungültige Seitenangabe" xml:space="preserve"><value>Especificación de páginas no válida</value></data>
-  <data name="Bitte geben Sie gültige Seiten zwischen 1 und {0} an," xml:space="preserve"><value>Indique páginas válidas entre 1 y {0},</value></data>
+  <data name="Bitte gib gültige Seiten zwischen 1 und {0} an," xml:space="preserve"><value>Indique páginas válidas entre 1 y {0},</value></data>
   <data name="z.B.  3  oder  2-5, 8" xml:space="preserve"><value>p.ej.  3  o  2-5, 8</value></data>
 
   <!-- Dokumenteigenschaften-Dialog -->

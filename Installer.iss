@@ -1,4 +1,4 @@
-; ============================================================================
+﻿; ============================================================================
 ; PDFlight – Inno-Setup-Skript
 ;
 ; Voraussetzungen auf dem Zielrechner:
@@ -47,7 +47,7 @@ Name: es; MessagesFile: "compiler:Languages\Spanish.isl"
 
 [Messages]
 en.ConfirmUninstall=Are you sure you want to remove %1 and all of its components? You do not need to uninstall before an update.
-de.ConfirmUninstall=Sind Sie sicher, dass Sie %1 und alle zugehörigen Komponenten entfernen möchten? Vor einem Update ist keine Deinstallation erforderlich.
+de.ConfirmUninstall=Bist du sicher, dass du %1 und alle zugehörigen Komponenten entfernen möchtest? Vor einem Update ist keine Deinstallation erforderlich.
 fr.ConfirmUninstall=Voulez-vous vraiment supprimer %1 et tous ses composants ? Une désinstallation n'est pas nécessaire avant une mise à jour.
 es.ConfirmUninstall=¿Seguro que desea quitar %1 y todos sus componentes? No es necesario desinstalar antes de una actualización.
 
@@ -60,7 +60,7 @@ en.PdfDocument=PDF file
 de.Run={#appName} starten
 de.DesktopIcon=Verknüpfung auf dem Desktop anlegen
 de.FileAssoc={#appName} im "Öffnen mit"-Menü für PDF-Dateien anbieten
-de.WebView2Missing=Die Microsoft-WebView2-Runtime wurde nicht gefunden.%n%n{#appName} benötigt sie für die PDF-Anzeige. Bitte laden Sie sie herunter von:%nhttps://developer.microsoft.com/microsoft-edge/webview2/%n%nDie Installation wird trotzdem fortgesetzt.
+de.WebView2Missing=Die Microsoft-WebView2-Runtime wurde nicht gefunden.%n%n{#appName} benötigt sie für die PDF-Anzeige. Bitte lade sie herunter von:%nhttps://developer.microsoft.com/microsoft-edge/webview2/%n%nDie Installation wird trotzdem fortgesetzt.
 de.PdfDocument=PDF-Datei
 fr.Run=Lancer {#appName}
 fr.DesktopIcon=Créer un raccourci sur le Bureau

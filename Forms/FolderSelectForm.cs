@@ -48,8 +48,8 @@ public partial class FolderSelectForm : Form
 
     private void FolderSelectForm_Load(object sender, EventArgs e)
     {
-        if (copyMode) { Text = Lng.T("KOPIEREN: Wählen Sie einen Ordner ..."); buttonOK.Text = Lng.T("Kopieren"); }
-        else { Text = Lng.T("VERSCHIEBEN: Wählen Sie einen Ordner ..."); buttonOK.Text = Lng.T("Verschieben"); }
+        if (copyMode) { Text = Lng.T("KOPIEREN: Wähle einen Ordner ..."); buttonOK.Text = Lng.T("Kopieren"); }
+        else { Text = Lng.T("VERSCHIEBEN: Wähle einen Ordner ..."); buttonOK.Text = Lng.T("Verschieben"); }
 
         cbAdd2Folderlist.Checked = comboBoxTarget.SelectedIndex != -1;
         cbAdd2Folderlist.Enabled = comboBoxTarget.SelectedIndex == -1;

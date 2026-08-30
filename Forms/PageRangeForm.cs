@@ -57,7 +57,7 @@ public partial class PageRangeForm : Form
         var pages = PdfEditService.ParsePageRange(input, pageCount);
         if (pages == null)
         {
-            TaskDlg.MsgTaskDlg(Handle, Lng.T("Ungültige Seitenangabe"), string.Format(Lng.T("Bitte geben Sie gültige Seiten zwischen 1 und {0} an,"), pageCount) + Environment.NewLine + Lng.T("z.B.  3  oder  2-5, 8"), TaskDialogIcon.Warning);
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Ungültige Seitenangabe"), string.Format(Lng.T("Bitte gib gültige Seiten zwischen 1 und {0} an,"), pageCount) + Environment.NewLine + Lng.T("z.B.  3  oder  2-5, 8"), TaskDialogIcon.Warning);
             DialogResult = DialogResult.None; // Dialog offen halten
             textBoxPages.SelectAll();
             textBoxPages.Focus();
