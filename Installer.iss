@@ -21,6 +21,7 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 AppPublisher=Wilhelm Happe
 AppCopyright=© 2026 W. Happe
+LicenseFile=LICENSE
 UsePreviousAppDir=yes
 DefaultDirName={autopf}\{#appName}
 DefaultGroupName={#appName}
@@ -79,6 +80,7 @@ Name: fileassoc; Description: "{cm:FileAssoc}"
 
 [Files]
 Source: "{#releaseDir}\*"; Excludes: "*.pdb"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\{#appName}"; Filename: "{app}\{#appName}.exe"
