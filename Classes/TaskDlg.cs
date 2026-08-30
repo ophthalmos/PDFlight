@@ -249,6 +249,7 @@ internal static class TaskDlg
         ("Alt+Enter", "Windows-Dateieigenschaften", null),
         ("Strg+E", "als E-Mail-Anhang senden", null),
         ("Strg+1 … 9", "in externem Programm öffnen", null),
+        ("Strg+,", "Einstellungen öffnen", null),
         ("Strg+F", "im Dokument suchen", null),
         ("Strg+P", "Dokument drucken", null),
         ("F7", "Textcursor-Navigation ein/aus (Markieren per Tastatur)",
