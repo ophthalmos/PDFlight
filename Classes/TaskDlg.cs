@@ -123,7 +123,8 @@ internal static class TaskDlg
         var indent = new string(' ', 14);
         var foot = $"{indent}© {buildDate:yyyy} Wilhelm Happe · Version {threeVersion} ({buildDate:d})" +
             $"\n{indent}WebView2-Runtime {webView2Runtime}" +
-            $"\n{indent}PDFsharp {typeof(PdfSharp.Pdf.PdfDocument).Assembly.GetName().Version?.ToString(3)}";
+            $"\n{indent}PDFsharp {typeof(PdfSharp.Pdf.PdfDocument).Assembly.GetName().Version?.ToString(3)}" +
+            $"\n{indent}<a href=\"https://www.netradio.info/pdf/\">www.netradio.info</a>";
         var initialPage = new TaskDialogPage()
         {
             Caption = Lng.T("Über") + " " + Application.ProductName,
@@ -132,10 +133,12 @@ internal static class TaskDlg
             Icon = icon32 == null ? null : new TaskDialogIcon(icon32),
             AllowCancel = true,
             SizeToContent = true,
+            EnableLinks = true,
             Buttons = { paypalButton, TaskDialogButton.OK },
             DefaultButton = TaskDialogButton.OK,
             Footnote = foot
         };
+        initialPage.LinkClicked += (s, e) => StartLink(hwnd, e.LinkHref);
 
         var result = TaskDialog.ShowDialog(hwnd, initialPage);
         if (result == paypalButton) { StartLink(hwnd, "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=S8DVXHKFC2CVS&source=url"); }

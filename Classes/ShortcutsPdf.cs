@@ -69,9 +69,30 @@ internal static partial class ShortcutsPdf
                 y += 4;
             }
         }
+        DrawFooter(gfx, page);
         gfx.Dispose();
         document.Save(path);
         return path;
+    }
+
+    /// <summary>Fußzeile: Trennlinie, darunter zentriert Copyright und die Webadresse als klickbarer Link.</summary>
+    private static void DrawFooter(XGraphics gfx, PdfSharp.Pdf.PdfPage page)
+    {
+        const string LinkText = "www.netradio.info";
+        const string LinkUrl = "https://www.netradio.info/pdf/";
+        XFont font = new("Segoe UI", 9);
+        var lineY = page.Height.Point - 44;
+        gfx.DrawLine(new XPen(XColor.FromArgb(180, 190, 200), 0.7), Margin, lineY, page.Width.Point - Margin, lineY);
+        var copyright = $"© {DateTime.Now.Year} Wilhelm Happe   ·   ";
+        var copyWidth = gfx.MeasureString(copyright, font).Width;
+        var linkWidth = gfx.MeasureString(LinkText, font).Width;
+        var x = (page.Width.Point - copyWidth - linkWidth) / 2;
+        var textY = lineY + 16;
+        gfx.DrawString(copyright, font, new XSolidBrush(XColor.FromArgb(90, 90, 90)), x, textY);
+        gfx.DrawString(LinkText, font, new XSolidBrush(XColor.FromArgb(0x1E, 0x5A, 0x96)), x + copyWidth, textY);
+        // klickbare Fläche über dem Linktext (WorldToDefaultPage rechnet ins PDF-Koordinatensystem um)
+        var linkRect = gfx.Transformer.WorldToDefaultPage(new XRect(x + copyWidth, textY - 10, linkWidth, 13));
+        page.AddWebLink(new PdfSharp.Pdf.PdfRectangle(linkRect), LinkUrl);
     }
 
     /// <summary>Dezent hellblauer Seitenhintergrund.</summary>
