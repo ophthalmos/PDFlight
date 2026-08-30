@@ -38,6 +38,9 @@ public partial class SettingsForm : Form
     [System.ComponentModel.Browsable(false)]
     public bool ReopenLastFile => cbReopenLast.Checked;
 
+    [System.ComponentModel.Browsable(false)]
+    public bool TwoPageLayout => cbTwoPageLayout.Checked;
+
     [System.ComponentModel.Browsable(false), System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
     public bool ClearRecentRequested { get; private set; }
 
@@ -61,6 +64,7 @@ public partial class SettingsForm : Form
         cbLargeIcons.Checked = source.LargeToolbarIcons;
         cbCloseOnEscape.Checked = source.CloseOnEscape;
         cbReopenLast.Checked = source.ReopenLastFile;
+        cbTwoPageLayout.Checked = source.TwoPageLayout;
         if (listTargets.Items.Count > 0) { listTargets.SelectedIndex = 0; }
         if (listPrograms.Items.Count > 0) { listPrograms.SelectedIndex = 0; }
         tabControl.SelectedIndex = Math.Clamp(initialTab, 0, tabControl.TabCount - 1);

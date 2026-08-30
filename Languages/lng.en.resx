@@ -112,6 +112,9 @@ extract pages, properties (shortcuts in the menu)</value></data>
   <data name="Strg+Umschalt+R / L" xml:space="preserve"><value>Ctrl+Shift+R / L</value></data>
   <data name="Ansicht drehen (ändert die Datei nicht)" xml:space="preserve"><value>Rotate view (does not change the file)</value></data>
   <data name="Strg+Umschalt+I" xml:space="preserve"><value>Ctrl+Shift+I</value></data>
+  <data name="Strg+Umschalt+A" xml:space="preserve"><value>Ctrl+Shift+A</value></data>
+  <data name="ein-/zweiseitiges Layout umschalten" xml:space="preserve"><value>toggle one-/two-page layout</value></data>
+  <data name="&amp;Zweiseitige Ansicht beim Öffnen" xml:space="preserve"><value>T&amp;wo-page view when opening</value></data>
   <data name="Strg+Umschalt+B" xml:space="preserve"><value>Ctrl+Shift+B</value></data>
   <data name="Inhalte-Leiste ein-/ausblenden" xml:space="preserve"><value>Show/hide the contents pane</value></data>
   <data name="Seite an Fensterbreite anpassen" xml:space="preserve"><value>Fit the page to the window width</value></data>

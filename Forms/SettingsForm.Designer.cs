@@ -38,6 +38,7 @@
             cbLargeIcons = new CheckBox();
             cbCloseOnEscape = new CheckBox();
             cbReopenLast = new CheckBox();
+            cbTwoPageLayout = new CheckBox();
             btnClearRecent = new Button();
             labelLanguage = new Label();
             comboLanguage = new ComboBox();
@@ -90,6 +91,7 @@
             tabGeneral.Controls.Add(cbLargeIcons);
             tabGeneral.Controls.Add(cbCloseOnEscape);
             tabGeneral.Controls.Add(cbReopenLast);
+            tabGeneral.Controls.Add(cbTwoPageLayout);
             tabGeneral.Controls.Add(btnClearRecent);
             tabGeneral.Controls.Add(labelLanguage);
             tabGeneral.Controls.Add(comboLanguage);
@@ -176,10 +178,20 @@
             cbReopenLast.TabIndex = 8;
             cbReopenLast.Text = "Zuletzt geöffnete &Datei beim Start laden";
             cbReopenLast.UseVisualStyleBackColor = true;
-            // 
+            //
+            // cbTwoPageLayout
+            //
+            cbTwoPageLayout.AutoSize = true;
+            cbTwoPageLayout.Location = new Point(16, 216);
+            cbTwoPageLayout.Name = "cbTwoPageLayout";
+            cbTwoPageLayout.Size = new Size(220, 19);
+            cbTwoPageLayout.TabIndex = 11;
+            cbTwoPageLayout.Text = "&Zweiseitige Ansicht beim Öffnen";
+            cbTwoPageLayout.UseVisualStyleBackColor = true;
+            //
             // btnClearRecent
-            // 
-            btnClearRecent.Location = new Point(16, 228);
+            //
+            btnClearRecent.Location = new Point(16, 244);
             btnClearRecent.Name = "btnClearRecent";
             btnClearRecent.Size = new Size(180, 27);
             btnClearRecent.TabIndex = 3;
@@ -515,6 +527,7 @@
         private System.Windows.Forms.CheckBox cbLargeIcons;
         private System.Windows.Forms.CheckBox cbCloseOnEscape;
         private System.Windows.Forms.CheckBox cbReopenLast;
+        private System.Windows.Forms.CheckBox cbTwoPageLayout;
         private System.Windows.Forms.Button btnClearRecent;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
