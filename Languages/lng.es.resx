@@ -111,6 +111,10 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
   <data name="Strg+I" xml:space="preserve"><value>Ctrl+I</value></data>
   <data name="Strg+X" xml:space="preserve"><value>Ctrl+X</value></data>
   <data name="Strg+Entf" xml:space="preserve"><value>Ctrl+Supr</value></data>
+  <data name="Strg+Umschalt+C" xml:space="preserve"><value>Ctrl+Mayús+C</value></data>
+  <data name="Dateipfad in die Zwischenablage kopieren" xml:space="preserve"><value>copiar la ruta del archivo al portapapeles</value></data>
+  <data name="Der Dateipfad wurde in die Zwischenablage kopiert." xml:space="preserve"><value>La ruta del archivo se copió al portapapeles.</value></data>
+  <data name="Kopieren in die Zwischenablage fehlgeschlagen." xml:space="preserve"><value>Error al copiar al portapapeles.</value></data>
   <data name="Strg+Umschalt+Entf" xml:space="preserve"><value>Ctrl+Mayús+Supr</value></data>
   <data name="Strg+Umschalt+← / →" xml:space="preserve"><value>Ctrl+Mayús+← / →</value></data>
   <data name="Strg+Umschalt+R / L" xml:space="preserve"><value>Ctrl+Mayús+R / L</value></data>
@@ -235,7 +239,7 @@ El botón de girar del visor, en cambio, solo cambia la vista.</value></data>
   <data name="Vorderseiten: {0}, Rückseiten: {1}" xml:space="preserve"><value>Caras delanteras: {0}, caras traseras: {1}</value></data>
   <data name="In welcher Reihenfolge liegen die Rückseiten vor?" xml:space="preserve"><value>¿En qué orden están las caras traseras?</value></data>
   <data name="In umgekehrter Reihenfolge" xml:space="preserve"><value>En orden inverso</value></data>
-  <data name="Der Stapel wurde zum Scannen gewendet — letzte Rückseite zuerst (Standard)." xml:space="preserve"><value>La pila se giró para escanear: última cara trasera primero (estándar).</value></data>
+  <data name="Der Stapel wurde zum Scannen gewendet – letzte Rückseite zuerst (Standard)." xml:space="preserve"><value>La pila se giró para escanear: última cara trasera primero (estándar).</value></data>
   <data name="In gleicher Reihenfolge" xml:space="preserve"><value>En el mismo orden</value></data>
   <data name="Die Rückseiten wurden von vorn nach hinten gescannt." xml:space="preserve"><value>Las caras traseras se escanearon de principio a fin.</value></data>
   <data name="Einfügen der Rückseiten" xml:space="preserve"><value>Inserción de las caras traseras</value></data>
@@ -245,8 +249,8 @@ El botón de girar del visor, en cambio, solo cambia la vista.</value></data>
   <data name="unbekannt" xml:space="preserve"><value>desconocida</value></data>
   <data name="nicht gefunden" xml:space="preserve"><value>no encontrado</value></data>
   <data name="Über" xml:space="preserve"><value>Acerca de</value></data>
-  <data name="About.Text" xml:space="preserve"><value>PDFlight es un visor con operaciones de archivo
-integradas (mover, copiar, eliminar, renombrar, enviar).
+  <data name="About.Text" xml:space="preserve"><value>PDFlight es un visor para las operaciones de archivo
+habituales (mover, copiar, eliminar, renombrar, enviar).
 Las carpetas de destino frecuentes se guardan en una
 lista, de modo que los archivos se mueven en un instante
 sin salir del programa. Además, se pueden quitar páginas
@@ -257,14 +261,13 @@ anexar otro archivo PDF.</value></data>
   <data name="Tastenkürzel …" xml:space="preserve"><value>Atajos de teclado…</value></data>
   <data name="Nach Updates suchen …" xml:space="preserve"><value>Buscar actualizaciones…</value></data>
   <data name="Über PDFlight …" xml:space="preserve"><value>Acerca de PDFlight…</value></data>
-  <data name="Tastenkürzel, Updates und Über PDFlight" xml:space="preserve"><value>Atajos de teclado, actualizaciones y Acerca de PDFlight</value></data>
   <data name="Vorhandene öffnen" xml:space="preserve"><value>Abrir el existente</value></data>
   <data name="Neu erstellen" xml:space="preserve"><value>Crear de nuevo</value></data>
   <data name="z.B. nach einem Update oder Sprachwechsel" xml:space="preserve"><value>p. ej., tras una actualización o un cambio de idioma</value></data>
   <data name="Kürzel-Übersicht bereits vorhanden" xml:space="preserve"><value>El resumen de atajos ya existe</value></data>
   <data name="Die PDF-Übersicht konnte nicht erstellt werden." xml:space="preserve"><value>No se pudo crear el resumen en PDF.</value></data>
   <data name="PDFlight-Tastenkürzel" xml:space="preserve"><value>Atajos-de-teclado-PDFlight</value></data>
-  <data name="Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert — Markieren ganz ohne Maus." xml:space="preserve"><value>Coloca un cursor de texto en el documento: las flechas lo mueven, Mayús+flechas seleccionan, Ctrl+C copia; seleccionar sin ratón.</value></data>
+  <data name="Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert – Markieren ganz ohne Maus." xml:space="preserve"><value>Coloca un cursor de texto en el documento: las flechas lo mueven, Mayús+flechas seleccionan, Ctrl+C copia; seleccionar sin ratón.</value></data>
   <data name="Tastenkürzel" xml:space="preserve"><value>Atajos de teclado</value></data>
   <data name="PDFlightSetup.exe herunterladen" xml:space="preserve"><value>Descargar PDFlightSetup.exe</value></data>
   <data name="Download.Detail" xml:space="preserve"><value>PDFlightSetup.exe se guardará en la carpeta de
@@ -273,7 +276,7 @@ para instalar la última versión.</value></data>
   <data name="{0} ist auf dem neuesten Stand." xml:space="preserve"><value>{0} está actualizado.</value></data>
   <data name="Die Update-Suche ist fehlgeschlagen." xml:space="preserve"><value>La búsqueda de actualización falló.</value></data>
   <data name="Die Update-Informationen wurden nicht gefunden." xml:space="preserve"><value>No se encontró la información de actualización.</value></data>
-  <data name="Zeitüberschreitung — bitte prüfe die Internetverbindung." xml:space="preserve"><value>Tiempo de espera agotado: compruebe su conexión a Internet.</value></data>
+  <data name="Zeitüberschreitung – bitte prüfe die Internetverbindung." xml:space="preserve"><value>Tiempo de espera agotado: compruebe su conexión a Internet.</value></data>
   <data name="Die Versionsangabe in der Update-Datei konnte nicht gelesen werden." xml:space="preserve"><value>No se pudo leer la versión del archivo de actualización.</value></data>
   <data name="Es steht ein Update zur Verfügung!" xml:space="preserve"><value>¡Hay una actualización disponible!</value></data>
   <data name="vom" xml:space="preserve"><value>del</value></data>

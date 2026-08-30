@@ -112,6 +112,10 @@ extract pages, properties (shortcuts in the menu)</value></data>
   <data name="Strg+I" xml:space="preserve"><value>Ctrl+I</value></data>
   <data name="Strg+X" xml:space="preserve"><value>Ctrl+X</value></data>
   <data name="Strg+Entf" xml:space="preserve"><value>Ctrl+Del</value></data>
+  <data name="Strg+Umschalt+C" xml:space="preserve"><value>Ctrl+Shift+C</value></data>
+  <data name="Dateipfad in die Zwischenablage kopieren" xml:space="preserve"><value>copy file path to the clipboard</value></data>
+  <data name="Der Dateipfad wurde in die Zwischenablage kopiert." xml:space="preserve"><value>The file path was copied to the clipboard.</value></data>
+  <data name="Kopieren in die Zwischenablage fehlgeschlagen." xml:space="preserve"><value>Copying to the clipboard failed.</value></data>
   <data name="Strg+Umschalt+Entf" xml:space="preserve"><value>Ctrl+Shift+Del</value></data>
   <data name="Strg+Umschalt+← / →" xml:space="preserve"><value>Ctrl+Shift+← / →</value></data>
   <data name="Strg+Umschalt+R / L" xml:space="preserve"><value>Ctrl+Shift+R / L</value></data>
@@ -201,7 +205,7 @@ extract pages, properties (shortcuts in the menu)</value></data>
   <data name="Rückseiten-Scan einfügen …" xml:space="preserve"><value>Insert back-page scan…</value></data>
   <data name="Rückseiten-Scan einfügen" xml:space="preserve"><value>Insert back-page scan</value></data>
   <data name="Duplex.Intro" xml:space="preserve"><value>For scanners without a duplex unit: the displayed file contains the front pages (1, 3, 5 …).
-In the next step, select the file with the back pages — it will be interleaved with the front pages
+In the next step, select the file with the back pages – it will be interleaved with the front pages
 into one complete document (1, 2, 3 …).
 
 Both files must have the same number of pages.</value></data>
@@ -236,7 +240,7 @@ The viewer's rotate button, by contrast, only changes the view.</value></data>
   <data name="Vorderseiten: {0}, Rückseiten: {1}" xml:space="preserve"><value>Front pages: {0}, back pages: {1}</value></data>
   <data name="In welcher Reihenfolge liegen die Rückseiten vor?" xml:space="preserve"><value>In what order are the back pages?</value></data>
   <data name="In umgekehrter Reihenfolge" xml:space="preserve"><value>In reverse order</value></data>
-  <data name="Der Stapel wurde zum Scannen gewendet — letzte Rückseite zuerst (Standard)." xml:space="preserve"><value>The stack was flipped for scanning — last back page first (standard).</value></data>
+  <data name="Der Stapel wurde zum Scannen gewendet – letzte Rückseite zuerst (Standard)." xml:space="preserve"><value>The stack was flipped for scanning – last back page first (standard).</value></data>
   <data name="In gleicher Reihenfolge" xml:space="preserve"><value>In the same order</value></data>
   <data name="Die Rückseiten wurden von vorn nach hinten gescannt." xml:space="preserve"><value>The back pages were scanned front to back.</value></data>
   <data name="Einfügen der Rückseiten" xml:space="preserve"><value>Inserting the back pages</value></data>
@@ -246,7 +250,7 @@ The viewer's rotate button, by contrast, only changes the view.</value></data>
   <data name="unbekannt" xml:space="preserve"><value>unknown</value></data>
   <data name="nicht gefunden" xml:space="preserve"><value>not found</value></data>
   <data name="Über" xml:space="preserve"><value>About</value></data>
-  <data name="About.Text" xml:space="preserve"><value>PDFlight is a viewer with integrated file operations
+  <data name="About.Text" xml:space="preserve"><value>PDFlight is a viewer for typical file operations
 (move, copy, delete, rename, mail).
 Frequently used target folders are kept in a list, so
 files can be moved in a flash without leaving the
@@ -258,14 +262,13 @@ can be appended.</value></data>
   <data name="Tastenkürzel …" xml:space="preserve"><value>Keyboard shortcuts…</value></data>
   <data name="Nach Updates suchen …" xml:space="preserve"><value>Check for updates…</value></data>
   <data name="Über PDFlight …" xml:space="preserve"><value>About PDFlight…</value></data>
-  <data name="Tastenkürzel, Updates und Über PDFlight" xml:space="preserve"><value>Keyboard shortcuts, updates and About PDFlight</value></data>
   <data name="Vorhandene öffnen" xml:space="preserve"><value>Open existing</value></data>
   <data name="Neu erstellen" xml:space="preserve"><value>Create new</value></data>
   <data name="z.B. nach einem Update oder Sprachwechsel" xml:space="preserve"><value>e.g. after an update or language change</value></data>
   <data name="Kürzel-Übersicht bereits vorhanden" xml:space="preserve"><value>Shortcut overview already exists</value></data>
   <data name="Die PDF-Übersicht konnte nicht erstellt werden." xml:space="preserve"><value>The PDF overview could not be created.</value></data>
   <data name="PDFlight-Tastenkürzel" xml:space="preserve"><value>PDFlight keyboard shortcuts</value></data>
-  <data name="Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert — Markieren ganz ohne Maus." xml:space="preserve"><value>Places a text cursor in the document: arrow keys move it, Shift+arrows select text, Ctrl+C copies — selecting entirely without a mouse.</value></data>
+  <data name="Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert – Markieren ganz ohne Maus." xml:space="preserve"><value>Places a text cursor in the document: arrow keys move it, Shift+arrows select text, Ctrl+C copies – selecting entirely without a mouse.</value></data>
   <data name="Tastenkürzel" xml:space="preserve"><value>Keyboard shortcuts</value></data>
   <data name="PDFlightSetup.exe herunterladen" xml:space="preserve"><value>Download PDFlightSetup.exe</value></data>
   <data name="Download.Detail" xml:space="preserve"><value>PDFlightSetup.exe is saved to your Downloads
@@ -274,7 +277,7 @@ the latest version.</value></data>
   <data name="{0} ist auf dem neuesten Stand." xml:space="preserve"><value>{0} is up to date.</value></data>
   <data name="Die Update-Suche ist fehlgeschlagen." xml:space="preserve"><value>The update check failed.</value></data>
   <data name="Die Update-Informationen wurden nicht gefunden." xml:space="preserve"><value>The update information was not found.</value></data>
-  <data name="Zeitüberschreitung — bitte prüfe die Internetverbindung." xml:space="preserve"><value>Timeout — please check your internet connection.</value></data>
+  <data name="Zeitüberschreitung – bitte prüfe die Internetverbindung." xml:space="preserve"><value>Timeout – please check your internet connection.</value></data>
   <data name="Die Versionsangabe in der Update-Datei konnte nicht gelesen werden." xml:space="preserve"><value>The version in the update file could not be read.</value></data>
   <data name="Es steht ein Update zur Verfügung!" xml:space="preserve"><value>An update is available!</value></data>
   <data name="vom" xml:space="preserve"><value>dated</value></data>
