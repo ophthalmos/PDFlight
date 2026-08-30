@@ -187,7 +187,7 @@ internal static class TaskDlg
             failed = true;
             updatePage.Heading = Lng.T("Die Update-Suche ist fehlgeschlagen.");
             updatePage.Text = ex is TaskCanceledException
-                ? Lng.T("Zeitüberschreitung — bitte prüfe die Internetverbindung.")
+                ? Lng.T("Zeitüberschreitung – bitte prüfe die Internetverbindung.")
                 : ex.Message;
         }
         finally { Cursor.Current = Cursors.Default; }
@@ -247,13 +247,14 @@ internal static class TaskDlg
         ("Strg+Z", "Dokumentänderung rückgängig machen", null),
         ("Strg+I", "Dokumenteigenschaften", null),
         ("Alt+Enter", "Windows-Dateieigenschaften", null),
+        ("Strg+Umschalt+C", "Dateipfad in die Zwischenablage kopieren", null),
         ("Strg+E", "als E-Mail-Anhang senden", null),
         ("Strg+1 … 9", "in externem Programm öffnen", null),
         ("Strg+,", "Einstellungen öffnen", null),
         ("Strg+F", "im Dokument suchen", null),
         ("Strg+P", "Dokument drucken", null),
         ("F7", "Textcursor-Navigation ein/aus (Markieren per Tastatur)",
-            "Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert — Markieren ganz ohne Maus."),
+            "Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert – Markieren ganz ohne Maus."),
         ("F11", "Vollbild ein/aus", null),
         ("2× Esc / Umschalt+Esc", "Programm beenden (Option)", null),
         ("F1", "diese Kürzel-Übersicht", null),

@@ -111,6 +111,10 @@ extraire des pages, propriétés (raccourcis dans le menu)</value></data>
   <data name="Strg+I" xml:space="preserve"><value>Ctrl+I</value></data>
   <data name="Strg+X" xml:space="preserve"><value>Ctrl+X</value></data>
   <data name="Strg+Entf" xml:space="preserve"><value>Ctrl+Suppr</value></data>
+  <data name="Strg+Umschalt+C" xml:space="preserve"><value>Ctrl+Maj+C</value></data>
+  <data name="Dateipfad in die Zwischenablage kopieren" xml:space="preserve"><value>copier le chemin du fichier dans le presse-papiers</value></data>
+  <data name="Der Dateipfad wurde in die Zwischenablage kopiert." xml:space="preserve"><value>Le chemin du fichier a été copié dans le presse-papiers.</value></data>
+  <data name="Kopieren in die Zwischenablage fehlgeschlagen." xml:space="preserve"><value>Échec de la copie dans le presse-papiers.</value></data>
   <data name="Strg+Umschalt+Entf" xml:space="preserve"><value>Ctrl+Maj+Suppr</value></data>
   <data name="Strg+Umschalt+← / →" xml:space="preserve"><value>Ctrl+Maj+← / →</value></data>
   <data name="Strg+Umschalt+R / L" xml:space="preserve"><value>Ctrl+Maj+R / L</value></data>
@@ -200,7 +204,7 @@ extraire des pages, propriétés (raccourcis dans le menu)</value></data>
   <data name="Rückseiten-Scan einfügen …" xml:space="preserve"><value>Insérer le scan des versos…</value></data>
   <data name="Rückseiten-Scan einfügen" xml:space="preserve"><value>Insérer le scan des versos</value></data>
   <data name="Duplex.Intro" xml:space="preserve"><value>Pour les scanners sans unité recto verso : le fichier affiché contient les rectos (1, 3, 5 …).
-À l'étape suivante, choisissez le fichier des versos — il sera entrelacé avec les rectos
+À l'étape suivante, choisissez le fichier des versos – il sera entrelacé avec les rectos
 pour former un document complet (1, 2, 3 …).
 
 Les deux fichiers doivent avoir le même nombre de pages.</value></data>
@@ -235,7 +239,7 @@ Le bouton de rotation de l'afficheur, lui, ne change que l'affichage.</value></d
   <data name="Vorderseiten: {0}, Rückseiten: {1}" xml:space="preserve"><value>Rectos : {0}, versos : {1}</value></data>
   <data name="In welcher Reihenfolge liegen die Rückseiten vor?" xml:space="preserve"><value>Dans quel ordre sont les versos ?</value></data>
   <data name="In umgekehrter Reihenfolge" xml:space="preserve"><value>En ordre inverse</value></data>
-  <data name="Der Stapel wurde zum Scannen gewendet — letzte Rückseite zuerst (Standard)." xml:space="preserve"><value>La pile a été retournée pour la numérisation — dernier verso en premier (standard).</value></data>
+  <data name="Der Stapel wurde zum Scannen gewendet – letzte Rückseite zuerst (Standard)." xml:space="preserve"><value>La pile a été retournée pour la numérisation – dernier verso en premier (standard).</value></data>
   <data name="In gleicher Reihenfolge" xml:space="preserve"><value>Dans le même ordre</value></data>
   <data name="Die Rückseiten wurden von vorn nach hinten gescannt." xml:space="preserve"><value>Les versos ont été numérisés du début à la fin.</value></data>
   <data name="Einfügen der Rückseiten" xml:space="preserve"><value>Insertion des versos</value></data>
@@ -245,8 +249,8 @@ Le bouton de rotation de l'afficheur, lui, ne change que l'affichage.</value></d
   <data name="unbekannt" xml:space="preserve"><value>inconnue</value></data>
   <data name="nicht gefunden" xml:space="preserve"><value>introuvable</value></data>
   <data name="Über" xml:space="preserve"><value>À propos de</value></data>
-  <data name="About.Text" xml:space="preserve"><value>PDFlight est une visionneuse dotée d'opérations de
-fichiers intégrées (déplacer, copier, supprimer, renommer,
+  <data name="About.Text" xml:space="preserve"><value>PDFlight est une visionneuse pour les opérations de
+fichiers courantes (déplacer, copier, supprimer, renommer,
 envoyer). Les dossiers cibles fréquents sont conservés
 dans une liste : les fichiers se déplacent en un éclair sans
 quitter le programme. De plus, des pages peuvent être
@@ -257,14 +261,13 @@ un autre fichier PDF peut être annexé.</value></data>
   <data name="Tastenkürzel …" xml:space="preserve"><value>Raccourcis clavier…</value></data>
   <data name="Nach Updates suchen …" xml:space="preserve"><value>Rechercher des mises à jour…</value></data>
   <data name="Über PDFlight …" xml:space="preserve"><value>À propos de PDFlight…</value></data>
-  <data name="Tastenkürzel, Updates und Über PDFlight" xml:space="preserve"><value>Raccourcis clavier, mises à jour et À propos de PDFlight</value></data>
   <data name="Vorhandene öffnen" xml:space="preserve"><value>Ouvrir l'existant</value></data>
   <data name="Neu erstellen" xml:space="preserve"><value>Créer à nouveau</value></data>
   <data name="z.B. nach einem Update oder Sprachwechsel" xml:space="preserve"><value>p. ex. après une mise à jour ou un changement de langue</value></data>
   <data name="Kürzel-Übersicht bereits vorhanden" xml:space="preserve"><value>L'aperçu des raccourcis existe déjà</value></data>
   <data name="Die PDF-Übersicht konnte nicht erstellt werden." xml:space="preserve"><value>L'aperçu PDF n'a pas pu être créé.</value></data>
   <data name="PDFlight-Tastenkürzel" xml:space="preserve"><value>Raccourcis-clavier-PDFlight</value></data>
-  <data name="Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert — Markieren ganz ohne Maus." xml:space="preserve"><value>Place un curseur de texte dans le document : les flèches le déplacent, Maj+flèches sélectionnent, Ctrl+C copie — sélectionner sans souris.</value></data>
+  <data name="Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert – Markieren ganz ohne Maus." xml:space="preserve"><value>Place un curseur de texte dans le document : les flèches le déplacent, Maj+flèches sélectionnent, Ctrl+C copie – sélectionner sans souris.</value></data>
   <data name="Tastenkürzel" xml:space="preserve"><value>Raccourcis clavier</value></data>
   <data name="PDFlightSetup.exe herunterladen" xml:space="preserve"><value>Télécharger PDFlightSetup.exe</value></data>
   <data name="Download.Detail" xml:space="preserve"><value>PDFlightSetup.exe sera enregistré dans le dossier
@@ -273,7 +276,7 @@ d'installation pour installer la dernière version.</value></data>
   <data name="{0} ist auf dem neuesten Stand." xml:space="preserve"><value>{0} est à jour.</value></data>
   <data name="Die Update-Suche ist fehlgeschlagen." xml:space="preserve"><value>La recherche de mise à jour a échoué.</value></data>
   <data name="Die Update-Informationen wurden nicht gefunden." xml:space="preserve"><value>Les informations de mise à jour sont introuvables.</value></data>
-  <data name="Zeitüberschreitung — bitte prüfe die Internetverbindung." xml:space="preserve"><value>Délai dépassé — veuillez vérifier votre connexion Internet.</value></data>
+  <data name="Zeitüberschreitung – bitte prüfe die Internetverbindung." xml:space="preserve"><value>Délai dépassé – veuillez vérifier votre connexion Internet.</value></data>
   <data name="Die Versionsangabe in der Update-Datei konnte nicht gelesen werden." xml:space="preserve"><value>Le numéro de version du fichier de mise à jour n'a pas pu être lu.</value></data>
   <data name="Es steht ein Update zur Verfügung!" xml:space="preserve"><value>Une mise à jour est disponible !</value></data>
   <data name="vom" xml:space="preserve"><value>du</value></data>

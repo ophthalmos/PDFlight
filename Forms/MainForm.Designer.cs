@@ -350,7 +350,6 @@
             ddbInfo.Name = "ddbInfo";
             ddbInfo.Size = new Size(32, 22);
             ddbInfo.Text = "Hilfe";
-            ddbInfo.ToolTipText = "Tastenkürzel, Updates und Über PDFlight";
             //
             // mnuShortcuts
             //

@@ -811,7 +811,7 @@ public partial class MainForm : Form
             Heading = Lng.T("Rückseiten-Scan einfügen"),
             Text = Lng.T("Duplex.Intro",
                 "Für Scanner ohne Duplex-Einheit: Die angezeigte Datei enthält die Vorderseiten (1, 3, 5 …)." + Environment.NewLine +
-                "Wähle im nächsten Schritt die Datei mit den Rückseiten — sie wird mit den Vorderseiten" + Environment.NewLine +
+                "Wähle im nächsten Schritt die Datei mit den Rückseiten – sie wird mit den Vorderseiten" + Environment.NewLine +
                 "zu einem vollständigen Dokument verzahnt (1, 2, 3 …)." + Environment.NewLine + Environment.NewLine +
                 "Beide Dateien müssen gleich viele Seiten haben."),
             Icon = TaskDialogIcon.Information,
@@ -835,7 +835,7 @@ public partial class MainForm : Form
             return;
         }
         TaskDialogButton btnReversed = new TaskDialogCommandLinkButton(Lng.T("In umgekehrter Reihenfolge"),
-            Lng.T("Der Stapel wurde zum Scannen gewendet — letzte Rückseite zuerst (Standard)."));
+            Lng.T("Der Stapel wurde zum Scannen gewendet – letzte Rückseite zuerst (Standard)."));
         TaskDialogButton btnSame = new TaskDialogCommandLinkButton(Lng.T("In gleicher Reihenfolge"),
             Lng.T("Die Rückseiten wurden von vorn nach hinten gescannt."));
         TaskDialogPage page = new()
@@ -1217,6 +1217,7 @@ public partial class MainForm : Form
             case Keys.I | Keys.Control: ShowProperties(); return true;
             case Keys.Oemcomma | Keys.Control: OpenSettings(SettingsForm.TabGeneral); return true; // Strg+, wie in vielen Editoren
             case Keys.Enter | Keys.Alt when currentFile != null: ShellUtil.ShowFileProperties(currentFile.FullName); return true; // Windows-Dateieigenschaften, wie im Explorer
+            case Keys.C | Keys.Control | Keys.Shift when currentFile != null: CopyPathToClipboard(); return true; // wie im Windows-11-Explorer
             case Keys.E | Keys.Control: EmailCurrent(); return true;
             case Keys.Right | Keys.Control | Keys.Shift: StepFile(1); return true;   // Strg+Pfeile ohne Umschalt gehören dem Viewer (Zoom & Co.)
             case Keys.Left | Keys.Control | Keys.Shift: StepFile(-1); return true;
@@ -1232,6 +1233,20 @@ public partial class MainForm : Form
             if (key is >= Keys.D1 and <= Keys.D9) { LaunchProgramByIndex(key - Keys.D1); return true; } // Strg+1 … Strg+9: externe Programme
         }
         return false;
+    }
+
+    /// <summary>Kopiert den vollständigen Pfad der angezeigten Datei in die Zwischenablage (Strg+Umschalt+C, wie im Explorer).</summary>
+    private void CopyPathToClipboard()
+    {
+        try
+        {
+            Clipboard.SetText(currentFile.FullName);
+            statusPath.Text = Lng.T("Der Dateipfad wurde in die Zwischenablage kopiert.");
+        }
+        catch (System.Runtime.InteropServices.ExternalException ex) // Zwischenablage von anderem Programm gesperrt
+        {
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Kopieren in die Zwischenablage fehlgeschlagen."), ex);
+        }
     }
 
     private DateTime lastEscape = DateTime.MinValue;
