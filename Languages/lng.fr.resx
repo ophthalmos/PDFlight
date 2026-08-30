@@ -111,7 +111,7 @@ extraire des pages, propriétés (raccourcis dans le menu)</value></data>
   <data name="Strg+I" xml:space="preserve"><value>Ctrl+I</value></data>
   <data name="Strg+X" xml:space="preserve"><value>Ctrl+X</value></data>
   <data name="Strg+Entf" xml:space="preserve"><value>Ctrl+Suppr</value></data>
-  <data name="Strg+Umschalt+C" xml:space="preserve"><value>Ctrl+Maj+C</value></data>
+  <data name="Strg+Umschalt+K" xml:space="preserve"><value>Ctrl+Maj+K</value></data>
   <data name="Dateipfad in die Zwischenablage kopieren" xml:space="preserve"><value>copier le chemin du fichier dans le presse-papiers</value></data>
   <data name="Der Dateipfad wurde in die Zwischenablage kopiert." xml:space="preserve"><value>Le chemin du fichier a été copié dans le presse-papiers.</value></data>
   <data name="Kopieren in die Zwischenablage fehlgeschlagen." xml:space="preserve"><value>Échec de la copie dans le presse-papiers.</value></data>
