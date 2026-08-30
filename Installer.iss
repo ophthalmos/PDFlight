@@ -90,6 +90,10 @@ Name: "{autodesktop}\{#appName}"; Filename: "{app}\{#appName}.exe"; Tasks: deskt
 [Registry]
 ; ProgID, damit PDFlight im "Öffnen mit"-Dialog erscheint (Standard-App bleibt Sache des Benutzers)
 Root: HKLM; Subkey: "Software\Classes\{#appName}.Document"; ValueType: string; ValueData: "{cm:PdfDocument}"; Flags: uninsdeletekey; Tasks: fileassoc
+; Die HKCU-Registrierung, die PDFlight bei jedem Start selbst schreibt (ShellUtil.RegisterFileType),
+; wird hier nur zum Deinstallieren vorgemerkt
+Root: HKCU; Subkey: "Software\Classes\{#appName}.Document"; ValueType: none; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\.pdf\OpenWithProgids"; ValueType: none; ValueName: "{#appName}.Document"; Flags: uninsdeletevalue
 ; neutrales Dokument-Icon für PDF-Dateien im Explorer (statt des Programm-Icons der EXE)
 Root: HKLM; Subkey: "Software\Classes\{#appName}.Document\DefaultIcon"; ValueType: string; ValueData: "{app}\pdffile.ico"; Tasks: fileassoc
 Root: HKLM; Subkey: "Software\Classes\{#appName}.Document\shell\open\command"; ValueType: string; ValueData: """{app}\{#appName}.exe"" ""%1"""; Tasks: fileassoc

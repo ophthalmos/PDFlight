@@ -51,6 +51,7 @@
   <data name="&amp;Abbrechen" xml:space="preserve"><value>&amp;Annuler</value></data>
 
   <!-- MainForm: Symbolleiste und Menüs -->
+  <data name="PDF-Datei" xml:space="preserve"><value>Fichier PDF</value></data>
   <data name="Öffnen" xml:space="preserve"><value>Ouvrir</value></data>
   <data name="Verschieben" xml:space="preserve"><value>Déplacer</value></data>
   <data name="Kopieren" xml:space="preserve"><value>Copier</value></data>

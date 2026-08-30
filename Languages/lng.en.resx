@@ -52,6 +52,7 @@
   <data name="Jetzt neu starten?" xml:space="preserve"><value>Restart now?</value></data>
 
   <!-- MainForm: Symbolleiste und Menüs -->
+  <data name="PDF-Datei" xml:space="preserve"><value>PDF file</value></data>
   <data name="Öffnen" xml:space="preserve"><value>Open</value></data>
   <data name="Verschieben" xml:space="preserve"><value>Move</value></data>
   <data name="Kopieren" xml:space="preserve"><value>Copy</value></data>
