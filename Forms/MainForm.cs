@@ -71,6 +71,7 @@ public partial class MainForm : Form
         viewHost.PdfFileDropped += (s, path) => LoadPdf(path, addToRecent: true); // Drop auf das Viewer-Areal
         InitDropDownClickShield();
         EnableClassicDragDrop();
+        ShellUtil.RegisterFileType(); // Datei-Icon und Öffnen-Befehl je Benutzer, unabhängig vom Installer-Task
         EnsureProgramList();
         RebuildProgramIconButtons();
         ApplyToolbarIcons();

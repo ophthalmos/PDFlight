@@ -6,6 +6,37 @@ namespace PDFLight.Classes;
 /// <summary>Zeigt den Windows-Eigenschaften-Dialog einer Datei (portiert aus PDFMover NativeMethods).</summary>
 internal static partial class ShellUtil
 {
+    /// <summary>Registriert die PDF-Verknüpfung (ProgID mit pdffile.ico und Öffnen-Befehl) bei jedem
+    /// Start unter HKCU — unabhängig vom Installer-Task. So gilt das neutrale Dateisymbol auch dann,
+    /// wenn der Anwender PDFlight erst nachträglich zum Standardprogramm für PDFs macht. Die
+    /// Standard-Wahl selbst bleibt unberührt (die trifft seit Windows 10 allein der Benutzer).</summary>
+    public static void RegisterFileType()
+    {
+        try
+        {
+            // die PDFlight-EXE neben der Programm-Assembly — auch aus Test-Treibern heraus korrekt
+            var exe = Path.ChangeExtension(typeof(ShellUtil).Assembly.Location, ".exe");
+            if (!File.Exists(exe)) { exe = Application.ExecutablePath; }
+            var icon = Path.Combine(Path.GetDirectoryName(exe)!, "pdffile.ico");
+            using var progId = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\Classes\PDFlight.Document");
+            progId.SetValue(null, Lng.T("PDF-Datei"));
+            using (var iconKey = progId.CreateSubKey("DefaultIcon"))
+            {
+                iconKey.SetValue(null, File.Exists(icon) ? icon : exe + ",0"); // ohne ico-Datei (z.B. Debug-Lauf) das EXE-Icon
+            }
+            using (var command = progId.CreateSubKey(@"shell\open\command"))
+            {
+                command.SetValue(null, $"\"{exe}\" \"%1\"");
+            }
+            using var openWith = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\Classes\.pdf\OpenWithProgids");
+            openWith.SetValue("PDFlight.Document", Array.Empty<byte>(), Microsoft.Win32.RegistryValueKind.None);
+        }
+        catch (Exception ex) when (ex is System.Security.SecurityException or UnauthorizedAccessException or IOException)
+        {
+            // ohne Registrierung läuft das Programm normal weiter — es fehlt nur das Datei-Icon
+        }
+    }
+
     /// <summary>Zeigt die Datei im Dateimanager an — in Directory Opus, falls installiert, sonst im Explorer (wie in PDFMover).</summary>
     public static void ShowInFileManager(string filePath)
     {

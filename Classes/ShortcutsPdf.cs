@@ -20,6 +20,7 @@ internal static partial class ShortcutsPdf
     {
         var path = directory == null ? DefaultPath : Path.Combine(directory, Lng.T("PDFlight-Tastenkürzel") + ".pdf");
         using PdfDocument document = new();
+        document.Options.ColorMode = PdfColorMode.Rgb;
         document.Info.Title = Application.ProductName + " – " + Lng.T("Tastenkürzel");
         document.Info.Author = Application.ProductName;
         XFont titleFont = new("Segoe UI", 17, XFontStyleEx.Bold);
@@ -96,10 +97,9 @@ internal static partial class ShortcutsPdf
     }
 
     /// <summary>Dezent hellblauer Seitenhintergrund.</summary>
-    private static void DrawPageBackground(XGraphics gfx, PdfSharp.Pdf.PdfPage page)
-    {
-        gfx.DrawRectangle(new XSolidBrush(XColor.FromArgb(0xF1, 0xF6, 0xFB)), 0, 0, page.Width.Point, page.Height.Point);
-    }
+    /// gfx.DrawRectangle(new XSolidBrush(XColor.FromArgb(0xF1, 0xF6, 0xFB)), 0, 0, page.Width.Point, page.Height.Point);
+    private static void DrawPageBackground(XGraphics gfx, PdfPage page) =>
+        gfx.DrawRectangle(new XSolidBrush(XColor.FromArgb(249, 252, 255)), 0, 0, page.Width.Point, page.Height.Point);
 
     internal static string IconDiag = "nicht aufgerufen"; // nur für die Test-Diagnose
 

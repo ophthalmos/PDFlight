@@ -32,6 +32,7 @@
   <!-- UseWPF entfernt System.IO und System.Net.Http aus den impliziten Usings — hier wiederherstellen -->
   <ItemGroup>
     <Using Include="System.IO" />
+    <None Include="pdffile.ico" CopyToOutputDirectory="PreserveNewest" /><!-- Explorer-Dateisymbol, s. ShellUtil.RegisterFileType -->
     <Using Include="System.Net.Http" />
   </ItemGroup>
 
