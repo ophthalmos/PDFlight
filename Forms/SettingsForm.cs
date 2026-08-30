@@ -184,7 +184,7 @@ public partial class SettingsForm : Form
             .Where(p => !detected.Any(d => string.Equals(d, p, StringComparison.OrdinalIgnoreCase))).ToList();
         if (custom.Count > 0)
         {
-            var names = string.Join(Environment.NewLine, custom.Select(ProgramFinder.GetDisplayName));
+            var names = string.Join(Environment.NewLine, custom.Select(p => "• " + ProgramFinder.GetDisplayName(p)));
             var remove = TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Individuelle Programmeinträge gefunden"),
                 Lng.T("Diese Programme kennt die automatische Erkennung nicht:") + Environment.NewLine + names
                 + Environment.NewLine + Environment.NewLine + Lng.T("Sollen sie aus der Liste entfernt werden?"),
