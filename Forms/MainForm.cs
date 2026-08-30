@@ -1218,7 +1218,7 @@ public partial class MainForm : Form
             case Keys.E | Keys.Control: EmailCurrent(); return true;
             case Keys.Right | Keys.Control | Keys.Shift: StepFile(1); return true;   // Strg+Pfeile ohne Umschalt gehören dem Viewer (Zoom & Co.)
             case Keys.Left | Keys.Control | Keys.Shift: StepFile(-1); return true;
-            case Keys.F1: TaskDlg.ShowShortcutsPdf(Handle); return true;
+            case Keys.F1: TaskDlg.ShowShortcutsPdf(Handle, Icon); return true;
             case Keys.F11: SetFullScreen(!isFullScreen); return true;
             case Keys.Escape | Keys.Shift when settings.CloseOnEscape: Close(); return true; // Shift+Esc beendet sofort (wie in NetRadio)
             case Keys.Escape when isFullScreen: SetFullScreen(false); return true;
@@ -1299,7 +1299,7 @@ public partial class MainForm : Form
     }
     private void MnuShortcuts_Click(object sender, EventArgs e)
     {
-        TaskDlg.ShowShortcutsPdf(Handle);
+        TaskDlg.ShowShortcutsPdf(Handle, Icon);
     }
     private async void MnuCheckUpdate_Click(object sender, EventArgs e)
     {

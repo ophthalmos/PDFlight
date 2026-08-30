@@ -226,78 +226,54 @@ internal static class TaskDlg
         return string.Join("\n", lines);
     }
 
-    /// <summary>Alle Tastenkürzel: Kürzel, Kurztext (Dialog-Tabelle) und ausführliche Erklärung (PDF-Übersicht).</summary>
+    /// <summary>Alle Tastenkürzel: Kürzel, Kurztext und optionale Zusatzerklärung (nur wo nötig) für die PDF-Übersicht.</summary>
     public static readonly (string Key, string Text, string Detail)[] ShortcutRows =
     [
-        ("Strg+O", "PDF-Datei öffnen",
-            "Öffnet den Dateiauswahl-Dialog. Der Pfeil neben der Schaltfläche listet die zuletzt geöffneten Dateien."),
-        ("Strg+Umschalt+← / →", "vorherige / nächste Datei des Ordners",
-            "Wechselt zur vorherigen bzw. nächsten PDF-Datei im Ordner der angezeigten Datei — ideal zum Abarbeiten eines Scan-Ordners."),
-        ("Bild ↑ / Bild ↓", "im Dokument blättern",
-            "Blättert innerhalb des Dokuments seitenweise vor und zurück."),
-        ("Strg+M", "verschieben (Strg+Klick: erster Zielordner)",
-            "Verschiebt die Datei in einen Ordner der Zielliste. Strg+Klick auf die Schaltfläche verschiebt sofort in den ersten Zielordner, der Pfeil öffnet die Liste."),
-        ("Strg+K", "Datei kopieren",
-            "Kopiert die Datei in einen wählbaren Ordner; die angezeigte Datei bleibt unverändert."),
-        ("F2", "Datei umbenennen",
-            "Benennt die Datei um. Der Dialog bietet Bausteine wie das Datum sowie eine gespeicherte Namensliste an."),
-        ("Strg+Umschalt+Entf", "Datei in den Papierkorb",
-            "Verschiebt die Datei in den Papierkorb. Die Sicherheitsabfrage lässt sich in den Einstellungen abschalten."),
-        ("Strg+Entf", "Seiten löschen",
-            "Löscht die angegebenen Seiten dauerhaft aus dem Dokument — rückgängig mit Strg+Z."),
-        ("Strg+R", "Seiten drehen",
-            "Dreht die angegebenen Seiten dauerhaft um 90° oder 180°; die Änderung wird sofort in der Datei gespeichert."),
-        ("Strg+Umschalt+R / L", "Ansicht drehen (ändert die Datei nicht)",
-            "Dreht nur die Bildschirmansicht rechts- bzw. linksherum. Die Datei bleibt unverändert; beim Neuladen ist die Drehung weg."),
-        ("Strg+Umschalt+I", "Inhalte-Leiste ein-/ausblenden",
-            "Öffnet oder schließt die Leiste mit den Miniaturansichten am linken Rand."),
-        ("Strg+Umschalt+B", "Seite an Fensterbreite anpassen",
-            "Wechselt zwischen den Zoomstufen „an Fensterbreite“ und „ganze Seite sichtbar“."),
-        ("Strg+G", "Gehe zu Seite (Zahl tippen + Enter)",
-            "Setzt den Cursor in das Seitenzahl-Feld der Viewer-Leiste. Seitenzahl eintippen und mit Enter springen."),
-        ("Strg+X", "Seiten als neue Datei extrahieren",
-            "Speichert die angegebenen Seiten als neue PDF-Datei; das Original bleibt unverändert."),
-        ("Strg+Z", "Dokumentänderung rückgängig",
-            "Macht die letzte Dokumentänderung rückgängig — etwa Seiten löschen/drehen, Anhängen oder eine Kennwort-Änderung."),
-        ("Strg+I", "Dokumenteigenschaften",
-            "Zeigt Titel, Autor, Betreff und Stichwörter (editierbar) sowie PDF-Version und erzeugendes Programm."),
-        ("Alt+Enter", "Windows-Dateieigenschaften",
-            "Öffnet das Eigenschaften-Fenster der Datei, wie man es aus dem Windows-Explorer kennt."),
-        ("Strg+E", "als E-Mail-Anhang senden",
-            "Erstellt im Standard-Mailprogramm eine neue E-Mail mit der Datei als Anhang."),
-        ("Strg+1 … 9", "in externem Programm öffnen",
-            "Öffnet die Datei im jeweiligen Programm der Programme-Liste (Reihenfolge wie im Menü)."),
-        ("Strg+F", "im Dokument suchen",
-            "Öffnet die Suchleiste des Viewers; F3 springt zum nächsten Treffer, Esc schließt die Leiste."),
-        ("Strg+P", "Dokument drucken",
-            "Öffnet die Druckvorschau mit allen Druckoptionen."),
+        ("Strg+O", "PDF-Datei öffnen", null),
+        ("Strg+Umschalt+← / →", "vorherige / nächste Datei des Ordners anzeigen", null),
+        ("Bild ↑ / Bild ↓", "im Dokument blättern", null),
+        ("Strg+M", "verschieben (Strg+Klick: erster Zielordner)", null),
+        ("Strg+K", "Datei kopieren", null),
+        ("F2", "Datei umbenennen", null),
+        ("Strg+Umschalt+Entf", "Datei in den Papierkorb verschieben", null),
+        ("Strg+Entf", "Seiten löschen", null),
+        ("Strg+R", "Seiten drehen", null),
+        ("Strg+Umschalt+R / L", "Ansicht drehen (ändert die Datei nicht)", null),
+        ("Strg+Umschalt+I", "Inhalte-Leiste ein-/ausblenden", null),
+        ("Strg+Umschalt+B", "Seite an Fensterbreite anpassen", null),
+        ("Strg+G", "Gehe zu Seite (Zahl tippen + Enter)", null),
+        ("Strg+X", "Seiten als neue Datei extrahieren", null),
+        ("Strg+Z", "Dokumentänderung rückgängig machen", null),
+        ("Strg+I", "Dokumenteigenschaften", null),
+        ("Alt+Enter", "Windows-Dateieigenschaften", null),
+        ("Strg+E", "als E-Mail-Anhang senden", null),
+        ("Strg+1 … 9", "in externem Programm öffnen", null),
+        ("Strg+F", "im Dokument suchen", null),
+        ("Strg+P", "Dokument drucken", null),
         ("F7", "Textcursor-Navigation ein/aus (Markieren per Tastatur)",
             "Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert — Markieren ganz ohne Maus."),
-        ("F11", "Vollbild ein/aus",
-            "Schaltet die Vollbild-Anzeige um; auch Esc beendet das Vollbild."),
-        ("2× Esc / Umschalt+Esc", "Programm beenden (Option)",
-            "Beendet das Programm, wenn die Option in den Einstellungen aktiv ist. Das erste Esc schließt zunächst eine offene Viewer-Leiste, Umschalt+Esc beendet sofort."),
-        ("F1", "diese Kürzel-Übersicht",
-            "Erstellt diese PDF-Übersicht im Downloads-Ordner und zeigt sie in einem eigenen PDFlight-Fenster an."),
+        ("F11", "Vollbild ein/aus", null),
+        ("2× Esc / Umschalt+Esc", "Programm beenden (Option)", null),
+        ("F1", "diese Kürzel-Übersicht", null),
     ];
 
     /// <summary>Kürzel-Übersicht (F1 und Info-Menü): erstellt die PDF-Übersicht im Downloads-Ordner und
     /// zeigt sie in einer neuen PDFlight-Instanz an — das aktuelle Dokument bleibt ungestört. Existiert
     /// die Datei schon, fragt ein Dialog, ob sie geöffnet oder neu erstellt werden soll.</summary>
-    public static void ShowShortcutsPdf(nint hwnd)
+    public static void ShowShortcutsPdf(nint hwnd, Icon icon)
     {
         var path = ShortcutsPdf.DefaultPath;
         if (File.Exists(path))
         {
-            TaskDialogButton openButton = new TaskDialogCommandLinkButton(Lng.T("Vorhandene öffnen"));
+            TaskDialogButton openButton = new TaskDialogCommandLinkButton(Lng.T("Vorhandene öffnen"), path);
             TaskDialogButton recreateButton = new TaskDialogCommandLinkButton(Lng.T("Neu erstellen"),
                 Lng.T("z.B. nach einem Update oder Sprachwechsel"));
+            using var icon32 = icon == null ? null : new Icon(icon, 32, 32); // sonst nimmt der TaskDialog die 16-px-Variante
             var page = new TaskDialogPage()
             {
                 Caption = Application.ProductName,
-                Heading = Lng.T("Die Kürzel-Übersicht ist bereits vorhanden."),
-                Text = path,
-                Icon = TaskDialogIcon.Information,
+                Heading = Lng.T("Kürzel-Übersicht bereits vorhanden"),
+                Icon = icon32 == null ? null : new TaskDialogIcon(icon32),
                 AllowCancel = true,
                 SizeToContent = true,
                 Buttons = { openButton, recreateButton, TaskDialogButton.Cancel },
