@@ -111,7 +111,7 @@ internal static class TaskDlg
         try { webView2Runtime = CoreWebView2Environment.GetAvailableBrowserVersionString(); }
         catch (WebView2RuntimeNotFoundException) { webView2Runtime = Lng.T("nicht gefunden"); }
         var msg = Lng.T("About.Text",
-            "PDFlight ist ein Viewer mit integrierten Dateioperationen" + Environment.NewLine +
+            "PDFlight ist ein Viewer für typische Dateioperationen" + Environment.NewLine +
             "(Verschieben, Kopieren, Löschen, Umbenennen, Mailen)." + Environment.NewLine +
             "Häufig benutzte Zielordner werden in einer Liste vorge-" + Environment.NewLine +
             "halten. Dateien lassen sich blitzschnell verschieben, ohne" + Environment.NewLine +
