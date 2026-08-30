@@ -37,6 +37,7 @@ internal static class ToolbarIcons
     public const char Keyboard = '\uE765';     // Tastenkürzel-Menüpunkt
     public const char UpdateSearch = '\uE777'; // UpdateRestore: nach Updates suchen
     public const char OpenWith = '\uE7AC';     // Menüpunkt Öffnen mit
+    public const char Help = '\uE9CE';         // Fragezeichen im Kreis: Hilfe-Menü
 
     private const string FontName = "Segoe MDL2 Assets";
     private static readonly Dictionary<(char Glyph, int Size), Image> cache = [];

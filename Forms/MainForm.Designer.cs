@@ -92,7 +92,7 @@
             // toolStrip
             // 
             toolStrip.GripStyle = ToolStripGripStyle.Hidden;
-            toolStrip.Items.AddRange(new ToolStripItem[] { btnOpen, toolStripSeparator1, btnPrev, btnNext, toolStripSeparator2, splitButtonMove, btnCopy, toolStripSeparator3, btnRename, btnDelete, btnShowInFolder, toolStripSeparator8, btnPrint, btnEmail, toolStripSeparator4, ddbEdit, toolStripSeparator9, ddbPrograms, toolStripSeparator5, btnSettings, ddbInfo });
+            toolStrip.Items.AddRange(new ToolStripItem[] { btnOpen, toolStripSeparator1, btnPrev, btnNext, toolStripSeparator2, splitButtonMove, btnCopy, toolStripSeparator3, btnRename, btnDelete, btnShowInFolder, toolStripSeparator8, btnPrint, btnEmail, toolStripSeparator4, ddbEdit, toolStripSeparator9, ddbPrograms, toolStripSeparator5, ddbInfo, btnSettings });
             toolStrip.Location = new Point(0, 0);
             toolStrip.Name = "toolStrip";
             toolStrip.Size = new Size(984, 25);
@@ -349,7 +349,7 @@
             ddbInfo.DropDownItems.AddRange(new ToolStripItem[] { mnuShortcuts, mnuCheckUpdate, toolStripSeparator11, mnuAbout });
             ddbInfo.Name = "ddbInfo";
             ddbInfo.Size = new Size(32, 22);
-            ddbInfo.Text = "Info";
+            ddbInfo.Text = "Hilfe";
             ddbInfo.ToolTipText = "Tastenkürzel, Updates und Über PDFlight";
             //
             // mnuShortcuts

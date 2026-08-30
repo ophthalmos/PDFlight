@@ -254,6 +254,7 @@ program. In addition, pages can be removed from the
 PDF or extracted to a new file, and another PDF file
 can be appended.</value></data>
   <data name="Anerkennung spenden via PayPal" xml:space="preserve"><value>Donate appreciation via PayPal</value></data>
+  <data name="Hilfe" xml:space="preserve"><value>Help</value></data>
   <data name="Tastenkürzel …" xml:space="preserve"><value>Keyboard shortcuts…</value></data>
   <data name="Nach Updates suchen …" xml:space="preserve"><value>Check for updates…</value></data>
   <data name="Über PDFlight …" xml:space="preserve"><value>About PDFlight…</value></data>

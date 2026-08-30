@@ -632,7 +632,7 @@ public partial class MainForm : Form
         Set(ddbPrograms, ToolbarIcons.AllApps);
         Set(btnShowInFolder, ToolbarIcons.FolderOpen);
         Set(btnSettings, ToolbarIcons.Settings);
-        Set(ddbInfo, ToolbarIcons.Info, imageOnly: true);
+        Set(ddbInfo, ToolbarIcons.Help, imageOnly: true);
         mnuDeletePages.Image = MenuIcon(ToolbarIcons.Delete); // Bearbeiten-Menü (Menüsymbole bleiben 16 px)
         mnuRotatePages.Image = MenuIcon(ToolbarIcons.Rotate);
         mnuAppendPdf.Image = MenuIcon(ToolbarIcons.Attach);

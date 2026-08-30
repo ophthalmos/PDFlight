@@ -253,6 +253,7 @@ quitter le programme. De plus, des pages peuvent être
 retirées du PDF ou extraites vers un nouveau fichier, et
 un autre fichier PDF peut être annexé.</value></data>
   <data name="Anerkennung spenden via PayPal" xml:space="preserve"><value>Faire un don via PayPal</value></data>
+  <data name="Hilfe" xml:space="preserve"><value>Aide</value></data>
   <data name="Tastenkürzel …" xml:space="preserve"><value>Raccourcis clavier…</value></data>
   <data name="Nach Updates suchen …" xml:space="preserve"><value>Rechercher des mises à jour…</value></data>
   <data name="Über PDFlight …" xml:space="preserve"><value>À propos de PDFlight…</value></data>
