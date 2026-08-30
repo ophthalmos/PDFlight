@@ -1072,11 +1072,11 @@ public partial class MainForm : Form
             ddbPrograms.DropDownItems.Add(new ToolStripMenuItem(Lng.T("(keine Programme gefunden)")) { Enabled = false });
         }
         ddbPrograms.DropDownItems.Add(new ToolStripSeparator());
-        ToolStripMenuItem openWith = new(Lng.T("Öffnen mit …")) { Enabled = currentFile != null };
+        ToolStripMenuItem openWith = new(Lng.T("Öffnen mit …")) { Enabled = currentFile != null, Image = MenuIcon(ToolbarIcons.OpenWith) };
         openWith.Click += (s, args) => OpenWithDialog();
         ddbPrograms.DropDownItems.Add(openWith);
         ddbPrograms.DropDownItems.Add(new ToolStripSeparator());
-        ToolStripMenuItem managePrograms = new(Lng.T("Programme verwalten …"));
+        ToolStripMenuItem managePrograms = new(Lng.T("Programme verwalten …")) { Image = MenuIcon(ToolbarIcons.Settings) };
         managePrograms.Click += (s, args) => OpenSettings(SettingsForm.TabPrograms);
         ddbPrograms.DropDownItems.Add(managePrograms);
     }
@@ -1215,6 +1215,7 @@ public partial class MainForm : Form
             case Keys.Space | Keys.Control: BeginInvoke(viewHost.ToggleLayout); return true;            // ein-/zweiseitiges Layout
             case Keys.Z | Keys.Control when undoTargetFile != null: UndoLastChange(); return true;
             case Keys.I | Keys.Control: ShowProperties(); return true;
+            case Keys.Oemcomma | Keys.Control: OpenSettings(SettingsForm.TabGeneral); return true; // Strg+, wie in vielen Editoren
             case Keys.Enter | Keys.Alt when currentFile != null: ShellUtil.ShowFileProperties(currentFile.FullName); return true; // Windows-Dateieigenschaften, wie im Explorer
             case Keys.E | Keys.Control: EmailCurrent(); return true;
             case Keys.Right | Keys.Control | Keys.Shift: StepFile(1); return true;   // Strg+Pfeile ohne Umschalt gehören dem Viewer (Zoom & Co.)

@@ -339,7 +339,7 @@
             btnSettings.Name = "btnSettings";
             btnSettings.Size = new Size(82, 22);
             btnSettings.Text = "Einstellungen";
-            btnSettings.ToolTipText = "Zielordner, Programme und Optionen verwalten";
+            btnSettings.ToolTipText = "Zielordner, Programme und Optionen verwalten (Strg+,)";
             btnSettings.Click += BtnSettings_Click;
             // 
             // ddbInfo

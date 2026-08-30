@@ -85,7 +85,9 @@
   <data name="Datei im Dateimanager anzeigen" xml:space="preserve"><value>Afficher le fichier dans le gestionnaire de fichiers</value></data>
   <data name="Neue E-Mail mit dieser Datei als Anhang (Strg+E)" xml:space="preserve"><value>Nouveau courriel avec ce fichier en pièce jointe (Ctrl+E)</value></data>
   <data name="Datei in einem anderen Programm öffnen (Strg+1 … Strg+9)" xml:space="preserve"><value>Ouvrir le fichier dans un autre programme (Ctrl+1 … Ctrl+9)</value></data>
-  <data name="Zielordner, Programme und Optionen verwalten" xml:space="preserve"><value>Gérer les dossiers cibles, les programmes et les options</value></data>
+  <data name="Zielordner, Programme und Optionen verwalten (Strg+,)" xml:space="preserve"><value>Gérer les dossiers cibles, les programmes et les options (Ctrl+,)</value></data>
+  <data name="Strg+," xml:space="preserve"><value>Ctrl+,</value></data>
+  <data name="Einstellungen öffnen" xml:space="preserve"><value>ouvrir les paramètres</value></data>
   <data name="Über PDFlight und Spenden (F1)" xml:space="preserve"><value>À propos de PDFlight et dons (F1)</value></data>
   <data name="Seitenzahl, Dateigröße und Änderungsdatum der angezeigten Datei" xml:space="preserve"><value>Nombre de pages, taille et date de modification du fichier affiché</value></data>
   <data name="Tooltip.Open" xml:space="preserve"><value>Ouvrir un fichier PDF (Ctrl+O)
