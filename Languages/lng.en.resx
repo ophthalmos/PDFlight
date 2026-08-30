@@ -253,34 +253,10 @@ can be appended.</value></data>
   <data name="Vorhandene öffnen" xml:space="preserve"><value>Open existing</value></data>
   <data name="Neu erstellen" xml:space="preserve"><value>Create new</value></data>
   <data name="z.B. nach einem Update oder Sprachwechsel" xml:space="preserve"><value>e.g. after an update or language change</value></data>
-  <data name="Die Kürzel-Übersicht ist bereits vorhanden." xml:space="preserve"><value>The shortcut overview already exists.</value></data>
+  <data name="Kürzel-Übersicht bereits vorhanden" xml:space="preserve"><value>Shortcut overview already exists</value></data>
   <data name="Die PDF-Übersicht konnte nicht erstellt werden." xml:space="preserve"><value>The PDF overview could not be created.</value></data>
   <data name="PDFlight-Tastenkürzel" xml:space="preserve"><value>PDFlight keyboard shortcuts</value></data>
-  <data name="Öffnet den Dateiauswahl-Dialog. Der Pfeil neben der Schaltfläche listet die zuletzt geöffneten Dateien." xml:space="preserve"><value>Opens the file selection dialog. The arrow next to the button lists the recently opened files.</value></data>
-  <data name="Wechselt zur vorherigen bzw. nächsten PDF-Datei im Ordner der angezeigten Datei — ideal zum Abarbeiten eines Scan-Ordners." xml:space="preserve"><value>Switches to the previous or next PDF file in the folder of the displayed file — ideal for working through a scan folder.</value></data>
-  <data name="Blättert innerhalb des Dokuments seitenweise vor und zurück." xml:space="preserve"><value>Moves forward and backward through the document page by page.</value></data>
-  <data name="Verschiebt die Datei in einen Ordner der Zielliste. Strg+Klick auf die Schaltfläche verschiebt sofort in den ersten Zielordner, der Pfeil öffnet die Liste." xml:space="preserve"><value>Moves the file to a folder from the target list. Ctrl+click on the button moves it straight to the first target folder; the arrow opens the list.</value></data>
-  <data name="Kopiert die Datei in einen wählbaren Ordner; die angezeigte Datei bleibt unverändert." xml:space="preserve"><value>Copies the file to a folder of your choice; the displayed file remains unchanged.</value></data>
-  <data name="Benennt die Datei um. Der Dialog bietet Bausteine wie das Datum sowie eine gespeicherte Namensliste an." xml:space="preserve"><value>Renames the file. The dialog offers building blocks such as the date and a saved list of names.</value></data>
-  <data name="Verschiebt die Datei in den Papierkorb. Die Sicherheitsabfrage lässt sich in den Einstellungen abschalten." xml:space="preserve"><value>Moves the file to the Recycle Bin. The confirmation prompt can be turned off in the settings.</value></data>
-  <data name="Löscht die angegebenen Seiten dauerhaft aus dem Dokument — rückgängig mit Strg+Z." xml:space="preserve"><value>Permanently deletes the specified pages from the document — undo with Ctrl+Z.</value></data>
-  <data name="Dreht die angegebenen Seiten dauerhaft um 90° oder 180°; die Änderung wird sofort in der Datei gespeichert." xml:space="preserve"><value>Permanently rotates the specified pages by 90° or 180°; the change is saved to the file immediately.</value></data>
-  <data name="Dreht nur die Bildschirmansicht rechts- bzw. linksherum. Die Datei bleibt unverändert; beim Neuladen ist die Drehung weg." xml:space="preserve"><value>Rotates only the on-screen view clockwise or counterclockwise. The file remains unchanged; the rotation is gone after reloading.</value></data>
-  <data name="Öffnet oder schließt die Leiste mit den Miniaturansichten am linken Rand." xml:space="preserve"><value>Opens or closes the pane with the thumbnail views on the left edge.</value></data>
-  <data name="Wechselt zwischen den Zoomstufen „an Fensterbreite“ und „ganze Seite sichtbar“." xml:space="preserve"><value>Switches between the zoom levels "fit to width" and "whole page visible".</value></data>
-  <data name="Setzt den Cursor in das Seitenzahl-Feld der Viewer-Leiste. Seitenzahl eintippen und mit Enter springen." xml:space="preserve"><value>Places the cursor in the page number field of the viewer toolbar. Type the page number and press Enter to jump.</value></data>
-  <data name="Speichert die angegebenen Seiten als neue PDF-Datei; das Original bleibt unverändert." xml:space="preserve"><value>Saves the specified pages as a new PDF file; the original remains unchanged.</value></data>
-  <data name="Macht die letzte Dokumentänderung rückgängig — etwa Seiten löschen/drehen, Anhängen oder eine Kennwort-Änderung." xml:space="preserve"><value>Undoes the last document change — such as deleting/rotating pages, appending, or a password change.</value></data>
-  <data name="Zeigt Titel, Autor, Betreff und Stichwörter (editierbar) sowie PDF-Version und erzeugendes Programm." xml:space="preserve"><value>Shows title, author, subject and keywords (editable) as well as the PDF version and the creating application.</value></data>
-  <data name="Öffnet das Eigenschaften-Fenster der Datei, wie man es aus dem Windows-Explorer kennt." xml:space="preserve"><value>Opens the file's properties window as known from Windows Explorer.</value></data>
-  <data name="Erstellt im Standard-Mailprogramm eine neue E-Mail mit der Datei als Anhang." xml:space="preserve"><value>Creates a new e-mail in the default mail program with the file attached.</value></data>
-  <data name="Öffnet die Datei im jeweiligen Programm der Programme-Liste (Reihenfolge wie im Menü)." xml:space="preserve"><value>Opens the file in the corresponding program of the programs list (same order as in the menu).</value></data>
-  <data name="Öffnet die Suchleiste des Viewers; F3 springt zum nächsten Treffer, Esc schließt die Leiste." xml:space="preserve"><value>Opens the viewer's search bar; F3 jumps to the next hit, Esc closes the bar.</value></data>
-  <data name="Öffnet die Druckvorschau mit allen Druckoptionen." xml:space="preserve"><value>Opens the print preview with all print options.</value></data>
   <data name="Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert — Markieren ganz ohne Maus." xml:space="preserve"><value>Places a text cursor in the document: arrow keys move it, Shift+arrows select text, Ctrl+C copies — selecting entirely without a mouse.</value></data>
-  <data name="Schaltet die Vollbild-Anzeige um; auch Esc beendet das Vollbild." xml:space="preserve"><value>Toggles full-screen display; Esc also leaves full screen.</value></data>
-  <data name="Beendet das Programm, wenn die Option in den Einstellungen aktiv ist. Das erste Esc schließt zunächst eine offene Viewer-Leiste, Umschalt+Esc beendet sofort." xml:space="preserve"><value>Closes the program if the option is enabled in the settings. The first Esc first closes an open viewer bar; Shift+Esc closes immediately.</value></data>
-  <data name="Erstellt diese PDF-Übersicht im Downloads-Ordner und zeigt sie in einem eigenen PDFlight-Fenster an." xml:space="preserve"><value>Creates this PDF overview in the Downloads folder and shows it in a separate PDFlight window.</value></data>
   <data name="Tastenkürzel" xml:space="preserve"><value>Keyboard shortcuts</value></data>
   <data name="PDFlightSetup.exe herunterladen" xml:space="preserve"><value>Download PDFlightSetup.exe</value></data>
   <data name="Download.Detail" xml:space="preserve"><value>PDFlightSetup.exe is saved to your Downloads
@@ -298,14 +274,14 @@ the latest version.</value></data>
   <data name="Ungültiger Link!" xml:space="preserve"><value>Invalid link!</value></data>
   <data name="'{0}' ist keine gültige URL." xml:space="preserve"><value>'{0}' is not a valid URL.</value></data>
   <data name="Der Link konnte nicht geöffnet werden." xml:space="preserve"><value>The link could not be opened.</value></data>
-  <data name="vorherige / nächste Datei des Ordners" xml:space="preserve"><value>previous / next file of the folder</value></data>
+  <data name="vorherige / nächste Datei des Ordners anzeigen" xml:space="preserve"><value>show previous / next file of the folder</value></data>
   <data name="im Dokument blättern" xml:space="preserve"><value>scroll through the document</value></data>
   <data name="verschieben (Strg+Klick: erster Zielordner)" xml:space="preserve"><value>move (Ctrl+click: first target folder)</value></data>
   <data name="Datei kopieren" xml:space="preserve"><value>copy file</value></data>
   <data name="Datei umbenennen" xml:space="preserve"><value>rename file</value></data>
-  <data name="Datei in den Papierkorb" xml:space="preserve"><value>file to the Recycle Bin</value></data>
+  <data name="Datei in den Papierkorb verschieben" xml:space="preserve"><value>move file to the Recycle Bin</value></data>
   <data name="Seiten als neue Datei extrahieren" xml:space="preserve"><value>extract pages to a new file</value></data>
-  <data name="Dokumentänderung rückgängig" xml:space="preserve"><value>undo document change</value></data>
+  <data name="Dokumentänderung rückgängig machen" xml:space="preserve"><value>undo document change</value></data>
   <data name="Dokumenteigenschaften" xml:space="preserve"><value>Document properties</value></data>
   <data name="Windows-Dateieigenschaften" xml:space="preserve"><value>Windows file properties</value></data>
   <data name="als E-Mail-Anhang senden" xml:space="preserve"><value>send as e-mail attachment</value></data>

@@ -252,34 +252,10 @@ anexar otro archivo PDF.</value></data>
   <data name="Vorhandene öffnen" xml:space="preserve"><value>Abrir el existente</value></data>
   <data name="Neu erstellen" xml:space="preserve"><value>Crear de nuevo</value></data>
   <data name="z.B. nach einem Update oder Sprachwechsel" xml:space="preserve"><value>p. ej., tras una actualización o un cambio de idioma</value></data>
-  <data name="Die Kürzel-Übersicht ist bereits vorhanden." xml:space="preserve"><value>El resumen de atajos ya existe.</value></data>
+  <data name="Kürzel-Übersicht bereits vorhanden" xml:space="preserve"><value>El resumen de atajos ya existe</value></data>
   <data name="Die PDF-Übersicht konnte nicht erstellt werden." xml:space="preserve"><value>No se pudo crear el resumen en PDF.</value></data>
   <data name="PDFlight-Tastenkürzel" xml:space="preserve"><value>Atajos-de-teclado-PDFlight</value></data>
-  <data name="Öffnet den Dateiauswahl-Dialog. Der Pfeil neben der Schaltfläche listet die zuletzt geöffneten Dateien." xml:space="preserve"><value>Abre el diálogo de selección de archivo. La flecha junto al botón muestra los archivos abiertos recientemente.</value></data>
-  <data name="Wechselt zur vorherigen bzw. nächsten PDF-Datei im Ordner der angezeigten Datei — ideal zum Abarbeiten eines Scan-Ordners." xml:space="preserve"><value>Cambia al archivo PDF anterior o siguiente de la carpeta mostrada: ideal para procesar una carpeta de escaneos.</value></data>
-  <data name="Blättert innerhalb des Dokuments seitenweise vor und zurück." xml:space="preserve"><value>Avanza y retrocede por el documento página a página.</value></data>
-  <data name="Verschiebt die Datei in einen Ordner der Zielliste. Strg+Klick auf die Schaltfläche verschiebt sofort in den ersten Zielordner, der Pfeil öffnet die Liste." xml:space="preserve"><value>Mueve el archivo a una carpeta de la lista de destinos. Ctrl+clic en el botón lo mueve directamente a la primera carpeta; la flecha abre la lista.</value></data>
-  <data name="Kopiert die Datei in einen wählbaren Ordner; die angezeigte Datei bleibt unverändert." xml:space="preserve"><value>Copia el archivo a una carpeta a elegir; el archivo mostrado no cambia.</value></data>
-  <data name="Benennt die Datei um. Der Dialog bietet Bausteine wie das Datum sowie eine gespeicherte Namensliste an." xml:space="preserve"><value>Cambia el nombre del archivo. El diálogo ofrece elementos como la fecha y una lista de nombres guardada.</value></data>
-  <data name="Verschiebt die Datei in den Papierkorb. Die Sicherheitsabfrage lässt sich in den Einstellungen abschalten." xml:space="preserve"><value>Mueve el archivo a la papelera. La pregunta de confirmación se puede desactivar en la configuración.</value></data>
-  <data name="Löscht die angegebenen Seiten dauerhaft aus dem Dokument — rückgängig mit Strg+Z." xml:space="preserve"><value>Elimina definitivamente las páginas indicadas del documento; deshacer con Ctrl+Z.</value></data>
-  <data name="Dreht die angegebenen Seiten dauerhaft um 90° oder 180°; die Änderung wird sofort in der Datei gespeichert." xml:space="preserve"><value>Gira definitivamente las páginas indicadas 90° o 180°; el cambio se guarda de inmediato en el archivo.</value></data>
-  <data name="Dreht nur die Bildschirmansicht rechts- bzw. linksherum. Die Datei bleibt unverändert; beim Neuladen ist die Drehung weg." xml:space="preserve"><value>Gira solo la vista en pantalla hacia la derecha o la izquierda. El archivo no cambia; al recargar, el giro desaparece.</value></data>
-  <data name="Öffnet oder schließt die Leiste mit den Miniaturansichten am linken Rand." xml:space="preserve"><value>Abre o cierra el panel con las miniaturas en el borde izquierdo.</value></data>
-  <data name="Wechselt zwischen den Zoomstufen „an Fensterbreite“ und „ganze Seite sichtbar“." xml:space="preserve"><value>Cambia entre los niveles de zoom «ancho de ventana» y «página completa visible».</value></data>
-  <data name="Setzt den Cursor in das Seitenzahl-Feld der Viewer-Leiste. Seitenzahl eintippen und mit Enter springen." xml:space="preserve"><value>Coloca el cursor en el campo de número de página de la barra del visor. Escriba el número y salte con Entrar.</value></data>
-  <data name="Speichert die angegebenen Seiten als neue PDF-Datei; das Original bleibt unverändert." xml:space="preserve"><value>Guarda las páginas indicadas como un nuevo archivo PDF; el original no cambia.</value></data>
-  <data name="Macht die letzte Dokumentänderung rückgängig — etwa Seiten löschen/drehen, Anhängen oder eine Kennwort-Änderung." xml:space="preserve"><value>Deshace el último cambio del documento, por ejemplo eliminar/girar páginas, anexar o un cambio de contraseña.</value></data>
-  <data name="Zeigt Titel, Autor, Betreff und Stichwörter (editierbar) sowie PDF-Version und erzeugendes Programm." xml:space="preserve"><value>Muestra título, autor, asunto y palabras clave (editables), además de la versión PDF y el programa creador.</value></data>
-  <data name="Öffnet das Eigenschaften-Fenster der Datei, wie man es aus dem Windows-Explorer kennt." xml:space="preserve"><value>Abre la ventana de propiedades del archivo, como en el Explorador de Windows.</value></data>
-  <data name="Erstellt im Standard-Mailprogramm eine neue E-Mail mit der Datei als Anhang." xml:space="preserve"><value>Crea un nuevo correo en el programa de correo predeterminado con el archivo adjunto.</value></data>
-  <data name="Öffnet die Datei im jeweiligen Programm der Programme-Liste (Reihenfolge wie im Menü)." xml:space="preserve"><value>Abre el archivo en el programa correspondiente de la lista de programas (mismo orden que en el menú).</value></data>
-  <data name="Öffnet die Suchleiste des Viewers; F3 springt zum nächsten Treffer, Esc schließt die Leiste." xml:space="preserve"><value>Abre la barra de búsqueda del visor; F3 salta a la siguiente coincidencia, Esc cierra la barra.</value></data>
-  <data name="Öffnet die Druckvorschau mit allen Druckoptionen." xml:space="preserve"><value>Abre la vista previa de impresión con todas las opciones.</value></data>
   <data name="Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert — Markieren ganz ohne Maus." xml:space="preserve"><value>Coloca un cursor de texto en el documento: las flechas lo mueven, Mayús+flechas seleccionan, Ctrl+C copia; seleccionar sin ratón.</value></data>
-  <data name="Schaltet die Vollbild-Anzeige um; auch Esc beendet das Vollbild." xml:space="preserve"><value>Activa o desactiva la pantalla completa; Esc también la cierra.</value></data>
-  <data name="Beendet das Programm, wenn die Option in den Einstellungen aktiv ist. Das erste Esc schließt zunächst eine offene Viewer-Leiste, Umschalt+Esc beendet sofort." xml:space="preserve"><value>Cierra el programa si la opción está activada en la configuración. El primer Esc cierra antes una barra abierta del visor; Mayús+Esc cierra de inmediato.</value></data>
-  <data name="Erstellt diese PDF-Übersicht im Downloads-Ordner und zeigt sie in einem eigenen PDFlight-Fenster an." xml:space="preserve"><value>Crea este resumen PDF en la carpeta Descargas y lo muestra en una ventana de PDFlight aparte.</value></data>
   <data name="Tastenkürzel" xml:space="preserve"><value>Atajos de teclado</value></data>
   <data name="PDFlightSetup.exe herunterladen" xml:space="preserve"><value>Descargar PDFlightSetup.exe</value></data>
   <data name="Download.Detail" xml:space="preserve"><value>PDFlightSetup.exe se guardará en la carpeta de
@@ -297,14 +273,14 @@ para instalar la última versión.</value></data>
   <data name="Ungültiger Link!" xml:space="preserve"><value>¡Enlace no válido!</value></data>
   <data name="'{0}' ist keine gültige URL." xml:space="preserve"><value>'{0}' no es una URL válida.</value></data>
   <data name="Der Link konnte nicht geöffnet werden." xml:space="preserve"><value>No se pudo abrir el enlace.</value></data>
-  <data name="vorherige / nächste Datei des Ordners" xml:space="preserve"><value>archivo anterior / siguiente de la carpeta</value></data>
+  <data name="vorherige / nächste Datei des Ordners anzeigen" xml:space="preserve"><value>mostrar el archivo anterior / siguiente de la carpeta</value></data>
   <data name="im Dokument blättern" xml:space="preserve"><value>desplazarse por el documento</value></data>
   <data name="verschieben (Strg+Klick: erster Zielordner)" xml:space="preserve"><value>mover (Ctrl+clic: primera carpeta de destino)</value></data>
   <data name="Datei kopieren" xml:space="preserve"><value>copiar archivo</value></data>
   <data name="Datei umbenennen" xml:space="preserve"><value>renombrar archivo</value></data>
-  <data name="Datei in den Papierkorb" xml:space="preserve"><value>archivo a la papelera</value></data>
+  <data name="Datei in den Papierkorb verschieben" xml:space="preserve"><value>mover el archivo a la papelera</value></data>
   <data name="Seiten als neue Datei extrahieren" xml:space="preserve"><value>extraer páginas a un archivo nuevo</value></data>
-  <data name="Dokumentänderung rückgängig" xml:space="preserve"><value>deshacer cambio del documento</value></data>
+  <data name="Dokumentänderung rückgängig machen" xml:space="preserve"><value>deshacer cambio del documento</value></data>
   <data name="Dokumenteigenschaften" xml:space="preserve"><value>Propiedades del documento</value></data>
   <data name="Windows-Dateieigenschaften" xml:space="preserve"><value>Propiedades de archivo de Windows</value></data>
   <data name="als E-Mail-Anhang senden" xml:space="preserve"><value>enviar como adjunto de correo</value></data>

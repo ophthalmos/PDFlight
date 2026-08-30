@@ -42,9 +42,11 @@ internal static partial class ShortcutsPdf
 
         foreach (var (key, text, detail) in TaskDlg.ShortcutRows)
         {
-            var detailLines = Wrap(gfx, Lng.T(detail), detailFont, width - DetailIndent);
-            var blockHeight = 15 + detailLines.Count * 12 + 9;
-            if (y + blockHeight > page.Height.Point - Margin) // Seitenumbruch
+            // kompakt: eine Zeile je Kürzel; Zusatzerklärung nur, wo eine hinterlegt ist (F7) —
+            // so passt die Übersicht auf eine A4-Seite
+            var detailLines = detail == null ? null : Wrap(gfx, Lng.T(detail), detailFont, width - DetailIndent);
+            var blockHeight = 17 + (detailLines?.Count ?? 0) * 12 + (detailLines == null ? 0 : 4);
+            if (y + blockHeight > page.Height.Point - Margin) // Seitenumbruch (zur Sicherheit — planmäßig eine Seite)
             {
                 gfx.Dispose();
                 page = document.AddPage();
@@ -53,13 +55,16 @@ internal static partial class ShortcutsPdf
             }
             gfx.DrawString(Lng.T(key), keyFont, XBrushes.Black, Margin, y + 11);
             gfx.DrawString(Lng.T(text), textFont, XBrushes.Black, Margin + DetailIndent, y + 11);
-            y += 15;
-            foreach (var line in detailLines)
+            y += 17;
+            if (detailLines != null)
             {
-                gfx.DrawString(line, detailFont, detailBrush, Margin + DetailIndent, y + 10);
-                y += 12;
+                foreach (var line in detailLines)
+                {
+                    gfx.DrawString(line, detailFont, detailBrush, Margin + DetailIndent, y + 10);
+                    y += 12;
+                }
+                y += 4;
             }
-            y += 9;
         }
         gfx.Dispose();
         document.Save(path);
