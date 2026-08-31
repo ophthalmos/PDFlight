@@ -8,7 +8,7 @@
 ; ============================================================================
 
 #define appName "PDFlight"
-#define appVersion "0.1.0"
+#define appVersion "1.0.0"
 #define releaseDir "bin\Release\net10.0-windows"
 
 [Setup]
@@ -57,28 +57,23 @@ es.ConfirmUninstall=¿Seguro que desea quitar %1 y todos sus componentes? No es 
 [CustomMessages]
 en.Run=Launch {#appName}
 en.DesktopIcon=Create a desktop shortcut
-en.FileAssoc=Offer {#appName} in the "Open with" menu for PDF files
 en.WebView2Missing=The Microsoft WebView2 runtime was not found.%n%n{#appName} needs it to display PDFs. Please download it from:%nhttps://developer.microsoft.com/microsoft-edge/webview2/%n%nSetup will continue anyway.
 en.PdfDocument=PDF file
 de.Run={#appName} starten
 de.DesktopIcon=Verknüpfung auf dem Desktop anlegen
-de.FileAssoc={#appName} im "Öffnen mit"-Menü für PDF-Dateien anbieten
 de.WebView2Missing=Die Microsoft-WebView2-Runtime wurde nicht gefunden.%n%n{#appName} benötigt sie für die PDF-Anzeige. Bitte lade sie herunter von:%nhttps://developer.microsoft.com/microsoft-edge/webview2/%n%nDie Installation wird trotzdem fortgesetzt.
 de.PdfDocument=PDF-Datei
 fr.Run=Lancer {#appName}
 fr.DesktopIcon=Créer un raccourci sur le Bureau
-fr.FileAssoc=Proposer {#appName} dans le menu « Ouvrir avec » pour les fichiers PDF
 fr.WebView2Missing=Le runtime Microsoft WebView2 est introuvable.%n%n{#appName} en a besoin pour afficher les PDF. Veuillez le télécharger depuis :%nhttps://developer.microsoft.com/microsoft-edge/webview2/%n%nL'installation continue malgré tout.
 fr.PdfDocument=Fichier PDF
 es.Run=Iniciar {#appName}
 es.DesktopIcon=Crear un acceso directo en el escritorio
-es.FileAssoc=Ofrecer {#appName} en el menú "Abrir con" para archivos PDF
 es.WebView2Missing=No se encontró el runtime de Microsoft WebView2.%n%n{#appName} lo necesita para mostrar PDF. Descárguelo desde:%nhttps://developer.microsoft.com/microsoft-edge/webview2/%n%nLa instalación continuará de todos modos.
 es.PdfDocument=Archivo PDF
 
 [Tasks]
 Name: desktopicon; Description: "{cm:DesktopIcon}"; Flags: unchecked
-Name: fileassoc; Description: "{cm:FileAssoc}"
 
 [Files]
 Source: "{#releaseDir}\*"; Excludes: "*.pdb"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -91,16 +86,16 @@ Name: "{autodesktop}\{#appName}"; Filename: "{app}\{#appName}.exe"; Tasks: deskt
 
 [Registry]
 ; ProgID, damit PDFlight im "Öffnen mit"-Dialog erscheint (Standard-App bleibt Sache des Benutzers)
-Root: HKLM; Subkey: "Software\Classes\{#appName}.Document"; ValueType: string; ValueData: "{cm:PdfDocument}"; Flags: uninsdeletekey; Tasks: fileassoc
+Root: HKLM; Subkey: "Software\Classes\{#appName}.Document"; ValueType: string; ValueData: "{cm:PdfDocument}"; Flags: uninsdeletekey
 ; Die HKCU-Registrierung, die PDFlight bei jedem Start selbst schreibt (ShellUtil.RegisterFileType),
 ; wird hier nur zum Deinstallieren vorgemerkt
 Root: HKCU; Subkey: "Software\Classes\{#appName}.Document"; ValueType: none; Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Classes\.pdf\OpenWithProgids"; ValueType: none; ValueName: "{#appName}.Document"; Flags: uninsdeletevalue
 ; neutrales Dokument-Icon für PDF-Dateien im Explorer (statt des Programm-Icons der EXE)
-Root: HKLM; Subkey: "Software\Classes\{#appName}.Document\DefaultIcon"; ValueType: string; ValueData: "{app}\pdffile.ico"; Tasks: fileassoc
-Root: HKLM; Subkey: "Software\Classes\{#appName}.Document\shell\open\command"; ValueType: string; ValueData: """{app}\{#appName}.exe"" ""%1"""; Tasks: fileassoc
-Root: HKLM; Subkey: "Software\Classes\.pdf\OpenWithProgids"; ValueType: string; ValueName: "{#appName}.Document"; ValueData: ""; Flags: uninsdeletevalue; Tasks: fileassoc
-Root: HKLM; Subkey: "Software\Classes\Applications\{#appName}.exe\shell\open\command"; ValueType: string; ValueData: """{app}\{#appName}.exe"" ""%1"""; Flags: uninsdeletekey; Tasks: fileassoc
+Root: HKLM; Subkey: "Software\Classes\{#appName}.Document\DefaultIcon"; ValueType: string; ValueData: "{app}\pdffile.ico"
+Root: HKLM; Subkey: "Software\Classes\{#appName}.Document\shell\open\command"; ValueType: string; ValueData: """{app}\{#appName}.exe"" ""%1"""
+Root: HKLM; Subkey: "Software\Classes\.pdf\OpenWithProgids"; ValueType: string; ValueName: "{#appName}.Document"; ValueData: ""; Flags: uninsdeletevalue
+Root: HKLM; Subkey: "Software\Classes\Applications\{#appName}.exe\shell\open\command"; ValueType: string; ValueData: """{app}\{#appName}.exe"" ""%1"""; Flags: uninsdeletekey
 
 [Run]
 Filename: "{app}\{#appName}.exe"; Description: "{cm:Run}"; Flags: nowait postinstall skipifsilent
