@@ -320,7 +320,7 @@ public partial class MainForm : Form
     /// <summary>Verteilt abgelegte Dateien: solange hier nichts angezeigt wird, übernimmt diese Instanz
     /// die erste Datei; jede weitere — und bei bereits angezeigtem Dokument jede — öffnet eine neue
     /// Instanz, damit das aktuelle Dokument nie ungefragt ersetzt wird.</summary>
-    private void OpenDroppedFiles(IReadOnlyList<string> files)
+    private void OpenDroppedFiles(List<string> files)
     {
         if (files.Count == 0) { return; }
         var index = 0;
