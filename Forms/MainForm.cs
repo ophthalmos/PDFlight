@@ -48,6 +48,12 @@ public partial class MainForm : Form
             while (item.DropDownItems.Count > 0) { menu.Items.Add(item.DropDownItems[0]); } // bestehende Einträge (Bearbeiten-Menü) übernehmen
             item.DropDown = menu;
         }
+        // Symbole und Schrift der Symbolleiste vor dem ersten Anzeigen — in Shown (nach dem
+        // WebView2-Start) wäre auf langsamen Rechnern sekundenlang die rohe Leiste zu sehen
+        EnsureProgramList();
+        RebuildProgramIconButtons();
+        ApplyToolbarIcons();
+        toolStrip.Resize += (s, args) => UpdateProgramIconVisibility();
         RestoreWindowBounds();
     }
 
@@ -68,14 +74,10 @@ public partial class MainForm : Form
             return;
         }
         webView.KeyDown += WebView_KeyDown; // Tastenkürzel funktionieren auch, wenn der Viewer den Fokus hat
-        viewHost.PdfFileDropped += (s, path) => LoadPdf(path, addToRecent: true); // Drop auf das Viewer-Areal
+        viewHost.PdfFileDropped += (s, path) => OpenDroppedFiles([path]); // Drop auf das Viewer-Areal
         InitDropDownClickShield();
         EnableClassicDragDrop();
         ShellUtil.RegisterFileType(); // Datei-Icon und Öffnen-Befehl je Benutzer, unabhängig vom Installer-Task
-        EnsureProgramList();
-        RebuildProgramIconButtons();
-        ApplyToolbarIcons();
-        toolStrip.Resize += (s, args) => UpdateProgramIconVisibility();
 
         if (!string.IsNullOrEmpty(startFile) && File.Exists(startFile)) { LoadPdf(startFile, addToRecent: true); }
         else if (settings.ReopenLastFile && !string.IsNullOrEmpty(settings.LastFile) && File.Exists(settings.LastFile)) { LoadPdf(settings.LastFile); }
@@ -298,26 +300,43 @@ public partial class MainForm : Form
 
     private void HandleDragEnter(object sender, DragEventArgs e)
     {
-        e.Effect = GetDroppedPdf(e) != null ? DragDropEffects.Copy : DragDropEffects.None;
+        e.Effect = GetDroppedPdfs(e).Count > 0 ? DragDropEffects.Copy : DragDropEffects.None;
     }
 
     private void HandleDragDrop(object sender, DragEventArgs e)
     {
-        var file = GetDroppedPdf(e);
-        if (file != null)
-        {
-            LoadPdf(file);
-            Activate();
-        }
+        OpenDroppedFiles(GetDroppedPdfs(e));
     }
 
-    private static string GetDroppedPdf(DragEventArgs e)
+    private static List<string> GetDroppedPdfs(DragEventArgs e)
     {
         if (e.Data?.GetDataPresent(DataFormats.FileDrop) == true && e.Data.GetData(DataFormats.FileDrop) is string[] files)
         {
-            return files.FirstOrDefault(f => f.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase) && File.Exists(f));
+            return [.. files.Where(f => f.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase) && File.Exists(f))];
         }
-        return null;
+        return [];
+    }
+
+    /// <summary>Verteilt abgelegte Dateien: solange hier nichts angezeigt wird, übernimmt diese Instanz
+    /// die erste Datei; jede weitere — und bei bereits angezeigtem Dokument jede — öffnet eine neue
+    /// Instanz, damit das aktuelle Dokument nie ungefragt ersetzt wird.</summary>
+    private void OpenDroppedFiles(IReadOnlyList<string> files)
+    {
+        if (files.Count == 0) { return; }
+        var index = 0;
+        if (currentFile == null) { LoadPdf(files[0], addToRecent: true); index = 1; }
+        else if (files.Count == 1 && string.Equals(files[0], currentFile.FullName, StringComparison.OrdinalIgnoreCase))
+        { LoadPdf(files[0]); index = 1; } // dieselbe Datei erneut abgelegt → nur neu laden statt zweiter Instanz
+        for (; index < files.Count; index++)
+        {
+            try { Process.Start(Application.ExecutablePath, [files[index]]); }
+            catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
+            {
+                TaskDlg.ErrTaskDlg(Handle, Lng.T("Das Programm konnte nicht gestartet werden."), ex);
+                break;
+            }
+        }
+        Activate();
     }
 
     /// <summary>Blättert zur nächsten/vorherigen PDF-Datei im Ordner (mit Umlauf, wie in PDFMover).</summary>

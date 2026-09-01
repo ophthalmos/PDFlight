@@ -65,8 +65,7 @@ internal partial class PdfViewHost(WebView2 webView)
             if (item is CoreWebView2File file && !string.IsNullOrEmpty(file.Path)
                 && file.Path.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase) && File.Exists(file.Path))
             {
-                RaisePdfFileDropped(file.Path);
-                break;
+                RaisePdfFileDropped(file.Path); // jede Datei einzeln melden — der Empfänger verteilt auf Instanzen
             }
         }
     }

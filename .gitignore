@@ -8,3 +8,4 @@ obj/
 
 # Installer-Ausgabe (wird aus dem Release-Build erzeugt)
 PDFlightSetup.exe
+/UI-Automation.pdf
