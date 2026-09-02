@@ -176,9 +176,9 @@
             cbReopenLast.TabIndex = 8;
             cbReopenLast.Text = "Zuletzt geöffnete &Datei beim Start laden";
             cbReopenLast.UseVisualStyleBackColor = true;
-            //
+            // 
             // btnClearRecent
-            //
+            // 
             btnClearRecent.Location = new Point(16, 228);
             btnClearRecent.Name = "btnClearRecent";
             btnClearRecent.Size = new Size(180, 27);
@@ -186,18 +186,18 @@
             btnClearRecent.Text = "Zuletzt-Liste &leeren";
             btnClearRecent.UseVisualStyleBackColor = true;
             btnClearRecent.Click += BtnClearRecent_Click;
-            //
+            // 
             // labelLanguage
-            //
+            // 
             labelLanguage.AutoSize = true;
             labelLanguage.Location = new Point(16, 284);
             labelLanguage.Name = "labelLanguage";
             labelLanguage.Size = new Size(115, 15);
             labelLanguage.TabIndex = 9;
             labelLanguage.Text = "Sprache / &Language:";
-            //
+            // 
             // comboLanguage
-            //
+            // 
             comboLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
             comboLanguage.Location = new Point(150, 280);
             comboLanguage.Name = "comboLanguage";
