@@ -268,7 +268,7 @@ public partial class MainForm : Form
         if (!TaskDlg.ConfirmTaskDlg(Handle,
             Lng.T("Möchtest du den Vorgang fortsetzen?"),
             Lng.T("Das Bearbeiten führt dazu, dass die PDF-Datei nicht mehr dem PDF/A-Standard entspricht.") + "\n\n" +
-            Lng.T("Das Aktivieren selbst ändert die Datei noch nicht. Erst wenn du eine Bearbeitung ausführst (Seiten löschen oder drehen, Metadaten ändern usw.), wird die Datei sofort gespeichert und verliert dabei die PDF/A-Kennzeichnung — einen gesonderten Speichern-Schritt gibt es in PDFlight nicht."),
+            Lng.T("Das Aktivieren selbst ändert die Datei noch nicht. Erst wenn du eine Bearbeitung ausführst (Seiten löschen oder drehen, Metadaten ändern usw.), wird die Datei sofort und ohne Nachfrage gespeichert und verliert dabei die PDF/A-Kennzeichnung – einen gesonderten Speichern-Schritt gibt es in PDFlight nicht."),
             TaskDialogIcon.Warning)) { return; }
         pdfAEditingEnabled = true;
         UpdateUiState();
