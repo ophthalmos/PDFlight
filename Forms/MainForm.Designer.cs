@@ -70,6 +70,7 @@
             statusStrip = new StatusStrip();
             statusIndex = new ToolStripStatusLabel();
             statusPath = new ToolStripStatusLabel();
+            statusOneClick = new ToolStripStatusLabel();
             statusFormat = new ToolStripStatusLabel();
             statusInfo = new ToolStripStatusLabel();
             pnlPdfA = new Panel();
@@ -150,7 +151,7 @@
             splitButtonMove.Name = "splitButtonMove";
             splitButtonMove.Size = new Size(86, 22);
             splitButtonMove.Text = "Verschieben";
-            splitButtonMove.ToolTipText = "In einen Ordner verschieben (Strg+M)\r\nStrg+Klick: direkt in den ersten Zielordner\r\nPfeil: Zielliste";
+            splitButtonMove.ToolTipText = "In einen Ordner verschieben (Strg+M)\r\nStrg+Klick: direkt in den 1-Klick-Ordner (siehe Statusleiste)\r\nPfeil: Zielliste";
             splitButtonMove.ButtonClick += SplitButtonMove_ButtonClick;
             splitButtonMove.DropDownOpening += SplitButtonMove_DropDownOpening;
             // 
@@ -385,7 +386,7 @@
             // 
             // statusStrip
             // 
-            statusStrip.Items.AddRange(new ToolStripItem[] { statusIndex, statusPath, statusFormat, statusInfo });
+            statusStrip.Items.AddRange(new ToolStripItem[] { statusIndex, statusPath, statusOneClick, statusFormat, statusInfo });
             statusStrip.Location = new Point(0, 725);
             statusStrip.Name = "statusStrip";
             statusStrip.ShowItemToolTips = true;
@@ -409,6 +410,14 @@
             statusPath.Spring = true;
             statusPath.Text = "Keine Datei geöffnet";
             statusPath.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // statusOneClick
+            //
+            statusOneClick.BorderSides = ToolStripStatusLabelBorderSides.Left;
+            statusOneClick.BorderStyle = Border3DStyle.Etched;
+            statusOneClick.Name = "statusOneClick";
+            statusOneClick.Size = new Size(4, 19);
+            statusOneClick.Visible = false;
             //
             // statusFormat
             //
@@ -536,6 +545,7 @@
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel statusIndex;
         private System.Windows.Forms.ToolStripStatusLabel statusPath;
+        private System.Windows.Forms.ToolStripStatusLabel statusOneClick;
         private System.Windows.Forms.ToolStripStatusLabel statusFormat;
         private System.Windows.Forms.ToolStripStatusLabel statusInfo;
         private System.Windows.Forms.Panel pnlPdfA;

@@ -38,6 +38,9 @@ public partial class SettingsForm : Form
     [System.ComponentModel.Browsable(false)]
     public bool ReopenLastFile => cbReopenLast.Checked;
 
+    [System.ComponentModel.Browsable(false)]
+    public bool ShowFullPathInTitle => cbFullPathTitle.Checked;
+
     [System.ComponentModel.Browsable(false), System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
     public bool ClearRecentRequested { get; private set; }
 
@@ -61,6 +64,7 @@ public partial class SettingsForm : Form
         cbLargeIcons.Checked = source.LargeToolbarIcons;
         cbCloseOnEscape.Checked = source.CloseOnEscape;
         cbReopenLast.Checked = source.ReopenLastFile;
+        cbFullPathTitle.Checked = source.ShowFullPathInTitle;
         if (listTargets.Items.Count > 0) { listTargets.SelectedIndex = 0; }
         if (listPrograms.Items.Count > 0) { listPrograms.SelectedIndex = 0; }
         tabControl.SelectedIndex = Math.Clamp(initialTab, 0, tabControl.TabCount - 1);
@@ -101,15 +105,15 @@ public partial class SettingsForm : Form
         labelTargetStatus.Text = index >= 0 && !Directory.Exists((string)listTargets.Items[index]) ? Lng.T("Der markierte Ordner existiert nicht mehr.") : string.Empty;
     }
 
-    /// <summary>Nicht mehr existierende Ordner werden rot dargestellt.</summary>
+    /// <summary>Nicht mehr existierende Ordner werden rot dargestellt. TextRenderer statt
+    /// Graphics.DrawString: gleiches (klares) GDI-Rendering wie bei einer normalen ListBox.</summary>
     private void ListTargets_DrawItem(object sender, DrawItemEventArgs e)
     {
         if (e.Index < 0) { return; }
         e.DrawBackground();
         var path = (string)listTargets.Items[e.Index];
         var color = Directory.Exists(path) ? e.ForeColor : Color.Firebrick;
-        using SolidBrush brush = new(color);
-        e.Graphics.DrawString(path, e.Font, brush, e.Bounds.Left + 2, e.Bounds.Top + 1);
+        TextRenderer.DrawText(e.Graphics, path, e.Font, new Point(e.Bounds.Left + 2, e.Bounds.Top + 1), color);
         e.DrawFocusRectangle();
     }
 

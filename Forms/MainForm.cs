@@ -278,7 +278,7 @@ public partial class MainForm : Form
     private void UpdateUiState()
     {
         var hasFile = currentFile != null;
-        Text = hasFile ? currentFile.Name + " – PDFlight" : "PDFlight";
+        Text = hasFile ? (settings.ShowFullPathInTitle ? currentFile.FullName : currentFile.Name) + " – PDFlight" : "PDFlight";
         splitButtonMove.Enabled = btnCopy.Enabled = btnRename.Enabled = btnDelete.Enabled = btnShowInFolder.Enabled = ddbEdit.Enabled = btnPrint.Enabled = btnEmail.Enabled = hasFile;
         // PDF/A-Schutz: verändernde Operationen bleiben gesperrt, bis „Bearbeitung aktivieren“ gedrückt wurde;
         // Extrahieren (neue Datei), Rückgängig (stellt alte Bytes wieder her) und Eigenschaften (dann nur lesend) bleiben frei
@@ -306,6 +306,7 @@ public partial class MainForm : Form
             statusFormat.Visible = false;
             btnPrev.Enabled = btnNext.Enabled = false;
         }
+        UpdateOneClickLabel();
     }
 
     /// <summary>True, solange die angezeigte PDF/A-Datei schreibgeschützt ist (Banner sichtbar).</summary>
@@ -570,6 +571,7 @@ public partial class MainForm : Form
             }
             settings.AddRecentFolder(folder);
             settings.Save();
+            UpdateOneClickLabel(); // der zuletzt verwendete Ordner kann jetzt der 1-Klick-Ordner sein
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
@@ -655,14 +657,75 @@ public partial class MainForm : Form
         }
     }
 
+    /// <summary>Der 1-Klick-Ordner: Ziel von Strg+Klick auf „Verschieben“, angezeigt in der Statusleiste.
+    /// Springt der Ordnerdialog zum zuletzt verwendeten Ordner, ist es dieser — sonst der erste Ordner
+    /// der Zielliste; null, wenn keiner davon existiert.</summary>
+    private string OneClickFolder()
+    {
+        if (settings.JumpToLastUsed && settings.RecentFolders.Count > 0 && Directory.Exists(settings.RecentFolders[0]))
+        {
+            return settings.RecentFolders[0];
+        }
+        return settings.TargetFolders.Count > 0 && Directory.Exists(settings.TargetFolders[0]) ? settings.TargetFolders[0] : null;
+    }
+
+    private string oneClickFolderShown; // der angezeigte 1-Klick-Ordner (voller Pfad); null = Label ausgeblendet
+
+    /// <summary>Zeigt den 1-Klick-Ordner in der Statusleiste: den vollen Pfad — nur wenn der Platz
+    /// nicht reicht (kleines Fenster, langer Dateipfad), verkürzt auf den Ordnernamen.</summary>
+    private void UpdateOneClickLabel()
+    {
+        oneClickFolderShown = OneClickFolder();
+        statusOneClick.Visible = oneClickFolderShown != null;
+        if (oneClickFolderShown == null) { return; }
+        statusOneClick.ToolTipText = oneClickFolderShown + "\n" + Lng.T("Strg+Klick auf „Verschieben“ verschiebt die Datei sofort in diesen Ordner.");
+        LayoutStatusBar();
+    }
+
+    /// <summary>Passt die Statusleiste an den verfügbaren Platz an — auch bei jeder Größenänderung
+    /// des Fensters (s. OnResize). Stufenweise: erst entfällt die Pfadangabe der Datei (sie steht
+    /// schon in der Titelleiste), danach beim 1-Klick-Ordner die Bezeichnung und zuletzt der Pfad
+    /// (nur noch der Ordnername). Zeigt statusPath gerade eine Meldung statt des Pfads, bleibt sie
+    /// unangetastet.</summary>
+    private void LayoutStatusBar()
+    {
+        if (statusOneClick == null) { return; } // OnResize feuert schon während InitializeComponent
+        int Width(string s) => TextRenderer.MeasureText(s, statusStrip.Font).Width;
+        var available = statusStrip.Width - Width(statusIndex.Text) - Width(statusInfo.Text)
+            - (statusFormat.Visible ? Width(statusFormat.Text) : 0) - 60; // Puffer für Ränder und Trennlinien
+        var pathShown = currentFile != null && (statusPath.Text == currentFile.FullName || string.IsNullOrEmpty(statusPath.Text));
+        var filePath = pathShown ? currentFile.FullName : statusPath.Text;
+        var pathHidden = pathShown ? string.Empty : statusPath.Text; // Meldungstexte bleiben stehen
+        var prefix = Lng.T("1-Klick-Ordner:") + " ";
+        var folderName = oneClickFolderShown == null ? null : new DirectoryInfo(oneClickFolderShown).Name;
+        (string Path, string OneClick)[] candidates =
+        [
+            (filePath, oneClickFolderShown == null ? null : prefix + oneClickFolderShown),
+            (pathHidden, oneClickFolderShown == null ? null : prefix + oneClickFolderShown),
+            (pathHidden, oneClickFolderShown),
+            (pathHidden, folderName),
+        ];
+        var pick = candidates.FirstOrDefault(c => Width(c.Path) + (c.OneClick == null ? 0 : Width(c.OneClick)) <= available);
+        if (pick.Path == null) { pick = candidates[^1]; } // selbst die kürzeste Stufe passt nicht ganz → sie anzeigen und abschneiden lassen
+        statusPath.Text = pick.Path;
+        if (pick.OneClick != null) { statusOneClick.Text = pick.OneClick; }
+    }
+
+    protected override void OnResize(EventArgs e)
+    {
+        base.OnResize(e);
+        LayoutStatusBar();
+    }
+
     private void SplitButtonMove_ButtonClick(object sender, EventArgs e)
     {
-        // Strg+Klick: direkt in den ersten Zielordner verschieben (wie in PDFMover)
-        if ((ModifierKeys & Keys.Control) == Keys.Control && settings.TargetFolders.Count > 0 && Directory.Exists(settings.TargetFolders[0]))
+        // Strg+Klick: direkt in den 1-Klick-Ordner verschieben (Schnell-Verschieben wie in PDFMover)
+        if ((ModifierKeys & Keys.Control) == Keys.Control)
         {
-            MoveOrCopyTo(settings.TargetFolders[0], copy: false);
+            settings.ReloadSharedLists(); // aktuelle Ziel-/Zuletzt-Listen anderer Instanzen übernehmen
+            if (OneClickFolder() is { } target) { MoveOrCopyTo(target, copy: false); return; }
         }
-        else { MoveCopyDialog(copy: false); }
+        MoveCopyDialog(copy: false);
     }
 
     private void SplitButtonMove_DropDownOpening(object sender, EventArgs e)
@@ -701,6 +764,7 @@ public partial class MainForm : Form
             settings.LargeToolbarIcons = dialog.LargeToolbarIcons;
             settings.CloseOnEscape = dialog.CloseOnEscape;
             settings.ReopenLastFile = dialog.ReopenLastFile;
+            settings.ShowFullPathInTitle = dialog.ShowFullPathInTitle;
             var languageChanged = dialog.Language != settings.Language;
             settings.Language = dialog.Language;
             if (dialog.ClearRecentRequested) { settings.RecentFolders.Clear(); }
@@ -711,6 +775,7 @@ public partial class MainForm : Form
             }
             RebuildProgramIconButtons();
             ApplyToolbarIcons();
+            UpdateUiState(); // übernimmt z.B. die Titelleisten-Option sofort
         }
     }
 

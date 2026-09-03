@@ -19,6 +19,7 @@
   <data name="Allgemein" xml:space="preserve"><value>General</value></data>
   <data name="Ordnerdialog springt zum zuletzt &amp;verwendeten Ordner" xml:space="preserve"><value>El diálogo de carpetas salta a la última carpeta &amp;utilizada</value></data>
   <data name="Vor dem Verschieben in den &amp;Papierkorb nachfragen" xml:space="preserve"><value>Preguntar antes de mover a la &amp;papelera</value></data>
+  <data name="Vollständigen Dateipfad in der Titelleiste an&amp;zeigen" xml:space="preserve"><value>Mostrar la ruta completa del archivo en la &amp;barra de título</value></data>
   <data name="Programm&amp;symbole zusätzlich in der Symbolleiste anzeigen" xml:space="preserve"><value>Mostrar también los iconos de programa&amp;s en la barra de herramientas</value></data>
   <data name="Symbole auf den Schal&amp;tflächen der Symbolleiste anzeigen" xml:space="preserve"><value>Mostrar iconos en los bo&amp;tones de la barra de herramientas</value></data>
   <data name="&amp;Große Symbole in der Symbolleiste (24 statt 16 Pixel)" xml:space="preserve"><value>Iconos &amp;grandes en la barra de herramientas (24 en lugar de 16 píxeles)</value></data>
@@ -36,7 +37,9 @@
   <data name="Nach &amp;unten" xml:space="preserve"><value>&amp;Bajar</value></data>
   <data name="&amp;Fehlende entfernen" xml:space="preserve"><value>Quitar los &amp;faltantes</value></data>
   <data name="&amp;Alphabetisch sortieren" xml:space="preserve"><value>Ordenar &amp;alfabéticamente</value></data>
-  <data name="Der erste Ordner ist das Ziel für das Schnell-Verschieben (Strg+Klick auf &quot;Verschieben&quot;)." xml:space="preserve"><value>La primera carpeta es el destino del movimiento rápido (Ctrl+clic en "Mover").</value></data>
+  <data name="Strg+Klick auf &quot;Verschieben&quot; verschiebt sofort in den 1-Klick-Ordner (siehe Statusleiste)." xml:space="preserve"><value>Ctrl+clic en "Mover" mueve directamente a la carpeta de 1 clic (ver la barra de estado).</value></data>
+  <data name="1-Klick-Ordner:" xml:space="preserve"><value>Carpeta de 1 clic:</value></data>
+  <data name="Strg+Klick auf „Verschieben“ verschiebt die Datei sofort in diesen Ordner." xml:space="preserve"><value>Ctrl+clic en "Mover" mueve el archivo inmediatamente a esta carpeta.</value></data>
   <data name="Der markierte Ordner existiert nicht mehr." xml:space="preserve"><value>La carpeta seleccionada ya no existe.</value></data>
   <data name="Ordner zur Zielliste hinzufügen" xml:space="preserve"><value>Agregar carpeta a la lista de destinos</value></data>
   <data name="Programme" xml:space="preserve"><value>Programas</value></data>
@@ -111,7 +114,7 @@ La vista procede de la memoria y sigue disponible.</value></data>
   <data name="Tooltip.Open" xml:space="preserve"><value>Abrir archivo PDF (Ctrl+O)
 Flecha: archivos recientes</value></data>
   <data name="Tooltip.Move" xml:space="preserve"><value>Mover a una carpeta (Ctrl+M)
-Ctrl+clic: directamente a la primera carpeta de destino
+Ctrl+clic: directamente a la carpeta de 1 clic (ver la barra de estado)
 Flecha: lista de destinos</value></data>
   <data name="Tooltip.Edit" xml:space="preserve"><value>Editar documento: eliminar/girar páginas, anexar PDF,
 extraer páginas, propiedades (atajos en el menú)</value></data>
