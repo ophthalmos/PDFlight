@@ -35,6 +35,7 @@ public partial class MainForm : Form
         // Mehrzeilige Tooltips brauchen explizite Schlüssel (Zeilenumbrüche taugen nicht als resx-Schlüssel)
         btnOpen.ToolTipText = Lng.T("Tooltip.Open", btnOpen.ToolTipText);
         splitButtonMove.ToolTipText = Lng.T("Tooltip.Move", splitButtonMove.ToolTipText);
+        btnCopy.ToolTipText = Lng.T("Tooltip.Copy", btnCopy.ToolTipText);
         ddbEdit.ToolTipText = Lng.T("Tooltip.Edit", ddbEdit.ToolTipText);
         statusIndex.ToolTipText = Lng.T("Tooltip.StatusIndex", statusIndex.ToolTipText);
         viewHost = new PdfViewHost(webView);
@@ -126,14 +127,14 @@ public partial class MainForm : Form
         if (missingFileNoticeShown) { return; }
         missingFileNoticeShown = true; // vor dem Dialog setzen — sein Schließen aktiviert das Formular erneut
         TaskDialogButton btnResave = new TaskDialogCommandLinkButton(Lng.T("Datei neu speichern"),
-            Lng.T("stellt die Datei am alten Ort wieder her"));
+            Lng.T("Stellt die Datei am alten Ort wieder her"));
         TaskDialogButton btnViewOnly = new TaskDialogCommandLinkButton(Lng.T("Nur weiter anzeigen"),
             Lng.T("Bearbeitungsfunktionen werden deaktiviert"));
         var page = new TaskDialogPage()
         {
-            Icon = TaskDialogIcon.Warning,
+            Icon = TaskDialogIcon.ShieldWarningYellowBar,
             Caption = Application.ProductName,
-            Heading = Lng.T("Die angezeigte Datei ist nicht mehr vorhanden."),
+            Heading = Lng.T("Die angezeigte Datei existiert nicht mehr!"),
             Text = currentFile.FullName + "\n\n" + Lng.T("FehlendeDatei.Text", // mehrzeilig → expliziter Schlüssel (wie Drehen.Info)
                 "Sie wurde extern verschoben, umbenannt oder gelöscht.\nDie Anzeige stammt aus dem Speicher und bleibt erhalten."),
             AllowCancel = true,
@@ -199,6 +200,57 @@ public partial class MainForm : Form
 
     private ClickShieldForm clickShield;
     private ToolStripDropDownItem[] dropDownButtons;
+
+    /// <summary>Kurzer Einblend-Hinweis mittig über dem Viewer (z. B. „Datei verschoben“). Wie beim
+    /// Klick-Schild ein eigenes randloses Fenster, denn Chromium zeichnet in einem fremden Prozess
+    /// und würde ein WinForms-Label schlicht übermalen.</summary>
+    private sealed class SplashLabelForm : Form
+    {
+        private readonly Label label = new()
+        {
+            AutoSize = true,
+            ForeColor = Color.White,
+            Font = new Font("Segoe UI", 12F),
+            Padding = new Padding(18, 10, 18, 10)
+        };
+
+        public SplashLabelForm()
+        {
+            FormBorderStyle = FormBorderStyle.None;
+            ShowInTaskbar = false;
+            StartPosition = FormStartPosition.Manual;
+            BackColor = Color.FromArgb(32, 44, 88); // das Navy des Programmicons
+            Opacity = 0.9;
+            AutoSize = true;
+            AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            Controls.Add(label);
+        }
+
+        protected override bool ShowWithoutActivation => true; // dem Hauptfenster nicht den Fokus stehlen
+
+        public void SetMessage(string text) => label.Text = text;
+    }
+
+    private SplashLabelForm splashLabel;
+
+    /// <summary>Zeigt eine Einblend-Meldung mittig über dem Viewer; splashTimer blendet sie nach 1 s aus.</summary>
+    private void ShowSplash(string text)
+    {
+        splashLabel ??= new SplashLabelForm();
+        splashLabel.SetMessage(text);
+        var host = webView.PointToScreen(Point.Empty);
+        var size = splashLabel.PreferredSize;
+        splashLabel.Location = new Point(host.X + (webView.Width - size.Width) / 2, host.Y + (webView.Height - size.Height) / 3); // im oberen Drittel: dort verdeckt sie kaum Inhalt und fällt trotzdem auf
+        splashLabel.Show(this);
+        splashTimer.Stop(); // eine laufende Anzeige beginnt von vorn
+        splashTimer.Start();
+    }
+
+    private void SplashTimer_Tick(object sender, EventArgs e)
+    {
+        splashTimer.Stop();
+        splashLabel.Hide();
+    }
 
     private void InitDropDownClickShield()
     {
@@ -349,14 +401,13 @@ public partial class MainForm : Form
     private void BtnOpen_DropDownOpening(object sender, EventArgs e)
     {
         settings.ReloadSharedLists();
+        if (settings.RecentFiles.RemoveAll(f => !File.Exists(f)) > 0) { settings.Save(); } // verschwundene Dateien gleich austragen statt sie auszugrauen
         btnOpen.DropDownItems.Clear();
         foreach (var file in settings.RecentFiles)
         {
-            ToolStripMenuItem item = new(Path.GetFileName(file).Replace("&", "&&"))
+            ToolStripMenuItem item = new(file.Replace("&", "&&")) // voller Pfad, wie im Verschieben-Dropdown
             {
                 Tag = file,
-                ToolTipText = file,
-                Enabled = File.Exists(file),
                 Image = ShellInfo.GetTypeIcon(".pdf", LogicalToDeviceUnits(16)),
             };
             item.Click += (s, args) => LoadPdf((string)((ToolStripMenuItem)s).Tag, addToRecent: true);
@@ -418,7 +469,9 @@ public partial class MainForm : Form
         var index = 0;
         if (currentFile == null) { LoadPdf(files[0], addToRecent: true); index = 1; }
         else if (files.Count == 1 && string.Equals(files[0], currentFile.FullName, StringComparison.OrdinalIgnoreCase))
-        { LoadPdf(files[0]); index = 1; } // dieselbe Datei erneut abgelegt → nur neu laden statt zweiter Instanz
+        {
+            LoadPdf(files[0]); index = 1;
+        } // dieselbe Datei erneut abgelegt → nur neu laden statt zweiter Instanz
         for (; index < files.Count; index++)
         {
             try { Process.Start(Application.ExecutablePath, [files[index]]); }
@@ -568,6 +621,7 @@ public partial class MainForm : Form
                 LoadPdf(destination); // die verschobene Datei bleibt angezeigt — nun vom neuen Ort (wie in PDFMover)
                 CheckForDuplicate(new FileInfo(destination));
                 previousFolder = sourceFolder; // beim nächsten Blättern die Rückkehr in den bisherigen Ordner anbieten
+                ShowSplash(Lng.T("Datei verschoben")); // das blitzschnelle Neuladen allein wäre leicht zu übersehen
             }
             settings.AddRecentFolder(folder);
             settings.Save();
@@ -678,7 +732,7 @@ public partial class MainForm : Form
         oneClickFolderShown = OneClickFolder();
         statusOneClick.Visible = oneClickFolderShown != null;
         if (oneClickFolderShown == null) { return; }
-        statusOneClick.ToolTipText = oneClickFolderShown + "\n" + Lng.T("Strg+Klick auf „Verschieben“ verschiebt die Datei sofort in diesen Ordner.");
+        statusOneClick.ToolTipText = oneClickFolderShown + "\n" + Lng.T("Strg+Klick auf „Verschieben“/„Kopieren“ verschiebt/kopiert die Datei sofort in diesen Ordner.");
         LayoutStatusBar();
     }
 
@@ -720,12 +774,18 @@ public partial class MainForm : Form
     private void SplitButtonMove_ButtonClick(object sender, EventArgs e)
     {
         // Strg+Klick: direkt in den 1-Klick-Ordner verschieben (Schnell-Verschieben wie in PDFMover)
-        if ((ModifierKeys & Keys.Control) == Keys.Control)
-        {
-            settings.ReloadSharedLists(); // aktuelle Ziel-/Zuletzt-Listen anderer Instanzen übernehmen
-            if (OneClickFolder() is { } target) { MoveOrCopyTo(target, copy: false); return; }
-        }
+        if ((ModifierKeys & Keys.Control) == Keys.Control && OneClickAction(copy: false)) { return; }
         MoveCopyDialog(copy: false);
+    }
+
+    /// <summary>Schnell-Verschieben/-Kopieren in den 1-Klick-Ordner, ohne Dialog.
+    /// Liefert false, wenn es keinen 1-Klick-Ordner gibt — dann übernimmt der Dialog.</summary>
+    private bool OneClickAction(bool copy)
+    {
+        settings.ReloadSharedLists(); // aktuelle Ziel-/Zuletzt-Listen anderer Instanzen übernehmen
+        if (OneClickFolder() is not { } target) { return false; }
+        MoveOrCopyTo(target, copy);
+        return true;
     }
 
     private void SplitButtonMove_DropDownOpening(object sender, EventArgs e)
@@ -1375,6 +1435,9 @@ public partial class MainForm : Form
             case Keys.F4:
             case Keys.M | Keys.Control: MoveCopyDialog(copy: false); return true;
             case Keys.K | Keys.Control: MoveCopyDialog(copy: true); return true;
+            case Keys.M | Keys.Control | Keys.Shift:
+            case Keys.F4 | Keys.Control: if (!OneClickAction(copy: false)) { MoveCopyDialog(copy: false); } return true;
+            case Keys.K | Keys.Control | Keys.Shift: if (!OneClickAction(copy: true)) { MoveCopyDialog(copy: true); } return true;
             case Keys.F2:
             case Keys.U | Keys.Control: RenameCurrent(); return true;
             // erst nach der Rückkehr aus dem Chromium-Tastatur-Callback: solange der läuft, wartet Chromium
@@ -1474,6 +1537,8 @@ public partial class MainForm : Form
     }
     private void BtnCopy_Click(object sender, EventArgs e)
     {
+        // Strg+Klick: direkt in den 1-Klick-Ordner kopieren (Schnell-Kopieren, analog zum Verschieben)
+        if ((ModifierKeys & Keys.Control) == Keys.Control && OneClickAction(copy: true)) { return; }
         MoveCopyDialog(copy: true);
     }
     private void BtnRename_Click(object sender, EventArgs e)

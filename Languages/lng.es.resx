@@ -37,9 +37,10 @@
   <data name="Nach &amp;unten" xml:space="preserve"><value>&amp;Bajar</value></data>
   <data name="&amp;Fehlende entfernen" xml:space="preserve"><value>Quitar los &amp;faltantes</value></data>
   <data name="&amp;Alphabetisch sortieren" xml:space="preserve"><value>Ordenar &amp;alfabéticamente</value></data>
-  <data name="Strg+Klick auf &quot;Verschieben&quot; verschiebt sofort in den 1-Klick-Ordner (siehe Statusleiste)." xml:space="preserve"><value>Ctrl+clic en "Mover" mueve directamente a la carpeta de 1 clic (ver la barra de estado).</value></data>
+  <data name="Strg+Klick auf &quot;Verschieben&quot;/&quot;Kopieren&quot;: sofort in den 1-Klick-Ordner (s. Statusleiste)." xml:space="preserve"><value>Ctrl+clic en "Mover"/"Copiar": directamente a la carpeta de 1 clic (ver la barra de estado).</value></data>
   <data name="1-Klick-Ordner:" xml:space="preserve"><value>Carpeta de 1 clic:</value></data>
-  <data name="Strg+Klick auf „Verschieben“ verschiebt die Datei sofort in diesen Ordner." xml:space="preserve"><value>Ctrl+clic en "Mover" mueve el archivo inmediatamente a esta carpeta.</value></data>
+  <data name="Strg+Klick auf „Verschieben“/„Kopieren“ verschiebt/kopiert die Datei sofort in diesen Ordner." xml:space="preserve"><value>Ctrl+clic en "Mover"/"Copiar" mueve o copia el archivo inmediatamente a esta carpeta.</value></data>
+  <data name="Datei verschoben" xml:space="preserve"><value>Archivo movido</value></data>
   <data name="Der markierte Ordner existiert nicht mehr." xml:space="preserve"><value>La carpeta seleccionada ya no existe.</value></data>
   <data name="Ordner zur Zielliste hinzufügen" xml:space="preserve"><value>Agregar carpeta a la lista de destinos</value></data>
   <data name="Programme" xml:space="preserve"><value>Programas</value></data>
@@ -83,7 +84,8 @@
   <!-- MainForm: Tooltips und Kürzel-Anzeigen -->
   <data name="Vorherige PDF-Datei im Ordner (Strg+Umschalt+←)" xml:space="preserve"><value>Archivo PDF anterior de la carpeta (Ctrl+Mayús+←)</value></data>
   <data name="Nächste PDF-Datei im Ordner (Strg+Umschalt+→)" xml:space="preserve"><value>Archivo PDF siguiente de la carpeta (Ctrl+Mayús+→)</value></data>
-  <data name="In einen Ordner kopieren (Strg+K)" xml:space="preserve"><value>Copiar a una carpeta (Ctrl+K)</value></data>
+  <data name="Tooltip.Copy" xml:space="preserve"><value>Copiar a una carpeta (Ctrl+K)
+Ctrl+clic: directamente a la carpeta de 1 clic (ver la barra de estado)</value></data>
   <data name="Datei umbenennen (F2)" xml:space="preserve"><value>Renombrar archivo (F2)</value></data>
   <data name="In den Papierkorb verschieben (Strg+Umschalt+Entf)" xml:space="preserve"><value>Mover a la papelera (Ctrl+Mayús+Supr)</value></data>
   <data name="Datei im Dateimanager anzeigen" xml:space="preserve"><value>Mostrar archivo en el administrador de archivos</value></data>
@@ -123,6 +125,8 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
   <data name="Strg+" xml:space="preserve"><value>Ctrl+</value></data>
   <data name="Strg+O" xml:space="preserve"><value>Ctrl+O</value></data>
   <data name="Strg+M / F4" xml:space="preserve"><value>Ctrl+M / F4</value></data>
+  <data name="Strg+Umschalt+M / Strg+F4" xml:space="preserve"><value>Ctrl+Mayús+M / Ctrl+F4</value></data>
+  <data name="Strg+Umschalt+K" xml:space="preserve"><value>Ctrl+Mayús+K</value></data>
   <data name="Strg+K" xml:space="preserve"><value>Ctrl+K</value></data>
   <data name="Strg+E" xml:space="preserve"><value>Ctrl+E</value></data>
   <data name="Strg+F" xml:space="preserve"><value>Ctrl+F</value></data>
@@ -308,8 +312,10 @@ para instalar la última versión.</value></data>
   <data name="Der Link konnte nicht geöffnet werden." xml:space="preserve"><value>No se pudo abrir el enlace.</value></data>
   <data name="vorherige / nächste Datei des Ordners anzeigen" xml:space="preserve"><value>mostrar el archivo anterior / siguiente de la carpeta</value></data>
   <data name="im Dokument blättern" xml:space="preserve"><value>desplazarse por el documento</value></data>
-  <data name="verschieben (Strg+Klick: erster Zielordner)" xml:space="preserve"><value>mover (Ctrl+clic: primera carpeta de destino)</value></data>
+  <data name="Datei verschieben" xml:space="preserve"><value>mover archivo</value></data>
+  <data name="sofort in den 1-Klick-Ordner verschieben" xml:space="preserve"><value>mover directamente a la carpeta de 1 clic</value></data>
   <data name="Datei kopieren" xml:space="preserve"><value>copiar archivo</value></data>
+  <data name="sofort in den 1-Klick-Ordner kopieren" xml:space="preserve"><value>copiar directamente a la carpeta de 1 clic</value></data>
   <data name="Datei umbenennen" xml:space="preserve"><value>renombrar archivo</value></data>
   <data name="Datei in den Papierkorb verschieben" xml:space="preserve"><value>mover el archivo a la papelera</value></data>
   <data name="Seiten als neue Datei extrahieren" xml:space="preserve"><value>extraer páginas a un archivo nuevo</value></data>

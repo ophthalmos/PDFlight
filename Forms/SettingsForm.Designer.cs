@@ -331,7 +331,7 @@
             labelTargetHint.Name = "labelTargetHint";
             labelTargetHint.Size = new Size(472, 19);
             labelTargetHint.TabIndex = 7;
-            labelTargetHint.Text = "Strg+Klick auf \"Verschieben\" verschiebt sofort in den 1-Klick-Ordner (siehe Statusleiste).";
+            labelTargetHint.Text = "Strg+Klick auf \"Verschieben\"/\"Kopieren\": sofort in den 1-Klick-Ordner (s. Statusleiste).";
             // 
             // tabPrograms
             // 
