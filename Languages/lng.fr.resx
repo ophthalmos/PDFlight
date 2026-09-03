@@ -91,6 +91,13 @@
   <data name="Einstellungen öffnen" xml:space="preserve"><value>ouvrir les paramètres</value></data>
   <data name="Über PDFlight und Spenden (F1)" xml:space="preserve"><value>À propos de PDFlight et dons (F1)</value></data>
   <data name="Seitenzahl, Dateigröße und Änderungsdatum der angezeigten Datei" xml:space="preserve"><value>Nombre de pages, taille et date de modification du fichier affiché</value></data>
+  <data name="PDF-Version der angezeigten Datei" xml:space="preserve"><value>Version PDF du fichier affiché</value></data>
+  <data name="PDF/A: Format für die Langzeitarchivierung" xml:space="preserve"><value>PDF/A : format pour l'archivage à long terme</value></data>
+  <data name="Diese Datei entspricht dem PDF/A-Standard für die Langzeitarchivierung und wurde schreibgeschützt geöffnet." xml:space="preserve"><value>Ce fichier est conforme à la norme PDF/A pour l'archivage à long terme et a été ouvert en lecture seule.</value></data>
+  <data name="Bearbeitung aktivieren" xml:space="preserve"><value>Activer la modification</value></data>
+  <data name="Möchtest du den Vorgang fortsetzen?" xml:space="preserve"><value>Veux-tu continuer ?</value></data>
+  <data name="Das Bearbeiten führt dazu, dass die PDF-Datei nicht mehr dem PDF/A-Standard entspricht." xml:space="preserve"><value>La modification aura pour effet que le fichier PDF ne sera plus conforme à la norme PDF/A.</value></data>
+  <data name="Das Aktivieren selbst ändert die Datei noch nicht. Erst wenn du eine Bearbeitung ausführst (Seiten löschen oder drehen, Metadaten ändern usw.), wird die Datei sofort gespeichert und verliert dabei die PDF/A-Kennzeichnung — einen gesonderten Speichern-Schritt gibt es in PDFlight nicht." xml:space="preserve"><value>L'activation seule ne modifie pas encore le fichier. Ce n'est que lorsque tu effectues une modification (supprimer ou faire pivoter des pages, modifier les métadonnées, etc.) que le fichier est immédiatement enregistré et perd alors son marquage PDF/A — il n'y a pas d'étape d'enregistrement séparée dans PDFlight.</value></data>
   <data name="Tooltip.Open" xml:space="preserve"><value>Ouvrir un fichier PDF (Ctrl+O)
 Flèche : fichiers récemment ouverts</value></data>
   <data name="Tooltip.Move" xml:space="preserve"><value>Déplacer vers un dossier (Ctrl+M)
@@ -138,18 +145,18 @@ extraire des pages, propriétés (raccourcis dans le menu)</value></data>
 
   <!-- MainForm: Meldungen und Dialoge -->
   <data name="Die WebView2-Runtime ist nicht installiert." xml:space="preserve"><value>Le runtime WebView2 n'est pas installé.</value></data>
-  <data name="Bitte installiere sie über:" xml:space="preserve"><value>Veuillez l'installer depuis :</value></data>
+  <data name="Bitte installiere sie über:" xml:space="preserve"><value>Installe-la depuis :</value></data>
   <data name="Die PDF-Anzeige (WebView2) konnte nicht gestartet werden." xml:space="preserve"><value>L'affichage PDF (WebView2) n'a pas pu démarrer.</value></data>
   <data name="Die Datei konnte nicht geladen werden." xml:space="preserve"><value>Le fichier n'a pas pu être chargé.</value></data>
   <data name="PDF-Dateien (*.pdf)|*.pdf" xml:space="preserve"><value>Fichiers PDF (*.pdf)|*.pdf</value></data>
   <data name="PDF-Datei öffnen" xml:space="preserve"><value>Ouvrir un fichier PDF</value></data>
   <data name="Vorheriger Ordner:" xml:space="preserve"><value>Dossier précédent :</value></data>
   <data name="Aktueller Ordner:" xml:space="preserve"><value>Dossier actuel :</value></data>
-  <data name="Du möchtest die {0} Datei öffnen." xml:space="preserve"><value>Vous voulez ouvrir le fichier {0}.</value></data>
+  <data name="Du möchtest die {0} Datei öffnen." xml:space="preserve"><value>Tu veux ouvrir le fichier {0}.</value></data>
   <data name="nächste" xml:space="preserve"><value>suivant</value></data>
   <data name="vorherige" xml:space="preserve"><value>précédent</value></data>
   <data name="Welcher Ordner soll durchsucht werden?" xml:space="preserve"><value>Quel dossier faut-il parcourir ?</value></data>
-  <data name="Wenn du abbrichst, wird der aktuelle Ordner verwendet." xml:space="preserve"><value>Si vous annulez, le dossier actuel sera utilisé.</value></data>
+  <data name="Wenn du abbrichst, wird der aktuelle Ordner verwendet." xml:space="preserve"><value>Si tu annules, le dossier actuel sera utilisé.</value></data>
   <data name="Der Ordner enthält keine PDF-Dateien." xml:space="preserve"><value>Le dossier ne contient aucun fichier PDF.</value></data>
   <data name="Der Ordner enthält keine weiteren PDF-Dateien." xml:space="preserve"><value>Le dossier ne contient pas d'autres fichiers PDF.</value></data>
   <data name="Der Zielordner existiert nicht." xml:space="preserve"><value>Le dossier cible n'existe pas.</value></data>
@@ -205,7 +212,7 @@ extraire des pages, propriétés (raccourcis dans le menu)</value></data>
   <data name="Rückseiten-Scan einfügen …" xml:space="preserve"><value>Insérer le scan des versos…</value></data>
   <data name="Rückseiten-Scan einfügen" xml:space="preserve"><value>Insérer le scan des versos</value></data>
   <data name="Duplex.Intro" xml:space="preserve"><value>Pour les scanners sans unité recto verso : le fichier affiché contient les rectos (1, 3, 5 …).
-À l'étape suivante, choisissez le fichier des versos – il sera entrelacé avec les rectos
+À l'étape suivante, choisis le fichier des versos – il sera entrelacé avec les rectos
 pour former un document complet (1, 2, 3 …).
 
 Les deux fichiers doivent avoir le même nombre de pages.</value></data>
@@ -222,7 +229,7 @@ Sans lui, le fichier ne pourra plus être affiché.</value></data>
 Le bouton de rotation de l'afficheur, lui, ne change que l'affichage.</value></data>
   <data name="Kennwort verbergen" xml:space="preserve"><value>Masquer le mot de passe</value></data>
   <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Répéter :</value></data>
-  <data name="Bitte gib ein Kennwort ein." xml:space="preserve"><value>Veuillez saisir un mot de passe.</value></data>
+  <data name="Bitte gib ein Kennwort ein." xml:space="preserve"><value>Saisis un mot de passe.</value></data>
   <data name="Die Kennwörter stimmen nicht überein." xml:space="preserve"><value>Les mots de passe ne correspondent pas.</value></data>
   <data name="Die Datei ist bereits verschlüsselt." xml:space="preserve"><value>Le fichier est déjà chiffré.</value></data>
   <data name="Vergeben des Kennworts" xml:space="preserve"><value>Définition du mot de passe</value></data>
@@ -235,7 +242,7 @@ Le bouton de rotation de l'afficheur, lui, ne change que l'affichage.</value></d
   <data name="Das Kennwort wurde entfernt." xml:space="preserve"><value>Le mot de passe a été supprimé.</value></data>
   <data name="Ein Kennwortschutz lässt sich über Bearbeiten → &quot;Kennwort entfernen&quot; aufheben." xml:space="preserve"><value>Une protection par mot de passe peut être levée via Édition → « Supprimer le mot de passe ».</value></data>
   <data name="Datei mit den Rückseiten wählen" xml:space="preserve"><value>Choisir le fichier des versos</value></data>
-  <data name="Bitte wähle eine andere Datei als die angezeigte." xml:space="preserve"><value>Veuillez choisir un fichier différent de celui affiché.</value></data>
+  <data name="Bitte wähle eine andere Datei als die angezeigte." xml:space="preserve"><value>Choisis un fichier différent de celui affiché.</value></data>
   <data name="Die Seitenzahlen passen nicht zusammen." xml:space="preserve"><value>Les nombres de pages ne correspondent pas.</value></data>
   <data name="Vorderseiten: {0}, Rückseiten: {1}" xml:space="preserve"><value>Rectos : {0}, versos : {1}</value></data>
   <data name="In welcher Reihenfolge liegen die Rückseiten vor?" xml:space="preserve"><value>Dans quel ordre sont les versos ?</value></data>
@@ -272,12 +279,12 @@ un autre fichier PDF peut être annexé.</value></data>
   <data name="Tastenkürzel" xml:space="preserve"><value>Raccourcis clavier</value></data>
   <data name="PDFlightSetup.exe herunterladen" xml:space="preserve"><value>Télécharger PDFlightSetup.exe</value></data>
   <data name="Download.Detail" xml:space="preserve"><value>PDFlightSetup.exe sera enregistré dans le dossier
-Téléchargements. Exécutez le programme
+Téléchargements. Exécute le programme
 d'installation pour installer la dernière version.</value></data>
   <data name="{0} ist auf dem neuesten Stand." xml:space="preserve"><value>{0} est à jour.</value></data>
   <data name="Die Update-Suche ist fehlgeschlagen." xml:space="preserve"><value>La recherche de mise à jour a échoué.</value></data>
   <data name="Die Update-Informationen wurden nicht gefunden." xml:space="preserve"><value>Les informations de mise à jour sont introuvables.</value></data>
-  <data name="Zeitüberschreitung – bitte prüfe die Internetverbindung." xml:space="preserve"><value>Délai dépassé – veuillez vérifier votre connexion Internet.</value></data>
+  <data name="Zeitüberschreitung – bitte prüfe die Internetverbindung." xml:space="preserve"><value>Délai dépassé – vérifie ta connexion Internet.</value></data>
   <data name="Die Versionsangabe in der Update-Datei konnte nicht gelesen werden." xml:space="preserve"><value>Le numéro de version du fichier de mise à jour n'a pas pu être lu.</value></data>
   <data name="Es steht ein Update zur Verfügung!" xml:space="preserve"><value>Une mise à jour est disponible !</value></data>
   <data name="vom" xml:space="preserve"><value>du</value></data>
@@ -366,7 +373,7 @@ d'installation pour installer la dernière version.</value></data>
   <data name="90° &amp;rechts" xml:space="preserve"><value>90° à &amp;droite</value></data>
   <data name="90° &amp;links" xml:space="preserve"><value>90° à &amp;gauche</value></data>
   <data name="Ungültige Seitenangabe" xml:space="preserve"><value>Indication de pages non valide</value></data>
-  <data name="Bitte gib gültige Seiten zwischen 1 und {0} an," xml:space="preserve"><value>Veuillez indiquer des pages valides entre 1 et {0},</value></data>
+  <data name="Bitte gib gültige Seiten zwischen 1 und {0} an," xml:space="preserve"><value>Indique des pages valides entre 1 et {0},</value></data>
   <data name="z.B.  3  oder  2-5, 8" xml:space="preserve"><value>p.ex.  3  ou  2-5, 8</value></data>
 
   <!-- Dokumenteigenschaften-Dialog -->

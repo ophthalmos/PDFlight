@@ -1,9 +1,13 @@
+using System.Text;
+using System.Text.RegularExpressions;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 
 namespace PDFLight.Classes;
 
 internal record PdfInfo(string Title, string Author, string Subject, string Keywords, int PageCount, string Version, string Creator, string Producer);
+
+internal record PdfStatus(int PageCount, string Version, string PdfALevel);
 
 /// <summary>Dokumentoperationen mit PDFsharp. Alle Methoden arbeiten direkt auf der Datei;
 /// die Anzeige bleibt davon unberührt, weil der Viewer aus dem Speicher liest.</summary>
@@ -18,6 +22,35 @@ internal static class PdfEditService
             return document.PageCount;
         }
         catch (Exception ex) when (IsPdfReadError(ex)) { return -1; }
+    }
+
+    /// <summary>Seitenzahl, PDF-Version und PDF/A-Stufe der Datei für die Statusleiste;
+    /// PageCount -1 und alles Weitere null, wenn die Datei nicht lesbar ist (z.B. verschlüsselt).</summary>
+    public static PdfStatus TryReadStatus(string path)
+    {
+        try
+        {
+            using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
+            var v = document.Version;
+            return new PdfStatus(document.PageCount, $"{v / 10}.{v % 10}", GetPdfALevel(document));
+        }
+        catch (Exception ex) when (IsPdfReadError(ex)) { return new PdfStatus(-1, null, null); }
+    }
+
+    /// <summary>Liest die deklarierte PDF/A-Stufe (z.B. "2b") aus den XMP-Metadaten des Dokuments;
+    /// null, wenn keine deklariert ist. Erkennt Attribut- und Element-Schreibweise der pdfaid-Einträge.</summary>
+    private static string GetPdfALevel(PdfDocument document)
+    {
+        try
+        {
+            if (document.Internals.Catalog.Elements.GetDictionary("/Metadata")?.Stream is not { } stream) { return null; }
+            var xmp = Encoding.UTF8.GetString(stream.UnfilteredValue);
+            var part = Regex.Match(xmp, @"pdfaid:part(?:\s*=\s*[""']|\s*>\s*)(\d+)").Groups[1].Value;
+            if (part.Length == 0) { return null; }
+            var conformance = Regex.Match(xmp, @"pdfaid:conformance(?:\s*=\s*[""']|\s*>\s*)([A-Za-z])").Groups[1].Value;
+            return part + conformance.ToLowerInvariant();
+        }
+        catch (Exception ex) when (IsPdfReadError(ex)) { return null; }
     }
 
     /// <summary>Löscht die angegebenen Seiten (1-basiert); mindestens eine Seite muss übrig bleiben.</summary>

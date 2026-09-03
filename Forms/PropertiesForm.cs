@@ -19,11 +19,13 @@ internal partial class PropertiesForm : Form
         DocSubject != (original.Subject ?? string.Empty).Trim() ||
         DocKeywords != (original.Keywords ?? string.Empty).Trim();
 
-    public PropertiesForm(PdfInfo info, FileInfo file)
+    public PropertiesForm(PdfInfo info, FileInfo file, bool readOnly = false)
     {
         InitializeComponent();
         Lng.Apply(this);
         original = info;
+        // Bei schreibgeschützten PDF/A-Dateien nur anzeigen, nicht bearbeiten
+        textBoxTitle.ReadOnly = textBoxAuthor.ReadOnly = textBoxSubject.ReadOnly = textBoxKeywords.ReadOnly = readOnly;
         textBoxTitle.Text = info.Title;
         textBoxAuthor.Text = info.Author;
         textBoxSubject.Text = info.Subject;
