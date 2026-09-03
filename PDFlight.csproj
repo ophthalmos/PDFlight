@@ -10,9 +10,9 @@
     <UseWindowsForms>true</UseWindowsForms>
     <UseWPF>true</UseWPF><!-- nur für UIAutomationClient (Seitenzahl aus der Viewer-Toolbar lesen) -->
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>1.0.0</AssemblyVersion>
-    <FileVersion>1.0.0</FileVersion>
-    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.1</AssemblyVersion>
+    <FileVersion>1.0.1</FileVersion>
+    <Version>1.0.1</Version>
     <SourceRevisionId>build$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</SourceRevisionId><!-- Builddatum für den Über-Dialog (TaskDlg.GetBuildDate) -->
     <Product>PDFlight</Product>
     <RootNamespace>PDFLight</RootNamespace><!-- Namespaces im Code bleiben PDFLight; nur der sichtbare Name ist PDFlight -->
@@ -43,7 +43,7 @@
        den NuGet-Targets des Pakets stehen — ein Entfernen erst im Build ließe Visual Studio
        über einen nicht auflösbaren Referenzpfad klagen. -->
   <ItemGroup>
-    <Reference Remove="@(Reference->WithMetadataValue('Filename', 'Microsoft.Web.WebView2.Wpf'))" />
+    <Reference Remove="@(Reference-&gt;WithMetadataValue('Filename', 'Microsoft.Web.WebView2.Wpf'))" />
   </ItemGroup>
 
 </Project>

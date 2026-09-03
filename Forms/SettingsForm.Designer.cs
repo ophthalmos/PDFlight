@@ -38,6 +38,7 @@
             cbLargeIcons = new CheckBox();
             cbCloseOnEscape = new CheckBox();
             cbReopenLast = new CheckBox();
+            cbFullPathTitle = new CheckBox();
             btnClearRecent = new Button();
             labelLanguage = new Label();
             comboLanguage = new ComboBox();
@@ -71,14 +72,14 @@
             // 
             // tabControl
             // 
-            tabControl.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             tabControl.Controls.Add(tabGeneral);
             tabControl.Controls.Add(tabTargets);
             tabControl.Controls.Add(tabPrograms);
-            tabControl.Location = new Point(12, 12);
+            tabControl.Dock = DockStyle.Top;
+            tabControl.Location = new Point(0, 0);
             tabControl.Name = "tabControl";
             tabControl.SelectedIndex = 0;
-            tabControl.Size = new Size(610, 350);
+            tabControl.Size = new Size(488, 316);
             tabControl.TabIndex = 0;
             // 
             // tabGeneral
@@ -90,13 +91,14 @@
             tabGeneral.Controls.Add(cbLargeIcons);
             tabGeneral.Controls.Add(cbCloseOnEscape);
             tabGeneral.Controls.Add(cbReopenLast);
+            tabGeneral.Controls.Add(cbFullPathTitle);
             tabGeneral.Controls.Add(btnClearRecent);
             tabGeneral.Controls.Add(labelLanguage);
             tabGeneral.Controls.Add(comboLanguage);
             tabGeneral.Location = new Point(4, 24);
             tabGeneral.Name = "tabGeneral";
             tabGeneral.Padding = new Padding(3);
-            tabGeneral.Size = new Size(602, 322);
+            tabGeneral.Size = new Size(480, 288);
             tabGeneral.TabIndex = 2;
             tabGeneral.Text = "Allgemein";
             tabGeneral.UseVisualStyleBackColor = true;
@@ -104,7 +106,7 @@
             // cbJumpLastUsed
             // 
             cbJumpLastUsed.AutoSize = true;
-            cbJumpLastUsed.Location = new Point(16, 20);
+            cbJumpLastUsed.Location = new Point(18, 20);
             cbJumpLastUsed.Name = "cbJumpLastUsed";
             cbJumpLastUsed.Size = new Size(310, 19);
             cbJumpLastUsed.TabIndex = 1;
@@ -114,7 +116,7 @@
             // cbConfirmDelete
             // 
             cbConfirmDelete.AutoSize = true;
-            cbConfirmDelete.Location = new Point(16, 48);
+            cbConfirmDelete.Location = new Point(18, 45);
             cbConfirmDelete.Name = "cbConfirmDelete";
             cbConfirmDelete.Size = new Size(295, 19);
             cbConfirmDelete.TabIndex = 2;
@@ -126,7 +128,7 @@
             cbShowProgramIcons.AutoSize = true;
             cbShowProgramIcons.Checked = true;
             cbShowProgramIcons.CheckState = CheckState.Checked;
-            cbShowProgramIcons.Location = new Point(16, 76);
+            cbShowProgramIcons.Location = new Point(18, 70);
             cbShowProgramIcons.Name = "cbShowProgramIcons";
             cbShowProgramIcons.Size = new Size(335, 19);
             cbShowProgramIcons.TabIndex = 4;
@@ -138,7 +140,7 @@
             cbToolbarIcons.AutoSize = true;
             cbToolbarIcons.Checked = true;
             cbToolbarIcons.CheckState = CheckState.Checked;
-            cbToolbarIcons.Location = new Point(16, 104);
+            cbToolbarIcons.Location = new Point(18, 95);
             cbToolbarIcons.Name = "cbToolbarIcons";
             cbToolbarIcons.Size = new Size(329, 19);
             cbToolbarIcons.TabIndex = 5;
@@ -150,7 +152,7 @@
             cbLargeIcons.AutoSize = true;
             cbLargeIcons.Checked = true;
             cbLargeIcons.CheckState = CheckState.Checked;
-            cbLargeIcons.Location = new Point(16, 132);
+            cbLargeIcons.Location = new Point(18, 120);
             cbLargeIcons.Name = "cbLargeIcons";
             cbLargeIcons.Size = new Size(301, 19);
             cbLargeIcons.TabIndex = 6;
@@ -160,7 +162,7 @@
             // cbCloseOnEscape
             // 
             cbCloseOnEscape.AutoSize = true;
-            cbCloseOnEscape.Location = new Point(16, 160);
+            cbCloseOnEscape.Location = new Point(18, 145);
             cbCloseOnEscape.Name = "cbCloseOnEscape";
             cbCloseOnEscape.Size = new Size(313, 19);
             cbCloseOnEscape.TabIndex = 7;
@@ -170,16 +172,26 @@
             // cbReopenLast
             // 
             cbReopenLast.AutoSize = true;
-            cbReopenLast.Location = new Point(16, 188);
+            cbReopenLast.Location = new Point(18, 170);
             cbReopenLast.Name = "cbReopenLast";
             cbReopenLast.Size = new Size(235, 19);
             cbReopenLast.TabIndex = 8;
             cbReopenLast.Text = "Zuletzt geöffnete &Datei beim Start laden";
             cbReopenLast.UseVisualStyleBackColor = true;
             // 
+            // cbFullPathTitle
+            // 
+            cbFullPathTitle.AutoSize = true;
+            cbFullPathTitle.Location = new Point(18, 195);
+            cbFullPathTitle.Name = "cbFullPathTitle";
+            cbFullPathTitle.Size = new Size(287, 19);
+            cbFullPathTitle.TabIndex = 9;
+            cbFullPathTitle.Text = "Vollständigen Dateipfad in der Titelleiste an&zeigen";
+            cbFullPathTitle.UseVisualStyleBackColor = true;
+            // 
             // btnClearRecent
             // 
-            btnClearRecent.Location = new Point(16, 228);
+            btnClearRecent.Location = new Point(18, 220);
             btnClearRecent.Name = "btnClearRecent";
             btnClearRecent.Size = new Size(180, 27);
             btnClearRecent.TabIndex = 3;
@@ -190,7 +202,7 @@
             // labelLanguage
             // 
             labelLanguage.AutoSize = true;
-            labelLanguage.Location = new Point(16, 284);
+            labelLanguage.Location = new Point(18, 256);
             labelLanguage.Name = "labelLanguage";
             labelLanguage.Size = new Size(115, 15);
             labelLanguage.TabIndex = 9;
@@ -199,7 +211,7 @@
             // comboLanguage
             // 
             comboLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboLanguage.Location = new Point(150, 280);
+            comboLanguage.Location = new Point(160, 253);
             comboLanguage.Name = "comboLanguage";
             comboLanguage.Size = new Size(140, 23);
             comboLanguage.TabIndex = 10;
@@ -218,7 +230,7 @@
             tabTargets.Location = new Point(4, 24);
             tabTargets.Name = "tabTargets";
             tabTargets.Padding = new Padding(3);
-            tabTargets.Size = new Size(602, 322);
+            tabTargets.Size = new Size(480, 288);
             tabTargets.TabIndex = 0;
             tabTargets.Text = "Zielordner";
             tabTargets.UseVisualStyleBackColor = true;
@@ -231,7 +243,7 @@
             listTargets.ItemHeight = 18;
             listTargets.Location = new Point(8, 8);
             listTargets.Name = "listTargets";
-            listTargets.Size = new Size(440, 250);
+            listTargets.Size = new Size(320, 255);
             listTargets.TabIndex = 0;
             listTargets.DrawItem += ListTargets_DrawItem;
             listTargets.SelectedIndexChanged += ListTargets_SelectedIndexChanged;
@@ -239,7 +251,7 @@
             // btnTargetAdd
             // 
             btnTargetAdd.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnTargetAdd.Location = new Point(456, 8);
+            btnTargetAdd.Location = new Point(334, 8);
             btnTargetAdd.Name = "btnTargetAdd";
             btnTargetAdd.Size = new Size(138, 27);
             btnTargetAdd.TabIndex = 1;
@@ -250,7 +262,7 @@
             // btnTargetRemove
             // 
             btnTargetRemove.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnTargetRemove.Location = new Point(456, 41);
+            btnTargetRemove.Location = new Point(334, 41);
             btnTargetRemove.Name = "btnTargetRemove";
             btnTargetRemove.Size = new Size(138, 27);
             btnTargetRemove.TabIndex = 2;
@@ -261,7 +273,7 @@
             // btnTargetUp
             // 
             btnTargetUp.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnTargetUp.Location = new Point(456, 84);
+            btnTargetUp.Location = new Point(334, 84);
             btnTargetUp.Name = "btnTargetUp";
             btnTargetUp.Size = new Size(138, 27);
             btnTargetUp.TabIndex = 3;
@@ -272,7 +284,7 @@
             // btnTargetDown
             // 
             btnTargetDown.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnTargetDown.Location = new Point(456, 117);
+            btnTargetDown.Location = new Point(334, 117);
             btnTargetDown.Name = "btnTargetDown";
             btnTargetDown.Size = new Size(138, 27);
             btnTargetDown.TabIndex = 4;
@@ -283,7 +295,7 @@
             // btnTargetRemoveMissing
             // 
             btnTargetRemoveMissing.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnTargetRemoveMissing.Location = new Point(456, 160);
+            btnTargetRemoveMissing.Location = new Point(334, 160);
             btnTargetRemoveMissing.Name = "btnTargetRemoveMissing";
             btnTargetRemoveMissing.Size = new Size(138, 27);
             btnTargetRemoveMissing.TabIndex = 5;
@@ -294,7 +306,7 @@
             // btnTargetSort
             // 
             btnTargetSort.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnTargetSort.Location = new Point(456, 193);
+            btnTargetSort.Location = new Point(334, 193);
             btnTargetSort.Name = "btnTargetSort";
             btnTargetSort.Size = new Size(138, 27);
             btnTargetSort.TabIndex = 8;
@@ -306,20 +318,20 @@
             // 
             labelTargetStatus.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             labelTargetStatus.ForeColor = Color.Firebrick;
-            labelTargetStatus.Location = new Point(8, 264);
+            labelTargetStatus.Location = new Point(8, 202);
             labelTargetStatus.Name = "labelTargetStatus";
-            labelTargetStatus.Size = new Size(440, 17);
+            labelTargetStatus.Size = new Size(318, 17);
             labelTargetStatus.TabIndex = 6;
             // 
             // labelTargetHint
             // 
             labelTargetHint.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             labelTargetHint.ForeColor = SystemColors.GrayText;
-            labelTargetHint.Location = new Point(8, 288);
+            labelTargetHint.Location = new Point(8, 266);
             labelTargetHint.Name = "labelTargetHint";
-            labelTargetHint.Size = new Size(586, 30);
+            labelTargetHint.Size = new Size(472, 19);
             labelTargetHint.TabIndex = 7;
-            labelTargetHint.Text = "Der erste Ordner ist das Ziel für das Schnell-Verschieben (Strg+Klick auf \"Verschieben\").";
+            labelTargetHint.Text = "Strg+Klick auf \"Verschieben\" verschiebt sofort in den 1-Klick-Ordner (siehe Statusleiste).";
             // 
             // tabPrograms
             // 
@@ -335,7 +347,7 @@
             tabPrograms.Location = new Point(4, 24);
             tabPrograms.Name = "tabPrograms";
             tabPrograms.Padding = new Padding(3);
-            tabPrograms.Size = new Size(602, 322);
+            tabPrograms.Size = new Size(480, 288);
             tabPrograms.TabIndex = 1;
             tabPrograms.Text = "Programme";
             tabPrograms.UseVisualStyleBackColor = true;
@@ -346,14 +358,14 @@
             listPrograms.IntegralHeight = false;
             listPrograms.Location = new Point(8, 8);
             listPrograms.Name = "listPrograms";
-            listPrograms.Size = new Size(440, 250);
+            listPrograms.Size = new Size(320, 255);
             listPrograms.TabIndex = 0;
             listPrograms.SelectedIndexChanged += ListPrograms_SelectedIndexChanged;
             // 
             // btnProgramAdd
             // 
             btnProgramAdd.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnProgramAdd.Location = new Point(456, 8);
+            btnProgramAdd.Location = new Point(334, 6);
             btnProgramAdd.Name = "btnProgramAdd";
             btnProgramAdd.Size = new Size(138, 27);
             btnProgramAdd.TabIndex = 1;
@@ -364,7 +376,7 @@
             // btnProgramRemove
             // 
             btnProgramRemove.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnProgramRemove.Location = new Point(456, 41);
+            btnProgramRemove.Location = new Point(334, 41);
             btnProgramRemove.Name = "btnProgramRemove";
             btnProgramRemove.Size = new Size(138, 27);
             btnProgramRemove.TabIndex = 2;
@@ -375,7 +387,7 @@
             // btnProgramUp
             // 
             btnProgramUp.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnProgramUp.Location = new Point(456, 84);
+            btnProgramUp.Location = new Point(334, 84);
             btnProgramUp.Name = "btnProgramUp";
             btnProgramUp.Size = new Size(138, 27);
             btnProgramUp.TabIndex = 3;
@@ -386,7 +398,7 @@
             // btnProgramDown
             // 
             btnProgramDown.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnProgramDown.Location = new Point(456, 117);
+            btnProgramDown.Location = new Point(334, 117);
             btnProgramDown.Name = "btnProgramDown";
             btnProgramDown.Size = new Size(138, 27);
             btnProgramDown.TabIndex = 4;
@@ -397,7 +409,7 @@
             // btnProgramDetect
             // 
             btnProgramDetect.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnProgramDetect.Location = new Point(456, 160);
+            btnProgramDetect.Location = new Point(334, 160);
             btnProgramDetect.Name = "btnProgramDetect";
             btnProgramDetect.Size = new Size(138, 27);
             btnProgramDetect.TabIndex = 5;
@@ -408,7 +420,7 @@
             // btnProgramSort
             // 
             btnProgramSort.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnProgramSort.Location = new Point(456, 193);
+            btnProgramSort.Location = new Point(334, 193);
             btnProgramSort.Name = "btnProgramSort";
             btnProgramSort.Size = new Size(138, 27);
             btnProgramSort.TabIndex = 8;
@@ -419,18 +431,18 @@
             // labelProgramStatus
             // 
             labelProgramStatus.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            labelProgramStatus.Location = new Point(8, 264);
+            labelProgramStatus.Location = new Point(8, 202);
             labelProgramStatus.Name = "labelProgramStatus";
-            labelProgramStatus.Size = new Size(440, 17);
+            labelProgramStatus.Size = new Size(318, 17);
             labelProgramStatus.TabIndex = 6;
             // 
             // labelProgramHint
             // 
             labelProgramHint.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             labelProgramHint.ForeColor = SystemColors.GrayText;
-            labelProgramHint.Location = new Point(8, 288);
+            labelProgramHint.Location = new Point(8, 266);
             labelProgramHint.Name = "labelProgramHint";
-            labelProgramHint.Size = new Size(586, 30);
+            labelProgramHint.Size = new Size(472, 19);
             labelProgramHint.TabIndex = 7;
             labelProgramHint.Text = "Die Reihenfolge bestimmt die Tastenkürzel Strg+1 bis Strg+9 im Programme-Menü.";
             // 
@@ -438,9 +450,9 @@
             // 
             buttonOK.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             buttonOK.DialogResult = DialogResult.OK;
-            buttonOK.Location = new Point(420, 372);
+            buttonOK.Location = new Point(207, 322);
             buttonOK.Name = "buttonOK";
-            buttonOK.Size = new Size(95, 27);
+            buttonOK.Size = new Size(125, 27);
             buttonOK.TabIndex = 1;
             buttonOK.Text = "OK";
             buttonOK.UseVisualStyleBackColor = true;
@@ -449,9 +461,9 @@
             // 
             buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             buttonCancel.DialogResult = DialogResult.Cancel;
-            buttonCancel.Location = new Point(527, 372);
+            buttonCancel.Location = new Point(338, 322);
             buttonCancel.Name = "buttonCancel";
-            buttonCancel.Size = new Size(95, 27);
+            buttonCancel.Size = new Size(138, 27);
             buttonCancel.TabIndex = 2;
             buttonCancel.Text = "Abbrechen";
             buttonCancel.UseVisualStyleBackColor = true;
@@ -462,13 +474,14 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonCancel;
-            ClientSize = new Size(634, 411);
+            ClientSize = new Size(488, 361);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
             Controls.Add(tabControl);
             Icon = (Icon)resources.GetObject("$this.Icon");
+            MaximumSize = new Size(1000, 400);
             MinimizeBox = false;
-            MinimumSize = new Size(560, 380);
+            MinimumSize = new Size(504, 400);
             Name = "SettingsForm";
             ShowInTaskbar = false;
             SizeGripStyle = SizeGripStyle.Show;
@@ -515,6 +528,7 @@
         private System.Windows.Forms.CheckBox cbLargeIcons;
         private System.Windows.Forms.CheckBox cbCloseOnEscape;
         private System.Windows.Forms.CheckBox cbReopenLast;
+        private System.Windows.Forms.CheckBox cbFullPathTitle;
         private System.Windows.Forms.Button btnClearRecent;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;

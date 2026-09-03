@@ -19,6 +19,7 @@
   <data name="Allgemein" xml:space="preserve"><value>General</value></data>
   <data name="Ordnerdialog springt zum zuletzt &amp;verwendeten Ordner" xml:space="preserve"><value>Folder dialog jumps to the most recently &amp;used folder</value></data>
   <data name="Vor dem Verschieben in den &amp;Papierkorb nachfragen" xml:space="preserve"><value>Ask before moving to the &amp;Recycle Bin</value></data>
+  <data name="Vollständigen Dateipfad in der Titelleiste an&amp;zeigen" xml:space="preserve"><value>Show the full file path in the title &amp;bar</value></data>
   <data name="Programm&amp;symbole zusätzlich in der Symbolleiste anzeigen" xml:space="preserve"><value>Also &amp;show program icons on the toolbar</value></data>
   <data name="Symbole auf den Schal&amp;tflächen der Symbolleiste anzeigen" xml:space="preserve"><value>Show icons on &amp;toolbar buttons</value></data>
   <data name="&amp;Große Symbole in der Symbolleiste (24 statt 16 Pixel)" xml:space="preserve"><value>Lar&amp;ge toolbar icons (24 instead of 16 pixels)</value></data>
@@ -36,7 +37,9 @@
   <data name="Nach &amp;unten" xml:space="preserve"><value>Move dow&amp;n</value></data>
   <data name="&amp;Fehlende entfernen" xml:space="preserve"><value>Remove &amp;missing</value></data>
   <data name="&amp;Alphabetisch sortieren" xml:space="preserve"><value>Sort &amp;alphabetically</value></data>
-  <data name="Der erste Ordner ist das Ziel für das Schnell-Verschieben (Strg+Klick auf &quot;Verschieben&quot;)." xml:space="preserve"><value>The first folder is the target for quick move (Ctrl+click on "Move").</value></data>
+  <data name="Strg+Klick auf &quot;Verschieben&quot; verschiebt sofort in den 1-Klick-Ordner (siehe Statusleiste)." xml:space="preserve"><value>Ctrl+click on "Move" moves straight to the 1-click folder (see the status bar).</value></data>
+  <data name="1-Klick-Ordner:" xml:space="preserve"><value>1-click folder:</value></data>
+  <data name="Strg+Klick auf „Verschieben“ verschiebt die Datei sofort in diesen Ordner." xml:space="preserve"><value>Ctrl+click on "Move" moves the file straight to this folder.</value></data>
   <data name="Der markierte Ordner existiert nicht mehr." xml:space="preserve"><value>The selected folder no longer exists.</value></data>
   <data name="Ordner zur Zielliste hinzufügen" xml:space="preserve"><value>Add folder to target list</value></data>
   <data name="Programme" xml:space="preserve"><value>Programs</value></data>
@@ -112,7 +115,7 @@ The display comes from memory and remains available.</value></data>
   <data name="Tooltip.Open" xml:space="preserve"><value>Open PDF file (Ctrl+O)
 Arrow: recently opened files</value></data>
   <data name="Tooltip.Move" xml:space="preserve"><value>Move to a folder (Ctrl+M)
-Ctrl+click: directly to the first target folder
+Ctrl+click: straight to the 1-click folder (see the status bar)
 Arrow: target list</value></data>
   <data name="Tooltip.Edit" xml:space="preserve"><value>Edit document: delete/rotate pages, append PDF,
 extract pages, properties (shortcuts in the menu)</value></data>
