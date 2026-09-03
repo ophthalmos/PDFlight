@@ -96,6 +96,16 @@
   <data name="Diese Datei entspricht dem PDF/A-Standard für die Langzeitarchivierung und wurde schreibgeschützt geöffnet." xml:space="preserve"><value>Ce fichier est conforme à la norme PDF/A pour l'archivage à long terme et a été ouvert en lecture seule.</value></data>
   <data name="Bearbeitung aktivieren" xml:space="preserve"><value>Activer la modification</value></data>
   <data name="Möchtest du den Vorgang fortsetzen?" xml:space="preserve"><value>Veux-tu continuer ?</value></data>
+  <data name="Die angezeigte Datei ist nicht mehr vorhanden." xml:space="preserve"><value>Le fichier affiché n'existe plus.</value></data>
+  <data name="FehlendeDatei.Text" xml:space="preserve"><value>Il a été déplacé, renommé ou supprimé en dehors de PDFlight.
+L'affichage provient de la mémoire et reste disponible.</value></data>
+  <data name="Datei neu speichern" xml:space="preserve"><value>Réenregistrer le fichier</value></data>
+  <data name="stellt die Datei am alten Ort wieder her" xml:space="preserve"><value>restaure le fichier à son ancien emplacement</value></data>
+  <data name="Nur weiter anzeigen" xml:space="preserve"><value>Continuer seulement l'affichage</value></data>
+  <data name="Bearbeitungsfunktionen werden deaktiviert" xml:space="preserve"><value>les fonctions de modification seront désactivées</value></data>
+  <data name="Die Datei wurde aus der Anzeige neu gespeichert." xml:space="preserve"><value>Le fichier a été réenregistré à partir de l'affichage.</value></data>
+  <data name="Die Datei konnte nicht gespeichert werden." xml:space="preserve"><value>Le fichier n'a pas pu être enregistré.</value></data>
+  <data name="Die Datei wurde verschoben oder gelöscht; die Anzeige stammt aus dem Speicher." xml:space="preserve"><value>Le fichier a été déplacé ou supprimé ; l'affichage provient de la mémoire.</value></data>
   <data name="Das Bearbeiten führt dazu, dass die PDF-Datei nicht mehr dem PDF/A-Standard entspricht." xml:space="preserve"><value>La modification aura pour effet que le fichier PDF ne sera plus conforme à la norme PDF/A.</value></data>
   <data name="Das Aktivieren selbst ändert die Datei noch nicht. Erst wenn du eine Bearbeitung ausführst (Seiten löschen oder drehen, Metadaten ändern usw.), wird die Datei sofort und ohne Nachfrage gespeichert und verliert dabei die PDF/A-Kennzeichnung – einen gesonderten Speichern-Schritt gibt es in PDFlight nicht." xml:space="preserve"><value>L'activation seule ne modifie pas encore le fichier. Ce n'est que lorsque tu effectues une modification (supprimer ou faire pivoter des pages, modifier les métadonnées, etc.) que le fichier est enregistré immédiatement et sans demande de confirmation, et perd alors son marquage PDF/A – il n'y a pas d'étape d'enregistrement séparée dans PDFlight.</value></data>
   <data name="Tooltip.Open" xml:space="preserve"><value>Ouvrir un fichier PDF (Ctrl+O)

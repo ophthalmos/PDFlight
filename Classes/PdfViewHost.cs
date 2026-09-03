@@ -25,6 +25,10 @@ internal partial class PdfViewHost(WebView2 webView)
 
     public bool IsReady { get; private set; }
 
+    /// <summary>Die Bytes des angezeigten Dokuments (null ohne Dokument) — z.B. um eine extern
+    /// verschwundene Datei aus der Anzeige wiederherzustellen.</summary>
+    public byte[] DocumentBytes => currentBytes;
+
     public async Task InitializeAsync()
     {
         // Eigener Datenordner, damit das Programm auch aus einem schreibgeschützten Installationsordner läuft.

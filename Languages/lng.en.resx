@@ -97,6 +97,16 @@
   <data name="Diese Datei entspricht dem PDF/A-Standard für die Langzeitarchivierung und wurde schreibgeschützt geöffnet." xml:space="preserve"><value>This file conforms to the PDF/A standard for long-term archiving and was opened read-only.</value></data>
   <data name="Bearbeitung aktivieren" xml:space="preserve"><value>Enable editing</value></data>
   <data name="Möchtest du den Vorgang fortsetzen?" xml:space="preserve"><value>Do you want to continue?</value></data>
+  <data name="Die angezeigte Datei ist nicht mehr vorhanden." xml:space="preserve"><value>The displayed file no longer exists.</value></data>
+  <data name="FehlendeDatei.Text" xml:space="preserve"><value>It was moved, renamed or deleted externally.
+The display comes from memory and remains available.</value></data>
+  <data name="Datei neu speichern" xml:space="preserve"><value>Save file again</value></data>
+  <data name="stellt die Datei am alten Ort wieder her" xml:space="preserve"><value>restores the file at its old location</value></data>
+  <data name="Nur weiter anzeigen" xml:space="preserve"><value>Just keep displaying it</value></data>
+  <data name="Bearbeitungsfunktionen werden deaktiviert" xml:space="preserve"><value>editing functions will be disabled</value></data>
+  <data name="Die Datei wurde aus der Anzeige neu gespeichert." xml:space="preserve"><value>The file was saved again from the current view.</value></data>
+  <data name="Die Datei konnte nicht gespeichert werden." xml:space="preserve"><value>The file could not be saved.</value></data>
+  <data name="Die Datei wurde verschoben oder gelöscht; die Anzeige stammt aus dem Speicher." xml:space="preserve"><value>The file was moved or deleted; the display comes from memory.</value></data>
   <data name="Das Bearbeiten führt dazu, dass die PDF-Datei nicht mehr dem PDF/A-Standard entspricht." xml:space="preserve"><value>Editing will cause the PDF file to no longer conform to the PDF/A standard.</value></data>
   <data name="Das Aktivieren selbst ändert die Datei noch nicht. Erst wenn du eine Bearbeitung ausführst (Seiten löschen oder drehen, Metadaten ändern usw.), wird die Datei sofort und ohne Nachfrage gespeichert und verliert dabei die PDF/A-Kennzeichnung – einen gesonderten Speichern-Schritt gibt es in PDFlight nicht." xml:space="preserve"><value>Enabling editing does not change the file yet. Only when you perform an edit (deleting or rotating pages, changing metadata, etc.) is the file saved immediately and without prompting, losing its PDF/A marking – there is no separate save step in PDFlight.</value></data>
   <data name="Tooltip.Open" xml:space="preserve"><value>Open PDF file (Ctrl+O)
