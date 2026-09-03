@@ -70,11 +70,16 @@
             statusStrip = new StatusStrip();
             statusIndex = new ToolStripStatusLabel();
             statusPath = new ToolStripStatusLabel();
+            statusFormat = new ToolStripStatusLabel();
             statusInfo = new ToolStripStatusLabel();
+            pnlPdfA = new Panel();
+            btnPdfAEnable = new Button();
+            lblPdfA = new Label();
             toolStripSeparator10 = new ToolStripSeparator();
             ((System.ComponentModel.ISupportInitialize)webView).BeginInit();
             toolStrip.SuspendLayout();
             statusStrip.SuspendLayout();
+            pnlPdfA.SuspendLayout();
             SuspendLayout();
             // 
             // webView
@@ -380,7 +385,7 @@
             // 
             // statusStrip
             // 
-            statusStrip.Items.AddRange(new ToolStripItem[] { statusIndex, statusPath, statusInfo });
+            statusStrip.Items.AddRange(new ToolStripItem[] { statusIndex, statusPath, statusFormat, statusInfo });
             statusStrip.Location = new Point(0, 725);
             statusStrip.Name = "statusStrip";
             statusStrip.ShowItemToolTips = true;
@@ -404,9 +409,17 @@
             statusPath.Spring = true;
             statusPath.Text = "Keine Datei geöffnet";
             statusPath.TextAlign = ContentAlignment.MiddleLeft;
-            // 
+            //
+            // statusFormat
+            //
+            statusFormat.BorderSides = ToolStripStatusLabelBorderSides.Left;
+            statusFormat.BorderStyle = Border3DStyle.Etched;
+            statusFormat.Name = "statusFormat";
+            statusFormat.Size = new Size(4, 19);
+            statusFormat.Visible = false;
+            //
             // statusInfo
-            // 
+            //
             statusInfo.BorderSides = ToolStripStatusLabelBorderSides.Left;
             statusInfo.BorderStyle = Border3DStyle.Etched;
             statusInfo.Name = "statusInfo";
@@ -417,13 +430,48 @@
             // 
             toolStripSeparator10.Name = "toolStripSeparator10";
             toolStripSeparator10.Size = new Size(230, 6);
-            // 
+            //
+            // pnlPdfA
+            //
+            pnlPdfA.BackColor = SystemColors.Info;
+            pnlPdfA.Controls.Add(btnPdfAEnable);
+            pnlPdfA.Controls.Add(lblPdfA);
+            pnlPdfA.Dock = DockStyle.Top;
+            pnlPdfA.Location = new Point(0, 39);
+            pnlPdfA.Name = "pnlPdfA";
+            pnlPdfA.Size = new Size(984, 36);
+            pnlPdfA.TabIndex = 3;
+            pnlPdfA.Visible = false;
+            //
+            // btnPdfAEnable
+            //
+            btnPdfAEnable.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnPdfAEnable.AutoSize = true;
+            btnPdfAEnable.Location = new Point(812, 5);
+            btnPdfAEnable.Name = "btnPdfAEnable";
+            btnPdfAEnable.Size = new Size(164, 27);
+            btnPdfAEnable.TabIndex = 1;
+            btnPdfAEnable.Text = "Bearbeitung aktivieren";
+            btnPdfAEnable.UseVisualStyleBackColor = true;
+            btnPdfAEnable.Click += BtnPdfAEnable_Click;
+            //
+            // lblPdfA
+            //
+            lblPdfA.AutoSize = true;
+            lblPdfA.ForeColor = SystemColors.InfoText;
+            lblPdfA.Location = new Point(10, 9);
+            lblPdfA.Name = "lblPdfA";
+            lblPdfA.Size = new Size(500, 19);
+            lblPdfA.TabIndex = 0;
+            lblPdfA.Text = "Diese Datei entspricht dem PDF/A-Standard für die Langzeitarchivierung und wurde schreibgeschützt geöffnet.";
+            //
             // MainForm
-            // 
+            //
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(984, 749);
             Controls.Add(webView);
+            Controls.Add(pnlPdfA);
             Controls.Add(statusStrip);
             Controls.Add(toolStrip);
             Font = new Font("Segoe UI", 10F);
@@ -440,6 +488,8 @@
             toolStrip.PerformLayout();
             statusStrip.ResumeLayout(false);
             statusStrip.PerformLayout();
+            pnlPdfA.ResumeLayout(false);
+            pnlPdfA.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -486,7 +536,11 @@
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel statusIndex;
         private System.Windows.Forms.ToolStripStatusLabel statusPath;
+        private System.Windows.Forms.ToolStripStatusLabel statusFormat;
         private System.Windows.Forms.ToolStripStatusLabel statusInfo;
+        private System.Windows.Forms.Panel pnlPdfA;
+        private System.Windows.Forms.Label lblPdfA;
+        private System.Windows.Forms.Button btnPdfAEnable;
         private ToolStripSeparator toolStripSeparator9;
         private ToolStripSeparator toolStripSeparator10;
     }

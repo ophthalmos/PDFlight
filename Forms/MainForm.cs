@@ -14,6 +14,8 @@ public partial class MainForm : Form
     private readonly Dictionary<string, Image> programIcons = new(StringComparer.OrdinalIgnoreCase);
     private FileInfo currentFile;
     private int currentPageCount = -1;      // -1 = nicht bestimmbar (z.B. verschlüsselt)
+    private PdfStatus currentPdfStatus;     // Version und PDF/A-Stufe für die Statusleiste
+    private bool pdfAEditingEnabled;        // „Bearbeitung aktivieren“ im PDF/A-Banner wurde gedrückt
     private DateTime loadedWriteTimeUtc;    // erkennt externe Änderungen an der angezeigten Datei
     private string undoBackupFile;          // Sicherungskopie für einstufiges Rückgängig
     private string undoTargetFile;          // Datei, für die die Sicherung gilt
@@ -181,7 +183,7 @@ public partial class MainForm : Form
         if (enable)
         {
             fullScreenPreviousState = WindowState;
-            toolStrip.Visible = statusStrip.Visible = false;
+            toolStrip.Visible = statusStrip.Visible = pnlPdfA.Visible = false;
             FormBorderStyle = FormBorderStyle.None;
             WindowState = FormWindowState.Normal;    // erzwingt die Neuberechnung, falls das Fenster bereits maximiert war
             WindowState = FormWindowState.Maximized; // randlos maximiert = echtes Vollbild inkl. Taskleiste
@@ -189,6 +191,7 @@ public partial class MainForm : Form
         else
         {
             toolStrip.Visible = statusStrip.Visible = true;
+            pnlPdfA.Visible = currentFile != null && PdfALocked;
             FormBorderStyle = FormBorderStyle.Sizable;
             WindowState = fullScreenPreviousState;
         }
@@ -209,7 +212,9 @@ public partial class MainForm : Form
         }
         currentFile = new FileInfo(path);
         loadedWriteTimeUtc = currentFile.LastWriteTimeUtc;
-        currentPageCount = PdfEditService.TryGetPageCount(path);
+        currentPdfStatus = PdfEditService.TryReadStatus(path);
+        currentPageCount = currentPdfStatus.PageCount;
+        pdfAEditingEnabled = false; // jede geladene PDF/A-Datei startet wieder schreibgeschützt
         if (addToRecent) // nur bei bewusstem Öffnen — nicht beim Blättern durch den Ordner
         {
             settings.ReloadSharedLists();
@@ -224,8 +229,12 @@ public partial class MainForm : Form
         var hasFile = currentFile != null;
         Text = hasFile ? currentFile.Name + " – PDFlight" : "PDFlight";
         splitButtonMove.Enabled = btnCopy.Enabled = btnRename.Enabled = btnDelete.Enabled = btnShowInFolder.Enabled = ddbEdit.Enabled = btnPrint.Enabled = btnEmail.Enabled = hasFile;
-        mnuSetPassword.Enabled = currentPageCount > 0;                // nur ohne bestehenden Kennwortschutz
-        mnuRemovePassword.Enabled = hasFile && currentPageCount <= 0; // nur bei geschützter (oder unlesbarer) Datei
+        // PDF/A-Schutz: verändernde Operationen bleiben gesperrt, bis „Bearbeitung aktivieren“ gedrückt wurde;
+        // Extrahieren (neue Datei), Rückgängig (stellt alte Bytes wieder her) und Eigenschaften (dann nur lesend) bleiben frei
+        pnlPdfA.Visible = hasFile && PdfALocked;
+        mnuDeletePages.Enabled = mnuRotatePages.Enabled = mnuAppendPdf.Enabled = mnuDuplex.Enabled = !PdfALocked;
+        mnuSetPassword.Enabled = currentPageCount > 0 && !PdfALocked;  // nur ohne bestehenden Kennwortschutz
+        mnuRemovePassword.Enabled = hasFile && currentPageCount <= 0;  // nur bei geschützter (oder unlesbarer) Datei
         foreach (var button in programIconButtons) { button.Enabled = hasFile; }
         if (hasFile)
         {
@@ -235,6 +244,7 @@ public partial class MainForm : Form
             statusPath.Text = currentFile.FullName;
             var pages = currentPageCount > 0 ? currentPageCount + " " + (currentPageCount == 1 ? Lng.T("Seite") : Lng.T("Seiten")) + "   " : string.Empty;
             statusInfo.Text = $"{pages}{currentFile.Length / 1024.0:N0} KB   {currentFile.LastWriteTime:g}";
+            UpdateFormatLabel();
             btnPrev.Enabled = btnNext.Enabled = files.Count > 1;
         }
         else
@@ -242,8 +252,38 @@ public partial class MainForm : Form
             statusIndex.Text = Lng.T("Datei") + " 0/0";
             statusPath.Text = Lng.T("Keine Datei geöffnet");
             statusInfo.Text = string.Empty;
+            statusFormat.Visible = false;
             btnPrev.Enabled = btnNext.Enabled = false;
         }
+    }
+
+    /// <summary>True, solange die angezeigte PDF/A-Datei schreibgeschützt ist (Banner sichtbar).</summary>
+    private bool PdfALocked => currentPdfStatus?.PdfALevel != null && !pdfAEditingEnabled;
+
+    /// <summary>„Bearbeitung aktivieren“ im PDF/A-Banner: hebt nach einer Warnung den Schreibschutz
+    /// für diese Datei auf. Die Datei selbst bleibt dabei unverändert — die PDF/A-Kennzeichnung geht
+    /// erst verloren, wenn tatsächlich eine Bearbeitung ausgeführt und die Datei neu gespeichert wird.</summary>
+    private void BtnPdfAEnable_Click(object sender, EventArgs e)
+    {
+        if (!TaskDlg.ConfirmTaskDlg(Handle,
+            Lng.T("Möchtest du den Vorgang fortsetzen?"),
+            Lng.T("Das Bearbeiten führt dazu, dass die PDF-Datei nicht mehr dem PDF/A-Standard entspricht.") + "\n\n" +
+            Lng.T("Das Aktivieren selbst ändert die Datei noch nicht. Erst wenn du eine Bearbeitung ausführst (Seiten löschen oder drehen, Metadaten ändern usw.), wird die Datei sofort gespeichert und verliert dabei die PDF/A-Kennzeichnung — einen gesonderten Speichern-Schritt gibt es in PDFlight nicht."),
+            TaskDialogIcon.Warning)) { return; }
+        pdfAEditingEnabled = true;
+        UpdateUiState();
+    }
+
+    /// <summary>Zeigt das Dateiformat in der Statusleiste: die PDF/A-Stufe, sonst die PDF-Version;
+    /// bei unlesbaren (z.B. verschlüsselten) Dateien bleibt das Label ausgeblendet.</summary>
+    private void UpdateFormatLabel()
+    {
+        var pdfA = currentPdfStatus?.PdfALevel;
+        statusFormat.Text = pdfA != null ? "PDF/A-" + pdfA : "PDF " + currentPdfStatus?.Version;
+        statusFormat.ToolTipText = pdfA != null
+            ? Lng.T("PDF/A: Format für die Langzeitarchivierung") + $" (PDF {currentPdfStatus.Version})"
+            : Lng.T("PDF-Version der angezeigten Datei");
+        statusFormat.Visible = currentPdfStatus?.Version != null;
     }
 
     private void OpenFile()
@@ -1019,7 +1059,7 @@ public partial class MainForm : Form
         try { info = PdfEditService.ReadInfo(currentFile.FullName); }
         catch (Exception ex) when (PdfEditService.IsPdfReadError(ex)) { ShowNotEditableMessage(); return; }
         currentFile.Refresh();
-        using PropertiesForm dialog = new(info, currentFile);
+        using PropertiesForm dialog = new(info, currentFile, PdfALocked);
         if (dialog.ShowDialog(this) == DialogResult.OK && dialog.InfoChanged)
         {
             if (RunPdfEdit(() => PdfEditService.WriteInfo(currentFile.FullName, dialog.DocTitle, dialog.DocAuthor, dialog.DocSubject, dialog.DocKeywords), Lng.T("Speichern der Eigenschaften")))
@@ -1221,10 +1261,10 @@ public partial class MainForm : Form
             case Keys.U | Keys.Control: RenameCurrent(); return true;
             // erst nach der Rückkehr aus dem Chromium-Tastatur-Callback: solange der läuft, wartet Chromium
             // auf unsere Antwort und kann die UIA-Seitenabfrage nicht bedienen (sie liefe in den Timeout)
-            case Keys.Delete | Keys.Control: BeginInvoke(DeletePagesDialog); return true;
+            case Keys.Delete | Keys.Control when !PdfALocked: BeginInvoke(DeletePagesDialog); return true;
             case Keys.X | Keys.Control: BeginInvoke(ExtractPagesDialog); return true; // eXtrahieren; nutzt ebenfalls die UIA-Seitenabfrage
             case Keys.Delete | Keys.Control | Keys.Shift when currentFile != null: DeleteCurrent(); return true;
-            case Keys.R | Keys.Control: RotatePagesDialog(); return true;
+            case Keys.R | Keys.Control when !PdfALocked: RotatePagesDialog(); return true;
             // Ansicht drehen (das Viewer-Kürzel Strg+] ist auf deutschen Tastaturen unerreichbar);
             // BeginInvoke: die UIA-Abfrage nicht im Chromium-Tastatur-Callback starten (s. Strg+Entf)
             case Keys.R | Keys.Control | Keys.Shift: BeginInvoke(() => viewHost.RotateView(clockwise: true)); return true;
