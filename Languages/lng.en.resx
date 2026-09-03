@@ -37,9 +37,10 @@
   <data name="Nach &amp;unten" xml:space="preserve"><value>Move dow&amp;n</value></data>
   <data name="&amp;Fehlende entfernen" xml:space="preserve"><value>Remove &amp;missing</value></data>
   <data name="&amp;Alphabetisch sortieren" xml:space="preserve"><value>Sort &amp;alphabetically</value></data>
-  <data name="Strg+Klick auf &quot;Verschieben&quot; verschiebt sofort in den 1-Klick-Ordner (siehe Statusleiste)." xml:space="preserve"><value>Ctrl+click on "Move" moves straight to the 1-click folder (see the status bar).</value></data>
+  <data name="Strg+Klick auf &quot;Verschieben&quot;/&quot;Kopieren&quot;: sofort in den 1-Klick-Ordner (s. Statusleiste)." xml:space="preserve"><value>Ctrl+click on "Move"/"Copy": straight to the 1-click folder (see the status bar).</value></data>
   <data name="1-Klick-Ordner:" xml:space="preserve"><value>1-click folder:</value></data>
-  <data name="Strg+Klick auf „Verschieben“ verschiebt die Datei sofort in diesen Ordner." xml:space="preserve"><value>Ctrl+click on "Move" moves the file straight to this folder.</value></data>
+  <data name="Strg+Klick auf „Verschieben“/„Kopieren“ verschiebt/kopiert die Datei sofort in diesen Ordner." xml:space="preserve"><value>Ctrl+click on "Move"/"Copy" moves or copies the file straight to this folder.</value></data>
+  <data name="Datei verschoben" xml:space="preserve"><value>File moved</value></data>
   <data name="Der markierte Ordner existiert nicht mehr." xml:space="preserve"><value>The selected folder no longer exists.</value></data>
   <data name="Ordner zur Zielliste hinzufügen" xml:space="preserve"><value>Add folder to target list</value></data>
   <data name="Programme" xml:space="preserve"><value>Programs</value></data>
@@ -84,7 +85,8 @@
   <!-- MainForm: Tooltips und Kürzel-Anzeigen -->
   <data name="Vorherige PDF-Datei im Ordner (Strg+Umschalt+←)" xml:space="preserve"><value>Previous PDF file in the folder (Ctrl+Shift+←)</value></data>
   <data name="Nächste PDF-Datei im Ordner (Strg+Umschalt+→)" xml:space="preserve"><value>Next PDF file in the folder (Ctrl+Shift+→)</value></data>
-  <data name="In einen Ordner kopieren (Strg+K)" xml:space="preserve"><value>Copy to a folder (Ctrl+K)</value></data>
+  <data name="Tooltip.Copy" xml:space="preserve"><value>Copy to a folder (Ctrl+K)
+Ctrl+click: straight to the 1-click folder (see the status bar)</value></data>
   <data name="Datei umbenennen (F2)" xml:space="preserve"><value>Rename file (F2)</value></data>
   <data name="In den Papierkorb verschieben (Strg+Umschalt+Entf)" xml:space="preserve"><value>Move to the Recycle Bin (Ctrl+Shift+Del)</value></data>
   <data name="Datei im Dateimanager anzeigen" xml:space="preserve"><value>Show file in file manager</value></data>
@@ -124,7 +126,9 @@ extract pages, properties (shortcuts in the menu)</value></data>
   <data name="Strg+" xml:space="preserve"><value>Ctrl+</value></data>
   <data name="Strg+O" xml:space="preserve"><value>Ctrl+O</value></data>
   <data name="Strg+M / F4" xml:space="preserve"><value>Ctrl+M / F4</value></data>
+  <data name="Strg+Umschalt+M / Strg+F4" xml:space="preserve"><value>Ctrl+Shift+M / Ctrl+F4</value></data>
   <data name="Strg+K" xml:space="preserve"><value>Ctrl+K</value></data>
+  <data name="Strg+Umschalt+K" xml:space="preserve"><value>Ctrl+Shift+K</value></data>
   <data name="Strg+E" xml:space="preserve"><value>Ctrl+E</value></data>
   <data name="Strg+F" xml:space="preserve"><value>Ctrl+F</value></data>
   <data name="Strg+P" xml:space="preserve"><value>Ctrl+P</value></data>
@@ -309,8 +313,10 @@ the latest version.</value></data>
   <data name="Der Link konnte nicht geöffnet werden." xml:space="preserve"><value>The link could not be opened.</value></data>
   <data name="vorherige / nächste Datei des Ordners anzeigen" xml:space="preserve"><value>show previous / next file of the folder</value></data>
   <data name="im Dokument blättern" xml:space="preserve"><value>scroll through the document</value></data>
-  <data name="verschieben (Strg+Klick: erster Zielordner)" xml:space="preserve"><value>move (Ctrl+click: first target folder)</value></data>
+  <data name="Datei verschieben" xml:space="preserve"><value>move file</value></data>
+  <data name="sofort in den 1-Klick-Ordner verschieben" xml:space="preserve"><value>move straight to the 1-click folder</value></data>
   <data name="Datei kopieren" xml:space="preserve"><value>copy file</value></data>
+  <data name="sofort in den 1-Klick-Ordner kopieren" xml:space="preserve"><value>copy straight to the 1-click folder</value></data>
   <data name="Datei umbenennen" xml:space="preserve"><value>rename file</value></data>
   <data name="Datei in den Papierkorb verschieben" xml:space="preserve"><value>move file to the Recycle Bin</value></data>
   <data name="Seiten als neue Datei extrahieren" xml:space="preserve"><value>extract pages to a new file</value></data>

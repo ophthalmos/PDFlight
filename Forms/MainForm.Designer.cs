@@ -28,8 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             var resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             webView = new Microsoft.Web.WebView2.WinForms.WebView2();
+            splashTimer = new System.Windows.Forms.Timer(components);
             toolStrip = new ToolStrip();
             btnOpen = new ToolStripSplitButton();
             toolStripSeparator1 = new ToolStripSeparator();
@@ -162,7 +164,7 @@
             btnCopy.Name = "btnCopy";
             btnCopy.Size = new Size(58, 22);
             btnCopy.Text = "Kopieren";
-            btnCopy.ToolTipText = "In einen Ordner kopieren (Strg+K)";
+            btnCopy.ToolTipText = "In einen Ordner kopieren (Strg+K)\r\nStrg+Klick: direkt in den 1-Klick-Ordner (siehe Statusleiste)";
             btnCopy.Click += BtnCopy_Click;
             // 
             // toolStripSeparator3
@@ -474,6 +476,11 @@
             lblPdfA.TabIndex = 0;
             lblPdfA.Text = "Diese Datei entspricht dem PDF/A-Standard für die Langzeitarchivierung und wurde schreibgeschützt geöffnet.";
             //
+            // splashTimer
+            //
+            splashTimer.Interval = 1000;
+            splashTimer.Tick += SplashTimer_Tick;
+            //
             // MainForm
             //
             AutoScaleDimensions = new SizeF(7F, 17F);
@@ -506,6 +513,7 @@
         #endregion
 
         private Microsoft.Web.WebView2.WinForms.WebView2 webView;
+        private System.Windows.Forms.Timer splashTimer;
         private System.Windows.Forms.ToolStrip toolStrip;
         private System.Windows.Forms.ToolStripSplitButton btnOpen;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
