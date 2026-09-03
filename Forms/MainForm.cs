@@ -16,6 +16,7 @@ public partial class MainForm : Form
     private int currentPageCount = -1;      // -1 = nicht bestimmbar (z.B. verschlüsselt)
     private PdfStatus currentPdfStatus;     // Version und PDF/A-Stufe für die Statusleiste
     private bool pdfAEditingEnabled;        // „Bearbeitung aktivieren“ im PDF/A-Banner wurde gedrückt
+    private bool missingFileNoticeShown;    // Hinweis auf extern verschwundene Datei nur einmal je Ladevorgang
     private DateTime loadedWriteTimeUtc;    // erkennt externe Änderungen an der angezeigten Datei
     private string undoBackupFile;          // Sicherungskopie für einstufiges Rückgängig
     private string undoTargetFile;          // Datei, für die die Sicherung gilt
@@ -105,13 +106,62 @@ public partial class MainForm : Form
         if (currentFile == null) { return; }
         try
         {
+            // Datei wurde extern verschoben, umbenannt oder gelöscht → fragen, wie es weitergehen soll
+            if (!File.Exists(currentFile.FullName)) { HandleMissingFile(); return; }
             // Datei wurde extern geändert (z.B. in einem anderen Programm gespeichert) → Anzeige aktualisieren
-            if (File.Exists(currentFile.FullName) && File.GetLastWriteTimeUtc(currentFile.FullName) != loadedWriteTimeUtc)
+            if (File.GetLastWriteTimeUtc(currentFile.FullName) != loadedWriteTimeUtc)
             {
                 LoadPdf(currentFile.FullName);
             }
         }
         catch (IOException) { }
+    }
+
+    /// <summary>Die angezeigte Datei ist von der Platte verschwunden. Die Anzeige stammt aus dem
+    /// Speicher und funktioniert weiter — der Dialog bietet an, die Datei daraus am alten Ort neu zu
+    /// speichern (für weitere Bearbeitung) oder sie nur noch anzuzeigen (Datei- und
+    /// Bearbeitungsfunktionen deaktiviert, bis eine andere Datei geöffnet wird).</summary>
+    private void HandleMissingFile()
+    {
+        if (missingFileNoticeShown) { return; }
+        missingFileNoticeShown = true; // vor dem Dialog setzen — sein Schließen aktiviert das Formular erneut
+        TaskDialogButton btnResave = new TaskDialogCommandLinkButton(Lng.T("Datei neu speichern"),
+            Lng.T("stellt die Datei am alten Ort wieder her"));
+        TaskDialogButton btnViewOnly = new TaskDialogCommandLinkButton(Lng.T("Nur weiter anzeigen"),
+            Lng.T("Bearbeitungsfunktionen werden deaktiviert"));
+        var page = new TaskDialogPage()
+        {
+            Icon = TaskDialogIcon.Warning,
+            Caption = Application.ProductName,
+            Heading = Lng.T("Die angezeigte Datei ist nicht mehr vorhanden."),
+            Text = currentFile.FullName + "\n\n" + Lng.T("FehlendeDatei.Text", // mehrzeilig → expliziter Schlüssel (wie Drehen.Info)
+                "Sie wurde extern verschoben, umbenannt oder gelöscht.\nDie Anzeige stammt aus dem Speicher und bleibt erhalten."),
+            AllowCancel = true,
+            SizeToContent = true,
+            Buttons = { btnResave, btnViewOnly },
+            DefaultButton = btnResave
+        };
+        if (TaskDialog.ShowDialog(Handle, page) == btnResave && viewHost.DocumentBytes is { } bytes)
+        {
+            try
+            {
+                File.WriteAllBytes(currentFile.FullName, bytes);
+                LoadPdf(currentFile.FullName); // frischer Zustand — alle Funktionen stehen wieder bereit
+                statusPath.Text = Lng.T("Die Datei wurde aus der Anzeige neu gespeichert.");
+                return;
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or DirectoryNotFoundException)
+            {
+                TaskDlg.ErrTaskDlg(Handle, Lng.T("Die Datei konnte nicht gespeichert werden."), ex);
+            }
+        }
+        // Nur anzeigen (auch bei Abbruch oder fehlgeschlagenem Speichern): Dateibezug lösen —
+        // alle Datei- und Bearbeitungsfunktionen deaktivieren sich darüber, die Anzeige bleibt bestehen
+        var name = currentFile.Name;
+        currentFile = null;
+        UpdateUiState();
+        Text = name + " – PDFlight";
+        statusPath.Text = name + " – " + Lng.T("Die Datei wurde verschoben oder gelöscht; die Anzeige stammt aus dem Speicher.");
     }
 
     private void RestoreWindowBounds()
@@ -215,6 +265,7 @@ public partial class MainForm : Form
         currentPdfStatus = PdfEditService.TryReadStatus(path);
         currentPageCount = currentPdfStatus.PageCount;
         pdfAEditingEnabled = false; // jede geladene PDF/A-Datei startet wieder schreibgeschützt
+        missingFileNoticeShown = false;
         if (addToRecent) // nur bei bewusstem Öffnen — nicht beim Blättern durch den Ordner
         {
             settings.ReloadSharedLists();
@@ -980,7 +1031,9 @@ public partial class MainForm : Form
     {
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
+        var currentPage = ClampedCurrentPage();
         using PageRangeForm dialog = new(Lng.T("Seiten drehen"), currentPageCount, emptyMeansAll: true, showRotation: true,
+            defaultRange: currentPage > 0 ? currentPage.ToString() : null, // meist soll die gerade angezeigte Seite gedreht werden
             infoText: Lng.T("Drehen.Info",
                 "Die Drehung wird dauerhaft in der Datei gespeichert." + Environment.NewLine +
                 "Die Drehen-Schaltfläche des Viewers ändert dagegen nur die Ansicht."));
@@ -1264,7 +1317,7 @@ public partial class MainForm : Form
             case Keys.Delete | Keys.Control when !PdfALocked: BeginInvoke(DeletePagesDialog); return true;
             case Keys.X | Keys.Control: BeginInvoke(ExtractPagesDialog); return true; // eXtrahieren; nutzt ebenfalls die UIA-Seitenabfrage
             case Keys.Delete | Keys.Control | Keys.Shift when currentFile != null: DeleteCurrent(); return true;
-            case Keys.R | Keys.Control when !PdfALocked: RotatePagesDialog(); return true;
+            case Keys.R | Keys.Control when !PdfALocked: BeginInvoke(RotatePagesDialog); return true; // BeginInvoke wegen der UIA-Seitenabfrage (s. Strg+Entf)
             // Ansicht drehen (das Viewer-Kürzel Strg+] ist auf deutschen Tastaturen unerreichbar);
             // BeginInvoke: die UIA-Abfrage nicht im Chromium-Tastatur-Callback starten (s. Strg+Entf)
             case Keys.R | Keys.Control | Keys.Shift: BeginInvoke(() => viewHost.RotateView(clockwise: true)); return true;
