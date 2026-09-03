@@ -1471,7 +1471,8 @@ public partial class MainForm : Form
         if ((keyData & (Keys.Control | Keys.Alt | Keys.Shift)) == Keys.Control)
         {
             var key = keyData & Keys.KeyCode;
-            if (key is >= Keys.D1 and <= Keys.D9) { LaunchProgramByIndex(key - Keys.D1); return true; } // Strg+1 … Strg+9: externe Programme
+            if (key is >= Keys.D1 and <= Keys.D9) { LaunchProgramByIndex(key - Keys.D1); return true; }             // Strg+1 … Strg+9: externe Programme
+            if (key is >= Keys.NumPad1 and <= Keys.NumPad9) { LaunchProgramByIndex(key - Keys.NumPad1); return true; } // dasselbe über den Ziffernblock
         }
         return false;
     }
