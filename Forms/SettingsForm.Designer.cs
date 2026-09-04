@@ -64,7 +64,9 @@
             labelProgramHint = new Label();
             buttonOK = new Button();
             buttonCancel = new Button();
+            panelButtons = new Panel();
             tabControl.SuspendLayout();
+            panelButtons.SuspendLayout();
             tabGeneral.SuspendLayout();
             tabTargets.SuspendLayout();
             tabPrograms.SuspendLayout();
@@ -75,7 +77,7 @@
             tabControl.Controls.Add(tabGeneral);
             tabControl.Controls.Add(tabTargets);
             tabControl.Controls.Add(tabPrograms);
-            tabControl.Dock = DockStyle.Top;
+            tabControl.Dock = DockStyle.Fill;
             tabControl.Location = new Point(0, 0);
             tabControl.Name = "tabControl";
             tabControl.SelectedIndex = 0;
@@ -448,9 +450,9 @@
             // 
             // buttonOK
             // 
-            buttonOK.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonOK.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonOK.DialogResult = DialogResult.OK;
-            buttonOK.Location = new Point(207, 322);
+            buttonOK.Location = new Point(207, 6);
             buttonOK.Name = "buttonOK";
             buttonOK.Size = new Size(125, 27);
             buttonOK.TabIndex = 1;
@@ -459,27 +461,36 @@
             // 
             // buttonCancel
             // 
-            buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonCancel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonCancel.DialogResult = DialogResult.Cancel;
-            buttonCancel.Location = new Point(338, 322);
+            buttonCancel.Location = new Point(338, 6);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new Size(138, 27);
             buttonCancel.TabIndex = 2;
             buttonCancel.Text = "Abbrechen";
             buttonCancel.UseVisualStyleBackColor = true;
-            // 
+            //
+            // panelButtons
+            //
+            panelButtons.Controls.Add(buttonCancel);
+            panelButtons.Controls.Add(buttonOK);
+            panelButtons.Dock = DockStyle.Bottom;
+            panelButtons.Location = new Point(0, 316);
+            panelButtons.Name = "panelButtons";
+            panelButtons.Size = new Size(488, 45);
+            panelButtons.TabIndex = 1;
+            //
             // SettingsForm
-            // 
+            //
             AcceptButton = buttonOK;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonCancel;
             ClientSize = new Size(488, 361);
-            Controls.Add(buttonCancel);
-            Controls.Add(buttonOK);
             Controls.Add(tabControl);
+            Controls.Add(panelButtons);
             Icon = (Icon)resources.GetObject("$this.Icon");
-            MaximumSize = new Size(1000, 400);
+            MaximumSize = new Size(1000, 600);
             MinimizeBox = false;
             MinimumSize = new Size(504, 400);
             Name = "SettingsForm";
@@ -492,12 +503,14 @@
             tabGeneral.PerformLayout();
             tabTargets.ResumeLayout(false);
             tabPrograms.ResumeLayout(false);
+            panelButtons.ResumeLayout(false);
             ResumeLayout(false);
         }
 
         #endregion
 
         private System.Windows.Forms.TabControl tabControl;
+        private System.Windows.Forms.Panel panelButtons;
         private System.Windows.Forms.TabPage tabTargets;
         private System.Windows.Forms.ListBox listTargets;
         private System.Windows.Forms.Button btnTargetAdd;
