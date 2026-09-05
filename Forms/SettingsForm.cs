@@ -24,6 +24,9 @@ public partial class SettingsForm : Form
     public bool ConfirmDelete => cbConfirmDelete.Checked;
 
     [System.ComponentModel.Browsable(false)]
+    public bool OpenNextAfterDelete => cbOpenNextAfterDelete.Checked;
+
+    [System.ComponentModel.Browsable(false)]
     public bool ShowProgramIcons => cbShowProgramIcons.Checked;
 
     [System.ComponentModel.Browsable(false)]
@@ -59,6 +62,7 @@ public partial class SettingsForm : Form
         listPrograms.Items.AddRange([.. source.ExternalPrograms.Where(f => !string.IsNullOrEmpty(f))]);
         cbJumpLastUsed.Checked = source.JumpToLastUsed;
         cbConfirmDelete.Checked = source.ConfirmDelete;
+        cbOpenNextAfterDelete.Checked = source.OpenNextAfterDelete;
         cbShowProgramIcons.Checked = source.ShowProgramIcons;
         cbToolbarIcons.Checked = source.ShowToolbarIcons;
         cbLargeIcons.Checked = source.LargeToolbarIcons;

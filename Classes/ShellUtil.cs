@@ -115,6 +115,77 @@ internal static partial class ShellUtil
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool ShellExecuteEx(ref SHELLEXECUTEINFO lpExecInfo);
 
+    // ------------------------------------------------------------------ Papierkorb (Rückgängig nach dem Löschen)
+
+    /// <summary>Sucht direkt nach dem Löschen den Papierkorb-Eintrag der Datei und liefert dessen
+    /// eindeutigen Ablagepfad (C:\$Recycle.Bin\…\$R…) — null, wenn keiner existiert (z.B. Netzlaufwerk).
+    /// Bei mehreren Einträgen gleichen Namens gewinnt der zuletzt gelöschte (ModifyDate = Löschdatum).</summary>
+    public static string FindRecycledFile(string originalPath)
+    {
+        try
+        {
+            dynamic shell = Activator.CreateInstance(Type.GetTypeFromProgID("Shell.Application"));
+            var bin = shell.NameSpace(10); // ssfBITBUCKET = Papierkorb
+            var name = Path.GetFileName(originalPath);
+            var stem = Path.GetFileNameWithoutExtension(originalPath);
+            var folder = Path.GetDirectoryName(originalPath);
+            string best = null;
+            var bestDate = DateTime.MinValue;
+            foreach (dynamic item in bin.Items())
+            {
+                string shownName = bin.GetDetailsOf(item, 0); // Anzeigename — je nach Explorer-Einstellung ohne Erweiterung
+                if (!string.Equals(shownName, name, StringComparison.OrdinalIgnoreCase)
+                    && !string.Equals(shownName, stem, StringComparison.OrdinalIgnoreCase)) { continue; }
+                if (!string.Equals((string)bin.GetDetailsOf(item, 1), folder, StringComparison.OrdinalIgnoreCase)) { continue; } // Ursprungsordner
+                DateTime deleted = item.ModifyDate; // bei Papierkorb-Einträgen das Löschdatum
+                if (deleted > bestDate) { bestDate = deleted; best = (string)item.Path; }
+            }
+            return best;
+        }
+        catch (Exception ex) when (IsShellComError(ex)) { return null; }
+    }
+
+    /// <summary>Stellt den Papierkorb-Eintrag (Pfad aus FindRecycledFile) am Originalpfad wieder her —
+    /// primär über das kanonische Shell-Verb „undelete“, sonst über den lokalisierten
+    /// Wiederherstellen-Eintrag des Kontextmenüs. True, sobald die Datei wieder existiert.</summary>
+    public static bool RestoreRecycledFile(string recycledPath, string originalPath)
+    {
+        try
+        {
+            dynamic shell = Activator.CreateInstance(Type.GetTypeFromProgID("Shell.Application"));
+            var bin = shell.NameSpace(10);
+            foreach (dynamic item in bin.Items())
+            {
+                if (!string.Equals((string)item.Path, recycledPath, StringComparison.OrdinalIgnoreCase)) { continue; }
+                item.InvokeVerb("undelete");
+                if (WaitForFile(originalPath)) { return true; }
+                foreach (dynamic verb in item.Verbs()) // Fallback: lokalisierter Menüeintrag (Programmsprachen des OS)
+                {
+                    var caption = ((string)verb.Name).Replace("&", string.Empty).Trim();
+                    if (caption is "Wiederherstellen" or "Restore" or "Restaurer" or "Restaurar")
+                    {
+                        verb.DoIt();
+                        return WaitForFile(originalPath);
+                    }
+                }
+                return false;
+            }
+        }
+        catch (Exception ex) when (IsShellComError(ex)) { }
+        return false;
+    }
+
+    /// <summary>Die Shell stellt asynchron wieder her — kurz auf das Erscheinen der Datei warten.</summary>
+    private static bool WaitForFile(string path)
+    {
+        for (var i = 0; i < 30 && !File.Exists(path); i++) { Thread.Sleep(100); }
+        return File.Exists(path);
+    }
+
+    private static bool IsShellComError(Exception ex) =>
+        ex is COMException or InvalidOperationException or ArgumentException or NotSupportedException
+        or Microsoft.CSharp.RuntimeBinder.RuntimeBinderException;
+
     public static void ShowFileProperties(string fileName)
     {
         var verb = Marshal.StringToHGlobalUni("properties");

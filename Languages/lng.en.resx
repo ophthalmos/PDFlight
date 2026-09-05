@@ -19,6 +19,8 @@
   <data name="Allgemein" xml:space="preserve"><value>General</value></data>
   <data name="Ordnerdialog springt zum zuletzt &amp;verwendeten Ordner" xml:space="preserve"><value>Folder dialog jumps to the most recently &amp;used folder</value></data>
   <data name="Vor dem Verschieben in den &amp;Papierkorb nachfragen" xml:space="preserve"><value>Ask before moving to the &amp;Recycle Bin</value></data>
+  <data name="Nach dem Löschen die &amp;nächste Datei des Ordners anzeigen" xml:space="preserve"><value>Show the &amp;next file of the folder after deleting</value></data>
+  <data name="Die Datei wurde in den Papierkorb verschoben." xml:space="preserve"><value>The file was moved to the Recycle Bin.</value></data>
   <data name="Vollständigen Dateipfad in der Titelleiste an&amp;zeigen" xml:space="preserve"><value>Show the full file path in the title &amp;bar</value></data>
   <data name="Programm&amp;symbole zusätzlich in der Symbolleiste anzeigen" xml:space="preserve"><value>Also &amp;show program icons on the toolbar</value></data>
   <data name="Symbole auf den Schal&amp;tflächen der Symbolleiste anzeigen" xml:space="preserve"><value>Show icons on &amp;toolbar buttons</value></data>
@@ -69,6 +71,10 @@
   <data name="PDF-Datei anhängen …" xml:space="preserve"><value>Append PDF file…</value></data>
   <data name="Seiten extrahieren …" xml:space="preserve"><value>Extract pages…</value></data>
   <data name="Änderung rückgängig" xml:space="preserve"><value>Undo change</value></data>
+  <data name="Rückgängig:" xml:space="preserve"><value>Undo:</value></data>
+  <data name="Verschieben nach „{0}“" xml:space="preserve"><value>Move to "{0}"</value></data>
+  <data name="In den Papierkorb verschieben" xml:space="preserve"><value>Move to the Recycle Bin</value></data>
+  <data name="Die Datei konnte nicht aus dem Papierkorb wiederhergestellt werden." xml:space="preserve"><value>The file could not be restored from the Recycle Bin.</value></data>
   <data name="Eigenschaften …" xml:space="preserve"><value>Properties…</value></data>
   <data name="Eigenschaften" xml:space="preserve"><value>Properties</value></data>
   <data name="Öffnen mit …" xml:space="preserve"><value>Open with…</value></data>
@@ -95,18 +101,20 @@ Ctrl+click: straight to the 1-click folder (see the status bar)</value></data>
   <data name="Zielordner, Programme und Optionen verwalten (Strg+,)" xml:space="preserve"><value>Manage target folders, programs and options (Ctrl+,)</value></data>
   <data name="Strg+," xml:space="preserve"><value>Ctrl+,</value></data>
   <data name="Einstellungen öffnen" xml:space="preserve"><value>open the settings</value></data>
-  <data name="Über PDFlight und Spenden (F1)" xml:space="preserve"><value>About PDFlight and donations (F1)</value></data>
   <data name="Seitenzahl, Dateigröße und Änderungsdatum der angezeigten Datei" xml:space="preserve"><value>Page count, file size and modification date of the displayed file</value></data>
   <data name="PDF-Version der angezeigten Datei" xml:space="preserve"><value>PDF version of the displayed file</value></data>
   <data name="PDF/A: Format für die Langzeitarchivierung" xml:space="preserve"><value>PDF/A: format for long-term archiving</value></data>
   <data name="Diese Datei entspricht dem PDF/A-Standard für die Langzeitarchivierung und wurde schreibgeschützt geöffnet." xml:space="preserve"><value>This file conforms to the PDF/A standard for long-term archiving and was opened read-only.</value></data>
   <data name="Bearbeitung aktivieren" xml:space="preserve"><value>Enable editing</value></data>
   <data name="Möchtest du den Vorgang fortsetzen?" xml:space="preserve"><value>Do you want to continue?</value></data>
-  <data name="Die angezeigte Datei ist nicht mehr vorhanden." xml:space="preserve"><value>The displayed file no longer exists.</value></data>
+  <data name="Die angezeigte Datei existiert nicht mehr!" xml:space="preserve"><value>The displayed file no longer exists!</value></data>
   <data name="FehlendeDatei.Text" xml:space="preserve"><value>It was moved, renamed or deleted externally.
 The display comes from memory and remains available.</value></data>
   <data name="Datei neu speichern" xml:space="preserve"><value>Save file again</value></data>
-  <data name="stellt die Datei am alten Ort wieder her" xml:space="preserve"><value>restores the file at its old location</value></data>
+  <data name="Stellt die Datei am alten Ort wieder her" xml:space="preserve"><value>Restores the file at its old location</value></data>
+  <data name="Strg+G" xml:space="preserve"><value>Ctrl+G</value></data>
+  <data name="E-Mail" xml:space="preserve"><value>E-mail</value></data>
+  <data name="in" xml:space="preserve"><value>in</value></data>
   <data name="Nur weiter anzeigen" xml:space="preserve"><value>Just keep displaying it</value></data>
   <data name="Bearbeitungsfunktionen werden deaktiviert" xml:space="preserve"><value>editing functions will be disabled</value></data>
   <data name="Die Datei wurde aus der Anzeige neu gespeichert." xml:space="preserve"><value>The file was saved again from the current view.</value></data>

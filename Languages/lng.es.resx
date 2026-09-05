@@ -19,6 +19,8 @@
   <data name="Allgemein" xml:space="preserve"><value>General</value></data>
   <data name="Ordnerdialog springt zum zuletzt &amp;verwendeten Ordner" xml:space="preserve"><value>El diálogo de carpetas salta a la última carpeta &amp;utilizada</value></data>
   <data name="Vor dem Verschieben in den &amp;Papierkorb nachfragen" xml:space="preserve"><value>Preguntar antes de mover a la &amp;papelera</value></data>
+  <data name="Nach dem Löschen die &amp;nächste Datei des Ordners anzeigen" xml:space="preserve"><value>Mostrar el siguie&amp;nte archivo de la carpeta tras eliminar</value></data>
+  <data name="Die Datei wurde in den Papierkorb verschoben." xml:space="preserve"><value>El archivo se ha movido a la papelera.</value></data>
   <data name="Vollständigen Dateipfad in der Titelleiste an&amp;zeigen" xml:space="preserve"><value>Mostrar la ruta completa del archivo en la &amp;barra de título</value></data>
   <data name="Programm&amp;symbole zusätzlich in der Symbolleiste anzeigen" xml:space="preserve"><value>Mostrar también los iconos de programa&amp;s en la barra de herramientas</value></data>
   <data name="Symbole auf den Schal&amp;tflächen der Symbolleiste anzeigen" xml:space="preserve"><value>Mostrar iconos en los bo&amp;tones de la barra de herramientas</value></data>
@@ -68,6 +70,10 @@
   <data name="PDF-Datei anhängen …" xml:space="preserve"><value>Anexar archivo PDF…</value></data>
   <data name="Seiten extrahieren …" xml:space="preserve"><value>Extraer páginas…</value></data>
   <data name="Änderung rückgängig" xml:space="preserve"><value>Deshacer cambio</value></data>
+  <data name="Rückgängig:" xml:space="preserve"><value>Deshacer:</value></data>
+  <data name="Verschieben nach „{0}“" xml:space="preserve"><value>Mover a "{0}"</value></data>
+  <data name="In den Papierkorb verschieben" xml:space="preserve"><value>Mover a la papelera</value></data>
+  <data name="Die Datei konnte nicht aus dem Papierkorb wiederhergestellt werden." xml:space="preserve"><value>El archivo no se pudo restaurar desde la papelera.</value></data>
   <data name="Eigenschaften …" xml:space="preserve"><value>Propiedades…</value></data>
   <data name="Eigenschaften" xml:space="preserve"><value>Propiedades</value></data>
   <data name="Öffnen mit …" xml:space="preserve"><value>Abrir con…</value></data>
@@ -94,18 +100,21 @@ Ctrl+clic: directamente a la carpeta de 1 clic (ver la barra de estado)</value><
   <data name="Zielordner, Programme und Optionen verwalten (Strg+,)" xml:space="preserve"><value>Administrar carpetas de destino, programas y opciones (Ctrl+,)</value></data>
   <data name="Strg+," xml:space="preserve"><value>Ctrl+,</value></data>
   <data name="Einstellungen öffnen" xml:space="preserve"><value>abrir la configuración</value></data>
-  <data name="Über PDFlight und Spenden (F1)" xml:space="preserve"><value>Acerca de PDFlight y donaciones (F1)</value></data>
   <data name="Seitenzahl, Dateigröße und Änderungsdatum der angezeigten Datei" xml:space="preserve"><value>Número de páginas, tamaño y fecha de modificación del archivo mostrado</value></data>
   <data name="PDF-Version der angezeigten Datei" xml:space="preserve"><value>Versión PDF del archivo mostrado</value></data>
   <data name="PDF/A: Format für die Langzeitarchivierung" xml:space="preserve"><value>PDF/A: formato para el archivado a largo plazo</value></data>
   <data name="Diese Datei entspricht dem PDF/A-Standard für die Langzeitarchivierung und wurde schreibgeschützt geöffnet." xml:space="preserve"><value>Este archivo cumple el estándar PDF/A para el archivado a largo plazo y se ha abierto como solo lectura.</value></data>
   <data name="Bearbeitung aktivieren" xml:space="preserve"><value>Activar la edición</value></data>
   <data name="Möchtest du den Vorgang fortsetzen?" xml:space="preserve"><value>¿Quieres continuar?</value></data>
-  <data name="Die angezeigte Datei ist nicht mehr vorhanden." xml:space="preserve"><value>El archivo mostrado ya no existe.</value></data>
+  <data name="Die angezeigte Datei existiert nicht mehr!" xml:space="preserve"><value>¡El archivo mostrado ya no existe!</value></data>
   <data name="FehlendeDatei.Text" xml:space="preserve"><value>Se ha movido, renombrado o eliminado fuera de PDFlight.
 La vista procede de la memoria y sigue disponible.</value></data>
   <data name="Datei neu speichern" xml:space="preserve"><value>Guardar el archivo de nuevo</value></data>
-  <data name="stellt die Datei am alten Ort wieder her" xml:space="preserve"><value>restaura el archivo en su ubicación anterior</value></data>
+  <data name="Stellt die Datei am alten Ort wieder her" xml:space="preserve"><value>Restaura el archivo en su ubicación anterior</value></data>
+  <data name="Strg+G" xml:space="preserve"><value>Ctrl+G</value></data>
+  <data name="E-Mail" xml:space="preserve"><value>Correo</value></data>
+  <data name="in" xml:space="preserve"><value>en</value></data>
+  <data name="Sprache / &amp;Language:" xml:space="preserve"><value>Idioma / &amp;Language:</value></data>
   <data name="Nur weiter anzeigen" xml:space="preserve"><value>Solo seguir mostrándolo</value></data>
   <data name="Bearbeitungsfunktionen werden deaktiviert" xml:space="preserve"><value>las funciones de edición quedarán desactivadas</value></data>
   <data name="Die Datei wurde aus der Anzeige neu gespeichert." xml:space="preserve"><value>El archivo se ha guardado de nuevo a partir de la vista.</value></data>

@@ -19,6 +19,8 @@
   <data name="Allgemein" xml:space="preserve"><value>Général</value></data>
   <data name="Ordnerdialog springt zum zuletzt &amp;verwendeten Ordner" xml:space="preserve"><value>La boîte de dialogue des dossiers ouvre le dernier dossier &amp;utilisé</value></data>
   <data name="Vor dem Verschieben in den &amp;Papierkorb nachfragen" xml:space="preserve"><value>Confirmer avant de déplacer vers la &amp;corbeille</value></data>
+  <data name="Nach dem Löschen die &amp;nächste Datei des Ordners anzeigen" xml:space="preserve"><value>Afficher le fichier suiva&amp;nt du dossier après la suppression</value></data>
+  <data name="Die Datei wurde in den Papierkorb verschoben." xml:space="preserve"><value>Le fichier a été déplacé vers la corbeille.</value></data>
   <data name="Vollständigen Dateipfad in der Titelleiste an&amp;zeigen" xml:space="preserve"><value>Afficher le chemin complet du fichier dans la &amp;barre de titre</value></data>
   <data name="Programm&amp;symbole zusätzlich in der Symbolleiste anzeigen" xml:space="preserve"><value>Afficher aussi les icônes des programme&amp;s dans la barre d'outils</value></data>
   <data name="Symbole auf den Schal&amp;tflächen der Symbolleiste anzeigen" xml:space="preserve"><value>Afficher les icônes sur les bou&amp;tons de la barre d'outils</value></data>
@@ -68,6 +70,10 @@
   <data name="PDF-Datei anhängen …" xml:space="preserve"><value>Annexer un fichier PDF…</value></data>
   <data name="Seiten extrahieren …" xml:space="preserve"><value>Extraire des pages…</value></data>
   <data name="Änderung rückgängig" xml:space="preserve"><value>Annuler la modification</value></data>
+  <data name="Rückgängig:" xml:space="preserve"><value>Annuler :</value></data>
+  <data name="Verschieben nach „{0}“" xml:space="preserve"><value>Déplacement vers « {0} »</value></data>
+  <data name="In den Papierkorb verschieben" xml:space="preserve"><value>Déplacer vers la corbeille</value></data>
+  <data name="Die Datei konnte nicht aus dem Papierkorb wiederhergestellt werden." xml:space="preserve"><value>Le fichier n'a pas pu être restauré depuis la corbeille.</value></data>
   <data name="Eigenschaften …" xml:space="preserve"><value>Propriétés…</value></data>
   <data name="Eigenschaften" xml:space="preserve"><value>Propriétés</value></data>
   <data name="Öffnen mit …" xml:space="preserve"><value>Ouvrir avec…</value></data>
@@ -94,18 +100,21 @@ Ctrl+clic : directement vers le dossier 1 clic (voir la barre d'état)</value></
   <data name="Zielordner, Programme und Optionen verwalten (Strg+,)" xml:space="preserve"><value>Gérer les dossiers cibles, les programmes et les options (Ctrl+,)</value></data>
   <data name="Strg+," xml:space="preserve"><value>Ctrl+,</value></data>
   <data name="Einstellungen öffnen" xml:space="preserve"><value>ouvrir les paramètres</value></data>
-  <data name="Über PDFlight und Spenden (F1)" xml:space="preserve"><value>À propos de PDFlight et dons (F1)</value></data>
   <data name="Seitenzahl, Dateigröße und Änderungsdatum der angezeigten Datei" xml:space="preserve"><value>Nombre de pages, taille et date de modification du fichier affiché</value></data>
   <data name="PDF-Version der angezeigten Datei" xml:space="preserve"><value>Version PDF du fichier affiché</value></data>
   <data name="PDF/A: Format für die Langzeitarchivierung" xml:space="preserve"><value>PDF/A : format pour l'archivage à long terme</value></data>
   <data name="Diese Datei entspricht dem PDF/A-Standard für die Langzeitarchivierung und wurde schreibgeschützt geöffnet." xml:space="preserve"><value>Ce fichier est conforme à la norme PDF/A pour l'archivage à long terme et a été ouvert en lecture seule.</value></data>
   <data name="Bearbeitung aktivieren" xml:space="preserve"><value>Activer la modification</value></data>
   <data name="Möchtest du den Vorgang fortsetzen?" xml:space="preserve"><value>Veux-tu continuer ?</value></data>
-  <data name="Die angezeigte Datei ist nicht mehr vorhanden." xml:space="preserve"><value>Le fichier affiché n'existe plus.</value></data>
+  <data name="Die angezeigte Datei existiert nicht mehr!" xml:space="preserve"><value>Le fichier affiché n'existe plus !</value></data>
   <data name="FehlendeDatei.Text" xml:space="preserve"><value>Il a été déplacé, renommé ou supprimé en dehors de PDFlight.
 L'affichage provient de la mémoire et reste disponible.</value></data>
   <data name="Datei neu speichern" xml:space="preserve"><value>Réenregistrer le fichier</value></data>
-  <data name="stellt die Datei am alten Ort wieder her" xml:space="preserve"><value>restaure le fichier à son ancien emplacement</value></data>
+  <data name="Stellt die Datei am alten Ort wieder her" xml:space="preserve"><value>Restaure le fichier à son ancien emplacement</value></data>
+  <data name="Strg+G" xml:space="preserve"><value>Ctrl+G</value></data>
+  <data name="E-Mail" xml:space="preserve"><value>E-mail</value></data>
+  <data name="in" xml:space="preserve"><value>dans</value></data>
+  <data name="Sprache / &amp;Language:" xml:space="preserve"><value>Langue / &amp;Language :</value></data>
   <data name="Nur weiter anzeigen" xml:space="preserve"><value>Continuer seulement l'affichage</value></data>
   <data name="Bearbeitungsfunktionen werden deaktiviert" xml:space="preserve"><value>les fonctions de modification seront désactivées</value></data>
   <data name="Die Datei wurde aus der Anzeige neu gespeichert." xml:space="preserve"><value>Le fichier a été réenregistré à partir de l'affichage.</value></data>

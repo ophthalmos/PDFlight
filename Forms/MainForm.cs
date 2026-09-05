@@ -18,8 +18,7 @@ public partial class MainForm : Form
     private bool pdfAEditingEnabled;        // „Bearbeitung aktivieren“ im PDF/A-Banner wurde gedrückt
     private bool missingFileNoticeShown;    // Hinweis auf extern verschwundene Datei nur einmal je Ladevorgang
     private DateTime loadedWriteTimeUtc;    // erkennt externe Änderungen an der angezeigten Datei
-    private string undoBackupFile;          // Sicherungskopie für einstufiges Rückgängig
-    private string undoTargetFile;          // Datei, für die die Sicherung gilt
+    private UndoAction undoAction;          // die zuletzt rückgängig machbare Aktion (null = keine)
     private bool isFullScreen;              // F11-Vollbild (randlos, ohne Tool-/Statusleiste)
     private FormWindowState fullScreenPreviousState;
 
@@ -29,6 +28,7 @@ public partial class MainForm : Form
         try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } // Fenstersymbol = Programmicon der EXE
         catch (Exception ex) when (ex is ArgumentException or IOException) { }
         this.startFile = startFile;
+        CleanupUndoBackups(); // verwaiste Undo-Sicherungen früherer Instanzen entsorgen
         settings = AppSettings.Load();
         Lng.Initialize(settings.Language); // vor PdfViewHost (Viewer-Sprache) und vor allen Dialogen
         Lng.Apply(this);
@@ -90,6 +90,8 @@ public partial class MainForm : Form
 
     private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
     {
+        try { File.Delete(OwnUndoBackup); } // die eigene Undo-Sicherung wird beim Beenden entsorgt
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // sonst räumt sie der nächste Start ab
         SetFullScreen(false); // sonst würden randlose Vollbild-Maße gespeichert
         settings.ReloadSharedLists(); // Listenänderungen anderer Instanzen nicht überschreiben
         settings.LastFile = currentFile?.FullName ?? string.Empty;
@@ -617,7 +619,9 @@ public partial class MainForm : Form
             else
             {
                 var sourceFolder = currentFile.DirectoryName;
+                var sourcePath = currentFile.FullName;
                 File.Move(currentFile.FullName, destination, true);
+                RememberMoveForUndo(string.Format(Lng.T("Verschieben nach „{0}“"), new DirectoryInfo(folder).Name), sourcePath, destination);
                 LoadPdf(destination); // die verschobene Datei bleibt angezeigt — nun vom neuen Ort (wie in PDFMover)
                 CheckForDuplicate(new FileInfo(destination));
                 previousFolder = sourceFolder; // beim nächsten Blättern die Rückkehr in den bisherigen Ordner anbieten
@@ -819,6 +823,7 @@ public partial class MainForm : Form
             settings.ExternalPrograms = dialog.ExternalPrograms;
             settings.JumpToLastUsed = dialog.JumpToLastUsed;
             settings.ConfirmDelete = dialog.ConfirmDelete;
+            settings.OpenNextAfterDelete = dialog.OpenNextAfterDelete;
             settings.ShowProgramIcons = dialog.ShowProgramIcons;
             settings.ShowToolbarIcons = dialog.ShowToolbarIcons;
             settings.LargeToolbarIcons = dialog.LargeToolbarIcons;
@@ -904,7 +909,9 @@ public partial class MainForm : Form
         if (string.Equals(newPath, currentFile.FullName, StringComparison.OrdinalIgnoreCase)) { UpdateUiState(); return; }
         try
         {
+            var oldPath = currentFile.FullName;
             File.Move(currentFile.FullName, newPath);
+            RememberMoveForUndo(Lng.T("Umbenennen"), oldPath, newPath);
             if (!string.Equals(dialog.NewFolder, currentFile.DirectoryName, StringComparison.OrdinalIgnoreCase))
             {
                 settings.AddRecentFolder(dialog.NewFolder); // Umbenennen mit Ordnerwechsel zählt wie ein Verschieben
@@ -934,14 +941,26 @@ public partial class MainForm : Form
         }
         var files = FileUtil.GetPdfFilesInFolder(currentFile.DirectoryName);
         var index = files.FindIndex(f => string.Equals(f, currentFile.FullName, StringComparison.OrdinalIgnoreCase));
-        try { FileSystem.DeleteFile(currentFile.FullName, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin); }
+        var deletedPath = currentFile.FullName;
+        try { FileSystem.DeleteFile(deletedPath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin); }
         catch (OperationCanceledException) { return; } // im Systemdialog abgebrochen
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             TaskDlg.ErrTaskDlg(Handle, Lng.T("Löschen fehlgeschlagen."), ex);
             return;
         }
-        LoadNextAfterRemoval(files, index);
+        Cursor.Current = Cursors.WaitCursor;
+        var recycled = ShellUtil.FindRecycledFile(deletedPath); // null z.B. auf Laufwerken ohne Papierkorb → kein Rückgängig
+        Cursor.Current = Cursors.Default;
+        SetUndoAction(recycled == null ? null : new UndoAction(UndoKind.Delete, Lng.T("In den Papierkorb verschieben"), deletedPath, recycled));
+        if (settings.OpenNextAfterDelete) { LoadNextAfterRemoval(files, index); }
+        else
+        {
+            currentFile = null; // Anzeige bewusst leeren (Option) — Strg+Z holt die Datei zurück
+            viewHost.CloseDocument();
+            UpdateUiState();
+            statusPath.Text = Lng.T("Die Datei wurde in den Papierkorb verschoben.");
+        }
     }
 
     private void ShowInFolder()
@@ -1099,7 +1118,7 @@ public partial class MainForm : Form
         Cursor.Current = Cursors.WaitCursor;
         try
         {
-            BackupForUndo();
+            BackupForUndo(actionName);
             edit();
             return true;
         }
@@ -1248,30 +1267,100 @@ public partial class MainForm : Form
         }
     }
 
-    private void BackupForUndo()
+    private enum UndoKind { Edit, Move, Delete }
+
+    /// <summary>Die zuletzt rückgängig machbare Aktion. Data je nach Art: bei Edit die Sicherungskopie
+    /// der alten Bytes, bei Move der alte Pfad, bei Delete der Ablagepfad im Papierkorb;
+    /// TargetFile ist immer der Pfad, unter dem die Datei nach dem Rückgängig (wieder) liegt bzw. lag.</summary>
+    private sealed record UndoAction(UndoKind Kind, string Description, string TargetFile, string Data);
+
+    private static string UndoFolder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PDFlight");
+    private static string OwnUndoBackup => Path.Combine(UndoFolder, $"undo-{Environment.ProcessId}.pdf"); // je Instanz eine eigene Sicherung
+
+    /// <summary>Merkt eine Dokument-Bearbeitung als rückgängig machbar (Sicherungskopie der Datei).</summary>
+    private void BackupForUndo(string actionName)
     {
-        var folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PDFlight");
-        Directory.CreateDirectory(folder);
-        undoBackupFile = Path.Combine(folder, "undo.pdf");
-        File.Copy(currentFile.FullName, undoBackupFile, true);
-        undoTargetFile = currentFile.FullName;
-        mnuUndo.Enabled = true;
+        Directory.CreateDirectory(UndoFolder);
+        File.Copy(currentFile.FullName, OwnUndoBackup, true);
+        SetUndoAction(new UndoAction(UndoKind.Edit, actionName, currentFile.FullName, OwnUndoBackup));
+    }
+
+    /// <summary>Merkt ein Verschieben/Umbenennen als rückgängig machbar (die Datei wandert dann zurück).</summary>
+    private void RememberMoveForUndo(string actionName, string previousPath, string newPath)
+    {
+        SetUndoAction(new UndoAction(UndoKind.Move, actionName, newPath, previousPath));
+    }
+
+    private void SetUndoAction(UndoAction action)
+    {
+        undoAction = action;
+        mnuUndo.Enabled = action != null;
+        mnuUndo.Text = action == null ? Lng.T("Änderung rückgängig") : Lng.T("Rückgängig:") + " " + action.Description;
     }
 
     private void UndoLastChange()
     {
-        if (undoTargetFile == null || !File.Exists(undoBackupFile)) { return; }
-        try { File.Copy(undoBackupFile, undoTargetFile, true); }
+        if (undoAction == null) { return; }
+        var action = undoAction;
+        try
+        {
+            switch (action.Kind)
+            {
+                case UndoKind.Edit:
+                    if (!File.Exists(action.Data)) { return; }
+                    File.Copy(action.Data, action.TargetFile, true);
+                    break;
+                case UndoKind.Move:
+                    File.Move(action.TargetFile, action.Data); // ohne Überschreiben — eine inzwischen am alten Ort liegende Datei bleibt geschützt
+                    break;
+                case UndoKind.Delete:
+                    Cursor.Current = Cursors.WaitCursor;
+                    try
+                    {
+                        if (File.Exists(action.TargetFile) || !ShellUtil.RestoreRecycledFile(action.Data, action.TargetFile))
+                        {
+                            TaskDlg.MsgTaskDlg(Handle, Lng.T("Rückgängig fehlgeschlagen."),
+                                Lng.T("Die Datei konnte nicht aus dem Papierkorb wiederhergestellt werden."), TaskDialogIcon.Error);
+                            return;
+                        }
+                    }
+                    finally { Cursor.Current = Cursors.Default; }
+                    break;
+            }
+        }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             TaskDlg.ErrTaskDlg(Handle, Lng.T("Rückgängig fehlgeschlagen."), ex);
             return;
         }
-        var file = undoTargetFile;
-        undoTargetFile = null;
-        mnuUndo.Enabled = false;
-        LoadPdf(file);
+        SetUndoAction(null);
+        LoadPdf(action.Kind == UndoKind.Move ? action.Data : action.TargetFile);
         statusPath.Text = Lng.T("Die letzte Änderung wurde rückgängig gemacht.");
+    }
+
+    /// <summary>Beim Start: Undo-Sicherungen beendeter oder abgestürzter Instanzen löschen — erkennbar
+    /// an der Prozess-ID im Dateinamen; auch das namenlose undo.pdf früherer Programmversionen.
+    /// Die eigene Sicherung löscht MainForm_FormClosing.</summary>
+    private static void CleanupUndoBackups()
+    {
+        try
+        {
+            if (!Directory.Exists(UndoFolder)) { return; }
+            foreach (var file in Directory.GetFiles(UndoFolder, "undo*.pdf"))
+            {
+                var name = Path.GetFileNameWithoutExtension(file);
+                if (name.StartsWith("undo-", StringComparison.Ordinal) && int.TryParse(name[5..], out var pid) && ProcessExists(pid)) { continue; }
+                try { File.Delete(file); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // gesperrt? Dann beim nächsten Start
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+    }
+
+    private static bool ProcessExists(int pid)
+    {
+        try { using var process = Process.GetProcessById(pid); return true; }
+        catch (ArgumentException) { return false; }
     }
 
     // ------------------------------------------------------------------ Externe Programme
@@ -1454,7 +1543,7 @@ public partial class MainForm : Form
             case Keys.I | Keys.Control | Keys.Shift: BeginInvoke(viewHost.ToggleContents); return true; // Inhalte-Leiste
             case Keys.B | Keys.Control | Keys.Shift: BeginInvoke(viewHost.FitToWidth); return true;     // Breite (Viewer-Kürzel Strg+\ ist auf deutschen Tastaturen unerreichbar)
             case Keys.Space | Keys.Control: BeginInvoke(viewHost.ToggleLayout); return true;            // ein-/zweiseitiges Layout
-            case Keys.Z | Keys.Control when undoTargetFile != null: UndoLastChange(); return true;
+            case Keys.Z | Keys.Control when undoAction != null: UndoLastChange(); return true;
             case Keys.I | Keys.Control: ShowProperties(); return true;
             case Keys.Oemcomma | Keys.Control: OpenSettings(SettingsForm.TabGeneral); return true; // Strg+, wie in vielen Editoren
             case Keys.Enter | Keys.Alt when currentFile != null: ShellUtil.ShowFileProperties(currentFile.FullName); return true; // Windows-Dateieigenschaften, wie im Explorer
