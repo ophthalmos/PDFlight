@@ -33,10 +33,12 @@ foreach ($code in $languages) {
 
 # ---------------------------------------------------------------- verwendete Schlüssel sammeln
 function ConvertFrom-CSharpLiteral([string]$s) {
-    $s -replace '\\r\\n', "`r`n" -replace '\\n', "`n" -replace '\\"', '"' -replace '\\\\', '\'
+    [regex]::Replace($s, '\\(.)', { param($m)
+        switch ($m.Groups[1].Value) { 'n' { "`n" } 'r' { "`r" } 't' { "`t" } default { $m.Groups[1].Value } } })
 }
 
 $literal = '"((?:[^"\\]|\\.)*)"'
+$tokens = '@"(?<v>(?:[^"]|"")*)"|"(?<s>(?:[^"\\]|\\.)*)"|' + "'" + '(?:\\.|[^' + "'" + '\\])' + "'" + '|//[^\r\n]*|/\*[\s\S]*?\*/'
 $used = New-Object 'System.Collections.Generic.HashSet[string]'
 $sources = Get-ChildItem $root -Recurse -Include *.cs -File | Where-Object { $_.FullName -notmatch '\\(obj|bin|\.claude)\\' }
 foreach ($file in $sources) {
@@ -65,6 +67,17 @@ foreach ($file in $sources) {
     # 5) die Detail-Spalte der ShortcutRows (drittes Tupel-Element)
     foreach ($m in [regex]::Matches($text, "ShortcutRows\s*=\s*\[(.*?)\];", 'Singleline')) {
         foreach ($s in [regex]::Matches($m.Groups[1].Value, $literal)) { [void]$used.Add((ConvertFrom-CSharpLiteral $s.Groups[1].Value)) }
+    }
+    # 6) Rettungsregel gegen Fehlalarme: Jedes Literal, das exakt einem vorhandenen resx-Schlüssel
+    #    entspricht, gilt als verwendet — deckt Felder, switch-Ausdrücke, Dialog-Filter usw. ab,
+    #    ohne LNG001 aufzuweichen (es zählen nur Texte, die bereits übersetzt sind). Tokenisiert
+    #    Strings, Kommentare und Zeichenliterale gemeinsam, damit Anführungszeichen in Kommentaren
+    #    die Paarung nicht verschieben.
+    foreach ($m in [regex]::Matches($text, $tokens)) {
+        $value = $null
+        if ($m.Groups['v'].Success) { $value = $m.Groups['v'].Value.Replace('""', '"') }
+        elseif ($m.Groups['s'].Success) { $value = ConvertFrom-CSharpLiteral $m.Groups['s'].Value }
+        if ($value -and ($languages | Where-Object { $langKeys[$_].Contains($value) })) { [void]$used.Add($value) }
     }
 }
 
