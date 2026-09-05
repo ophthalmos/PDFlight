@@ -38,6 +38,12 @@
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
+  <!-- Übersetzungs-Konsistenz (deutscher Text = resx-Schlüssel): meldet nach jedem Debug-Build
+       fehlende und verwaiste Schlüssel als Warnungen (LNG001/LNG002), s. check-lng.ps1 -->
+  <Target Name="CheckTranslations" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\check-lng.ps1&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="true" />
+  </Target>
+
   <!-- WebView2 referenziert ungefragt auch seine WPF-Assembly; sie wird nicht benötigt und
        verursachte die MSB3277-Warnung (WindowsBase-Versionskonflikt). Das Entfernen muss nach
        den NuGet-Targets des Pakets stehen — ein Entfernen erst im Build ließe Visual Studio

@@ -14,6 +14,7 @@ public class AppSettings
     public List<string> ExternalPrograms { get; set; } = []; // wird beim ersten Start automatisch gefüllt (ProgramFinder)
     public bool JumpToLastUsed { get; set; } = true;      // Ordnerdialog springt zum zuletzt verwendeten Ordner
     public bool ConfirmDelete { get; set; } = true;       // vor dem Verschieben in den Papierkorb nachfragen
+    public bool OpenNextAfterDelete { get; set; } = true; // nach dem Löschen die nächste Datei des Ordners anzeigen (wie in PDFMover optional)
     public bool ShowProgramIcons { get; set; } = true;    // Symbole der externen Programme zusätzlich in der Symbolleiste
     public bool ShowToolbarIcons { get; set; } = true;    // Symbole auf den Schaltflächen der Symbolleiste
     public bool LargeToolbarIcons { get; set; } = true;   // 24 statt 16 Pixel (vor DPI-Skalierung)

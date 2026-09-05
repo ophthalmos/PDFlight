@@ -33,6 +33,7 @@
             tabGeneral = new TabPage();
             cbJumpLastUsed = new CheckBox();
             cbConfirmDelete = new CheckBox();
+            cbOpenNextAfterDelete = new CheckBox();
             cbShowProgramIcons = new CheckBox();
             cbToolbarIcons = new CheckBox();
             cbLargeIcons = new CheckBox();
@@ -81,13 +82,14 @@
             tabControl.Location = new Point(0, 0);
             tabControl.Name = "tabControl";
             tabControl.SelectedIndex = 0;
-            tabControl.Size = new Size(488, 316);
+            tabControl.Size = new Size(488, 341);
             tabControl.TabIndex = 0;
             // 
             // tabGeneral
             // 
             tabGeneral.Controls.Add(cbJumpLastUsed);
             tabGeneral.Controls.Add(cbConfirmDelete);
+            tabGeneral.Controls.Add(cbOpenNextAfterDelete);
             tabGeneral.Controls.Add(cbShowProgramIcons);
             tabGeneral.Controls.Add(cbToolbarIcons);
             tabGeneral.Controls.Add(cbLargeIcons);
@@ -100,7 +102,7 @@
             tabGeneral.Location = new Point(4, 24);
             tabGeneral.Name = "tabGeneral";
             tabGeneral.Padding = new Padding(3);
-            tabGeneral.Size = new Size(480, 288);
+            tabGeneral.Size = new Size(480, 313);
             tabGeneral.TabIndex = 2;
             tabGeneral.Text = "Allgemein";
             tabGeneral.UseVisualStyleBackColor = true;
@@ -124,13 +126,25 @@
             cbConfirmDelete.TabIndex = 2;
             cbConfirmDelete.Text = "Vor dem Verschieben in den &Papierkorb nachfragen";
             cbConfirmDelete.UseVisualStyleBackColor = true;
-            // 
+            //
+            // cbOpenNextAfterDelete
+            //
+            cbOpenNextAfterDelete.AutoSize = true;
+            cbOpenNextAfterDelete.Checked = true;
+            cbOpenNextAfterDelete.CheckState = CheckState.Checked;
+            cbOpenNextAfterDelete.Location = new Point(18, 70);
+            cbOpenNextAfterDelete.Name = "cbOpenNextAfterDelete";
+            cbOpenNextAfterDelete.Size = new Size(300, 19);
+            cbOpenNextAfterDelete.TabIndex = 3;
+            cbOpenNextAfterDelete.Text = "Nach dem Löschen die &nächste Datei des Ordners anzeigen";
+            cbOpenNextAfterDelete.UseVisualStyleBackColor = true;
+            //
             // cbShowProgramIcons
-            // 
+            //
             cbShowProgramIcons.AutoSize = true;
             cbShowProgramIcons.Checked = true;
             cbShowProgramIcons.CheckState = CheckState.Checked;
-            cbShowProgramIcons.Location = new Point(18, 70);
+            cbShowProgramIcons.Location = new Point(18, 95);
             cbShowProgramIcons.Name = "cbShowProgramIcons";
             cbShowProgramIcons.Size = new Size(335, 19);
             cbShowProgramIcons.TabIndex = 4;
@@ -142,7 +156,7 @@
             cbToolbarIcons.AutoSize = true;
             cbToolbarIcons.Checked = true;
             cbToolbarIcons.CheckState = CheckState.Checked;
-            cbToolbarIcons.Location = new Point(18, 95);
+            cbToolbarIcons.Location = new Point(18, 120);
             cbToolbarIcons.Name = "cbToolbarIcons";
             cbToolbarIcons.Size = new Size(329, 19);
             cbToolbarIcons.TabIndex = 5;
@@ -154,7 +168,7 @@
             cbLargeIcons.AutoSize = true;
             cbLargeIcons.Checked = true;
             cbLargeIcons.CheckState = CheckState.Checked;
-            cbLargeIcons.Location = new Point(18, 120);
+            cbLargeIcons.Location = new Point(18, 145);
             cbLargeIcons.Name = "cbLargeIcons";
             cbLargeIcons.Size = new Size(301, 19);
             cbLargeIcons.TabIndex = 6;
@@ -164,7 +178,7 @@
             // cbCloseOnEscape
             // 
             cbCloseOnEscape.AutoSize = true;
-            cbCloseOnEscape.Location = new Point(18, 145);
+            cbCloseOnEscape.Location = new Point(18, 170);
             cbCloseOnEscape.Name = "cbCloseOnEscape";
             cbCloseOnEscape.Size = new Size(313, 19);
             cbCloseOnEscape.TabIndex = 7;
@@ -174,7 +188,7 @@
             // cbReopenLast
             // 
             cbReopenLast.AutoSize = true;
-            cbReopenLast.Location = new Point(18, 170);
+            cbReopenLast.Location = new Point(18, 195);
             cbReopenLast.Name = "cbReopenLast";
             cbReopenLast.Size = new Size(235, 19);
             cbReopenLast.TabIndex = 8;
@@ -184,7 +198,7 @@
             // cbFullPathTitle
             // 
             cbFullPathTitle.AutoSize = true;
-            cbFullPathTitle.Location = new Point(18, 195);
+            cbFullPathTitle.Location = new Point(18, 220);
             cbFullPathTitle.Name = "cbFullPathTitle";
             cbFullPathTitle.Size = new Size(287, 19);
             cbFullPathTitle.TabIndex = 9;
@@ -193,10 +207,10 @@
             // 
             // btnClearRecent
             // 
-            btnClearRecent.Location = new Point(18, 220);
+            btnClearRecent.Location = new Point(18, 245);
             btnClearRecent.Name = "btnClearRecent";
             btnClearRecent.Size = new Size(180, 27);
-            btnClearRecent.TabIndex = 3;
+            btnClearRecent.TabIndex = 11;
             btnClearRecent.Text = "Zuletzt-Liste &leeren";
             btnClearRecent.UseVisualStyleBackColor = true;
             btnClearRecent.Click += BtnClearRecent_Click;
@@ -204,7 +218,7 @@
             // labelLanguage
             // 
             labelLanguage.AutoSize = true;
-            labelLanguage.Location = new Point(18, 256);
+            labelLanguage.Location = new Point(18, 281);
             labelLanguage.Name = "labelLanguage";
             labelLanguage.Size = new Size(115, 15);
             labelLanguage.TabIndex = 9;
@@ -213,7 +227,7 @@
             // comboLanguage
             // 
             comboLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboLanguage.Location = new Point(160, 253);
+            comboLanguage.Location = new Point(160, 278);
             comboLanguage.Name = "comboLanguage";
             comboLanguage.Size = new Size(140, 23);
             comboLanguage.TabIndex = 10;
@@ -486,7 +500,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonCancel;
-            ClientSize = new Size(488, 361);
+            ClientSize = new Size(488, 386);
             Controls.Add(tabControl);
             Controls.Add(panelButtons);
             Icon = (Icon)resources.GetObject("$this.Icon");
@@ -534,6 +548,7 @@
         private System.Windows.Forms.TabPage tabGeneral;
         private System.Windows.Forms.CheckBox cbJumpLastUsed;
         private System.Windows.Forms.CheckBox cbConfirmDelete;
+        private System.Windows.Forms.CheckBox cbOpenNextAfterDelete;
         private System.Windows.Forms.Label labelLanguage;
         private System.Windows.Forms.ComboBox comboLanguage;
         private System.Windows.Forms.CheckBox cbShowProgramIcons;
