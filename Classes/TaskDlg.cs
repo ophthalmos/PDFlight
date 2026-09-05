@@ -229,40 +229,49 @@ internal static class TaskDlg
         return string.Join("\n", lines);
     }
 
-    /// <summary>Alle Tastenkürzel: Kürzel, Kurztext und optionale Zusatzerklärung (nur wo nötig) für die PDF-Übersicht.</summary>
+    /// <summary>Alle Tastenkürzel: Kürzel, Kurztext und optionale Zusatzerklärung (nur wo nötig) für die
+    /// PDF-Übersicht. Sortiert nach Tastenart: F-Tasten, Strg+Zahl, Strg+Buchstabe (alphabetisch),
+    /// Strg+Sondertaste, Strg+Umschalt+Buchstabe, Strg+Umschalt+Sondertaste, Übrige.</summary>
     public static readonly (string Key, string Text, string Detail)[] ShortcutRows =
     [
-        ("Strg+O", "PDF-Datei öffnen", null),
-        ("Strg+Umschalt+← / →", "vorherige / nächste Datei des Ordners anzeigen", null),
-        ("Bild ↑ / Bild ↓", "im Dokument blättern", null),
-        ("Strg+M / F4", "Datei verschieben", null),
-        ("Strg+Umschalt+M / Strg+F4", "sofort in den 1-Klick-Ordner verschieben", null),
-        ("Strg+K", "Datei kopieren", null),
-        ("Strg+Umschalt+K", "sofort in den 1-Klick-Ordner kopieren", null),
+        // F-Tasten
+        ("F1", "diese Kürzel-Übersicht", null),
         ("F2", "Datei umbenennen", null),
-        ("Strg+Umschalt+Entf", "Datei in den Papierkorb verschieben", null),
-        ("Strg+Entf", "Seiten löschen", null),
-        ("Strg+R", "Seiten drehen", null),
-        ("Strg+Umschalt+R / L", "Ansicht drehen (ändert die Datei nicht)", null),
-        ("Strg+Umschalt+I", "Inhalte-Leiste ein-/ausblenden", null),
-        ("Strg+Umschalt+B", "Seite an Fensterbreite anpassen", null),
-        ("Strg+Leertaste", "ein-/zweiseitiges Layout umschalten", null),
-        ("Strg+G", "Gehe zu Seite (Zahl tippen + Enter)", null),
-        ("Strg+X", "Seiten als neue Datei extrahieren", null),
-        ("Strg+Z", "Dokumentänderung rückgängig machen", null),
-        ("Strg+I", "Dokumenteigenschaften", null),
-        ("Alt+Enter", "Windows-Dateieigenschaften", null),
-        ("Strg+Umschalt+C", "Dateipfad in die Zwischenablage kopieren", null),
-        ("Strg+E", "als E-Mail-Anhang senden", null),
-        ("Strg+1 … 9", "in externem Programm öffnen", null),
-        ("Strg+,", "Einstellungen öffnen", null),
-        ("Strg+F", "im Dokument suchen", null),
-        ("Strg+P", "Dokument drucken", null),
         ("F7", "Textcursor-Navigation ein/aus (Markieren per Tastatur)",
             "Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert – Markieren ganz ohne Maus."),
         ("F11", "Vollbild ein/aus", null),
+        // Strg + Zahl
+        ("Strg+1 … 9", "in externem Programm öffnen", null),
+        // Strg + Buchstabe
+        ("Strg+E", "als E-Mail-Anhang senden", null),
+        ("Strg+F", "im Dokument suchen", null),
+        ("Strg+G", "Gehe zu Seite (Zahl tippen + Enter)", null),
+        ("Strg+I", "Dokumenteigenschaften", null),
+        ("Strg+K", "Datei kopieren", null),
+        ("Strg+M / F4", "Datei verschieben", null),
+        ("Strg+O", "PDF-Datei öffnen", null),
+        ("Strg+P", "Dokument drucken", null),
+        ("Strg+R", "Seiten drehen", null),
+        ("Strg+X", "Seiten als neue Datei extrahieren", null),
+        ("Strg+Z", "Dokumentänderung rückgängig machen", null),
+        // Strg + Sondertaste
+        ("Strg+Entf", "Seiten löschen", null),
+        ("Strg+Leertaste", "ein-/zweiseitiges Layout umschalten", null),
+        ("Strg+,", "Einstellungen öffnen", null),
+        // Strg + Umschalt + Buchstabe
+        ("Strg+Umschalt+B", "Seite an Fensterbreite anpassen", null),
+        ("Strg+Umschalt+C", "Dateipfad in die Zwischenablage kopieren", null),
+        ("Strg+Umschalt+I", "Inhalte-Leiste ein-/ausblenden", null),
+        ("Strg+Umschalt+K", "sofort in den 1-Klick-Ordner kopieren", null),
+        ("Strg+Umschalt+M / Strg+F4", "sofort in den 1-Klick-Ordner verschieben", null),
+        ("Strg+Umschalt+R / L", "Ansicht drehen (ändert die Datei nicht)", null),
+        // Strg + Umschalt + Sondertaste
+        ("Strg+Umschalt+Entf", "Datei in den Papierkorb verschieben", null),
+        ("Strg+Umschalt+← / →", "vorherige / nächste Datei des Ordners anzeigen", null),
+        // Übrige
+        ("Bild ↑ / Bild ↓", "im Dokument blättern", null),
+        ("Alt+Enter", "Windows-Dateieigenschaften", null),
         ("2× Esc / Umschalt+Esc", "Programm beenden (Option)", null),
-        ("F1", "diese Kürzel-Übersicht", null),
     ];
 
     /// <summary>Kürzel-Übersicht (F1 und Info-Menü): erstellt die PDF-Übersicht im Downloads-Ordner und
