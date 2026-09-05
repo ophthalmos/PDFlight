@@ -147,8 +147,23 @@ internal class FolderTreeView : TreeView
     {
         TreeNode node = new(text) { Tag = path, Name = path };
         node.ImageIndex = node.SelectedImageIndex = GetIconIndex(path);
-        node.Nodes.Add(new TreeNode(string.Empty) { Name = DummyNodeKey });
+        if (HasSubfolders(path)) { node.Nodes.Add(new TreeNode(string.Empty) { Name = DummyNodeKey }); }
         return node;
+    }
+
+    /// <summary>Gibt es mindestens einen anzuzeigenden Unterordner? Bricht beim ersten Treffer ab —
+    /// entscheidet, ob der Knoten einen Aufklapp-Pfeil bekommt (Filterlogik wie PopulateNode).</summary>
+    private bool HasSubfolders(string path)
+    {
+        try
+        {
+            foreach (var dir in new DirectoryInfo(path).EnumerateDirectories())
+            {
+                if (showHidden || (dir.Attributes & FileAttributes.Hidden) == 0) { return true; }
+            }
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException or System.Security.SecurityException) { } // nicht lesbar → aufklappen brächte ohnehin nichts
+        return false;
     }
 
     /// <summary>Ersetzt den Dummy-Knoten durch die tatsächlichen Unterordner (einmalig pro Knoten).</summary>
