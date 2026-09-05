@@ -15,6 +15,7 @@ public partial class PasswordForm : Form
     public PasswordForm(string fileName, bool confirm = false)
     {
         InitializeComponent();
+        TextBoxMargins.Apply(this);
         this.confirm = confirm;
         if (confirm)
         {

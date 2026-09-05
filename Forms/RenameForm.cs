@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.Text.RegularExpressions;
 using Microsoft.VisualBasic.FileIO;
 using PDFLight.Classes;
@@ -30,9 +29,9 @@ public partial class RenameForm : Form
         Lng.Apply(this);
         Lng.Apply(btnTransformMenu); // Kontextmenüs hängen nicht im Control-Baum
         Lng.Apply(contextMenuListView);
+        TextBoxMargins.Apply(this);
         fileInfo = currentFile;
         directoryTextBox.Text = fileInfo.DirectoryName;
-        listView.PreviewKeyDown += (sender, e) => { if (e.KeyCode == Keys.Enter) { e.IsInputKey = true; } }; // Enter in der Liste übernimmt den Namen statt OK
 
         // Datums-Menü: obere Hälfte = Präfixe, untere Hälfte = Suffixe (wie in PDFMover)
         btnDateMenu.Items.Add(DateTime.Now.ToString("yyyyMMdd_"));
@@ -198,6 +197,11 @@ public partial class RenameForm : Form
     }
 
     // ------------------------------------------------------------------ Dateiliste
+
+    private void ListView_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+    {
+        if (e.KeyCode == Keys.Enter) { e.IsInputKey = true; } // Enter in der Liste übernimmt den Namen statt OK
+    }
 
     private void ListView_KeyDown(object sender, KeyEventArgs e)
     {

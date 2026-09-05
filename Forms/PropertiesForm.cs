@@ -23,6 +23,7 @@ internal partial class PropertiesForm : Form
     {
         InitializeComponent();
         Lng.Apply(this);
+        TextBoxMargins.Apply(this);
         original = info;
         // Bei schreibgeschützten PDF/A-Dateien nur anzeigen, nicht bearbeiten
         textBoxTitle.ReadOnly = textBoxAuthor.ReadOnly = textBoxSubject.ReadOnly = textBoxKeywords.ReadOnly = readOnly;
