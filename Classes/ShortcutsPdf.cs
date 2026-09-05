@@ -113,7 +113,7 @@ internal static partial class ShortcutsPdf
         var iconSource = Path.ChangeExtension(typeof(ShortcutsPdf).Assembly.Location, ".exe");
         if (!File.Exists(iconSource)) { iconSource = Application.ExecutablePath; }
         var hr = SHDefExtractIcon(iconSource, 0, 0, out var hIcon, out var hIconSmall, 128);
-        if (hIconSmall != 0) { _ = DestroyIcon(hIconSmall); }
+        if (hIconSmall != 0) { _ = NativeMethods.DestroyIcon(hIconSmall); }
         if (hr != 0 || hIcon == 0) { IconDiag = $"hr={hr} hIcon={hIcon}"; return 0; }
         try
         {
@@ -131,15 +131,11 @@ internal static partial class ShortcutsPdf
             IconDiag = ex.GetType().Name + ": " + ex.Message;
             return 0;
         }
-        finally { _ = DestroyIcon(hIcon); }
+        finally { _ = NativeMethods.DestroyIcon(hIcon); }
     }
 
     [LibraryImport("shell32.dll", EntryPoint = "SHDefExtractIconW", StringMarshalling = StringMarshalling.Utf16)]
     private static partial int SHDefExtractIcon(string iconFile, int iconIndex, uint flags, out nint hIconLarge, out nint hIconSmall, uint iconSize);
-
-    [LibraryImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool DestroyIcon(nint hIcon);
 
     /// <summary>Einfacher Zeilenumbruch: bricht text an Wortgrenzen auf maxWidth Punkt um.</summary>
     private static List<string> Wrap(XGraphics gfx, string text, XFont font, double maxWidth)

@@ -7,4 +7,9 @@ internal static partial class NativeMethods
     // Für EM_SETMARGINS (Innenabstand der TextBoxen, s. TextBoxMargins.Apply)
     [LibraryImport("user32.dll", EntryPoint = "SendMessageW")]
     public static partial nint SendMessage(nint hWnd, uint msg, nint wParam, nint lParam);
+
+    // Gibt per Icon-Handle geladene Icons frei (ShellInfo.FreeIcon, ShortcutsPdf)
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool DestroyIcon(nint hIcon);
 }

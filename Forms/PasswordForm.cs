@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using PDFLight.Classes;
 
 namespace PDFLight.Forms;
@@ -87,9 +86,6 @@ public partial class PasswordForm : Form
             box.SelectionStart = box.TextLength;
         };
         box.Controls.Add(reveal);
-        SendMessageW(box.Handle, 0xD3 /*EM_SETMARGINS*/, 2 /*EC_RIGHTMARGIN*/, reveal.Width << 16); // Text nicht unter dem Auge
+        NativeMethods.SendMessage(box.Handle, 0xD3 /*EM_SETMARGINS*/, 2 /*EC_RIGHTMARGIN*/, reveal.Width << 16); // Text nicht unter dem Auge
     }
-
-    [LibraryImport("user32.dll")]
-    private static partial nint SendMessageW(nint hWnd, uint msg, nint wParam, nint lParam);
 }
