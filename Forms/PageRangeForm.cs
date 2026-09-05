@@ -18,6 +18,7 @@ public partial class PageRangeForm : Form
     {
         InitializeComponent();
         Lng.Apply(this);
+        TextBoxMargins.Apply(this);
         this.pageCount = pageCount;
         this.emptyMeansAll = emptyMeansAll;
         Text = title; // kommt bereits übersetzt vom Aufrufer

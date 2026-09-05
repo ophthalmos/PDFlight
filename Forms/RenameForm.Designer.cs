@@ -244,6 +244,7 @@ namespace PDFLight.Forms
             listView.BeforeLabelEdit += ListView_BeforeLabelEdit;
             listView.KeyDown += ListView_KeyDown;
             listView.MouseDoubleClick += ListView_MouseDoubleClick;
+            listView.PreviewKeyDown += ListView_PreviewKeyDown;
             // 
             // columnName
             // 

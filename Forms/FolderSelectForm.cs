@@ -29,6 +29,7 @@ public partial class FolderSelectForm : Form
     {
         InitializeComponent();
         Lng.Apply(this);
+        TextBoxMargins.Apply(this);
         this.copyMode = copyMode;
         this.jumpToLastUsed = jumpToLastUsed;
         shellTreeView.ItemHeight = 20;
