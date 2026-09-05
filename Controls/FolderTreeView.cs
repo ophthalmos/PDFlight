@@ -293,10 +293,6 @@ internal static partial class ShellInfo
     [LibraryImport("shell32.dll", EntryPoint = "SHGetFileInfoW", StringMarshalling = StringMarshalling.Utf16)] // der Generator macht kein A/W-Probing
     private static partial IntPtr SHGetFileInfo(string pszPath, uint dwFileAttributes, ref SHFILEINFO psfi, uint cbFileInfo, uint uFlags);
 
-    [LibraryImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool DestroyIcon(IntPtr hIcon);
-
     [LibraryImport("shlwapi.dll", StringMarshalling = StringMarshalling.Utf16)]
     private static partial int StrCmpLogicalW(string psz1, string psz2);
 
@@ -308,7 +304,7 @@ internal static partial class ShellInfo
         return result == IntPtr.Zero ? (0, IntPtr.Zero) : (info.iIcon, info.hIcon);
     }
 
-    public static void FreeIcon(IntPtr hIcon) { _ = DestroyIcon(hIcon); }
+    public static void FreeIcon(IntPtr hIcon) { _ = Classes.NativeMethods.DestroyIcon(hIcon); }
 
     private static readonly Dictionary<string, Image> typeIconCache = [];
 
