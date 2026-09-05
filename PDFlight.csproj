@@ -38,9 +38,9 @@
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
-  <!-- Übersetzungs-Konsistenz (deutscher Text = resx-Schlüssel): meldet nach jedem Debug-Build
+  <!-- Übersetzungs-Konsistenz (deutscher Text = resx-Schlüssel): meldet nach jedem Build (Debug und Release)
        fehlende und verwaiste Schlüssel als Warnungen (LNG001/LNG002), s. check-lng.ps1 -->
-  <Target Name="CheckTranslations" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+  <Target Name="CheckTranslations" AfterTargets="Build">
     <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\check-lng.ps1&quot;" WorkingDirectory="$(MSBuildProjectDirectory)" ContinueOnError="true" />
   </Target>
 

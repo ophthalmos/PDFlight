@@ -4,7 +4,7 @@
 #         deutscher Text geändert, ohne die Schlüssel nachzuziehen.
 # LNG002: Ein resx-Schlüssel kommt im Code nicht mehr vor — Altlast nach einer Umformulierung.
 # Grenzen: String-Konstanten und mehrzeilige Fallbacks expliziter Schlüssel sieht der Scanner nicht
-# (siehe Ignorierliste). Ausgabe im MSBuild-Warnungsformat; läuft als Build-Target im Debug
+# (siehe Ignorierliste). Ausgabe im MSBuild-Warnungsformat; läuft als Build-Target nach jedem Build
 # (s. PDFlight.csproj) und jederzeit manuell:  powershell -ExecutionPolicy Bypass -File check-lng.ps1
 
 $root = $PSScriptRoot
