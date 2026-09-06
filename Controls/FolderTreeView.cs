@@ -69,6 +69,12 @@ internal class FolderTreeView : TreeView
         base.OnBeforeExpand(e);
     }
 
+    protected override void OnBeforeLabelEdit(NodeLabelEditEventArgs e)
+    {
+        PDFLight.Classes.LabelEditGuard.Pin(this); // WinForms-Bug: sonst droht nach der Bearbeitung ein FailFast-Absturz
+        base.OnBeforeLabelEdit(e);
+    }
+
     protected override void OnAfterLabelEdit(NodeLabelEditEventArgs e)
     {
         BeginInvoke(new Action(() => LabelEdit = false)); // LabelEdit wird nur für CreateDir aktiviert
