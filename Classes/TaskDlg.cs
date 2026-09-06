@@ -102,7 +102,7 @@ internal static class TaskDlg
 
     /// <summary>Über-Dialog mit den Versionen der verwendeten Komponenten, PayPal-Spendenlink
     /// (Button-Details aus PDFMover übernommen) und manueller Updatesuche.</summary>
-    public static void AboutTaskDlg(nint hwnd, Icon icon)
+    public static void AboutTaskDlg(nint hwnd, Icon? icon)
     {
         var curVersion = Assembly.GetExecutingAssembly().GetName().Version;
         var threeVersion = curVersion?.ToString(3) ?? Lng.T("unbekannt");
@@ -309,7 +309,7 @@ internal static class TaskDlg
     /// <summary>Kürzel-Übersicht (F1 und Info-Menü): erstellt die PDF-Übersicht im Downloads-Ordner und
     /// zeigt sie in einer neuen PDFlight-Instanz an — das aktuelle Dokument bleibt ungestört. Existiert
     /// die Datei schon, fragt ein Dialog, ob sie geöffnet oder neu erstellt werden soll.</summary>
-    public static void ShowShortcutsPdf(nint hwnd, Icon icon)
+    public static void ShowShortcutsPdf(nint hwnd, Icon? icon)
     {
         var path = ShortcutsPdf.DefaultPath;
         if (File.Exists(path))

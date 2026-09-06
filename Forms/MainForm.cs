@@ -11,14 +11,14 @@ public partial class MainForm : Form
     private readonly AppSettings settings;
     private readonly PdfViewHost viewHost;
     private readonly string? startFile;
-    private readonly Dictionary<string, Image> programIcons = new(StringComparer.OrdinalIgnoreCase);
-    private FileInfo currentFile;
+    private readonly Dictionary<string, Image?> programIcons = new(StringComparer.OrdinalIgnoreCase);
+    private FileInfo? currentFile;
     private int currentPageCount = -1;      // -1 = nicht bestimmbar (z.B. verschlüsselt)
-    private PdfStatus currentPdfStatus;     // Version und PDF/A-Stufe für die Statusleiste
+    private PdfStatus? currentPdfStatus;     // Version und PDF/A-Stufe für die Statusleiste
     private bool pdfAEditingEnabled;        // „Bearbeitung aktivieren“ im PDF/A-Banner wurde gedrückt
     private bool missingFileNoticeShown;    // Hinweis auf extern verschwundene Datei nur einmal je Ladevorgang
     private DateTime loadedWriteTimeUtc;    // erkennt externe Änderungen an der angezeigten Datei
-    private UndoAction undoAction;          // die zuletzt rückgängig machbare Aktion (null = keine)
+    private UndoAction? undoAction;          // die zuletzt rückgängig machbare Aktion (null = keine)
     private bool isFullScreen;              // F11-Vollbild (randlos, ohne Tool-/Statusleiste)
     private FormWindowState fullScreenPreviousState;
 
@@ -128,7 +128,7 @@ public partial class MainForm : Form
     /// Bearbeitungsfunktionen deaktiviert, bis eine andere Datei geöffnet wird).</summary>
     private void HandleMissingFile()
     {
-        if (missingFileNoticeShown) { return; }
+        if (missingFileNoticeShown || currentFile == null) { return; }
         missingFileNoticeShown = true; // vor dem Dialog setzen — sein Schließen aktiviert das Formular erneut
         TaskDialogButton btnResave = new TaskDialogCommandLinkButton(Lng.T("Datei neu speichern"),
             Lng.T("Stellt die Datei am alten Ort wieder her"));
@@ -202,8 +202,8 @@ public partial class MainForm : Form
         protected override bool ShowWithoutActivation => true; // darf dem Menü nicht den Fokus stehlen
     }
 
-    private ClickShieldForm clickShield;
-    private ToolStripDropDownItem[] dropDownButtons;
+    private ClickShieldForm? clickShield;
+    private ToolStripDropDownItem[] dropDownButtons = [];
 
     /// <summary>Kurzer Einblend-Hinweis mittig über dem Viewer (z. B. „Datei verschoben“). Wie beim
     /// Klick-Schild ein eigenes randloses Fenster, denn Chromium zeichnet in einem fremden Prozess
@@ -235,7 +235,7 @@ public partial class MainForm : Form
         public void SetMessage(string text) => label.Text = text;
     }
 
-    private SplashLabelForm splashLabel;
+    private SplashLabelForm? splashLabel;
 
     /// <summary>Zeigt eine Einblend-Meldung mittig über dem Viewer; splashTimer blendet sie nach 1 s aus.</summary>
     private void ShowSplash(string text)
@@ -253,7 +253,7 @@ public partial class MainForm : Form
     private void SplashTimer_Tick(object? sender, EventArgs e)
     {
         splashTimer.Stop();
-        splashLabel.Hide();
+        splashLabel?.Hide();
     }
 
     private void InitDropDownClickShield()
@@ -270,6 +270,7 @@ public partial class MainForm : Form
 
     private void ShowClickShield()
     {
+        if (clickShield == null) { return; }
         clickShield.Bounds = new Rectangle(webView.PointToScreen(Point.Empty), webView.Size);
         clickShield.Show(this); // liegt über dem WebView, aber unter dem (Topmost-)Menü
     }
@@ -277,7 +278,7 @@ public partial class MainForm : Form
     private void CloseToolStripDropDowns()
     {
         foreach (var item in dropDownButtons) { item.HideDropDown(); }
-        clickShield.Hide();
+        clickShield?.Hide();
     }
 
     /// <summary>F11-Vollbild wie im Browser: randlos maximiert, Tool- und Statusleiste ausgeblendet; Esc oder F11 beendet.</summary>
@@ -335,7 +336,7 @@ public partial class MainForm : Form
     {
         var hasFile = currentFile != null;
         InstanceRegistry.Publish(currentFile?.FullName); // den anderen Instanzen melden, welche Datei hier offen ist
-        Text = hasFile ? (settings.ShowFullPathInTitle ? currentFile.FullName : currentFile.Name) + " – PDFlight" : "PDFlight";
+        Text = hasFile ? (settings.ShowFullPathInTitle ? currentFile!.FullName : currentFile!.Name) + " – PDFlight" : "PDFlight";
         splitButtonMove.Enabled = btnCopy.Enabled = btnRename.Enabled = btnDelete.Enabled = btnShowInFolder.Enabled = ddbEdit.Enabled = btnPrint.Enabled = btnEmail.Enabled = hasFile;
         // PDF/A-Schutz: verändernde Operationen bleiben gesperrt, bis „Bearbeitung aktivieren“ gedrückt wurde;
         // Extrahieren (neue Datei), Rückgängig (stellt alte Bytes wieder her) und Eigenschaften (dann nur lesend) bleiben frei
@@ -346,7 +347,7 @@ public partial class MainForm : Form
         foreach (var button in programIconButtons) { button.Enabled = hasFile; }
         if (hasFile)
         {
-            var files = FileUtil.GetPdfFilesInFolder(currentFile.DirectoryName);
+            var files = FileUtil.GetPdfFilesInFolder(currentFile!.DirectoryName!);
             var index = files.FindIndex(f => string.Equals(f, currentFile.FullName, StringComparison.OrdinalIgnoreCase));
             statusIndex.Text = Lng.T("Datei") + " " + (index >= 0 ? (index + 1).ToString() : "–") + "/" + files.Count;
             statusPath.Text = currentFile.FullName;
@@ -390,7 +391,7 @@ public partial class MainForm : Form
         var pdfA = currentPdfStatus?.PdfALevel;
         statusFormat.Text = pdfA != null ? "PDF/A-" + pdfA : "PDF " + currentPdfStatus?.Version;
         statusFormat.ToolTipText = pdfA != null
-            ? Lng.T("PDF/A: Format für die Langzeitarchivierung") + $" (PDF {currentPdfStatus.Version})"
+            ? Lng.T("PDF/A: Format für die Langzeitarchivierung") + $" (PDF {currentPdfStatus!.Version})"
             : Lng.T("PDF-Version der angezeigten Datei");
         statusFormat.Visible = currentPdfStatus?.Version != null;
     }
@@ -415,7 +416,7 @@ public partial class MainForm : Form
                 Tag = file,
                 Image = ShellInfo.GetTypeIcon(".pdf", LogicalToDeviceUnits(16)),
             };
-            item.Click += (s, args) => LoadPdf((string)((ToolStripMenuItem)s).Tag, addToRecent: true);
+            item.Click += (s, args) => LoadPdf((string)((ToolStripMenuItem)s!).Tag!, addToRecent: true);
             btnOpen.DropDownItems.Add(item);
         }
         if (btnOpen.DropDownItems.Count == 0)
@@ -490,12 +491,12 @@ public partial class MainForm : Form
     }
 
     /// <summary>Blättert zur nächsten/vorherigen PDF-Datei im Ordner (mit Umlauf, wie in PDFMover).</summary>
-    private string previousFolder; // Quellordner des letzten Verschiebens — fürs Blättern (Dialog wie in PDFMover)
+    private string? previousFolder; // Quellordner des letzten Verschiebens — fürs Blättern (Dialog wie in PDFMover)
 
     private void StepFile(int step)
     {
         if (currentFile == null) { return; }
-        var folder = currentFile.DirectoryName;
+        var folder = currentFile.DirectoryName!;
         // Nach einem Verschieben: im Zielordner weiterblättern oder zurück in den bisherigen Ordner? (wie in PDFMover)
         if (previousFolder != null && Directory.Exists(previousFolder) && !string.Equals(previousFolder, folder, StringComparison.OrdinalIgnoreCase))
         {
@@ -529,7 +530,7 @@ public partial class MainForm : Form
     private void StepFileInFolder(string folder, int step)
     {
         var files = FileUtil.GetPdfFilesInFolder(folder);
-        var reference = Path.Combine(folder, currentFile.Name);
+        var reference = Path.Combine(folder, currentFile!.Name);
         var index = files.FindIndex(f => string.Equals(f, reference, StringComparison.OrdinalIgnoreCase));
         if (index < 0)
         {
@@ -551,7 +552,7 @@ public partial class MainForm : Form
         var choice = TaskDlg.OpenConflictTaskDlg(Handle, step > 0 ? Lng.T("Die nächste Datei ist bereits geöffnet") : Lng.T("Die vorherige Datei ist bereits geöffnet"),
             files[next], Lng.T("Dieses Fenster zeigt weiter die aktuelle Datei."), Lng.T("Datei überspringen"), alternative, restorePath: null, offerExit: false);
         if (choice == TaskDlg.ConflictChoice.Activate && !InstanceRegistry.Activate(pid.Value)) { LoadPdf(files[next]); } // das andere Fenster ist inzwischen weg → hier anzeigen
-        else if (choice == TaskDlg.ConflictChoice.Alternative) { LoadPdf(alternative); }
+        else if (choice == TaskDlg.ConflictChoice.Alternative) { LoadPdf(alternative!); } // Alternative wird nur mit Pfad angeboten
     }
 
     /// <summary>Nach dem Löschen: nächste Datei an gleicher Position laden oder Anzeige leeren. Zeigt eine
@@ -574,7 +575,7 @@ public partial class MainForm : Form
                 if (InstanceRegistry.Activate(pid.Value)) { ClearDisplay(Lng.T("Die Datei wurde in den Papierkorb verschoben.")); }
                 else { LoadPdf(next); } // das andere Fenster ist inzwischen weg → hier anzeigen
                 break;
-            case TaskDlg.ConflictChoice.Alternative: LoadPdf(alternative); break;
+            case TaskDlg.ConflictChoice.Alternative: LoadPdf(alternative!); break; // Alternative wird nur mit Pfad angeboten
             case TaskDlg.ConflictChoice.Undo: UndoLastChange(); break;
             case TaskDlg.ConflictChoice.Exit: Close(); break;
             default: ClearDisplay(Lng.T("Die Datei wurde in den Papierkorb verschoben.")); break; // Abbruch: leer, Strg+Z holt die Datei zurück
@@ -592,7 +593,7 @@ public partial class MainForm : Form
 
     /// <summary>Erste Datei ab start in Schrittrichtung (mit Umlauf), die keine andere Instanz anzeigt
     /// und nicht exclude ist — null, wenn es keine gibt.</summary>
-    private static string FindFreeFile(List<string> files, int start, int step, string exclude)
+    private static string? FindFreeFile(List<string> files, int start, int step, string? exclude)
     {
         for (var i = 1; i < files.Count; i++)
         {
@@ -685,7 +686,7 @@ public partial class MainForm : Form
 
     /// <summary>Zieldatei existiert bereits: Ersetzen, unter freiem name_n-Namen anlegen oder abbrechen (Dialog wie in PDFMover).
     /// Liefert den zu verwendenden Zielpfad oder null bei Abbruch.</summary>
-    private string AskReplaceOrRename(string destination)
+    private string? AskReplaceOrRename(string destination)
     {
         FileInfo destInfo = new(destination);
         var suggestion = FileUtil.SuggestAdditionalFileName(destInfo);
@@ -694,7 +695,7 @@ public partial class MainForm : Form
         TaskDialogButton btnRename = new TaskDialogCommandLinkButton(Lng.T("&Umbenennen"), Lng.T("Eine neue Datei erstellen:") + "\n" + suggestion?.Name);
         var page = new TaskDialogPage()
         {
-            Caption = currentFile.DirectoryName,
+            Caption = currentFile!.DirectoryName,
             Heading = Lng.T("Im Ziel ist bereits eine Datei mit diesem Namen vorhanden."),
             Text = destInfo.Name,
             AllowCancel = true,
@@ -705,7 +706,7 @@ public partial class MainForm : Form
         if (suggestion != null) { page.Buttons.Insert(1, btnRename); }
         var result = TaskDialog.ShowDialog(Handle, page);
         if (result == btnReplace) { return destination; }
-        if (result == btnRename) { return suggestion.FullName; }
+        if (result == btnRename) { return suggestion?.FullName; }
         return null;
     }
 
@@ -713,7 +714,7 @@ public partial class MainForm : Form
     private void AskWhichFileToShow(string copiedFile)
     {
         TaskDialogButton btnCopy = new TaskDialogCommandLinkButton(Lng.T("Dateikopie:"), copiedFile);
-        TaskDialogButton btnSource = new TaskDialogCommandLinkButton(Lng.T("Originaldatei:"), currentFile.FullName);
+        TaskDialogButton btnSource = new TaskDialogCommandLinkButton(Lng.T("Originaldatei:"), currentFile!.FullName);
         var page = new TaskDialogPage()
         {
             Caption = Application.ProductName,
@@ -732,7 +733,7 @@ public partial class MainForm : Form
     /// statt einer neuen Instanz wird die vorhandene Datei im selben Fenster angezeigt)</summary>
     private void CheckForDuplicate(FileInfo movedFile)
     {
-        var duplicate = FileUtil.FindDuplicateInFolder(movedFile, movedFile.DirectoryName);
+        var duplicate = FileUtil.FindDuplicateInFolder(movedFile, movedFile.DirectoryName!);
         if (duplicate == null) { return; }
         TaskDialogButton btnOpenExisting = new TaskDialogCommandLinkButton(Lng.T("Vorhandene Datei öffnen"), duplicate.Name);
         TaskDialogButton btnDeleteCurrent = new TaskDialogCommandLinkButton(Lng.T("Aktuelle Datei löschen"), movedFile.Name);
@@ -764,7 +765,7 @@ public partial class MainForm : Form
     /// <summary>Der 1-Klick-Ordner: Ziel von Strg+Klick auf „Verschieben“, angezeigt in der Statusleiste.
     /// Springt der Ordnerdialog zum zuletzt verwendeten Ordner, ist es dieser — sonst der erste Ordner
     /// der Zielliste; null, wenn keiner davon existiert.</summary>
-    private string OneClickFolder()
+    private string? OneClickFolder()
     {
         if (settings.JumpToLastUsed && settings.RecentFolders.Count > 0 && Directory.Exists(settings.RecentFolders[0]))
         {
@@ -773,7 +774,7 @@ public partial class MainForm : Form
         return settings.TargetFolders.Count > 0 && Directory.Exists(settings.TargetFolders[0]) ? settings.TargetFolders[0] : null;
     }
 
-    private string oneClickFolderShown; // der angezeigte 1-Klick-Ordner (voller Pfad); null = Label ausgeblendet
+    private string? oneClickFolderShown; // der angezeigte 1-Klick-Ordner (voller Pfad); null = Label ausgeblendet
 
     /// <summary>Zeigt den 1-Klick-Ordner in der Statusleiste: den vollen Pfad — nur wenn der Platz
     /// nicht reicht (kleines Fenster, langer Dateipfad), verkürzt auf den Ordnernamen.</summary>
@@ -794,15 +795,15 @@ public partial class MainForm : Form
     private void LayoutStatusBar()
     {
         if (statusOneClick == null) { return; } // OnResize feuert schon während InitializeComponent
-        int Width(string s) => TextRenderer.MeasureText(s, statusStrip.Font).Width;
+        int Width(string? s) => TextRenderer.MeasureText(s, statusStrip.Font).Width;
         var available = statusStrip.Width - Width(statusIndex.Text) - Width(statusInfo.Text)
             - (statusFormat.Visible ? Width(statusFormat.Text) : 0) - 60; // Puffer für Ränder und Trennlinien
         var pathShown = currentFile != null && (statusPath.Text == currentFile.FullName || string.IsNullOrEmpty(statusPath.Text));
-        var filePath = pathShown ? currentFile.FullName : statusPath.Text;
+        var filePath = pathShown ? currentFile!.FullName : statusPath.Text;
         var pathHidden = pathShown ? string.Empty : statusPath.Text; // Meldungstexte bleiben stehen
         var prefix = Lng.T("1-Klick-Ordner:") + " ";
         var folderName = oneClickFolderShown == null ? null : new DirectoryInfo(oneClickFolderShown).Name;
-        (string Path, string OneClick)[] candidates =
+        (string? Path, string? OneClick)[] candidates =
         [
             (filePath, oneClickFolderShown == null ? null : prefix + oneClickFolderShown),
             (pathHidden, oneClickFolderShown == null ? null : prefix + oneClickFolderShown),
@@ -846,7 +847,7 @@ public partial class MainForm : Form
         foreach (var folder in targets)
         {
             ToolStripMenuItem item = new(folder.Replace("&", "&&")) { Enabled = Directory.Exists(folder), Tag = folder, Image = ShellInfo.GetTypeIcon(null, LogicalToDeviceUnits(16)) };
-            item.Click += (s, args) => MoveOrCopyTo((string)((ToolStripMenuItem)s).Tag, copy: false);
+            item.Click += (s, args) => MoveOrCopyTo((string)((ToolStripMenuItem)s!).Tag!, copy: false);
             splitButtonMove.DropDownItems.Add(item);
         }
         if (splitButtonMove.DropDownItems.Count == 0)
@@ -937,7 +938,7 @@ public partial class MainForm : Form
 
     /// <summary>16-px-Symbol für Menüeinträge (die Menüs sind auf diese Größe festgelegt);
     /// null, wenn Symbole abgeschaltet sind.</summary>
-    private Image MenuIcon(char glyph)
+    private Image? MenuIcon(char glyph)
     {
         return settings.ShowToolbarIcons && ToolbarIcons.FontAvailable
             ? ToolbarIcons.Get(glyph, LogicalToDeviceUnits(new Size(16, 16)))
@@ -985,7 +986,7 @@ public partial class MainForm : Form
                 settings.Save();
             }
         }
-        var files = FileUtil.GetPdfFilesInFolder(currentFile.DirectoryName);
+        var files = FileUtil.GetPdfFilesInFolder(currentFile.DirectoryName!);
         var index = files.FindIndex(f => string.Equals(f, currentFile.FullName, StringComparison.OrdinalIgnoreCase));
         var deletedPath = currentFile.FullName;
         try { FileSystem.DeleteFile(deletedPath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin); }
@@ -1321,7 +1322,7 @@ public partial class MainForm : Form
     private void BackupForUndo(string actionName)
     {
         Directory.CreateDirectory(UndoFolder);
-        File.Copy(currentFile.FullName, OwnUndoBackup, true);
+        File.Copy(currentFile!.FullName, OwnUndoBackup, true);
         SetUndoAction(new UndoAction(UndoKind.Edit, actionName, currentFile.FullName, OwnUndoBackup));
     }
 
@@ -1331,7 +1332,7 @@ public partial class MainForm : Form
         SetUndoAction(new UndoAction(UndoKind.Move, actionName, newPath, previousPath));
     }
 
-    private void SetUndoAction(UndoAction action)
+    private void SetUndoAction(UndoAction? action)
     {
         undoAction = action;
         mnuUndo.Enabled = action != null;
@@ -1425,7 +1426,7 @@ public partial class MainForm : Form
                 ToolTipText = exe,
                 Enabled = currentFile != null,
             };
-            item.Click += (s, args) => LaunchExternalProgram((string)((ToolStripMenuItem)s).Tag);
+            item.Click += (s, args) => LaunchExternalProgram((string)((ToolStripMenuItem)s!).Tag!);
             ddbPrograms.DropDownItems.Add(item);
             number++;
         }
@@ -1488,7 +1489,7 @@ public partial class MainForm : Form
                     ToolTipText = ProgramFinder.GetDisplayName(exe) + " (" + Lng.T("Strg+") + number + ")",
                     Enabled = currentFile != null,
                 };
-                button.Click += (s, e) => LaunchExternalProgram((string)((ToolStripItem)s).Tag);
+                button.Click += (s, e) => LaunchExternalProgram((string)((ToolStripItem)s!).Tag!);
                 toolStrip.Items.Insert(insertIndex++, button);
                 programIconButtons.Add(button);
             }
@@ -1522,7 +1523,7 @@ public partial class MainForm : Form
         Process.Start(new ProcessStartInfo("rundll32.exe", "shell32.dll,OpenAs_RunDLL " + currentFile.FullName) { UseShellExecute = false });
     }
 
-    private Image GetProgramIcon(string exePath)
+    private Image? GetProgramIcon(string exePath)
     {
         if (!programIcons.TryGetValue(exePath, out var image))
         {
@@ -1537,9 +1538,9 @@ public partial class MainForm : Form
         return image;
     }
 
-    private readonly Dictionary<string, Image> programIconsGray = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, Image?> programIconsGray = new(StringComparer.OrdinalIgnoreCase);
 
-    private Image GetProgramIconGray(string exePath)
+    private Image? GetProgramIconGray(string exePath)
     {
         if (!programIconsGray.TryGetValue(exePath, out var image))
         {
@@ -1604,6 +1605,7 @@ public partial class MainForm : Form
     /// <summary>Kopiert den vollständigen Pfad der angezeigten Datei in die Zwischenablage (Strg+Umschalt+C, wie im Explorer).</summary>
     private void CopyPathToClipboard()
     {
+        if (currentFile == null) { return; }
         try
         {
             Clipboard.SetText(currentFile.FullName);

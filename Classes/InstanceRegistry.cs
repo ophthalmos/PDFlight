@@ -13,7 +13,7 @@ internal static class InstanceRegistry
     private static string OwnFile => Path.Combine(Folder, $"shown-{Environment.ProcessId}.txt");
 
     /// <summary>Meldet die aktuell angezeigte Datei (null = keine) für die anderen Instanzen.</summary>
-    public static void Publish(string path)
+    public static void Publish(string? path)
     {
         try
         {

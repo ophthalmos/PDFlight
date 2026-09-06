@@ -34,7 +34,8 @@ internal static class Lng
 
     /// <summary>Für mehrzeilige Texte: Nachschlag über einen expliziten Schlüssel, denn Zeilenumbrüche
     /// taugen nicht als resx-Schlüssel (XML-Attribut-Normalisierung).</summary>
-    public static string T(string key, string german)
+    [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(german))]
+    public static string? T(string key, string? german)
     {
         if (culture == null) { return german; }
         try { return resources.GetString(key, culture) ?? german; }
