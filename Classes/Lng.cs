@@ -11,7 +11,7 @@ namespace PDFLight.Classes;
 internal static class Lng
 {
     private static readonly ResourceManager resources = new("PDFLight.Languages.lng", typeof(Lng).Assembly);
-    private static CultureInfo culture; // null = Deutsch (keine Übersetzung nötig)
+    private static CultureInfo? culture; // null = Deutsch (keine Übersetzung nötig)
 
     /// <summary>Der gewählte Kultur-Code ("de", "en", …), z.B. für die Sprache des WebView2-Viewers.</summary>
     public static string CultureCode { get; private set; } = "de";
@@ -24,7 +24,8 @@ internal static class Lng
     }
 
     /// <summary>Übersetzt einen deutschen Text; ohne Eintrag (oder auf Deutsch) kommt er unverändert zurück.</summary>
-    public static string T(string german)
+    [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(german))]
+    public static string? T(string? german)
     {
         if (culture == null || string.IsNullOrEmpty(german)) { return german; }
         try { return resources.GetString(german, culture) ?? german; }

@@ -7,7 +7,7 @@ namespace PDFLight.Classes;
 
 internal record PdfInfo(string Title, string Author, string Subject, string Keywords, int PageCount, string Version, string Creator, string Producer);
 
-internal record PdfStatus(int PageCount, string Version, string PdfALevel);
+internal record PdfStatus(int PageCount, string? Version, string? PdfALevel);
 
 /// <summary>Dokumentoperationen mit PDFsharp. Alle Methoden arbeiten direkt auf der Datei;
 /// die Anzeige bleibt davon unberührt, weil der Viewer aus dem Speicher liest.</summary>
@@ -39,7 +39,7 @@ internal static partial class PdfEditService
 
     /// <summary>Liest die deklarierte PDF/A-Stufe (z.B. "2b") aus den XMP-Metadaten des Dokuments;
     /// null, wenn keine deklariert ist. Erkennt Attribut- und Element-Schreibweise der pdfaid-Einträge.</summary>
-    private static string GetPdfALevel(PdfDocument document)
+    private static string? GetPdfALevel(PdfDocument document)
     {
         try
         {
@@ -187,7 +187,7 @@ internal static partial class PdfEditService
     }
 
     /// <summary>Parst Seitenangaben wie "3", "2-5" oder "1, 4, 7-9"; null bei ungültiger Eingabe.</summary>
-    public static List<int> ParsePageRange(string input, int pageCount)
+    public static List<int>? ParsePageRange(string? input, int pageCount)
     {
         List<int> pages = [];
         foreach (var part in (input ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))

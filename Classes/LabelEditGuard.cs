@@ -14,7 +14,7 @@ namespace PDFLight.Classes;
 internal static class LabelEditGuard
 {
     private static readonly List<object> pinned = [];
-    private static readonly Dictionary<Type, FieldInfo> fieldCache = [];
+    private static readonly Dictionary<Type, FieldInfo?> fieldCache = [];
 
     /// <summary>Beim Start einer Beschriftungsbearbeitung aufrufen (BeforeLabelEdit). Das interne
     /// Bearbeitungsfenster entsteht erst nach dem Ereignis, daher greift Pin per BeginInvoke darauf zu.</summary>
@@ -31,12 +31,12 @@ internal static class LabelEditGuard
 
     /// <summary>Das private Feld, das das LabelEditNativeWindow hält (TreeView._labelEdit, ListView._labelEdit) –
     /// gesucht über den Typ (NativeWindow-Abkömmling mit „LabelEdit“ im Namen), nicht über den Feldnamen.</summary>
-    private static FieldInfo FindLabelEditField(Type controlType)
+    private static FieldInfo? FindLabelEditField(Type controlType)
     {
         lock (fieldCache)
         {
             if (fieldCache.TryGetValue(controlType, out var cached)) { return cached; }
-            FieldInfo found = null;
+            FieldInfo? found = null;
             for (var type = controlType; type != null && found == null; type = type.BaseType)
             {
                 found = type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
