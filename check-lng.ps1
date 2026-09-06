@@ -7,6 +7,9 @@
 # (siehe Ignorierliste). Ausgabe im MSBuild-Warnungsformat; läuft als Build-Target nach jedem Build
 # (s. PDFlight.csproj) und jederzeit manuell:  powershell -ExecutionPolicy Bypass -File check-lng.ps1
 
+# -Strict (Release-Build): Funde als Fehler statt Warnungen melden und mit Exit-Code 1 abbrechen
+param([switch]$Strict)
+$severity = if ($Strict) { "error" } else { "warning" }
 $root = $PSScriptRoot
 $languages = "en", "fr", "es"
 
@@ -90,7 +93,7 @@ foreach ($key in $used | Sort-Object) {
     if ($key -match '^(F\d+|Alt\+Enter)$') { continue } # sprachneutrale Kürzel
     if ($ignore -contains $key) { continue }
     foreach ($code in ($languages | Where-Object { -not $langKeys[$_].Contains($key) })) {
-        Write-Output "Languages\lng.$code.resx : warning LNG001: Übersetzung fehlt für Schlüssel: `"$key`""
+        Write-Output "Languages\lng.$code.resx : $severity LNG001: Übersetzung fehlt für Schlüssel: `"$key`""
         $findings++
     }
 }
@@ -100,11 +103,12 @@ foreach ($code in $languages) {
     foreach ($key in $langKeys[$code] | Sort-Object) {
         if ($ignore -contains $key) { continue }
         if (-not $used.Contains($key)) {
-            Write-Output "Languages\lng.$code.resx : warning LNG002: Verwaister Schlüssel (im Code nicht gefunden): `"$key`""
+            Write-Output "Languages\lng.$code.resx : $severity LNG002: Verwaister Schlüssel (im Code nicht gefunden): `"$key`""
             $findings++
         }
     }
 }
 
 if ($findings -eq 0) { Write-Output "check-lng: Alle Übersetzungen konsistent ($($used.Count) Schlüssel geprüft)." }
+if ($Strict -and $findings -gt 0) { exit 1 }
 exit 0
