@@ -508,9 +508,8 @@ public partial class MainForm : Form
                 Heading = string.Format(Lng.T("Du möchtest die {0} Datei öffnen."), step > 0 ? Lng.T("nächste") : Lng.T("vorherige")) + Environment.NewLine + Lng.T("Welcher Ordner soll durchsucht werden?"),
                 AllowCancel = true,
                 SizeToContent = true,
-                Buttons = { btnPrevious, btnCurrent },
-                DefaultButton = btnPrevious,
-                Footnote = Lng.T("Wenn du abbrichst, wird der aktuelle Ordner verwendet.")
+                Buttons = { btnPrevious, btnCurrent, TaskDialogButton.Cancel },
+                DefaultButton = btnPrevious
             };
             var result = TaskDialog.ShowDialog(Handle, page);
             if (result == btnPrevious)
@@ -520,7 +519,8 @@ public partial class MainForm : Form
                 StepFileInFolder(target, step);
                 return;
             }
-            if (result == btnCurrent) { previousFolder = null; } // bei Abbruch bleibt die Frage fürs nächste Blättern bestehen
+            if (result != btnCurrent) { return; } // Abbrechen (auch Esc): nichts passiert, die Frage bleibt fürs nächste Blättern bestehen
+            previousFolder = null;
         }
         StepFileInFolder(folder, step);
     }

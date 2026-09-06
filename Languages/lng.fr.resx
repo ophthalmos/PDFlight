@@ -182,7 +182,6 @@ extraire des pages, propriétés (raccourcis dans le menu)</value></data>
   <data name="nächste" xml:space="preserve"><value>suivant</value></data>
   <data name="vorherige" xml:space="preserve"><value>précédent</value></data>
   <data name="Welcher Ordner soll durchsucht werden?" xml:space="preserve"><value>Quel dossier faut-il parcourir ?</value></data>
-  <data name="Wenn du abbrichst, wird der aktuelle Ordner verwendet." xml:space="preserve"><value>Si tu annules, le dossier actuel sera utilisé.</value></data>
   <data name="Der Ordner enthält keine PDF-Dateien." xml:space="preserve"><value>Le dossier ne contient aucun fichier PDF.</value></data>
   <data name="Der Ordner enthält keine weiteren PDF-Dateien." xml:space="preserve"><value>Le dossier ne contient pas d'autres fichiers PDF.</value></data>
   <data name="Der Zielordner existiert nicht." xml:space="preserve"><value>Le dossier cible n'existe pas.</value></data>

@@ -182,7 +182,6 @@ extract pages, properties (shortcuts in the menu)</value></data>
   <data name="nächste" xml:space="preserve"><value>next</value></data>
   <data name="vorherige" xml:space="preserve"><value>previous</value></data>
   <data name="Welcher Ordner soll durchsucht werden?" xml:space="preserve"><value>Which folder should be searched?</value></data>
-  <data name="Wenn du abbrichst, wird der aktuelle Ordner verwendet." xml:space="preserve"><value>If you cancel, the current folder is used.</value></data>
   <data name="Der Ordner enthält keine PDF-Dateien." xml:space="preserve"><value>The folder contains no PDF files.</value></data>
   <data name="Der Ordner enthält keine weiteren PDF-Dateien." xml:space="preserve"><value>The folder contains no further PDF files.</value></data>
   <data name="Der Zielordner existiert nicht." xml:space="preserve"><value>The target folder does not exist.</value></data>

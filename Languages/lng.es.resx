@@ -182,7 +182,6 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
   <data name="nächste" xml:space="preserve"><value>siguiente</value></data>
   <data name="vorherige" xml:space="preserve"><value>anterior</value></data>
   <data name="Welcher Ordner soll durchsucht werden?" xml:space="preserve"><value>¿Qué carpeta se debe examinar?</value></data>
-  <data name="Wenn du abbrichst, wird der aktuelle Ordner verwendet." xml:space="preserve"><value>Si cancela, se usará la carpeta actual.</value></data>
   <data name="Der Ordner enthält keine PDF-Dateien." xml:space="preserve"><value>La carpeta no contiene archivos PDF.</value></data>
   <data name="Der Ordner enthält keine weiteren PDF-Dateien." xml:space="preserve"><value>La carpeta no contiene más archivos PDF.</value></data>
   <data name="Der Zielordner existiert nicht." xml:space="preserve"><value>La carpeta de destino no existe.</value></data>
