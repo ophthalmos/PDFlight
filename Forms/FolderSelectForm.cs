@@ -89,7 +89,7 @@ public partial class FolderSelectForm : Form
             pathEdit.Text = shellTreeView.SelectedPath;
             comboBoxTarget.SelectedIndex = comboBoxTarget.FindStringExact(shellTreeView.SelectedPath);
             comboBoxRecent.SelectedIndex = comboBoxRecent.FindStringExact(shellTreeView.SelectedPath);
-            if (shellTreeView.SelectedNode.Nodes.Count > 0) { shellTreeView.SelectedNode.Expand(); }
+            if (shellTreeView.SelectedNode is { } selected && selected.Nodes.Count > 0) { selected.Expand(); }
             cbAdd2Folderlist.Checked = comboBoxTarget.SelectedIndex != -1;
             cbAdd2Folderlist.Enabled = comboBoxTarget.SelectedIndex == -1;
         }
@@ -117,7 +117,7 @@ public partial class FolderSelectForm : Form
         }
     }
 
-    private void ButtonNewFolder_Clicked(object? sender, EventArgs e)
+    private void ButtonNewFolder_Clicked(object? sender, EventArgs? e)
     {
         try { shellTreeView.CreateDir(Lng.T(NewFolderName), true); }
         catch (Exception ex) when (ex is UnauthorizedAccessException or InvalidOperationException or IOException)
@@ -126,9 +126,9 @@ public partial class FolderSelectForm : Form
         }
     }
 
-    private void ComboBoxTarget_SelectedIndexChanged(object? sender, EventArgs e) { SelectFolderPath(comboBoxTarget, (string)comboBoxTarget.SelectedItem); }
+    private void ComboBoxTarget_SelectedIndexChanged(object? sender, EventArgs e) { if (comboBoxTarget.SelectedItem is string path) { SelectFolderPath(comboBoxTarget, path); } }
 
-    private void ComboBoxRecent_SelectedIndexChanged(object? sender, EventArgs e) { SelectFolderPath(comboBoxRecent, (string)comboBoxRecent.SelectedItem); }
+    private void ComboBoxRecent_SelectedIndexChanged(object? sender, EventArgs e) { if (comboBoxRecent.SelectedItem is string path) { SelectFolderPath(comboBoxRecent, path); } }
 
     private void SelectFolderPath(ComboBox comboBox, string path)
     {
@@ -158,7 +158,7 @@ public partial class FolderSelectForm : Form
         if (!string.IsNullOrEmpty(pathEdit.Text))
         {
             if (pathEdit.IsValidPath) { shellTreeView.SelectedPath = pathEdit.Text; }
-            else if (Path.HasExtension(pathEdit.Text) && Directory.Exists(Path.GetDirectoryName(pathEdit.Text))) { shellTreeView.SelectedPath = Path.GetDirectoryName(pathEdit.Text); }
+            else if (Path.HasExtension(pathEdit.Text) && Directory.Exists(Path.GetDirectoryName(pathEdit.Text))) { shellTreeView.SelectedPath = Path.GetDirectoryName(pathEdit.Text)!; }
             else
             {
                 // schrittweise auf existierende übergeordnete Ordner zurückfallen
@@ -303,8 +303,8 @@ public partial class FolderSelectForm : Form
         return base.ProcessCmdKey(ref msg, keyData);
     }
 
-    private void LinkLabelRecent_LinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
+    private void LinkLabelRecent_LinkClicked(object? sender, LinkLabelLinkClickedEventArgs? e)
     {
-        if (comboBoxRecent.Items.Count > 0) { SelectFolderPath(comboBoxRecent, comboBoxRecent.Items[0].ToString()); }
+        if (comboBoxRecent.Items.Count > 0 && comboBoxRecent.Items[0] is string first) { SelectFolderPath(comboBoxRecent, first); }
     }
 }

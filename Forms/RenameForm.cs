@@ -21,7 +21,7 @@ public partial class RenameForm : Form
     private bool selectAllDone;
     private bool dateOrderDescending = true;
     private bool nameOrderDescending;
-    private string filenameBeforeListEdit;
+    private string filenameBeforeListEdit = string.Empty;
 
     public RenameForm(FileInfo currentFile)
     {
@@ -79,7 +79,7 @@ public partial class RenameForm : Form
 
     private IEnumerable<string> SortedFiles()
     {
-        var files = FileUtil.GetPdfFilesInFolder(fileInfo.DirectoryName); // natürliche Sortierung
+        var files = FileUtil.GetPdfFilesInFolder(fileInfo.DirectoryName!); // natürliche Sortierung
         if (dateSortButton.Checked)
         {
             return dateOrderDescending ? files.OrderBy(f => File.GetLastWriteTime(f)) : files.OrderByDescending(f => File.GetLastWriteTime(f));
@@ -186,6 +186,7 @@ public partial class RenameForm : Form
 
     private void BtnDateMenu_ItemClicked(object? sender, ToolStripItemClickedEventArgs e)
     {
+        if (e.ClickedItem == null) { return; }
         var index = btnDateMenu.Items.IndexOf(e.ClickedItem);
         var split = btnDateMenu.Items.Count / 2;
         var date = e.ClickedItem.Text.Trim();
@@ -234,8 +235,8 @@ public partial class RenameForm : Form
         if (e.Label == null) { return; }
         try
         {
-            var destPath = Path.Combine(fileInfo.DirectoryName, e.Label);
-            File.Move(Path.Combine(fileInfo.DirectoryName, filenameBeforeListEdit), destPath);
+            var destPath = Path.Combine(fileInfo.DirectoryName!, e.Label);
+            File.Move(Path.Combine(fileInfo.DirectoryName!, filenameBeforeListEdit), destPath);
             listView.Items[e.Item].Name = destPath;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
@@ -262,14 +263,14 @@ public partial class RenameForm : Form
         if (listView.SelectedItems.Count > 0) { listView.SelectedItems[0].BeginEdit(); }
     }
 
-    private void OpenMenuItem_Click(object? sender, EventArgs e)
+    private void OpenMenuItem_Click(object? sender, EventArgs? e)
     {
         if (listView.SelectedItems.Count == 0) { return; }
         try { Process.Start(new ProcessStartInfo(Application.ExecutablePath, $"\"{listView.SelectedItems[0].Name}\"") { UseShellExecute = false }); } // neue PDFlight-Instanz
         catch (Exception ex) when (ex is Win32Exception or InvalidOperationException) { TaskDlg.ErrTaskDlg(Handle, Lng.T("PDFlight konnte nicht gestartet werden."), ex); }
     }
 
-    private void DeleteMenuItem_Click(object? sender, EventArgs e)
+    private void DeleteMenuItem_Click(object? sender, EventArgs? e)
     {
         if (listView.SelectedItems.Count == 0
             || string.Equals(listView.SelectedItems[0].Name, fileInfo.FullName, StringComparison.OrdinalIgnoreCase)) { return; }
@@ -290,7 +291,7 @@ public partial class RenameForm : Form
 
     // ------------------------------------------------------------------ Sortierung (F5/F6)
 
-    private void AlphabeticSortButton_Click(object? sender, EventArgs e)
+    private void AlphabeticSortButton_Click(object? sender, EventArgs? e)
     {
         if (alphabeticSortButton.Checked) { nameOrderDescending = !nameOrderDescending; }
         alphabeticSortButton.Checked = true;
@@ -299,7 +300,7 @@ public partial class RenameForm : Form
         FillList(SortedFiles());
     }
 
-    private void DateSortButton_Click(object? sender, EventArgs e)
+    private void DateSortButton_Click(object? sender, EventArgs? e)
     {
         if (dateSortButton.Checked) { dateOrderDescending = !dateOrderDescending; }
         dateSortButton.Checked = true;
@@ -320,7 +321,7 @@ public partial class RenameForm : Form
         else { TaskDlg.MsgTaskDlg(Handle, Lng.T("Der angegebene Pfad existiert nicht."), null, TaskDialogIcon.Warning); }
     }
 
-    private void OtherFolderButton_Click(object? sender, EventArgs e)
+    private void OtherFolderButton_Click(object? sender, EventArgs? e)
     {
         using FolderBrowserDialog dialog = new() { Description = Lng.T("Zielordner für die umbenannte Datei"), UseDescriptionForTitle = true, InitialDirectory = directoryTextBox.Text };
         if (dialog.ShowDialog(this) == DialogResult.OK && !string.IsNullOrEmpty(dialog.SelectedPath) && !dialog.SelectedPath.Equals(fileInfo.DirectoryName, StringComparison.OrdinalIgnoreCase))

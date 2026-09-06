@@ -100,7 +100,7 @@ internal class FolderHistoryToolBar : ToolStrip
     private void Tree_AfterSelect(object? sender, TreeViewEventArgs e)
     {
         if (navigating) { UpdateButtons(); return; }
-        var path = folderTree.SelectedPath;
+        var path = folderTree?.SelectedPath;
         if (string.IsNullOrEmpty(path) || (historyIndex >= 0 && history[historyIndex] == path)) { UpdateButtons(); return; }
         if (historyIndex < history.Count - 1) { history.RemoveRange(historyIndex + 1, history.Count - historyIndex - 1); } // Vorwärts-Verlauf verwerfen
         history.Add(path);
@@ -112,7 +112,7 @@ internal class FolderHistoryToolBar : ToolStrip
     private void NavigateTo(string path)
     {
         navigating = true;
-        try { if (Directory.Exists(path)) { folderTree.SelectedPath = path; } }
+        try { if (folderTree != null && Directory.Exists(path)) { folderTree.SelectedPath = path; } }
         finally { navigating = false; }
         UpdateButtons();
     }
