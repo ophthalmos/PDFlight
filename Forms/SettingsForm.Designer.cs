@@ -67,10 +67,10 @@
             buttonCancel = new Button();
             panelButtons = new Panel();
             tabControl.SuspendLayout();
-            panelButtons.SuspendLayout();
             tabGeneral.SuspendLayout();
             tabTargets.SuspendLayout();
             tabPrograms.SuspendLayout();
+            panelButtons.SuspendLayout();
             SuspendLayout();
             // 
             // tabControl
@@ -126,21 +126,21 @@
             cbConfirmDelete.TabIndex = 2;
             cbConfirmDelete.Text = "Vor dem Verschieben in den &Papierkorb nachfragen";
             cbConfirmDelete.UseVisualStyleBackColor = true;
-            //
+            // 
             // cbOpenNextAfterDelete
-            //
+            // 
             cbOpenNextAfterDelete.AutoSize = true;
             cbOpenNextAfterDelete.Checked = true;
             cbOpenNextAfterDelete.CheckState = CheckState.Checked;
             cbOpenNextAfterDelete.Location = new Point(18, 70);
             cbOpenNextAfterDelete.Name = "cbOpenNextAfterDelete";
-            cbOpenNextAfterDelete.Size = new Size(300, 19);
+            cbOpenNextAfterDelete.Size = new Size(337, 19);
             cbOpenNextAfterDelete.TabIndex = 3;
             cbOpenNextAfterDelete.Text = "Nach dem Löschen die &nächste Datei des Ordners anzeigen";
             cbOpenNextAfterDelete.UseVisualStyleBackColor = true;
-            //
+            // 
             // cbShowProgramIcons
-            //
+            // 
             cbShowProgramIcons.AutoSize = true;
             cbShowProgramIcons.Checked = true;
             cbShowProgramIcons.CheckState = CheckState.Checked;
@@ -246,7 +246,7 @@
             tabTargets.Location = new Point(4, 24);
             tabTargets.Name = "tabTargets";
             tabTargets.Padding = new Padding(3);
-            tabTargets.Size = new Size(480, 288);
+            tabTargets.Size = new Size(480, 313);
             tabTargets.TabIndex = 0;
             tabTargets.Text = "Zielordner";
             tabTargets.UseVisualStyleBackColor = true;
@@ -259,7 +259,7 @@
             listTargets.ItemHeight = 18;
             listTargets.Location = new Point(8, 8);
             listTargets.Name = "listTargets";
-            listTargets.Size = new Size(320, 255);
+            listTargets.Size = new Size(320, 280);
             listTargets.TabIndex = 0;
             listTargets.DrawItem += ListTargets_DrawItem;
             listTargets.SelectedIndexChanged += ListTargets_SelectedIndexChanged;
@@ -343,7 +343,7 @@
             // 
             labelTargetHint.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             labelTargetHint.ForeColor = SystemColors.GrayText;
-            labelTargetHint.Location = new Point(8, 266);
+            labelTargetHint.Location = new Point(6, 291);
             labelTargetHint.Name = "labelTargetHint";
             labelTargetHint.Size = new Size(472, 19);
             labelTargetHint.TabIndex = 7;
@@ -363,7 +363,7 @@
             tabPrograms.Location = new Point(4, 24);
             tabPrograms.Name = "tabPrograms";
             tabPrograms.Padding = new Padding(3);
-            tabPrograms.Size = new Size(480, 288);
+            tabPrograms.Size = new Size(480, 313);
             tabPrograms.TabIndex = 1;
             tabPrograms.Text = "Programme";
             tabPrograms.UseVisualStyleBackColor = true;
@@ -374,7 +374,7 @@
             listPrograms.IntegralHeight = false;
             listPrograms.Location = new Point(8, 8);
             listPrograms.Name = "listPrograms";
-            listPrograms.Size = new Size(320, 255);
+            listPrograms.Size = new Size(320, 280);
             listPrograms.TabIndex = 0;
             listPrograms.SelectedIndexChanged += ListPrograms_SelectedIndexChanged;
             // 
@@ -456,7 +456,7 @@
             // 
             labelProgramHint.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             labelProgramHint.ForeColor = SystemColors.GrayText;
-            labelProgramHint.Location = new Point(8, 266);
+            labelProgramHint.Location = new Point(6, 291);
             labelProgramHint.Name = "labelProgramHint";
             labelProgramHint.Size = new Size(472, 19);
             labelProgramHint.TabIndex = 7;
@@ -483,19 +483,19 @@
             buttonCancel.TabIndex = 2;
             buttonCancel.Text = "Abbrechen";
             buttonCancel.UseVisualStyleBackColor = true;
-            //
+            // 
             // panelButtons
-            //
+            // 
             panelButtons.Controls.Add(buttonCancel);
             panelButtons.Controls.Add(buttonOK);
             panelButtons.Dock = DockStyle.Bottom;
-            panelButtons.Location = new Point(0, 316);
+            panelButtons.Location = new Point(0, 341);
             panelButtons.Name = "panelButtons";
             panelButtons.Size = new Size(488, 45);
             panelButtons.TabIndex = 1;
-            //
+            // 
             // SettingsForm
-            //
+            // 
             AcceptButton = buttonOK;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
