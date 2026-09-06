@@ -71,7 +71,7 @@ internal static partial class ShellUtil
     }
 
     [LibraryImport("user32.dll", EntryPoint = "FindWindowW", StringMarshalling = StringMarshalling.Utf16)]
-    private static partial IntPtr FindWindow(string className, string windowName);
+    private static partial IntPtr FindWindow(string className, string? windowName);
 
     private const int SW_SHOW = 5;
     private const uint SEE_MASK_INVOKEIDLIST = 12;
@@ -106,16 +106,17 @@ internal static partial class ShellUtil
     /// <summary>Sucht direkt nach dem Löschen den Papierkorb-Eintrag der Datei und liefert dessen
     /// eindeutigen Ablagepfad (C:\$Recycle.Bin\…\$R…) — null, wenn keiner existiert (z.B. Netzlaufwerk).
     /// Bei mehreren Einträgen gleichen Namens gewinnt der zuletzt gelöschte (ModifyDate = Löschdatum).</summary>
-    public static string FindRecycledFile(string originalPath)
+    public static string? FindRecycledFile(string originalPath)
     {
         try
         {
-            dynamic shell = Activator.CreateInstance(Type.GetTypeFromProgID("Shell.Application"));
+            if (Type.GetTypeFromProgID("Shell.Application") is not { } shellType) { return null; }
+            dynamic shell = Activator.CreateInstance(shellType)!;
             var bin = shell.NameSpace(10); // ssfBITBUCKET = Papierkorb
             var name = Path.GetFileName(originalPath);
             var stem = Path.GetFileNameWithoutExtension(originalPath);
             var folder = Path.GetDirectoryName(originalPath);
-            string best = null;
+            string? best = null;
             var bestDate = DateTime.MinValue;
             foreach (dynamic item in bin.Items())
             {
@@ -138,7 +139,8 @@ internal static partial class ShellUtil
     {
         try
         {
-            dynamic shell = Activator.CreateInstance(Type.GetTypeFromProgID("Shell.Application"));
+            if (Type.GetTypeFromProgID("Shell.Application") is not { } shellType) { return false; }
+            dynamic shell = Activator.CreateInstance(shellType)!;
             var bin = shell.NameSpace(10);
             foreach (dynamic item in bin.Items())
             {

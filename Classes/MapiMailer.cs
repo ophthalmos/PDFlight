@@ -51,7 +51,7 @@ internal static partial class MapiMailer
     private static partial int MAPISendMailA(IntPtr session, IntPtr hwnd, ref MapiMessage message, int flags, int reserved);
 
     /// <summary>Erstellt eine neue E-Mail mit der Datei als Anhang; null bei Erfolg oder Benutzerabbruch, sonst eine deutsche Fehlermeldung.</summary>
-    public static string SendWithAttachment(string filePath, string subject)
+    public static string? SendWithAttachment(string filePath, string subject)
     {
         int result;
         try { result = Send(filePath, subject, unicode: true); }

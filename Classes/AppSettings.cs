@@ -73,7 +73,7 @@ public class AppSettings
     {
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(SettingsPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(SettingsPath)!); // SettingsPath ist immer ein voller Dateipfad
             File.WriteAllText(SettingsPath, JsonSerializer.Serialize(this, SerializerOptions));
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // Speichern darf das Programm nie blockieren

@@ -16,13 +16,13 @@ internal static partial class ShortcutsPdf
     public static string DefaultPath => Path.Combine(GetDownloadsPath(), Lng.T("PDFlight-Tastenkürzel") + ".pdf");
 
     /// <summary>Schreibt die Übersicht in den angegebenen Ordner (null = Downloads) und liefert den Dateipfad.</summary>
-    public static string Create(string directory = null)
+    public static string Create(string? directory = null)
     {
         var path = directory == null ? DefaultPath : Path.Combine(directory, Lng.T("PDFlight-Tastenkürzel") + ".pdf");
         using PdfDocument document = new();
         document.Options.ColorMode = PdfColorMode.Rgb;
         document.Info.Title = Application.ProductName + " – " + Lng.T("Tastenkürzel");
-        document.Info.Author = Application.ProductName;
+        document.Info.Author = Application.ProductName ?? string.Empty;
         XFont titleFont = new("Segoe UI", 17, XFontStyleEx.Bold);
         XFont subFont = new("Segoe UI", 9);
         XFont keyFont = new("Segoe UI", 10, XFontStyleEx.Bold);

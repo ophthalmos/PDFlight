@@ -54,7 +54,7 @@ internal static class ProgramFinder
         return Path.GetFileNameWithoutExtension(exePath);
     }
 
-    private static string GetAppPath(string exeName)
+    private static string? GetAppPath(string exeName)
     {
         foreach (var root in new[] { Registry.CurrentUser, Registry.LocalMachine })
         {

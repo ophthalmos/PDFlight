@@ -10,7 +10,7 @@ public partial class MainForm : Form
 {
     private readonly AppSettings settings;
     private readonly PdfViewHost viewHost;
-    private readonly string startFile;
+    private readonly string? startFile;
     private readonly Dictionary<string, Image> programIcons = new(StringComparer.OrdinalIgnoreCase);
     private FileInfo currentFile;
     private int currentPageCount = -1;      // -1 = nicht bestimmbar (z.B. verschlüsselt)
@@ -22,7 +22,7 @@ public partial class MainForm : Form
     private bool isFullScreen;              // F11-Vollbild (randlos, ohne Tool-/Statusleiste)
     private FormWindowState fullScreenPreviousState;
 
-    public MainForm(string startFile)
+    public MainForm(string? startFile)
     {
         InitializeComponent();
         try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } // Fenstersymbol = Programmicon der EXE

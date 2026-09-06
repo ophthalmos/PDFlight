@@ -42,9 +42,9 @@ internal static class FileUtil
     }
 
     /// <summary>Schlägt "name_1.pdf" usw. vor — den nächsten freien _n-Index im Zielordner (wie in PDFMover).</summary>
-    public static FileInfo SuggestAdditionalFileName(FileInfo destFile)
+    public static FileInfo? SuggestAdditionalFileName(FileInfo destFile)
     {
-        var folder = destFile.DirectoryName;
+        var folder = destFile.DirectoryName!; // eine Datei hat immer einen Ordner
         var extension = destFile.Extension;
         var nameNoExt = Path.GetFileNameWithoutExtension(destFile.FullName);
         var foundIndex = 0;
@@ -61,11 +61,11 @@ internal static class FileUtil
     }
 
     /// <summary>Sucht im Ordner eine inhaltsgleiche PDF-Datei (gleiche Größe und gleicher Hash, wie in PDFMover); null, wenn keine existiert.</summary>
-    public static FileInfo FindDuplicateInFolder(FileInfo file, string folder)
+    public static FileInfo? FindDuplicateInFolder(FileInfo file, string folder)
     {
         try
         {
-            byte[] hash = null; // erst berechnen, wenn es überhaupt einen Kandidaten gleicher Größe gibt
+            byte[]? hash = null; // erst berechnen, wenn es überhaupt einen Kandidaten gleicher Größe gibt
             foreach (var candidate in Directory.EnumerateFiles(folder, "*.pdf"))
             {
                 if (string.Equals(candidate, file.FullName, StringComparison.OrdinalIgnoreCase)) { continue; }

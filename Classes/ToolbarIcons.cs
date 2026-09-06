@@ -53,7 +53,7 @@ internal static class ToolbarIcons
 
     /// <summary>Graustufen-Kopie eines Bildes — für die Programm-Symbole in der Symbolleiste,
     /// damit sie sich den einfarbigen MDL2-Symbolen unterordnen (im Menü bleiben sie farbig).</summary>
-    public static Image ToGrayscale(Image source)
+    public static Image? ToGrayscale(Image? source)
     {
         if (source == null) { return null; }
         Bitmap result = new(source.Width, source.Height);
