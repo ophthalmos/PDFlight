@@ -97,7 +97,7 @@ public partial class SettingsForm : Form
 
     // ------------------------------------------------------------------ Zielordner
 
-    private void ListTargets_SelectedIndexChanged(object sender, EventArgs e) { UpdateTargetButtons(); }
+    private void ListTargets_SelectedIndexChanged(object? sender, EventArgs e) { UpdateTargetButtons(); }
 
     private void UpdateTargetButtons()
     {
@@ -111,7 +111,7 @@ public partial class SettingsForm : Form
 
     /// <summary>Nicht mehr existierende Ordner werden rot dargestellt. TextRenderer statt
     /// Graphics.DrawString: gleiches (klares) GDI-Rendering wie bei einer normalen ListBox.</summary>
-    private void ListTargets_DrawItem(object sender, DrawItemEventArgs e)
+    private void ListTargets_DrawItem(object? sender, DrawItemEventArgs e)
     {
         if (e.Index < 0) { return; }
         e.DrawBackground();
@@ -121,7 +121,7 @@ public partial class SettingsForm : Form
         e.DrawFocusRectangle();
     }
 
-    private void BtnTargetAdd_Click(object sender, EventArgs e)
+    private void BtnTargetAdd_Click(object? sender, EventArgs e)
     {
         using FolderBrowserDialog dialog = new() { Description = Lng.T("Ordner zur Zielliste hinzufügen"), UseDescriptionForTitle = true, ShowNewFolderButton = true };
         if (listTargets.SelectedIndex >= 0) { dialog.InitialDirectory = (string)listTargets.Items[listTargets.SelectedIndex]; }
@@ -131,13 +131,13 @@ public partial class SettingsForm : Form
         UpdateTargetButtons();
     }
 
-    private void BtnTargetRemove_Click(object sender, EventArgs e) { RemoveSelected(listTargets); UpdateTargetButtons(); }
+    private void BtnTargetRemove_Click(object? sender, EventArgs e) { RemoveSelected(listTargets); UpdateTargetButtons(); }
 
-    private void BtnTargetUp_Click(object sender, EventArgs e) { MoveSelected(listTargets, -1); }
+    private void BtnTargetUp_Click(object? sender, EventArgs e) { MoveSelected(listTargets, -1); }
 
-    private void BtnTargetDown_Click(object sender, EventArgs e) { MoveSelected(listTargets, 1); }
+    private void BtnTargetDown_Click(object? sender, EventArgs e) { MoveSelected(listTargets, 1); }
 
-    private void BtnTargetRemoveMissing_Click(object sender, EventArgs e)
+    private void BtnTargetRemoveMissing_Click(object? sender, EventArgs e)
     {
         for (var i = listTargets.Items.Count - 1; i >= 0; i--)
         {
@@ -146,7 +146,7 @@ public partial class SettingsForm : Form
         UpdateTargetButtons();
     }
 
-    private void BtnTargetSort_Click(object sender, EventArgs e)
+    private void BtnTargetSort_Click(object? sender, EventArgs e)
     {
         var selected = listTargets.SelectedIndex >= 0 ? (string)listTargets.Items[listTargets.SelectedIndex] : null;
         var sorted = listTargets.Items.Cast<string>().OrderBy(f => f, StringComparer.OrdinalIgnoreCase).ToArray();
@@ -158,7 +158,7 @@ public partial class SettingsForm : Form
 
     // ------------------------------------------------------------------ Programme
 
-    private void ListPrograms_SelectedIndexChanged(object sender, EventArgs e) { UpdateProgramButtons(); }
+    private void ListPrograms_SelectedIndexChanged(object? sender, EventArgs e) { UpdateProgramButtons(); }
 
     private void UpdateProgramButtons()
     {
@@ -169,7 +169,7 @@ public partial class SettingsForm : Form
         labelProgramStatus.Text = index >= 0 ? ProgramFinder.GetDisplayName((string)listPrograms.Items[index]) : string.Empty;
     }
 
-    private void BtnProgramAdd_Click(object sender, EventArgs e)
+    private void BtnProgramAdd_Click(object? sender, EventArgs e)
     {
         using OpenFileDialog dialog = new() { Filter = Lng.T("Programme (*.exe)|*.exe"), Title = Lng.T("Programm hinzufügen") };
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
@@ -178,13 +178,13 @@ public partial class SettingsForm : Form
         UpdateProgramButtons();
     }
 
-    private void BtnProgramRemove_Click(object sender, EventArgs e) { RemoveSelected(listPrograms); UpdateProgramButtons(); }
+    private void BtnProgramRemove_Click(object? sender, EventArgs e) { RemoveSelected(listPrograms); UpdateProgramButtons(); }
 
-    private void BtnProgramUp_Click(object sender, EventArgs e) { MoveSelected(listPrograms, -1); }
+    private void BtnProgramUp_Click(object? sender, EventArgs e) { MoveSelected(listPrograms, -1); }
 
-    private void BtnProgramDown_Click(object sender, EventArgs e) { MoveSelected(listPrograms, 1); }
+    private void BtnProgramDown_Click(object? sender, EventArgs e) { MoveSelected(listPrograms, 1); }
 
-    private void BtnProgramDetect_Click(object sender, EventArgs e)
+    private void BtnProgramDetect_Click(object? sender, EventArgs e)
     {
         var detected = ProgramFinder.DetectPrograms();
         // von Hand hinzugefügte Einträge nicht ungefragt verwerfen
@@ -205,7 +205,7 @@ public partial class SettingsForm : Form
         UpdateProgramButtons();
     }
 
-    private void BtnProgramSort_Click(object sender, EventArgs e)
+    private void BtnProgramSort_Click(object? sender, EventArgs e)
     {
         var selected = listPrograms.SelectedIndex >= 0 ? (string)listPrograms.Items[listPrograms.SelectedIndex] : null;
         var sorted = listPrograms.Items.Cast<string>().OrderBy(ProgramFinder.GetDisplayName, StringComparer.OrdinalIgnoreCase).ToArray(); // nach Anzeigename, nicht nach Pfad
@@ -217,7 +217,7 @@ public partial class SettingsForm : Form
 
     // ------------------------------------------------------------------ Allgemein
 
-    private void BtnClearRecent_Click(object sender, EventArgs e)
+    private void BtnClearRecent_Click(object? sender, EventArgs e)
     {
         if (TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Die Liste der zuletzt verwendeten Ordner leeren?"), null))
         {

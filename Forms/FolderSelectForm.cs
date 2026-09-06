@@ -47,7 +47,7 @@ public partial class FolderSelectForm : Form
         toolTip.SetToolTip(btnNewFolder, Lng.T("Neuer Ordner (Strg+N)"));
     }
 
-    private void FolderSelectForm_Load(object sender, EventArgs e)
+    private void FolderSelectForm_Load(object? sender, EventArgs e)
     {
         if (copyMode) { Text = Lng.T("KOPIEREN: Wähle einen Ordner ..."); buttonOK.Text = Lng.T("Kopieren"); }
         else { Text = Lng.T("VERSCHIEBEN: Wähle einen Ordner ..."); buttonOK.Text = Lng.T("Verschieben"); }
@@ -56,7 +56,7 @@ public partial class FolderSelectForm : Form
         cbAdd2Folderlist.Enabled = comboBoxTarget.SelectedIndex == -1;
     }
 
-    private void FolderSelectForm_Shown(object sender, EventArgs e)
+    private void FolderSelectForm_Shown(object? sender, EventArgs e)
     {
         Cursor.Current = Cursors.Default;
         btnNewFolder.Size = new Size(48, 48);
@@ -66,14 +66,14 @@ public partial class FolderSelectForm : Form
         if (jumpToLastUsed) { LinkLabelRecent_LinkClicked(null, null); }
     }
 
-    private void ShellTreeView_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e) { e.IsInputKey = e.KeyCode is Keys.Return or Keys.Enter; }
+    private void ShellTreeView_PreviewKeyDown(object? sender, PreviewKeyDownEventArgs e) { e.IsInputKey = e.KeyCode is Keys.Return or Keys.Enter; }
 
-    private void ShellTreeView_KeyDown(object sender, KeyEventArgs e)
+    private void ShellTreeView_KeyDown(object? sender, KeyEventArgs e)
     {
         if (e.KeyCode == Keys.Enter && e.Modifiers == Keys.Control && !string.IsNullOrEmpty(shellTreeView.SelectedPath)) { DialogResult = DialogResult.OK; }
     }
 
-    private void ShellTreeView_DoubleClick(object sender, EventArgs e)
+    private void ShellTreeView_DoubleClick(object? sender, EventArgs e)
     {
         if (!string.IsNullOrEmpty(shellTreeView.SelectedPath))
         {
@@ -82,7 +82,7 @@ public partial class FolderSelectForm : Form
         }
     }
 
-    private void ShellTreeView_AfterSelect(object sender, TreeViewEventArgs e)
+    private void ShellTreeView_AfterSelect(object? sender, TreeViewEventArgs e)
     {
         if (!string.IsNullOrEmpty(shellTreeView.SelectedPath))
         {
@@ -102,7 +102,7 @@ public partial class FolderSelectForm : Form
         btnNewFolder.Visible = shellTreeView.SelectedNode != null && FileUtil.HasFolderWritePermission(shellTreeView.SelectedPath);
     }
 
-    private void ShellTreeView_Resize(object sender, EventArgs e)
+    private void ShellTreeView_Resize(object? sender, EventArgs e)
     {
         btnNewFolder.Location = new Point(shellTreeView.Width - btnNewFolder.Width - SystemInformation.VerticalScrollBarWidth * 2, SystemInformation.VerticalScrollBarWidth);
     }
@@ -117,7 +117,7 @@ public partial class FolderSelectForm : Form
         }
     }
 
-    private void ButtonNewFolder_Clicked(object sender, EventArgs e)
+    private void ButtonNewFolder_Clicked(object? sender, EventArgs e)
     {
         try { shellTreeView.CreateDir(Lng.T(NewFolderName), true); }
         catch (Exception ex) when (ex is UnauthorizedAccessException or InvalidOperationException or IOException)
@@ -126,9 +126,9 @@ public partial class FolderSelectForm : Form
         }
     }
 
-    private void ComboBoxTarget_SelectedIndexChanged(object sender, EventArgs e) { SelectFolderPath(comboBoxTarget, (string)comboBoxTarget.SelectedItem); }
+    private void ComboBoxTarget_SelectedIndexChanged(object? sender, EventArgs e) { SelectFolderPath(comboBoxTarget, (string)comboBoxTarget.SelectedItem); }
 
-    private void ComboBoxRecent_SelectedIndexChanged(object sender, EventArgs e) { SelectFolderPath(comboBoxRecent, (string)comboBoxRecent.SelectedItem); }
+    private void ComboBoxRecent_SelectedIndexChanged(object? sender, EventArgs e) { SelectFolderPath(comboBoxRecent, (string)comboBoxRecent.SelectedItem); }
 
     private void SelectFolderPath(ComboBox comboBox, string path)
     {
@@ -141,7 +141,7 @@ public partial class FolderSelectForm : Form
         }
     }
 
-    private void ShellTreeView_AfterLabelEdit(object sender, NodeLabelEditEventArgs e)
+    private void ShellTreeView_AfterLabelEdit(object? sender, NodeLabelEditEventArgs e)
     {
         if (shellTreeView.SelectedNode != null)
         {
@@ -153,7 +153,7 @@ public partial class FolderSelectForm : Form
         }
     }
 
-    private void PathEdit_ButtonClick(object sender, EventArgs e)
+    private void PathEdit_ButtonClick(object? sender, EventArgs e)
     {
         if (!string.IsNullOrEmpty(pathEdit.Text))
         {
@@ -175,7 +175,7 @@ public partial class FolderSelectForm : Form
         }
     }
 
-    private void PathEditTextBox_KeyDown(object sender, KeyEventArgs e)
+    private void PathEditTextBox_KeyDown(object? sender, KeyEventArgs e)
     {
         if (e.KeyCode == Keys.Enter && !string.IsNullOrEmpty(pathEdit.Text))
         {
@@ -188,7 +188,7 @@ public partial class FolderSelectForm : Form
         }
     }
 
-    private void PathEdit_EditFieldEnter(object sender, EventArgs e)
+    private void PathEdit_EditFieldEnter(object? sender, EventArgs e)
     {
         if (MouseButtons == MouseButtons.None)
         {
@@ -197,9 +197,9 @@ public partial class FolderSelectForm : Form
         }
     }
 
-    private void PathEdit_EditFieldLeave(object sender, EventArgs e) { selectAllDone = false; }
+    private void PathEdit_EditFieldLeave(object? sender, EventArgs e) { selectAllDone = false; }
 
-    private void PathEdit_EditFieldClick(object sender, EventArgs e)
+    private void PathEdit_EditFieldClick(object? sender, EventArgs e)
     {
         if (!selectAllDone && pathEdit.TextBox.SelectionLength == 0)
         {
@@ -208,7 +208,7 @@ public partial class FolderSelectForm : Form
         }
     }
 
-    private void FolderSelectForm_FormClosing(object sender, FormClosingEventArgs e)
+    private void FolderSelectForm_FormClosing(object? sender, FormClosingEventArgs e)
     {
         if (DialogResult != DialogResult.OK) { return; } // nur beim Übernehmen den Pfad aus dem Textfeld verarbeiten
         if (shellTreeView.SelectedPath != pathEdit.Text && pathEdit.IsValidPath)
@@ -236,13 +236,13 @@ public partial class FolderSelectForm : Form
         }
     }
 
-    private void FolderSelectForm_HelpButtonClicked(object sender, System.ComponentModel.CancelEventArgs e)
+    private void FolderSelectForm_HelpButtonClicked(object? sender, System.ComponentModel.CancelEventArgs e)
     {
         e.Cancel = true;
         ShowHelpMsgBox();
     }
 
-    private void FolderSelectForm_HelpRequested(object sender, HelpEventArgs hlpevent)
+    private void FolderSelectForm_HelpRequested(object? sender, HelpEventArgs hlpevent)
     {
         hlpevent.Handled = true;
         ShowHelpMsgBox();
@@ -303,7 +303,7 @@ public partial class FolderSelectForm : Form
         return base.ProcessCmdKey(ref msg, keyData);
     }
 
-    private void LinkLabelRecent_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    private void LinkLabelRecent_LinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
     {
         if (comboBoxRecent.Items.Count > 0) { SelectFolderPath(comboBoxRecent, comboBoxRecent.Items[0].ToString()); }
     }

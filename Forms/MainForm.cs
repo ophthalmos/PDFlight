@@ -62,7 +62,7 @@ public partial class MainForm : Form
         RestoreWindowBounds();
     }
 
-    private async void MainForm_Shown(object sender, EventArgs e)
+    private async void MainForm_Shown(object? sender, EventArgs e)
     {
         try { await viewHost.InitializeAsync(); }
         catch (WebView2RuntimeNotFoundException)
@@ -89,7 +89,7 @@ public partial class MainForm : Form
         else { UpdateUiState(); }
     }
 
-    private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+    private void MainForm_FormClosing(object? sender, FormClosingEventArgs e)
     {
         try { File.Delete(OwnUndoBackup); } // die eigene Undo-Sicherung wird beim Beenden entsorgt
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // sonst räumt sie der nächste Start ab
@@ -106,7 +106,7 @@ public partial class MainForm : Form
         settings.Save();
     }
 
-    private void MainForm_Activated(object sender, EventArgs e)
+    private void MainForm_Activated(object? sender, EventArgs e)
     {
         if (currentFile == null) { return; }
         try
@@ -250,7 +250,7 @@ public partial class MainForm : Form
         splashTimer.Start();
     }
 
-    private void SplashTimer_Tick(object sender, EventArgs e)
+    private void SplashTimer_Tick(object? sender, EventArgs e)
     {
         splashTimer.Stop();
         splashLabel.Hide();
@@ -372,7 +372,7 @@ public partial class MainForm : Form
     /// <summary>„Bearbeitung aktivieren“ im PDF/A-Banner: hebt nach einer Warnung den Schreibschutz
     /// für diese Datei auf. Die Datei selbst bleibt dabei unverändert — die PDF/A-Kennzeichnung geht
     /// erst verloren, wenn tatsächlich eine Bearbeitung ausgeführt und die Datei neu gespeichert wird.</summary>
-    private void BtnPdfAEnable_Click(object sender, EventArgs e)
+    private void BtnPdfAEnable_Click(object? sender, EventArgs e)
     {
         if (!TaskDlg.ConfirmTaskDlg(Handle,
             Lng.T("Möchtest du den Vorgang fortsetzen?"),
@@ -403,7 +403,7 @@ public partial class MainForm : Form
     }
 
     /// <summary>Dropdown des Öffnen-Buttons: die zuletzt geöffneten Dateien.</summary>
-    private void BtnOpen_DropDownOpening(object sender, EventArgs e)
+    private void BtnOpen_DropDownOpening(object? sender, EventArgs e)
     {
         settings.ReloadSharedLists();
         if (settings.RecentFiles.RemoveAll(f => !File.Exists(f)) > 0) { settings.Save(); } // verschwundene Dateien gleich austragen statt sie auszugrauen
@@ -446,12 +446,12 @@ public partial class MainForm : Form
         statusStrip.DragDrop += HandleDragDrop;
     }
 
-    private void HandleDragEnter(object sender, DragEventArgs e)
+    private void HandleDragEnter(object? sender, DragEventArgs e)
     {
         e.Effect = GetDroppedPdfs(e).Count > 0 ? DragDropEffects.Copy : DragDropEffects.None;
     }
 
-    private void HandleDragDrop(object sender, DragEventArgs e)
+    private void HandleDragDrop(object? sender, DragEventArgs e)
     {
         OpenDroppedFiles(GetDroppedPdfs(e));
     }
@@ -821,7 +821,7 @@ public partial class MainForm : Form
         LayoutStatusBar();
     }
 
-    private void SplitButtonMove_ButtonClick(object sender, EventArgs e)
+    private void SplitButtonMove_ButtonClick(object? sender, EventArgs e)
     {
         // Strg+Klick: direkt in den 1-Klick-Ordner verschieben (Schnell-Verschieben wie in PDFMover)
         if ((ModifierKeys & Keys.Control) == Keys.Control && OneClickAction(copy: false)) { return; }
@@ -838,7 +838,7 @@ public partial class MainForm : Form
         return true;
     }
 
-    private void SplitButtonMove_DropDownOpening(object sender, EventArgs e)
+    private void SplitButtonMove_DropDownOpening(object? sender, EventArgs e)
     {
         settings.ReloadSharedLists(); // Zielliste anderer Instanzen übernehmen
         splitButtonMove.DropDownItems.Clear();
@@ -1410,7 +1410,7 @@ public partial class MainForm : Form
         }
     }
 
-    private void DdbPrograms_DropDownOpening(object sender, EventArgs e)
+    private void DdbPrograms_DropDownOpening(object? sender, EventArgs e)
     {
         settings.ReloadSharedLists();
         ddbPrograms.DropDownItems.Clear();
@@ -1639,7 +1639,7 @@ public partial class MainForm : Form
     // Per Maus geöffnete Viewer-Dialoge (Toolbar-Buttons) bleiben unsichtbar; dort beendet Esc wie gewohnt.
     private bool viewerDialogOpen;
 
-    private void WebView_KeyDown(object sender, KeyEventArgs e)
+    private void WebView_KeyDown(object? sender, KeyEventArgs e)
     {
         if (e.KeyData is (Keys.Control | Keys.F) or Keys.F3 or (Keys.Control | Keys.P)) { viewerDialogOpen = true; return; } // Suche bzw. Drucken — an Chromium durchreichen
         if (e.KeyData == Keys.Escape && viewerDialogOpen) { viewerDialogOpen = false; return; }
@@ -1648,93 +1648,93 @@ public partial class MainForm : Form
 
     // ------------------------------------------------------------------ Toolbar-Klicks
 
-    private void BtnOpen_Click(object sender, EventArgs e)
+    private void BtnOpen_Click(object? sender, EventArgs e)
     {
         OpenFile();
     }
-    private void BtnPrev_Click(object sender, EventArgs e)
+    private void BtnPrev_Click(object? sender, EventArgs e)
     {
         StepFile(-1);
     }
-    private void BtnNext_Click(object sender, EventArgs e)
+    private void BtnNext_Click(object? sender, EventArgs e)
     {
         StepFile(1);
     }
-    private void BtnCopy_Click(object sender, EventArgs e)
+    private void BtnCopy_Click(object? sender, EventArgs e)
     {
         // Strg+Klick: direkt in den 1-Klick-Ordner kopieren (Schnell-Kopieren, analog zum Verschieben)
         if ((ModifierKeys & Keys.Control) == Keys.Control && OneClickAction(copy: true)) { return; }
         MoveCopyDialog(copy: true);
     }
-    private void BtnRename_Click(object sender, EventArgs e)
+    private void BtnRename_Click(object? sender, EventArgs e)
     {
         RenameCurrent();
     }
-    private void BtnDelete_Click(object sender, EventArgs e)
+    private void BtnDelete_Click(object? sender, EventArgs e)
     {
         DeleteCurrent();
     }
-    private void BtnShowInFolder_Click(object sender, EventArgs e)
+    private void BtnShowInFolder_Click(object? sender, EventArgs e)
     {
         ShowInFolder();
     }
-    private void BtnSettings_Click(object sender, EventArgs e)
+    private void BtnSettings_Click(object? sender, EventArgs e)
     {
         OpenSettings(SettingsForm.TabGeneral);
     }
-    private void MnuShortcuts_Click(object sender, EventArgs e)
+    private void MnuShortcuts_Click(object? sender, EventArgs e)
     {
         TaskDlg.ShowShortcutsPdf(Handle, Icon);
     }
-    private async void MnuCheckUpdate_Click(object sender, EventArgs e)
+    private async void MnuCheckUpdate_Click(object? sender, EventArgs e)
     {
         await TaskDlg.UpdateTaskDlg(Handle);
     }
-    private void MnuAbout_Click(object sender, EventArgs e)
+    private void MnuAbout_Click(object? sender, EventArgs e)
     {
         TaskDlg.AboutTaskDlg(Handle, Icon);
     }
-    private void BtnPrint_Click(object sender, EventArgs e)
+    private void BtnPrint_Click(object? sender, EventArgs e)
     {
         viewHost.ShowPrintDialog();
     }
-    private void BtnEmail_Click(object sender, EventArgs e)
+    private void BtnEmail_Click(object? sender, EventArgs e)
     {
         EmailCurrent();
     }
-    private void MnuDeletePages_Click(object sender, EventArgs e)
+    private void MnuDeletePages_Click(object? sender, EventArgs e)
     {
         DeletePagesDialog();
     }
-    private void MnuRotatePages_Click(object sender, EventArgs e)
+    private void MnuRotatePages_Click(object? sender, EventArgs e)
     {
         RotatePagesDialog();
     }
-    private void MnuAppendPdf_Click(object sender, EventArgs e)
+    private void MnuAppendPdf_Click(object? sender, EventArgs e)
     {
         AppendPdfDialog();
     }
-    private void MnuExtractPages_Click(object sender, EventArgs e)
+    private void MnuExtractPages_Click(object? sender, EventArgs e)
     {
         ExtractPagesDialog();
     }
-    private void MnuDuplex_Click(object sender, EventArgs e)
+    private void MnuDuplex_Click(object? sender, EventArgs e)
     {
         MergeDuplexDialog();
     }
-    private void MnuSetPassword_Click(object sender, EventArgs e)
+    private void MnuSetPassword_Click(object? sender, EventArgs e)
     {
         SetPasswordDialog();
     }
-    private void MnuRemovePassword_Click(object sender, EventArgs e)
+    private void MnuRemovePassword_Click(object? sender, EventArgs e)
     {
         RemovePasswordDialog();
     }
-    private void MnuUndo_Click(object sender, EventArgs e)
+    private void MnuUndo_Click(object? sender, EventArgs e)
     {
         UndoLastChange();
     }
-    private void MnuProperties_Click(object sender, EventArgs e)
+    private void MnuProperties_Click(object? sender, EventArgs e)
     {
         ShowProperties();
     }

@@ -18,16 +18,16 @@ internal partial class PdfViewHost(WebView2 webView)
 {
     private const string VirtualHost = "pdflight.doc";
     private readonly WebView2 webView = webView;
-    private byte[] currentBytes;
+    private byte[]? currentBytes;
 
     /// <summary>Wird ausgelöst, wenn eine PDF-Datei auf den Viewer gezogen wurde (Drop löst dort eine file://-Navigation aus).</summary>
-    public event EventHandler<string> PdfFileDropped;
+    public event EventHandler<string>? PdfFileDropped;
 
     public bool IsReady { get; private set; }
 
     /// <summary>Die Bytes des angezeigten Dokuments (null ohne Dokument) — z.B. um eine extern
     /// verschwundene Datei aus der Anzeige wiederherzustellen.</summary>
-    public byte[] DocumentBytes => currentBytes;
+    public byte[]? DocumentBytes => currentBytes;
 
     public async Task InitializeAsync()
     {
@@ -61,7 +61,7 @@ internal partial class PdfViewHost(WebView2 webView)
     }
 
     /// <summary>Drop auf die Leerseite: deren Skript meldet die Dateien per postMessageWithAdditionalObjects mit echten Pfaden.</summary>
-    private void Core_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
+    private void Core_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
     {
         if (e.AdditionalObjects == null) { return; }
         foreach (var item in e.AdditionalObjects)
@@ -75,7 +75,7 @@ internal partial class PdfViewHost(WebView2 webView)
     }
 
     /// <summary>Manche Drops und Links landen als "neues Fenster": PDFs übernehmen, Web-Links in den Standardbrowser.</summary>
-    private void Core_NewWindowRequested(object sender, CoreWebView2NewWindowRequestedEventArgs e)
+    private void Core_NewWindowRequested(object? sender, CoreWebView2NewWindowRequestedEventArgs e)
     {
         e.Handled = true;
         var uri = e.Uri ?? string.Empty;
@@ -98,7 +98,7 @@ internal partial class PdfViewHost(WebView2 webView)
     }
 
     /// <summary>Lässt nur eigene Inhalte zu; abgelegte PDF-Dateien werden gemeldet, Web-Links im Standardbrowser geöffnet.</summary>
-    private void Core_NavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
+    private void Core_NavigationStarting(object? sender, CoreWebView2NavigationStartingEventArgs e)
     {
         var uri = e.Uri ?? string.Empty;
         if (uri.StartsWith("https://" + VirtualHost + "/", StringComparison.OrdinalIgnoreCase)
@@ -199,7 +199,7 @@ internal partial class PdfViewHost(WebView2 webView)
         {
             LayoutDiag = "gestartet";
             var root = System.Windows.Automation.AutomationElement.FromHandle(chromiumHandle);
-            System.Windows.Automation.AutomationElement layouts = null;
+            System.Windows.Automation.AutomationElement? layouts = null;
             for (var i = 0; i < 40 && layouts == null; i++) // beim Kaltstart braucht Chromiums Accessibility-Baum mehrere Sekunden
             {
                 layouts = root.FindFirst(System.Windows.Automation.TreeScope.Descendants,
@@ -216,7 +216,7 @@ internal partial class PdfViewHost(WebView2 webView)
             {
                 // direkt nach einem Dokumentladen reagiert die frische Toolbar noch nicht immer auf
                 // den ersten Klick — deshalb das Öffnen bei Bedarf wiederholen
-                System.Windows.Automation.AutomationElement target = null;
+                System.Windows.Automation.AutomationElement? target = null;
                 for (var attempt = 0; attempt < 3 && target == null; attempt++)
                 {
                     ClickCenter(layouts.Current.BoundingRectangle); // Menü öffnen
@@ -395,7 +395,7 @@ internal partial class PdfViewHost(WebView2 webView)
     }
 
     [System.Runtime.InteropServices.LibraryImport("user32.dll", EntryPoint = "FindWindowExW", StringMarshalling = System.Runtime.InteropServices.StringMarshalling.Utf16)]
-    private static partial IntPtr FindWindowEx(IntPtr parent, IntPtr after, string className, string windowName);
+    private static partial IntPtr FindWindowEx(IntPtr parent, IntPtr after, string? className, string? windowName);
 
     [System.Runtime.InteropServices.LibraryImport("user32.dll", EntryPoint = "PostMessageW")]
     [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
@@ -452,7 +452,7 @@ internal partial class PdfViewHost(WebView2 webView)
             """);
     }
 
-    private void Core_WebResourceRequested(object sender, CoreWebView2WebResourceRequestedEventArgs e)
+    private void Core_WebResourceRequested(object? sender, CoreWebView2WebResourceRequestedEventArgs e)
     {
         var environment = webView.CoreWebView2.Environment;
         e.Response = currentBytes == null

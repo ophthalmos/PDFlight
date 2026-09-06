@@ -17,11 +17,11 @@ internal class PathEditBox : UserControl
     private readonly Button button = new();
     private readonly Button historyButton = new();
 
-    public event EventHandler ButtonClick;
-    public event EventHandler HistoryButtonClick;
-    public event EventHandler EditFieldEnter;
-    public event EventHandler EditFieldLeave;
-    public event EventHandler EditFieldClick;
+    public event EventHandler? ButtonClick;
+    public event EventHandler? HistoryButtonClick;
+    public event EventHandler? EditFieldEnter;
+    public event EventHandler? EditFieldLeave;
+    public event EventHandler? EditFieldClick;
 
     public PathEditBox()
     {
@@ -61,7 +61,7 @@ internal class PathEditBox : UserControl
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public Button HistoryButton => historyButton;
 
-    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), System.Diagnostics.CodeAnalysis.AllowNull]
     public override string Text
     {
         get => textBox.Text;
