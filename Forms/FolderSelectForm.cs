@@ -36,9 +36,9 @@ public partial class FolderSelectForm : Form
 
         if (!jumpToLastUsed) { shellTreeView.SelectedPath = string.IsNullOrEmpty(startFolder) ? Environment.GetFolderPath(Environment.SpecialFolder.Desktop) : startFolder; }
 
-        btnNewFolder.Text = " ➕";
+        btnNewFolder.Glyph = ToolbarIcons.NewFolder;
+        btnNewFolder.Text = Lng.T(NewFolderName); // nicht gezeichnet — Name für UI Automation
         btnNewFolder.BackColor = SystemColors.ButtonFace;
-        btnNewFolder.Font = new Font(btnNewFolder.Font.Name, 12F);
         pathEdit.TextBox.PreviewKeyDown += (sender, e) => e.IsInputKey = e.KeyCode is Keys.Return or Keys.Enter; // verhindert, dass Enter das Formular schließt
         pathEdit.TextBox.KeyDown += PathEditTextBox_KeyDown;
         shellHistory.DropDownAnchor = pathEdit.HistoryButton; // Verlaufsmenü klappt unter dem ▼-Button des Pfadfelds auf
