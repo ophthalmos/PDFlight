@@ -17,8 +17,8 @@ internal class FolderHistoryToolBar : ToolStrip
     private readonly ToolStripButton btnForward;
     private readonly ToolStripButton btnUp;
     private readonly ContextMenuStrip historyMenu = new();
-    private Control dropDownAnchor;
-    private FolderTreeView folderTree;
+    private Control? dropDownAnchor;
+    private FolderTreeView? folderTree;
 
     public FolderHistoryToolBar()
     {
@@ -41,7 +41,7 @@ internal class FolderHistoryToolBar : ToolStrip
 
     /// <summary>Steuerelement, unter dem das Verlaufsmenü aufklappt (z.B. der ▼-Button der PathEditBox); es wird je nach Verlauf aktiviert/deaktiviert.</summary>
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public Control DropDownAnchor
+    public Control? DropDownAnchor
     {
         get => dropDownAnchor;
         set { dropDownAnchor = value; UpdateButtons(); }
@@ -49,7 +49,7 @@ internal class FolderHistoryToolBar : ToolStrip
 
     /// <summary>Der Ordnerbaum, dessen Auswahl aufgezeichnet und gesteuert wird.</summary>
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
-    public FolderTreeView Tree
+    public FolderTreeView? Tree
     {
         get => folderTree;
         set
@@ -84,7 +84,7 @@ internal class FolderHistoryToolBar : ToolStrip
         var parent = folderTree?.SelectedNode?.Parent;
         if (parent != null)
         {
-            folderTree.SelectedNode = parent; // läuft über Tree_AfterSelect in den Verlauf
+            folderTree!.SelectedNode = parent; // läuft über Tree_AfterSelect in den Verlauf (parent stammt aus folderTree)
             parent.EnsureVisible();
         }
     }
@@ -97,7 +97,7 @@ internal class FolderHistoryToolBar : ToolStrip
         historyMenu.Show(anchor, new Point(anchor.Width, anchor.Height), ToolStripDropDownDirection.BelowLeft); // rechtsbündig unter dem Anker
     }
 
-    private void Tree_AfterSelect(object sender, TreeViewEventArgs e)
+    private void Tree_AfterSelect(object? sender, TreeViewEventArgs e)
     {
         if (navigating) { UpdateButtons(); return; }
         var path = folderTree.SelectedPath;

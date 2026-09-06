@@ -15,7 +15,7 @@ internal class FolderTreeView : TreeView
     private readonly ImageList iconList = new() { ColorDepth = ColorDepth.Depth32Bit, ImageSize = SystemInformation.SmallIconSize };
     private readonly Dictionary<int, int> systemIconMap = []; // System-Iconindex → Index in iconList
     private bool showHidden;
-    private string pendingSelectPath; // SelectedPath, das vor der Handle-Erzeugung gesetzt wurde
+    private string? pendingSelectPath; // SelectedPath, das vor der Handle-Erzeugung gesetzt wurde
 
     public FolderTreeView()
     {
@@ -65,7 +65,7 @@ internal class FolderTreeView : TreeView
 
     protected override void OnBeforeExpand(TreeViewCancelEventArgs e)
     {
-        PopulateNode(e.Node);
+        if (e.Node != null) { PopulateNode(e.Node); }
         base.OnBeforeExpand(e);
     }
 
@@ -79,15 +79,15 @@ internal class FolderTreeView : TreeView
     {
         BeginInvoke(new Action(() => LabelEdit = false)); // LabelEdit wird nur für CreateDir aktiviert
         var newName = e.Label?.Trim();
-        if (!string.IsNullOrEmpty(newName) && newName != e.Node.Text)
+        if (!string.IsNullOrEmpty(newName) && e.Node is { } node && newName != node.Text)
         {
-            var oldPath = (string)e.Node.Tag;
+            var oldPath = (string)node.Tag!;
             try
             {
-                var newPath = Path.Combine(Path.GetDirectoryName(oldPath), newName);
+                var newPath = Path.Combine(Path.GetDirectoryName(oldPath)!, newName);
                 Directory.Move(oldPath, newPath);
-                e.Node.Tag = newPath;
-                e.Node.Name = newPath;
+                node.Tag = newPath;
+                node.Name = newPath;
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
             {
@@ -105,7 +105,7 @@ internal class FolderTreeView : TreeView
         if (parent == null) { return; }
         if (string.IsNullOrWhiteSpace(name)) { name = "Neuer Ordner"; }
         PopulateNode(parent); // vor dem Einfügen laden, sonst würde der Dummy-Knoten den neuen Ordner überschreiben
-        var parentPath = (string)parent.Tag;
+        var parentPath = (string)parent.Tag!;
         var newPath = Path.Combine(parentPath, name);
         for (var i = 2; Directory.Exists(newPath); i++) { newPath = Path.Combine(parentPath, name + " (" + i + ")"); }
         Directory.CreateDirectory(newPath); // Exceptions (fehlende Rechte etc.) behandelt der Aufrufer
@@ -180,7 +180,7 @@ internal class FolderTreeView : TreeView
         try
         {
             List<TreeNode> children = [];
-            foreach (var dir in new DirectoryInfo((string)node.Tag).EnumerateDirectories())
+            foreach (var dir in new DirectoryInfo((string)node.Tag!).EnumerateDirectories())
             {
                 if (!showHidden && (dir.Attributes & FileAttributes.Hidden) != 0) { continue; }
                 children.Add(CreateFolderNode(dir.FullName, dir.Name));
@@ -201,18 +201,18 @@ internal class FolderTreeView : TreeView
         }
     }
 
-    private TreeNode FindNodeByPath(string path)
+    private TreeNode? FindNodeByPath(string path)
     {
         if (string.IsNullOrWhiteSpace(path)) { return null; }
         path = path.Trim().Trim('"');
         if (path.Length > 3) { path = path.TrimEnd(Path.DirectorySeparatorChar); } // "C:\" behalten
 
         // Wurzel mit dem längsten übereinstimmenden Pfad suchen (z.B. Desktop statt C:\)
-        TreeNode current = null;
-        string currentPath = null;
+        TreeNode? current = null;
+        string? currentPath = null;
         foreach (TreeNode root in Nodes)
         {
-            var rootPath = ((string)root.Tag).TrimEnd(Path.DirectorySeparatorChar);
+            var rootPath = ((string)root.Tag!).TrimEnd(Path.DirectorySeparatorChar);
             var matches = path.StartsWith(rootPath, StringComparison.OrdinalIgnoreCase)
                 && (path.Length == rootPath.Length || path[rootPath.Length] == Path.DirectorySeparatorChar);
             if (matches && (currentPath == null || rootPath.Length > currentPath.Length)) { current = root; currentPath = rootPath; }
@@ -226,13 +226,13 @@ internal class FolderTreeView : TreeView
             var rootIndex = Nodes.IndexOfKey(pathRoot);
             if (rootIndex < 0) { return null; }
             current = Nodes[rootIndex];
-            currentPath = ((string)current.Tag).TrimEnd(Path.DirectorySeparatorChar);
+            currentPath = ((string)current.Tag!).TrimEnd(Path.DirectorySeparatorChar);
         }
 
-        foreach (var segment in path[currentPath.Length..].Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries))
+        foreach (var segment in path[currentPath!.Length..].Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries))
         {
             PopulateNode(current);
-            currentPath = Path.Combine((string)current.Tag, segment);
+            currentPath = Path.Combine((string)current.Tag!, segment);
             var child = FindChild(current, currentPath);
             if (child == null)
             {
@@ -245,7 +245,7 @@ internal class FolderTreeView : TreeView
         return current;
     }
 
-    private static TreeNode FindChild(TreeNode parent, string fullPath)
+    private static TreeNode? FindChild(TreeNode parent, string fullPath)
     {
         foreach (TreeNode child in parent.Nodes)
         {
@@ -312,12 +312,12 @@ internal static partial class ShellInfo
 
     public static void FreeIcon(IntPtr hIcon) { _ = Classes.NativeMethods.DestroyIcon(hIcon); }
 
-    private static readonly Dictionary<string, Image> typeIconCache = [];
+    private static readonly Dictionary<string, Image?> typeIconCache = [];
 
     /// <summary>Explorer-Icon für einen Dateityp (z.B. ".pdf") oder — bei extension null — für Ordner,
     /// skaliert auf edge Pixel. Generisch über die Dateiattribute, also ohne Plattenzugriff; Bilder werden
     /// geteilt und dürfen deshalb nicht freigegeben werden. Null, wenn die Shell kein Icon liefert.</summary>
-    public static Image GetTypeIcon(string extension, int edge)
+    public static Image? GetTypeIcon(string? extension, int edge)
     {
         var key = (extension ?? "<ordner>") + "|" + edge;
         if (typeIconCache.TryGetValue(key, out var cached)) { return cached; }
@@ -326,7 +326,7 @@ internal static partial class ShellInfo
         var sizeFlag = edge > 20 ? 0u /*SHGFI_LARGEICON: 32 px, herunterskaliert schärfer als 16 px hochgezogen*/ : SHGFI_SMALLICON;
         var result = SHGetFileInfo(extension == null ? "ordner" : "datei" + extension, attributes,
             ref info, (uint)Marshal.SizeOf<SHFILEINFO>(), SHGFI_ICON | sizeFlag | SHGFI_USEFILEATTRIBUTES);
-        Image image = null;
+        Image? image = null;
         if (result != IntPtr.Zero && info.hIcon != IntPtr.Zero)
         {
             using var icon = Icon.FromHandle(info.hIcon);

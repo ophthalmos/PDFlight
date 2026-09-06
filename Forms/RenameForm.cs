@@ -55,7 +55,7 @@ public partial class RenameForm : Form
         btnDateMenu.Items.Add(DateTime.Now.AddYears(-1).ToString("               _yyyy"));
     }
 
-    private void RenameForm_Load(object sender, EventArgs e)
+    private void RenameForm_Load(object? sender, EventArgs e)
     {
         renameTextBox.Text = Path.GetFileNameWithoutExtension(fileInfo.Name);
         InitFileIcons();
@@ -75,7 +75,7 @@ public partial class RenameForm : Form
         Disposed += (s, e) => icons.Dispose(); // die ListView übernimmt die ImageList nicht in ihre Dispose-Kette
     }
 
-    private void RenameForm_Shown(object sender, EventArgs e) { renameTextBox.Focus(); }
+    private void RenameForm_Shown(object? sender, EventArgs e) { renameTextBox.Focus(); }
 
     private IEnumerable<string> SortedFiles()
     {
@@ -105,19 +105,19 @@ public partial class RenameForm : Form
 
     // ------------------------------------------------------------------ Namensfeld
 
-    private void RenameTextBox_Enter(object sender, EventArgs e)
+    private void RenameTextBox_Enter(object? sender, EventArgs e)
     {
         if (MouseButtons == MouseButtons.None) { selectAllDone = true; renameTextBox.SelectAll(); }
     }
 
-    private void RenameTextBox_Leave(object sender, EventArgs e) { selectAllDone = false; renameTextBox.SelectionStart = renameTextBox.Text.Length; }
+    private void RenameTextBox_Leave(object? sender, EventArgs e) { selectAllDone = false; renameTextBox.SelectionStart = renameTextBox.Text.Length; }
 
-    private void RenameTextBox_Click(object sender, EventArgs e)
+    private void RenameTextBox_Click(object? sender, EventArgs e)
     {
         if (!selectAllDone && renameTextBox.SelectionLength == 0) { selectAllDone = true; renameTextBox.SelectAll(); }
     }
 
-    private void RenameTextBox_KeyDown(object sender, KeyEventArgs e)
+    private void RenameTextBox_KeyDown(object? sender, KeyEventArgs e)
     {
         if (((e.Control && e.KeyCode == Keys.V) || (e.Shift && e.KeyCode == Keys.Insert)) && Clipboard.ContainsText())
         {
@@ -131,13 +131,13 @@ public partial class RenameForm : Form
         }
     }
 
-    private void RenameTextBox_KeyPress(object sender, KeyPressEventArgs e)
+    private void RenameTextBox_KeyPress(object? sender, KeyPressEventArgs e)
     {
         if (e.KeyChar == (char)Keys.Back || (ModifierKeys & Keys.Control) == Keys.Control) { return; }
         if (Path.GetInvalidFileNameChars().Contains(e.KeyChar)) { e.Handled = true; Console.Beep(); }
     }
 
-    private void RenameTextBox_TextChanged(object sender, EventArgs e)
+    private void RenameTextBox_TextChanged(object? sender, EventArgs e)
     {
         var text = renameTextBox.Text;
         btnOK.Enabled = !(string.IsNullOrWhiteSpace(text) || text == fileInfo.Name || text == Path.GetFileNameWithoutExtension(fileInfo.Name));
@@ -164,19 +164,19 @@ public partial class RenameForm : Form
         renameTextBox.Focus();
     }
 
-    private void BtnTransform_Click(object sender, EventArgs e) { btnTransformMenu.Show(btnTransform.PointToScreen(new Point(0, btnTransform.Height))); }
+    private void BtnTransform_Click(object? sender, EventArgs e) { btnTransformMenu.Show(btnTransform.PointToScreen(new Point(0, btnTransform.Height))); }
 
-    private void UnderscoreMenuItem_Click(object sender, EventArgs e) { SetName(NameWithoutPdf().Replace(", ", "_").Replace(" – ", "-").Replace(" ", "_")); }
+    private void UnderscoreMenuItem_Click(object? sender, EventArgs e) { SetName(NameWithoutPdf().Replace(", ", "_").Replace(" – ", "-").Replace(" ", "_")); }
 
-    private void HyphensMenuItem_Click(object sender, EventArgs e) { SetName(NameWithoutPdf().Replace(", ", "-").Replace(" – ", "_").Replace(" ", "-")); }
+    private void HyphensMenuItem_Click(object? sender, EventArgs e) { SetName(NameWithoutPdf().Replace(", ", "-").Replace(" – ", "_").Replace(" ", "-")); }
 
-    private void LowercaseMenuItem_Click(object sender, EventArgs e) { SetName(NameWithoutPdf().ToLowerInvariant()); }
+    private void LowercaseMenuItem_Click(object? sender, EventArgs e) { SetName(NameWithoutPdf().ToLowerInvariant()); }
 
-    private void FirstLetterMenuItem_Click(object sender, EventArgs e) { SetName(System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(NameWithoutPdf().ToLower())); }
+    private void FirstLetterMenuItem_Click(object? sender, EventArgs e) { SetName(System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(NameWithoutPdf().ToLower())); }
 
-    private void RemoveDiacriticMenuItem_Click(object sender, EventArgs e) { SetName(FileUtil.RemoveDiacritics(NameWithoutPdf())); }
+    private void RemoveDiacriticMenuItem_Click(object? sender, EventArgs e) { SetName(FileUtil.RemoveDiacritics(NameWithoutPdf())); }
 
-    private void BtnDate_Click(object sender, EventArgs e) { btnDateMenu.Show(btnDate.PointToScreen(new Point(0, btnDate.Height))); }
+    private void BtnDate_Click(object? sender, EventArgs e) { btnDateMenu.Show(btnDate.PointToScreen(new Point(0, btnDate.Height))); }
 
     [GeneratedRegex(@"^\d{4}-?((0[1-9])|(1[012]))?((0[1-9]|[12]\d)|3[01])?(_|-)")]
     private static partial Regex DatePrefixRegex();
@@ -184,7 +184,7 @@ public partial class RenameForm : Form
     [GeneratedRegex(@"(_|-)((0[1-9]|[12]\d)|3[01])?((0[1-9])|(1[012]))?-?\d{4}$")]
     private static partial Regex DateSuffixRegex();
 
-    private void BtnDateMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+    private void BtnDateMenu_ItemClicked(object? sender, ToolStripItemClickedEventArgs e)
     {
         var index = btnDateMenu.Items.IndexOf(e.ClickedItem);
         var split = btnDateMenu.Items.Count / 2;
@@ -198,12 +198,12 @@ public partial class RenameForm : Form
 
     // ------------------------------------------------------------------ Dateiliste
 
-    private void ListView_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+    private void ListView_PreviewKeyDown(object? sender, PreviewKeyDownEventArgs e)
     {
         if (e.KeyCode == Keys.Enter) { e.IsInputKey = true; } // Enter in der Liste übernimmt den Namen statt OK
     }
 
-    private void ListView_KeyDown(object sender, KeyEventArgs e)
+    private void ListView_KeyDown(object? sender, KeyEventArgs e)
     {
         if (listView.SelectedItems.Count == 0) { return; }
         if (e.KeyData == Keys.F2) { listView.SelectedItems[0].BeginEdit(); }
@@ -216,20 +216,20 @@ public partial class RenameForm : Form
         }
     }
 
-    private void ListView_MouseDoubleClick(object sender, MouseEventArgs e)
+    private void ListView_MouseDoubleClick(object? sender, MouseEventArgs e)
     {
         var clicked = listView.HitTest(e.Location).Item;
         if (clicked != null) { renameTextBox.Text = Path.GetFileNameWithoutExtension(clicked.Text); }
     }
 
-    private void ListView_BeforeLabelEdit(object sender, LabelEditEventArgs e)
+    private void ListView_BeforeLabelEdit(object? sender, LabelEditEventArgs e)
     {
         LabelEditGuard.Pin(listView); // WinForms-Bug: sonst droht nach der Bearbeitung ein FailFast-Absturz
         if (string.Equals(listView.Items[e.Item].Name, fileInfo.FullName, StringComparison.OrdinalIgnoreCase)) { e.CancelEdit = true; } // aktuelle Datei nur übers Namensfeld
         else { filenameBeforeListEdit = listView.Items[e.Item].Text; }
     }
 
-    private void ListView_AfterLabelEdit(object sender, LabelEditEventArgs e)
+    private void ListView_AfterLabelEdit(object? sender, LabelEditEventArgs e)
     {
         if (e.Label == null) { return; }
         try
@@ -245,31 +245,31 @@ public partial class RenameForm : Form
         }
     }
 
-    private void ContextMenuListView_Opening(object sender, CancelEventArgs e)
+    private void ContextMenuListView_Opening(object? sender, CancelEventArgs e)
     {
         if (listView.SelectedItems.Count == 0) { e.Cancel = true; return; }
         var isCurrent = string.Equals(listView.SelectedItems[0].Name, fileInfo.FullName, StringComparison.OrdinalIgnoreCase);
         deleteMenuItem.Enabled = renameMenuItem.Enabled = openMenuItem.Enabled = !isCurrent;
     }
 
-    private void AcceptMenuItem_Click(object sender, EventArgs e)
+    private void AcceptMenuItem_Click(object? sender, EventArgs e)
     {
         if (listView.SelectedItems.Count > 0) { renameTextBox.Text = Path.GetFileNameWithoutExtension(listView.SelectedItems[0].Text); }
     }
 
-    private void RenameMenuItem_Click(object sender, EventArgs e)
+    private void RenameMenuItem_Click(object? sender, EventArgs e)
     {
         if (listView.SelectedItems.Count > 0) { listView.SelectedItems[0].BeginEdit(); }
     }
 
-    private void OpenMenuItem_Click(object sender, EventArgs e)
+    private void OpenMenuItem_Click(object? sender, EventArgs e)
     {
         if (listView.SelectedItems.Count == 0) { return; }
         try { Process.Start(new ProcessStartInfo(Application.ExecutablePath, $"\"{listView.SelectedItems[0].Name}\"") { UseShellExecute = false }); } // neue PDFlight-Instanz
         catch (Exception ex) when (ex is Win32Exception or InvalidOperationException) { TaskDlg.ErrTaskDlg(Handle, Lng.T("PDFlight konnte nicht gestartet werden."), ex); }
     }
 
-    private void DeleteMenuItem_Click(object sender, EventArgs e)
+    private void DeleteMenuItem_Click(object? sender, EventArgs e)
     {
         if (listView.SelectedItems.Count == 0
             || string.Equals(listView.SelectedItems[0].Name, fileInfo.FullName, StringComparison.OrdinalIgnoreCase)) { return; }
@@ -283,14 +283,14 @@ public partial class RenameForm : Form
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { TaskDlg.ErrTaskDlg(Handle, Lng.T("Löschen fehlgeschlagen."), ex); }
     }
 
-    private void PropertiesMenuItem_Click(object sender, EventArgs e)
+    private void PropertiesMenuItem_Click(object? sender, EventArgs e)
     {
         if (listView.SelectedItems.Count > 0) { ShellUtil.ShowFileProperties(listView.SelectedItems[0].Name); }
     }
 
     // ------------------------------------------------------------------ Sortierung (F5/F6)
 
-    private void AlphabeticSortButton_Click(object sender, EventArgs e)
+    private void AlphabeticSortButton_Click(object? sender, EventArgs e)
     {
         if (alphabeticSortButton.Checked) { nameOrderDescending = !nameOrderDescending; }
         alphabeticSortButton.Checked = true;
@@ -299,7 +299,7 @@ public partial class RenameForm : Form
         FillList(SortedFiles());
     }
 
-    private void DateSortButton_Click(object sender, EventArgs e)
+    private void DateSortButton_Click(object? sender, EventArgs e)
     {
         if (dateSortButton.Checked) { dateOrderDescending = !dateOrderDescending; }
         dateSortButton.Checked = true;
@@ -310,7 +310,7 @@ public partial class RenameForm : Form
 
     // ------------------------------------------------------------------ Ordner
 
-    private void FolderButton_Click(object sender, EventArgs e)
+    private void FolderButton_Click(object? sender, EventArgs e)
     {
         if (Directory.Exists(directoryTextBox.Text))
         {
@@ -320,7 +320,7 @@ public partial class RenameForm : Form
         else { TaskDlg.MsgTaskDlg(Handle, Lng.T("Der angegebene Pfad existiert nicht."), null, TaskDialogIcon.Warning); }
     }
 
-    private void OtherFolderButton_Click(object sender, EventArgs e)
+    private void OtherFolderButton_Click(object? sender, EventArgs e)
     {
         using FolderBrowserDialog dialog = new() { Description = Lng.T("Zielordner für die umbenannte Datei"), UseDescriptionForTitle = true, InitialDirectory = directoryTextBox.Text };
         if (dialog.ShowDialog(this) == DialogResult.OK && !string.IsNullOrEmpty(dialog.SelectedPath) && !dialog.SelectedPath.Equals(fileInfo.DirectoryName, StringComparison.OrdinalIgnoreCase))
@@ -333,7 +333,7 @@ public partial class RenameForm : Form
 
     // ------------------------------------------------------------------ Abschluss
 
-    private void RenameForm_FormClosing(object sender, FormClosingEventArgs e)
+    private void RenameForm_FormClosing(object? sender, FormClosingEventArgs e)
     {
         if (DialogResult != DialogResult.OK) { return; }
         var fileName = renameTextBox.Text.Trim();

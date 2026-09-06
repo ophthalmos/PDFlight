@@ -47,7 +47,7 @@ public partial class PageRangeForm : Form
         }
     }
 
-    private void ButtonOK_Click(object sender, EventArgs e)
+    private void ButtonOK_Click(object? sender, EventArgs e)
     {
         var input = textBoxPages.Text.Trim();
         if (input.Length == 0 && emptyMeansAll)

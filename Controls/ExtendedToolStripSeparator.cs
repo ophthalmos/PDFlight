@@ -7,7 +7,7 @@ internal class ExtendedToolStripSeparator : ToolStripSeparator
 {
     public ExtendedToolStripSeparator() { Paint += ExtendedToolStripSeparator_Paint; }
 
-    private void ExtendedToolStripSeparator_Paint(object sender, PaintEventArgs e)
+    private void ExtendedToolStripSeparator_Paint(object? sender, PaintEventArgs e)
     {
         using SolidBrush background = new(Color.FromArgb(253, 253, 253));
         using Pen line = new(Color.Black);

@@ -43,7 +43,7 @@ public partial class PasswordForm : Form
         labelFileValue.Text = fileName;
     }
 
-    private void ButtonOK_Click(object sender, EventArgs e)
+    private void ButtonOK_Click(object? sender, EventArgs e)
     {
         if (!confirm) { return; } // DialogResult.OK schließt das Formular selbst
         if (textBoxPassword.Text.Length == 0)
