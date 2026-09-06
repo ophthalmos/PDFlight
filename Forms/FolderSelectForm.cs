@@ -147,6 +147,9 @@ public partial class FolderSelectForm : Form
         {
             shellTreeView.SelectedNode.EnsureVisible();
             shellTreeView.TopNode = shellTreeView.SelectedNode;
+            // Der umbenannte Ordner hat einen neuen Pfad — Pfadfeld und Listen nachziehen, sonst legt FormClosing
+            // beim OK den alten, nicht mehr existierenden Pfad aus dem Textfeld neu an („Neuer Ordner“ neben „Bücher“)
+            BeginInvoke(new Action(() => ShellTreeView_AfterSelect(shellTreeView, new TreeViewEventArgs(shellTreeView.SelectedNode))));
         }
     }
 
