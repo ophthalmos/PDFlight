@@ -11,7 +11,7 @@ internal record PdfStatus(int PageCount, string Version, string PdfALevel);
 
 /// <summary>Dokumentoperationen mit PDFsharp. Alle Methoden arbeiten direkt auf der Datei;
 /// die Anzeige bleibt davon unberührt, weil der Viewer aus dem Speicher liest.</summary>
-internal static class PdfEditService
+internal static partial class PdfEditService
 {
     /// <summary>Seitenzahl der Datei; -1, wenn die Datei nicht lesbar ist (z.B. verschlüsselt).</summary>
     public static int TryGetPageCount(string path)
@@ -45,13 +45,20 @@ internal static class PdfEditService
         {
             if (document.Internals.Catalog.Elements.GetDictionary("/Metadata")?.Stream is not { } stream) { return null; }
             var xmp = Encoding.UTF8.GetString(stream.UnfilteredValue);
-            var part = Regex.Match(xmp, @"pdfaid:part(?:\s*=\s*[""']|\s*>\s*)(\d+)").Groups[1].Value;
+            var part = PdfAPartRegex().Match(xmp).Groups[1].Value;
             if (part.Length == 0) { return null; }
-            var conformance = Regex.Match(xmp, @"pdfaid:conformance(?:\s*=\s*[""']|\s*>\s*)([A-Za-z])").Groups[1].Value;
+            var conformance = PdfAConformanceRegex().Match(xmp).Groups[1].Value;
             return part + conformance.ToLowerInvariant();
         }
         catch (Exception ex) when (IsPdfReadError(ex)) { return null; }
     }
+
+    // pdfaid:part="2" bzw. <pdfaid:part>2</pdfaid:part> — beide Schreibweisen kommen vor
+    [GeneratedRegex(@"pdfaid:part(?:\s*=\s*[""']|\s*>\s*)(\d+)")]
+    private static partial Regex PdfAPartRegex();
+
+    [GeneratedRegex(@"pdfaid:conformance(?:\s*=\s*[""']|\s*>\s*)([A-Za-z])")]
+    private static partial Regex PdfAConformanceRegex();
 
     /// <summary>Löscht die angegebenen Seiten (1-basiert); mindestens eine Seite muss übrig bleiben.</summary>
     public static void DeletePages(string path, IReadOnlyList<int> pages)
