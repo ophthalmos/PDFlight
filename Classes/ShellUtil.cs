@@ -61,8 +61,8 @@ internal static partial class ShellUtil
                 var lister = FindWindow("dopus.lister", null);
                 if (lister != IntPtr.Zero)
                 {
-                    if (IsIconic(lister)) { ShowWindow(lister, SW_RESTORE); }
-                    SetForegroundWindow(lister);
+                    if (NativeMethods.IsIconic(lister)) { NativeMethods.ShowWindow(lister, NativeMethods.SW_RESTORE); }
+                    NativeMethods.SetForegroundWindow(lister);
                     return;
                 }
                 Thread.Sleep(100);
@@ -70,22 +70,8 @@ internal static partial class ShellUtil
         });
     }
 
-    private const int SW_RESTORE = 9;
-
     [LibraryImport("user32.dll", EntryPoint = "FindWindowW", StringMarshalling = StringMarshalling.Utf16)]
     private static partial IntPtr FindWindow(string className, string windowName);
-
-    [LibraryImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool SetForegroundWindow(IntPtr hWnd);
-
-    [LibraryImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool IsIconic(IntPtr hWnd);
-
-    [LibraryImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
     private const int SW_SHOW = 5;
     private const uint SEE_MASK_INVOKEIDLIST = 12;

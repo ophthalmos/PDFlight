@@ -414,4 +414,15 @@ the latest version.</value></data>
   <data name="geändert" xml:space="preserve"><value>modified</value></data>
   <data name="Anwendung:" xml:space="preserve"><value>Application:</value></data>
   <data name="PDF-Produzent:" xml:space="preserve"><value>PDF producer:</value></data>
+  <data name="Die nächste Datei ist bereits geöffnet" xml:space="preserve"><value>The next file is already open</value></data>
+  <data name="Die vorherige Datei ist bereits geöffnet" xml:space="preserve"><value>The previous file is already open</value></data>
+  <data name="Diese Datei wird bereits in einem anderen PDFlight-Fenster angezeigt:" xml:space="preserve"><value>This file is already displayed in another PDFlight window:</value></data>
+  <data name="Anderes Fenster aktivieren" xml:space="preserve"><value>Activate the other window</value></data>
+  <data name="Dieses Fenster bleibt leer." xml:space="preserve"><value>This window stays empty.</value></data>
+  <data name="Dieses Fenster zeigt weiter die aktuelle Datei." xml:space="preserve"><value>This window keeps showing the current file.</value></data>
+  <data name="Nächste freie Datei anzeigen" xml:space="preserve"><value>Show the next free file</value></data>
+  <data name="Datei überspringen" xml:space="preserve"><value>Skip this file</value></data>
+  <data name="Gelöschte Datei wiederherstellen" xml:space="preserve"><value>Restore the deleted file</value></data>
+  <data name="Programm beenden" xml:space="preserve"><value>Exit the program</value></data>
+  <data name="PDFlight wird geschlossen." xml:space="preserve"><value>PDFlight will be closed.</value></data>
 </root>

@@ -274,6 +274,38 @@ internal static class TaskDlg
         ("2× Esc / Umschalt+Esc", "Programm beenden (Option)", null),
     ];
 
+    public enum ConflictChoice { Cancel, Activate, Alternative, Undo, Exit }
+
+    /// <summary>Die gewünschte Datei zeigt schon eine andere PDFlight-Instanz an (Nachrücken nach dem Löschen,
+    /// Blättern). Zur Wahl: das andere Fenster aktivieren (activateDetail sagt, was hier dann passiert), stattdessen
+    /// die Datei alternative nehmen (null = keine freie Datei), die gelöschte Datei restorePath wiederherstellen
+    /// (null = nicht möglich) und das Programm beenden (offerExit); Abbrechen lässt alles, wie es ist.</summary>
+    public static ConflictChoice OpenConflictTaskDlg(nint hwnd, string heading, string file, string activateDetail, string alternativeText, string alternative, string restorePath, bool offerExit)
+    {
+        TaskDialogButton activateButton = new TaskDialogCommandLinkButton(Lng.T("Anderes Fenster aktivieren"), activateDetail);
+        TaskDialogButton alternativeButton = alternative == null ? null : new TaskDialogCommandLinkButton(alternativeText, alternative);
+        TaskDialogButton restoreButton = restorePath == null ? null : new TaskDialogCommandLinkButton(Lng.T("Gelöschte Datei wiederherstellen"), restorePath);
+        TaskDialogButton exitButton = offerExit ? new TaskDialogCommandLinkButton(Lng.T("Programm beenden"), Lng.T("PDFlight wird geschlossen.")) : null;
+        var page = new TaskDialogPage()
+        {
+            Caption = Application.ProductName,
+            Heading = heading,
+            Text = Lng.T("Diese Datei wird bereits in einem anderen PDFlight-Fenster angezeigt:") + "\n" + file,
+            Icon = TaskDialogIcon.Information,
+            AllowCancel = true,
+            SizeToContent = true
+        };
+        foreach (var button in new[] { activateButton, alternativeButton, restoreButton, exitButton }.Where(b => b != null)) { page.Buttons.Add(button); }
+        page.Buttons.Add(TaskDialogButton.Cancel);
+        page.DefaultButton = activateButton;
+        var result = TaskDialog.ShowDialog(hwnd, page);
+        return result == activateButton ? ConflictChoice.Activate
+            : result == alternativeButton ? ConflictChoice.Alternative
+            : result == restoreButton ? ConflictChoice.Undo
+            : result == exitButton ? ConflictChoice.Exit
+            : ConflictChoice.Cancel;
+    }
+
     /// <summary>Kürzel-Übersicht (F1 und Info-Menü): erstellt die PDF-Übersicht im Downloads-Ordner und
     /// zeigt sie in einer neuen PDFlight-Instanz an — das aktuelle Dokument bleibt ungestört. Existiert
     /// die Datei schon, fragt ein Dialog, ob sie geöffnet oder neu erstellt werden soll.</summary>
