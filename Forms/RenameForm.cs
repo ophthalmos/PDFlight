@@ -224,6 +224,7 @@ public partial class RenameForm : Form
 
     private void ListView_BeforeLabelEdit(object sender, LabelEditEventArgs e)
     {
+        LabelEditGuard.Pin(listView); // WinForms-Bug: sonst droht nach der Bearbeitung ein FailFast-Absturz
         if (string.Equals(listView.Items[e.Item].Name, fileInfo.FullName, StringComparison.OrdinalIgnoreCase)) { e.CancelEdit = true; } // aktuelle Datei nur übers Namensfeld
         else { filenameBeforeListEdit = listView.Items[e.Item].Text; }
     }
