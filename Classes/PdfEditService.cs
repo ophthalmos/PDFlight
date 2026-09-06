@@ -101,7 +101,7 @@ internal static partial class PdfEditService
     }
 
     /// <summary>True, wenn sich die Datei mit dem Kennwort öffnen lässt (null/leer = ohne Kennwort).</summary>
-    public static bool CanOpen(string path, string password)
+    public static bool CanOpen(string path, string? password)
     {
         try
         {

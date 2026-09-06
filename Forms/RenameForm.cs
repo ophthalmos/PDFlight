@@ -189,7 +189,7 @@ public partial class RenameForm : Form
         if (e.ClickedItem == null) { return; }
         var index = btnDateMenu.Items.IndexOf(e.ClickedItem);
         var split = btnDateMenu.Items.Count / 2;
-        var date = e.ClickedItem.Text.Trim();
+        var date = (e.ClickedItem.Text ?? string.Empty).Trim();
         var name = NameWithoutPdf();
         name = DatePrefixRegex().Replace(name, ""); // vorhandenes Datums-Präfix ersetzen
         name = DateSuffixRegex().Replace(name, ""); // vorhandenes Datums-Suffix ersetzen

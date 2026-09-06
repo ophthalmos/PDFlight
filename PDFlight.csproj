@@ -6,7 +6,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
-    <Nullable>disable</Nullable>
+    <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <UseWPF>true</UseWPF><!-- nur für UIAutomationClient (Seitenzahl aus der Viewer-Toolbar lesen) -->
     <ImplicitUsings>enable</ImplicitUsings>
