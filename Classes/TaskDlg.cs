@@ -12,7 +12,7 @@ namespace PDFLight.Classes;
 /// ConfirmTaskDlg, AboutTaskDlg und die ErrTaskDlg-Variante mit fachlicher Überschrift ergänzen sie im selben Stil.</summary>
 internal static class TaskDlg
 {
-    public static void MsgTaskDlg(nint hwnd, string heading, string message, TaskDialogIcon icon = null)
+    public static void MsgTaskDlg(nint hwnd, string heading, string? message, TaskDialogIcon? icon = null)
     {
         TaskDialog.ShowDialog(hwnd, new TaskDialogPage() { Caption = Application.ProductName, SizeToContent = true, Heading = heading, Text = message, Icon = icon ?? TaskDialogIcon.None, AllowCancel = true, Buttons = { TaskDialogButton.OK } });
     }
@@ -64,7 +64,7 @@ internal static class TaskDlg
 
     /// <summary>Ja/Nein-Frage; true nur bei ausdrücklichem Ja (Abbrechen/Esc zählt als Nein).
     /// Mit defaultNo steht der Fokus auf "Nein" — für destruktive Aktionen wie das Ersetzen von Dateien.</summary>
-    public static bool ConfirmTaskDlg(nint hwnd, string heading, string message, TaskDialogIcon icon = null, bool defaultNo = false)
+    public static bool ConfirmTaskDlg(nint hwnd, string heading, string? message, TaskDialogIcon? icon = null, bool defaultNo = false)
     {
         TaskDialogPage page = new() { Caption = Application.ProductName, SizeToContent = true, Heading = heading, Text = message, Icon = icon ?? TaskDialogIcon.None, AllowCancel = true, Buttons = { TaskDialogButton.Yes, TaskDialogButton.No } };
         if (defaultNo) { page.DefaultButton = page.Buttons[1]; }
@@ -73,7 +73,7 @@ internal static class TaskDlg
 
     /// <summary>Ja/Nein-Frage mit Kontrollkästchen (z.B. "Immer fragen"); verificationChecked
     /// gibt den Anfangszustand vor und liefert den Endzustand zurück.</summary>
-    public static bool ConfirmTaskDlg(nint hwnd, string heading, string message, string verificationText, ref bool verificationChecked, TaskDialogIcon icon = null, bool defaultNo = false)
+    public static bool ConfirmTaskDlg(nint hwnd, string heading, string? message, string verificationText, ref bool verificationChecked, TaskDialogIcon? icon = null, bool defaultNo = false)
     {
         TaskDialogPage page = new()
         {
@@ -163,7 +163,7 @@ internal static class TaskDlg
             Buttons = { TaskDialogButton.Close }
         };
         var urlString = WebsiteUrl; // Fallback: die Webseite, falls die XML keinen Download-Link nennt
-        Version updateVersion = null;
+        Version? updateVersion = null;
         var dateString = string.Empty;
         var failed = false;
         Cursor.Current = Cursors.WaitCursor; // die Abfrage dauert im Normalfall unter einer Sekunde
@@ -201,7 +201,7 @@ internal static class TaskDlg
             updatePage.Text = Lng.T("Die Versionsangabe in der Update-Datei konnte nicht gelesen werden.");
         }
         if (failed) { updatePage.Icon = TaskDialogIcon.Error; }
-        else if (curVersion != null && updateVersion.CompareTo(curVersion) > 0)
+        else if (curVersion != null && updateVersion!.CompareTo(curVersion) > 0) // updateVersion == null ist oben als failed abgefangen
         {
             updatePage.Heading = Lng.T("Es steht ein Update zur Verfügung!");
             updatePage.Text = "Version " + updateVersion + (dateString.Length > 0 ? " " + Lng.T("vom") + " " + dateString : string.Empty);
@@ -232,7 +232,7 @@ internal static class TaskDlg
     /// <summary>Alle Tastenkürzel: Kürzel, Kurztext und optionale Zusatzerklärung (nur wo nötig) für die
     /// PDF-Übersicht. Sortiert nach Tastenart: F-Tasten, Strg+Zahl, Strg+Buchstabe (alphabetisch),
     /// Strg+Sondertaste, Strg+Umschalt+Buchstabe, Strg+Umschalt+Sondertaste, Übrige.</summary>
-    public static readonly (string Key, string Text, string Detail)[] ShortcutRows =
+    public static readonly (string Key, string Text, string? Detail)[] ShortcutRows =
     [
         // F-Tasten
         ("F1", "diese Kürzel-Übersicht", null),
@@ -280,12 +280,12 @@ internal static class TaskDlg
     /// Blättern). Zur Wahl: das andere Fenster aktivieren (activateDetail sagt, was hier dann passiert), stattdessen
     /// die Datei alternative nehmen (null = keine freie Datei), die gelöschte Datei restorePath wiederherstellen
     /// (null = nicht möglich) und das Programm beenden (offerExit); Abbrechen lässt alles, wie es ist.</summary>
-    public static ConflictChoice OpenConflictTaskDlg(nint hwnd, string heading, string file, string activateDetail, string alternativeText, string alternative, string restorePath, bool offerExit)
+    public static ConflictChoice OpenConflictTaskDlg(nint hwnd, string heading, string file, string activateDetail, string alternativeText, string? alternative, string? restorePath, bool offerExit)
     {
         TaskDialogButton activateButton = new TaskDialogCommandLinkButton(Lng.T("Anderes Fenster aktivieren"), activateDetail);
-        TaskDialogButton alternativeButton = alternative == null ? null : new TaskDialogCommandLinkButton(alternativeText, alternative);
-        TaskDialogButton restoreButton = restorePath == null ? null : new TaskDialogCommandLinkButton(Lng.T("Gelöschte Datei wiederherstellen"), restorePath);
-        TaskDialogButton exitButton = offerExit ? new TaskDialogCommandLinkButton(Lng.T("Programm beenden"), Lng.T("PDFlight wird geschlossen.")) : null;
+        TaskDialogButton? alternativeButton = alternative == null ? null : new TaskDialogCommandLinkButton(alternativeText, alternative);
+        TaskDialogButton? restoreButton = restorePath == null ? null : new TaskDialogCommandLinkButton(Lng.T("Gelöschte Datei wiederherstellen"), restorePath);
+        TaskDialogButton? exitButton = offerExit ? new TaskDialogCommandLinkButton(Lng.T("Programm beenden"), Lng.T("PDFlight wird geschlossen.")) : null;
         var page = new TaskDialogPage()
         {
             Caption = Application.ProductName,
@@ -295,7 +295,7 @@ internal static class TaskDlg
             AllowCancel = true,
             SizeToContent = true
         };
-        foreach (var button in new[] { activateButton, alternativeButton, restoreButton, exitButton }.Where(b => b != null)) { page.Buttons.Add(button); }
+        foreach (var button in new[] { activateButton, alternativeButton, restoreButton, exitButton }.OfType<TaskDialogButton>()) { page.Buttons.Add(button); }
         page.Buttons.Add(TaskDialogButton.Cancel);
         page.DefaultButton = activateButton;
         var result = TaskDialog.ShowDialog(hwnd, page);

@@ -14,7 +14,7 @@ public partial class PageRangeForm : Form
     /// <summary>+90 (rechts), -90 (links) oder 180 Grad — nur relevant, wenn der Dialog mit Drehoptionen angezeigt wird.</summary>
     public int RotationDelta => radioLeft.Checked ? -90 : radioTurn.Checked ? 180 : 90;
 
-    public PageRangeForm(string title, int pageCount, bool emptyMeansAll, bool showRotation, string defaultRange = null, string infoText = null)
+    public PageRangeForm(string title, int pageCount, bool emptyMeansAll, bool showRotation, string? defaultRange = null, string? infoText = null)
     {
         InitializeComponent();
         Lng.Apply(this);
