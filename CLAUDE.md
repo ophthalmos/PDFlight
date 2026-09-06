@@ -13,7 +13,7 @@ Der sichtbare Name ist **PDFlight** (kleines l — Doppeldeutigkeit light/Flight
 ## Aufbau
 
 - `Forms\MainForm` — Hauptfenster, Toolbar, Hotkeys; Dialoge: SettingsForm, RenameForm, PageRangeForm, PasswordForm, PropertiesForm, FolderSelectForm.
-- `Classes\` — PdfViewHost (WebView2 + UI-Automation), PdfEditService (PDFsharp), AppSettings (JSON in `%APPDATA%\PDFlight`), Lng (Mehrsprachigkeit), TaskDlg (alle Dialoge), ShellUtil, MailSender/MapiMailer, ToolbarIcons (Segoe-MDL2-Glyphen), ShortcutsPdf, FileUtil, ProgramFinder.
+- `Classes\` — PdfViewHost (WebView2 + UI-Automation), PdfEditService (PDFsharp), AppSettings (JSON in `%APPDATA%\PDFlight`), Lng (Mehrsprachigkeit), TaskDlg (alle Dialoge), ShellUtil, InstanceRegistry (welche Datei andere Instanzen anzeigen – Konfliktdialog beim Nachrücken nach dem Löschen und beim Blättern), MailSender/MapiMailer, ToolbarIcons (Segoe-MDL2-Glyphen), ShortcutsPdf, FileUtil, ProgramFinder.
 - `Controls\` — FolderTreeView, PathEditBox, FolderHistoryToolBar (eigene Controls, Ersatz für ShellBrowser.NET).
 - `Languages\` — `lng.resx` (Deutsch, einkompilierter Rückfall) und `lng.<kultur>.resx` für en/fr/es.
 

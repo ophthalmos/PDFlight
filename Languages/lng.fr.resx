@@ -414,4 +414,15 @@ d'installation pour installer la dernière version.</value></data>
   <data name="geändert" xml:space="preserve"><value>modifié</value></data>
   <data name="Anwendung:" xml:space="preserve"><value>Application :</value></data>
   <data name="PDF-Produzent:" xml:space="preserve"><value>Producteur PDF :</value></data>
+  <data name="Die nächste Datei ist bereits geöffnet" xml:space="preserve"><value>Le fichier suivant est déjà ouvert</value></data>
+  <data name="Die vorherige Datei ist bereits geöffnet" xml:space="preserve"><value>Le fichier précédent est déjà ouvert</value></data>
+  <data name="Diese Datei wird bereits in einem anderen PDFlight-Fenster angezeigt:" xml:space="preserve"><value>Ce fichier est déjà affiché dans une autre fenêtre PDFlight :</value></data>
+  <data name="Anderes Fenster aktivieren" xml:space="preserve"><value>Activer l'autre fenêtre</value></data>
+  <data name="Dieses Fenster bleibt leer." xml:space="preserve"><value>Cette fenêtre reste vide.</value></data>
+  <data name="Dieses Fenster zeigt weiter die aktuelle Datei." xml:space="preserve"><value>Cette fenêtre continue d'afficher le fichier actuel.</value></data>
+  <data name="Nächste freie Datei anzeigen" xml:space="preserve"><value>Afficher le prochain fichier libre</value></data>
+  <data name="Datei überspringen" xml:space="preserve"><value>Ignorer ce fichier</value></data>
+  <data name="Gelöschte Datei wiederherstellen" xml:space="preserve"><value>Restaurer le fichier supprimé</value></data>
+  <data name="Programm beenden" xml:space="preserve"><value>Quitter le programme</value></data>
+  <data name="PDFlight wird geschlossen." xml:space="preserve"><value>PDFlight va se fermer.</value></data>
 </root>

@@ -29,6 +29,7 @@ public partial class MainForm : Form
         catch (Exception ex) when (ex is ArgumentException or IOException) { }
         this.startFile = startFile;
         CleanupUndoBackups(); // verwaiste Undo-Sicherungen früherer Instanzen entsorgen
+        InstanceRegistry.Cleanup(); // ebenso deren Meldungen, welche Datei sie anzeigten
         settings = AppSettings.Load();
         Lng.Initialize(settings.Language); // vor PdfViewHost (Viewer-Sprache) und vor allen Dialogen
         Lng.Apply(this);
@@ -92,6 +93,7 @@ public partial class MainForm : Form
     {
         try { File.Delete(OwnUndoBackup); } // die eigene Undo-Sicherung wird beim Beenden entsorgt
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // sonst räumt sie der nächste Start ab
+        InstanceRegistry.Clear(); // diese Instanz zeigt nichts mehr an
         SetFullScreen(false); // sonst würden randlose Vollbild-Maße gespeichert
         settings.ReloadSharedLists(); // Listenänderungen anderer Instanzen nicht überschreiben
         settings.LastFile = currentFile?.FullName ?? string.Empty;
@@ -332,6 +334,7 @@ public partial class MainForm : Form
     private void UpdateUiState()
     {
         var hasFile = currentFile != null;
+        InstanceRegistry.Publish(currentFile?.FullName); // den anderen Instanzen melden, welche Datei hier offen ist
         Text = hasFile ? (settings.ShowFullPathInTitle ? currentFile.FullName : currentFile.Name) + " – PDFlight" : "PDFlight";
         splitButtonMove.Enabled = btnCopy.Enabled = btnRename.Enabled = btnDelete.Enabled = btnShowInFolder.Enabled = ddbEdit.Enabled = btnPrint.Enabled = btnEmail.Enabled = hasFile;
         // PDF/A-Schutz: verändernde Operationen bleiben gesperrt, bis „Bearbeitung aktivieren“ gedrückt wurde;
@@ -540,21 +543,64 @@ public partial class MainForm : Form
             index = files.FindIndex(f => string.Equals(f, reference, StringComparison.OrdinalIgnoreCase));
         }
         var next = (index + step + files.Count) % files.Count;
-        if (next != index && !string.Equals(files[next], currentFile.FullName, StringComparison.OrdinalIgnoreCase)) { LoadPdf(files[next]); }
+        if (next == index || string.Equals(files[next], currentFile.FullName, StringComparison.OrdinalIgnoreCase)) { return; }
+        var pid = InstanceRegistry.FindInstanceShowing(files[next]);
+        if (pid == null) { LoadPdf(files[next]); return; }
+        // Die Zieldatei steht schon in einem anderen Fenster — nachfragen statt sie doppelt anzuzeigen
+        var alternative = FindFreeFile(files, next, step, currentFile.FullName);
+        var choice = TaskDlg.OpenConflictTaskDlg(Handle, step > 0 ? Lng.T("Die nächste Datei ist bereits geöffnet") : Lng.T("Die vorherige Datei ist bereits geöffnet"),
+            files[next], Lng.T("Dieses Fenster zeigt weiter die aktuelle Datei."), Lng.T("Datei überspringen"), alternative, restorePath: null, offerExit: false);
+        if (choice == TaskDlg.ConflictChoice.Activate && !InstanceRegistry.Activate(pid.Value)) { LoadPdf(files[next]); } // das andere Fenster ist inzwischen weg → hier anzeigen
+        else if (choice == TaskDlg.ConflictChoice.Alternative) { LoadPdf(alternative); }
     }
 
-    /// <summary>Nach Verschieben/Löschen: nächste Datei an gleicher Position laden oder Anzeige leeren.</summary>
+    /// <summary>Nach dem Löschen: nächste Datei an gleicher Position laden oder Anzeige leeren. Zeigt eine
+    /// andere Instanz die nachrückende Datei bereits an, entscheidet ein Dialog, wie es weitergeht.</summary>
     private void LoadNextAfterRemoval(List<string> files, int removedIndex)
     {
         if (removedIndex >= 0) { files.RemoveAt(removedIndex); } else { removedIndex = 0; }
-        if (files.Count == 0)
+        if (files.Count == 0) { ClearDisplay(Lng.T("Der Ordner enthält keine weiteren PDF-Dateien.")); return; }
+        var nextIndex = removedIndex % files.Count;
+        var next = files[nextIndex];
+        var pid = InstanceRegistry.FindInstanceShowing(next);
+        if (pid == null) { LoadPdf(next); return; }
+        var alternative = FindFreeFile(files, nextIndex, 1, null);
+        var restorePath = undoAction?.Kind == UndoKind.Delete ? undoAction.TargetFile : null; // Wiederherstellen nur mit Papierkorb-Eintrag
+        currentFile = null; // sonst meldet MainForm_Activated nach dem Dialog die gelöschte Datei als extern verschwunden
+        switch (TaskDlg.OpenConflictTaskDlg(Handle, Lng.T("Die nächste Datei ist bereits geöffnet"), next, Lng.T("Dieses Fenster bleibt leer."),
+            Lng.T("Nächste freie Datei anzeigen"), alternative, restorePath, offerExit: true))
         {
-            currentFile = null;
-            viewHost.CloseDocument();
-            UpdateUiState();
-            statusPath.Text = Lng.T("Der Ordner enthält keine weiteren PDF-Dateien.");
+            case TaskDlg.ConflictChoice.Activate:
+                if (InstanceRegistry.Activate(pid.Value)) { ClearDisplay(Lng.T("Die Datei wurde in den Papierkorb verschoben.")); }
+                else { LoadPdf(next); } // das andere Fenster ist inzwischen weg → hier anzeigen
+                break;
+            case TaskDlg.ConflictChoice.Alternative: LoadPdf(alternative); break;
+            case TaskDlg.ConflictChoice.Undo: UndoLastChange(); break;
+            case TaskDlg.ConflictChoice.Exit: Close(); break;
+            default: ClearDisplay(Lng.T("Die Datei wurde in den Papierkorb verschoben.")); break; // Abbruch: leer, Strg+Z holt die Datei zurück
         }
-        else { LoadPdf(files[removedIndex % files.Count]); }
+    }
+
+    /// <summary>Anzeige leeren (kein Dateibezug mehr) und den Grund in der Statusleiste nennen.</summary>
+    private void ClearDisplay(string status)
+    {
+        currentFile = null;
+        viewHost.CloseDocument();
+        UpdateUiState();
+        statusPath.Text = status;
+    }
+
+    /// <summary>Erste Datei ab start in Schrittrichtung (mit Umlauf), die keine andere Instanz anzeigt
+    /// und nicht exclude ist — null, wenn es keine gibt.</summary>
+    private static string FindFreeFile(List<string> files, int start, int step, string exclude)
+    {
+        for (var i = 1; i < files.Count; i++)
+        {
+            var candidate = files[((start + i * step) % files.Count + files.Count) % files.Count];
+            if (string.Equals(candidate, exclude, StringComparison.OrdinalIgnoreCase)) { continue; }
+            if (!InstanceRegistry.IsShownElsewhere(candidate)) { return candidate; }
+        }
+        return null;
     }
 
     // ------------------------------------------------------------------ Verschieben / Kopieren
@@ -954,13 +1000,7 @@ public partial class MainForm : Form
         Cursor.Current = Cursors.Default;
         SetUndoAction(recycled == null ? null : new UndoAction(UndoKind.Delete, Lng.T("In den Papierkorb verschieben"), deletedPath, recycled));
         if (settings.OpenNextAfterDelete) { LoadNextAfterRemoval(files, index); }
-        else
-        {
-            currentFile = null; // Anzeige bewusst leeren (Option) — Strg+Z holt die Datei zurück
-            viewHost.CloseDocument();
-            UpdateUiState();
-            statusPath.Text = Lng.T("Die Datei wurde in den Papierkorb verschoben.");
-        }
+        else { ClearDisplay(Lng.T("Die Datei wurde in den Papierkorb verschoben.")); } // Anzeige bewusst leeren (Option) — Strg+Z holt die Datei zurück
     }
 
     private void ShowInFolder()
@@ -1349,7 +1389,7 @@ public partial class MainForm : Form
             foreach (var file in Directory.GetFiles(UndoFolder, "undo*.pdf"))
             {
                 var name = Path.GetFileNameWithoutExtension(file);
-                if (name.StartsWith("undo-", StringComparison.Ordinal) && int.TryParse(name[5..], out var pid) && ProcessExists(pid)) { continue; }
+                if (name.StartsWith("undo-", StringComparison.Ordinal) && int.TryParse(name[5..], out var pid) && InstanceRegistry.ProcessExists(pid)) { continue; }
                 try { File.Delete(file); }
                 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // gesperrt? Dann beim nächsten Start
             }
@@ -1357,11 +1397,6 @@ public partial class MainForm : Form
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
     }
 
-    private static bool ProcessExists(int pid)
-    {
-        try { using var process = Process.GetProcessById(pid); return true; }
-        catch (ArgumentException) { return false; }
-    }
 
     // ------------------------------------------------------------------ Externe Programme
 
