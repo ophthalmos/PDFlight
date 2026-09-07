@@ -45,24 +45,23 @@ internal static partial class ShortcutsPdf
         y += 26;
         var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3);
         gfx.DrawString("Version " + version + " – " + DateTime.Now.ToString("d", System.Globalization.CultureInfo.GetCultureInfo(Lng.CultureCode)), subFont, detailBrush, Margin, y + 9);
-        y += 30;
-        y = Math.Max(y, Margin - 4 + iconHeight + 12); // der Hinweiskasten beginnt unterhalb des Icons
+        y += 22;
+        // Abschnittsüberschrift links neben dem Icon, etwa auf Höhe seines unteren Randes; die Tabelle beginnt darunter
+        var iconBottom = Margin - 4 + iconHeight;
+        var headingY = Math.Max(y, iconBottom - 20);
+        gfx.DrawString(Lng.T("Tastenkürzel"), sectionFont, new XSolidBrush(Accent), Margin, headingY + 12);
+        y = Math.Max(headingY + 22, iconBottom + 8);
 
-        y = DrawNoteBox(gfx, Margin, y, width) + 20;
-
-        // Abschnittsüberschrift der Kürzeltabelle
-        gfx.DrawString(Lng.T("Tastenkürzel"), sectionFont, new XSolidBrush(Accent), Margin, y + 12);
-        gfx.DrawLine(new XPen(RuleColor, 0.7), Margin, y + 18, Margin + width, y + 18);
-        y += 27;
-
-        // Zeilenhöhe so wählen, dass die Tabelle auf die Seite passt (12–17 Punkt); die Erklärungszeilen
-        // (nur wo hinterlegt, z.B. F7) haben feste Höhe
+        // Zeilenhöhe so wählen, dass Tabelle und Hinweiskasten auf die Seite passen (12–17 Punkt); die
+        // Erklärungszeilen (nur wo hinterlegt, z.B. F7) und der Kasten haben feste Höhe
         var rows = TaskDlg.ShortcutRows;
         var detailLines = rows.Select(r => r.Detail == null ? null : Wrap(gfx, Lng.T(r.Detail), detailFont, width - DetailIndent)).ToList();
         var detailHeight = detailLines.Sum(l => l == null ? 0 : l.Count * 12 + 4);
+        var noteLines = NoteBoxLines(gfx, width);
+        var noteHeight = NoteBoxHeight(noteLines);
         var footerTop = page.Height.Point - FooterHeight - 6;
-        var rowHeight = Math.Clamp(Math.Floor((footerTop - y - detailHeight) / rows.Length), 12, 17);
-        var fontSize = rowHeight < 15 ? 9 : 10;
+        var rowHeight = Math.Clamp((footerTop - y - detailHeight - NoteGap - noteHeight) / rows.Length, 12, 17);
+        var fontSize = rowHeight >= 15 ? 10 : rowHeight >= 13.5 ? 9.5 : 9;
         XFont keyFont = new("Segoe UI", fontSize, XFontStyleEx.Bold);
         XFont textFont = new("Segoe UI", fontSize);
 
@@ -93,50 +92,67 @@ internal static partial class ShortcutsPdf
                 y += 4;
             }
         }
+        y += NoteGap;
+        if (y + noteHeight > footerTop) // zur Sicherheit — planmäßig eine Seite
+        {
+            DrawFooter(gfx, page);
+            gfx.Dispose();
+            page = document.AddPage();
+            gfx = XGraphics.FromPdfPage(page);
+            DrawPageBackground(gfx, page);
+            y = Margin;
+        }
+        DrawNoteBox(gfx, Margin, y, width, noteLines, noteHeight);
         DrawFooter(gfx, page);
         gfx.Dispose();
         document.Save(path);
         return path;
     }
 
-    /// <summary>Hinweiskasten „Anzeigen und Bearbeiten“: abgerundete, hellblaue Fläche mit Überschrift in der
-    /// Akzentfarbe und drei Absätzen. Liefert die Unterkante des Kastens.</summary>
-    private static double DrawNoteBox(XGraphics gfx, double x, double y, double width)
+    // Hinweiskasten unter der Kürzeltabelle: Anzeige aus dem Speicher, Viewer-Werkzeuge ohne Wirkung auf die
+    // Datei, Bearbeiten-Befehle mit sofortigem Speichern
+    private const double NoteGap = 16;
+    private const double NotePad = 12;
+    private const double NoteLineHeight = 12.5;
+    private const double NoteParagraphGap = 5;
+    private static readonly XFont NoteFont = new("Segoe UI", 9);
+
+    /// <summary>Die drei Absätze des Hinweiskastens, auf die Kastenbreite umbrochen.</summary>
+    private static List<List<string>> NoteBoxLines(XGraphics gfx, double width)
     {
-        const double Pad = 12;
-        const double LineHeight = 12.5;
-        const double ParagraphGap = 5;
-        XFont headFont = new("Segoe UI", 10.5, XFontStyleEx.Bold);
-        XFont font = new("Segoe UI", 9);
         string[] paragraphs =
         [
             Lng.T("PDFlight lädt die Datei zum Anzeigen in den Arbeitsspeicher. Die Datei selbst bleibt dabei frei: andere Programme können sie jederzeit ändern oder verschieben. Wird sie geändert, zeigt PDFlight den neuen Stand, sobald du zum Fenster zurückkehrst."),
             Lng.T("Die Werkzeuge in der Anzeige (Zoom, Ansicht drehen, Suchen) verändern nur die Darstellung, nie die Datei. Alles, was du dort drehst, ist beim nächsten Öffnen wieder wie vorher."),
             Lng.T("Die Befehle im Menü „Bearbeiten“ und in der Symbolleiste (Seiten löschen oder drehen, anhängen, Kennwort, Eigenschaften) ändern die Datei dagegen wirklich – und zwar sofort, ohne gesonderten Speichern-Schritt. Einen Fehlgriff machst du mit Strg+Z rückgängig."),
         ];
-        var lines = paragraphs.Select(p => Wrap(gfx, p, font, width - 2 * Pad)).ToList();
-        var height = Pad + 18 + lines.Sum(l => l.Count * LineHeight) + (lines.Count - 1) * ParagraphGap + Pad;
+        return paragraphs.Select(p => Wrap(gfx, p, NoteFont, width - 2 * NotePad)).ToList();
+    }
+
+    private static double NoteBoxHeight(List<List<string>> lines) =>
+        NotePad + lines.Sum(l => l.Count * NoteLineHeight) + (lines.Count - 1) * NoteParagraphGap + NotePad;
+
+    /// <summary>Zeichnet den Hinweiskasten: abgerundete, hellblaue Fläche mit den drei Absätzen.</summary>
+    private static void DrawNoteBox(XGraphics gfx, double x, double y, double width, List<List<string>> lines, double height)
+    {
         gfx.DrawRoundedRectangle(new XPen(RuleColor, 0.7), new XSolidBrush(XColor.FromArgb(0xEA, 0xF2, 0xFA)), x, y, width, height, 10, 10);
-        var ty = y + Pad;
-        gfx.DrawString(Lng.T("Anzeigen und Bearbeiten – ein Hinweis"), headFont, new XSolidBrush(Accent), x + Pad, ty + 10);
-        ty += 18;
+        var ty = y + NotePad;
         foreach (var paragraph in lines)
         {
             foreach (var line in paragraph)
             {
-                gfx.DrawString(line, font, XBrushes.Black, x + Pad, ty + 9);
-                ty += LineHeight;
+                gfx.DrawString(line, NoteFont, XBrushes.Black, x + NotePad, ty + 9);
+                ty += NoteLineHeight;
             }
-            ty += ParagraphGap;
+            ty += NoteParagraphGap;
         }
-        return y + height;
     }
 
     /// <summary>Fußzeile: Trennlinie, darunter zentriert Copyright und die Webadresse als klickbarer Link.</summary>
     private static void DrawFooter(XGraphics gfx, PdfSharp.Pdf.PdfPage page)
     {
-        const string LinkText = "www.netradio.info";
-        const string LinkUrl = "https://www.netradio.info/pdf/";
+        const string LinkText = "www.netradio.de/pdf";
+        const string LinkUrl = "https://www.netradio.de/pdf/";
         XFont font = new("Segoe UI", 9);
         var lineY = page.Height.Point - FooterHeight;
         gfx.DrawLine(new XPen(RuleColor, 0.7), Margin, lineY, page.Width.Point - Margin, lineY);
