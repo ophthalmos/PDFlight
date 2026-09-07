@@ -293,10 +293,6 @@ un autre fichier PDF peut être annexé.</value></data>
   <data name="Hilfe" xml:space="preserve"><value>Aide</value></data>
   <data name="Nach Updates suchen …" xml:space="preserve"><value>Rechercher des mises à jour…</value></data>
   <data name="Über PDFlight …" xml:space="preserve"><value>À propos de PDFlight…</value></data>
-  <data name="Vorhandene öffnen" xml:space="preserve"><value>Ouvrir l'existant</value></data>
-  <data name="Neu erstellen" xml:space="preserve"><value>Créer à nouveau</value></data>
-  <data name="z.B. nach einem Update oder Sprachwechsel" xml:space="preserve"><value>p. ex. après une mise à jour ou un changement de langue</value></data>
-  <data name="Die PDF-Übersicht konnte nicht erstellt werden." xml:space="preserve"><value>L'aperçu PDF n'a pas pu être créé.</value></data>
   <data name="Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert – Markieren ganz ohne Maus." xml:space="preserve"><value>Place un curseur de texte dans le document : les flèches le déplacent, Maj+flèches sélectionnent, Ctrl+C copie – sélectionner sans souris.</value></data>
   <data name="Tastenkürzel" xml:space="preserve"><value>Raccourcis clavier</value></data>
   <data name="PDFlightSetup.exe herunterladen" xml:space="preserve"><value>Télécharger PDFlightSetup.exe</value></data>
@@ -421,7 +417,6 @@ d'installation pour installer la dernière version.</value></data>
   <data name="Programm beenden" xml:space="preserve"><value>Quitter le programme</value></data>
   <data name="PDFlight wird geschlossen." xml:space="preserve"><value>PDFlight va se fermer.</value></data>
   <data name="PDFlight-Hilfe" xml:space="preserve"><value>PDFlight-Aide</value></data>
-  <data name="Hilfedatei bereits vorhanden" xml:space="preserve"><value>Le fichier d'aide existe déjà</value></data>
   <data name="diese Hilfedatei (PDF)" xml:space="preserve"><value>ce fichier d'aide (PDF)</value></data>
   <data name="Hilfedatei (PDF) …" xml:space="preserve"><value>Fichier d'aide (PDF)…</value></data>
   <data name="PDFlight lädt die Datei zum Anzeigen in den Arbeitsspeicher. Die Datei selbst bleibt dabei frei: andere Programme können sie jederzeit ändern oder verschieben. Wird sie geändert, zeigt PDFlight den neuen Stand, sobald du zum Fenster zurückkehrst." xml:space="preserve"><value>PDFlight charge le fichier en mémoire pour l'afficher. Le fichier lui-même reste libre : d'autres programmes peuvent le modifier ou le déplacer à tout moment. S'il est modifié, PDFlight affiche la nouvelle version dès que tu reviens à la fenêtre.</value></data>
