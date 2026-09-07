@@ -291,15 +291,12 @@ del PDF o extraerlas a un archivo nuevo, y se puede
 anexar otro archivo PDF.</value></data>
   <data name="Anerkennung spenden via PayPal" xml:space="preserve"><value>Donar mediante PayPal</value></data>
   <data name="Hilfe" xml:space="preserve"><value>Ayuda</value></data>
-  <data name="Tastenkürzel …" xml:space="preserve"><value>Atajos de teclado…</value></data>
   <data name="Nach Updates suchen …" xml:space="preserve"><value>Buscar actualizaciones…</value></data>
   <data name="Über PDFlight …" xml:space="preserve"><value>Acerca de PDFlight…</value></data>
   <data name="Vorhandene öffnen" xml:space="preserve"><value>Abrir el existente</value></data>
   <data name="Neu erstellen" xml:space="preserve"><value>Crear de nuevo</value></data>
   <data name="z.B. nach einem Update oder Sprachwechsel" xml:space="preserve"><value>p. ej., tras una actualización o un cambio de idioma</value></data>
-  <data name="Kürzel-Übersicht bereits vorhanden" xml:space="preserve"><value>El resumen de atajos ya existe</value></data>
   <data name="Die PDF-Übersicht konnte nicht erstellt werden." xml:space="preserve"><value>No se pudo crear el resumen en PDF.</value></data>
-  <data name="PDFlight-Tastenkürzel" xml:space="preserve"><value>Atajos-de-teclado-PDFlight</value></data>
   <data name="Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert – Markieren ganz ohne Maus." xml:space="preserve"><value>Coloca un cursor de texto en el documento: las flechas lo mueven, Mayús+flechas seleccionan, Ctrl+C copia; seleccionar sin ratón.</value></data>
   <data name="Tastenkürzel" xml:space="preserve"><value>Atajos de teclado</value></data>
   <data name="PDFlightSetup.exe herunterladen" xml:space="preserve"><value>Descargar PDFlightSetup.exe</value></data>
@@ -336,7 +333,6 @@ para instalar la última versión.</value></data>
   <data name="Dokument drucken" xml:space="preserve"><value>imprimir el documento</value></data>
   <data name="Vollbild ein/aus" xml:space="preserve"><value>pantalla completa sí/no</value></data>
   <data name="Programm beenden (Option)" xml:space="preserve"><value>cerrar el programa (opción)</value></data>
-  <data name="diese Kürzel-Übersicht" xml:space="preserve"><value>este resumen de atajos</value></data>
 
   <!-- Umbenennen-Dialog -->
   <data name="&amp;Neuer Dateiname:" xml:space="preserve"><value>&amp;Nuevo nombre de archivo:</value></data>
@@ -424,4 +420,12 @@ para instalar la última versión.</value></data>
   <data name="Gelöschte Datei wiederherstellen" xml:space="preserve"><value>Restaurar el archivo eliminado</value></data>
   <data name="Programm beenden" xml:space="preserve"><value>Salir del programa</value></data>
   <data name="PDFlight wird geschlossen." xml:space="preserve"><value>PDFlight se cerrará.</value></data>
+  <data name="PDFlight-Hilfe" xml:space="preserve"><value>PDFlight-Ayuda</value></data>
+  <data name="Hilfedatei bereits vorhanden" xml:space="preserve"><value>El archivo de ayuda ya existe</value></data>
+  <data name="diese Hilfedatei (PDF)" xml:space="preserve"><value>este archivo de ayuda (PDF)</value></data>
+  <data name="Hilfedatei (PDF) …" xml:space="preserve"><value>Archivo de ayuda (PDF)…</value></data>
+  <data name="Anzeigen und Bearbeiten – ein Hinweis" xml:space="preserve"><value>Ver y editar – una nota</value></data>
+  <data name="PDFlight lädt die Datei zum Anzeigen in den Arbeitsspeicher. Die Datei selbst bleibt dabei frei: andere Programme können sie jederzeit ändern oder verschieben. Wird sie geändert, zeigt PDFlight den neuen Stand, sobald du zum Fenster zurückkehrst." xml:space="preserve"><value>PDFlight carga el archivo en la memoria para mostrarlo. El archivo en sí queda libre: otros programas pueden modificarlo o moverlo en cualquier momento. Si se modifica, PDFlight muestra la nueva versión en cuanto vuelves a la ventana.</value></data>
+  <data name="Die Werkzeuge in der Anzeige (Zoom, Ansicht drehen, Suchen) verändern nur die Darstellung, nie die Datei. Alles, was du dort drehst, ist beim nächsten Öffnen wieder wie vorher." xml:space="preserve"><value>Las herramientas del visor (zoom, girar la vista, buscar) solo cambian la presentación, nunca el archivo. Todo lo que gires ahí vuelve a estar como antes la próxima vez que lo abras.</value></data>
+  <data name="Die Befehle im Menü „Bearbeiten“ und in der Symbolleiste (Seiten löschen oder drehen, anhängen, Kennwort, Eigenschaften) ändern die Datei dagegen wirklich – und zwar sofort, ohne gesonderten Speichern-Schritt. Einen Fehlgriff machst du mit Strg+Z rückgängig." xml:space="preserve"><value>Los comandos del menú «Editar» y de la barra de herramientas (eliminar o girar páginas, anexar, contraseña, propiedades), en cambio, sí cambian el archivo – de inmediato, sin un paso de guardar aparte. Un desliz lo deshaces con Ctrl+Z.</value></data>
 </root>

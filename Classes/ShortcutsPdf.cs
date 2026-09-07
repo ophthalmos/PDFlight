@@ -1,32 +1,37 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.InteropServices;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 
 namespace PDFLight.Classes;
 
-/// <summary>Erstellt die druckbare Tastenkürzel-Übersicht als PDF in der aktuellen Programmsprache —
-/// dynamisch mit PDFsharp (die Schriften löst der PlatformFontResolver über die Windows-Schriften auf).</summary>
+/// <summary>Erstellt die druckbare Hilfedatei (Hinweis zu Anzeigen/Bearbeiten und Tastenkürzel-Übersicht)
+/// als PDF in der aktuellen Programmsprache — dynamisch mit PDFsharp (die Schriften löst der
+/// PlatformFontResolver über die Windows-Schriften auf). Planmäßig eine A4-Seite: Die Zeilenhöhe der
+/// Kürzeltabelle passt sich dem verbleibenden Platz an.</summary>
 internal static partial class ShortcutsPdf
 {
     private const double Margin = 50;      // Seitenränder in Punkt
     private const double DetailIndent = 150; // Einzug der Kurztext-/Erklärungsspalte
+    private const double FooterHeight = 44; // Platz für Trennlinie und Fußzeile
 
-    /// <summary>Der Standard-Ablageort der Übersicht: Downloads-Ordner, Dateiname in der Programmsprache.</summary>
-    public static string DefaultPath => Path.Combine(GetDownloadsPath(), Lng.T("PDFlight-Tastenkürzel") + ".pdf");
+    private static readonly XColor Accent = XColor.FromArgb(0x1E, 0x5A, 0x96);
+    private static readonly XColor RuleColor = XColor.FromArgb(180, 190, 200);
 
-    /// <summary>Schreibt die Übersicht in den angegebenen Ordner (null = Downloads) und liefert den Dateipfad.</summary>
+    /// <summary>Der Standard-Ablageort der Hilfedatei: Downloads-Ordner, Dateiname in der Programmsprache.</summary>
+    public static string DefaultPath => Path.Combine(GetDownloadsPath(), Lng.T("PDFlight-Hilfe") + ".pdf");
+
+    /// <summary>Schreibt die Hilfedatei in den angegebenen Ordner (null = Downloads) und liefert den Dateipfad.</summary>
     public static string Create(string? directory = null)
     {
-        var path = directory == null ? DefaultPath : Path.Combine(directory, Lng.T("PDFlight-Tastenkürzel") + ".pdf");
+        var path = directory == null ? DefaultPath : Path.Combine(directory, Lng.T("PDFlight-Hilfe") + ".pdf");
         using PdfDocument document = new();
         document.Options.ColorMode = PdfColorMode.Rgb;
-        document.Info.Title = Application.ProductName + " – " + Lng.T("Tastenkürzel");
+        document.Info.Title = Application.ProductName + " – " + Lng.T("Hilfe");
         document.Info.Author = Application.ProductName ?? string.Empty;
         XFont titleFont = new("Segoe UI", 17, XFontStyleEx.Bold);
         XFont subFont = new("Segoe UI", 9);
-        XFont keyFont = new("Segoe UI", 10, XFontStyleEx.Bold);
-        XFont textFont = new("Segoe UI", 10);
+        XFont sectionFont = new("Segoe UI", 12, XFontStyleEx.Bold);
         XFont detailFont = new("Segoe UI", 9);
         XBrush detailBrush = new XSolidBrush(XColor.FromArgb(90, 90, 90));
 
@@ -36,33 +41,51 @@ internal static partial class ShortcutsPdf
         var width = page.Width.Point - 2 * Margin;
         var y = Margin;
         var iconHeight = DrawAppIcon(gfx, page.Width.Point - Margin); // Programm-Icon rechts oben, 128 px unskaliert
-        gfx.DrawString(Application.ProductName + " – " + Lng.T("Tastenkürzel"), titleFont, XBrushes.Black, Margin, y + 17);
+        gfx.DrawString(Application.ProductName + " – " + Lng.T("Hilfe"), titleFont, XBrushes.Black, Margin, y + 17);
         y += 26;
         var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3);
         gfx.DrawString("Version " + version + " – " + DateTime.Now.ToString("d", System.Globalization.CultureInfo.GetCultureInfo(Lng.CultureCode)), subFont, detailBrush, Margin, y + 9);
         y += 30;
-        y = Math.Max(y, Margin - 4 + iconHeight + 14); // die Kürzelzeilen beginnen unterhalb des Icons
+        y = Math.Max(y, Margin - 4 + iconHeight + 12); // der Hinweiskasten beginnt unterhalb des Icons
 
-        foreach (var (key, text, detail) in TaskDlg.ShortcutRows)
+        y = DrawNoteBox(gfx, Margin, y, width) + 20;
+
+        // Abschnittsüberschrift der Kürzeltabelle
+        gfx.DrawString(Lng.T("Tastenkürzel"), sectionFont, new XSolidBrush(Accent), Margin, y + 12);
+        gfx.DrawLine(new XPen(RuleColor, 0.7), Margin, y + 18, Margin + width, y + 18);
+        y += 27;
+
+        // Zeilenhöhe so wählen, dass die Tabelle auf die Seite passt (12–17 Punkt); die Erklärungszeilen
+        // (nur wo hinterlegt, z.B. F7) haben feste Höhe
+        var rows = TaskDlg.ShortcutRows;
+        var detailLines = rows.Select(r => r.Detail == null ? null : Wrap(gfx, Lng.T(r.Detail), detailFont, width - DetailIndent)).ToList();
+        var detailHeight = detailLines.Sum(l => l == null ? 0 : l.Count * 12 + 4);
+        var footerTop = page.Height.Point - FooterHeight - 6;
+        var rowHeight = Math.Clamp(Math.Floor((footerTop - y - detailHeight) / rows.Length), 12, 17);
+        var fontSize = rowHeight < 15 ? 9 : 10;
+        XFont keyFont = new("Segoe UI", fontSize, XFontStyleEx.Bold);
+        XFont textFont = new("Segoe UI", fontSize);
+
+        for (var i = 0; i < rows.Length; i++)
         {
-            // kompakt: eine Zeile je Kürzel; Zusatzerklärung nur, wo eine hinterlegt ist (F7) —
-            // so passt die Übersicht auf eine A4-Seite
-            var detailLines = detail == null ? null : Wrap(gfx, Lng.T(detail), detailFont, width - DetailIndent);
-            var blockHeight = 17 + (detailLines?.Count ?? 0) * 12 + (detailLines == null ? 0 : 4);
-            if (y + blockHeight > page.Height.Point - Margin) // Seitenumbruch (zur Sicherheit — planmäßig eine Seite)
+            var (key, text, _) = rows[i];
+            var lines = detailLines[i];
+            var blockHeight = rowHeight + (lines == null ? 0 : lines.Count * 12 + 4);
+            if (y + blockHeight > footerTop) // Seitenumbruch (zur Sicherheit — planmäßig eine Seite)
             {
+                DrawFooter(gfx, page);
                 gfx.Dispose();
                 page = document.AddPage();
                 gfx = XGraphics.FromPdfPage(page);
                 DrawPageBackground(gfx, page);
                 y = Margin;
             }
-            gfx.DrawString(Lng.T(key), keyFont, XBrushes.Black, Margin, y + 11);
-            gfx.DrawString(Lng.T(text), textFont, XBrushes.Black, Margin + DetailIndent, y + 11);
-            y += 17;
-            if (detailLines != null)
+            gfx.DrawString(Lng.T(key), keyFont, XBrushes.Black, Margin, y + rowHeight - 6);
+            gfx.DrawString(Lng.T(text), textFont, XBrushes.Black, Margin + DetailIndent, y + rowHeight - 6);
+            y += rowHeight;
+            if (lines != null)
             {
-                foreach (var line in detailLines)
+                foreach (var line in lines)
                 {
                     gfx.DrawString(line, detailFont, detailBrush, Margin + DetailIndent, y + 10);
                     y += 12;
@@ -76,28 +99,60 @@ internal static partial class ShortcutsPdf
         return path;
     }
 
+    /// <summary>Hinweiskasten „Anzeigen und Bearbeiten“: abgerundete, hellblaue Fläche mit Überschrift in der
+    /// Akzentfarbe und drei Absätzen. Liefert die Unterkante des Kastens.</summary>
+    private static double DrawNoteBox(XGraphics gfx, double x, double y, double width)
+    {
+        const double Pad = 12;
+        const double LineHeight = 12.5;
+        const double ParagraphGap = 5;
+        XFont headFont = new("Segoe UI", 10.5, XFontStyleEx.Bold);
+        XFont font = new("Segoe UI", 9);
+        string[] paragraphs =
+        [
+            Lng.T("PDFlight lädt die Datei zum Anzeigen in den Arbeitsspeicher. Die Datei selbst bleibt dabei frei: andere Programme können sie jederzeit ändern oder verschieben. Wird sie geändert, zeigt PDFlight den neuen Stand, sobald du zum Fenster zurückkehrst."),
+            Lng.T("Die Werkzeuge in der Anzeige (Zoom, Ansicht drehen, Suchen) verändern nur die Darstellung, nie die Datei. Alles, was du dort drehst, ist beim nächsten Öffnen wieder wie vorher."),
+            Lng.T("Die Befehle im Menü „Bearbeiten“ und in der Symbolleiste (Seiten löschen oder drehen, anhängen, Kennwort, Eigenschaften) ändern die Datei dagegen wirklich – und zwar sofort, ohne gesonderten Speichern-Schritt. Einen Fehlgriff machst du mit Strg+Z rückgängig."),
+        ];
+        var lines = paragraphs.Select(p => Wrap(gfx, p, font, width - 2 * Pad)).ToList();
+        var height = Pad + 18 + lines.Sum(l => l.Count * LineHeight) + (lines.Count - 1) * ParagraphGap + Pad;
+        gfx.DrawRoundedRectangle(new XPen(RuleColor, 0.7), new XSolidBrush(XColor.FromArgb(0xEA, 0xF2, 0xFA)), x, y, width, height, 10, 10);
+        var ty = y + Pad;
+        gfx.DrawString(Lng.T("Anzeigen und Bearbeiten – ein Hinweis"), headFont, new XSolidBrush(Accent), x + Pad, ty + 10);
+        ty += 18;
+        foreach (var paragraph in lines)
+        {
+            foreach (var line in paragraph)
+            {
+                gfx.DrawString(line, font, XBrushes.Black, x + Pad, ty + 9);
+                ty += LineHeight;
+            }
+            ty += ParagraphGap;
+        }
+        return y + height;
+    }
+
     /// <summary>Fußzeile: Trennlinie, darunter zentriert Copyright und die Webadresse als klickbarer Link.</summary>
     private static void DrawFooter(XGraphics gfx, PdfSharp.Pdf.PdfPage page)
     {
         const string LinkText = "www.netradio.info";
         const string LinkUrl = "https://www.netradio.info/pdf/";
         XFont font = new("Segoe UI", 9);
-        var lineY = page.Height.Point - 44;
-        gfx.DrawLine(new XPen(XColor.FromArgb(180, 190, 200), 0.7), Margin, lineY, page.Width.Point - Margin, lineY);
+        var lineY = page.Height.Point - FooterHeight;
+        gfx.DrawLine(new XPen(RuleColor, 0.7), Margin, lineY, page.Width.Point - Margin, lineY);
         var copyright = $"© {DateTime.Now.Year} Wilhelm Happe   ·   ";
         var copyWidth = gfx.MeasureString(copyright, font).Width;
         var linkWidth = gfx.MeasureString(LinkText, font).Width;
         var x = (page.Width.Point - copyWidth - linkWidth) / 2;
         var textY = lineY + 16;
         gfx.DrawString(copyright, font, new XSolidBrush(XColor.FromArgb(90, 90, 90)), x, textY);
-        gfx.DrawString(LinkText, font, new XSolidBrush(XColor.FromArgb(0x1E, 0x5A, 0x96)), x + copyWidth, textY);
+        gfx.DrawString(LinkText, font, new XSolidBrush(Accent), x + copyWidth, textY);
         // klickbare Fläche über dem Linktext (WorldToDefaultPage rechnet ins PDF-Koordinatensystem um)
         var linkRect = gfx.Transformer.WorldToDefaultPage(new XRect(x + copyWidth, textY - 10, linkWidth, 13));
         page.AddWebLink(new PdfSharp.Pdf.PdfRectangle(linkRect), LinkUrl);
     }
 
     /// <summary>Dezent hellblauer Seitenhintergrund.</summary>
-    /// gfx.DrawRectangle(new XSolidBrush(XColor.FromArgb(0xF1, 0xF6, 0xFB)), 0, 0, page.Width.Point, page.Height.Point);
     private static void DrawPageBackground(XGraphics gfx, PdfPage page) =>
         gfx.DrawRectangle(new XSolidBrush(XColor.FromArgb(249, 252, 255)), 0, 0, page.Width.Point, page.Height.Point);
 

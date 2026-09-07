@@ -235,7 +235,7 @@ internal static class TaskDlg
     public static readonly (string Key, string Text, string? Detail)[] ShortcutRows =
     [
         // F-Tasten
-        ("F1", "diese Kürzel-Übersicht", null),
+        ("F1", "diese Hilfedatei (PDF)", null),
         ("F2", "Datei umbenennen", null),
         ("F7", "Textcursor-Navigation ein/aus (Markieren per Tastatur)",
             "Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert – Markieren ganz ohne Maus."),
@@ -306,7 +306,7 @@ internal static class TaskDlg
             : ConflictChoice.Cancel;
     }
 
-    /// <summary>Kürzel-Übersicht (F1 und Info-Menü): erstellt die PDF-Übersicht im Downloads-Ordner und
+    /// <summary>Hilfedatei (F1 und Hilfe-Menü): erstellt die PDF im Downloads-Ordner und
     /// zeigt sie in einer neuen PDFlight-Instanz an — das aktuelle Dokument bleibt ungestört. Existiert
     /// die Datei schon, fragt ein Dialog, ob sie geöffnet oder neu erstellt werden soll.</summary>
     public static void ShowShortcutsPdf(nint hwnd, Icon? icon)
@@ -321,7 +321,7 @@ internal static class TaskDlg
             var page = new TaskDialogPage()
             {
                 Caption = Application.ProductName,
-                Heading = Lng.T("Kürzel-Übersicht bereits vorhanden"),
+                Heading = Lng.T("Hilfedatei bereits vorhanden"),
                 Icon = icon32 == null ? null : new TaskDialogIcon(icon32),
                 AllowCancel = true,
                 SizeToContent = true,

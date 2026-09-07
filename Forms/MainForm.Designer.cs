@@ -364,7 +364,7 @@
             mnuShortcuts.Name = "mnuShortcuts";
             mnuShortcuts.ShortcutKeyDisplayString = "F1";
             mnuShortcuts.Size = new Size(233, 22);
-            mnuShortcuts.Text = "Tastenkürzel …";
+            mnuShortcuts.Text = "Hilfedatei (PDF) …";
             mnuShortcuts.Click += MnuShortcuts_Click;
             //
             // mnuCheckUpdate
