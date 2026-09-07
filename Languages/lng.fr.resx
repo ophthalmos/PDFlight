@@ -440,4 +440,5 @@ d'installation pour installer la dernière version.</value></data>
   <data name="Der Ordner enthält {0}." xml:space="preserve"><value>Le dossier contient {0}.</value></data>
   <data name="Sie wird mit in den Papierkorb verschoben." xml:space="preserve"><value>Il sera lui aussi déplacé vers la corbeille.</value></data>
   <data name="Sie werden mit in den Papierkorb verschoben." xml:space="preserve"><value>Ils seront eux aussi déplacés vers la corbeille.</value></data>
+  <data name="Die Hilfedatei konnte nicht erstellt werden." xml:space="preserve"><value>Le fichier d'aide n'a pas pu être créé.</value></data>
 </root>

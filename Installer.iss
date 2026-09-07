@@ -98,7 +98,8 @@ Root: HKLM; Subkey: "Software\Classes\.pdf\OpenWithProgids"; ValueType: string; 
 Root: HKLM; Subkey: "Software\Classes\Applications\{#appName}.exe\shell\open\command"; ValueType: string; ValueData: """{app}\{#appName}.exe"" ""%1"""; Flags: uninsdeletekey
 
 [Run]
-Filename: "{app}\{#appName}.exe"; Description: "{cm:Run}"; Flags: nowait postinstall skipifsilent
+; --help: PDFlight erzeugt die Hilfedatei (Downloads-Ordner, Programmsprache) und zeigt sie als erstes Dokument an
+Filename: "{app}\{#appName}.exe"; Parameters: "--help"; Description: "{cm:Run}"; Flags: nowait postinstall skipifsilent
 
 ; Hinweis: Die Benutzereinstellungen (%APPDATA%\PDFlight\settings.json) und der
 ; WebView2-Datenordner (%LOCALAPPDATA%\PDFlight) bleiben bei der Deinstallation erhalten.
