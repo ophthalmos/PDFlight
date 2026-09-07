@@ -38,7 +38,7 @@ internal static class ToolbarIcons
     public const char UpdateSearch = '\uE777'; // UpdateRestore: nach Updates suchen
     public const char OpenWith = '\uE7AC';     // Menüpunkt Öffnen mit
     public const char Help = '\uE9CE';         // Fragezeichen im Kreis: Hilfe-Menü
-    public const char NewFolder = '\uE8F4';    // runder „Neuer Ordner“-Knopf im Verschieben-Dialog
+    public const char Add = '\uE710';          // Plus: runder „Neuer Ordner“-Knopf im Verschieben-Dialog
 
     private const string FontName = "Segoe MDL2 Assets";
     private static readonly Dictionary<(char Glyph, int Size), Image> cache = [];
