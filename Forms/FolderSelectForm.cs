@@ -112,10 +112,16 @@ public partial class FolderSelectForm : Form
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // dann gilt das bisher Gezählte
         if (files == 0 && folders == 0) { return Lng.T("Der Ordner ist leer."); }
-        var fileText = files + folders >= CountLimit ? string.Format(Lng.T("mehr als {0} Dateien"), CountLimit - 1)
-            : files == 1 ? Lng.T("1 Datei") : string.Format(Lng.T("{0} Dateien"), files);
-        var folderText = folders == 1 ? Lng.T("1 Unterordner") : string.Format(Lng.T("{0} Unterordner"), folders);
-        return string.Format(Lng.T("Enthält {0} und {1} – alles wandert mit in den Papierkorb."), fileText, folderText);
+        // Ein-/Mehrzahl an drei Stellen: Dateien, Unterordner und das Pronomen des zweiten Satzes
+        var fileText = files == 0 ? null
+            : files + folders >= CountLimit ? string.Format(Lng.T("mehr als {0} Dateien"), CountLimit - 1)
+            : files == 1 ? Lng.T("eine Datei") : string.Format(Lng.T("{0} Dateien"), files);
+        var folderText = folders == 0 ? null : folders == 1 ? Lng.T("einen Unterordner") : string.Format(Lng.T("{0} Unterordner"), folders);
+        var contains = fileText != null && folderText != null
+            ? string.Format(Lng.T("Der Ordner enthält {0} und {1}."), fileText, folderText)
+            : string.Format(Lng.T("Der Ordner enthält {0}."), fileText ?? folderText);
+        var moved = files + folders == 1 ? Lng.T("Sie wird mit in den Papierkorb verschoben.") : Lng.T("Sie werden mit in den Papierkorb verschoben.");
+        return contains + "\n" + moved;
     }
 
     private void DeleteFolderMenuItem_Click(object? sender, EventArgs? e)
