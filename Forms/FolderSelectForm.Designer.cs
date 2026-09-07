@@ -41,6 +41,11 @@
             cbAdd2Folderlist = new CheckBox();
             toolTip = new ToolTip(components);
             linkLabelRecent = new LinkLabel();
+            contextMenuTree = new ContextMenuStrip(components);
+            newFolderMenuItem = new ToolStripMenuItem();
+            renameFolderMenuItem = new ToolStripMenuItem();
+            deleteFolderMenuItem = new ToolStripMenuItem();
+            contextMenuTree.SuspendLayout();
             SuspendLayout();
             // 
             // comboBoxRecent
@@ -99,6 +104,7 @@
             // shellTreeView
             // 
             shellTreeView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            shellTreeView.ContextMenuStrip = contextMenuTree;
             shellTreeView.HideSelection = false;
             shellTreeView.ImageIndex = 0;
             shellTreeView.Indent = 19;
@@ -112,6 +118,7 @@
             shellTreeView.AfterSelect += ShellTreeView_AfterSelect;
             shellTreeView.DoubleClick += ShellTreeView_DoubleClick;
             shellTreeView.KeyDown += ShellTreeView_KeyDown;
+            shellTreeView.NodeMouseClick += ShellTreeView_NodeMouseClick;
             shellTreeView.PreviewKeyDown += ShellTreeView_PreviewKeyDown;
             shellTreeView.Resize += ShellTreeView_Resize;
             // 
@@ -194,6 +201,38 @@
             Load += FolderSelectForm_Load;
             Shown += FolderSelectForm_Shown;
             HelpRequested += FolderSelectForm_HelpRequested;
+            //
+            // contextMenuTree
+            //
+            contextMenuTree.Items.AddRange(new ToolStripItem[] { newFolderMenuItem, renameFolderMenuItem, deleteFolderMenuItem });
+            contextMenuTree.Name = "contextMenuTree";
+            contextMenuTree.Size = new Size(220, 70);
+            contextMenuTree.Opening += ContextMenuTree_Opening;
+            //
+            // newFolderMenuItem
+            //
+            newFolderMenuItem.Name = "newFolderMenuItem";
+            newFolderMenuItem.ShortcutKeyDisplayString = "Strg+N";
+            newFolderMenuItem.Size = new Size(219, 22);
+            newFolderMenuItem.Text = "Neuer Ordner";
+            newFolderMenuItem.Click += ButtonNewFolder_Clicked;
+            //
+            // renameFolderMenuItem
+            //
+            renameFolderMenuItem.Name = "renameFolderMenuItem";
+            renameFolderMenuItem.ShortcutKeyDisplayString = "F2";
+            renameFolderMenuItem.Size = new Size(219, 22);
+            renameFolderMenuItem.Text = "Umbenennen";
+            renameFolderMenuItem.Click += RenameFolderMenuItem_Click;
+            //
+            // deleteFolderMenuItem
+            //
+            deleteFolderMenuItem.Name = "deleteFolderMenuItem";
+            deleteFolderMenuItem.ShortcutKeyDisplayString = "Entf";
+            deleteFolderMenuItem.Size = new Size(219, 22);
+            deleteFolderMenuItem.Text = "In den Papierkorb";
+            deleteFolderMenuItem.Click += DeleteFolderMenuItem_Click;
+            contextMenuTree.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -211,5 +250,9 @@
         private System.Windows.Forms.CheckBox cbAdd2Folderlist;
         private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.LinkLabel linkLabelRecent;
+        private System.Windows.Forms.ContextMenuStrip contextMenuTree;
+        private System.Windows.Forms.ToolStripMenuItem newFolderMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem renameFolderMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem deleteFolderMenuItem;
     }
 }

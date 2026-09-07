@@ -29,6 +29,7 @@ public partial class FolderSelectForm : Form
     {
         InitializeComponent();
         Lng.Apply(this);
+        Lng.Apply(contextMenuTree); // Kontextmenüs hängen nicht im Control-Baum
         TextBoxMargins.Apply(this);
         this.copyMode = copyMode;
         this.jumpToLastUsed = jumpToLastUsed;
@@ -71,6 +72,34 @@ public partial class FolderSelectForm : Form
     private void ShellTreeView_KeyDown(object? sender, KeyEventArgs e)
     {
         if (e.KeyCode == Keys.Enter && e.Modifiers == Keys.Control && !string.IsNullOrEmpty(shellTreeView.SelectedPath)) { DialogResult = DialogResult.OK; }
+        else if (e.KeyData == Keys.F2) { RenameFolderMenuItem_Click(null, null); e.Handled = true; }
+        else if (e.KeyData == Keys.Delete) { DeleteFolderMenuItem_Click(null, null); e.Handled = true; }
+    }
+
+    /// <summary>Rechtsklick wählt den Knoten unter der Maus, damit das Kontextmenü den richtigen Ordner meint.</summary>
+    private void ShellTreeView_NodeMouseClick(object? sender, TreeNodeMouseClickEventArgs e)
+    {
+        if (e.Button == MouseButtons.Right) { shellTreeView.SelectedNode = e.Node; }
+    }
+
+    private void ContextMenuTree_Opening(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        newFolderMenuItem.Enabled = btnNewFolder.Visible; // ein beschreibbarer Ordner ist ausgewählt
+        renameFolderMenuItem.Enabled = deleteFolderMenuItem.Enabled = shellTreeView.SelectedNode?.Parent != null; // Wurzeln (Laufwerke, Desktop …) nicht
+    }
+
+    private void RenameFolderMenuItem_Click(object? sender, EventArgs? e) => shellTreeView.RenameSelected();
+
+    private void DeleteFolderMenuItem_Click(object? sender, EventArgs? e)
+    {
+        if (shellTreeView.SelectedNode?.Parent == null) { return; }
+        if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("In den Papierkorb verschieben?"), shellTreeView.SelectedPath, TaskDialogIcon.Warning)) { return; }
+        try { shellTreeView.DeleteSelected(); }
+        catch (OperationCanceledException) { } // im Systemdialog abgebrochen
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Der Ordner konnte nicht gelöscht werden."), ex);
+        }
     }
 
     private void ShellTreeView_DoubleClick(object? sender, EventArgs e)
@@ -259,6 +288,8 @@ public partial class FolderSelectForm : Form
             ("Strg+H", "Versteckte Ordner ein-/ausblenden."),
             ("Strg+L", "Zum zuletzt verwendeten Ordner springen."),
             ("Strg+N", "Neuen Ordner anlegen."),
+            ("F2", "Ausgewählten Ordner umbenennen."),
+            ("Entf", "Ausgewählten Ordner in den Papierkorb verschieben."),
             ("Strg+Eingabe", "Auswahl übernehmen."),
         ]);
         TaskDlg.MsgTaskDlg(Handle, Lng.T("Tastenkürzel"), text);
