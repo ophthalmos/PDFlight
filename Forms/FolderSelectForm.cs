@@ -93,10 +93,39 @@ public partial class FolderSelectForm : Form
 
     private void RenameFolderMenuItem_Click(object? sender, EventArgs? e) => shellTreeView.RenameSelected();
 
+    private const int CountLimit = 5000; // mehr wird nicht gezählt – die Aussage „sehr viele“ genügt, und das Zählen bleibt kurz
+
+    /// <summary>Für die Lösch-Rückfrage: wie viele Dateien und Unterordner (rekursiv) im Ordner stecken – sie
+    /// wandern mit in den Papierkorb. Unzugängliche Teile werden übersprungen, ab CountLimit wird abgebrochen.</summary>
+    private static string DescribeFolderContents(string path)
+    {
+        var files = 0;
+        var folders = 0;
+        try
+        {
+            EnumerationOptions options = new() { RecurseSubdirectories = true, IgnoreInaccessible = true, AttributesToSkip = 0 };
+            foreach (var entry in new DirectoryInfo(path).EnumerateFileSystemInfos("*", options))
+            {
+                if ((entry.Attributes & FileAttributes.Directory) != 0) { folders++; } else { files++; }
+                if (files + folders >= CountLimit) { break; }
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // dann gilt das bisher Gezählte
+        if (files == 0 && folders == 0) { return Lng.T("Der Ordner ist leer."); }
+        var fileText = files + folders >= CountLimit ? string.Format(Lng.T("mehr als {0} Dateien"), CountLimit - 1)
+            : files == 1 ? Lng.T("1 Datei") : string.Format(Lng.T("{0} Dateien"), files);
+        var folderText = folders == 1 ? Lng.T("1 Unterordner") : string.Format(Lng.T("{0} Unterordner"), folders);
+        return string.Format(Lng.T("Enthält {0} und {1} – alles wandert mit in den Papierkorb."), fileText, folderText);
+    }
+
     private void DeleteFolderMenuItem_Click(object? sender, EventArgs? e)
     {
         if (shellTreeView.SelectedNode?.Parent == null) { return; }
-        if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("In den Papierkorb verschieben?"), shellTreeView.SelectedPath, TaskDialogIcon.Warning)) { return; }
+        var path = shellTreeView.SelectedPath;
+        Cursor.Current = Cursors.WaitCursor;
+        var contents = DescribeFolderContents(path);
+        Cursor.Current = Cursors.Default;
+        if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("In den Papierkorb verschieben?"), path + "\n\n" + contents, TaskDialogIcon.None)) { return; }
         try { shellTreeView.DeleteSelected(); }
         catch (OperationCanceledException) { } // im Systemdialog abgebrochen
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)

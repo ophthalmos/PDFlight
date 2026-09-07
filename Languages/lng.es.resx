@@ -430,4 +430,11 @@ para instalar la última versión.</value></data>
   <data name="Der Ordner konnte nicht gelöscht werden." xml:space="preserve"><value>No se pudo eliminar la carpeta.</value></data>
   <data name="Ausgewählten Ordner umbenennen." xml:space="preserve"><value>Renombrar la carpeta seleccionada.</value></data>
   <data name="Ausgewählten Ordner in den Papierkorb verschieben." xml:space="preserve"><value>Mover la carpeta seleccionada a la papelera.</value></data>
+  <data name="Der Ordner ist leer." xml:space="preserve"><value>La carpeta está vacía.</value></data>
+  <data name="mehr als {0} Dateien" xml:space="preserve"><value>más de {0} archivos</value></data>
+  <data name="1 Datei" xml:space="preserve"><value>1 archivo</value></data>
+  <data name="{0} Dateien" xml:space="preserve"><value>{0} archivos</value></data>
+  <data name="1 Unterordner" xml:space="preserve"><value>1 subcarpeta</value></data>
+  <data name="{0} Unterordner" xml:space="preserve"><value>{0} subcarpetas</value></data>
+  <data name="Enthält {0} und {1} – alles wandert mit in den Papierkorb." xml:space="preserve"><value>Contiene {0} y {1} – todo va también a la papelera.</value></data>
 </root>
