@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Runtime.InteropServices;
+using Microsoft.VisualBasic.FileIO;
 
 namespace PDFLight.Controls;
 
@@ -118,6 +119,24 @@ internal class FolderTreeView : TreeView
         {
             BeginInvoke(new Action(() => { LabelEdit = true; node.BeginEdit(); })); // BeginEdit direkt nach SelectedNode-Wechsel schlägt sonst fehl
         }
+    }
+
+    /// <summary>Startet die Umbenennung des ausgewählten Ordners im Baum; Wurzeln (Laufwerke, Desktop, …) sind ausgenommen.</summary>
+    public void RenameSelected()
+    {
+        if (SelectedNode is not { Parent: not null } node) { return; }
+        BeginInvoke(new Action(() => { LabelEdit = true; node.BeginEdit(); })); // erst nach dem Schließen des Kontextmenüs, sonst geht der Fokus verloren
+    }
+
+    /// <summary>Verschiebt den ausgewählten Ordner in den Papierkorb (die Rückfrage stellt der Aufrufer) und wählt danach den
+    /// übergeordneten Ordner; Wurzeln sind ausgenommen. Wirft IOException/UnauthorizedAccessException bzw.
+    /// OperationCanceledException, wenn der Systemdialog abgebrochen wurde.</summary>
+    public void DeleteSelected()
+    {
+        if (SelectedNode is not { Parent: { } parent } node) { return; }
+        FileSystem.DeleteDirectory((string)node.Tag!, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+        SelectedNode = parent;
+        node.Remove();
     }
 
     private void LoadRoots()
