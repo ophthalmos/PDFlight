@@ -50,7 +50,7 @@ internal partial class PdfViewHost(WebView2 webView)
         core.AddWebResourceRequestedFilter("https://" + VirtualHost + "/*", CoreWebView2WebResourceContext.All);
         core.WebResourceRequested += Core_WebResourceRequested;
         core.NavigationStarting += Core_NavigationStarting;
-        core.NavigationCompleted += (s, e) => twoPageActive = false; // jedes Dokumentladen startet im einseitigen Viewer-Standard
+        core.NavigationCompleted += (s, e) => { twoPageActive = false; documentLoaded?.TrySetResult(); }; // jedes Dokumentladen startet im einseitigen Viewer-Standard
         core.NewWindowRequested += Core_NewWindowRequested;
         core.WebMessageReceived += Core_WebMessageReceived; // Drop-Meldungen der Leerseite
         webView.AllowExternalDrop = true; // Drops aufs Dokument landen als file://-Navigation in Core_NavigationStarting
@@ -132,6 +132,7 @@ internal partial class PdfViewHost(WebView2 webView)
     /// Mit page &gt; 0 springt der Viewer direkt zu dieser Seite (z.B. nach dem Löschen von Seiten).</summary>
     public void Load(string filePath, int page = 0)
     {
+        documentLoaded = new(TaskCreationOptions.RunContinuationsAsynchronously);
         currentBytes = File.ReadAllBytes(filePath); // wirft IOException etc. → behandelt der Aufrufer
         var fragment = page > 0 ? "#page=" + page : string.Empty;
         webView.CoreWebView2.Navigate($"https://{VirtualHost}/{Uri.EscapeDataString(Path.GetFileName(filePath))}?t={DateTime.Now.Ticks}{fragment}");
@@ -147,6 +148,20 @@ internal partial class PdfViewHost(WebView2 webView)
     public void ShowPrintDialog()
     {
         if (IsReady) { webView.CoreWebView2.ShowPrintUI(CoreWebView2PrintDialogKind.Browser); }
+    }
+
+    private TaskCompletionSource? documentLoaded; // wird mit jedem Load neu gesetzt und bei NavigationCompleted erfüllt
+
+    /// <summary>Druckt das angezeigte Dokument ohne Dialog (Start mit /print): wartet das Laden ab, gibt dem PDF-Viewer
+    /// noch einen Moment zum Rendern und druckt dann auf dem Standarddrucker bzw. dem genannten Drucker.</summary>
+    public async Task<CoreWebView2PrintStatus> PrintAsync(string? printerName)
+    {
+        if (!IsReady || currentBytes == null) { return CoreWebView2PrintStatus.OtherError; }
+        if (documentLoaded != null) { await documentLoaded.Task; }
+        await Task.Delay(1500);
+        var settings = webView.CoreWebView2.Environment.CreatePrintSettings();
+        if (!string.IsNullOrEmpty(printerName)) { settings.PrinterName = printerName; }
+        return await webView.CoreWebView2.PrintAsync(settings);
     }
 
     /// <summary>Dreht die Viewer-Ansicht um 90° (nur Anzeige, die Datei bleibt unverändert): drückt den
