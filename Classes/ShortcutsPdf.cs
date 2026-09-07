@@ -60,7 +60,7 @@ internal static partial class ShortcutsPdf
         var noteLines = NoteBoxLines(gfx, width);
         var noteHeight = NoteBoxHeight(noteLines);
         var footerTop = page.Height.Point - FooterHeight - 6;
-        var rowHeight = Math.Clamp((footerTop - y - detailHeight - NoteGap - noteHeight) / rows.Length, 12, 17);
+        var rowHeight = Math.Clamp((footerTop - 2 - y - detailHeight - NoteGap - noteHeight) / rows.Length, 12, 17); // 2 pt Reserve gegen Rundungsreste
         var fontSize = rowHeight >= 15 ? 10 : rowHeight >= 13.5 ? 9.5 : 9;
         XFont keyFont = new("Segoe UI", fontSize, XFontStyleEx.Bold);
         XFont textFont = new("Segoe UI", fontSize);
@@ -112,10 +112,10 @@ internal static partial class ShortcutsPdf
     // Hinweiskasten unter der Kürzeltabelle: Anzeige aus dem Speicher, Viewer-Werkzeuge ohne Wirkung auf die
     // Datei, Bearbeiten-Befehle mit sofortigem Speichern
     private const double NoteGap = 16;
-    private const double NotePad = 12;
-    private const double NoteLineHeight = 12.5;
-    private const double NoteParagraphGap = 5;
-    private static readonly XFont NoteFont = new("Segoe UI", 9);
+    private const double NotePad = 7;
+    private const double NoteLineHeight = 13.5;
+    private const double NoteParagraphGap = 0; // die Absätze folgen als bloße Zeilenumbrüche
+    private static readonly XFont NoteFont = new("Segoe UI", 10); // wie die Kürzeltabelle
 
     /// <summary>Die drei Absätze des Hinweiskastens, auf die Kastenbreite umbrochen.</summary>
     private static List<List<string>> NoteBoxLines(XGraphics gfx, double width)
