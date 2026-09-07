@@ -430,4 +430,11 @@ the latest version.</value></data>
   <data name="Der Ordner konnte nicht gelöscht werden." xml:space="preserve"><value>The folder could not be deleted.</value></data>
   <data name="Ausgewählten Ordner umbenennen." xml:space="preserve"><value>Rename the selected folder.</value></data>
   <data name="Ausgewählten Ordner in den Papierkorb verschieben." xml:space="preserve"><value>Move the selected folder to the recycle bin.</value></data>
+  <data name="Der Ordner ist leer." xml:space="preserve"><value>The folder is empty.</value></data>
+  <data name="mehr als {0} Dateien" xml:space="preserve"><value>more than {0} files</value></data>
+  <data name="1 Datei" xml:space="preserve"><value>1 file</value></data>
+  <data name="{0} Dateien" xml:space="preserve"><value>{0} files</value></data>
+  <data name="1 Unterordner" xml:space="preserve"><value>1 subfolder</value></data>
+  <data name="{0} Unterordner" xml:space="preserve"><value>{0} subfolders</value></data>
+  <data name="Enthält {0} und {1} – alles wandert mit in den Papierkorb." xml:space="preserve"><value>Contains {0} and {1} – all of it goes to the recycle bin as well.</value></data>
 </root>

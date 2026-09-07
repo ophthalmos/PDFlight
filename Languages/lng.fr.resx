@@ -430,4 +430,11 @@ d'installation pour installer la dernière version.</value></data>
   <data name="Der Ordner konnte nicht gelöscht werden." xml:space="preserve"><value>Le dossier n'a pas pu être supprimé.</value></data>
   <data name="Ausgewählten Ordner umbenennen." xml:space="preserve"><value>Renommer le dossier sélectionné.</value></data>
   <data name="Ausgewählten Ordner in den Papierkorb verschieben." xml:space="preserve"><value>Déplacer le dossier sélectionné vers la corbeille.</value></data>
+  <data name="Der Ordner ist leer." xml:space="preserve"><value>Le dossier est vide.</value></data>
+  <data name="mehr als {0} Dateien" xml:space="preserve"><value>plus de {0} fichiers</value></data>
+  <data name="1 Datei" xml:space="preserve"><value>1 fichier</value></data>
+  <data name="{0} Dateien" xml:space="preserve"><value>{0} fichiers</value></data>
+  <data name="1 Unterordner" xml:space="preserve"><value>1 sous-dossier</value></data>
+  <data name="{0} Unterordner" xml:space="preserve"><value>{0} sous-dossiers</value></data>
+  <data name="Enthält {0} und {1} – alles wandert mit in den Papierkorb." xml:space="preserve"><value>Contient {0} et {1} – tout part aussi à la corbeille.</value></data>
 </root>
