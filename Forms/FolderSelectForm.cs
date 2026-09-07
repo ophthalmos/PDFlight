@@ -96,8 +96,9 @@ public partial class FolderSelectForm : Form
     private const int CountLimit = 5000; // mehr wird nicht gezählt – die Aussage „sehr viele“ genügt, und das Zählen bleibt kurz
 
     /// <summary>Für die Lösch-Rückfrage: wie viele Dateien und Unterordner (rekursiv) im Ordner stecken – sie
-    /// wandern mit in den Papierkorb. Unzugängliche Teile werden übersprungen, ab CountLimit wird abgebrochen.</summary>
-    private static string DescribeFolderContents(string path)
+    /// wandern mit in den Papierkorb; null, wenn der Ordner leer ist. Unzugängliche Teile werden übersprungen,
+    /// ab CountLimit wird abgebrochen.</summary>
+    private static string? DescribeFolderContents(string path)
     {
         var files = 0;
         var folders = 0;
@@ -111,7 +112,7 @@ public partial class FolderSelectForm : Form
             }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // dann gilt das bisher Gezählte
-        if (files == 0 && folders == 0) { return Lng.T("Der Ordner ist leer."); }
+        if (files == 0 && folders == 0) { return null; }
         // Ein-/Mehrzahl an drei Stellen: Dateien, Unterordner und das Pronomen des zweiten Satzes
         var fileText = files == 0 ? null
             : files + folders >= CountLimit ? string.Format(Lng.T("mehr als {0} Dateien"), CountLimit - 1)
@@ -131,7 +132,8 @@ public partial class FolderSelectForm : Form
         Cursor.Current = Cursors.WaitCursor;
         var contents = DescribeFolderContents(path);
         Cursor.Current = Cursors.Default;
-        if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("In den Papierkorb verschieben?"), path + "\n\n" + contents, TaskDialogIcon.None)) { return; }
+        var icon = contents == null ? TaskDialogIcon.None : TaskDialogIcon.Warning; // Warnsymbol nur, wenn Inhalt mitgeht
+        if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("In den Papierkorb verschieben?"), path + "\n\n" + (contents ?? Lng.T("Der Ordner ist leer.")), icon)) { return; }
         try { shellTreeView.DeleteSelected(); }
         catch (OperationCanceledException) { } // im Systemdialog abgebrochen
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
