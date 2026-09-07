@@ -39,12 +39,21 @@ internal static class ToolbarIcons
     public const char OpenWith = '\uE7AC';     // Menüpunkt Öffnen mit
     public const char Help = '\uE9CE';         // Fragezeichen im Kreis: Hilfe-Menü
     public const char Add = '\uE710';          // Plus: runder „Neuer Ordner“-Knopf im Verschieben-Dialog
+    public const char NewFolder = '\uE8F4';    // Kontextmenü des Ordnerbaums
 
     private const string FontName = "Segoe MDL2 Assets";
     private static readonly Dictionary<(char Glyph, int Size), Image> cache = [];
 
     /// <summary>False, falls die Symbolschrift fehlt — dann bleiben die Buttons reine Textbuttons.</summary>
     public static bool FontAvailable { get; } = CheckFontAvailable();
+
+    /// <summary>Ob Menüeinträge Symbole bekommen (Einstellung „Symbole anzeigen“ und Schrift vorhanden) –
+    /// setzt MainForm beim Anwenden der Einstellungen; die Dialoge fragen nur noch hier nach.</summary>
+    public static bool MenuIconsEnabled { get; set; }
+
+    /// <summary>16-px-Symbol für einen Menüeintrag in der DPI-Skalierung des Controls; null, wenn Symbole abgeschaltet sind.</summary>
+    public static Image? MenuIcon(char glyph, Control control) =>
+        MenuIconsEnabled ? Get(glyph, control.LogicalToDeviceUnits(new Size(16, 16))) : null;
 
     private static bool CheckFontAvailable()
     {

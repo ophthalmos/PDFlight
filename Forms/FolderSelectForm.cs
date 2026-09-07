@@ -30,6 +30,9 @@ public partial class FolderSelectForm : Form
         InitializeComponent();
         Lng.Apply(this);
         Lng.Apply(contextMenuTree); // Kontextmenüs hängen nicht im Control-Baum
+        newFolderMenuItem.Image = ToolbarIcons.MenuIcon(ToolbarIcons.NewFolder, this); // Symbole wie in den Hauptmenüs (Einstellung „Symbole anzeigen“)
+        renameFolderMenuItem.Image = ToolbarIcons.MenuIcon(ToolbarIcons.Rename, this);
+        deleteFolderMenuItem.Image = ToolbarIcons.MenuIcon(ToolbarIcons.Delete, this);
         TextBoxMargins.Apply(this);
         this.copyMode = copyMode;
         this.jumpToLastUsed = jumpToLastUsed;

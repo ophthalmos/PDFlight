@@ -899,6 +899,7 @@ public partial class MainForm : Form
         var fontSize = settings.LargeToolbarIcons ? 10f : 9f; // größere Symbole → größere Schrift in der Symbolleiste
         if (Math.Abs(toolStrip.Font.Size - fontSize) > 0.1f) { toolStrip.Font = new Font(toolStrip.Font.FontFamily, fontSize); } // ToolStrip erbt die Form-Schrift nicht → direkt setzen
         var showIcons = settings.ShowToolbarIcons && ToolbarIcons.FontAvailable;
+        ToolbarIcons.MenuIconsEnabled = showIcons; // auch für die Kontextmenüs der Dialoge
         var size = toolStrip.ImageScalingSize;
         void Set(ToolStripItem item, char glyph, bool imageOnly = false)
         {
