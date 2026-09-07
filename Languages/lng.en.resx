@@ -440,4 +440,5 @@ the latest version.</value></data>
   <data name="Der Ordner enthält {0}." xml:space="preserve"><value>The folder contains {0}.</value></data>
   <data name="Sie wird mit in den Papierkorb verschoben." xml:space="preserve"><value>It will be moved to the recycle bin as well.</value></data>
   <data name="Sie werden mit in den Papierkorb verschoben." xml:space="preserve"><value>They will be moved to the recycle bin as well.</value></data>
+  <data name="Die Hilfedatei konnte nicht erstellt werden." xml:space="preserve"><value>The help file could not be created.</value></data>
 </root>

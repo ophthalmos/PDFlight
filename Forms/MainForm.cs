@@ -11,6 +11,7 @@ public partial class MainForm : Form
     private readonly AppSettings settings;
     private readonly PdfViewHost viewHost;
     private readonly string? startFile;
+    private readonly bool showHelp;         // Start mit --help (Installer): die Hilfedatei erzeugen und anzeigen
     private readonly Dictionary<string, Image?> programIcons = new(StringComparer.OrdinalIgnoreCase);
     private FileInfo? currentFile;
     private int currentPageCount = -1;      // -1 = nicht bestimmbar (z.B. verschlüsselt)
@@ -22,12 +23,13 @@ public partial class MainForm : Form
     private bool isFullScreen;              // F11-Vollbild (randlos, ohne Tool-/Statusleiste)
     private FormWindowState fullScreenPreviousState;
 
-    public MainForm(string? startFile)
+    public MainForm(string? startFile, bool showHelp = false)
     {
         InitializeComponent();
         try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } // Fenstersymbol = Programmicon der EXE
         catch (Exception ex) when (ex is ArgumentException or IOException) { }
         this.startFile = startFile;
+        this.showHelp = showHelp;
         CleanupUndoBackups(); // verwaiste Undo-Sicherungen früherer Instanzen entsorgen
         InstanceRegistry.Cleanup(); // ebenso deren Meldungen, welche Datei sie anzeigten
         settings = AppSettings.Load();
@@ -84,9 +86,21 @@ public partial class MainForm : Form
         EnableClassicDragDrop();
         ShellUtil.RegisterFileType(); // Datei-Icon und Öffnen-Befehl je Benutzer, unabhängig vom Installer-Task
 
-        if (!string.IsNullOrEmpty(startFile) && File.Exists(startFile)) { LoadPdf(startFile, addToRecent: true); }
+        if (showHelp) { ShowHelpFile(); } // nach der Installation: die Hilfedatei als erstes Dokument
+        else if (!string.IsNullOrEmpty(startFile) && File.Exists(startFile)) { LoadPdf(startFile, addToRecent: true); }
         else if (settings.ReopenLastFile && !string.IsNullOrEmpty(settings.LastFile) && File.Exists(settings.LastFile)) { LoadPdf(settings.LastFile); }
         else { UpdateUiState(); }
+    }
+
+    /// <summary>Erzeugt die Hilfedatei neu (Downloads-Ordner, aktuelle Programmsprache) und zeigt sie an – Start mit --help.</summary>
+    private void ShowHelpFile()
+    {
+        try { LoadPdf(ShortcutsPdf.Create()); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Die Hilfedatei konnte nicht erstellt werden."), ex);
+            UpdateUiState();
+        }
     }
 
     private void MainForm_FormClosing(object? sender, FormClosingEventArgs e)

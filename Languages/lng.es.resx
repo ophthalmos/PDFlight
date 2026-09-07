@@ -440,4 +440,5 @@ para instalar la última versión.</value></data>
   <data name="Der Ordner enthält {0}." xml:space="preserve"><value>La carpeta contiene {0}.</value></data>
   <data name="Sie wird mit in den Papierkorb verschoben." xml:space="preserve"><value>También se moverá a la papelera.</value></data>
   <data name="Sie werden mit in den Papierkorb verschoben." xml:space="preserve"><value>También se moverán a la papelera.</value></data>
+  <data name="Die Hilfedatei konnte nicht erstellt werden." xml:space="preserve"><value>No se pudo crear el archivo de ayuda.</value></data>
 </root>
