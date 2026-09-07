@@ -441,4 +441,10 @@ d'installation pour installer la dernière version.</value></data>
   <data name="Sie wird mit in den Papierkorb verschoben." xml:space="preserve"><value>Il sera lui aussi déplacé vers la corbeille.</value></data>
   <data name="Sie werden mit in den Papierkorb verschoben." xml:space="preserve"><value>Ils seront eux aussi déplacés vers la corbeille.</value></data>
   <data name="Die Hilfedatei konnte nicht erstellt werden." xml:space="preserve"><value>Le fichier d'aide n'a pas pu être créé.</value></data>
+  <data name="Drucke …" xml:space="preserve"><value>Impression…</value></data>
+  <data name="Drucken fehlgeschlagen." xml:space="preserve"><value>L'impression a échoué.</value></data>
+  <data name="Der Drucker ist nicht verfügbar." xml:space="preserve"><value>L'imprimante n'est pas disponible.</value></data>
+  <data name="Das Dokument konnte nicht gedruckt werden." xml:space="preserve"><value>Le document n'a pas pu être imprimé.</value></data>
+  <data name="Kommandozeile:" xml:space="preserve"><value>Ligne de commande :</value></data>
+  <data name="(auch mit „--“)" xml:space="preserve"><value>(aussi avec « -- »)</value></data>
 </root>

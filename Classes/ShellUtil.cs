@@ -28,6 +28,10 @@ internal static partial class ShellUtil
             {
                 command.SetValue(null, $"\"{exe}\" \"%1\"");
             }
+            using (var print = progId.CreateSubKey(@"shell\print\command")) // Explorer-Kontextmenü „Drucken“: ohne Dialog auf den Standarddrucker
+            {
+                print.SetValue(null, $"\"{exe}\" /print \"%1\"");
+            }
             using var openWith = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\Classes\.pdf\OpenWithProgids");
             openWith.SetValue("PDFlight.Document", Array.Empty<byte>(), Microsoft.Win32.RegistryValueKind.None);
         }

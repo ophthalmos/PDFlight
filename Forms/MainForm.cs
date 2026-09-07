@@ -10,8 +10,7 @@ public partial class MainForm : Form
 {
     private readonly AppSettings settings;
     private readonly PdfViewHost viewHost;
-    private readonly string? startFile;
-    private readonly bool showHelp;         // Start mit --help (Installer): die Hilfedatei erzeugen und anzeigen
+    private readonly StartOptions options;  // Kommandozeile: Datei und Schalter (/help, /max, /page:N, /print)
     private readonly Dictionary<string, Image?> programIcons = new(StringComparer.OrdinalIgnoreCase);
     private FileInfo? currentFile;
     private int currentPageCount = -1;      // -1 = nicht bestimmbar (z.B. verschlüsselt)
@@ -23,13 +22,12 @@ public partial class MainForm : Form
     private bool isFullScreen;              // F11-Vollbild (randlos, ohne Tool-/Statusleiste)
     private FormWindowState fullScreenPreviousState;
 
-    public MainForm(string? startFile, bool showHelp = false)
+    internal MainForm(StartOptions options)
     {
         InitializeComponent();
         try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } // Fenstersymbol = Programmicon der EXE
         catch (Exception ex) when (ex is ArgumentException or IOException) { }
-        this.startFile = startFile;
-        this.showHelp = showHelp;
+        this.options = options;
         CleanupUndoBackups(); // verwaiste Undo-Sicherungen früherer Instanzen entsorgen
         InstanceRegistry.Cleanup(); // ebenso deren Meldungen, welche Datei sie anzeigten
         settings = AppSettings.Load();
@@ -86,13 +84,31 @@ public partial class MainForm : Form
         EnableClassicDragDrop();
         ShellUtil.RegisterFileType(); // Datei-Icon und Öffnen-Befehl je Benutzer, unabhängig vom Installer-Task
 
-        if (showHelp) { ShowHelpFile(); } // nach der Installation: die Hilfedatei als erstes Dokument
-        else if (!string.IsNullOrEmpty(startFile) && File.Exists(startFile)) { LoadPdf(startFile, addToRecent: true); }
+        if (options.Help) { ShowHelpFile(); } // nach der Installation: die Hilfedatei als erstes Dokument
+        else if (!string.IsNullOrEmpty(options.File) && File.Exists(options.File))
+        {
+            LoadPdf(options.File, options.Page, addToRecent: true);
+            if (options.Print) { await PrintAndCloseAsync(); }
+        }
         else if (settings.ReopenLastFile && !string.IsNullOrEmpty(settings.LastFile) && File.Exists(settings.LastFile)) { LoadPdf(settings.LastFile); }
         else { UpdateUiState(); }
     }
 
-    /// <summary>Erzeugt die Hilfedatei neu (Downloads-Ordner, aktuelle Programmsprache) und zeigt sie an – Start mit --help.</summary>
+    /// <summary>Start mit /print: das Dokument ohne Dialog auf dem Standarddrucker (bzw. /print:Druckername) ausgeben
+    /// und PDFlight beenden – so bedient PDFlight auch das Explorer-Kontextmenü „Drucken“.</summary>
+    private async Task PrintAndCloseAsync()
+    {
+        statusPath.Text = Lng.T("Drucke …");
+        var status = await viewHost.PrintAsync(options.Printer);
+        if (status != CoreWebView2PrintStatus.Succeeded)
+        {
+            var reason = status == CoreWebView2PrintStatus.PrinterUnavailable ? Lng.T("Der Drucker ist nicht verfügbar.") : Lng.T("Das Dokument konnte nicht gedruckt werden.");
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Drucken fehlgeschlagen."), reason + (string.IsNullOrEmpty(options.Printer) ? string.Empty : "\n" + options.Printer), TaskDialogIcon.Error);
+        }
+        Close();
+    }
+
+    /// <summary>Erzeugt die Hilfedatei neu (Downloads-Ordner, aktuelle Programmsprache) und zeigt sie an – Start mit /help.</summary>
     private void ShowHelpFile()
     {
         try { LoadPdf(ShortcutsPdf.Create()); }
@@ -116,7 +132,7 @@ public partial class MainForm : Form
         settings.WindowY = bounds.Y;
         settings.WindowWidth = bounds.Width;
         settings.WindowHeight = bounds.Height;
-        settings.WindowMaximized = WindowState == FormWindowState.Maximized;
+        if (!options.Maximized) { settings.WindowMaximized = WindowState == FormWindowState.Maximized; } // /max ist einmalig, nicht die gemerkte Vorgabe
         settings.Save();
     }
 
@@ -194,7 +210,7 @@ public partial class MainForm : Form
                 Bounds = bounds;
             }
         }
-        if (settings.WindowMaximized) { WindowState = FormWindowState.Maximized; }
+        if (settings.WindowMaximized || options.Maximized) { WindowState = FormWindowState.Maximized; } // /max erzwingt es
     }
 
     // ------------------------------------------------------------------ Menü-Schließen über dem WebView
