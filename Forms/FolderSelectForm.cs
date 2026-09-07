@@ -36,7 +36,7 @@ public partial class FolderSelectForm : Form
 
         if (!jumpToLastUsed) { shellTreeView.SelectedPath = string.IsNullOrEmpty(startFolder) ? Environment.GetFolderPath(Environment.SpecialFolder.Desktop) : startFolder; }
 
-        btnNewFolder.Glyph = ToolbarIcons.NewFolder;
+        btnNewFolder.Glyph = ToolbarIcons.Add;
         btnNewFolder.Text = Lng.T(NewFolderName); // nicht gezeichnet — Name für UI Automation
         btnNewFolder.BackColor = SystemColors.ButtonFace;
         pathEdit.TextBox.PreviewKeyDown += (sender, e) => e.IsInputKey = e.KeyCode is Keys.Return or Keys.Enter; // verhindert, dass Enter das Formular schließt
