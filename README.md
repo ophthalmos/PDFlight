@@ -2,7 +2,7 @@
 
 Schlanker PDF-Betrachter mit Dateiverwaltung für Windows — ansehen, einsortieren, fertig.
 
-![PDFlight](docs/screenshot.png)
+![PDFlight](screenshot.png)
 
 PDFlight zeigt PDF-Dateien im nativen Chromium-Viewer (WebView2) an und verbindet die
 Anzeige mit den Dateioperationen, die beim Abarbeiten voller Scan- und Eingangsordner
