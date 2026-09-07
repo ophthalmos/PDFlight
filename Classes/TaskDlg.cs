@@ -306,39 +306,20 @@ internal static class TaskDlg
             : ConflictChoice.Cancel;
     }
 
-    /// <summary>Hilfedatei (F1 und Hilfe-Menü): erstellt die PDF im Downloads-Ordner und
-    /// zeigt sie in einer neuen PDFlight-Instanz an — das aktuelle Dokument bleibt ungestört. Existiert
-    /// die Datei schon, fragt ein Dialog, ob sie geöffnet oder neu erstellt werden soll.</summary>
-    public static void ShowShortcutsPdf(nint hwnd, Icon? icon)
+    /// <summary>Hilfedatei (F1 und Hilfe-Menü): zeigt die PDF aus dem Downloads-Ordner in einer neuen
+    /// PDFlight-Instanz an — das aktuelle Dokument bleibt ungestört. Fehlt die Datei, wird sie erstellt;
+    /// nach einem Update erzeugt sie der Installer-Start mit /help ohnehin neu.</summary>
+    public static void ShowShortcutsPdf(nint hwnd)
     {
-        var path = ShortcutsPdf.DefaultPath;
-        if (File.Exists(path))
-        {
-            TaskDialogButton openButton = new TaskDialogCommandLinkButton(Lng.T("Vorhandene öffnen"), path);
-            TaskDialogButton recreateButton = new TaskDialogCommandLinkButton(Lng.T("Neu erstellen"),
-                Lng.T("z.B. nach einem Update oder Sprachwechsel"));
-            using var icon32 = icon == null ? null : new Icon(icon, 32, 32); // sonst nimmt der TaskDialog die 16-px-Variante
-            var page = new TaskDialogPage()
-            {
-                Caption = Application.ProductName,
-                Heading = Lng.T("Hilfedatei bereits vorhanden"),
-                Icon = icon32 == null ? null : new TaskDialogIcon(icon32),
-                AllowCancel = true,
-                SizeToContent = true,
-                Buttons = { openButton, recreateButton, TaskDialogButton.Cancel },
-                DefaultButton = openButton
-            };
-            var result = TaskDialog.ShowDialog(hwnd, page);
-            if (result != openButton && result != recreateButton) { return; }
-            if (result == openButton) { OpenInNewInstance(hwnd, path); return; }
-        }
         try
         {
-            OpenInNewInstance(hwnd, ShortcutsPdf.Create());
+            var path = ShortcutsPdf.DefaultPath;
+            if (!File.Exists(path)) { path = ShortcutsPdf.Create(); }
+            OpenInNewInstance(hwnd, path);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or PdfSharp.PdfSharpException)
         {
-            ErrTaskDlg(hwnd, Lng.T("Die PDF-Übersicht konnte nicht erstellt werden."), ex);
+            ErrTaskDlg(hwnd, Lng.T("Die Hilfedatei konnte nicht erstellt werden."), ex);
         }
     }
 
