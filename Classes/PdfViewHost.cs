@@ -35,7 +35,16 @@ internal partial class PdfViewHost(WebView2 webView)
         // Je Sprache getrennt: Alle Prozesse am selben Ordner müssen identische Optionen verwenden, sonst
         // scheitert die Initialisierung (z.B. alte Instanz läuft nach einem Sprachwechsel noch).
         var dataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PDFlight", "WebView2." + Lng.CultureCode);
-        var options = new CoreWebView2EnvironmentOptions { Language = Lng.CultureCode }; // Viewer-Oberfläche in der Programmsprache
+        var options = new CoreWebView2EnvironmentOptions
+        {
+            Language = Lng.CultureCode, // Viewer-Oberfläche in der Programmsprache
+            IsCustomCrashReportingEnabled = true, // Absturzberichte nicht an Microsoft senden (Minidumps bleiben lokal im Datenordner)
+            // Datensparsamkeit — nur Schalter, die Chromium tatsächlich kennt (chrome_switches.h, metrics_switches.h; unbekannte
+            // wie „--disable-telemetry“ würden still ignoriert): Metriken (UMA) nur aufzeichnen, nicht hochladen; keine
+            // Hintergrund-Netzwerkdienste; keine Domain-Reliability-Berichte; keine Komponenten-Updates aus dem Viewer heraus.
+            // Was Microsoft als „erforderliche Diagnosedaten“ des WebView2-Laufzeitmoduls einstuft, lässt sich per App nicht abstellen.
+            AdditionalBrowserArguments = "--metrics-recording-only --disable-background-networking --disable-domain-reliability --disable-component-update",
+        };
         var environment = await CoreWebView2Environment.CreateAsync(null, dataFolder, options);
         await webView.EnsureCoreWebView2Async(environment);
 
@@ -44,6 +53,7 @@ internal partial class PdfViewHost(WebView2 webView)
         core.Settings.IsStatusBarEnabled = false;
         core.Settings.IsGeneralAutofillEnabled = false;
         core.Settings.IsPasswordAutosaveEnabled = false;
+        core.Settings.IsReputationCheckingRequired = false; // SmartScreen aus: PDFlight zeigt nur lokale Dateien, nichts geht zur Prüfung an Microsoft
         core.Settings.HiddenPdfToolbarItems = CoreWebView2PdfToolbarItems.Save | CoreWebView2PdfToolbarItems.SaveAs // Speichern übernimmt PDFlight selbst
             | CoreWebView2PdfToolbarItems.FullScreen // der Chromium-Vollbildmodus ist im Host-Fenster kaum beendbar → PDFlight bietet stattdessen F11
             | CoreWebView2PdfToolbarItems.Print; // Drucken sitzt in der Hauptmenüleiste — die Viewer-Leiste bleibt den Ansichts-Funktionen vorbehalten
