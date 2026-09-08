@@ -5,8 +5,8 @@ namespace PDFLight.Classes;
 /// <summary>Programmeinstellungen, gespeichert als JSON unter %APPDATA%\PDFlight\settings.json.</summary>
 public class AppSettings
 {
-    public const int MaxRecentFolders = 16;
-    public const int MaxRecentFiles = 10;
+    public const int MaxRecentFolders = 64;
+    public const int MaxRecentFiles = 32;
 
     public List<string> TargetFolders { get; set; } = [];
     public List<string> RecentFolders { get; set; } = [];

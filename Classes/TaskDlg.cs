@@ -121,7 +121,7 @@ internal static class TaskDlg
         TaskDialogButton paypalButton = new TaskDialogCommandLinkButton(Lng.T("Anerkennung spenden via PayPal"));
         using var icon32 = icon == null ? null : new Icon(icon, 32, 32); // sonst nimmt der TaskDialog die 16-px-Variante des Fenster-Icons
         var indent = new string(' ', 14);
-        var foot = $"{indent}© {buildDate:yyyy} Wilhelm Happe · Version {threeVersion} ({buildDate:d})" +
+        var foot = $"{indent}© {buildDate:yyyy} Wilhelm Happe · Version {threeVersion} ({buildDate:d.M.yyyy})" +
             $"\n{indent}WebView2-Runtime {webView2Runtime}" +
             $"\n{indent}PDFsharp {typeof(PdfSharp.Pdf.PdfDocument).Assembly.GetName().Version?.ToString(3)}" +
             $"\n{indent}<a href=\"https://www.netradio.info/pdf/\">www.netradio.info</a>";
