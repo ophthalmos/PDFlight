@@ -42,7 +42,7 @@ namespace PDFLight.Forms
             labelFileValue.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             labelFileValue.Location = new System.Drawing.Point(12, 12);
             labelFileValue.Name = "labelFileValue";
-            labelFileValue.Size = new System.Drawing.Size(400, 15);
+            labelFileValue.Size = new System.Drawing.Size(306, 15);
             labelFileValue.TabIndex = 0;
             labelFileValue.Text = "datei.pdf";
             //
@@ -53,7 +53,7 @@ namespace PDFLight.Forms
             labelInfo.Name = "labelInfo";
             labelInfo.Size = new System.Drawing.Size(300, 15);
             labelInfo.TabIndex = 1;
-            labelInfo.Text = "Ohne Namen erscheint der Dateiname im Favoriten-Menü.";
+            labelInfo.Text = "Ohne Namen erscheint der Dateiname.";
             //
             // labelName
             //
@@ -62,21 +62,22 @@ namespace PDFLight.Forms
             labelName.Name = "labelName";
             labelName.Size = new System.Drawing.Size(95, 15);
             labelName.TabIndex = 2;
-            labelName.Text = "&Name (optional):";
+            labelName.Text = "&Name (optional, bis 30 Zeichen):";
             //
             // textBoxName
             //
             textBoxName.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             textBoxName.Location = new System.Drawing.Point(12, 84);
+            textBoxName.MaxLength = 30;
             textBoxName.Name = "textBoxName";
-            textBoxName.Size = new System.Drawing.Size(400, 23);
+            textBoxName.Size = new System.Drawing.Size(306, 23);
             textBoxName.TabIndex = 3;
             //
             // buttonOK
             //
             buttonOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            buttonOK.Location = new System.Drawing.Point(216, 125);
+            buttonOK.Location = new System.Drawing.Point(122, 125);
             buttonOK.Name = "buttonOK";
             buttonOK.Size = new System.Drawing.Size(95, 27);
             buttonOK.TabIndex = 4;
@@ -87,7 +88,7 @@ namespace PDFLight.Forms
             //
             buttonCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            buttonCancel.Location = new System.Drawing.Point(317, 125);
+            buttonCancel.Location = new System.Drawing.Point(223, 125);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new System.Drawing.Size(95, 27);
             buttonCancel.TabIndex = 5;
@@ -100,7 +101,7 @@ namespace PDFLight.Forms
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             CancelButton = buttonCancel;
-            ClientSize = new System.Drawing.Size(424, 164);
+            ClientSize = new System.Drawing.Size(330, 164);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
             Controls.Add(textBoxName);
