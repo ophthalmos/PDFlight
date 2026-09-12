@@ -129,7 +129,7 @@ internal static partial class ShortcutsPdf
             Lng.T("Die Werkzeuge in der Anzeige (Zoom, Ansicht drehen, Suchen) verändern nur die Darstellung, nie die Datei. Alles, was du dort drehst, ist beim nächsten Öffnen wieder wie vorher."),
             Lng.T("Die Befehle im Menü „Bearbeiten“ und in der Symbolleiste (Seiten löschen oder drehen, anhängen, Kennwort, Eigenschaften) ändern die Datei dagegen wirklich – und zwar sofort, ohne gesonderten Speichern-Schritt. Einen Fehlgriff machst du mit Strg+Z rückgängig."),
         ];
-        return paragraphs.Select(p => Wrap(gfx, p, NoteFont, width - 2 * NotePad)).ToList();
+        return [.. paragraphs.Select(p => Wrap(gfx, p, NoteFont, width - 2 * NotePad))];
     }
 
     private static double NoteBoxHeight(List<List<string>> lines) =>

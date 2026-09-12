@@ -122,7 +122,7 @@ internal static partial class ShellUtil
             var folder = Path.GetDirectoryName(originalPath);
             string? best = null;
             var bestDate = DateTime.MinValue;
-            foreach (dynamic item in bin.Items())
+            foreach (var item in bin.Items())
             {
                 string shownName = bin.GetDetailsOf(item, 0); // Anzeigename — je nach Explorer-Einstellung ohne Erweiterung
                 if (!string.Equals(shownName, name, StringComparison.OrdinalIgnoreCase)
@@ -146,12 +146,12 @@ internal static partial class ShellUtil
             if (Type.GetTypeFromProgID("Shell.Application") is not { } shellType) { return false; }
             dynamic shell = Activator.CreateInstance(shellType)!;
             var bin = shell.NameSpace(10);
-            foreach (dynamic item in bin.Items())
+            foreach (var item in bin.Items())
             {
                 if (!string.Equals((string)item.Path, recycledPath, StringComparison.OrdinalIgnoreCase)) { continue; }
                 item.InvokeVerb("undelete");
                 if (WaitForFile(originalPath)) { return true; }
-                foreach (dynamic verb in item.Verbs()) // Fallback: lokalisierter Menüeintrag (Programmsprachen des OS)
+                foreach (var verb in item.Verbs()) // Fallback: lokalisierter Menüeintrag (Programmsprachen des OS)
                 {
                     var caption = ((string)verb.Name).Replace("&", string.Empty).Trim();
                     if (caption is "Wiederherstellen" or "Restore" or "Restaurer" or "Restaurar")
