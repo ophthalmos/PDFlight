@@ -79,6 +79,7 @@ public partial class MainForm : Form
             return;
         }
         webView.KeyDown += WebView_KeyDown; // Tastenkürzel funktionieren auch, wenn der Viewer den Fokus hat
+        viewHost.ZoomChanged += ViewHost_ZoomChanged;
         viewHost.PdfFileDropped += (s, path) => OpenDroppedFiles([path]); // Drop auf das Viewer-Areal
         InitDropDownClickShield();
         EnableClassicDragDrop();
@@ -124,6 +125,7 @@ public partial class MainForm : Form
         try { File.Delete(OwnUndoBackup); } // die eigene Undo-Sicherung wird beim Beenden entsorgt
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // sonst räumt sie der nächste Start ab
         InstanceRegistry.Clear(); // diese Instanz zeigt nichts mehr an
+        viewHost.ReleaseZoomHook();
         SetFullScreen(false); // sonst würden randlose Vollbild-Maße gespeichert
         settings.ReloadSharedLists(); // Listenänderungen anderer Instanzen nicht überschreiben
         settings.LastFile = currentFile?.FullName ?? string.Empty;
@@ -351,6 +353,8 @@ public partial class MainForm : Form
         loadedWriteTimeUtc = currentFile.LastWriteTimeUtc;
         currentPdfStatus = PdfEditService.TryReadStatus(path);
         currentPageCount = currentPdfStatus.PageCount;
+        viewHost.SetPageSize(currentPdfStatus.PageWidthPt, currentPdfStatus.PageHeightPt); // Referenz für die Zoomanzeige
+        statusZoom.Visible = false; // bis der Viewer die Zoomstufe des neuen Dokuments meldet
         pdfAEditingEnabled = false; // jede geladene PDF/A-Datei startet wieder schreibgeschützt
         missingFileNoticeShown = false;
         if (addToRecent) // nur bei bewusstem Öffnen — nicht beim Blättern durch den Ordner
@@ -392,6 +396,7 @@ public partial class MainForm : Form
             statusPath.Text = Lng.T("Keine Datei geöffnet");
             statusInfo.Text = string.Empty;
             statusFormat.Visible = false;
+            statusZoom.Visible = false;
             btnPrev.Enabled = btnNext.Enabled = false;
         }
         UpdateOneClickLabel();
@@ -1811,7 +1816,19 @@ public partial class MainForm : Form
     {
         if (e.KeyData is (Keys.Control | Keys.F) or Keys.F3 or (Keys.Control | Keys.P)) { viewerDialogOpen = true; return; } // Suche bzw. Drucken — an Chromium durchreichen
         if (e.KeyData == Keys.Escape && viewerDialogOpen) { viewerDialogOpen = false; return; }
+        if (e.KeyData is (Keys.Control | Keys.Add) or (Keys.Control | Keys.Oemplus) or (Keys.Control | Keys.Subtract) or (Keys.Control | Keys.OemMinus)
+            or (Keys.Control | Keys.D0) or (Keys.Control | Keys.NumPad0))
+        {
+            viewHost.RequestZoomUpdate(); // Tastaturzoom: der Viewer meldet ihn nicht selbst – die Taste läuft weiter an ihn durch
+            return;
+        }
         if (HandleShortcut(e.KeyData)) { e.Handled = true; }
+    }
+
+    private void ViewHost_ZoomChanged(object? sender, int percent)
+    {
+        statusZoom.Text = percent + " %";
+        statusZoom.Visible = currentFile != null;
     }
 
     // ------------------------------------------------------------------ Toolbar-Klicks

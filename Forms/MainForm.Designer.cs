@@ -80,6 +80,7 @@
             statusPath = new ToolStripStatusLabel();
             statusOneClick = new ToolStripStatusLabel();
             statusFormat = new ToolStripStatusLabel();
+            statusZoom = new ToolStripStatusLabel();
             statusInfo = new ToolStripStatusLabel();
             pnlPdfA = new Panel();
             btnPdfAEnable = new Button();
@@ -441,7 +442,7 @@
             // 
             // statusStrip
             // 
-            statusStrip.Items.AddRange(new ToolStripItem[] { statusIndex, statusPath, statusOneClick, statusFormat, statusInfo });
+            statusStrip.Items.AddRange(new ToolStripItem[] { statusIndex, statusPath, statusOneClick, statusFormat, statusZoom, statusInfo });
             statusStrip.Location = new Point(0, 725);
             statusStrip.Name = "statusStrip";
             statusStrip.ShowItemToolTips = true;
@@ -481,6 +482,15 @@
             statusFormat.Name = "statusFormat";
             statusFormat.Size = new Size(4, 19);
             statusFormat.Visible = false;
+            // 
+            // statusZoom
+            // 
+            statusZoom.BorderSides = ToolStripStatusLabelBorderSides.Left;
+            statusZoom.BorderStyle = Border3DStyle.Etched;
+            statusZoom.Name = "statusZoom";
+            statusZoom.Size = new Size(4, 19);
+            statusZoom.ToolTipText = "Zoomstufe des Viewers";
+            statusZoom.Visible = false;
             //
             // statusInfo
             //
@@ -614,6 +624,7 @@
         private System.Windows.Forms.ToolStripStatusLabel statusPath;
         private System.Windows.Forms.ToolStripStatusLabel statusOneClick;
         private System.Windows.Forms.ToolStripStatusLabel statusFormat;
+        private System.Windows.Forms.ToolStripStatusLabel statusZoom;
         private System.Windows.Forms.ToolStripStatusLabel statusInfo;
         private System.Windows.Forms.Panel pnlPdfA;
         private System.Windows.Forms.Label lblPdfA;

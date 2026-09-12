@@ -60,7 +60,7 @@ internal partial class PdfViewHost(WebView2 webView)
         core.AddWebResourceRequestedFilter("https://" + VirtualHost + "/*", CoreWebView2WebResourceContext.All);
         core.WebResourceRequested += Core_WebResourceRequested;
         core.NavigationStarting += Core_NavigationStarting;
-        core.NavigationCompleted += (s, e) => { twoPageActive = false; documentLoaded?.TrySetResult(); }; // jedes Dokumentladen startet im einseitigen Viewer-Standard
+        core.NavigationCompleted += (s, e) => { twoPageActive = false; documentLoaded?.TrySetResult(); RequestZoomUpdate(); }; // jedes Dokumentladen startet im einseitigen Viewer-Standard
         core.NewWindowRequested += Core_NewWindowRequested;
         core.WebMessageReceived += Core_WebMessageReceived; // Drop-Meldungen der Leerseite
         webView.AllowExternalDrop = true; // Drops aufs Dokument landen als file://-Navigation in Core_NavigationStarting
@@ -319,6 +319,117 @@ internal partial class PdfViewHost(WebView2 webView)
         {
             // reine Komfortfunktionen — schlägt der Klick fehl, ändert sich die Ansicht einfach nicht
         }
+    }
+
+    // ------------------------------------------------------------------ Zoomstufe
+
+    // Der Viewer verrät seine Zoomstufe nicht per API. Aber: Die Zoom-Buttons, Strg+Mausrad und die Anpassen-Buttons
+    // füttern eine ARIA-Live-Region („Vergrößert, 110 Prozent“), und dabei feuert das Chromium-Fenster jedes Mal das
+    // WinEvent EVENT_OBJECT_LIVEREGIONCHANGED – das ist der Auslöser ohne Timer. Tastaturzoom (Strg+Plus/Minus/0)
+    // meldet keine Live-Region, den sieht das Hauptfenster selbst im KeyDown und ruft RequestZoomUpdate direkt auf.
+    // Der Wert selbst kommt aus der UIA-Geometrie des ersten Seitenelements gegen die Seitengröße aus der PDF-Datei –
+    // über die Fläche, damit die gedrehte Ansicht dasselbe Ergebnis liefert.
+    private const uint EVENT_OBJECT_LIVEREGIONCHANGED = 0x8019;
+    private const uint WINEVENT_OUTOFCONTEXT = 0x0000;
+    private const uint WINEVENT_SKIPOWNPROCESS = 0x0002;
+    private NativeMethods.WinEventProc? zoomHookProc; // Referenz halten, sonst räumt der GC den Callback ab
+    private nint zoomHook;
+    private nint zoomHookWindow;   // das Chromium-Fenster, auf das der Hook gefiltert ist
+    private double pageAreaPt;     // Fläche der ersten Seite in Punkt² (Referenz für 100 %); 0 = keine Anzeige
+    private int zoomPercent;       // zuletzt gemeldete Zoomstufe (0 = unbekannt)
+    private int zoomRequests;      // laufende Nummer, damit nur die jüngste Abfrage meldet
+
+    /// <summary>Zoomstufe des Viewers in Prozent – gemeldet auf dem UI-Thread nach jeder erkannten Änderung.</summary>
+    public event EventHandler<int>? ZoomChanged;
+
+    /// <summary>Größe der ersten Seite in Punkt (aus der PDF-Datei) – die Referenz, aus der die Zoomstufe berechnet wird;
+    /// vor dem Laden setzen. 0 schaltet die Anzeige ab (z.B. verschlüsselte Datei).</summary>
+    public void SetPageSize(double widthPt, double heightPt)
+    {
+        pageAreaPt = widthPt * heightPt;
+        zoomPercent = 0;
+    }
+
+    /// <summary>Liest die Zoomstufe neu – nach einem Live-Region-Ereignis des Viewers, nach dem Laden oder nach einem
+    /// Tastaturzoom. Das Layout ist beim Auslöser noch nicht fertig, deshalb fasst ein Hintergrund-Task kurz nach, bis
+    /// sich der Wert geändert hat (höchstens ~1 s): ein einmaliges Nachfassen je Auslöser, kein laufender Timer.</summary>
+    public void RequestZoomUpdate()
+    {
+        if (!IsReady || currentBytes == null || pageAreaPt <= 0) { return; }
+        var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
+        if (chromium == IntPtr.Zero) { return; }
+        EnsureZoomHook(chromium);
+        var previous = zoomPercent;
+        var request = ++zoomRequests;
+        var dpiScale = webView.DeviceDpi / 72.0;                 // Punkt → Gerätepixel bei 100 %
+        var referenceArea = pageAreaPt * dpiScale * dpiScale;
+        _ = Task.Run(() =>
+        {
+            var percent = 0;
+            for (var i = 0; i < 20; i++)
+            {
+                percent = ReadZoomPercent(chromium, referenceArea);
+                if (percent > 0 && percent != previous) { break; }
+                if (request != zoomRequests) { return; } // ein neuerer Auslöser übernimmt
+                Thread.Sleep(50);
+            }
+            if (percent <= 0 || percent == previous) { return; }
+            webView.BeginInvoke(() =>
+            {
+                if (request != zoomRequests) { return; }
+                zoomPercent = percent;
+                ZoomChanged?.Invoke(this, percent);
+            });
+        });
+    }
+
+    /// <summary>Hängt den WinEvent-Hook an den Browserprozess – nur für das Live-Region-Ereignis und nur für das
+    /// Chromium-Fenster des Viewers (nach einem Fensterwechsel neu).</summary>
+    private void EnsureZoomHook(IntPtr chromium)
+    {
+        if (chromium == zoomHookWindow && zoomHook != 0) { return; }
+        ReleaseZoomHook();
+        NativeMethods.GetWindowThreadProcessId(chromium, out var browserProcess);
+        zoomHookProc ??= (hook, eventType, hwnd, idObject, idChild, thread, time) =>
+        {
+            if (hwnd == zoomHookWindow) { RequestZoomUpdate(); } // läuft auf dem UI-Thread (Nachrichtenschleife des Hook-Threads)
+        };
+        zoomHook = NativeMethods.SetWinEventHook(EVENT_OBJECT_LIVEREGIONCHANGED, EVENT_OBJECT_LIVEREGIONCHANGED, 0, zoomHookProc, browserProcess, 0, WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
+        zoomHookWindow = zoomHook != 0 ? chromium : 0;
+    }
+
+    /// <summary>Löst den WinEvent-Hook (beim Beenden).</summary>
+    public void ReleaseZoomHook()
+    {
+        if (zoomHook != 0) { NativeMethods.UnhookWinEvent(zoomHook); }
+        zoomHook = 0;
+        zoomHookWindow = 0;
+    }
+
+    /// <summary>Zoomstufe aus der Fläche des ersten Seitenelements (erste Gruppe unter dem Dokument-Element) gegen die
+    /// Referenzfläche bei 100 %; 0, wenn das Element (noch) nicht im Baum steht.</summary>
+    private static int ReadZoomPercent(IntPtr chromiumHandle, double referenceArea)
+    {
+        try
+        {
+            var root = System.Windows.Automation.AutomationElement.FromHandle(chromiumHandle);
+            // Dokument-Elemente sind geschachtelt (Viewer-Seite → „PDF Document“ → das eigentliche PDF); das erste mit
+            // einer Gruppe als Kind ist das PDF, die Gruppe seine erste Seite
+            System.Windows.Automation.AutomationElement? page = null;
+            foreach (System.Windows.Automation.AutomationElement document in root.FindAll(System.Windows.Automation.TreeScope.Descendants,
+                new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.Document)))
+            {
+                page = document.FindFirst(System.Windows.Automation.TreeScope.Children,
+                    new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.ControlTypeProperty, System.Windows.Automation.ControlType.Group));
+                if (page != null) { break; }
+            }
+            if (page == null) { return 0; }
+            var rect = page.Current.BoundingRectangle;
+            if (rect.Width <= 0 || rect.Height <= 0) { return 0; }
+            return (int)Math.Round(Math.Sqrt(rect.Width * rect.Height / referenceArea) * 100);
+        }
+        catch (Exception ex) when (ex is System.Windows.Automation.ElementNotAvailableException
+            or System.Runtime.InteropServices.COMException or InvalidOperationException) { return 0; }
     }
 
     // ------------------------------------------------------------------ Aktuelle Seite per UI Automation
