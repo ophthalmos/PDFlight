@@ -651,12 +651,6 @@ public partial class MainForm : Form
         dialog.SetRecentFolders(settings.RecentFolders);
         dialog.SetTargetFolders(settings.TargetFolders.Where(f => !string.IsNullOrEmpty(f)));
         dialog.ShellTreePath = startFolder;
-        dialog.EditTargetsRequested += EditTargets;
-        void EditTargets(object? s, EventArgs args) // „Liste bearbeiten“: Einstellungen (Zielliste) über dem Dialog, danach die Zielliste dort auffrischen
-        {
-            OpenSettings(SettingsForm.TabTargets, dialog);
-            dialog.SetTargetFolders(settings.TargetFolders.Where(f => !string.IsNullOrEmpty(f)));
-        }
 
         var result = dialog.ShowDialog(this);
         // Einstellungen aus dem Dialog gelten unabhängig vom Ergebnis: Länge der Zuletzt-Liste, „Liste leeren“
@@ -665,6 +659,12 @@ public partial class MainForm : Form
         {
             settings.MaxRecentFolders = dialog.MaxRecent;
             settings.Save();
+        }
+        if (dialog.EditTargetsRequested) // „Liste bearbeiten“: der Dialog hat sich geschlossen, jetzt die Einstellungen (Zielliste)
+        {
+            Cursor.Current = Cursors.Default;
+            OpenSettings(SettingsForm.TabTargets);
+            return;
         }
         if (result == DialogResult.OK)
         {
@@ -905,11 +905,11 @@ public partial class MainForm : Form
         splitButtonMove.DropDownItems.Add(editList);
     }
 
-    private void OpenSettings(int tabIndex, IWin32Window? owner = null)
+    private void OpenSettings(int tabIndex)
     {
         settings.ReloadSharedLists();
         using SettingsForm dialog = new(settings, tabIndex);
-        if (dialog.ShowDialog(owner ?? this) == DialogResult.OK)
+        if (dialog.ShowDialog(this) == DialogResult.OK)
         {
             settings.TargetFolders = dialog.TargetFolders;
             settings.ExternalPrograms = dialog.ExternalPrograms;
@@ -924,7 +924,6 @@ public partial class MainForm : Form
             settings.ShowFullPathInTitle = dialog.ShowFullPathInTitle;
             var languageChanged = dialog.Language != settings.Language;
             settings.Language = dialog.Language;
-            if (dialog.ClearRecentRequested) { settings.RecentFolders.Clear(); }
             settings.Save();
             if (languageChanged && TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Die Sprachänderung wird nach einem Neustart des Programms wirksam."), Lng.T("Jetzt neu starten?")))
             {

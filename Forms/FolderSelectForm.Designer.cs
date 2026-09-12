@@ -55,12 +55,14 @@
             // comboBoxRecent
             // 
             comboBoxRecent.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            comboBoxRecent.DrawMode = DrawMode.OwnerDrawFixed;
             comboBoxRecent.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBoxRecent.FormattingEnabled = true;
             comboBoxRecent.Location = new Point(90, 13);
             comboBoxRecent.Name = "comboBoxRecent";
             comboBoxRecent.Size = new Size(260, 23);
             comboBoxRecent.TabIndex = 0;
+            comboBoxRecent.DrawItem += ComboBoxRecent_DrawItem;
             comboBoxRecent.SelectedIndexChanged += ComboBoxRecent_SelectedIndexChanged;
             // 
             // labelTarget
