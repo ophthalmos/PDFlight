@@ -368,7 +368,7 @@
             mnuFavoriteAdd.Name = "mnuFavoriteAdd";
             mnuFavoriteAdd.ShortcutKeyDisplayString = "Strg+D";
             mnuFavoriteAdd.Size = new Size(233, 22);
-            mnuFavoriteAdd.Text = "Datei zu den Favoriten hinzufügen …";
+            mnuFavoriteAdd.Text = "Angezeigte Datei zu den Favoriten hinzufügen …";
             mnuFavoriteAdd.Click += MnuFavoriteAdd_Click;
             // 
             // mnuFavoriteRemove
