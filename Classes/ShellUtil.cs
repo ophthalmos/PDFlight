@@ -107,60 +107,54 @@ internal static partial class ShellUtil
 
     // ------------------------------------------------------------------ Papierkorb (Rückgängig nach dem Löschen)
 
-    /// <summary>Sucht direkt nach dem Löschen den Papierkorb-Eintrag der Datei und liefert dessen
-    /// eindeutigen Ablagepfad (C:\$Recycle.Bin\…\$R…) — null, wenn keiner existiert (z.B. Netzlaufwerk).
-    /// Bei mehreren Einträgen gleichen Namens gewinnt der zuletzt gelöschte (ModifyDate = Löschdatum).</summary>
-    public static string? FindRecycledFile(string originalPath)
+    /// <summary>Hat das Laufwerk der Datei einen Papierkorb? Billiger Test fÃ¼r das RÃ¼ckgÃ¤ngig-Angebot nach dem LÃ¶schen â
+    /// die eigentliche Suche im Papierkorb (Shell-AufzÃ¤hlung, je nach FÃ¼llstand Sekunden) lÃ¤uft erst bei Strg+Z.</summary>
+    public static bool HasRecycleBin(string path)
     {
         try
         {
-            if (Type.GetTypeFromProgID("Shell.Application") is not { } shellType) { return null; }
-            dynamic shell = Activator.CreateInstance(shellType)!;
-            var bin = shell.NameSpace(10); // ssfBITBUCKET = Papierkorb
-            var name = Path.GetFileName(originalPath);
-            var stem = Path.GetFileNameWithoutExtension(originalPath);
-            var folder = Path.GetDirectoryName(originalPath);
-            string? best = null;
-            var bestDate = DateTime.MinValue;
-            foreach (var item in bin.Items())
-            {
-                string shownName = bin.GetDetailsOf(item, 0); // Anzeigename — je nach Explorer-Einstellung ohne Erweiterung
-                if (!string.Equals(shownName, name, StringComparison.OrdinalIgnoreCase)
-                    && !string.Equals(shownName, stem, StringComparison.OrdinalIgnoreCase)) { continue; }
-                if (!string.Equals((string)bin.GetDetailsOf(item, 1), folder, StringComparison.OrdinalIgnoreCase)) { continue; } // Ursprungsordner
-                DateTime deleted = item.ModifyDate; // bei Papierkorb-Einträgen das Löschdatum
-                if (deleted > bestDate) { bestDate = deleted; best = (string)item.Path; }
-            }
-            return best;
+            var root = Path.GetPathRoot(path);
+            return !string.IsNullOrEmpty(root) && !root.StartsWith(@"\\", StringComparison.Ordinal) && Directory.Exists(Path.Combine(root, "$Recycle.Bin"));
         }
-        catch (Exception ex) when (IsShellComError(ex)) { return null; }
+        catch (Exception ex) when (ex is ArgumentException or IOException or UnauthorizedAccessException) { return false; }
     }
 
-    /// <summary>Stellt den Papierkorb-Eintrag (Pfad aus FindRecycledFile) am Originalpfad wieder her —
-    /// primär über das kanonische Shell-Verb „undelete“, sonst über den lokalisierten
-    /// Wiederherstellen-Eintrag des Kontextmenüs. True, sobald die Datei wieder existiert.</summary>
-    public static bool RestoreRecycledFile(string recycledPath, string originalPath)
+    /// <summary>Stellt die zuletzt gelÃ¶schte Datei mit diesem Ursprungspfad aus dem Papierkorb wieder her â primÃ¤r Ã¼ber
+    /// das kanonische Shell-Verb âundeleteâ, sonst Ã¼ber den lokalisierten Wiederherstellen-Eintrag des KontextmenÃ¼s.
+    /// Bei mehreren EintrÃ¤gen gleichen Namens gewinnt der zuletzt gelÃ¶schte (ModifyDate = LÃ¶schdatum). Eine einzige
+    /// AufzÃ¤hlung des Papierkorbs; true, sobald die Datei wieder existiert.</summary>
+    public static bool RestoreFromRecycleBin(string originalPath)
     {
         try
         {
             if (Type.GetTypeFromProgID("Shell.Application") is not { } shellType) { return false; }
             dynamic shell = Activator.CreateInstance(shellType)!;
-            var bin = shell.NameSpace(10);
+            var bin = shell.NameSpace(10); // ssfBITBUCKET = Papierkorb
+            var name = Path.GetFileName(originalPath);
+            var stem = Path.GetFileNameWithoutExtension(originalPath);
+            var folder = Path.GetDirectoryName(originalPath);
+            dynamic? best = null;
+            var bestDate = DateTime.MinValue;
             foreach (var item in bin.Items())
             {
-                if (!string.Equals((string)item.Path, recycledPath, StringComparison.OrdinalIgnoreCase)) { continue; }
-                item.InvokeVerb("undelete");
-                if (WaitForFile(originalPath)) { return true; }
-                foreach (var verb in item.Verbs()) // Fallback: lokalisierter Menüeintrag (Programmsprachen des OS)
+                string shownName = bin.GetDetailsOf(item, 0); // Anzeigename â je nach Explorer-Einstellung ohne Erweiterung
+                if (!string.Equals(shownName, name, StringComparison.OrdinalIgnoreCase)
+                    && !string.Equals(shownName, stem, StringComparison.OrdinalIgnoreCase)) { continue; }
+                if (!string.Equals((string)bin.GetDetailsOf(item, 1), folder, StringComparison.OrdinalIgnoreCase)) { continue; } // Ursprungsordner
+                DateTime deleted = item.ModifyDate; // bei Papierkorb-EintrÃ¤gen das LÃ¶schdatum
+                if (deleted > bestDate) { bestDate = deleted; best = item; }
+            }
+            if (best == null) { return false; }
+            best.InvokeVerb("undelete");
+            if (WaitForFile(originalPath)) { return true; }
+            foreach (var verb in best.Verbs()) // Fallback: lokalisierter MenÃ¼eintrag (Programmsprachen des OS)
+            {
+                var caption = ((string)verb.Name).Replace("&", string.Empty).Trim();
+                if (caption is "Wiederherstellen" or "Restore" or "Restaurer" or "Restaurar")
                 {
-                    var caption = ((string)verb.Name).Replace("&", string.Empty).Trim();
-                    if (caption is "Wiederherstellen" or "Restore" or "Restaurer" or "Restaurar")
-                    {
-                        verb.DoIt();
-                        return WaitForFile(originalPath);
-                    }
+                    verb.DoIt();
+                    return WaitForFile(originalPath);
                 }
-                return false;
             }
         }
         catch (Exception ex) when (IsShellComError(ex)) { }

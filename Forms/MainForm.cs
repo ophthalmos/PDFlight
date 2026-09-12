@@ -1045,10 +1045,8 @@ public partial class MainForm : Form
             TaskDlg.ErrTaskDlg(Handle, Lng.T("Löschen fehlgeschlagen."), ex);
             return;
         }
-        Cursor.Current = Cursors.WaitCursor;
-        var recycled = ShellUtil.FindRecycledFile(deletedPath); // null z.B. auf Laufwerken ohne Papierkorb → kein Rückgängig
-        Cursor.Current = Cursors.Default;
-        SetUndoAction(recycled == null ? null : new UndoAction(UndoKind.Delete, Lng.T("In den Papierkorb verschieben"), deletedPath, recycled));
+        // Rückgängig nur anbieten, wenn das Laufwerk einen Papierkorb hat; die teure Suche nach dem Eintrag läuft erst bei Strg+Z
+        SetUndoAction(ShellUtil.HasRecycleBin(deletedPath) ? new UndoAction(UndoKind.Delete, Lng.T("In den Papierkorb verschieben"), deletedPath, string.Empty) : null);
         if (settings.OpenNextAfterDelete) { LoadNextAfterRemoval(files, index); }
         else { ClearDisplay(Lng.T("Die Datei wurde in den Papierkorb verschoben.")); } // Anzeige bewusst leeren (Option) — Strg+Z holt die Datei zurück
     }
@@ -1360,7 +1358,7 @@ public partial class MainForm : Form
     private enum UndoKind { Edit, Move, Delete }
 
     /// <summary>Die zuletzt rückgängig machbare Aktion. Data je nach Art: bei Edit die Sicherungskopie
-    /// der alten Bytes, bei Move der alte Pfad, bei Delete der Ablagepfad im Papierkorb;
+    /// der alten Bytes, bei Move der alte Pfad, bei Delete ungenutzt (der Papierkorb-Eintrag wird erst beim Rückgängig gesucht);
     /// TargetFile ist immer der Pfad, unter dem die Datei nach dem Rückgängig (wieder) liegt bzw. lag.</summary>
     private sealed record UndoAction(UndoKind Kind, string Description, string TargetFile, string Data);
 
@@ -1407,7 +1405,7 @@ public partial class MainForm : Form
                     Cursor.Current = Cursors.WaitCursor;
                     try
                     {
-                        if (File.Exists(action.TargetFile) || !ShellUtil.RestoreRecycledFile(action.Data, action.TargetFile))
+                        if (File.Exists(action.TargetFile) || !ShellUtil.RestoreFromRecycleBin(action.TargetFile)) // sucht und stellt in einem Durchgang wieder her
                         {
                             TaskDlg.MsgTaskDlg(Handle, Lng.T("Rückgängig fehlgeschlagen."),
                                 Lng.T("Die Datei konnte nicht aus dem Papierkorb wiederhergestellt werden."), TaskDialogIcon.Error);
