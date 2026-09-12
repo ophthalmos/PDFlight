@@ -656,7 +656,8 @@ public partial class MainForm : Form
         var result = dialog.ShowDialog(this);
         // Einstellungen aus dem Dialog gelten unabhängig vom Ergebnis: Länge der Zuletzt-Liste, „Liste leeren“
         if (dialog.ClearRecentRequested) { settings.RecentFolders.Clear(); }
-        if (dialog.ClearRecentRequested || settings.MaxRecentFolders != dialog.MaxRecent)
+        else if (dialog.RecentTrimmed) { settings.RecentFolders = [.. dialog.RecentFolders]; } // Kürzung wurde im Dialog bestätigt
+        if (dialog.ClearRecentRequested || dialog.RecentTrimmed || settings.MaxRecentFolders != dialog.MaxRecent)
         {
             settings.MaxRecentFolders = dialog.MaxRecent;
             settings.TrimRecentLists(); // eine kleinere Höchstzahl (bis hin zu 0) wirft überzählige Einträge sofort weg

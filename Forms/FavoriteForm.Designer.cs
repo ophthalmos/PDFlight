@@ -28,92 +28,92 @@ namespace PDFLight.Forms
         /// </summary>
         private void InitializeComponent()
         {
-            labelFileValue = new System.Windows.Forms.Label();
-            labelInfo = new System.Windows.Forms.Label();
-            labelName = new System.Windows.Forms.Label();
-            textBoxName = new System.Windows.Forms.TextBox();
-            buttonOK = new System.Windows.Forms.Button();
-            buttonCancel = new System.Windows.Forms.Button();
+            labelFileValue = new Label();
+            labelInfo = new Label();
+            labelName = new Label();
+            textBoxName = new TextBox();
+            buttonOK = new Button();
+            buttonCancel = new Button();
             SuspendLayout();
-            //
+            // 
             // labelFileValue
-            //
+            // 
             labelFileValue.AutoEllipsis = true;
-            labelFileValue.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            labelFileValue.Location = new System.Drawing.Point(12, 12);
+            labelFileValue.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            labelFileValue.Location = new Point(12, 12);
             labelFileValue.Name = "labelFileValue";
-            labelFileValue.Size = new System.Drawing.Size(306, 15);
+            labelFileValue.Size = new Size(256, 15);
             labelFileValue.TabIndex = 0;
             labelFileValue.Text = "datei.pdf";
-            //
+            // 
             // labelInfo
-            //
+            // 
             labelInfo.AutoSize = true;
-            labelInfo.Location = new System.Drawing.Point(12, 38);
+            labelInfo.Location = new Point(12, 38);
             labelInfo.Name = "labelInfo";
-            labelInfo.Size = new System.Drawing.Size(300, 15);
+            labelInfo.Size = new Size(212, 15);
             labelInfo.TabIndex = 1;
             labelInfo.Text = "Ohne Namen erscheint der Dateiname.";
-            //
+            // 
             // labelName
-            //
+            // 
             labelName.AutoSize = true;
-            labelName.Location = new System.Drawing.Point(12, 66);
+            labelName.Location = new Point(12, 66);
             labelName.Name = "labelName";
-            labelName.Size = new System.Drawing.Size(95, 15);
+            labelName.Size = new Size(178, 15);
             labelName.TabIndex = 2;
             labelName.Text = "&Name (optional, bis 30 Zeichen):";
-            //
+            // 
             // textBoxName
-            //
-            textBoxName.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            textBoxName.Location = new System.Drawing.Point(12, 84);
+            // 
+            textBoxName.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textBoxName.Location = new Point(12, 84);
             textBoxName.MaxLength = 30;
             textBoxName.Name = "textBoxName";
-            textBoxName.Size = new System.Drawing.Size(306, 23);
+            textBoxName.Size = new Size(256, 23);
             textBoxName.TabIndex = 3;
-            //
+            // 
             // buttonOK
-            //
-            buttonOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            buttonOK.Location = new System.Drawing.Point(122, 125);
+            // 
+            buttonOK.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonOK.DialogResult = DialogResult.OK;
+            buttonOK.Location = new Point(72, 125);
             buttonOK.Name = "buttonOK";
-            buttonOK.Size = new System.Drawing.Size(95, 27);
+            buttonOK.Size = new Size(95, 27);
             buttonOK.TabIndex = 4;
             buttonOK.Text = "OK";
             buttonOK.UseVisualStyleBackColor = true;
-            //
+            // 
             // buttonCancel
-            //
-            buttonCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            buttonCancel.Location = new System.Drawing.Point(223, 125);
+            // 
+            buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonCancel.DialogResult = DialogResult.Cancel;
+            buttonCancel.Location = new Point(173, 125);
             buttonCancel.Name = "buttonCancel";
-            buttonCancel.Size = new System.Drawing.Size(95, 27);
+            buttonCancel.Size = new Size(95, 27);
             buttonCancel.TabIndex = 5;
             buttonCancel.Text = "Abbrechen";
             buttonCancel.UseVisualStyleBackColor = true;
-            //
+            // 
             // FavoriteForm
-            //
+            // 
             AcceptButton = buttonOK;
-            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonCancel;
-            ClientSize = new System.Drawing.Size(330, 164);
+            ClientSize = new Size(280, 164);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
             Controls.Add(textBoxName);
             Controls.Add(labelName);
             Controls.Add(labelInfo);
             Controls.Add(labelFileValue);
-            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "FavoriteForm";
             ShowInTaskbar = false;
-            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            StartPosition = FormStartPosition.CenterParent;
             Text = "Favorit hinzufügen";
             ResumeLayout(false);
             PerformLayout();

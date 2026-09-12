@@ -12,12 +12,23 @@ public partial class FolderSelectForm : Form
     /// <summary>Wurde in der Zuletzt-Liste „Liste leeren“ gewählt? Das Hauptfenster leert dann die gespeicherte Liste – auch bei Abbruch.</summary>
     public bool ClearRecentRequested { get; private set; }
 
+    /// <summary>True, wenn die Zuletzt-Liste im Dialog gekürzt wurde (Höchstzahl gesenkt, Rückfrage bestätigt) – RecentFolders ist dann der neue Stand.</summary>
+    [System.ComponentModel.Browsable(false), System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+    public bool RecentTrimmed { get; private set; }
+
+    [System.ComponentModel.Browsable(false), System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+    public IReadOnlyList<string> RecentFolders => recentFolders;
+
     /// <summary>Höchstzahl der Einträge der Zuletzt-Liste (NumericUpDown oben rechts; Grenzen stehen im Designer).</summary>
     [System.ComponentModel.Browsable(false), System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
     public int MaxRecent
     {
         get => (int)numUpDownMaxRecent.Value;
-        set => numUpDownMaxRecent.Value = Math.Clamp(value, (int)numUpDownMaxRecent.Minimum, (int)numUpDownMaxRecent.Maximum);
+        set
+        {
+            appliedMaxRecent = Math.Clamp(value, (int)numUpDownMaxRecent.Minimum, (int)numUpDownMaxRecent.Maximum);
+            numUpDownMaxRecent.Value = appliedMaxRecent;
+        }
     }
 
     /// <summary>„Liste bearbeiten“ wurde gedrückt: Der Dialog schließt sich (Abbrechen), das Hauptfenster öffnet die Einstellungen (Zielliste).</summary>
@@ -30,6 +41,7 @@ public partial class FolderSelectForm : Form
     private sealed class ClearListEntry { public override string ToString() => Lng.T("Liste leeren"); }
 
     private List<string> recentFolders = []; // die vollständige Zuletzt-Liste; die ComboBox zeigt höchstens MaxRecent davon
+    private int appliedMaxRecent;            // zuletzt bestätigte Höchstzahl – dorthin zurück, wenn die Rückfrage abgelehnt wird
 
     /// <summary>Übernimmt die Zuletzt-Liste des Hauptfensters.</summary>
     public void SetRecentFolders(IEnumerable<string> folders)
@@ -248,12 +260,8 @@ public partial class FolderSelectForm : Form
         if (comboBoxRecent.SelectedItem is ClearListEntry)
         {
             comboBoxRecent.SelectedIndex = -1; // ein Befehl, keine Ordnerauswahl
-            // Rückfrage mit den Einträgen, die verloren gehen (bei langen Listen die ersten und die Zahl der übrigen)
-            const int ShowLimit = 12;
-            var lines = recentFolders.Take(ShowLimit).ToList();
-            if (recentFolders.Count > ShowLimit) { lines.Add(string.Format(Lng.T("… und {0} weitere"), recentFolders.Count - ShowLimit)); }
             var summary = recentFolders.Count == 1 ? Lng.T("1 Eintrag:") : string.Format(Lng.T("{0} Einträge:"), recentFolders.Count);
-            if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Die Liste der zuletzt verwendeten Ordner leeren?"), summary + "\n" + string.Join("\n", lines))) { return; }
+            if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Die Liste der zuletzt verwendeten Ordner leeren?"), summary + "\n" + Excerpt(recentFolders))) { return; }
             ClearRecentRequested = true;
             recentFolders.Clear();
             FillRecentCombo();
@@ -261,7 +269,39 @@ public partial class FolderSelectForm : Form
         else if (comboBoxRecent.SelectedItem is string path) { SelectFolderPath(comboBoxRecent, path); }
     }
 
-    private void NumUpDownMaxRecent_ValueChanged(object? sender, EventArgs e) => FillRecentCombo(); // Liste sofort auf die neue Länge bringen
+    /// <summary>Die Einträge, die eine Rückfrage auflistet: bei langen Listen die ersten und die Zahl der übrigen.</summary>
+    private static string Excerpt(List<string> entries)
+    {
+        const int ShowLimit = 12;
+        var lines = entries.Take(ShowLimit).ToList();
+        if (entries.Count > ShowLimit) { lines.Add(string.Format(Lng.T("… und {0} weitere"), entries.Count - ShowLimit)); }
+        return string.Join("\n", lines);
+    }
+
+    /// <summary>Neue Höchstzahl: Würden dabei Einträge verloren gehen, fragt der Dialog wie beim Leeren nach und nennt sie;
+    /// bei Ablehnung springt der Wert zurück. Sonst wird die Liste sofort auf die neue Länge gebracht.</summary>
+    private void NumUpDownMaxRecent_ValueChanged(object? sender, EventArgs e)
+    {
+        var max = MaxRecent;
+        if (max < recentFolders.Count && max < appliedMaxRecent)
+        {
+            var lost = recentFolders.Skip(max).ToList();
+            var heading = max == 0 ? Lng.T("Die Liste der zuletzt verwendeten Ordner leeren?")
+                : max == 1 ? Lng.T("Die Zuletzt-Liste auf einen Eintrag kürzen?")
+                : string.Format(Lng.T("Die Zuletzt-Liste auf {0} Einträge kürzen?"), max);
+            var summary = lost.Count == 1 ? Lng.T("1 Eintrag geht verloren:") : string.Format(Lng.T("{0} Einträge gehen verloren:"), lost.Count);
+            if (!TaskDlg.ConfirmTaskDlg(Handle, heading, summary + "\n" + Excerpt(lost)))
+            {
+                MaxRecent = appliedMaxRecent; // zurück auf den bestätigten Wert (löst ValueChanged erneut aus, dann ohne Verlust)
+                return;
+            }
+            recentFolders.RemoveRange(max, recentFolders.Count - max);
+            RecentTrimmed = true;
+            if (max == 0) { ClearRecentRequested = true; }
+        }
+        appliedMaxRecent = max;
+        FillRecentCombo();
+    }
 
     private void BtnTargetSettings_Click(object? sender, EventArgs e)
     {
