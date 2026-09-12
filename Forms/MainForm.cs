@@ -984,7 +984,7 @@ public partial class MainForm : Form
         mnuRemovePassword.Image = MenuIcon(ToolbarIcons.Unlock);
         mnuProperties.Image = MenuIcon(ToolbarIcons.Info);
         mnuFavoriteAdd.Image = MenuIcon(ToolbarIcons.Favorite); // Favoriten-Menü
-        mnuFavoriteRemove.Image = MenuIcon(ToolbarIcons.Unfavorite);
+        mnuFavoriteRemove.Image = MenuIcon(ToolbarIcons.Delete); // schlicht – der Stern steht schon am Menü selbst
         mnuFavoriteCleanup.Image = MenuIcon(ToolbarIcons.Clear);
         mnuShortcuts.Image = MenuIcon(ToolbarIcons.Keyboard); // Info-Menü
         mnuCheckUpdate.Image = MenuIcon(ToolbarIcons.UpdateSearch);
