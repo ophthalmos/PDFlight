@@ -116,7 +116,6 @@ L'affichage provient de la mémoire et reste disponible.</value></data>
   <data name="Strg+G" xml:space="preserve"><value>Ctrl+G</value></data>
   <data name="E-Mail" xml:space="preserve"><value>E-mail</value></data>
   <data name="in" xml:space="preserve"><value>dans</value></data>
-  <data name="Sprache / &amp;Language:" xml:space="preserve"><value>Langue / &amp;Language :</value></data>
   <data name="Nur weiter anzeigen" xml:space="preserve"><value>Continuer seulement l'affichage</value></data>
   <data name="Bearbeitungsfunktionen werden deaktiviert" xml:space="preserve"><value>les fonctions de modification seront désactivées</value></data>
   <data name="Die Datei wurde aus der Anzeige neu gespeichert." xml:space="preserve"><value>Le fichier a été réenregistré à partir de l'affichage.</value></data>
