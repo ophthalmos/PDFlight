@@ -25,16 +25,25 @@ public partial class SettingsForm : Form
     [System.ComponentModel.Browsable(false)]
     public bool OpenNextAfterDelete => cbOpenNextAfterDelete.Checked;
 
-    // Gestaltung der Symbolleiste als Stufenleiter (wie die Vorgabe des Installers): 0 = große Symbole und Programm-Icons,
-    // 1 = kleine Symbole, 2 = zusätzlich ohne Programm-Icons, 3 = nur Text – dahinter stehen die drei Einstellungen
-    [System.ComponentModel.Browsable(false)]
-    public bool LargeToolbarIcons => comboToolbar.SelectedIndex < 1;
+    /// <summary>Die Einträge der Symbolleisten-Auswahl (Reihenfolge wie im Dialog) und die drei Einstellungen dahinter:
+    /// große Symbole, Programm-Icons, Symbole überhaupt. Die Installer-Vorgabe (setup.default) kennt vier Stufen davon.</summary>
+    private static readonly (string Text, bool Large, bool Program, bool Icons)[] ToolbarLayouts =
+    [
+        ("Große Symbole und Programm-Icons", true, true, true),
+        ("Große Symbole, ohne Programm-Icons", true, false, true),
+        ("Kleine Symbole und Programm-Icons", false, true, true),
+        ("Kleine Symbole, ohne Programm-Icons", false, false, true),
+        ("Nur Text", false, false, false),
+    ];
 
     [System.ComponentModel.Browsable(false)]
-    public bool ShowProgramIcons => comboToolbar.SelectedIndex < 2;
+    public bool LargeToolbarIcons => ToolbarLayouts[comboToolbar.SelectedIndex].Large;
 
     [System.ComponentModel.Browsable(false)]
-    public bool ShowToolbarIcons => comboToolbar.SelectedIndex < 3;
+    public bool ShowProgramIcons => ToolbarLayouts[comboToolbar.SelectedIndex].Program;
+
+    [System.ComponentModel.Browsable(false)]
+    public bool ShowToolbarIcons => ToolbarLayouts[comboToolbar.SelectedIndex].Icons;
 
     [System.ComponentModel.Browsable(false)]
     public bool CloseOnEscape => cbCloseOnEscape.Checked;
@@ -67,8 +76,9 @@ public partial class SettingsForm : Form
         cbJumpLastUsed.Checked = source.JumpToLastUsed;
         cbConfirmDelete.Checked = source.ConfirmDelete;
         cbOpenNextAfterDelete.Checked = source.OpenNextAfterDelete;
-        comboToolbar.Items.AddRange([Lng.T("Große Symbole und Programm-Icons"), Lng.T("Kleine Symbole und Programm-Icons"), Lng.T("Kleine Symbole, ohne Programm-Icons"), Lng.T("Nur Text")]);
-        comboToolbar.SelectedIndex = !source.ShowToolbarIcons ? 3 : !source.ShowProgramIcons ? 2 : !source.LargeToolbarIcons ? 1 : 0;
+        comboToolbar.Items.AddRange([.. ToolbarLayouts.Select(l => (object)Lng.T(l.Text))]);
+        var layout = Array.FindIndex(ToolbarLayouts, l => l.Large == source.LargeToolbarIcons && l.Program == source.ShowProgramIcons && l.Icons == source.ShowToolbarIcons);
+        comboToolbar.SelectedIndex = layout >= 0 ? layout : ToolbarLayouts.Length - 1; // Kombinationen ohne Listeneintrag (z.B. nur Text mit Programm-Icons) landen bei „Nur Text“
         cbCloseOnEscape.Checked = source.CloseOnEscape;
         cbReopenLast.Checked = source.ReopenLastFile;
         cbFullPathTitle.Checked = source.ShowFullPathInTitle;
