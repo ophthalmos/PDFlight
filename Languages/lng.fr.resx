@@ -20,7 +20,7 @@
   <data name="Ordnerdialog springt zum zuletzt &amp;verwendeten Ordner" xml:space="preserve"><value>La boîte de dialogue des dossiers ouvre le dernier dossier &amp;utilisé</value></data>
   <data name="Vor dem Verschieben in den &amp;Papierkorb nachfragen" xml:space="preserve"><value>Confirmer avant de déplacer vers la &amp;corbeille</value></data>
   <data name="Nach dem Löschen die &amp;nächste Datei des Ordners anzeigen" xml:space="preserve"><value>Afficher le fichier suiva&amp;nt du dossier après la suppression</value></data>
-  <data name="&amp;Symbolleiste:" xml:space="preserve"><value>Barre d'&amp;outils :</value></data>
+  <data name="Layout der Hauptmenüleiste:" xml:space="preserve"><value>Disposition de la barre d'outils principale :</value></data>
   <data name="Große Symbole und Programm-Icons" xml:space="preserve"><value>Grandes icônes et icônes des programmes</value></data>
   <data name="Kleine Symbole und Programm-Icons" xml:space="preserve"><value>Petites icônes et icônes des programmes</value></data>
   <data name="Kleine Symbole, ohne Programm-Icons" xml:space="preserve"><value>Petites icônes, sans icônes des programmes</value></data>
