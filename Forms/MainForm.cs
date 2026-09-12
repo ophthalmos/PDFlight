@@ -1623,8 +1623,6 @@ public partial class MainForm : Form
         var current = currentFile == null ? null : settings.FindFavorite(currentFile.FullName);
         mnuFavoriteAdd.Visible = current == null;
         mnuFavoriteAdd.Enabled = currentFile != null;
-        mnuFavoriteAdd.Text = currentFile == null ? Lng.T("Datei zu den Favoriten hinzufügen …")
-            : string.Format(Lng.T("»{0}« zu den Favoriten hinzufügen …"), currentFile.Name);
         mnuFavoriteRemove.Visible = current != null;
         if (current != null) { mnuFavoriteRemove.Text = string.Format(Lng.T("»{0}« aus den Favoriten entfernen"), current.Label); }
         var items = ddbFavorites.DropDownItems;
