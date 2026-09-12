@@ -44,6 +44,9 @@ public partial class SettingsForm : Form
     [System.ComponentModel.Browsable(false)]
     public bool ShowFullPathInTitle => cbFullPathTitle.Checked;
 
+    /// <summary>Favoriten-Menü in der Symbolleiste anzeigen (Strg+D merkt Seiten); Standard aus.</summary>
+    public bool ShowFavorites => cbShowFavorites.Checked;
+
     [System.ComponentModel.Browsable(false)]
     public int MaxRecentFiles => (int)numMaxRecentFiles.Value; // 0 = kein Verlauf im Öffnen-Menü
 
@@ -69,6 +72,7 @@ public partial class SettingsForm : Form
         cbCloseOnEscape.Checked = source.CloseOnEscape;
         cbReopenLast.Checked = source.ReopenLastFile;
         cbFullPathTitle.Checked = source.ShowFullPathInTitle;
+        cbShowFavorites.Checked = source.ShowFavorites;
         numMaxRecentFiles.Value = Math.Clamp(source.MaxRecentFiles, (int)numMaxRecentFiles.Minimum, (int)numMaxRecentFiles.Maximum);
         if (listTargets.Items.Count > 0) { listTargets.SelectedIndex = 0; }
         if (listPrograms.Items.Count > 0) { listPrograms.SelectedIndex = 0; }

@@ -40,6 +40,7 @@
             cbCloseOnEscape = new CheckBox();
             cbReopenLast = new CheckBox();
             cbFullPathTitle = new CheckBox();
+            cbShowFavorites = new CheckBox();
             labelMaxRecentFiles = new Label();
             numMaxRecentFiles = new NumericUpDown();
             labelLanguage = new Label();
@@ -84,7 +85,7 @@
             tabControl.Location = new Point(0, 0);
             tabControl.Name = "tabControl";
             tabControl.SelectedIndex = 0;
-            tabControl.Size = new Size(488, 341);
+            tabControl.Size = new Size(488, 366);
             tabControl.TabIndex = 0;
             // 
             // tabGeneral
@@ -98,6 +99,7 @@
             tabGeneral.Controls.Add(cbCloseOnEscape);
             tabGeneral.Controls.Add(cbReopenLast);
             tabGeneral.Controls.Add(cbFullPathTitle);
+            tabGeneral.Controls.Add(cbShowFavorites);
             tabGeneral.Controls.Add(labelMaxRecentFiles);
             tabGeneral.Controls.Add(numMaxRecentFiles);
             tabGeneral.Controls.Add(labelLanguage);
@@ -105,7 +107,7 @@
             tabGeneral.Location = new Point(4, 24);
             tabGeneral.Name = "tabGeneral";
             tabGeneral.Padding = new Padding(3);
-            tabGeneral.Size = new Size(480, 313);
+            tabGeneral.Size = new Size(480, 338);
             tabGeneral.TabIndex = 2;
             tabGeneral.Text = "Allgemein";
             tabGeneral.UseVisualStyleBackColor = true;
@@ -208,41 +210,51 @@
             cbFullPathTitle.Text = "Vollständigen Dateipfad in der Titelleiste an&zeigen";
             cbFullPathTitle.UseVisualStyleBackColor = true;
             // 
+            // cbShowFavorites
+            // 
+            cbShowFavorites.AutoSize = true;
+            cbShowFavorites.Location = new Point(18, 245);
+            cbShowFavorites.Name = "cbShowFavorites";
+            cbShowFavorites.Size = new Size(300, 19);
+            cbShowFavorites.TabIndex = 10;
+            cbShowFavorites.Text = "&Favoriten-Menü anzeigen (Seiten merken, Strg+D)";
+            cbShowFavorites.UseVisualStyleBackColor = true;
+            // 
             // labelMaxRecentFiles
             // 
             labelMaxRecentFiles.AutoSize = true;
-            labelMaxRecentFiles.Location = new Point(18, 252);
+            labelMaxRecentFiles.Location = new Point(18, 277);
             labelMaxRecentFiles.Name = "labelMaxRecentFiles";
             labelMaxRecentFiles.Size = new Size(255, 15);
-            labelMaxRecentFiles.TabIndex = 10;
+            labelMaxRecentFiles.TabIndex = 11;
             labelMaxRecentFiles.Text = "Zuletzt geöffnete Dateien &merken (0 = keine):";
             // 
             // numMaxRecentFiles
             // 
             numMaxRecentFiles.Increment = new decimal(new int[] { 5, 0, 0, 0 });
-            numMaxRecentFiles.Location = new Point(300, 249);
+            numMaxRecentFiles.Location = new Point(300, 274);
             numMaxRecentFiles.Maximum = new decimal(new int[] { 50, 0, 0, 0 });
             numMaxRecentFiles.Name = "numMaxRecentFiles";
             numMaxRecentFiles.Size = new Size(60, 23);
-            numMaxRecentFiles.TabIndex = 11;
+            numMaxRecentFiles.TabIndex = 12;
             numMaxRecentFiles.Value = new decimal(new int[] { 20, 0, 0, 0 });
             // 
             // labelLanguage
             // 
             labelLanguage.AutoSize = true;
-            labelLanguage.Location = new Point(18, 281);
+            labelLanguage.Location = new Point(18, 306);
             labelLanguage.Name = "labelLanguage";
             labelLanguage.Size = new Size(115, 15);
-            labelLanguage.TabIndex = 12;
+            labelLanguage.TabIndex = 13;
             labelLanguage.Text = "Sprache / &Language:";
             // 
             // comboLanguage
             // 
             comboLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboLanguage.Location = new Point(160, 278);
+            comboLanguage.Location = new Point(160, 303);
             comboLanguage.Name = "comboLanguage";
             comboLanguage.Size = new Size(140, 23);
-            comboLanguage.TabIndex = 13;
+            comboLanguage.TabIndex = 14;
             // 
             // tabTargets
             // 
@@ -258,7 +270,7 @@
             tabTargets.Location = new Point(4, 24);
             tabTargets.Name = "tabTargets";
             tabTargets.Padding = new Padding(3);
-            tabTargets.Size = new Size(480, 313);
+            tabTargets.Size = new Size(480, 338);
             tabTargets.TabIndex = 0;
             tabTargets.Text = "Zielordner";
             tabTargets.UseVisualStyleBackColor = true;
@@ -271,7 +283,7 @@
             listTargets.ItemHeight = 18;
             listTargets.Location = new Point(8, 8);
             listTargets.Name = "listTargets";
-            listTargets.Size = new Size(320, 280);
+            listTargets.Size = new Size(320, 305);
             listTargets.TabIndex = 0;
             listTargets.DrawItem += ListTargets_DrawItem;
             listTargets.SelectedIndexChanged += ListTargets_SelectedIndexChanged;
@@ -355,7 +367,7 @@
             // 
             labelTargetHint.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             labelTargetHint.ForeColor = SystemColors.GrayText;
-            labelTargetHint.Location = new Point(6, 291);
+            labelTargetHint.Location = new Point(6, 316);
             labelTargetHint.Name = "labelTargetHint";
             labelTargetHint.Size = new Size(472, 19);
             labelTargetHint.TabIndex = 7;
@@ -375,7 +387,7 @@
             tabPrograms.Location = new Point(4, 24);
             tabPrograms.Name = "tabPrograms";
             tabPrograms.Padding = new Padding(3);
-            tabPrograms.Size = new Size(480, 313);
+            tabPrograms.Size = new Size(480, 338);
             tabPrograms.TabIndex = 1;
             tabPrograms.Text = "Programme";
             tabPrograms.UseVisualStyleBackColor = true;
@@ -386,7 +398,7 @@
             listPrograms.IntegralHeight = false;
             listPrograms.Location = new Point(8, 8);
             listPrograms.Name = "listPrograms";
-            listPrograms.Size = new Size(320, 280);
+            listPrograms.Size = new Size(320, 305);
             listPrograms.TabIndex = 0;
             listPrograms.SelectedIndexChanged += ListPrograms_SelectedIndexChanged;
             // 
@@ -468,7 +480,7 @@
             // 
             labelProgramHint.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             labelProgramHint.ForeColor = SystemColors.GrayText;
-            labelProgramHint.Location = new Point(6, 291);
+            labelProgramHint.Location = new Point(6, 316);
             labelProgramHint.Name = "labelProgramHint";
             labelProgramHint.Size = new Size(472, 19);
             labelProgramHint.TabIndex = 7;
@@ -501,7 +513,7 @@
             panelButtons.Controls.Add(buttonCancel);
             panelButtons.Controls.Add(buttonOK);
             panelButtons.Dock = DockStyle.Bottom;
-            panelButtons.Location = new Point(0, 341);
+            panelButtons.Location = new Point(0, 366);
             panelButtons.Name = "panelButtons";
             panelButtons.Size = new Size(488, 45);
             panelButtons.TabIndex = 1;
@@ -512,7 +524,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonCancel;
-            ClientSize = new Size(488, 386);
+            ClientSize = new Size(488, 411);
             Controls.Add(tabControl);
             Controls.Add(panelButtons);
             Icon = (Icon)resources.GetObject("$this.Icon");
@@ -572,6 +584,7 @@
         private System.Windows.Forms.CheckBox cbCloseOnEscape;
         private System.Windows.Forms.CheckBox cbReopenLast;
         private System.Windows.Forms.CheckBox cbFullPathTitle;
+        private System.Windows.Forms.CheckBox cbShowFavorites;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
     }
