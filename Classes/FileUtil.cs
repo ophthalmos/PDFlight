@@ -11,6 +11,15 @@ namespace PDFLight.Classes;
 internal static class FileUtil
 {
     /// <summary>Ersetzt Umlaute/ß und entfernt alle übrigen diakritischen Zeichen ("Café" → "Cafe").</summary>
+    /// <summary>Kürzt einen Text auf maxLength Zeichen, indem die Mitte durch „…“ ersetzt wird (lange Pfade in Menütexten).</summary>
+    public static string ShortenMiddle(string text, int maxLength)
+    {
+        if (text.Length <= maxLength || maxLength < 3) { return text; }
+        var head = (maxLength - 1) / 2;
+        var tail = maxLength - 1 - head;
+        return text[..head] + "…" + text[^tail..];
+    }
+
     public static string RemoveDiacritics(string s)
     {
         s = s.Replace("ß", "ss").Replace("ä", "ae").Replace("ö", "oe").Replace("ü", "ue").Replace("Ä", "Ae").Replace("Ö", "Oe").Replace("Ü", "Ue");

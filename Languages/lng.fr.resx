@@ -454,6 +454,8 @@ d'installation pour installer la dernière version.</value></data>
   <data name="Dateien als Favoriten merken und wiederfinden (Strg+D)" xml:space="preserve"><value>Mémoriser des fichiers comme favoris et les retrouver (Ctrl+D)</value></data>
   <data name="Datei zu den Favoriten hinzufügen …" xml:space="preserve"><value>Ajouter le fichier aux favoris…</value></data>
   <data name="Datei aus den Favoriten entfernen" xml:space="preserve"><value>Retirer le fichier des favoris</value></data>
+  <data name="»{0}« zu den Favoriten hinzufügen …" xml:space="preserve"><value>Ajouter « {0} » aux favoris…</value></data>
+  <data name="»{0}« aus den Favoriten entfernen" xml:space="preserve"><value>Retirer « {0} » des favoris</value></data>
   <data name="Nicht mehr vorhandene Favoriten entfernen" xml:space="preserve"><value>Retirer les favoris qui n'existent plus</value></data>
   <data name="(keine Favoriten)" xml:space="preserve"><value>(aucun favori)</value></data>
   <data name="Strg+D" xml:space="preserve"><value>Ctrl+D</value></data>
