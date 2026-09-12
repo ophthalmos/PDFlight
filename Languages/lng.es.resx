@@ -442,4 +442,8 @@ para instalar la última versión.</value></data>
   <data name="Das Dokument konnte nicht gedruckt werden." xml:space="preserve"><value>No se pudo imprimir el documento.</value></data>
   <data name="Kommandozeile:" xml:space="preserve"><value>Línea de comandos:</value></data>
   <data name="(auch mit „--“)" xml:space="preserve"><value>(también con «--»)</value></data>
+  <data name="Maximal:" xml:space="preserve"><value>Máx.:</value></data>
+  <data name="Liste bearbeiten" xml:space="preserve"><value>Editar lista</value></data>
+  <data name="Zielliste in den Einstellungen bearbeiten" xml:space="preserve"><value>Editar la lista de destinos en los ajustes</value></data>
+  <data name="Höchstzahl der gemerkten Ordner in der Zuletzt-Liste" xml:space="preserve"><value>Número máximo de carpetas en la lista de recientes</value></data>
 </root>

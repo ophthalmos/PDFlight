@@ -36,16 +36,20 @@
             buttonOK = new Button();
             comboBoxTarget = new ComboBox();
             shellTreeView = new PDFLight.Controls.FolderTreeView();
+            contextMenuTree = new ContextMenuStrip(components);
+            newFolderMenuItem = new ToolStripMenuItem();
+            renameFolderMenuItem = new ToolStripMenuItem();
+            deleteFolderMenuItem = new ToolStripMenuItem();
             pathEdit = new PDFLight.Controls.PathEditBox();
             shellHistory = new PDFLight.Controls.FolderHistoryToolBar();
             cbAdd2Folderlist = new CheckBox();
             toolTip = new ToolTip(components);
             linkLabelRecent = new LinkLabel();
-            contextMenuTree = new ContextMenuStrip(components);
-            newFolderMenuItem = new ToolStripMenuItem();
-            renameFolderMenuItem = new ToolStripMenuItem();
-            deleteFolderMenuItem = new ToolStripMenuItem();
+            labelMaxRecent = new Label();
+            numUpDownMaxRecent = new NumericUpDown();
+            btnTargetSettings = new Button();
             contextMenuTree.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numUpDownMaxRecent).BeginInit();
             SuspendLayout();
             // 
             // comboBoxRecent
@@ -53,9 +57,9 @@
             comboBoxRecent.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             comboBoxRecent.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBoxRecent.FormattingEnabled = true;
-            comboBoxRecent.Location = new Point(90, 12);
+            comboBoxRecent.Location = new Point(90, 13);
             comboBoxRecent.Name = "comboBoxRecent";
-            comboBoxRecent.Size = new Size(381, 23);
+            comboBoxRecent.Size = new Size(260, 23);
             comboBoxRecent.TabIndex = 0;
             comboBoxRecent.SelectedIndexChanged += ComboBoxRecent_SelectedIndexChanged;
             // 
@@ -97,7 +101,7 @@
             comboBoxTarget.FormattingEnabled = true;
             comboBoxTarget.Location = new Point(90, 41);
             comboBoxTarget.Name = "comboBoxTarget";
-            comboBoxTarget.Size = new Size(381, 23);
+            comboBoxTarget.Size = new Size(260, 23);
             comboBoxTarget.TabIndex = 1;
             comboBoxTarget.SelectedIndexChanged += ComboBoxTarget_SelectedIndexChanged;
             // 
@@ -116,11 +120,42 @@
             shellTreeView.TabIndex = 2;
             shellTreeView.AfterLabelEdit += ShellTreeView_AfterLabelEdit;
             shellTreeView.AfterSelect += ShellTreeView_AfterSelect;
+            shellTreeView.NodeMouseClick += ShellTreeView_NodeMouseClick;
             shellTreeView.DoubleClick += ShellTreeView_DoubleClick;
             shellTreeView.KeyDown += ShellTreeView_KeyDown;
-            shellTreeView.NodeMouseClick += ShellTreeView_NodeMouseClick;
             shellTreeView.PreviewKeyDown += ShellTreeView_PreviewKeyDown;
             shellTreeView.Resize += ShellTreeView_Resize;
+            // 
+            // contextMenuTree
+            // 
+            contextMenuTree.Items.AddRange(new ToolStripItem[] { newFolderMenuItem, renameFolderMenuItem, deleteFolderMenuItem });
+            contextMenuTree.Name = "contextMenuTree";
+            contextMenuTree.Size = new Size(196, 70);
+            contextMenuTree.Opening += ContextMenuTree_Opening;
+            // 
+            // newFolderMenuItem
+            // 
+            newFolderMenuItem.Name = "newFolderMenuItem";
+            newFolderMenuItem.ShortcutKeyDisplayString = "Strg+N";
+            newFolderMenuItem.Size = new Size(195, 22);
+            newFolderMenuItem.Text = "Neuer Ordner";
+            newFolderMenuItem.Click += ButtonNewFolder_Clicked;
+            // 
+            // renameFolderMenuItem
+            // 
+            renameFolderMenuItem.Name = "renameFolderMenuItem";
+            renameFolderMenuItem.ShortcutKeyDisplayString = "F2";
+            renameFolderMenuItem.Size = new Size(195, 22);
+            renameFolderMenuItem.Text = "Umbenennen";
+            renameFolderMenuItem.Click += RenameFolderMenuItem_Click;
+            // 
+            // deleteFolderMenuItem
+            // 
+            deleteFolderMenuItem.Name = "deleteFolderMenuItem";
+            deleteFolderMenuItem.ShortcutKeyDisplayString = "Entf";
+            deleteFolderMenuItem.Size = new Size(195, 22);
+            deleteFolderMenuItem.Text = "In den Papierkorb";
+            deleteFolderMenuItem.Click += DeleteFolderMenuItem_Click;
             // 
             // pathEdit
             // 
@@ -169,6 +204,37 @@
             linkLabelRecent.Text = "Zuletzt:";
             linkLabelRecent.LinkClicked += LinkLabelRecent_LinkClicked;
             // 
+            // labelMaxRecent
+            // 
+            labelMaxRecent.AutoSize = true;
+            labelMaxRecent.Location = new Point(356, 16);
+            labelMaxRecent.Name = "labelMaxRecent";
+            labelMaxRecent.Size = new Size(55, 15);
+            labelMaxRecent.TabIndex = 11;
+            labelMaxRecent.Text = "Maximal:";
+            // 
+            // numUpDownMaxRecent
+            // 
+            numUpDownMaxRecent.Increment = new decimal(new int[] { 5, 0, 0, 0 });
+            numUpDownMaxRecent.Location = new Point(417, 13);
+            numUpDownMaxRecent.Maximum = new decimal(new int[] { 50, 0, 0, 0 });
+            numUpDownMaxRecent.Minimum = new decimal(new int[] { 5, 0, 0, 0 });
+            numUpDownMaxRecent.Name = "numUpDownMaxRecent";
+            numUpDownMaxRecent.Size = new Size(48, 23);
+            numUpDownMaxRecent.TabIndex = 12;
+            numUpDownMaxRecent.Value = new decimal(new int[] { 10, 0, 0, 0 });
+            numUpDownMaxRecent.ValueChanged += NumUpDownMaxRecent_ValueChanged;
+            // 
+            // btnTargetSettings
+            // 
+            btnTargetSettings.Location = new Point(356, 40);
+            btnTargetSettings.Name = "btnTargetSettings";
+            btnTargetSettings.Size = new Size(109, 23);
+            btnTargetSettings.TabIndex = 13;
+            btnTargetSettings.Text = "Liste bearbeiten";
+            btnTargetSettings.UseVisualStyleBackColor = true;
+            btnTargetSettings.Click += BtnTargetSettings_Click;
+            // 
             // FolderSelectForm
             // 
             AcceptButton = buttonOK;
@@ -176,6 +242,9 @@
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonCancel;
             ClientSize = new Size(477, 644);
+            Controls.Add(btnTargetSettings);
+            Controls.Add(numUpDownMaxRecent);
+            Controls.Add(labelMaxRecent);
             Controls.Add(linkLabelRecent);
             Controls.Add(cbAdd2Folderlist);
             Controls.Add(shellHistory);
@@ -201,38 +270,8 @@
             Load += FolderSelectForm_Load;
             Shown += FolderSelectForm_Shown;
             HelpRequested += FolderSelectForm_HelpRequested;
-            //
-            // contextMenuTree
-            //
-            contextMenuTree.Items.AddRange(new ToolStripItem[] { newFolderMenuItem, renameFolderMenuItem, deleteFolderMenuItem });
-            contextMenuTree.Name = "contextMenuTree";
-            contextMenuTree.Size = new Size(220, 70);
-            contextMenuTree.Opening += ContextMenuTree_Opening;
-            //
-            // newFolderMenuItem
-            //
-            newFolderMenuItem.Name = "newFolderMenuItem";
-            newFolderMenuItem.ShortcutKeyDisplayString = "Strg+N";
-            newFolderMenuItem.Size = new Size(219, 22);
-            newFolderMenuItem.Text = "Neuer Ordner";
-            newFolderMenuItem.Click += ButtonNewFolder_Clicked;
-            //
-            // renameFolderMenuItem
-            //
-            renameFolderMenuItem.Name = "renameFolderMenuItem";
-            renameFolderMenuItem.ShortcutKeyDisplayString = "F2";
-            renameFolderMenuItem.Size = new Size(219, 22);
-            renameFolderMenuItem.Text = "Umbenennen";
-            renameFolderMenuItem.Click += RenameFolderMenuItem_Click;
-            //
-            // deleteFolderMenuItem
-            //
-            deleteFolderMenuItem.Name = "deleteFolderMenuItem";
-            deleteFolderMenuItem.ShortcutKeyDisplayString = "Entf";
-            deleteFolderMenuItem.Size = new Size(219, 22);
-            deleteFolderMenuItem.Text = "In den Papierkorb";
-            deleteFolderMenuItem.Click += DeleteFolderMenuItem_Click;
             contextMenuTree.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)numUpDownMaxRecent).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -254,5 +293,8 @@
         private System.Windows.Forms.ToolStripMenuItem newFolderMenuItem;
         private System.Windows.Forms.ToolStripMenuItem renameFolderMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteFolderMenuItem;
+        private Label labelMaxRecent;
+        private NumericUpDown numUpDownMaxRecent;
+        private Button btnTargetSettings;
     }
 }

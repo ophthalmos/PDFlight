@@ -7,9 +7,51 @@ namespace PDFLight.Forms;
 /// <summary>Zielordner-Dialog: Ordnerbaum mit Zuletzt-/Zielliste, Verlauf, Pfadfeld und Neuer-Ordner-Funktion (portiert aus PDFMover).</summary>
 public partial class FolderSelectForm : Form
 {
-    public ComboBox TargetComboBox => comboBoxTarget;
-    public ComboBox RecentComboBox => comboBoxRecent;
     public CheckBox Add2Folderlist => cbAdd2Folderlist;
+
+    /// <summary>Wurde in der Zuletzt-Liste „Liste leeren“ gewählt? Das Hauptfenster leert dann die gespeicherte Liste – auch bei Abbruch.</summary>
+    public bool ClearRecentRequested { get; private set; }
+
+    /// <summary>Höchstzahl der Einträge der Zuletzt-Liste (NumericUpDown oben rechts; Grenzen stehen im Designer).</summary>
+    [System.ComponentModel.Browsable(false), System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+    public int MaxRecent
+    {
+        get => (int)numUpDownMaxRecent.Value;
+        set => numUpDownMaxRecent.Value = Math.Clamp(value, (int)numUpDownMaxRecent.Minimum, (int)numUpDownMaxRecent.Maximum);
+    }
+
+    /// <summary>„Liste bearbeiten“: Das Hauptfenster öffnet daraufhin die Einstellungen (Zielliste) und ruft danach SetTargetFolders auf.</summary>
+    public event EventHandler? EditTargetsRequested;
+
+    /// <summary>Der letzte Eintrag der Zuletzt-Liste: „Liste leeren“. Eine ComboBox kennt keine Menüeinträge, deshalb ein
+    /// eigener Typ, den SelectedIndexChanged als Befehl statt als Ordner erkennt.</summary>
+    private sealed class ClearListEntry { public override string ToString() => Lng.T("Liste leeren"); }
+
+    private List<string> recentFolders = []; // die vollständige Zuletzt-Liste; die ComboBox zeigt höchstens MaxRecent davon
+
+    /// <summary>Übernimmt die Zuletzt-Liste des Hauptfensters.</summary>
+    public void SetRecentFolders(IEnumerable<string> folders)
+    {
+        recentFolders = [.. folders];
+        FillRecentCombo();
+    }
+
+    /// <summary>Füllt die Zielliste neu (nach dem Bearbeiten in den Einstellungen) und gleicht Auswahl und Häkchen ab.</summary>
+    public void SetTargetFolders(IEnumerable<string> folders)
+    {
+        comboBoxTarget.Items.Clear();
+        comboBoxTarget.Items.AddRange([.. folders]);
+        if (IsHandleCreated) { ShellTreeView_AfterSelect(shellTreeView, new TreeViewEventArgs(shellTreeView.SelectedNode)); }
+    }
+
+    private void FillRecentCombo()
+    {
+        var selected = comboBoxRecent.SelectedItem as string;
+        comboBoxRecent.Items.Clear();
+        comboBoxRecent.Items.AddRange([.. recentFolders.Take(MaxRecent)]);
+        if (comboBoxRecent.Items.Count > 0) { comboBoxRecent.Items.Add(new ClearListEntry()); }
+        if (selected != null) { comboBoxRecent.SelectedIndex = comboBoxRecent.FindStringExact(selected); }
+    }
 
     [System.ComponentModel.Browsable(false), System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
     public string ShellTreePath
@@ -49,6 +91,8 @@ public partial class FolderSelectForm : Form
         pathEdit.HistoryButtonClick += (sender, e) => shellHistory.ShowDropDown();
         btnNewFolder.Click += ButtonNewFolder_Clicked;
         toolTip.SetToolTip(btnNewFolder, Lng.T("Neuer Ordner (Strg+N)"));
+        toolTip.SetToolTip(btnTargetSettings, Lng.T("Zielliste in den Einstellungen bearbeiten"));
+        toolTip.SetToolTip(numUpDownMaxRecent, Lng.T("Höchstzahl der gemerkten Ordner in der Zuletzt-Liste"));
     }
 
     private void FolderSelectForm_Load(object? sender, EventArgs e)
@@ -197,7 +241,22 @@ public partial class FolderSelectForm : Form
 
     private void ComboBoxTarget_SelectedIndexChanged(object? sender, EventArgs e) { if (comboBoxTarget.SelectedItem is string path) { SelectFolderPath(comboBoxTarget, path); } }
 
-    private void ComboBoxRecent_SelectedIndexChanged(object? sender, EventArgs e) { if (comboBoxRecent.SelectedItem is string path) { SelectFolderPath(comboBoxRecent, path); } }
+    private void ComboBoxRecent_SelectedIndexChanged(object? sender, EventArgs e)
+    {
+        if (comboBoxRecent.SelectedItem is ClearListEntry)
+        {
+            comboBoxRecent.SelectedIndex = -1; // ein Befehl, keine Ordnerauswahl
+            if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Die Liste der zuletzt verwendeten Ordner leeren?"), null)) { return; }
+            ClearRecentRequested = true;
+            recentFolders.Clear();
+            FillRecentCombo();
+        }
+        else if (comboBoxRecent.SelectedItem is string path) { SelectFolderPath(comboBoxRecent, path); }
+    }
+
+    private void NumUpDownMaxRecent_ValueChanged(object? sender, EventArgs e) => FillRecentCombo(); // Liste sofort auf die neue Länge bringen
+
+    private void BtnTargetSettings_Click(object? sender, EventArgs e) => EditTargetsRequested?.Invoke(this, EventArgs.Empty);
 
     private void SelectFolderPath(ComboBox comboBox, string path)
     {
