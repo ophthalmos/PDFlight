@@ -29,7 +29,7 @@ namespace PDFLight.Forms
         private void InitializeComponent()
         {
             labelFileValue = new System.Windows.Forms.Label();
-            labelPage = new System.Windows.Forms.Label();
+            labelInfo = new System.Windows.Forms.Label();
             labelName = new System.Windows.Forms.Label();
             textBoxName = new System.Windows.Forms.TextBox();
             buttonOK = new System.Windows.Forms.Button();
@@ -46,13 +46,14 @@ namespace PDFLight.Forms
             labelFileValue.TabIndex = 0;
             labelFileValue.Text = "datei.pdf";
             //
-            // labelPage
+            // labelInfo
             //
-            labelPage.AutoSize = true;
-            labelPage.Location = new System.Drawing.Point(12, 38);
-            labelPage.Name = "labelPage";
-            labelPage.Size = new System.Drawing.Size(0, 15);
-            labelPage.TabIndex = 1;
+            labelInfo.AutoSize = true;
+            labelInfo.Location = new System.Drawing.Point(12, 38);
+            labelInfo.Name = "labelInfo";
+            labelInfo.Size = new System.Drawing.Size(300, 15);
+            labelInfo.TabIndex = 1;
+            labelInfo.Text = "Ohne Namen erscheint der Dateiname im Favoriten-Menü.";
             //
             // labelName
             //
@@ -104,7 +105,7 @@ namespace PDFLight.Forms
             Controls.Add(buttonOK);
             Controls.Add(textBoxName);
             Controls.Add(labelName);
-            Controls.Add(labelPage);
+            Controls.Add(labelInfo);
             Controls.Add(labelFileValue);
             FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             MaximizeBox = false;
@@ -120,7 +121,7 @@ namespace PDFLight.Forms
         #endregion
 
         private System.Windows.Forms.Label labelFileValue;
-        private System.Windows.Forms.Label labelPage;
+        private System.Windows.Forms.Label labelInfo;
         private System.Windows.Forms.Label labelName;
         private System.Windows.Forms.TextBox textBoxName;
         private System.Windows.Forms.Button buttonOK;

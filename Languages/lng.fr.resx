@@ -451,25 +451,21 @@ d'installation pour installer la dernière version.</value></data>
   <data name="(Verlauf in den Einstellungen abgeschaltet)" xml:space="preserve"><value>(historique désactivé dans les paramètres)</value></data>
   <!-- Favoriten (Menü, Dialog, Einstellung) -->
   <data name="Favoriten" xml:space="preserve"><value>Favoris</value></data>
-  <data name="Seiten als Favoriten merken und wiederfinden (Strg+D)" xml:space="preserve"><value>Mémoriser des pages comme favoris et les retrouver (Ctrl+D)</value></data>
-  <data name="Seite zu den Favoriten hinzufügen …" xml:space="preserve"><value>Ajouter la page aux favoris…</value></data>
-  <data name="Seite aus den Favoriten entfernen" xml:space="preserve"><value>Retirer la page des favoris</value></data>
-  <data name="Seite {0} zu den Favoriten hinzufügen …" xml:space="preserve"><value>Ajouter la page {0} aux favoris…</value></data>
-  <data name="Seite {0} aus den Favoriten entfernen" xml:space="preserve"><value>Retirer la page {0} des favoris</value></data>
+  <data name="Dateien als Favoriten merken und wiederfinden (Strg+D)" xml:space="preserve"><value>Mémoriser des fichiers comme favoris et les retrouver (Ctrl+D)</value></data>
+  <data name="Datei zu den Favoriten hinzufügen …" xml:space="preserve"><value>Ajouter le fichier aux favoris…</value></data>
+  <data name="Datei aus den Favoriten entfernen" xml:space="preserve"><value>Retirer le fichier des favoris</value></data>
   <data name="Nicht mehr vorhandene Favoriten entfernen" xml:space="preserve"><value>Retirer les favoris qui n'existent plus</value></data>
   <data name="(keine Favoriten)" xml:space="preserve"><value>(aucun favori)</value></data>
-  <data name="Seite {0}" xml:space="preserve"><value>Page {0}</value></data>
   <data name="Strg+D" xml:space="preserve"><value>Ctrl+D</value></data>
-  <data name="Seite zu den Favoriten hinzufügen / entfernen (Option)" xml:space="preserve"><value>ajouter la page aux favoris / la retirer (option)</value></data>
-  <data name="Seite {0} wurde zu den Favoriten hinzugefügt." xml:space="preserve"><value>La page {0} a été ajoutée aux favoris.</value></data>
-  <data name="Seite {0} wurde aus den Favoriten entfernt." xml:space="preserve"><value>La page {0} a été retirée des favoris.</value></data>
-  <data name="Die aktuelle Seite konnte nicht ermittelt werden." xml:space="preserve"><value>La page actuelle n'a pas pu être déterminée.</value></data>
+  <data name="Datei zu den Favoriten hinzufügen / entfernen (Option)" xml:space="preserve"><value>ajouter le fichier aux favoris / le retirer (option)</value></data>
+  <data name="Die Datei wurde zu den Favoriten hinzugefügt." xml:space="preserve"><value>Le fichier a été ajouté aux favoris.</value></data>
+  <data name="Die Datei wurde aus den Favoriten entfernt." xml:space="preserve"><value>Le fichier a été retiré des favoris.</value></data>
   <data name="Die Datei existiert nicht mehr." xml:space="preserve"><value>Le fichier n'existe plus.</value></data>
   <data name="Die Höchstzahl von {0} Favoriten ist erreicht." xml:space="preserve"><value>Le maximum de {0} favoris est atteint.</value></data>
   <data name="Ein Favorit wurde entfernt." xml:space="preserve"><value>Un favori a été retiré.</value></data>
   <data name="{0} Favoriten wurden entfernt." xml:space="preserve"><value>{0} favoris ont été retirés.</value></data>
   <data name="Favorit hinzufügen" xml:space="preserve"><value>Ajouter un favori</value></data>
+  <data name="Ohne Namen erscheint der Dateiname im Favoriten-Menü." xml:space="preserve"><value>Sans nom, le nom du fichier apparaît dans le menu des favoris.</value></data>
   <data name="&amp;Name (optional):" xml:space="preserve"><value>&amp;Nom (facultatif) :</value></data>
-  <data name="Seite {0} zu den Favoriten hinzufügen" xml:space="preserve"><value>Ajouter la page {0} aux favoris</value></data>
-  <data name="&amp;Favoriten-Menü anzeigen (Seiten merken, Strg+D)" xml:space="preserve"><value>Afficher le menu des fa&amp;voris (mémoriser des pages, Ctrl+D)</value></data>
+  <data name="&amp;Favoriten-Menü anzeigen (Dateien merken, Strg+D)" xml:space="preserve"><value>Afficher le menu des fa&amp;voris (mémoriser des fichiers, Ctrl+D)</value></data>
 </root>

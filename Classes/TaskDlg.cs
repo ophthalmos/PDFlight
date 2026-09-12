@@ -243,7 +243,7 @@ internal static class TaskDlg
         // Strg + Zahl
         ("Strg+1 … 9", "in externem Programm öffnen", null),
         // Strg + Buchstabe
-        ("Strg+D", "Seite zu den Favoriten hinzufügen / entfernen (Option)", null),
+        ("Strg+D", "Datei zu den Favoriten hinzufügen / entfernen (Option)", null),
         ("Strg+E", "als E-Mail-Anhang senden", null),
         ("Strg+F", "im Dokument suchen", null),
         ("Strg+G", "Gehe zu Seite (Zahl tippen + Enter)", null),

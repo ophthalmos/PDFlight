@@ -369,36 +369,6 @@ internal partial class PdfViewHost(WebView2 webView)
         return 0;
     }
 
-    /// <summary>Springt im angezeigten Dokument zu einer Seite, ohne es neu zu laden (Favoriten): setzt die
-    /// Seitenzahl per UI Automation in das Seitenzahl-Feld der Viewer-Toolbar — Chromium löst dabei dieselbe
-    /// Änderung aus wie eine Eingabe mit Enter. Gleiche Regeln wie die Seitenabfrage: Hintergrund-Task mit
-    /// Zeitbudget am Chromium-Kindfenster. False, wenn der Sprung nicht bestätigt werden konnte — dann lädt
-    /// der Aufrufer das Dokument auf der Seite neu.</summary>
-    public bool GoToPage(int page)
-    {
-        if (!IsReady || currentBytes == null || page < 1) { return false; }
-        var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
-        if (chromium == IntPtr.Zero) { return false; }
-        var task = Task.Run(() =>
-        {
-            try
-            {
-                var edit = FindPageNumberEdit(chromium);
-                if (edit == null || !edit.TryGetCurrentPattern(System.Windows.Automation.ValuePattern.Pattern, out var pattern)) { return false; }
-                ((System.Windows.Automation.ValuePattern)pattern).SetValue(page.ToString());
-                for (var i = 0; i < 10; i++) // der Viewer braucht einen Moment, bis das Feld die neue Seite meldet
-                {
-                    Thread.Sleep(50);
-                    if (ReadPageNumber(chromium) == page) { return true; }
-                }
-                return false;
-            }
-            catch (Exception ex) when (ex is System.Windows.Automation.ElementNotAvailableException
-                or System.Runtime.InteropServices.COMException or InvalidOperationException) { return false; }
-        });
-        return task.Wait(TimeSpan.FromMilliseconds(1500)) && task.Result;
-    }
-
     /// <summary>„Gehe zu Seite": setzt den Eingabefokus in das Seitenzahl-Feld der Viewer-Toolbar —
     /// Zahl eintippen und Enter springt (die native Sprungfunktion des Viewers).</summary>
     public void FocusPageField()

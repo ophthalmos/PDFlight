@@ -217,7 +217,7 @@
             cbShowFavorites.Name = "cbShowFavorites";
             cbShowFavorites.Size = new Size(300, 19);
             cbShowFavorites.TabIndex = 10;
-            cbShowFavorites.Text = "&Favoriten-Menü anzeigen (Seiten merken, Strg+D)";
+            cbShowFavorites.Text = "&Favoriten-Menü anzeigen (Dateien merken, Strg+D)";
             cbShowFavorites.UseVisualStyleBackColor = true;
             // 
             // labelMaxRecentFiles

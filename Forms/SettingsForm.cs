@@ -44,7 +44,7 @@ public partial class SettingsForm : Form
     [System.ComponentModel.Browsable(false)]
     public bool ShowFullPathInTitle => cbFullPathTitle.Checked;
 
-    /// <summary>Favoriten-Menü in der Symbolleiste anzeigen (Strg+D merkt Seiten); Standard aus.</summary>
+    /// <summary>Favoriten-Menü in der Symbolleiste anzeigen (Strg+D merkt die Datei); Standard aus.</summary>
     public bool ShowFavorites => cbShowFavorites.Checked;
 
     [System.ComponentModel.Browsable(false)]

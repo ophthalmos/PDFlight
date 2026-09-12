@@ -1203,8 +1203,6 @@ public partial class MainForm : Form
         var backFile = dialog.FileName;
         if (RunPdfEdit(() => PdfEditService.MergeDuplex(currentFile.FullName, backFile, result == btnReversed), Lng.T("Einfügen der Rückseiten")))
         {
-            var file = currentFile.FullName;
-            UpdateFavorites(file, () => settings.SpreadFavoritePagesForDuplex(file));
             LoadPdf(currentFile.FullName);
             statusPath.Text = string.Format(Lng.T("Die Rückseiten aus \"{0}\" wurden eingefügt."), Path.GetFileName(backFile));
         }
@@ -1257,8 +1255,6 @@ public partial class MainForm : Form
         var remaining = currentPageCount - pages.Count;
         if (RunPdfEdit(() => PdfEditService.DeletePages(currentFile.FullName, pages), Lng.T("Seiten löschen")))
         {
-            var file = currentFile.FullName;
-            UpdateFavorites(file, () => settings.RemoveFavoritePages(file, pages));
             LoadPdf(currentFile.FullName, Math.Min(pages[0], remaining));
             statusPath.Text = pages.Count == 1 ? string.Format(Lng.T("Seite {0} wurde gelöscht."), pages[0]) : string.Format(Lng.T("{0} Seiten wurden gelöscht."), pages.Count);
         }
@@ -1612,29 +1608,22 @@ public partial class MainForm : Form
 
     // ------------------------------------------------------------------ Favoriten
 
-    private int favoritesMenuPage; // die Seite, für die das geöffnete Favoriten-Menü gebaut wurde (0 = unbekannt)
-
     /// <summary>Blendet das Favoriten-Menü gemäß der Einstellung ein oder aus (Standard: aus).</summary>
     private void ApplyFavoritesOption()
     {
         ddbFavorites.Visible = toolStripSeparator12.Visible = settings.ShowFavorites;
     }
 
-    /// <summary>Baut das Favoriten-Menü beim Öffnen: Hinzufügen bzw. Entfernen für die aktuelle Seite, dann die
-    /// Favoriten der angezeigten Datei direkt und andere Dateien als Untermenüs (Vorbild SumatraPDF). Favoriten
-    /// fehlender Dateien – etwa auf einem gerade nicht angeschlossenen Laufwerk – bleiben ausgegraut stehen und
-    /// lassen sich gesammelt entfernen.</summary>
+    /// <summary>Baut das Favoriten-Menü beim Öffnen: Hinzufügen bzw. Entfernen für die angezeigte Datei, darunter
+    /// alle Favoriten alphabetisch, die angezeigte Datei mit Haken. Favoriten fehlender Dateien – etwa auf einem
+    /// gerade nicht angeschlossenen Laufwerk – bleiben ausgegraut stehen und lassen sich gesammelt entfernen.</summary>
     private void DdbFavorites_DropDownOpening(object? sender, EventArgs e)
     {
         settings.ReloadSharedLists(); // auch die Favoriten anderer Instanzen sehen
-        var page = currentFile != null ? ClampedCurrentPage() : 0;
-        favoritesMenuPage = page;
-        var current = currentFile != null && page > 0 ? settings.FindFavorite(currentFile.FullName, page) : null;
+        var current = currentFile == null ? null : settings.FindFavorite(currentFile.FullName);
         mnuFavoriteAdd.Visible = current == null;
-        mnuFavoriteAdd.Enabled = page > 0;
-        mnuFavoriteAdd.Text = page > 0 ? string.Format(Lng.T("Seite {0} zu den Favoriten hinzufügen …"), page) : Lng.T("Seite zu den Favoriten hinzufügen …");
+        mnuFavoriteAdd.Enabled = currentFile != null;
         mnuFavoriteRemove.Visible = current != null;
-        mnuFavoriteRemove.Text = string.Format(Lng.T("Seite {0} aus den Favoriten entfernen"), page);
         var items = ddbFavorites.DropDownItems;
         while (items.Count > 4) // die dynamischen Einträge unter dem Trennstrich neu aufbauen
         {
@@ -1642,99 +1631,67 @@ public partial class MainForm : Form
             items.Remove(old);
             old.Dispose();
         }
-        var groups = settings.Favorites
-            .GroupBy(f => f.File, StringComparer.OrdinalIgnoreCase)
-            .OrderBy(g => currentFile != null && string.Equals(g.Key, currentFile.FullName, StringComparison.OrdinalIgnoreCase) ? 0 : 1)
-            .ThenBy(g => Path.GetFileName(g.Key), StringComparer.CurrentCultureIgnoreCase)
-            .ToList();
         var anyMissing = false;
-        foreach (var group in groups)
+        foreach (var favorite in settings.Favorites.OrderBy(f => f.Label, StringComparer.CurrentCultureIgnoreCase))
         {
-            var isCurrent = currentFile != null && string.Equals(group.Key, currentFile.FullName, StringComparison.OrdinalIgnoreCase);
-            var exists = isCurrent || File.Exists(group.Key);
+            var isCurrent = currentFile != null && favorite.IsFor(currentFile.FullName);
+            var exists = isCurrent || File.Exists(favorite.File);
             anyMissing |= !exists;
-            if (isCurrent)
-            {
-                foreach (var favorite in group.OrderBy(f => f.Page)) { items.Add(FavoriteMenuItem(favorite, favorite.Page == page)); }
-                continue;
-            }
-            ToolStripMenuItem fileItem = new(Path.GetFileName(group.Key)) { Enabled = exists, Image = MenuIcon(ToolbarIcons.Page) };
-            foreach (var favorite in group.OrderBy(f => f.Page)) { fileItem.DropDownItems.Add(FavoriteMenuItem(favorite, false)); }
-            items.Add(fileItem);
+            ToolStripMenuItem item = new(favorite.Label) { Tag = favorite, Checked = isCurrent, Enabled = exists, ToolTipText = favorite.File };
+            item.Click += FavoriteMenuItem_Click;
+            items.Add(item);
         }
-        if (groups.Count == 0) { items.Add(new ToolStripMenuItem(Lng.T("(keine Favoriten)")) { Enabled = false }); }
+        if (settings.Favorites.Count == 0) { items.Add(new ToolStripMenuItem(Lng.T("(keine Favoriten)")) { Enabled = false }); }
         mnuFavoriteCleanup.Visible = anyMissing;
-    }
-
-    private ToolStripMenuItem FavoriteMenuItem(Favorite favorite, bool isCurrentPage)
-    {
-        ToolStripMenuItem item = new(favorite.Label) { Tag = favorite, Checked = isCurrentPage };
-        item.Click += FavoriteMenuItem_Click;
-        return item;
     }
 
     private void FavoriteMenuItem_Click(object? sender, EventArgs e)
     {
-        if ((sender as ToolStripMenuItem)?.Tag is Favorite favorite) { OpenFavorite(favorite); }
-    }
-
-    /// <summary>Springt zur Seite des Favoriten – in der angezeigten Datei ohne Neuladen, sonst wird die Datei geladen.</summary>
-    private void OpenFavorite(Favorite favorite)
-    {
-        if (currentFile != null && favorite.IsFor(currentFile.FullName))
-        {
-            if (!viewHost.GoToPage(favorite.Page)) { LoadPdf(currentFile.FullName, favorite.Page); } // Rückfall: Neuladen auf der Seite
-            return;
-        }
+        if ((sender as ToolStripMenuItem)?.Tag is not Favorite favorite) { return; }
+        if (currentFile != null && favorite.IsFor(currentFile.FullName)) { return; } // wird bereits angezeigt
         if (!File.Exists(favorite.File))
         {
             TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei existiert nicht mehr."), favorite.File, TaskDialogIcon.Warning);
             return;
         }
-        LoadPdf(favorite.File, favorite.Page, addToRecent: true);
+        LoadPdf(favorite.File, addToRecent: true);
     }
 
-    private void MnuFavoriteAdd_Click(object? sender, EventArgs e) { AddFavorite(favoritesMenuPage); }
+    private void MnuFavoriteAdd_Click(object? sender, EventArgs e) { AddFavorite(); }
 
-    private void MnuFavoriteRemove_Click(object? sender, EventArgs e) { RemoveFavorite(favoritesMenuPage); }
+    private void MnuFavoriteRemove_Click(object? sender, EventArgs e) { RemoveFavorite(); }
 
-    /// <summary>Strg+D: die aktuelle Seite als Favorit merken – oder, wenn sie schon einer ist, wieder austragen.</summary>
+    /// <summary>Strg+D: die angezeigte Datei als Favorit merken – oder, wenn sie schon einer ist, wieder austragen.</summary>
     private void ToggleFavorite()
     {
         if (currentFile == null) { return; }
-        var page = ClampedCurrentPage();
-        if (page == 0)
-        {
-            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die aktuelle Seite konnte nicht ermittelt werden."), null, TaskDialogIcon.Warning);
-            return;
-        }
         settings.ReloadSharedLists();
-        if (settings.FindFavorite(currentFile.FullName, page) != null) { RemoveFavorite(page); } else { AddFavorite(page); }
+        if (settings.FindFavorite(currentFile.FullName) != null) { RemoveFavorite(); } else { AddFavorite(); }
     }
 
-    private void AddFavorite(int page)
+    private void AddFavorite()
     {
-        if (currentFile == null || page == 0) { return; }
-        using FavoriteForm dialog = new(currentFile.Name, page);
+        if (currentFile == null) { return; }
+        using FavoriteForm dialog = new(currentFile.Name);
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         settings.ReloadSharedLists(); // parallel laufende Instanzen nicht überschreiben
-        if (!settings.AddFavorite(currentFile.FullName, page, dialog.FavoriteName))
+        if (!settings.AddFavorite(currentFile.FullName, dialog.FavoriteName))
         {
             TaskDlg.MsgTaskDlg(Handle, string.Format(Lng.T("Die Höchstzahl von {0} Favoriten ist erreicht."), AppSettings.FavoritesLimit), null, TaskDialogIcon.Warning);
             return;
         }
         settings.Save();
-        statusPath.Text = string.Format(Lng.T("Seite {0} wurde zu den Favoriten hinzugefügt."), page);
+        statusPath.Text = Lng.T("Die Datei wurde zu den Favoriten hinzugefügt.");
     }
 
-    private void RemoveFavorite(int page)
+    private void RemoveFavorite()
     {
-        if (currentFile == null || page == 0) { return; }
+        if (currentFile == null) { return; }
         var file = currentFile.FullName;
         settings.ReloadSharedLists();
-        if (settings.Favorites.RemoveAll(f => f.Page == page && f.IsFor(file)) == 0) { return; }
+        if (settings.Favorites.RemoveAll(f => f.IsFor(file)) == 0) { return; }
         settings.Save();
-        statusPath.Text = string.Format(Lng.T("Seite {0} wurde aus den Favoriten entfernt."), page);
+        statusPath.Text = Lng.T("Die Datei wurde aus den Favoriten entfernt.");
     }
 
     private void MnuFavoriteCleanup_Click(object? sender, EventArgs e)
@@ -1746,8 +1703,8 @@ public partial class MainForm : Form
         statusPath.Text = removed == 1 ? Lng.T("Ein Favorit wurde entfernt.") : string.Format(Lng.T("{0} Favoriten wurden entfernt."), removed);
     }
 
-    /// <summary>Passt die Favoriten einer Datei an (Pfad nach Umbenennen/Verschieben, Seitennummern nach dem Löschen
-    /// oder Verzahnen von Seiten) – nur wenn es welche gibt, und auf dem frischen Stand der Platte.</summary>
+    /// <summary>Nach Umbenennen oder Verschieben (auch per Rückgängig) folgt der Favorit der Datei auf den neuen Pfad –
+    /// nur wenn es einen gibt, und auf dem frischen Stand der Platte.</summary>
     private void UpdateFavorites(string file, Action change)
     {
         settings.ReloadSharedLists(); // parallel laufende Instanzen nicht überschreiben
@@ -1791,7 +1748,7 @@ public partial class MainForm : Form
             case Keys.Enter | Keys.Alt when currentFile != null: ShellUtil.ShowFileProperties(currentFile.FullName); return true; // Windows-Dateieigenschaften, wie im Explorer
             case Keys.C | Keys.Control | Keys.Shift when currentFile != null: CopyPathToClipboard(); return true; // wie im Windows-11-Explorer
             case Keys.E | Keys.Control: EmailCurrent(); return true;
-            case Keys.D | Keys.Control when settings.ShowFavorites: BeginInvoke(ToggleFavorite); return true; // Favorit merken/entfernen (BeginInvoke wegen der UIA-Seitenabfrage)
+            case Keys.D | Keys.Control when settings.ShowFavorites: ToggleFavorite(); return true; // Datei als Favorit merken / wieder austragen
             case Keys.Right | Keys.Control | Keys.Shift: StepFile(1); return true;   // Strg+Pfeile ohne Umschalt gehören dem Viewer (Zoom & Co.)
             case Keys.Left | Keys.Control | Keys.Shift: StepFile(-1); return true;
             case Keys.F1: TaskDlg.ShowShortcutsPdf(Handle); return true;
