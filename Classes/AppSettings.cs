@@ -41,7 +41,7 @@ public class AppSettings
     public List<string> RecentFolders { get; set; } = [];
     public List<string> RecentFiles { get; set; } = [];      // zuletzt geöffnete PDF-Dateien (Öffnen-Dropdown)
     public List<string> ExternalPrograms { get; set; } = []; // wird beim ersten Start automatisch gefüllt (ProgramFinder)
-    public List<Favorite> Favorites { get; set; } = [];        // gemerkte Seiten (Favoriten-Menü, Option ShowFavorites)
+    public List<Favorite> Favorites { get; set; } = [];        // gemerkte Dateien (Favoriten-Menü, Option ShowFavorites)
     public bool JumpToLastUsed { get; set; } = true;      // Ordnerdialog springt zum zuletzt verwendeten Ordner
     public bool ConfirmDelete { get; set; } = true;       // vor dem Verschieben in den Papierkorb nachfragen
     public bool OpenNextAfterDelete { get; set; } = true; // nach dem Löschen die nächste Datei des Ordners anzeigen (wie in PDFMover optional)
@@ -51,7 +51,7 @@ public class AppSettings
     public bool CloseOnEscape { get; set; }               // Programm mit 2× Esc beenden (Shift+Esc sofort)
     public bool ReopenLastFile { get; set; }              // zuletzt geöffnete Datei beim Start laden
     public bool ShowFullPathInTitle { get; set; }         // vollständigen Dateipfad statt nur des Dateinamens in der Titelleiste
-    public bool ShowFavorites { get; set; }               // Favoriten-Menü in der Symbolleiste (Strg+D merkt Seiten); Standard aus
+    public bool ShowFavorites { get; set; }               // Favoriten-Menü in der Symbolleiste (Strg+D merkt die Datei); Standard aus
     public string Language { get; set; } = "de";          // Kultur-Code; Sprachen liegen als Languages\lng.<code>.resx bereit
     public string InstallerLanguage { get; set; } = string.Empty; // zuletzt übernommene Setup-Sprachwahl (s. ApplyInstallerLanguage)
     public string LastFile { get; set; } = string.Empty;  // Datei, die beim Beenden geöffnet war
@@ -132,36 +132,23 @@ public class AppSettings
 
     // ------------------------------------------------------------------ Favoriten
 
-    /// <summary>Der Favorit für diese Seite dieser Datei; null, wenn es keinen gibt.</summary>
-    public Favorite? FindFavorite(string file, int page) => Favorites.Find(f => f.Page == page && f.IsFor(file));
+    /// <summary>Der Favorit dieser Datei; null, wenn es keinen gibt.</summary>
+    public Favorite? FindFavorite(string file) => Favorites.Find(f => f.IsFor(file));
 
-    /// <summary>Trägt eine Seite als Favorit ein (ersetzt einen vorhandenen Eintrag derselben Seite).
+    /// <summary>Trägt eine Datei als Favorit ein (ersetzt einen vorhandenen Eintrag derselben Datei).
     /// False, wenn die Höchstzahl erreicht ist.</summary>
-    public bool AddFavorite(string file, int page, string name)
+    public bool AddFavorite(string file, string name)
     {
-        Favorites.RemoveAll(f => f.Page == page && f.IsFor(file));
+        Favorites.RemoveAll(f => f.IsFor(file));
         if (Favorites.Count >= FavoritesLimit) { return false; }
-        Favorites.Add(new Favorite { File = file, Page = page, Name = name.Trim() });
+        Favorites.Add(new Favorite { File = file, Name = name.Trim() });
         return true;
     }
 
-    /// <summary>Zieht die Favoriten einer umbenannten oder verschobenen Datei auf ihren neuen Pfad um.</summary>
+    /// <summary>Zieht den Favoriten einer umbenannten oder verschobenen Datei auf ihren neuen Pfad um.</summary>
     public void MoveFavorites(string oldFile, string newFile)
     {
         foreach (var favorite in Favorites.Where(f => f.IsFor(oldFile))) { favorite.File = newFile; }
-    }
-
-    /// <summary>Nach dem Löschen von Seiten: Favoriten gelöschter Seiten entfallen, die dahinter rücken auf.</summary>
-    public void RemoveFavoritePages(string file, IReadOnlyCollection<int> deletedPages)
-    {
-        Favorites.RemoveAll(f => f.IsFor(file) && deletedPages.Contains(f.Page));
-        foreach (var favorite in Favorites.Where(f => f.IsFor(file))) { favorite.Page -= deletedPages.Count(p => p < favorite.Page); }
-    }
-
-    /// <summary>Nach dem Verzahnen der Rückseiten: aus Seite n wird Seite 2n−1.</summary>
-    public void SpreadFavoritePagesForDuplex(string file)
-    {
-        foreach (var favorite in Favorites.Where(f => f.IsFor(file))) { favorite.Page = favorite.Page * 2 - 1; }
     }
 
     /// <summary>Übernimmt die gemeinsamen Listen frisch von der Platte, damit mehrere gleichzeitig laufende

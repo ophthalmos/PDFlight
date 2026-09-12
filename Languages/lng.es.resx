@@ -451,25 +451,21 @@ para instalar la última versión.</value></data>
   <data name="(Verlauf in den Einstellungen abgeschaltet)" xml:space="preserve"><value>(historial desactivado en los ajustes)</value></data>
   <!-- Favoriten (Menü, Dialog, Einstellung) -->
   <data name="Favoriten" xml:space="preserve"><value>Favoritos</value></data>
-  <data name="Seiten als Favoriten merken und wiederfinden (Strg+D)" xml:space="preserve"><value>Recordar páginas como favoritos y volver a encontrarlas (Ctrl+D)</value></data>
-  <data name="Seite zu den Favoriten hinzufügen …" xml:space="preserve"><value>Añadir la página a favoritos…</value></data>
-  <data name="Seite aus den Favoriten entfernen" xml:space="preserve"><value>Quitar la página de favoritos</value></data>
-  <data name="Seite {0} zu den Favoriten hinzufügen …" xml:space="preserve"><value>Añadir la página {0} a favoritos…</value></data>
-  <data name="Seite {0} aus den Favoriten entfernen" xml:space="preserve"><value>Quitar la página {0} de favoritos</value></data>
+  <data name="Dateien als Favoriten merken und wiederfinden (Strg+D)" xml:space="preserve"><value>Recordar archivos como favoritos y volver a encontrarlos (Ctrl+D)</value></data>
+  <data name="Datei zu den Favoriten hinzufügen …" xml:space="preserve"><value>Añadir el archivo a favoritos…</value></data>
+  <data name="Datei aus den Favoriten entfernen" xml:space="preserve"><value>Quitar el archivo de favoritos</value></data>
   <data name="Nicht mehr vorhandene Favoriten entfernen" xml:space="preserve"><value>Quitar los favoritos que ya no existen</value></data>
   <data name="(keine Favoriten)" xml:space="preserve"><value>(sin favoritos)</value></data>
-  <data name="Seite {0}" xml:space="preserve"><value>Página {0}</value></data>
   <data name="Strg+D" xml:space="preserve"><value>Ctrl+D</value></data>
-  <data name="Seite zu den Favoriten hinzufügen / entfernen (Option)" xml:space="preserve"><value>añadir la página a favoritos / quitarla (opción)</value></data>
-  <data name="Seite {0} wurde zu den Favoriten hinzugefügt." xml:space="preserve"><value>La página {0} se añadió a favoritos.</value></data>
-  <data name="Seite {0} wurde aus den Favoriten entfernt." xml:space="preserve"><value>La página {0} se quitó de favoritos.</value></data>
-  <data name="Die aktuelle Seite konnte nicht ermittelt werden." xml:space="preserve"><value>No se pudo determinar la página actual.</value></data>
+  <data name="Datei zu den Favoriten hinzufügen / entfernen (Option)" xml:space="preserve"><value>añadir el archivo a favoritos / quitarlo (opción)</value></data>
+  <data name="Die Datei wurde zu den Favoriten hinzugefügt." xml:space="preserve"><value>El archivo se añadió a favoritos.</value></data>
+  <data name="Die Datei wurde aus den Favoriten entfernt." xml:space="preserve"><value>El archivo se quitó de favoritos.</value></data>
   <data name="Die Datei existiert nicht mehr." xml:space="preserve"><value>El archivo ya no existe.</value></data>
   <data name="Die Höchstzahl von {0} Favoriten ist erreicht." xml:space="preserve"><value>Se alcanzó el máximo de {0} favoritos.</value></data>
   <data name="Ein Favorit wurde entfernt." xml:space="preserve"><value>Se quitó un favorito.</value></data>
   <data name="{0} Favoriten wurden entfernt." xml:space="preserve"><value>Se quitaron {0} favoritos.</value></data>
   <data name="Favorit hinzufügen" xml:space="preserve"><value>Añadir favorito</value></data>
+  <data name="Ohne Namen erscheint der Dateiname im Favoriten-Menü." xml:space="preserve"><value>Sin nombre, el nombre del archivo aparece en el menú de favoritos.</value></data>
   <data name="&amp;Name (optional):" xml:space="preserve"><value>&amp;Nombre (opcional):</value></data>
-  <data name="Seite {0} zu den Favoriten hinzufügen" xml:space="preserve"><value>Añadir la página {0} a favoritos</value></data>
-  <data name="&amp;Favoriten-Menü anzeigen (Seiten merken, Strg+D)" xml:space="preserve"><value>Mostrar el menú de fa&amp;voritos (recordar páginas, Ctrl+D)</value></data>
+  <data name="&amp;Favoriten-Menü anzeigen (Dateien merken, Strg+D)" xml:space="preserve"><value>Mostrar el menú de fa&amp;voritos (recordar archivos, Ctrl+D)</value></data>
 </root>

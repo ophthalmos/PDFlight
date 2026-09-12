@@ -451,25 +451,21 @@ the latest version.</value></data>
   <data name="(Verlauf in den Einstellungen abgeschaltet)" xml:space="preserve"><value>(history turned off in the settings)</value></data>
   <!-- Favoriten (Menü, Dialog, Einstellung) -->
   <data name="Favoriten" xml:space="preserve"><value>Favorites</value></data>
-  <data name="Seiten als Favoriten merken und wiederfinden (Strg+D)" xml:space="preserve"><value>Remember pages as favorites and find them again (Ctrl+D)</value></data>
-  <data name="Seite zu den Favoriten hinzufügen …" xml:space="preserve"><value>Add page to favorites…</value></data>
-  <data name="Seite aus den Favoriten entfernen" xml:space="preserve"><value>Remove page from favorites</value></data>
-  <data name="Seite {0} zu den Favoriten hinzufügen …" xml:space="preserve"><value>Add page {0} to favorites…</value></data>
-  <data name="Seite {0} aus den Favoriten entfernen" xml:space="preserve"><value>Remove page {0} from favorites</value></data>
+  <data name="Dateien als Favoriten merken und wiederfinden (Strg+D)" xml:space="preserve"><value>Remember files as favorites and find them again (Ctrl+D)</value></data>
+  <data name="Datei zu den Favoriten hinzufügen …" xml:space="preserve"><value>Add file to favorites…</value></data>
+  <data name="Datei aus den Favoriten entfernen" xml:space="preserve"><value>Remove file from favorites</value></data>
   <data name="Nicht mehr vorhandene Favoriten entfernen" xml:space="preserve"><value>Remove favorites that no longer exist</value></data>
   <data name="(keine Favoriten)" xml:space="preserve"><value>(no favorites)</value></data>
-  <data name="Seite {0}" xml:space="preserve"><value>Page {0}</value></data>
   <data name="Strg+D" xml:space="preserve"><value>Ctrl+D</value></data>
-  <data name="Seite zu den Favoriten hinzufügen / entfernen (Option)" xml:space="preserve"><value>add the page to the favorites / remove it (option)</value></data>
-  <data name="Seite {0} wurde zu den Favoriten hinzugefügt." xml:space="preserve"><value>Page {0} was added to the favorites.</value></data>
-  <data name="Seite {0} wurde aus den Favoriten entfernt." xml:space="preserve"><value>Page {0} was removed from the favorites.</value></data>
-  <data name="Die aktuelle Seite konnte nicht ermittelt werden." xml:space="preserve"><value>The current page could not be determined.</value></data>
+  <data name="Datei zu den Favoriten hinzufügen / entfernen (Option)" xml:space="preserve"><value>add the file to the favorites / remove it (option)</value></data>
+  <data name="Die Datei wurde zu den Favoriten hinzugefügt." xml:space="preserve"><value>The file was added to the favorites.</value></data>
+  <data name="Die Datei wurde aus den Favoriten entfernt." xml:space="preserve"><value>The file was removed from the favorites.</value></data>
   <data name="Die Datei existiert nicht mehr." xml:space="preserve"><value>The file no longer exists.</value></data>
   <data name="Die Höchstzahl von {0} Favoriten ist erreicht." xml:space="preserve"><value>The maximum of {0} favorites has been reached.</value></data>
   <data name="Ein Favorit wurde entfernt." xml:space="preserve"><value>One favorite was removed.</value></data>
   <data name="{0} Favoriten wurden entfernt." xml:space="preserve"><value>{0} favorites were removed.</value></data>
   <data name="Favorit hinzufügen" xml:space="preserve"><value>Add favorite</value></data>
+  <data name="Ohne Namen erscheint der Dateiname im Favoriten-Menü." xml:space="preserve"><value>Without a name, the file name appears in the favorites menu.</value></data>
   <data name="&amp;Name (optional):" xml:space="preserve"><value>&amp;Name (optional):</value></data>
-  <data name="Seite {0} zu den Favoriten hinzufügen" xml:space="preserve"><value>Add page {0} to the favorites</value></data>
-  <data name="&amp;Favoriten-Menü anzeigen (Seiten merken, Strg+D)" xml:space="preserve"><value>Sho&amp;w the favorites menu (remember pages, Ctrl+D)</value></data>
+  <data name="&amp;Favoriten-Menü anzeigen (Dateien merken, Strg+D)" xml:space="preserve"><value>Sho&amp;w the favorites menu (remember files, Ctrl+D)</value></data>
 </root>
