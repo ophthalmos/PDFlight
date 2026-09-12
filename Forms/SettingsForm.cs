@@ -44,6 +44,9 @@ public partial class SettingsForm : Form
     [System.ComponentModel.Browsable(false)]
     public bool ShowFullPathInTitle => cbFullPathTitle.Checked;
 
+    [System.ComponentModel.Browsable(false)]
+    public int MaxRecentFiles => (int)numMaxRecentFiles.Value; // 0 = kein Verlauf im Öffnen-Menü
+
     private static readonly (string Name, string Code)[] Languages = [("Deutsch", "de"), ("English", "en"), ("Français", "fr"), ("Español", "es")];
 
     [System.ComponentModel.Browsable(false)]
@@ -66,6 +69,7 @@ public partial class SettingsForm : Form
         cbCloseOnEscape.Checked = source.CloseOnEscape;
         cbReopenLast.Checked = source.ReopenLastFile;
         cbFullPathTitle.Checked = source.ShowFullPathInTitle;
+        numMaxRecentFiles.Value = Math.Clamp(source.MaxRecentFiles, (int)numMaxRecentFiles.Minimum, (int)numMaxRecentFiles.Maximum);
         if (listTargets.Items.Count > 0) { listTargets.SelectedIndex = 0; }
         if (listPrograms.Items.Count > 0) { listPrograms.SelectedIndex = 0; }
         tabControl.SelectedIndex = Math.Clamp(initialTab, 0, tabControl.TabCount - 1);

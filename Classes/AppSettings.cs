@@ -5,16 +5,35 @@ namespace PDFLight.Classes;
 /// <summary>Programmeinstellungen, gespeichert als JSON unter %APPDATA%\PDFlight\settings.json.</summary>
 public class AppSettings
 {
-    public const int MaxRecentFiles = 20;
-    public const int MinRecentFoldersLimit = 5;  // Grenzen der einstellbaren Länge der Zuletzt-Liste (Ordnerdialog)
-    public const int MaxRecentFoldersLimit = 50;
+    public const int RecentListLimit = 50; // Obergrenze der einstellbaren Zuletzt-Listen; 0 schaltet die jeweilige Liste ab
     private int maxRecentFolders = 10;
+    private int maxRecentFiles = 20;
 
-    /// <summary>Höchstzahl der Einträge der Zuletzt-Liste im Ordnerdialog; dort einstellbar, beim Laden auf die Grenzen gestutzt.</summary>
+    /// <summary>Höchstzahl der Einträge der Zuletzt-Liste im Ordnerdialog (dort einstellbar; 0 = nichts merken).</summary>
     public int MaxRecentFolders
     {
         get => maxRecentFolders;
-        set => maxRecentFolders = Math.Clamp(value, MinRecentFoldersLimit, MaxRecentFoldersLimit);
+        set => maxRecentFolders = Math.Clamp(value, 0, RecentListLimit);
+    }
+
+    /// <summary>Höchstzahl der zuletzt geöffneten Dateien im Öffnen-Menü (Einstellungen; 0 = nichts merken).</summary>
+    public int MaxRecentFiles
+    {
+        get => maxRecentFiles;
+        set => maxRecentFiles = Math.Clamp(value, 0, RecentListLimit);
+    }
+
+    /// <summary>Kürzt beide Zuletzt-Listen auf ihre Höchstzahl – nach dem Laden (die Reihenfolge der JSON-Felder ist
+    /// nicht garantiert) und nachdem eine Höchstzahl gesenkt wurde.</summary>
+    public void TrimRecentLists()
+    {
+        Trim(RecentFolders, MaxRecentFolders);
+        Trim(RecentFiles, MaxRecentFiles);
+    }
+
+    private static void Trim(List<string> list, int max)
+    {
+        if (list.Count > max) { list.RemoveRange(max, list.Count - max); }
     }
 
     public List<string> TargetFolders { get; set; } = [];
@@ -47,7 +66,9 @@ public class AppSettings
         {
             if (File.Exists(SettingsPath))
             {
-                return ApplyInstallerLanguage(JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(SettingsPath)) ?? new AppSettings());
+                var loaded = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(SettingsPath)) ?? new AppSettings();
+                loaded.TrimRecentLists();
+                return ApplyInstallerLanguage(loaded);
             }
         }
         catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException) { } // defekte Datei → Standardwerte
@@ -91,17 +112,19 @@ public class AppSettings
     /// <summary>Trägt einen Ordner vorne in die Zuletzt-Liste ein (ohne Duplikate, begrenzte Länge).</summary>
     public void AddRecentFolder(string path)
     {
+        if (MaxRecentFolders == 0) { return; } // Zuletzt-Liste abgeschaltet: keine Spuren
         RecentFolders.RemoveAll(x => string.Equals(x, path, StringComparison.OrdinalIgnoreCase));
         RecentFolders.Insert(0, path);
-        if (RecentFolders.Count > MaxRecentFolders) { RecentFolders.RemoveRange(MaxRecentFolders, RecentFolders.Count - MaxRecentFolders); }
+        Trim(RecentFolders, MaxRecentFolders);
     }
 
     /// <summary>Trägt eine Datei vorne in die Liste der zuletzt geöffneten Dateien ein.</summary>
     public void AddRecentFile(string path)
     {
+        if (MaxRecentFiles == 0) { return; } // Verlauf abgeschaltet: keine Spuren
         RecentFiles.RemoveAll(x => string.Equals(x, path, StringComparison.OrdinalIgnoreCase));
         RecentFiles.Insert(0, path);
-        if (RecentFiles.Count > MaxRecentFiles) { RecentFiles.RemoveRange(MaxRecentFiles, RecentFiles.Count - MaxRecentFiles); }
+        Trim(RecentFiles, MaxRecentFiles);
     }
 
     /// <summary>Übernimmt die gemeinsamen Listen frisch von der Platte, damit mehrere gleichzeitig laufende

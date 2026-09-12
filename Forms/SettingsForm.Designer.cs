@@ -40,6 +40,8 @@
             cbCloseOnEscape = new CheckBox();
             cbReopenLast = new CheckBox();
             cbFullPathTitle = new CheckBox();
+            labelMaxRecentFiles = new Label();
+            numMaxRecentFiles = new NumericUpDown();
             labelLanguage = new Label();
             comboLanguage = new ComboBox();
             tabTargets = new TabPage();
@@ -70,6 +72,7 @@
             tabTargets.SuspendLayout();
             tabPrograms.SuspendLayout();
             panelButtons.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numMaxRecentFiles).BeginInit();
             SuspendLayout();
             // 
             // tabControl
@@ -95,6 +98,8 @@
             tabGeneral.Controls.Add(cbCloseOnEscape);
             tabGeneral.Controls.Add(cbReopenLast);
             tabGeneral.Controls.Add(cbFullPathTitle);
+            tabGeneral.Controls.Add(labelMaxRecentFiles);
+            tabGeneral.Controls.Add(numMaxRecentFiles);
             tabGeneral.Controls.Add(labelLanguage);
             tabGeneral.Controls.Add(comboLanguage);
             tabGeneral.Location = new Point(4, 24);
@@ -203,22 +208,41 @@
             cbFullPathTitle.Text = "Vollständigen Dateipfad in der Titelleiste an&zeigen";
             cbFullPathTitle.UseVisualStyleBackColor = true;
             // 
+            // labelMaxRecentFiles
+            // 
+            labelMaxRecentFiles.AutoSize = true;
+            labelMaxRecentFiles.Location = new Point(18, 252);
+            labelMaxRecentFiles.Name = "labelMaxRecentFiles";
+            labelMaxRecentFiles.Size = new Size(255, 15);
+            labelMaxRecentFiles.TabIndex = 10;
+            labelMaxRecentFiles.Text = "Zuletzt geöffnete Dateien &merken (0 = keine):";
+            // 
+            // numMaxRecentFiles
+            // 
+            numMaxRecentFiles.Increment = new decimal(new int[] { 5, 0, 0, 0 });
+            numMaxRecentFiles.Location = new Point(300, 249);
+            numMaxRecentFiles.Maximum = new decimal(new int[] { 50, 0, 0, 0 });
+            numMaxRecentFiles.Name = "numMaxRecentFiles";
+            numMaxRecentFiles.Size = new Size(60, 23);
+            numMaxRecentFiles.TabIndex = 11;
+            numMaxRecentFiles.Value = new decimal(new int[] { 20, 0, 0, 0 });
+            // 
             // labelLanguage
             // 
             labelLanguage.AutoSize = true;
-            labelLanguage.Location = new Point(18, 250);
+            labelLanguage.Location = new Point(18, 281);
             labelLanguage.Name = "labelLanguage";
             labelLanguage.Size = new Size(115, 15);
-            labelLanguage.TabIndex = 9;
+            labelLanguage.TabIndex = 12;
             labelLanguage.Text = "Sprache / &Language:";
             // 
             // comboLanguage
             // 
             comboLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboLanguage.Location = new Point(160, 247);
+            comboLanguage.Location = new Point(160, 278);
             comboLanguage.Name = "comboLanguage";
             comboLanguage.Size = new Size(140, 23);
-            comboLanguage.TabIndex = 10;
+            comboLanguage.TabIndex = 13;
             // 
             // tabTargets
             // 
@@ -506,6 +530,7 @@
             tabTargets.ResumeLayout(false);
             tabPrograms.ResumeLayout(false);
             panelButtons.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)numMaxRecentFiles).EndInit();
             ResumeLayout(false);
         }
 
@@ -539,6 +564,8 @@
         private System.Windows.Forms.CheckBox cbOpenNextAfterDelete;
         private System.Windows.Forms.Label labelLanguage;
         private System.Windows.Forms.ComboBox comboLanguage;
+        private System.Windows.Forms.Label labelMaxRecentFiles;
+        private System.Windows.Forms.NumericUpDown numMaxRecentFiles;
         private System.Windows.Forms.CheckBox cbShowProgramIcons;
         private System.Windows.Forms.CheckBox cbToolbarIcons;
         private System.Windows.Forms.CheckBox cbLargeIcons;
