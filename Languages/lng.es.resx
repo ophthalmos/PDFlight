@@ -472,5 +472,5 @@ para instalar la última versión.</value></data>
   <data name="Favorit hinzufügen" xml:space="preserve"><value>Añadir favorito</value></data>
   <data name="Ohne Namen erscheint der Dateiname." xml:space="preserve"><value>Sin nombre, se muestra el nombre del archivo.</value></data>
   <data name="&amp;Name (optional, bis 30 Zeichen):" xml:space="preserve"><value>&amp;Nombre (opcional, hasta 30 caracteres):</value></data>
-  <data name="&amp;Favoriten-Menü anzeigen (Dateien merken, Strg+D)" xml:space="preserve"><value>Mostrar el menú de fa&amp;voritos (recordar archivos, Ctrl+D)</value></data>
+  <data name="&amp;Favoriten-Menü anzeigen (Dateien merken, max. 200 Einträge)" xml:space="preserve"><value>Mostrar el menú de fa&amp;voritos (recordar archivos, máx. 200 entradas)</value></data>
 </root>

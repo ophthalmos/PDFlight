@@ -70,10 +70,10 @@
             panelButtons = new Panel();
             tabControl.SuspendLayout();
             tabGeneral.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numMaxRecentFiles).BeginInit();
             tabTargets.SuspendLayout();
             tabPrograms.SuspendLayout();
             panelButtons.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)numMaxRecentFiles).BeginInit();
             SuspendLayout();
             // 
             // tabControl
@@ -215,9 +215,9 @@
             cbShowFavorites.AutoSize = true;
             cbShowFavorites.Location = new Point(18, 245);
             cbShowFavorites.Name = "cbShowFavorites";
-            cbShowFavorites.Size = new Size(300, 19);
+            cbShowFavorites.Size = new Size(353, 19);
             cbShowFavorites.TabIndex = 10;
-            cbShowFavorites.Text = "&Favoriten-Menü anzeigen (Dateien merken, Strg+D)";
+            cbShowFavorites.Text = "&Favoriten-Menü anzeigen (Dateien merken, max. 200 Einträge)";
             cbShowFavorites.UseVisualStyleBackColor = true;
             // 
             // labelMaxRecentFiles
@@ -225,14 +225,14 @@
             labelMaxRecentFiles.AutoSize = true;
             labelMaxRecentFiles.Location = new Point(18, 277);
             labelMaxRecentFiles.Name = "labelMaxRecentFiles";
-            labelMaxRecentFiles.Size = new Size(255, 15);
+            labelMaxRecentFiles.Size = new Size(245, 15);
             labelMaxRecentFiles.TabIndex = 11;
             labelMaxRecentFiles.Text = "Zuletzt geöffnete Dateien &merken (0 = keine):";
             // 
             // numMaxRecentFiles
             // 
             numMaxRecentFiles.Increment = new decimal(new int[] { 5, 0, 0, 0 });
-            numMaxRecentFiles.Location = new Point(300, 274);
+            numMaxRecentFiles.Location = new Point(334, 274);
             numMaxRecentFiles.Maximum = new decimal(new int[] { 50, 0, 0, 0 });
             numMaxRecentFiles.Name = "numMaxRecentFiles";
             numMaxRecentFiles.Size = new Size(60, 23);
@@ -251,9 +251,9 @@
             // comboLanguage
             // 
             comboLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboLanguage.Location = new Point(160, 303);
+            comboLanguage.Location = new Point(203, 303);
             comboLanguage.Name = "comboLanguage";
-            comboLanguage.Size = new Size(140, 23);
+            comboLanguage.Size = new Size(125, 23);
             comboLanguage.TabIndex = 14;
             // 
             // tabTargets
@@ -539,10 +539,10 @@
             tabControl.ResumeLayout(false);
             tabGeneral.ResumeLayout(false);
             tabGeneral.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numMaxRecentFiles).EndInit();
             tabTargets.ResumeLayout(false);
             tabPrograms.ResumeLayout(false);
             panelButtons.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)numMaxRecentFiles).EndInit();
             ResumeLayout(false);
         }
 
