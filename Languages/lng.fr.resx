@@ -99,6 +99,7 @@ Ctrl+clic : directement vers le dossier 1 clic (voir la barre d'état)</value></
   <data name="Strg+," xml:space="preserve"><value>Ctrl+,</value></data>
   <data name="Einstellungen öffnen" xml:space="preserve"><value>ouvrir les paramètres</value></data>
   <data name="Seitenzahl, Dateigröße und Änderungsdatum der angezeigten Datei" xml:space="preserve"><value>Nombre de pages, taille et date de modification du fichier affiché</value></data>
+  <data name="Zoomstufe des Viewers" xml:space="preserve"><value>Niveau de zoom de la visionneuse</value></data>
   <data name="PDF-Version der angezeigten Datei" xml:space="preserve"><value>Version PDF du fichier affiché</value></data>
   <data name="PDF/A: Format für die Langzeitarchivierung" xml:space="preserve"><value>PDF/A : format pour l'archivage à long terme</value></data>
   <data name="Diese Datei entspricht dem PDF/A-Standard für die Langzeitarchivierung und wurde schreibgeschützt geöffnet." xml:space="preserve"><value>Ce fichier est conforme à la norme PDF/A pour l'archivage à long terme et a été ouvert en lecture seule.</value></data>

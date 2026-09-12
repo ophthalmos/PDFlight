@@ -7,7 +7,8 @@ namespace PDFLight.Classes;
 
 internal record PdfInfo(string Title, string Author, string Subject, string Keywords, int PageCount, string Version, string Creator, string Producer);
 
-internal record PdfStatus(int PageCount, string? Version, string? PdfALevel);
+/// <summary>Kenndaten einer Datei; PageWidthPt/PageHeightPt = Größe der ersten Seite in Punkt (Referenz für die Zoomanzeige; 0 = unbekannt).</summary>
+internal record PdfStatus(int PageCount, string? Version, string? PdfALevel, double PageWidthPt = 0, double PageHeightPt = 0);
 
 /// <summary>Dokumentoperationen mit PDFsharp. Alle Methoden arbeiten direkt auf der Datei;
 /// die Anzeige bleibt davon unberührt, weil der Viewer aus dem Speicher liest.</summary>
@@ -32,7 +33,8 @@ internal static partial class PdfEditService
         {
             using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
             var v = document.Version;
-            return new PdfStatus(document.PageCount, $"{v / 10}.{v % 10}", GetPdfALevel(document));
+            var first = document.PageCount > 0 ? document.Pages[0] : null;
+            return new PdfStatus(document.PageCount, $"{v / 10}.{v % 10}", GetPdfALevel(document), first?.Width.Point ?? 0, first?.Height.Point ?? 0);
         }
         catch (Exception ex) when (IsPdfReadError(ex)) { return new PdfStatus(-1, null, null); }
     }
