@@ -104,15 +104,44 @@ Filename: "{app}\{#appName}.exe"; Parameters: "--help"; Description: "{cm:Run}";
 ; Hinweis: Die Benutzereinstellungen (%APPDATA%\PDFlight\settings.json) und der
 ; WebView2-Datenordner (%LOCALAPPDATA%\PDFlight) bleiben bei der Deinstallation erhalten.
 
-[UninstallDelete]
+[InstallDelete]
+; Vorgänger von setup.default aus früheren Versionen
 Type: files; Name: "{app}\language.default"
 
+[UninstallDelete]
+Type: files; Name: "{app}\setup.default"
+
 [Code]
+function GetSystemMetrics(nIndex: Integer): Integer; external 'GetSystemMetrics@user32.dll stdcall';
+function GetDpiForSystem(): Cardinal; external 'GetDpiForSystem@user32.dll stdcall delayload';
+
+{ Abstufung der Symbolleiste nach der logischen Breite des Hauptbildschirms (physische Pixel durch die DPI-Skalierung):
+  gemessener Platzbedarf 1390 px mit großen Symbolen und Programm-Icons, 1245 px mit kleinen Symbolen, 1153 px ohne
+  Programm-Icons, 977 px nur Text. 0 = alles an, 1 = kleine Symbole, 2 = zusätzlich ohne Programm-Icons, 3 = nur Text. }
+function ToolbarLevel(): Integer;
+var
+  Width, Dpi: Integer;
+begin
+  Dpi := 96;
+  try
+    Dpi := GetDpiForSystem();
+  except
+  end;
+  if Dpi <= 0 then Dpi := 96;
+  Width := GetSystemMetrics(0) * 96 div Dpi;
+  if Width >= 1440 then Result := 0
+  else if Width >= 1280 then Result := 1
+  else if Width >= 1100 then Result := 2
+  else Result := 3;
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
-  { Sprachwahl des Setups für PDFlight hinterlegen; das Programm übernimmt sie einmalig beim Start }
+  { Sprachwahl des Setups und Symbolleisten-Abstufung für PDFlight hinterlegen; das Programm übernimmt beides
+    einmalig beim ersten Start nach der Installation (AppSettings.ApplyInstallerDefaults) }
   if CurStep = ssPostInstall then
-    SaveStringToFile(ExpandConstant('{app}\language.default'), ActiveLanguage, False);
+    SaveStringToFile(ExpandConstant('{app}\setup.default'),
+      'language=' + ActiveLanguage + #13#10 + 'toolbar=' + IntToStr(ToolbarLevel()) + #13#10, False);
 end;
 
 function InitializeSetup(): Boolean;

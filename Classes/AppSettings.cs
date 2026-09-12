@@ -53,7 +53,8 @@ public class AppSettings
     public bool ShowFullPathInTitle { get; set; }         // vollständigen Dateipfad statt nur des Dateinamens in der Titelleiste
     public bool ShowFavorites { get; set; }               // Favoriten-Menü in der Symbolleiste (Strg+D merkt die Datei); Standard aus
     public string Language { get; set; } = "de";          // Kultur-Code; Sprachen liegen als Languages\lng.<code>.resx bereit
-    public string InstallerLanguage { get; set; } = string.Empty; // zuletzt übernommene Setup-Sprachwahl (s. ApplyInstallerLanguage)
+    public string InstallerLanguage { get; set; } = string.Empty; // zuletzt übernommene Setup-Sprachwahl (s. ApplyInstallerDefaults)
+    public int InstallerToolbarLevel { get; set; } = -1;          // zuletzt übernommene Symbolleisten-Abstufung des Setups (-1 = noch keine)
     public string LastFile { get; set; } = string.Empty;  // Datei, die beim Beenden geöffnet war
     public int WindowX { get; set; } = -1;
     public int WindowY { get; set; } = -1;
@@ -71,28 +72,41 @@ public class AppSettings
             {
                 var loaded = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(SettingsPath)) ?? new AppSettings();
                 loaded.TrimRecentLists();
-                return ApplyInstallerLanguage(loaded);
+                return ApplyInstallerDefaults(loaded);
             }
         }
         catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException) { } // defekte Datei → Standardwerte
-        return ApplyInstallerLanguage(new AppSettings());
+        return ApplyInstallerDefaults(new AppSettings());
     }
 
-    /// <summary>Übernimmt die Sprachwahl des Installers (Datei language.default neben der EXE) genau einmal
-    /// pro Installation: Erst wenn eine (Neu-)Installation eine andere Wahl hinterlegt, überschreibt sie die
-    /// Programmsprache — eine spätere Umstellung im Einstellungsdialog bleibt bis dahin erhalten.</summary>
-    private static AppSettings ApplyInstallerLanguage(AppSettings settings)
+    /// <summary>Übernimmt die Vorgaben des Installers (Datei setup.default neben der EXE, Zeilen „language=de“ und
+    /// „toolbar=0…3“) genau einmal pro Installation: Erst wenn eine (Neu-)Installation einen anderen Wert hinterlegt,
+    /// überschreibt er die Einstellung — eine spätere Umstellung im Einstellungsdialog bleibt bis dahin erhalten.
+    /// Die Symbolleisten-Abstufung richtet sich nach der Bildschirmbreite bei der Installation: 0 = alles an,
+    /// 1 = kleine Symbole, 2 = zusätzlich ohne Programm-Icons, 3 = nur Text.</summary>
+    private static AppSettings ApplyInstallerDefaults(AppSettings settings)
     {
         try
         {
-            var marker = Path.Combine(AppContext.BaseDirectory, "language.default");
-            if (File.Exists(marker))
+            var marker = Path.Combine(AppContext.BaseDirectory, "setup.default");
+            if (!File.Exists(marker)) { return settings; }
+            foreach (var line in File.ReadAllLines(marker))
             {
-                var code = File.ReadAllText(marker).Trim();
-                if (code.Length == 2 && code != settings.InstallerLanguage)
+                var separator = line.IndexOf('=');
+                if (separator <= 0) { continue; }
+                var key = line[..separator].Trim();
+                var value = line[(separator + 1)..].Trim();
+                if (key == "language" && value.Length == 2 && value != settings.InstallerLanguage)
                 {
-                    settings.InstallerLanguage = code; // wird beim nächsten Save festgehalten
-                    settings.Language = code;
+                    settings.InstallerLanguage = value; // wird beim nächsten Save festgehalten
+                    settings.Language = value;
+                }
+                else if (key == "toolbar" && int.TryParse(value, out var level) && level is >= 0 and <= 3 && level != settings.InstallerToolbarLevel)
+                {
+                    settings.InstallerToolbarLevel = level;
+                    settings.LargeToolbarIcons = level < 1;
+                    settings.ShowProgramIcons = level < 2;
+                    settings.ShowToolbarIcons = level < 3;
                 }
             }
         }
