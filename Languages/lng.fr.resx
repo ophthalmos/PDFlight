@@ -22,6 +22,7 @@
   <data name="Nach dem Löschen die &amp;nächste Datei des Ordners anzeigen" xml:space="preserve"><value>Afficher le fichier suiva&amp;nt du dossier après la suppression</value></data>
   <data name="Layout der Hauptmenüleiste:" xml:space="preserve"><value>Style de la barre d'outils :</value></data>
   <data name="Große Symbole und Programm-Icons" xml:space="preserve"><value>Grandes icônes et icônes des programmes</value></data>
+  <data name="Große Symbole, ohne Programm-Icons" xml:space="preserve"><value>Grandes icônes, sans icônes des programmes</value></data>
   <data name="Kleine Symbole und Programm-Icons" xml:space="preserve"><value>Petites icônes et icônes des programmes</value></data>
   <data name="Kleine Symbole, ohne Programm-Icons" xml:space="preserve"><value>Petites icônes, sans icônes des programmes</value></data>
   <data name="Nur Text" xml:space="preserve"><value>Texte seulement</value></data>

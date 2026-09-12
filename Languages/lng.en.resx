@@ -22,6 +22,7 @@
   <data name="Nach dem Löschen die &amp;nächste Datei des Ordners anzeigen" xml:space="preserve"><value>Show the &amp;next file of the folder after deleting</value></data>
   <data name="Layout der Hauptmenüleiste:" xml:space="preserve"><value>Main toolbar layout:</value></data>
   <data name="Große Symbole und Programm-Icons" xml:space="preserve"><value>Large icons and program icons</value></data>
+  <data name="Große Symbole, ohne Programm-Icons" xml:space="preserve"><value>Large icons, no program icons</value></data>
   <data name="Kleine Symbole und Programm-Icons" xml:space="preserve"><value>Small icons and program icons</value></data>
   <data name="Kleine Symbole, ohne Programm-Icons" xml:space="preserve"><value>Small icons, no program icons</value></data>
   <data name="Nur Text" xml:space="preserve"><value>Text only</value></data>
