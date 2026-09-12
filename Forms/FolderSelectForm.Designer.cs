@@ -220,7 +220,7 @@
             numUpDownMaxRecent.Increment = new decimal(new int[] { 5, 0, 0, 0 });
             numUpDownMaxRecent.Location = new Point(417, 13);
             numUpDownMaxRecent.Maximum = new decimal(new int[] { 50, 0, 0, 0 });
-            numUpDownMaxRecent.Minimum = new decimal(new int[] { 5, 0, 0, 0 });
+            numUpDownMaxRecent.Minimum = new decimal(new int[] { 0, 0, 0, 0 });
             numUpDownMaxRecent.Name = "numUpDownMaxRecent";
             numUpDownMaxRecent.Size = new Size(48, 23);
             numUpDownMaxRecent.TabIndex = 12;

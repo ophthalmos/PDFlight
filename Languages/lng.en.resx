@@ -443,5 +443,10 @@ the latest version.</value></data>
   <data name="Maximal:" xml:space="preserve"><value>Max.:</value></data>
   <data name="Liste bearbeiten" xml:space="preserve"><value>Edit list</value></data>
   <data name="Zielliste in den Einstellungen bearbeiten" xml:space="preserve"><value>Edit the target list in the settings</value></data>
-  <data name="Höchstzahl der gemerkten Ordner in der Zuletzt-Liste" xml:space="preserve"><value>Maximum number of folders kept in the recent list</value></data>
+  <data name="Höchstzahl der gemerkten Ordner in der Zuletzt-Liste (0 = keine)" xml:space="preserve"><value>Maximum number of folders kept in the recent list (0 = none)</value></data>
+  <data name="1 Eintrag:" xml:space="preserve"><value>1 entry:</value></data>
+  <data name="{0} Einträge:" xml:space="preserve"><value>{0} entries:</value></data>
+  <data name="… und {0} weitere" xml:space="preserve"><value>… and {0} more</value></data>
+  <data name="Zuletzt geöffnete Dateien &amp;merken (0 = keine):" xml:space="preserve"><value>Re&amp;member recently opened files (0 = none):</value></data>
+  <data name="(Verlauf in den Einstellungen abgeschaltet)" xml:space="preserve"><value>(history turned off in the settings)</value></data>
 </root>

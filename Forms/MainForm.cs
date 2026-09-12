@@ -451,7 +451,8 @@ public partial class MainForm : Form
         }
         if (btnOpen.DropDownItems.Count == 0)
         {
-            btnOpen.DropDownItems.Add(new ToolStripMenuItem(Lng.T("(keine zuletzt geöffneten Dateien)")) { Enabled = false });
+            var hint = settings.MaxRecentFiles == 0 ? Lng.T("(Verlauf in den Einstellungen abgeschaltet)") : Lng.T("(keine zuletzt geöffneten Dateien)");
+            btnOpen.DropDownItems.Add(new ToolStripMenuItem(hint) { Enabled = false });
         }
         else
         {
@@ -658,6 +659,7 @@ public partial class MainForm : Form
         if (dialog.ClearRecentRequested || settings.MaxRecentFolders != dialog.MaxRecent)
         {
             settings.MaxRecentFolders = dialog.MaxRecent;
+            settings.TrimRecentLists(); // eine kleinere Höchstzahl (bis hin zu 0) wirft überzählige Einträge sofort weg
             settings.Save();
         }
         if (dialog.EditTargetsRequested) // „Liste bearbeiten“: der Dialog hat sich geschlossen, jetzt die Einstellungen (Zielliste)
@@ -922,6 +924,8 @@ public partial class MainForm : Form
             settings.CloseOnEscape = dialog.CloseOnEscape;
             settings.ReopenLastFile = dialog.ReopenLastFile;
             settings.ShowFullPathInTitle = dialog.ShowFullPathInTitle;
+            settings.MaxRecentFiles = dialog.MaxRecentFiles;
+            settings.TrimRecentLists(); // eine kleinere Höchstzahl (bis hin zu 0) wirft überzählige Einträge sofort weg
             var languageChanged = dialog.Language != settings.Language;
             settings.Language = dialog.Language;
             settings.Save();

@@ -94,7 +94,7 @@ public partial class FolderSelectForm : Form
         btnNewFolder.Click += ButtonNewFolder_Clicked;
         toolTip.SetToolTip(btnNewFolder, Lng.T("Neuer Ordner (Strg+N)"));
         toolTip.SetToolTip(btnTargetSettings, Lng.T("Zielliste in den Einstellungen bearbeiten"));
-        toolTip.SetToolTip(numUpDownMaxRecent, Lng.T("Höchstzahl der gemerkten Ordner in der Zuletzt-Liste"));
+        toolTip.SetToolTip(numUpDownMaxRecent, Lng.T("Höchstzahl der gemerkten Ordner in der Zuletzt-Liste (0 = keine)"));
     }
 
     private void FolderSelectForm_Load(object? sender, EventArgs e)
@@ -248,7 +248,12 @@ public partial class FolderSelectForm : Form
         if (comboBoxRecent.SelectedItem is ClearListEntry)
         {
             comboBoxRecent.SelectedIndex = -1; // ein Befehl, keine Ordnerauswahl
-            if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Die Liste der zuletzt verwendeten Ordner leeren?"), null)) { return; }
+            // Rückfrage mit den Einträgen, die verloren gehen (bei langen Listen die ersten und die Zahl der übrigen)
+            const int ShowLimit = 12;
+            var lines = recentFolders.Take(ShowLimit).ToList();
+            if (recentFolders.Count > ShowLimit) { lines.Add(string.Format(Lng.T("… und {0} weitere"), recentFolders.Count - ShowLimit)); }
+            var summary = recentFolders.Count == 1 ? Lng.T("1 Eintrag:") : string.Format(Lng.T("{0} Einträge:"), recentFolders.Count);
+            if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Die Liste der zuletzt verwendeten Ordner leeren?"), summary + "\n" + string.Join("\n", lines))) { return; }
             ClearRecentRequested = true;
             recentFolders.Clear();
             FillRecentCombo();
