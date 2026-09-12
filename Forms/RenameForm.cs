@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using Microsoft.VisualBasic.FileIO;
 using PDFLight.Classes;
 using PDFLight.Controls;
 
@@ -277,7 +276,7 @@ public partial class RenameForm : Form
         if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("In den Papierkorb verschieben?"), listView.SelectedItems[0].Text)) { return; }
         try
         {
-            FileSystem.DeleteFile(listView.SelectedItems[0].Name, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+            ShellUtil.MoveToRecycleBin(listView.SelectedItems[0].Name, Handle);
             listView.SelectedItems[0].Remove();
         }
         catch (OperationCanceledException) { }
@@ -358,7 +357,7 @@ public partial class RenameForm : Form
         {
             if (TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Vorhandene Datei ersetzen?"), Lng.T("Eine Datei gleichen Namens ist bereits vorhanden. Sie wird in den Papierkorb verschoben."), TaskDialogIcon.Warning, defaultNo: true))
             {
-                try { FileSystem.DeleteFile(newPath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin); }
+                try { ShellUtil.MoveToRecycleBin(newPath, Handle); }
                 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or OperationCanceledException)
                 {
                     TaskDlg.ErrTaskDlg(Handle, Lng.T("Die vorhandene Datei konnte nicht ersetzt werden."), ex);
