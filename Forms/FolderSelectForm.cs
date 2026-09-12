@@ -59,11 +59,10 @@ public partial class FolderSelectForm : Form
 
     private void FillRecentCombo()
     {
-        var selected = comboBoxRecent.SelectedItem as string;
         comboBoxRecent.Items.Clear();
         comboBoxRecent.Items.AddRange([.. recentFolders.Take(MaxRecent)]);
         if (comboBoxRecent.Items.Count > 0) { comboBoxRecent.Items.Add(new ClearListEntry()); }
-        if (selected != null) { comboBoxRecent.SelectedIndex = comboBoxRecent.FindStringExact(selected); }
+        if (comboBoxRecent.SelectedItem is string selected) { comboBoxRecent.SelectedIndex = comboBoxRecent.FindStringExact(selected); }
     }
 
     [System.ComponentModel.Browsable(false), System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
