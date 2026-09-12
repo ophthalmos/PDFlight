@@ -20,11 +20,13 @@
   <data name="Ordnerdialog springt zum zuletzt &amp;verwendeten Ordner" xml:space="preserve"><value>El diálogo de carpetas salta a la última carpeta &amp;utilizada</value></data>
   <data name="Vor dem Verschieben in den &amp;Papierkorb nachfragen" xml:space="preserve"><value>Preguntar antes de mover a la &amp;papelera</value></data>
   <data name="Nach dem Löschen die &amp;nächste Datei des Ordners anzeigen" xml:space="preserve"><value>Mostrar el siguie&amp;nte archivo de la carpeta tras eliminar</value></data>
+  <data name="&amp;Symbolleiste:" xml:space="preserve"><value>Barra de &amp;herramientas:</value></data>
+  <data name="Große Symbole und Programm-Icons" xml:space="preserve"><value>Iconos grandes e iconos de programas</value></data>
+  <data name="Kleine Symbole und Programm-Icons" xml:space="preserve"><value>Iconos pequeños e iconos de programas</value></data>
+  <data name="Kleine Symbole, ohne Programm-Icons" xml:space="preserve"><value>Iconos pequeños, sin iconos de programas</value></data>
+  <data name="Nur Text" xml:space="preserve"><value>Solo texto</value></data>
   <data name="Die Datei wurde in den Papierkorb verschoben." xml:space="preserve"><value>El archivo se ha movido a la papelera.</value></data>
   <data name="Vollständigen Dateipfad in der Titelleiste an&amp;zeigen" xml:space="preserve"><value>Mostrar la ruta completa del archivo en la &amp;barra de título</value></data>
-  <data name="Programm&amp;symbole zusätzlich in der Symbolleiste anzeigen" xml:space="preserve"><value>Mostrar también los iconos de programa&amp;s en la barra de herramientas</value></data>
-  <data name="Symbole auf den Schal&amp;tflächen der Symbolleiste anzeigen" xml:space="preserve"><value>Mostrar iconos en los bo&amp;tones de la barra de herramientas</value></data>
-  <data name="&amp;Große Symbole in der Symbolleiste (24 statt 16 Pixel)" xml:space="preserve"><value>Iconos &amp;grandes en la barra de herramientas (24 en lugar de 16 píxeles)</value></data>
   <data name="Programm mit 2× &amp;Esc beenden (Umschalt+Esc: sofort)" xml:space="preserve"><value>Cerrar el programa con 2× &amp;Esc (Mayús+Esc: inmediatamente)</value></data>
   <data name="Zuletzt geöffnete &amp;Datei beim Start laden" xml:space="preserve"><value>Cargar el último &amp;archivo abierto al iniciar</value></data>
   <data name="Die Liste der zuletzt verwendeten Ordner leeren?" xml:space="preserve"><value>¿Vaciar la lista de carpetas usadas recientemente?</value></data>

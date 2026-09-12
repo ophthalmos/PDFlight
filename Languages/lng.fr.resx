@@ -20,11 +20,13 @@
   <data name="Ordnerdialog springt zum zuletzt &amp;verwendeten Ordner" xml:space="preserve"><value>La boîte de dialogue des dossiers ouvre le dernier dossier &amp;utilisé</value></data>
   <data name="Vor dem Verschieben in den &amp;Papierkorb nachfragen" xml:space="preserve"><value>Confirmer avant de déplacer vers la &amp;corbeille</value></data>
   <data name="Nach dem Löschen die &amp;nächste Datei des Ordners anzeigen" xml:space="preserve"><value>Afficher le fichier suiva&amp;nt du dossier après la suppression</value></data>
+  <data name="&amp;Symbolleiste:" xml:space="preserve"><value>Barre d'&amp;outils :</value></data>
+  <data name="Große Symbole und Programm-Icons" xml:space="preserve"><value>Grandes icônes et icônes des programmes</value></data>
+  <data name="Kleine Symbole und Programm-Icons" xml:space="preserve"><value>Petites icônes et icônes des programmes</value></data>
+  <data name="Kleine Symbole, ohne Programm-Icons" xml:space="preserve"><value>Petites icônes, sans icônes des programmes</value></data>
+  <data name="Nur Text" xml:space="preserve"><value>Texte seulement</value></data>
   <data name="Die Datei wurde in den Papierkorb verschoben." xml:space="preserve"><value>Le fichier a été déplacé vers la corbeille.</value></data>
   <data name="Vollständigen Dateipfad in der Titelleiste an&amp;zeigen" xml:space="preserve"><value>Afficher le chemin complet du fichier dans la &amp;barre de titre</value></data>
-  <data name="Programm&amp;symbole zusätzlich in der Symbolleiste anzeigen" xml:space="preserve"><value>Afficher aussi les icônes des programme&amp;s dans la barre d'outils</value></data>
-  <data name="Symbole auf den Schal&amp;tflächen der Symbolleiste anzeigen" xml:space="preserve"><value>Afficher les icônes sur les bou&amp;tons de la barre d'outils</value></data>
-  <data name="&amp;Große Symbole in der Symbolleiste (24 statt 16 Pixel)" xml:space="preserve"><value>&amp;Grandes icônes dans la barre d'outils (24 au lieu de 16 pixels)</value></data>
   <data name="Programm mit 2× &amp;Esc beenden (Umschalt+Esc: sofort)" xml:space="preserve"><value>Quitter le programme avec 2× &amp;Échap (Maj+Échap : immédiatement)</value></data>
   <data name="Zuletzt geöffnete &amp;Datei beim Start laden" xml:space="preserve"><value>Charger le dernier &amp;fichier ouvert au démarrage</value></data>
   <data name="Die Liste der zuletzt verwendeten Ordner leeren?" xml:space="preserve"><value>Vider la liste des derniers dossiers utilisés ?</value></data>

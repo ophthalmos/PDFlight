@@ -26,14 +26,16 @@ public partial class SettingsForm : Form
     [System.ComponentModel.Browsable(false)]
     public bool OpenNextAfterDelete => cbOpenNextAfterDelete.Checked;
 
+    // Gestaltung der Symbolleiste als Stufenleiter (wie die Vorgabe des Installers): 0 = große Symbole und Programm-Icons,
+    // 1 = kleine Symbole, 2 = zusätzlich ohne Programm-Icons, 3 = nur Text – dahinter stehen die drei Einstellungen
     [System.ComponentModel.Browsable(false)]
-    public bool ShowProgramIcons => cbShowProgramIcons.Checked;
+    public bool LargeToolbarIcons => comboToolbar.SelectedIndex < 1;
 
     [System.ComponentModel.Browsable(false)]
-    public bool ShowToolbarIcons => cbToolbarIcons.Checked;
+    public bool ShowProgramIcons => comboToolbar.SelectedIndex < 2;
 
     [System.ComponentModel.Browsable(false)]
-    public bool LargeToolbarIcons => cbLargeIcons.Checked;
+    public bool ShowToolbarIcons => comboToolbar.SelectedIndex < 3;
 
     [System.ComponentModel.Browsable(false)]
     public bool CloseOnEscape => cbCloseOnEscape.Checked;
@@ -66,9 +68,8 @@ public partial class SettingsForm : Form
         cbJumpLastUsed.Checked = source.JumpToLastUsed;
         cbConfirmDelete.Checked = source.ConfirmDelete;
         cbOpenNextAfterDelete.Checked = source.OpenNextAfterDelete;
-        cbShowProgramIcons.Checked = source.ShowProgramIcons;
-        cbToolbarIcons.Checked = source.ShowToolbarIcons;
-        cbLargeIcons.Checked = source.LargeToolbarIcons;
+        comboToolbar.Items.AddRange([Lng.T("Große Symbole und Programm-Icons"), Lng.T("Kleine Symbole und Programm-Icons"), Lng.T("Kleine Symbole, ohne Programm-Icons"), Lng.T("Nur Text")]);
+        comboToolbar.SelectedIndex = !source.ShowToolbarIcons ? 3 : !source.ShowProgramIcons ? 2 : !source.LargeToolbarIcons ? 1 : 0;
         cbCloseOnEscape.Checked = source.CloseOnEscape;
         cbReopenLast.Checked = source.ReopenLastFile;
         cbFullPathTitle.Checked = source.ShowFullPathInTitle;
