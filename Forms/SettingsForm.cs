@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using PDFLight.Classes;
+﻿using PDFLight.Classes;
 
 namespace PDFLight.Forms;
 
