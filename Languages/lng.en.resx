@@ -472,5 +472,5 @@ the latest version.</value></data>
   <data name="Favorit hinzufügen" xml:space="preserve"><value>Add favorite</value></data>
   <data name="Ohne Namen erscheint der Dateiname." xml:space="preserve"><value>Without a name, the file name is shown.</value></data>
   <data name="&amp;Name (optional, bis 30 Zeichen):" xml:space="preserve"><value>&amp;Name (optional, up to 30 characters):</value></data>
-  <data name="&amp;Favoriten-Menü anzeigen (Dateien merken, Strg+D)" xml:space="preserve"><value>Sho&amp;w the favorites menu (remember files, Ctrl+D)</value></data>
+  <data name="&amp;Favoriten-Menü anzeigen (Dateien merken, max. 200 Einträge)" xml:space="preserve"><value>Sho&amp;w the favorites menu (remember files, max. 200 entries)</value></data>
 </root>
