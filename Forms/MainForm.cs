@@ -1615,7 +1615,7 @@ public partial class MainForm : Form
     }
 
     /// <summary>Baut das Favoriten-Menü beim Öffnen: Hinzufügen bzw. Entfernen für die angezeigte Datei, darunter
-    /// alle Favoriten alphabetisch, die angezeigte Datei mit Haken. Favoriten fehlender Dateien – etwa auf einem
+    /// alle Favoriten alphabetisch als „Name (Pfad)“, die angezeigte Datei mit Haken. Favoriten fehlender Dateien – etwa auf einem
     /// gerade nicht angeschlossenen Laufwerk – bleiben ausgegraut stehen und lassen sich gesammelt entfernen.</summary>
     private void DdbFavorites_DropDownOpening(object? sender, EventArgs e)
     {
@@ -1623,7 +1623,10 @@ public partial class MainForm : Form
         var current = currentFile == null ? null : settings.FindFavorite(currentFile.FullName);
         mnuFavoriteAdd.Visible = current == null;
         mnuFavoriteAdd.Enabled = currentFile != null;
+        mnuFavoriteAdd.Text = currentFile == null ? Lng.T("Datei zu den Favoriten hinzufügen …")
+            : string.Format(Lng.T("»{0}« zu den Favoriten hinzufügen …"), currentFile.Name);
         mnuFavoriteRemove.Visible = current != null;
+        if (current != null) { mnuFavoriteRemove.Text = string.Format(Lng.T("»{0}« aus den Favoriten entfernen"), current.Label); }
         var items = ddbFavorites.DropDownItems;
         while (items.Count > 4) // die dynamischen Einträge unter dem Trennstrich neu aufbauen
         {
@@ -1637,7 +1640,7 @@ public partial class MainForm : Form
             var isCurrent = currentFile != null && favorite.IsFor(currentFile.FullName);
             var exists = isCurrent || File.Exists(favorite.File);
             anyMissing |= !exists;
-            ToolStripMenuItem item = new(favorite.Label) { Tag = favorite, Checked = isCurrent, Enabled = exists, ToolTipText = favorite.File };
+            ToolStripMenuItem item = new(favorite.MenuText) { Tag = favorite, Checked = isCurrent, Enabled = exists, ToolTipText = favorite.File };
             item.Click += FavoriteMenuItem_Click;
             items.Add(item);
         }

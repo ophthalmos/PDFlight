@@ -454,6 +454,8 @@ the latest version.</value></data>
   <data name="Dateien als Favoriten merken und wiederfinden (Strg+D)" xml:space="preserve"><value>Remember files as favorites and find them again (Ctrl+D)</value></data>
   <data name="Datei zu den Favoriten hinzufügen …" xml:space="preserve"><value>Add file to favorites…</value></data>
   <data name="Datei aus den Favoriten entfernen" xml:space="preserve"><value>Remove file from favorites</value></data>
+  <data name="»{0}« zu den Favoriten hinzufügen …" xml:space="preserve"><value>Add “{0}” to favorites…</value></data>
+  <data name="»{0}« aus den Favoriten entfernen" xml:space="preserve"><value>Remove “{0}” from favorites</value></data>
   <data name="Nicht mehr vorhandene Favoriten entfernen" xml:space="preserve"><value>Remove favorites that no longer exist</value></data>
   <data name="(keine Favoriten)" xml:space="preserve"><value>(no favorites)</value></data>
   <data name="Strg+D" xml:space="preserve"><value>Ctrl+D</value></data>
