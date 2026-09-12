@@ -40,7 +40,6 @@
             cbCloseOnEscape = new CheckBox();
             cbReopenLast = new CheckBox();
             cbFullPathTitle = new CheckBox();
-            btnClearRecent = new Button();
             labelLanguage = new Label();
             comboLanguage = new ComboBox();
             tabTargets = new TabPage();
@@ -96,7 +95,6 @@
             tabGeneral.Controls.Add(cbCloseOnEscape);
             tabGeneral.Controls.Add(cbReopenLast);
             tabGeneral.Controls.Add(cbFullPathTitle);
-            tabGeneral.Controls.Add(btnClearRecent);
             tabGeneral.Controls.Add(labelLanguage);
             tabGeneral.Controls.Add(comboLanguage);
             tabGeneral.Location = new Point(4, 24);
@@ -205,20 +203,10 @@
             cbFullPathTitle.Text = "Vollständigen Dateipfad in der Titelleiste an&zeigen";
             cbFullPathTitle.UseVisualStyleBackColor = true;
             // 
-            // btnClearRecent
-            // 
-            btnClearRecent.Location = new Point(18, 245);
-            btnClearRecent.Name = "btnClearRecent";
-            btnClearRecent.Size = new Size(180, 27);
-            btnClearRecent.TabIndex = 11;
-            btnClearRecent.Text = "Zuletzt-Liste &leeren";
-            btnClearRecent.UseVisualStyleBackColor = true;
-            btnClearRecent.Click += BtnClearRecent_Click;
-            // 
             // labelLanguage
             // 
             labelLanguage.AutoSize = true;
-            labelLanguage.Location = new Point(18, 281);
+            labelLanguage.Location = new Point(18, 250);
             labelLanguage.Name = "labelLanguage";
             labelLanguage.Size = new Size(115, 15);
             labelLanguage.TabIndex = 9;
@@ -227,7 +215,7 @@
             // comboLanguage
             // 
             comboLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboLanguage.Location = new Point(160, 278);
+            comboLanguage.Location = new Point(160, 247);
             comboLanguage.Name = "comboLanguage";
             comboLanguage.Size = new Size(140, 23);
             comboLanguage.TabIndex = 10;
@@ -557,7 +545,6 @@
         private System.Windows.Forms.CheckBox cbCloseOnEscape;
         private System.Windows.Forms.CheckBox cbReopenLast;
         private System.Windows.Forms.CheckBox cbFullPathTitle;
-        private System.Windows.Forms.Button btnClearRecent;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
     }

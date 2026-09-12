@@ -44,9 +44,6 @@ public partial class SettingsForm : Form
     [System.ComponentModel.Browsable(false)]
     public bool ShowFullPathInTitle => cbFullPathTitle.Checked;
 
-    [System.ComponentModel.Browsable(false), System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
-    public bool ClearRecentRequested { get; private set; }
-
     private static readonly (string Name, string Code)[] Languages = [("Deutsch", "de"), ("English", "en"), ("Français", "fr"), ("Español", "es")];
 
     [System.ComponentModel.Browsable(false)]
@@ -213,17 +210,5 @@ public partial class SettingsForm : Form
         listPrograms.Items.AddRange(sorted);
         if (selected != null) { listPrograms.SelectedIndex = Array.IndexOf(sorted, selected); }
         UpdateProgramButtons();
-    }
-
-    // ------------------------------------------------------------------ Allgemein
-
-    private void BtnClearRecent_Click(object? sender, EventArgs e)
-    {
-        if (TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Die Liste der zuletzt verwendeten Ordner leeren?"), null))
-        {
-            ClearRecentRequested = true;
-            btnClearRecent.Enabled = false;
-            btnClearRecent.Text = Lng.T("Zuletzt-Liste wird geleert");
-        }
     }
 }
