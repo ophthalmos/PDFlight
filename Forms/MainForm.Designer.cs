@@ -62,6 +62,12 @@
             mnuRemovePassword = new ToolStripMenuItem();
             toolStripSeparator9 = new ToolStripSeparator();
             ddbPrograms = new ToolStripDropDownButton();
+            toolStripSeparator12 = new ToolStripSeparator();
+            ddbFavorites = new ToolStripDropDownButton();
+            mnuFavoriteAdd = new ToolStripMenuItem();
+            mnuFavoriteRemove = new ToolStripMenuItem();
+            mnuFavoriteCleanup = new ToolStripMenuItem();
+            toolStripSeparator13 = new ToolStripSeparator();
             toolStripSeparator5 = new ToolStripSeparator();
             btnSettings = new ToolStripButton();
             ddbInfo = new ToolStripDropDownButton();
@@ -100,7 +106,7 @@
             // toolStrip
             // 
             toolStrip.GripStyle = ToolStripGripStyle.Hidden;
-            toolStrip.Items.AddRange(new ToolStripItem[] { btnOpen, toolStripSeparator1, btnPrev, btnNext, toolStripSeparator2, splitButtonMove, btnCopy, toolStripSeparator3, btnRename, btnDelete, btnShowInFolder, toolStripSeparator8, btnPrint, btnEmail, toolStripSeparator4, ddbEdit, toolStripSeparator9, ddbPrograms, toolStripSeparator5, ddbInfo, btnSettings });
+            toolStrip.Items.AddRange(new ToolStripItem[] { btnOpen, toolStripSeparator1, btnPrev, btnNext, toolStripSeparator2, splitButtonMove, btnCopy, toolStripSeparator3, btnRename, btnDelete, btnShowInFolder, toolStripSeparator8, btnPrint, btnEmail, toolStripSeparator4, ddbEdit, toolStripSeparator9, ddbPrograms, toolStripSeparator12, ddbFavorites, toolStripSeparator5, ddbInfo, btnSettings });
             toolStrip.Location = new Point(0, 0);
             toolStrip.Name = "toolStrip";
             toolStrip.Size = new Size(984, 25);
@@ -340,6 +346,53 @@
             toolStripSeparator5.Name = "toolStripSeparator5";
             toolStripSeparator5.Size = new Size(6, 25);
             // 
+            // toolStripSeparator12
+            // 
+            toolStripSeparator12.Name = "toolStripSeparator12";
+            toolStripSeparator12.Size = new Size(6, 25);
+            toolStripSeparator12.Visible = false;
+            // 
+            // ddbFavorites
+            // 
+            ddbFavorites.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            ddbFavorites.DropDownItems.AddRange(new ToolStripItem[] { mnuFavoriteAdd, mnuFavoriteRemove, mnuFavoriteCleanup, toolStripSeparator13 });
+            ddbFavorites.Name = "ddbFavorites";
+            ddbFavorites.Size = new Size(66, 22);
+            ddbFavorites.Text = "Favoriten";
+            ddbFavorites.ToolTipText = "Seiten als Favoriten merken und wiederfinden (Strg+D)";
+            ddbFavorites.Visible = false;
+            ddbFavorites.DropDownOpening += DdbFavorites_DropDownOpening;
+            // 
+            // mnuFavoriteAdd
+            // 
+            mnuFavoriteAdd.Name = "mnuFavoriteAdd";
+            mnuFavoriteAdd.ShortcutKeyDisplayString = "Strg+D";
+            mnuFavoriteAdd.Size = new Size(233, 22);
+            mnuFavoriteAdd.Text = "Seite zu den Favoriten hinzufügen …";
+            mnuFavoriteAdd.Click += MnuFavoriteAdd_Click;
+            // 
+            // mnuFavoriteRemove
+            // 
+            mnuFavoriteRemove.Name = "mnuFavoriteRemove";
+            mnuFavoriteRemove.ShortcutKeyDisplayString = "Strg+D";
+            mnuFavoriteRemove.Size = new Size(233, 22);
+            mnuFavoriteRemove.Text = "Seite aus den Favoriten entfernen";
+            mnuFavoriteRemove.Visible = false;
+            mnuFavoriteRemove.Click += MnuFavoriteRemove_Click;
+            // 
+            // mnuFavoriteCleanup
+            // 
+            mnuFavoriteCleanup.Name = "mnuFavoriteCleanup";
+            mnuFavoriteCleanup.Size = new Size(233, 22);
+            mnuFavoriteCleanup.Text = "Nicht mehr vorhandene Favoriten entfernen";
+            mnuFavoriteCleanup.Visible = false;
+            mnuFavoriteCleanup.Click += MnuFavoriteCleanup_Click;
+            // 
+            // toolStripSeparator13
+            // 
+            toolStripSeparator13.Name = "toolStripSeparator13";
+            toolStripSeparator13.Size = new Size(230, 6);
+            // 
             // btnSettings
             // 
             btnSettings.Alignment = ToolStripItemAlignment.Right;
@@ -542,6 +595,12 @@
         private System.Windows.Forms.ToolStripMenuItem mnuProperties;
         private System.Windows.Forms.ToolStripDropDownButton ddbPrograms;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator12;
+        private System.Windows.Forms.ToolStripDropDownButton ddbFavorites;
+        private System.Windows.Forms.ToolStripMenuItem mnuFavoriteAdd;
+        private System.Windows.Forms.ToolStripMenuItem mnuFavoriteRemove;
+        private System.Windows.Forms.ToolStripMenuItem mnuFavoriteCleanup;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator13;
         private System.Windows.Forms.ToolStripButton btnShowInFolder;
         private System.Windows.Forms.ToolStripButton btnPrint;
         private System.Windows.Forms.ToolStripButton btnSettings;

@@ -40,6 +40,8 @@ internal static class ToolbarIcons
     public const char Help = '\uE9CE';         // Fragezeichen im Kreis: Hilfe-Menü
     public const char Add = '\uE710';          // Plus: runder „Neuer Ordner“-Knopf im Verschieben-Dialog
     public const char NewFolder = '\uE8F4';    // Kontextmenü des Ordnerbaums
+    public const char Favorite = '\uE734';     // FavoriteStar: Favoriten-Menü und „hinzufügen“
+    public const char Unfavorite = '\uE8D9';   // Seite aus den Favoriten entfernen
 
     private const string FontName = "Segoe MDL2 Assets";
     private static readonly Dictionary<(char Glyph, int Size), Image> cache = [];
