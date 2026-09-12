@@ -31,7 +31,6 @@
   <data name="Programm mit 2× &amp;Esc beenden (Umschalt+Esc: sofort)" xml:space="preserve"><value>Close program with double &amp;Esc (Shift+Esc: immediately)</value></data>
   <data name="Zuletzt geöffnete &amp;Datei beim Start laden" xml:space="preserve"><value>Load most recently opened &amp;file at startup</value></data>
   <data name="Die Liste der zuletzt verwendeten Ordner leeren?" xml:space="preserve"><value>Clear the list of recently used folders?</value></data>
-  <data name="Sprache / &amp;Language:" xml:space="preserve"><value>Sprache / &amp;Language:</value></data>
   <data name="Die Sprachänderung wird nach einem Neustart des Programms wirksam." xml:space="preserve"><value>The language change takes effect after restarting the program.</value></data>
   <data name="Zielordner" xml:space="preserve"><value>Target folders</value></data>
   <data name="&amp;Hinzufügen …" xml:space="preserve"><value>&amp;Add…</value></data>

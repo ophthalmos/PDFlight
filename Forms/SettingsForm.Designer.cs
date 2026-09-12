@@ -113,7 +113,7 @@
             // cbJumpLastUsed
             // 
             cbJumpLastUsed.AutoSize = true;
-            cbJumpLastUsed.Location = new Point(18, 47);
+            cbJumpLastUsed.Location = new Point(19, 74);
             cbJumpLastUsed.Name = "cbJumpLastUsed";
             cbJumpLastUsed.Size = new Size(310, 19);
             cbJumpLastUsed.TabIndex = 1;
@@ -123,7 +123,7 @@
             // cbConfirmDelete
             // 
             cbConfirmDelete.AutoSize = true;
-            cbConfirmDelete.Location = new Point(18, 72);
+            cbConfirmDelete.Location = new Point(19, 99);
             cbConfirmDelete.Name = "cbConfirmDelete";
             cbConfirmDelete.Size = new Size(295, 19);
             cbConfirmDelete.TabIndex = 2;
@@ -135,7 +135,7 @@
             cbOpenNextAfterDelete.AutoSize = true;
             cbOpenNextAfterDelete.Checked = true;
             cbOpenNextAfterDelete.CheckState = CheckState.Checked;
-            cbOpenNextAfterDelete.Location = new Point(18, 97);
+            cbOpenNextAfterDelete.Location = new Point(19, 124);
             cbOpenNextAfterDelete.Name = "cbOpenNextAfterDelete";
             cbOpenNextAfterDelete.Size = new Size(337, 19);
             cbOpenNextAfterDelete.TabIndex = 3;
@@ -145,7 +145,7 @@
             // labelToolbar
             // 
             labelToolbar.AutoSize = true;
-            labelToolbar.Location = new Point(18, 21);
+            labelToolbar.Location = new Point(19, 48);
             labelToolbar.Name = "labelToolbar";
             labelToolbar.Size = new Size(160, 15);
             labelToolbar.TabIndex = 4;
@@ -154,7 +154,7 @@
             // comboToolbar
             // 
             comboToolbar.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboToolbar.Location = new Point(203, 18);
+            comboToolbar.Location = new Point(203, 45);
             comboToolbar.Name = "comboToolbar";
             comboToolbar.Size = new Size(269, 23);
             comboToolbar.TabIndex = 5;
@@ -162,7 +162,7 @@
             // cbCloseOnEscape
             // 
             cbCloseOnEscape.AutoSize = true;
-            cbCloseOnEscape.Location = new Point(18, 122);
+            cbCloseOnEscape.Location = new Point(19, 149);
             cbCloseOnEscape.Name = "cbCloseOnEscape";
             cbCloseOnEscape.Size = new Size(313, 19);
             cbCloseOnEscape.TabIndex = 6;
@@ -172,7 +172,7 @@
             // cbReopenLast
             // 
             cbReopenLast.AutoSize = true;
-            cbReopenLast.Location = new Point(18, 147);
+            cbReopenLast.Location = new Point(19, 174);
             cbReopenLast.Name = "cbReopenLast";
             cbReopenLast.Size = new Size(235, 19);
             cbReopenLast.TabIndex = 7;
@@ -182,7 +182,7 @@
             // cbFullPathTitle
             // 
             cbFullPathTitle.AutoSize = true;
-            cbFullPathTitle.Location = new Point(18, 172);
+            cbFullPathTitle.Location = new Point(19, 199);
             cbFullPathTitle.Name = "cbFullPathTitle";
             cbFullPathTitle.Size = new Size(287, 19);
             cbFullPathTitle.TabIndex = 8;
@@ -192,7 +192,7 @@
             // cbShowFavorites
             // 
             cbShowFavorites.AutoSize = true;
-            cbShowFavorites.Location = new Point(18, 197);
+            cbShowFavorites.Location = new Point(19, 224);
             cbShowFavorites.Name = "cbShowFavorites";
             cbShowFavorites.Size = new Size(353, 19);
             cbShowFavorites.TabIndex = 9;
@@ -202,7 +202,7 @@
             // labelMaxRecentFiles
             // 
             labelMaxRecentFiles.AutoSize = true;
-            labelMaxRecentFiles.Location = new Point(18, 229);
+            labelMaxRecentFiles.Location = new Point(19, 251);
             labelMaxRecentFiles.Name = "labelMaxRecentFiles";
             labelMaxRecentFiles.Size = new Size(245, 15);
             labelMaxRecentFiles.TabIndex = 10;
@@ -211,7 +211,7 @@
             // numMaxRecentFiles
             // 
             numMaxRecentFiles.Increment = new decimal(new int[] { 5, 0, 0, 0 });
-            numMaxRecentFiles.Location = new Point(334, 226);
+            numMaxRecentFiles.Location = new Point(334, 249);
             numMaxRecentFiles.Maximum = new decimal(new int[] { 50, 0, 0, 0 });
             numMaxRecentFiles.Name = "numMaxRecentFiles";
             numMaxRecentFiles.Size = new Size(60, 23);
@@ -221,18 +221,18 @@
             // labelLanguage
             // 
             labelLanguage.AutoSize = true;
-            labelLanguage.Location = new Point(18, 258);
+            labelLanguage.Location = new Point(19, 19);
             labelLanguage.Name = "labelLanguage";
-            labelLanguage.Size = new Size(115, 15);
+            labelLanguage.Size = new Size(213, 15);
             labelLanguage.TabIndex = 12;
-            labelLanguage.Text = "Sprache / &Language:";
+            labelLanguage.Text = "Sprache / &Language / Langue / Idioma:";
             // 
             // comboLanguage
             // 
             comboLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboLanguage.Location = new Point(203, 255);
+            comboLanguage.Location = new Point(257, 16);
             comboLanguage.Name = "comboLanguage";
-            comboLanguage.Size = new Size(125, 23);
+            comboLanguage.Size = new Size(215, 23);
             comboLanguage.TabIndex = 13;
             // 
             // tabTargets

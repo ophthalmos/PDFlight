@@ -116,7 +116,6 @@ La vista procede de la memoria y sigue disponible.</value></data>
   <data name="Strg+G" xml:space="preserve"><value>Ctrl+G</value></data>
   <data name="E-Mail" xml:space="preserve"><value>Correo</value></data>
   <data name="in" xml:space="preserve"><value>en</value></data>
-  <data name="Sprache / &amp;Language:" xml:space="preserve"><value>Idioma / &amp;Language:</value></data>
   <data name="Nur weiter anzeigen" xml:space="preserve"><value>Solo seguir mostrándolo</value></data>
   <data name="Bearbeitungsfunktionen werden deaktiviert" xml:space="preserve"><value>las funciones de edición quedarán desactivadas</value></data>
   <data name="Die Datei wurde aus der Anzeige neu gespeichert." xml:space="preserve"><value>El archivo se ha guardado de nuevo a partir de la vista.</value></data>
