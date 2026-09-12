@@ -1,49 +1,52 @@
 # PDFlight
 
-Schlanker PDF-Betrachter mit Dateiverwaltung für Windows — ansehen, einsortieren, fertig.
+A lightweight PDF viewer with built-in file management for Windows – view, sort, done.
 
 ![PDFlight](screenshot.png)
 
-PDFlight zeigt PDF-Dateien im nativen Chromium-Viewer (WebView2) an und verbindet die
-Anzeige mit den Dateioperationen, die beim Abarbeiten voller Scan- und Eingangsordner
-anfallen: Verschieben und Kopieren über eine Zielordnerliste, Umbenennen mit
-Namensvorlagen, Löschen in den Papierkorb, Blättern durch den Ordner sowie Weitergabe
-per E-Mail oder an andere PDF-Programme. Die angezeigte Datei wird aus dem Speicher
-geladen und ist dadurch nie gesperrt. Mit PDFsharp lassen sich außerdem Seiten löschen,
-drehen und extrahieren, PDF-Dateien anhängen und Dokumenteigenschaften bearbeiten —
-mit einstufigem Rückgängig.
+PDFlight is a lean PDF viewer for everyone who works through scans and incoming
+documents every day. What other programs force you to do via a detour through Explorer,
+PDFlight does right at the open document: move or copy it to another folder – with a
+single click if you like. Frequently used locations are kept in a list.
 
-Oberfläche in Deutsch, Englisch, Französisch und Spanisch. Eine Übersicht aller
-Tastenkürzel zeigt der Über-Dialog (F1).
+Further actions are renaming, moving to the recycle bin, sending by e-mail or handing the
+file over to another program. One keystroke flips to the next file in the folder.
 
-## Voraussetzungen
+The displayed file is never locked; other programs can change it at any time. The editing
+tools – deleting or rotating pages, extracting pages into a new file, appending PDFs,
+changing document properties or the password – save immediately. A slip can be undone
+with Ctrl+Z. PDFlight recognises PDF/A files and protects them from accidental editing.
 
-- Windows 10/11 (64-Bit)
-- [.NET Desktop Runtime 10](https://dotnet.microsoft.com/download/dotnet/10.0) und
-  [WebView2-Runtime](https://developer.microsoft.com/microsoft-edge/webview2/) —
-  beides ist auf aktuellen Systemen meist vorhanden; fehlt etwas, weisen Setup
-  bzw. Programmstart darauf hin
+PDFlight is open source (MIT), runs on Windows 10 and 11 and speaks German, English,
+French and Spanish. A printable help sheet with all keyboard shortcuts is one keystroke
+away (F1).
 
-## Bauen
+## Requirements
 
-Mit dem .NET-10-SDK:
+- Windows 10/11 (64-bit)
+- [.NET Desktop Runtime 10](https://dotnet.microsoft.com/download/dotnet/10.0) and the
+  [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/) – both are
+  usually present on current systems; if something is missing, the setup or the program
+  start will tell you.
+
+## Building
+
+With the .NET 10 SDK:
 
 ```
 dotnet build PDFlight.csproj -c Release
 ```
 
-Das Setup entsteht mit [Inno Setup](https://jrsoftware.org/isinfo.php) aus `Installer.iss`
-direkt aus dem Release-Ordner.
+The setup is produced with [Inno Setup](https://jrsoftware.org/isinfo.php) from
+`Installer.iss` directly out of the release folder.
 
-## Technik
+## Under the hood
 
-WebView2/Chromium rendert die Anzeige (das Dokument wird über ein virtuelles Host-Schema
-aus dem Speicher serviert), [PDFsharp](https://www.pdfsharp.net/) (MIT) übernimmt die
-Seitenoperationen, sämtlicher Windows-Interop ist quellgeneriert — keine kommerziellen
-Abhängigkeiten.
+WebView2/Chromium renders the display (the document is served from memory through a
+virtual host scheme), [PDFsharp](https://www.pdfsharp.net/) (MIT) handles the page
+operations, and all Windows interop is source-generated – no commercial dependencies.
 
-## Lizenz und Unterstützung
+## License and support
 
-[MIT](LICENSE) — © 2026 Wilhelm Happe. Wer das Programm nützlich findet, kann über den
-Über-Dialog (F1) oder [direkt per PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=S8DVXHKFC2CVS&source=url)
-spenden.
+[MIT](LICENSE) – © 2026 Wilhelm Happe. If you find the program useful, you can donate via
+the About dialog or [directly through PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=S8DVXHKFC2CVS&source=url).
