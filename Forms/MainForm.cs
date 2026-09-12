@@ -647,11 +647,26 @@ public partial class MainForm : Form
             && !string.Equals(startFolder, settings.RecentFolders[0], StringComparison.OrdinalIgnoreCase);
 
         using FolderSelectForm dialog = new(startFolder, copy, jumpToLastUsed);
-        if (settings.RecentFolders.Count > 0) { dialog.RecentComboBox.Items.AddRange([.. settings.RecentFolders]); }
-        dialog.TargetComboBox.Items.AddRange([.. settings.TargetFolders.Where(f => !string.IsNullOrEmpty(f))]);
+        dialog.MaxRecent = settings.MaxRecentFolders;
+        dialog.SetRecentFolders(settings.RecentFolders);
+        dialog.SetTargetFolders(settings.TargetFolders.Where(f => !string.IsNullOrEmpty(f)));
         dialog.ShellTreePath = startFolder;
+        dialog.EditTargetsRequested += EditTargets;
+        void EditTargets(object? s, EventArgs args) // „Liste bearbeiten“: Einstellungen (Zielliste) über dem Dialog, danach die Zielliste dort auffrischen
+        {
+            OpenSettings(SettingsForm.TabTargets, dialog);
+            dialog.SetTargetFolders(settings.TargetFolders.Where(f => !string.IsNullOrEmpty(f)));
+        }
 
-        if (dialog.ShowDialog(this) == DialogResult.OK)
+        var result = dialog.ShowDialog(this);
+        // Einstellungen aus dem Dialog gelten unabhängig vom Ergebnis: Länge der Zuletzt-Liste, „Liste leeren“
+        if (dialog.ClearRecentRequested) { settings.RecentFolders.Clear(); }
+        if (dialog.ClearRecentRequested || settings.MaxRecentFolders != dialog.MaxRecent)
+        {
+            settings.MaxRecentFolders = dialog.MaxRecent;
+            settings.Save();
+        }
+        if (result == DialogResult.OK)
         {
             var folder = dialog.ShellTreePath;
             if (string.IsNullOrEmpty(folder)) { return; }
@@ -890,11 +905,11 @@ public partial class MainForm : Form
         splitButtonMove.DropDownItems.Add(editList);
     }
 
-    private void OpenSettings(int tabIndex)
+    private void OpenSettings(int tabIndex, IWin32Window? owner = null)
     {
         settings.ReloadSharedLists();
         using SettingsForm dialog = new(settings, tabIndex);
-        if (dialog.ShowDialog(this) == DialogResult.OK)
+        if (dialog.ShowDialog(owner ?? this) == DialogResult.OK)
         {
             settings.TargetFolders = dialog.TargetFolders;
             settings.ExternalPrograms = dialog.ExternalPrograms;

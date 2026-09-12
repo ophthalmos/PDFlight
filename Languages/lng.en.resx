@@ -442,4 +442,8 @@ the latest version.</value></data>
   <data name="Das Dokument konnte nicht gedruckt werden." xml:space="preserve"><value>The document could not be printed.</value></data>
   <data name="Kommandozeile:" xml:space="preserve"><value>Command line:</value></data>
   <data name="(auch mit „--“)" xml:space="preserve"><value>(also with “--”)</value></data>
+  <data name="Maximal:" xml:space="preserve"><value>Max.:</value></data>
+  <data name="Liste bearbeiten" xml:space="preserve"><value>Edit list</value></data>
+  <data name="Zielliste in den Einstellungen bearbeiten" xml:space="preserve"><value>Edit the target list in the settings</value></data>
+  <data name="Höchstzahl der gemerkten Ordner in der Zuletzt-Liste" xml:space="preserve"><value>Maximum number of folders kept in the recent list</value></data>
 </root>

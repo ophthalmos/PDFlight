@@ -5,8 +5,17 @@ namespace PDFLight.Classes;
 /// <summary>Programmeinstellungen, gespeichert als JSON unter %APPDATA%\PDFlight\settings.json.</summary>
 public class AppSettings
 {
-    public const int MaxRecentFolders = 64;
-    public const int MaxRecentFiles = 32;
+    public const int MaxRecentFiles = 20;
+    public const int MinRecentFoldersLimit = 5;  // Grenzen der einstellbaren Länge der Zuletzt-Liste (Ordnerdialog)
+    public const int MaxRecentFoldersLimit = 50;
+    private int maxRecentFolders = 10;
+
+    /// <summary>Höchstzahl der Einträge der Zuletzt-Liste im Ordnerdialog; dort einstellbar, beim Laden auf die Grenzen gestutzt.</summary>
+    public int MaxRecentFolders
+    {
+        get => maxRecentFolders;
+        set => maxRecentFolders = Math.Clamp(value, MinRecentFoldersLimit, MaxRecentFoldersLimit);
+    }
 
     public List<string> TargetFolders { get; set; } = [];
     public List<string> RecentFolders { get; set; } = [];

@@ -442,4 +442,8 @@ d'installation pour installer la dernière version.</value></data>
   <data name="Das Dokument konnte nicht gedruckt werden." xml:space="preserve"><value>Le document n'a pas pu être imprimé.</value></data>
   <data name="Kommandozeile:" xml:space="preserve"><value>Ligne de commande :</value></data>
   <data name="(auch mit „--“)" xml:space="preserve"><value>(aussi avec « -- »)</value></data>
+  <data name="Maximal:" xml:space="preserve"><value>Max. :</value></data>
+  <data name="Liste bearbeiten" xml:space="preserve"><value>Modifier la liste</value></data>
+  <data name="Zielliste in den Einstellungen bearbeiten" xml:space="preserve"><value>Modifier la liste des dossiers cibles dans les paramètres</value></data>
+  <data name="Höchstzahl der gemerkten Ordner in der Zuletzt-Liste" xml:space="preserve"><value>Nombre maximal de dossiers dans la liste des derniers dossiers</value></data>
 </root>
