@@ -21,7 +21,7 @@ $ignore = @(
     "OK", "A–Z", "Z–A",
     "&Seiten (1–99):", # Designer-Platzhalter; zur Laufzeit ersetzt durch "&Seiten (1–{0}):"
     "datei.pdf",       # Designer-Platzhalter; zur Laufzeit ersetzt durch den echten Dateinamen
-    "Neuer Ordner"     # über die Konstante NewFolderName verwendet (FolderSelectForm/FolderTreeView),
+    "Neuer Ordner",    # über die Konstante NewFolderName verwendet (FolderSelectForm/FolderTreeView)
     "Sprache / &Language / Langue / Idioma:" # Sprachwahl-Beschriftung nennt alle vier Sprachen selbst
 )
 
