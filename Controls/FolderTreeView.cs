@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Runtime.InteropServices;
-using Microsoft.VisualBasic.FileIO;
 
 namespace PDFLight.Controls;
 
@@ -134,7 +133,7 @@ internal class FolderTreeView : TreeView
     public void DeleteSelected()
     {
         if (SelectedNode is not { Parent: { } parent } node) { return; }
-        FileSystem.DeleteDirectory((string)node.Tag!, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+        PDFLight.Classes.ShellUtil.MoveToRecycleBin((string)node.Tag!, Handle);
         SelectedNode = parent;
         node.Remove();
     }

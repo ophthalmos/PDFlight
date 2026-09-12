@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using Microsoft.VisualBasic.FileIO;
 using Microsoft.Web.WebView2.Core;
 using PDFLight.Classes;
 using PDFLight.Controls;
@@ -801,7 +800,7 @@ public partial class MainForm : Form
         {
             try
             {
-                FileSystem.DeleteFile(movedFile.FullName, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                ShellUtil.MoveToRecycleBin(movedFile.FullName, Handle);
                 LoadPdf(duplicate.FullName); // das Duplikat bleibt übrig und wird angezeigt
             }
             catch (OperationCanceledException) { }
@@ -1038,7 +1037,7 @@ public partial class MainForm : Form
         var files = FileUtil.GetPdfFilesInFolder(currentFile.DirectoryName!);
         var index = files.FindIndex(f => string.Equals(f, currentFile.FullName, StringComparison.OrdinalIgnoreCase));
         var deletedPath = currentFile.FullName;
-        try { FileSystem.DeleteFile(deletedPath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin); }
+        try { ShellUtil.MoveToRecycleBin(deletedPath, Handle); }
         catch (OperationCanceledException) { return; } // im Systemdialog abgebrochen
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
