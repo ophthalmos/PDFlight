@@ -30,6 +30,9 @@ public partial class AnnotationListForm : Form
         labelFileValue.Text = Path.GetFileName(filePath);
         btnEdit.Image = ButtonIcon(ToolbarIcons.Edit);
         btnDelete.Image = ButtonIcon(ToolbarIcons.Delete);
+        Lng.Apply(contextMenuList); // Kontextmenüs hängen nicht im Control-Baum
+        editMenuItem.Image = ToolbarIcons.MenuIcon(ToolbarIcons.Edit, this);
+        deleteMenuItem.Image = ToolbarIcons.MenuIcon(ToolbarIcons.Delete, this);
         Reload();
     }
 
@@ -95,6 +98,14 @@ public partial class AnnotationListForm : Form
     }
 
     private void ListView_SelectedIndexChanged(object? sender, EventArgs e) => UpdateButtons();
+
+    /// <summary>Kontextmenü: dieselben Befehle wie die Buttons, mit deren Freigabe (Rechtsklick markiert die Zeile bereits).</summary>
+    private void ContextMenuList_Opening(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        editMenuItem.Enabled = btnEdit.Enabled;
+        deleteMenuItem.Enabled = btnDelete.Enabled;
+        e.Cancel = Selected == null;
+    }
 
     private void ListView_DoubleClick(object? sender, EventArgs e) { if (btnEdit.Enabled) { EditSelected(); } }
 

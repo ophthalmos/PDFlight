@@ -509,6 +509,7 @@ Clicking into the preview sets the position.</value></data>
   <!-- Anmerkungen verwalten -->
   <data name="Textanmerkungen verwalten …" xml:space="preserve"><value>Manage text annotations…</value></data>
   <data name="Strg+Umschalt+T" xml:space="preserve"><value>Ctrl+Shift+T</value></data>
+  <data name="Enter" xml:space="preserve"><value>Enter</value></data>
   <data name="Textanmerkungen verwalten (bearbeiten, löschen)" xml:space="preserve"><value>manage text annotations (edit, delete)</value></data>
   <data name="Textanmerkungen" xml:space="preserve"><value>Text annotations</value></data>
   <data name="Seitennr." xml:space="preserve"><value>Page no.</value></data>

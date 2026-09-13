@@ -29,6 +29,10 @@ namespace PDFLight.Forms
         private void InitializeComponent()
         {
             var resources = new System.ComponentModel.ComponentResourceManager(typeof(AnnotationListForm));
+            components = new System.ComponentModel.Container();
+            contextMenuList = new ContextMenuStrip(components);
+            editMenuItem = new ToolStripMenuItem();
+            deleteMenuItem = new ToolStripMenuItem();
             labelFileValue = new Label();
             listView = new ListView();
             colPage = new ColumnHeader();
@@ -37,7 +41,30 @@ namespace PDFLight.Forms
             btnEdit = new Button();
             btnDelete = new Button();
             buttonClose = new Button();
+            contextMenuList.SuspendLayout();
             SuspendLayout();
+            // 
+            // contextMenuList
+            // 
+            contextMenuList.Items.AddRange(new ToolStripItem[] { editMenuItem, deleteMenuItem });
+            contextMenuList.Name = "contextMenuList";
+            contextMenuList.Size = new Size(160, 48);
+            contextMenuList.Opening += ContextMenuList_Opening;
+            // 
+            // editMenuItem
+            // 
+            editMenuItem.Name = "editMenuItem";
+            editMenuItem.ShortcutKeyDisplayString = "Enter";
+            editMenuItem.Size = new Size(159, 22);
+            editMenuItem.Text = "&Bearbeiten …";
+            editMenuItem.Click += BtnEdit_Click;
+            // 
+            // deleteMenuItem
+            // 
+            deleteMenuItem.Name = "deleteMenuItem";
+            deleteMenuItem.Size = new Size(159, 22);
+            deleteMenuItem.Text = "Löschen";
+            deleteMenuItem.Click += BtnDelete_Click;
             // 
             // labelFileValue
             // 
@@ -53,6 +80,7 @@ namespace PDFLight.Forms
             // 
             listView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             listView.Columns.AddRange(new ColumnHeader[] { colPage, colPosition, colText });
+            listView.ContextMenuStrip = contextMenuList;
             listView.FullRowSelect = true;
             listView.Location = new Point(12, 36);
             listView.MultiSelect = false;
@@ -136,11 +164,15 @@ namespace PDFLight.Forms
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;
             Text = "Textanmerkungen";
+            contextMenuList.ResumeLayout(false);
             ResumeLayout(false);
         }
 
         #endregion
 
+        private System.Windows.Forms.ContextMenuStrip contextMenuList;
+        private System.Windows.Forms.ToolStripMenuItem editMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem deleteMenuItem;
         private System.Windows.Forms.Label labelFileValue;
         private System.Windows.Forms.ListView listView;
         private System.Windows.Forms.ColumnHeader colPage;
