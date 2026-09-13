@@ -101,7 +101,7 @@ public partial class AnnotationListForm : Form
     {
         if (Selected is not { Subtype: "FreeText" } annotation) { return; }
         using AnnotationForm dialog = new(filePath, pageCount, annotation.Page);
-        dialog.Preset(annotation.Contents, annotation.LeftMm, annotation.TopMm, annotation.FontSize);
+        dialog.Preset(annotation.Contents, annotation.LeftMm, annotation.TopMm, annotation.FontSize, annotation.Index);
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         if (runEdit(() => PdfEditService.UpdateFreeTextAnnotation(filePath, annotation.Page, annotation.Index, dialog.AnnotationText, dialog.LeftMm, dialog.TopMm, dialog.FontSize), Lng.T("Textanmerkung")))
         {

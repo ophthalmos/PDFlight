@@ -221,8 +221,8 @@ internal static partial class PdfEditService
         pdfPage.Annotations.Elements.Add(annotation.Reference!); // nach AddObject hat das Objekt eine Referenz
     }
 
-    private const double Padding = 4;          // Innenabstand des Anmerkungskastens (Punkt)
-    private const double LeadingFactor = 1.25; // Zeilenabstand relativ zur Schriftgröße
+    public const double Padding = 4;           // Innenabstand des Anmerkungskastens (Punkt) – die Vorschau zeichnet damit
+    public const double LeadingFactor = 1.25;  // Zeilenabstand relativ zur Schriftgröße
 
     private static string[] SplitLines(string text) => text.Replace("\r\n", "\n").Split('\n');
 
@@ -239,12 +239,17 @@ internal static partial class PdfEditService
 
     /// <summary>Speichert eine Seite als Einzelseiten-PDF für die Vorschau im Anmerkungsdialog – mit einem magentafarbenen
     /// Rahmen am Seitenrand, an dem der Dialog die Seitenfläche im abfotografierten Viewerbild sicher wiederfindet
-    /// (Weiß gegen den hellgrauen Viewerhintergrund wäre zu unsicher). Liefert die Seitengröße in Punkt.</summary>
-    public static (double Width, double Height) ExtractPageForPreview(string sourcePath, string destinationPath, int page)
+    /// (Weiß gegen den hellgrauen Viewerhintergrund wäre zu unsicher). Liefert die Seitengröße in Punkt.
+    /// excludeAnnotationIndex blendet die gerade bearbeitete Anmerkung aus.</summary>
+    public static (double Width, double Height) ExtractPageForPreview(string sourcePath, string destinationPath, int page, int excludeAnnotationIndex = -1)
     {
         using var source = PdfReader.Open(sourcePath, PdfDocumentOpenMode.Import);
         using PdfDocument destination = new();
         var copy = destination.AddPage(source.Pages[page - 1]);
+        if (excludeAnnotationIndex >= 0 && excludeAnnotationIndex < copy.Annotations.Count)
+        {
+            copy.Annotations.Elements.RemoveAt(excludeAnnotationIndex); // beim Bearbeiten zeigt die Vorschau nur den neuen Kasten
+        }
         var (width, height) = (copy.Width.Point, copy.Height.Point);
         using (var gfx = XGraphics.FromPdfPage(copy, XGraphicsPdfPageOptions.Append))
         {
