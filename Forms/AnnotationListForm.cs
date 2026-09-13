@@ -103,7 +103,7 @@ public partial class AnnotationListForm : Form
         using AnnotationForm dialog = new(filePath, pageCount, annotation.Page);
         dialog.Preset(annotation.Contents, annotation.LeftMm, annotation.TopMm, annotation.FontSize, annotation.Index);
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
-        if (runEdit(() => PdfEditService.UpdateFreeTextAnnotation(filePath, annotation.Page, annotation.Index, dialog.AnnotationText, dialog.LeftMm, dialog.TopMm, dialog.FontSize), Lng.T("Textanmerkung")))
+        if (runEdit(() => PdfEditService.UpdateFreeTextAnnotation(filePath, annotation.Page, annotation.Index, annotation.ObjectNumber, dialog.AnnotationText, dialog.LeftMm, dialog.TopMm, dialog.FontSize), Lng.T("Textanmerkung")))
         {
             Changed = true;
             LastPage = annotation.Page;
@@ -115,7 +115,7 @@ public partial class AnnotationListForm : Form
     {
         if (Selected is not { } annotation) { return; }
         if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Diese Anmerkung löschen?"), TypeName(annotation.Subtype) + ", " + string.Format(Lng.T("Seite {0}"), annotation.Page) + "\n" + FirstLine(annotation.Contents))) { return; }
-        if (runEdit(() => PdfEditService.DeleteAnnotation(filePath, annotation.Page, annotation.Index), Lng.T("Anmerkung löschen")))
+        if (runEdit(() => PdfEditService.DeleteAnnotation(filePath, annotation.Page, annotation.Index, annotation.ObjectNumber), Lng.T("Anmerkung löschen")))
         {
             Changed = true;
             LastPage = annotation.Page;

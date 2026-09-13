@@ -55,16 +55,16 @@ namespace PDFLight.Forms
             // 
             labelFileValue.AutoEllipsis = true;
             labelFileValue.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            labelFileValue.Location = new Point(12, 12);
+            labelFileValue.Location = new Point(358, 9);
             labelFileValue.Name = "labelFileValue";
-            labelFileValue.Size = new Size(300, 15);
+            labelFileValue.Size = new Size(269, 15);
             labelFileValue.TabIndex = 0;
             labelFileValue.Text = "datei.pdf";
             // 
             // labelPage
             // 
             labelPage.AutoSize = true;
-            labelPage.Location = new Point(12, 32);
+            labelPage.Location = new Point(357, 32);
             labelPage.Name = "labelPage";
             labelPage.Size = new Size(0, 15);
             labelPage.TabIndex = 1;
@@ -72,7 +72,7 @@ namespace PDFLight.Forms
             // labelText
             // 
             labelText.AutoSize = true;
-            labelText.Location = new Point(12, 62);
+            labelText.Location = new Point(358, 62);
             labelText.Name = "labelText";
             labelText.Size = new Size(31, 15);
             labelText.TabIndex = 2;
@@ -81,18 +81,18 @@ namespace PDFLight.Forms
             // textBoxText
             // 
             textBoxText.AcceptsReturn = true;
-            textBoxText.Location = new Point(12, 80);
+            textBoxText.Location = new Point(358, 80);
             textBoxText.Multiline = true;
             textBoxText.Name = "textBoxText";
             textBoxText.ScrollBars = ScrollBars.Vertical;
-            textBoxText.Size = new Size(258, 84);
+            textBoxText.Size = new Size(257, 84);
             textBoxText.TabIndex = 3;
             textBoxText.TextChanged += Preview_Changed;
             // 
             // labelInfo
             // 
             labelInfo.ForeColor = SystemColors.GrayText;
-            labelInfo.Location = new Point(12, 170);
+            labelInfo.Location = new Point(358, 167);
             labelInfo.Name = "labelInfo";
             labelInfo.Size = new Size(258, 30);
             labelInfo.TabIndex = 4;
@@ -101,7 +101,7 @@ namespace PDFLight.Forms
             // labelLeft
             // 
             labelLeft.AutoSize = true;
-            labelLeft.Location = new Point(12, 215);
+            labelLeft.Location = new Point(358, 214);
             labelLeft.Name = "labelLeft";
             labelLeft.Size = new Size(137, 15);
             labelLeft.TabIndex = 5;
@@ -111,7 +111,7 @@ namespace PDFLight.Forms
             // 
             numLeft.DecimalPlaces = 1;
             numLeft.Increment = new decimal(new int[] { 5, 0, 0, 0 });
-            numLeft.Location = new Point(190, 212);
+            numLeft.Location = new Point(535, 212);
             numLeft.Maximum = new decimal(new int[] { 500, 0, 0, 0 });
             numLeft.Name = "numLeft";
             numLeft.Size = new Size(80, 23);
@@ -122,7 +122,7 @@ namespace PDFLight.Forms
             // labelTop
             // 
             labelTop.AutoSize = true;
-            labelTop.Location = new Point(12, 244);
+            labelTop.Location = new Point(358, 243);
             labelTop.Name = "labelTop";
             labelTop.Size = new Size(140, 15);
             labelTop.TabIndex = 7;
@@ -132,7 +132,7 @@ namespace PDFLight.Forms
             // 
             numTop.DecimalPlaces = 1;
             numTop.Increment = new decimal(new int[] { 5, 0, 0, 0 });
-            numTop.Location = new Point(190, 241);
+            numTop.Location = new Point(535, 241);
             numTop.Maximum = new decimal(new int[] { 500, 0, 0, 0 });
             numTop.Name = "numTop";
             numTop.Size = new Size(80, 23);
@@ -143,7 +143,7 @@ namespace PDFLight.Forms
             // labelSize
             // 
             labelSize.AutoSize = true;
-            labelSize.Location = new Point(12, 273);
+            labelSize.Location = new Point(358, 272);
             labelSize.Name = "labelSize";
             labelSize.Size = new Size(97, 15);
             labelSize.TabIndex = 9;
@@ -151,7 +151,7 @@ namespace PDFLight.Forms
             // 
             // numSize
             // 
-            numSize.Location = new Point(190, 270);
+            numSize.Location = new Point(535, 270);
             numSize.Maximum = new decimal(new int[] { 72, 0, 0, 0 });
             numSize.Minimum = new decimal(new int[] { 6, 0, 0, 0 });
             numSize.Name = "numSize";
@@ -165,7 +165,7 @@ namespace PDFLight.Forms
             previewWebView.AllowExternalDrop = false;
             previewWebView.CreationProperties = null;
             previewWebView.DefaultBackgroundColor = Color.White;
-            previewWebView.Location = new Point(276, 12);
+            previewWebView.Location = new Point(12, 12);
             previewWebView.Name = "previewWebView";
             previewWebView.Size = new Size(340, 415);
             previewWebView.TabIndex = 11;
@@ -177,7 +177,7 @@ namespace PDFLight.Forms
             picturePreview.BackColor = SystemColors.ControlLight;
             picturePreview.BorderStyle = BorderStyle.FixedSingle;
             picturePreview.Cursor = Cursors.Cross;
-            picturePreview.Location = new Point(276, 12);
+            picturePreview.Location = new Point(12, 12);
             picturePreview.Name = "picturePreview";
             picturePreview.Size = new Size(340, 415);
             picturePreview.TabIndex = 12;
@@ -188,7 +188,7 @@ namespace PDFLight.Forms
             // labelPreviewState
             // 
             labelPreviewState.ForeColor = SystemColors.GrayText;
-            labelPreviewState.Location = new Point(276, 430);
+            labelPreviewState.Location = new Point(12, 430);
             labelPreviewState.Name = "labelPreviewState";
             labelPreviewState.Size = new Size(340, 15);
             labelPreviewState.TabIndex = 13;
@@ -197,7 +197,7 @@ namespace PDFLight.Forms
             // buttonOK
             // 
             buttonOK.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            buttonOK.Location = new Point(74, 424);
+            buttonOK.Location = new Point(420, 424);
             buttonOK.Name = "buttonOK";
             buttonOK.Size = new Size(95, 27);
             buttonOK.TabIndex = 14;
@@ -209,7 +209,7 @@ namespace PDFLight.Forms
             // 
             buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             buttonCancel.DialogResult = DialogResult.Cancel;
-            buttonCancel.Location = new Point(175, 424);
+            buttonCancel.Location = new Point(521, 424);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new Size(95, 27);
             buttonCancel.TabIndex = 15;

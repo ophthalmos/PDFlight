@@ -136,13 +136,22 @@ public partial class AnnotationForm : Form
         }
         imageOffset = new PointF((picturePreview.ClientSize.Width - size.Width) / 2f, (picturePreview.ClientSize.Height - size.Height) / 2f);
         scaledPageRect = new RectangleF(pageRect.X * scale, pageRect.Y * scale, pageRect.Width * scale, pageRect.Height * scale);
+        // den magentafarbenen Erkennungsrahmen übermalen: weißer Streifen in Rahmenbreite, darüber eine dezente Seitenkante
+        using (var g = Graphics.FromImage(scaledImage))
+        {
+            var band = (int)Math.Ceiling(PdfEditService.PreviewFrameWidth * scaledPageRect.Width / pageSizePt.Width) + 1;
+            using Pen white = new(Color.White, band * 2) { Alignment = System.Drawing.Drawing2D.PenAlignment.Inset };
+            g.DrawRectangle(white, scaledPageRect.X, scaledPageRect.Y, scaledPageRect.Width - 1, scaledPageRect.Height - 1);
+            using Pen edge = new(Color.FromArgb(200, 200, 200));
+            g.DrawRectangle(edge, scaledPageRect.X, scaledPageRect.Y, scaledPageRect.Width - 1, scaledPageRect.Height - 1);
+        }
     }
 
     private void PicturePreview_Paint(object? sender, PaintEventArgs e)
     {
         if (scaledImage == null || pageSizePt.Width <= 0) { return; }
         e.Graphics.DrawImageUnscaled(scaledImage, (int)imageOffset.X, (int)imageOffset.Y);
-        var text = AnnotationText.Length > 0 ? AnnotationText : "Text";
+        var text = AnnotationText; // leer: ein kleiner leerer Kasten
         if (text != measuredText || FontSize != measuredSize)
         {
             boxPt = PdfEditService.MeasureAnnotation(text, FontSize); // nur bei geändertem Text oder geänderter Größe messen
@@ -161,7 +170,7 @@ public partial class AnnotationForm : Form
         // der Text im Kasten, im Maßstab der Vorschau (Arial steht für Helvetica – wie bei der Messung)
         var pxPerPt = pxPerMm * MmPerPoint;
         var fontPx = (float)(FontSize * pxPerPt);
-        if (fontPx < 3) { return; }
+        if (fontPx < 3 || text.Length == 0) { return; }
         using Font font = new("Arial", fontPx, GraphicsUnit.Pixel);
         e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
         var y = box.Y + (float)(PdfEditService.Padding * pxPerPt);
