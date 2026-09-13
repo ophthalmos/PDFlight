@@ -493,4 +493,22 @@ para instalar la última versión.</value></data>
   <data name="Vorschau wird erstellt …" xml:space="preserve"><value>Creando la vista previa…</value></data>
   <data name="Vorschau nicht verfügbar" xml:space="preserve"><value>Vista previa no disponible</value></data>
   <data name="Klick ins Vorschaubild setzt die Position." xml:space="preserve"><value>Haz clic en la vista previa para fijar la posición.</value></data>
+  <!-- Anmerkungen verwalten -->
+  <data name="Textanmerkungen verwalten …" xml:space="preserve"><value>Administrar anotaciones de texto…</value></data>
+  <data name="Strg+Umschalt+T" xml:space="preserve"><value>Ctrl+Mayús+T</value></data>
+  <data name="Textanmerkungen verwalten (bearbeiten, löschen)" xml:space="preserve"><value>administrar anotaciones de texto (editar, eliminar)</value></data>
+  <data name="Textanmerkungen" xml:space="preserve"><value>Anotaciones de texto</value></data>
+  <data name="Seite Nr." xml:space="preserve"><value>Página n.º</value></data>
+  <data name="Art" xml:space="preserve"><value>Tipo</value></data>
+  <data name="Position" xml:space="preserve"><value>Posición</value></data>
+  <data name="Text" xml:space="preserve"><value>Texto</value></data>
+  <data name="&amp;Bearbeiten …" xml:space="preserve"><value>&amp;Editar…</value></data>
+  <data name="Schließen" xml:space="preserve"><value>Cerrar</value></data>
+  <data name="Haftnotiz" xml:space="preserve"><value>Nota adhesiva</value></data>
+  <data name="Textanmerkung bearbeiten" xml:space="preserve"><value>Editar anotación de texto</value></data>
+  <data name="(keine Anmerkungen)" xml:space="preserve"><value>(sin anotaciones)</value></data>
+  <data name="Diese Anmerkung löschen?" xml:space="preserve"><value>¿Eliminar esta anotación?</value></data>
+  <data name="Anmerkung löschen" xml:space="preserve"><value>Eliminar anotación</value></data>
+  <data name="links {0:0.#} mm, oben {1:0.#} mm" xml:space="preserve"><value>izquierda {0:0.#} mm, arriba {1:0.#} mm</value></data>
+  <data name="Seite {0}" xml:space="preserve"><value>Página {0}</value></data>
 </root>

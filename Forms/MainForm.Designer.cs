@@ -55,6 +55,7 @@
             mnuDuplex = new ToolStripMenuItem();
             mnuExtractPages = new ToolStripMenuItem();
             mnuAddAnnotation = new ToolStripMenuItem();
+            mnuManageAnnotations = new ToolStripMenuItem();
             toolStripSeparator6 = new ToolStripSeparator();
             mnuUndo = new ToolStripMenuItem();
             toolStripSeparator7 = new ToolStripSeparator();
@@ -243,7 +244,7 @@
             // ddbEdit
             // 
             ddbEdit.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuAppendPdf, mnuDuplex, mnuExtractPages, mnuAddAnnotation, toolStripSeparator6, mnuUndo, toolStripSeparator7, mnuSetPassword, mnuRemovePassword, toolStripSeparator10, mnuProperties });
+            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuAppendPdf, mnuDuplex, mnuExtractPages, mnuAddAnnotation, mnuManageAnnotations, toolStripSeparator6, mnuUndo, toolStripSeparator7, mnuSetPassword, mnuRemovePassword, toolStripSeparator10, mnuProperties });
             ddbEdit.Enabled = false;
             ddbEdit.Name = "ddbEdit";
             ddbEdit.Size = new Size(76, 22);
@@ -295,6 +296,14 @@
             mnuAddAnnotation.Size = new Size(233, 22);
             mnuAddAnnotation.Text = "Textanmerkung hinzufügen …";
             mnuAddAnnotation.Click += MnuAddAnnotation_Click;
+            // 
+            // mnuManageAnnotations
+            // 
+            mnuManageAnnotations.Name = "mnuManageAnnotations";
+            mnuManageAnnotations.ShortcutKeyDisplayString = "Strg+Umschalt+T";
+            mnuManageAnnotations.Size = new Size(233, 22);
+            mnuManageAnnotations.Text = "Textanmerkungen verwalten …";
+            mnuManageAnnotations.Click += MnuManageAnnotations_Click;
             // 
             // toolStripSeparator6
             // 
@@ -609,6 +618,7 @@
         private System.Windows.Forms.ToolStripMenuItem mnuRemovePassword;
         private System.Windows.Forms.ToolStripMenuItem mnuExtractPages;
         private System.Windows.Forms.ToolStripMenuItem mnuAddAnnotation;
+        private System.Windows.Forms.ToolStripMenuItem mnuManageAnnotations;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripMenuItem mnuUndo;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;

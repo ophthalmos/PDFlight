@@ -267,6 +267,7 @@ internal static class TaskDlg
         ("Strg+Umschalt+K", "sofort in den 1-Klick-Ordner kopieren", null),
         ("Strg+Umschalt+M / Strg+F4", "sofort in den 1-Klick-Ordner verschieben", null),
         ("Strg+Umschalt+R / L", "Ansicht drehen (ändert die Datei nicht)", null),
+        ("Strg+Umschalt+T", "Textanmerkungen verwalten (bearbeiten, löschen)", null),
         // Strg + Umschalt + Sondertaste
         ("Strg+Umschalt+Entf", "Datei in den Papierkorb verschieben", null),
         ("Strg+Umschalt+← / →", "vorherige / nächste Datei des Ordners anzeigen", null),
