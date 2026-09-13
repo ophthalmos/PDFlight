@@ -1372,12 +1372,23 @@ public partial class MainForm : Form
             Cursor.Current = Cursors.WaitCursor;
             PdfEditService.ExtractPages(currentFile.FullName, saveDialog.FileName, rangeDialog.SelectedPages);
             statusPath.Text = Lng.T("Auszug gespeichert:") + " " + saveDialog.FileName;
+            OpenInNewInstance(saveDialog.FileName); // den Auszug gleich zeigen – in einer eigenen Instanz, das Original bleibt hier offen
         }
         catch (Exception ex) when (PdfEditService.IsPdfReadError(ex))
         {
             TaskDlg.ErrTaskDlg(Handle, Lng.T("Extrahieren fehlgeschlagen."), ex);
         }
         finally { Cursor.Current = Cursors.Default; }
+    }
+
+    /// <summary>Startet eine weitere PDFlight-Instanz mit dieser Datei (z.B. für einen frisch gespeicherten Auszug).</summary>
+    private void OpenInNewInstance(string path)
+    {
+        try { Process.Start(Application.ExecutablePath, [path]); }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
+        {
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Das Programm konnte nicht gestartet werden."), ex);
+        }
     }
 
     private void ShowProperties()
