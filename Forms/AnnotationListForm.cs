@@ -26,9 +26,22 @@ public partial class AnnotationListForm : Form
         this.pageCount = pageCount;
         this.runEdit = runEdit;
         labelFileValue.Text = Path.GetFileName(filePath);
-        btnEdit.Image = ToolbarIcons.MenuIcon(ToolbarIcons.Edit, this);
-        btnDelete.Image = ToolbarIcons.MenuIcon(ToolbarIcons.Delete, this);
+        btnEdit.Image = ButtonIcon(ToolbarIcons.Edit);
+        btnDelete.Image = ButtonIcon(ToolbarIcons.Delete);
         Reload();
+    }
+
+    /// <summary>Menüsymbol für einen Textbutton: die Glyphe sitzt zentriert im Zeilenkasten und wirkt neben dem Text zu hoch –
+    /// ein paar Pixel Luft oben rücken sie optisch auf die Textmitte.</summary>
+    private Image? ButtonIcon(char glyph)
+    {
+        var icon = ToolbarIcons.MenuIcon(glyph, this);
+        if (icon == null) { return null; }
+        var shift = LogicalToDeviceUnits(3);
+        Bitmap padded = new(icon.Width, icon.Height + shift);
+        using var g = Graphics.FromImage(padded);
+        g.DrawImageUnscaled(icon, 0, shift);
+        return padded;
     }
 
     private AnnotationInfo? Selected => listView.SelectedItems.Count > 0 ? listView.SelectedItems[0].Tag as AnnotationInfo : null;
@@ -42,9 +55,9 @@ public partial class AnnotationListForm : Form
             foreach (var annotation in PdfEditService.ListAnnotations(filePath))
             {
                 ListViewItem item = new(annotation.Page.ToString()) { Tag = annotation };
-                item.SubItems.Add(TypeName(annotation.Subtype));
                 item.SubItems.Add(string.Format(Lng.T("links {0:0.#} mm, oben {1:0.#} mm"), annotation.LeftMm, annotation.TopMm));
-                item.SubItems.Add(FirstLine(annotation.Contents));
+                // andere Arten (Haftnotiz, Markierung …) lassen sich nur löschen – sie tragen ihre Art vor dem Text
+                item.SubItems.Add(annotation.Subtype == "FreeText" ? FirstLine(annotation.Contents) : TypeName(annotation.Subtype) + ": " + FirstLine(annotation.Contents));
                 listView.Items.Add(item);
             }
         }
