@@ -233,7 +233,7 @@ namespace PDFLight.Forms
             // 
             picturePreview.BackColor = SystemColors.ControlLight;
             picturePreview.BorderStyle = BorderStyle.FixedSingle;
-            picturePreview.Cursor = Cursors.Cross;
+            picturePreview.Cursor = Cursors.Hand;
             picturePreview.Location = new Point(1, 1);
             picturePreview.Name = "picturePreview";
             picturePreview.Size = new Size(335, 460);
