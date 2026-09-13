@@ -42,6 +42,8 @@ namespace PDFLight.Forms
             labelBackground = new Label();
             comboBackground = new ComboBox();
             cbBorder = new CheckBox();
+            labelTextColor = new Label();
+            comboTextColor = new ComboBox();
             previewWebView = new Microsoft.Web.WebView2.WinForms.WebView2();
             picturePreview = new PictureBox();
             labelPreviewState = new Label();
@@ -183,15 +185,35 @@ namespace PDFLight.Forms
             comboBackground.DrawItem += ComboBackground_DrawItem;
             comboBackground.SelectedIndexChanged += Preview_Changed;
             // 
+            // labelTextColor
+            // 
+            labelTextColor.AutoSize = true;
+            labelTextColor.Location = new Point(358, 332);
+            labelTextColor.Name = "labelTextColor";
+            labelTextColor.Size = new Size(75, 15);
+            labelTextColor.TabIndex = 13;
+            labelTextColor.Text = "Schrift&farbe:";
+            // 
+            // comboTextColor
+            // 
+            comboTextColor.DrawMode = DrawMode.OwnerDrawFixed;
+            comboTextColor.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboTextColor.Location = new Point(495, 329);
+            comboTextColor.Name = "comboTextColor";
+            comboTextColor.Size = new Size(120, 23);
+            comboTextColor.TabIndex = 14;
+            comboTextColor.DrawItem += ComboTextColor_DrawItem;
+            comboTextColor.SelectedIndexChanged += Preview_Changed;
+            // 
             // cbBorder
             // 
             cbBorder.AutoSize = true;
             cbBorder.Checked = true;
             cbBorder.CheckState = CheckState.Checked;
-            cbBorder.Location = new Point(358, 332);
+            cbBorder.Location = new Point(358, 362);
             cbBorder.Name = "cbBorder";
             cbBorder.Size = new Size(70, 19);
-            cbBorder.TabIndex = 13;
+            cbBorder.TabIndex = 15;
             cbBorder.Text = "&Rahmen";
             cbBorder.UseVisualStyleBackColor = true;
             cbBorder.CheckedChanged += Preview_Changed;
@@ -264,6 +286,8 @@ namespace PDFLight.Forms
             Controls.Add(labelPreviewState);
             Controls.Add(picturePreview);
             Controls.Add(previewWebView);
+            Controls.Add(comboTextColor);
+            Controls.Add(labelTextColor);
             Controls.Add(cbBorder);
             Controls.Add(comboBackground);
             Controls.Add(labelBackground);
@@ -312,6 +336,8 @@ namespace PDFLight.Forms
         private System.Windows.Forms.Label labelBackground;
         private System.Windows.Forms.ComboBox comboBackground;
         private System.Windows.Forms.CheckBox cbBorder;
+        private System.Windows.Forms.Label labelTextColor;
+        private System.Windows.Forms.ComboBox comboTextColor;
         private Microsoft.Web.WebView2.WinForms.WebView2 previewWebView;
         private System.Windows.Forms.PictureBox picturePreview;
         private System.Windows.Forms.Label labelPreviewState;

@@ -502,6 +502,11 @@ para instalar la última versión.</value></data>
   <data name="Hellgrün" xml:space="preserve"><value>Verde claro</value></data>
   <data name="Rosa" xml:space="preserve"><value>Rosa</value></data>
   <data name="Transparent" xml:space="preserve"><value>Transparente</value></data>
+  <data name="Schrift&amp;farbe:" xml:space="preserve"><value>Color del te&amp;xto:</value></data>
+  <data name="Schwarz" xml:space="preserve"><value>Negro</value></data>
+  <data name="Rot" xml:space="preserve"><value>Rojo</value></data>
+  <data name="Grün" xml:space="preserve"><value>Verde</value></data>
+  <data name="Blau" xml:space="preserve"><value>Azul</value></data>
   <!-- Anmerkungen verwalten -->
   <data name="Textanmerkungen verwalten …" xml:space="preserve"><value>Administrar anotaciones de texto…</value></data>
   <data name="Strg+Umschalt+T" xml:space="preserve"><value>Ctrl+Mayús+T</value></data>

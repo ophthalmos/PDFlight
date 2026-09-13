@@ -18,13 +18,17 @@ internal record PdfInfo(string Title, string Author, string Subject, string Keyw
 /// erneuten Öffnen sicher, der Index dient nur als Rückfall.</summary>
 internal record AnnotationInfo(int Page, int Index, int ObjectNumber, string Subtype, string Contents, double LeftMm, double TopMm, double FontSize, AnnotationStyle Style);
 
-/// <summary>Gestaltung einer Textanmerkung: Rahmen ja/nein und Hintergrundfarbe (null = transparent).</summary>
-internal sealed record AnnotationStyle(bool Border, Color? Background)
+/// <summary>Gestaltung einer Textanmerkung: Rahmen ja/nein, Hintergrundfarbe (null = transparent) und Schriftfarbe.</summary>
+internal sealed record AnnotationStyle(bool Border, Color? Background, Color TextColor)
 {
-    public static readonly AnnotationStyle Default = new(true, Color.FromArgb(255, 255, 204));
+    public static readonly AnnotationStyle Default = new(true, Color.FromArgb(255, 255, 204), Color.Black);
 
     /// <summary>Hintergrund als RRGGBB für die Einstellungen; leer = transparent.</summary>
-    public string BackgroundHex => Background is { } color ? $"{color.R:X2}{color.G:X2}{color.B:X2}" : string.Empty;
+    public string BackgroundHex => Background is { } color ? ToHex(color) : string.Empty;
+
+    public string TextColorHex => ToHex(TextColor);
+
+    public static string ToHex(Color color) => $"{color.R:X2}{color.G:X2}{color.B:X2}";
 
     public static Color? ParseHex(string hex) =>
         hex.Length == 6 && int.TryParse(hex, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var rgb) ? Color.FromArgb(rgb >> 16 & 0xFF, rgb >> 8 & 0xFF, rgb & 0xFF) : null;
@@ -211,10 +215,18 @@ internal static partial class PdfEditService
         }
         var border = true;
         if (annotation.Elements.GetDictionary("/BS") is { } bs && bs.Elements.ContainsKey("/W")) { border = bs.Elements.GetReal("/W") > 0; }
-        return new AnnotationStyle(border, background);
+        var textColor = Color.Black;
+        var rgb = TextColorInDa().Match(annotation.Elements.GetString("/DA")); // „r g b rg“ im Standarderscheinungsbild; „g“ (Grau) bleibt Schwarz
+        if (rgb.Success) { textColor = Color.FromArgb(Component(rgb.Groups[1].Value), Component(rgb.Groups[2].Value), Component(rgb.Groups[3].Value)); }
+        return new AnnotationStyle(border, background, textColor);
     }
 
     private static int Channel(PdfArray array, int index) => (int)Math.Round(Math.Clamp(array.Elements.GetReal(index), 0, 1) * 255);
+
+    private static int Component(string value) => (int)Math.Round(Math.Clamp(double.Parse(value, CultureInfo.InvariantCulture), 0, 1) * 255);
+
+    [GeneratedRegex(@"(\d*\.?\d+)\s+(\d*\.?\d+)\s+(\d*\.?\d+)\s+rg")]
+    private static partial Regex TextColorInDa();
 
     [GeneratedRegex(@"(\d+(?:\.\d+)?)\s+Tf")]
     private static partial Regex FontSizeInDa();
@@ -248,7 +260,8 @@ internal static partial class PdfEditService
             content.Append(CultureInfo.InvariantCulture, $"0.6 0.6 0.4 RG 0.5 w 0.25 0.25 {width - 0.5:0.##} {height - 0.5:0.##} re S ");
         }
         content.Append("Q ");
-        content.Append(CultureInfo.InvariantCulture, $"BT /Helv {fontSize:0.##} Tf 0 g {leading:0.##} TL {Padding:0.##} {height - Padding - fontSize * 0.8:0.##} Td ");
+        var textColor = style.TextColor;
+        content.Append(CultureInfo.InvariantCulture, $"BT /Helv {fontSize:0.##} Tf {textColor.R / 255.0:0.###} {textColor.G / 255.0:0.###} {textColor.B / 255.0:0.###} rg {leading:0.##} TL {Padding:0.##} {height - Padding - fontSize * 0.8:0.##} Td ");
         foreach (var line in lines)
         {
             content.Append('(').Append(line.Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)")).Append(") Tj T* ");
@@ -269,7 +282,7 @@ internal static partial class PdfEditService
         annotation.Elements.SetName("/Subtype", "/FreeText");
         annotation.Elements.SetRectangle("/Rect", new PdfRectangle(new XRect(left, top - height, width, height)));
         annotation.Elements.SetString("/Contents", text);
-        annotation.Elements.SetString("/DA", string.Create(CultureInfo.InvariantCulture, $"/Helv {fontSize:0.##} Tf 0 g"));
+        annotation.Elements.SetString("/DA", string.Create(CultureInfo.InvariantCulture, $"/Helv {fontSize:0.##} Tf {textColor.R / 255.0:0.###} {textColor.G / 255.0:0.###} {textColor.B / 255.0:0.###} rg"));
         annotation.Elements.SetInteger("/F", 4); // drucken
         var color = new PdfArray(document); // /C = Hintergrund; leer = transparent (auch für Viewer, die das Erscheinungsbild neu aufbauen)
         if (style.Background is { } background)
