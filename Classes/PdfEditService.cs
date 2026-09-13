@@ -10,11 +10,12 @@ namespace PDFLight.Classes;
 
 internal record PdfInfo(string Title, string Author, string Subject, string Keywords, int PageCount, string Version, string Creator, string Producer);
 
-/// <summary>Kenndaten einer Datei; PageWidthPt/PageHeightPt = Größe der ersten Seite in Punkt (Referenz für die Zoomanzeige; 0 = unbekannt).</summary>
+/// <summary>Kenndaten einer Datei; PageWidthPt/PageHeightPt = Größe der ersten Seite in Punkt (Referenz für die Zoomanzeige; 0 = unbekannt),
+/// AnnotationCount = verwaltbare Anmerkungen (s. ListAnnotations) – schaltet den Verwaltungsdialog frei.</summary>
 /// <summary>Eine Anmerkung fürs Verwalten (s. PdfEditService.ListAnnotations).</summary>
 internal record AnnotationInfo(int Page, int Index, string Subtype, string Contents, double LeftMm, double TopMm, double FontSize);
 
-internal record PdfStatus(int PageCount, string? Version, string? PdfALevel, double PageWidthPt = 0, double PageHeightPt = 0);
+internal record PdfStatus(int PageCount, string? Version, string? PdfALevel, double PageWidthPt = 0, double PageHeightPt = 0, int AnnotationCount = 0);
 
 /// <summary>Dokumentoperationen mit PDFsharp. Alle Methoden arbeiten direkt auf der Datei;
 /// die Anzeige bleibt davon unberührt, weil der Viewer aus dem Speicher liest.</summary>
@@ -40,7 +41,7 @@ internal static partial class PdfEditService
             using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
             var v = document.Version;
             var first = document.PageCount > 0 ? document.Pages[0] : null;
-            return new PdfStatus(document.PageCount, $"{v / 10}.{v % 10}", GetPdfALevel(document), first?.Width.Point ?? 0, first?.Height.Point ?? 0);
+            return new PdfStatus(document.PageCount, $"{v / 10}.{v % 10}", GetPdfALevel(document), first?.Width.Point ?? 0, first?.Height.Point ?? 0, CountAnnotations(document));
         }
         catch (Exception ex) when (IsPdfReadError(ex)) { return new PdfStatus(-1, null, null); }
     }
@@ -115,9 +116,8 @@ internal static partial class PdfEditService
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         var annotations = document.Pages[page - 1].Annotations;
-        var popup = annotations[index].Elements["/Popup"] as PdfReference;
         annotations.Elements.RemoveAt(index);
-        if (popup != null)
+        if (annotations[index].Elements["/Popup"] is PdfReference popup)
         {
             for (var i = annotations.Elements.Count - 1; i >= 0; i--)
             {
@@ -125,6 +125,22 @@ internal static partial class PdfEditService
             }
         }
         document.Save(path);
+    }
+
+    private static bool IsManageable(string subtype) => subtype is not ("Link" or "Popup" or "Widget");
+
+    private static int CountAnnotations(PdfDocument document)
+    {
+        var count = 0;
+        for (var p = 0; p < document.PageCount; p++)
+        {
+            var annotations = document.Pages[p].Annotations;
+            for (var i = 0; i < annotations.Count; i++)
+            {
+                if (IsManageable(annotations[i].Elements.GetName("/Subtype").TrimStart('/'))) { count++; }
+            }
+        }
+        return count;
     }
 
     /// <summary>Alle Anmerkungen des Dokuments fürs Verwalten – ohne Links, Popups und Formularfelder. Index = Position im
@@ -141,7 +157,7 @@ internal static partial class PdfEditService
             {
                 var a = annotations[i];
                 var subtype = a.Elements.GetName("/Subtype").TrimStart('/');
-                if (subtype is "Link" or "Popup" or "Widget") { continue; }
+                if (!IsManageable(subtype)) { continue; }
                 var rect = a.Elements.GetRectangle("/Rect");
                 var fontSize = 12.0;
                 var match = FontSizeInDa().Match(a.Elements.GetString("/DA"));

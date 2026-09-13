@@ -182,7 +182,6 @@ namespace PDFLight.Forms
             picturePreview.Size = new System.Drawing.Size(340, 420);
             picturePreview.TabIndex = 12;
             picturePreview.TabStop = false;
-            picturePreview.Visible = false;
             picturePreview.MouseClick += PicturePreview_MouseClick;
             picturePreview.Paint += PicturePreview_Paint;
             //

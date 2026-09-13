@@ -375,7 +375,8 @@ public partial class MainForm : Form
         // PDF/A-Schutz: verändernde Operationen bleiben gesperrt, bis „Bearbeitung aktivieren“ gedrückt wurde;
         // Extrahieren (neue Datei), Rückgängig (stellt alte Bytes wieder her) und Eigenschaften (dann nur lesend) bleiben frei
         pnlPdfA.Visible = hasFile && PdfALocked;
-        mnuDeletePages.Enabled = mnuRotatePages.Enabled = mnuAppendPdf.Enabled = mnuDuplex.Enabled = mnuAddAnnotation.Enabled = mnuManageAnnotations.Enabled = !PdfALocked;
+        mnuDeletePages.Enabled = mnuRotatePages.Enabled = mnuAppendPdf.Enabled = mnuDuplex.Enabled = mnuAddAnnotation.Enabled = !PdfALocked;
+        mnuManageAnnotations.Enabled = !PdfALocked && (currentPdfStatus?.AnnotationCount ?? 0) > 0; // ohne Anmerkungen gibt es nichts zu verwalten
         mnuSetPassword.Enabled = currentPageCount > 0 && !PdfALocked;  // nur ohne bestehenden Kennwortschutz
         mnuRemovePassword.Enabled = hasFile && currentPageCount <= 0;  // nur bei geschützter (oder unlesbarer) Datei
         foreach (var button in programIconButtons) { button.Enabled = hasFile; }
@@ -1768,7 +1769,7 @@ public partial class MainForm : Form
             case Keys.Delete | Keys.Control when !PdfALocked: BeginInvoke(DeletePagesDialog); return true;
             case Keys.X | Keys.Control: BeginInvoke(ExtractPagesDialog); return true; // eXtrahieren; nutzt ebenfalls die UIA-Seitenabfrage
             case Keys.T | Keys.Control when !PdfALocked: BeginInvoke(AddAnnotationDialog); return true; // Textanmerkung; ebenso
-            case Keys.T | Keys.Control | Keys.Shift when !PdfALocked: BeginInvoke(ManageAnnotationsDialog); return true; // BeginInvoke: das WebView2 der Vorschau ließe sich im Chromium-Tastatur-Callback nicht initialisieren
+            case Keys.T | Keys.Control | Keys.Shift when mnuManageAnnotations.Enabled: BeginInvoke(ManageAnnotationsDialog); return true; // BeginInvoke: das WebView2 der Vorschau ließe sich im Chromium-Tastatur-Callback nicht initialisieren
             case Keys.Delete | Keys.Control | Keys.Shift when currentFile != null: DeleteCurrent(); return true;
             case Keys.R | Keys.Control when !PdfALocked: BeginInvoke(RotatePagesDialog); return true; // BeginInvoke wegen der UIA-Seitenabfrage (s. Strg+Entf)
             // Ansicht drehen (das Viewer-Kürzel Strg+] ist auf deutschen Tastaturen unerreichbar);
