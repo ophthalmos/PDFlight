@@ -78,9 +78,10 @@ public partial class AnnotationListForm : Form
         _ => subtype, // andere Arten sprachneutral mit ihrem PDF-Namen (Highlight, Square, …)
     };
 
+    /// <summary>Der Text einzeilig für die Liste: Zeilenumbrüche (auch die reinen CR aus Acrobat) als „ | “, lange Texte gekürzt.</summary>
     private static string FirstLine(string contents)
     {
-        var line = contents.Replace("\r", string.Empty).Split('\n')[0].Trim();
+        var line = string.Join(" | ", PdfEditService.SplitLines(contents).Select(l => l.Trim()).Where(l => l.Length > 0));
         return line.Length > 80 ? line[..79] + "…" : line;
     }
 

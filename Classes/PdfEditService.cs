@@ -245,7 +245,8 @@ internal static partial class PdfEditService
     public const double Padding = 4;           // Innenabstand des Anmerkungskastens (Punkt) – die Vorschau zeichnet damit
     public const double LeadingFactor = 1.25;  // Zeilenabstand relativ zur Schriftgröße
 
-    private static string[] SplitLines(string text) => text.Replace("\r\n", "\n").Split('\n');
+    /// <summary>Zeilen eines Anmerkungstexts – Zeilenumbrüche als CRLF, LF oder auch nur CR (so schreibt sie Acrobat).</summary>
+    public static string[] SplitLines(string text) => text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
 
     /// <summary>Größe des Anmerkungskastens in Punkt für Text und Schriftgröße – dieselbe Rechnung wie beim Einfügen,
     /// damit die Vorschau im Dialog stimmt (Arial-Metriken stehen für Helvetica).</summary>

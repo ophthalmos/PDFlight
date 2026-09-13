@@ -47,7 +47,7 @@ public partial class AnnotationForm : Form
     {
         Text = Lng.T("Textanmerkung bearbeiten");
         excludeAnnotationIndex = annotationIndex;
-        textBoxText.Text = text.Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
+        textBoxText.Text = string.Join(Environment.NewLine, PdfEditService.SplitLines(text));
         numLeft.Value = Math.Clamp((decimal)leftMm, numLeft.Minimum, numLeft.Maximum);
         numTop.Value = Math.Clamp((decimal)topMm, numTop.Minimum, numTop.Maximum);
         numSize.Value = Math.Clamp((decimal)fontSize, numSize.Minimum, numSize.Maximum);
@@ -178,7 +178,7 @@ public partial class AnnotationForm : Form
         e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
         var format = StringFormat.GenericTypographic; // ohne den Zusatzabstand des Standardformats, sonst ragt der Text rechts über den Kasten
         var y = box.Y + (float)(PdfEditService.Padding * pxPerPt);
-        foreach (var line in text.Replace("\r\n", "\n").Split('\n'))
+        foreach (var line in PdfEditService.SplitLines(text))
         {
             e.Graphics.DrawString(line, font, Brushes.Black, box.X + (float)(PdfEditService.Padding * pxPerPt), y, format);
             y += (float)(FontSize * PdfEditService.LeadingFactor * pxPerPt);
