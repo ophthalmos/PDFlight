@@ -122,18 +122,21 @@ public partial class AnnotationForm : Form
         return right < 0 ? Rectangle.Empty : Rectangle.FromLTRB(left, top, right + 1, bottom + 1);
     }
 
-    /// <summary>Skaliert das abfotografierte Bild einmal auf die PictureBox (zentriert) und rechnet die Seitenfläche mit um.</summary>
+    /// <summary>Schneidet das abfotografierte Bild auf die Seitenfläche zu, skaliert es einmal auf die PictureBox (zentriert)
+    /// und rechnet die Seitenfläche mit um.</summary>
     private void PrepareScaledImage(Bitmap bitmap, Rectangle pageRect)
     {
-        var scale = Math.Min((float)picturePreview.ClientSize.Width / bitmap.Width, (float)picturePreview.ClientSize.Height / bitmap.Height);
-        var size = new Size(Math.Max(1, (int)(bitmap.Width * scale)), Math.Max(1, (int)(bitmap.Height * scale)));
+        // nur die Seitenfläche verwenden – Bildlaufleiste und grauer Rand des Viewers bleiben außen vor
+        var scale = Math.Min((float)picturePreview.ClientSize.Width / pageRect.Width, (float)picturePreview.ClientSize.Height / pageRect.Height);
+        var size = new Size(Math.Max(1, (int)(pageRect.Width * scale)), Math.Max(1, (int)(pageRect.Height * scale)));
         scaledImage?.Dispose();
         scaledImage = new Bitmap(size.Width, size.Height);
         using (var g = Graphics.FromImage(scaledImage))
         {
             g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-            g.DrawImage(bitmap, 0, 0, size.Width, size.Height);
+            g.DrawImage(bitmap, new Rectangle(0, 0, size.Width, size.Height), pageRect, GraphicsUnit.Pixel);
         }
+        pageRect = new Rectangle(0, 0, pageRect.Width, pageRect.Height); // ab hier zählt das zugeschnittene Bild
         imageOffset = new PointF((picturePreview.ClientSize.Width - size.Width) / 2f, (picturePreview.ClientSize.Height - size.Height) / 2f);
         scaledPageRect = new RectangleF(pageRect.X * scale, pageRect.Y * scale, pageRect.Width * scale, pageRect.Height * scale);
         // den magentafarbenen Erkennungsrahmen übermalen: weißer Streifen in Rahmenbreite, darüber eine dezente Seitenkante
