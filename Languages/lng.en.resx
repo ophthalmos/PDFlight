@@ -502,6 +502,11 @@ the latest version.</value></data>
   <data name="Hellgrün" xml:space="preserve"><value>Light green</value></data>
   <data name="Rosa" xml:space="preserve"><value>Pink</value></data>
   <data name="Transparent" xml:space="preserve"><value>Transparent</value></data>
+  <data name="Schrift&amp;farbe:" xml:space="preserve"><value>Text &amp;colour:</value></data>
+  <data name="Schwarz" xml:space="preserve"><value>Black</value></data>
+  <data name="Rot" xml:space="preserve"><value>Red</value></data>
+  <data name="Grün" xml:space="preserve"><value>Green</value></data>
+  <data name="Blau" xml:space="preserve"><value>Blue</value></data>
   <!-- Anmerkungen verwalten -->
   <data name="Textanmerkungen verwalten …" xml:space="preserve"><value>Manage text annotations…</value></data>
   <data name="Strg+Umschalt+T" xml:space="preserve"><value>Ctrl+Shift+T</value></data>

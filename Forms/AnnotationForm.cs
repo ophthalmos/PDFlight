@@ -16,13 +16,19 @@ public partial class AnnotationForm : Form
     public double LeftMm => (double)numLeft.Value;
     public double TopMm => (double)numTop.Value;
     public double FontSize => (double)numSize.Value;
-    internal AnnotationStyle Style => new(cbBorder.Checked, Backgrounds[Math.Max(0, comboBackground.SelectedIndex)].Color);
+    internal AnnotationStyle Style => new(cbBorder.Checked, Backgrounds[Math.Max(0, comboBackground.SelectedIndex)].Color, TextColors[Math.Max(0, comboTextColor.SelectedIndex)].Color);
 
     /// <summary>Die wählbaren Hintergründe (Namen sind Lng-Schlüssel); null = transparent.</summary>
     private static readonly (string Name, Color? Color)[] Backgrounds =
     [
         ("Gelb", Color.FromArgb(255, 255, 204)), ("Weiß", Color.White), ("Hellblau", Color.FromArgb(221, 238, 255)),
         ("Hellgrün", Color.FromArgb(221, 255, 221)), ("Rosa", Color.FromArgb(255, 221, 238)), ("Transparent", null),
+    ];
+
+    /// <summary>Die wählbaren Schriftfarben (Namen sind Lng-Schlüssel).</summary>
+    private static readonly (string Name, Color Color)[] TextColors =
+    [
+        ("Schwarz", Color.Black), ("Rot", Color.FromArgb(192, 0, 0)), ("Grün", Color.FromArgb(0, 128, 0)), ("Blau", Color.FromArgb(0, 0, 192)),
     ];
 
     private const double MmPerPoint = 25.4 / 72;
@@ -49,6 +55,7 @@ public partial class AnnotationForm : Form
         labelPage.Text = string.Format(Lng.T("Seite {0} von {1}"), this.page, pageCount);
         labelPreviewState.Text = Lng.T("Vorschau wird erstellt …");
         comboBackground.Items.AddRange([.. Backgrounds.Select(bg => (object)Lng.T(bg.Name))]);
+        comboTextColor.Items.AddRange([.. TextColors.Select(tc => (object)Lng.T(tc.Name))]);
         SetStyle(AnnotationStyle.Default);
     }
 
@@ -59,6 +66,8 @@ public partial class AnnotationForm : Form
         cbBorder.Checked = style.Border;
         var index = Array.FindIndex(Backgrounds, bg => bg.Color?.ToArgb() == style.Background?.ToArgb());
         comboBackground.SelectedIndex = index >= 0 ? index : 0;
+        var textIndex = Array.FindIndex(TextColors, tc => tc.Color.ToArgb() == style.TextColor.ToArgb());
+        comboTextColor.SelectedIndex = textIndex >= 0 ? textIndex : 0;
     }
 
     /// <summary>Bearbeiten einer vorhandenen Anmerkung: Werte vorbelegen und den Titel anpassen.</summary>
@@ -204,10 +213,11 @@ public partial class AnnotationForm : Form
         using Font font = new("Arial", fontPx, GraphicsUnit.Pixel);
         e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
         var format = StringFormat.GenericTypographic; // ohne den Zusatzabstand des Standardformats, sonst ragt der Text rechts über den Kasten
+        using SolidBrush textBrush = new(style.TextColor);
         var y = box.Y + (float)(PdfEditService.Padding * pxPerPt);
         foreach (var line in PdfEditService.SplitLines(text))
         {
-            e.Graphics.DrawString(line, font, Brushes.Black, box.X + (float)(PdfEditService.Padding * pxPerPt), y, format);
+            e.Graphics.DrawString(line, font, textBrush, box.X + (float)(PdfEditService.Padding * pxPerPt), y, format);
             y += (float)(FontSize * PdfEditService.LeadingFactor * pxPerPt);
         }
     }
@@ -222,12 +232,20 @@ public partial class AnnotationForm : Form
         numTop.Value = Math.Clamp((decimal)Math.Round(pageY * mmPerPx, 1), numTop.Minimum, numTop.Maximum);
     }
 
-    /// <summary>Hintergrund-Auswahl mit Farbfeld vor dem Namen; „Transparent“ bekommt ein weißes Feld mit Diagonale.</summary>
     private void ComboBackground_DrawItem(object? sender, DrawItemEventArgs e)
     {
+        if (e.Index >= 0 && e.Index < Backgrounds.Length) { DrawColorItem(e, Backgrounds[e.Index].Name, Backgrounds[e.Index].Color); }
+    }
+
+    private void ComboTextColor_DrawItem(object? sender, DrawItemEventArgs e)
+    {
+        if (e.Index >= 0 && e.Index < TextColors.Length) { DrawColorItem(e, TextColors[e.Index].Name, TextColors[e.Index].Color); }
+    }
+
+    /// <summary>Listeneintrag mit Farbfeld vor dem Namen; „Transparent“ (null) bekommt ein weißes Feld mit Diagonale.</summary>
+    private void DrawColorItem(DrawItemEventArgs e, string name, Color? color)
+    {
         e.DrawBackground();
-        if (e.Index < 0 || e.Index >= Backgrounds.Length) { return; }
-        var (name, color) = Backgrounds[e.Index];
         var edge = e.Bounds.Height - 4;
         Rectangle swatch = new(e.Bounds.X + 2, e.Bounds.Y + 2, edge, edge);
         using SolidBrush fill = new(color ?? Color.White);
