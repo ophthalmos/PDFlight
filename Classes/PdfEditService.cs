@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
+using PdfSharp.Pdf.Annotations;
 using PdfSharp.Pdf.IO;
 
 namespace PDFLight.Classes;
@@ -12,8 +13,10 @@ internal record PdfInfo(string Title, string Author, string Subject, string Keyw
 
 /// <summary>Kenndaten einer Datei; PageWidthPt/PageHeightPt = Größe der ersten Seite in Punkt (Referenz für die Zoomanzeige; 0 = unbekannt),
 /// AnnotationCount = verwaltbare Anmerkungen (s. ListAnnotations) – schaltet den Verwaltungsdialog frei.</summary>
-/// <summary>Eine Anmerkung fürs Verwalten (s. PdfEditService.ListAnnotations).</summary>
-internal record AnnotationInfo(int Page, int Index, string Subtype, string Contents, double LeftMm, double TopMm, double FontSize);
+/// <summary>Eine Anmerkung fürs Verwalten (s. PdfEditService.ListAnnotations): Index = Position im Annots-Array der Seite,
+/// ObjectNumber = PDF-Objektnummer (0 bei direkt eingebetteten Wörterbüchern) – sie identifiziert die Anmerkung beim
+/// erneuten Öffnen sicher, der Index dient nur als Rückfall.</summary>
+internal record AnnotationInfo(int Page, int Index, int ObjectNumber, string Subtype, string Contents, double LeftMm, double TopMm, double FontSize);
 
 internal record PdfStatus(int PageCount, string? Version, string? PdfALevel, double PageWidthPt = 0, double PageHeightPt = 0, int AnnotationCount = 0);
 
@@ -102,22 +105,24 @@ internal static partial class PdfEditService
 
     /// <summary>Ersetzt eine FreeText-Anmerkung (Index im Annots-Array der Seite) durch eine neue mit geänderten Werten –
     /// auch fremde FreeText-Anmerkungen bekommen dabei PDFlights Kasten.</summary>
-    public static void UpdateFreeTextAnnotation(string path, int page, int index, string text, double leftMm, double topMm, double fontSize)
+    public static void UpdateFreeTextAnnotation(string path, int page, int index, int objectNumber, string text, double leftMm, double topMm, double fontSize)
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         var pdfPage = document.Pages[page - 1];
-        pdfPage.Annotations.Elements.RemoveAt(index);
+        pdfPage.Annotations.Elements.RemoveAt(ResolveIndex(pdfPage.Annotations, objectNumber, index));
         AppendFreeText(document, pdfPage, text, leftMm, topMm, fontSize);
         document.Save(path);
     }
 
     /// <summary>Entfernt eine Anmerkung (Index im Annots-Array der Seite) samt zugehörigem Popup.</summary>
-    public static void DeleteAnnotation(string path, int page, int index)
+    public static void DeleteAnnotation(string path, int page, int index, int objectNumber)
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         var annotations = document.Pages[page - 1].Annotations;
+        index = ResolveIndex(annotations, objectNumber, index);
+        var popup = annotations[index].Elements["/Popup"] as PdfReference; // vor dem Entfernen lesen – danach zeigt der Index ins Leere
         annotations.Elements.RemoveAt(index);
-        if (annotations[index].Elements["/Popup"] is PdfReference popup)
+        if (popup != null)
         {
             for (var i = annotations.Elements.Count - 1; i >= 0; i--)
             {
@@ -143,6 +148,21 @@ internal static partial class PdfEditService
         return count;
     }
 
+    /// <summary>Die Position der Anmerkung mit dieser Objektnummer im Annots-Array; ohne Treffer (direkt eingebettetes
+    /// Wörterbuch) der gemerkte Index, sofern er noch ins Array passt.</summary>
+    private static int ResolveIndex(PdfAnnotations annotations, int objectNumber, int index)
+    {
+        if (objectNumber > 0)
+        {
+            for (var i = 0; i < annotations.Elements.Count; i++)
+            {
+                if (annotations.Elements[i] is PdfReference reference && reference.ObjectNumber == objectNumber) { return i; }
+            }
+        }
+        if (index < 0 || index >= annotations.Elements.Count) { throw new InvalidOperationException("Die Anmerkung wurde in der Datei nicht mehr gefunden."); }
+        return index;
+    }
+
     /// <summary>Alle Anmerkungen des Dokuments fürs Verwalten – ohne Links, Popups und Formularfelder. Index = Position im
     /// Annots-Array der Seite (die übersprungenen Einträge zählen mit), Position in Millimetern von links/oben.</summary>
     public static List<AnnotationInfo> ListAnnotations(string path)
@@ -162,7 +182,8 @@ internal static partial class PdfEditService
                 var fontSize = 12.0;
                 var match = FontSizeInDa().Match(a.Elements.GetString("/DA"));
                 if (match.Success && double.TryParse(match.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var size) && size > 0) { fontSize = size; }
-                result.Add(new AnnotationInfo(p + 1, i, subtype, a.Elements.GetString("/Contents"), rect.X1 * 25.4 / 72, (page.Height.Point - rect.Y2) * 25.4 / 72, fontSize));
+                var objectNumber = (annotations.Elements[i] as PdfReference)?.ObjectNumber ?? 0;
+                result.Add(new AnnotationInfo(p + 1, i, objectNumber, subtype, a.Elements.GetString("/Contents"), rect.X1 * 25.4 / 72, (page.Height.Point - rect.Y2) * 25.4 / 72, fontSize));
             }
         }
         return result;
@@ -233,7 +254,7 @@ internal static partial class PdfEditService
         var lines = SplitLines(text);
         using var measure = XGraphics.CreateMeasureContext(new XSize(1000, 1000), XGraphicsUnit.Point, XPageDirection.Downwards);
         var font = new XFont("Arial", fontSize);
-        var textWidth = lines.Max(line => measure.MeasureString(line, font).Width);
+        var textWidth = Math.Max(lines.Max(line => measure.MeasureString(line, font).Width), fontSize * 2); // leerer Text: ein kleiner Kasten statt nichts
         return (textWidth + 2 * Padding, lines.Length * fontSize * LeadingFactor + 2 * Padding);
     }
 
@@ -259,7 +280,7 @@ internal static partial class PdfEditService
         return (width, height);
     }
 
-    private const double PreviewFrameWidth = 3; // Punkt – auch bei kleiner Vorschau noch ein erkennbarer Streifen
+    public const double PreviewFrameWidth = 3;  // Punkt – auch bei kleiner Vorschau noch ein erkennbarer Streifen
 
     /// <summary>Breite und Höhe einer Seite in Punkt (1-basiert).</summary>
     public static (double Width, double Height) GetPageSize(string path, int page)
