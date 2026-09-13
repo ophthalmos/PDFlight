@@ -375,7 +375,7 @@ public partial class MainForm : Form
         // PDF/A-Schutz: verändernde Operationen bleiben gesperrt, bis „Bearbeitung aktivieren“ gedrückt wurde;
         // Extrahieren (neue Datei), Rückgängig (stellt alte Bytes wieder her) und Eigenschaften (dann nur lesend) bleiben frei
         pnlPdfA.Visible = hasFile && PdfALocked;
-        mnuDeletePages.Enabled = mnuRotatePages.Enabled = mnuAppendPdf.Enabled = mnuDuplex.Enabled = !PdfALocked;
+        mnuDeletePages.Enabled = mnuRotatePages.Enabled = mnuAppendPdf.Enabled = mnuDuplex.Enabled = mnuAddAnnotation.Enabled = !PdfALocked;
         mnuSetPassword.Enabled = currentPageCount > 0 && !PdfALocked;  // nur ohne bestehenden Kennwortschutz
         mnuRemovePassword.Enabled = hasFile && currentPageCount <= 0;  // nur bei geschützter (oder unlesbarer) Datei
         foreach (var button in programIconButtons) { button.Enabled = hasFile; }
@@ -985,6 +985,7 @@ public partial class MainForm : Form
         mnuAppendPdf.Image = MenuIcon(ToolbarIcons.Attach);
         mnuDuplex.Image = MenuIcon(ToolbarIcons.Interleave);
         mnuExtractPages.Image = MenuIcon(ToolbarIcons.Page);
+        mnuAddAnnotation.Image = MenuIcon(ToolbarIcons.Comment);
         mnuUndo.Image = MenuIcon(ToolbarIcons.Undo);
         mnuSetPassword.Image = MenuIcon(ToolbarIcons.Lock);
         mnuRemovePassword.Image = MenuIcon(ToolbarIcons.Unlock);
@@ -1290,6 +1291,22 @@ public partial class MainForm : Form
             LoadPdf(currentFile.FullName, pages.Count == currentPageCount ? 0 : pages[0]);
             statusPath.Text = pages.Count == currentPageCount ? Lng.T("Alle Seiten wurden gedreht.")
                 : (pages.Count == 1 ? string.Format(Lng.T("Seite {0} wurde gedreht."), pages[0]) : string.Format(Lng.T("{0} Seiten wurden gedreht."), pages.Count));
+        }
+    }
+
+    /// <summary>Textanmerkung (FreeText mit Erscheinungsbild) an einer Position einfügen; die Datei wird sofort gespeichert
+    /// (Rückgängig über die Bearbeiten-Sicherung).</summary>
+    private void AddAnnotationDialog()
+    {
+        if (currentFile == null) { return; }
+        if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
+        using AnnotationForm dialog = new(currentFile.Name, currentPageCount, ClampedCurrentPage());
+        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
+        var page = dialog.Page;
+        if (RunPdfEdit(() => PdfEditService.AddFreeTextAnnotation(currentFile.FullName, page, dialog.AnnotationText, dialog.LeftMm, dialog.TopMm, dialog.FontSize), Lng.T("Textanmerkung")))
+        {
+            LoadPdf(currentFile.FullName, page);
+            statusPath.Text = string.Format(Lng.T("Die Textanmerkung wurde auf Seite {0} eingefügt."), page);
         }
     }
 
@@ -1739,6 +1756,7 @@ public partial class MainForm : Form
             // auf unsere Antwort und kann die UIA-Seitenabfrage nicht bedienen (sie liefe in den Timeout)
             case Keys.Delete | Keys.Control when !PdfALocked: BeginInvoke(DeletePagesDialog); return true;
             case Keys.X | Keys.Control: BeginInvoke(ExtractPagesDialog); return true; // eXtrahieren; nutzt ebenfalls die UIA-Seitenabfrage
+            case Keys.T | Keys.Control when !PdfALocked: BeginInvoke(AddAnnotationDialog); return true; // Textanmerkung; ebenso
             case Keys.Delete | Keys.Control | Keys.Shift when currentFile != null: DeleteCurrent(); return true;
             case Keys.R | Keys.Control when !PdfALocked: BeginInvoke(RotatePagesDialog); return true; // BeginInvoke wegen der UIA-Seitenabfrage (s. Strg+Entf)
             // Ansicht drehen (das Viewer-Kürzel Strg+] ist auf deutschen Tastaturen unerreichbar);
@@ -1902,6 +1920,10 @@ public partial class MainForm : Form
     private void MnuExtractPages_Click(object? sender, EventArgs e)
     {
         ExtractPagesDialog();
+    }
+    private void MnuAddAnnotation_Click(object? sender, EventArgs e)
+    {
+        AddAnnotationDialog();
     }
     private void MnuDuplex_Click(object? sender, EventArgs e)
     {

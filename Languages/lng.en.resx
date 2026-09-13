@@ -476,4 +476,18 @@ the latest version.</value></data>
   <data name="Ohne Namen erscheint der Dateiname." xml:space="preserve"><value>Without a name, the file name is shown.</value></data>
   <data name="&amp;Name (optional, bis 30 Zeichen):" xml:space="preserve"><value>&amp;Name (optional, up to 30 characters):</value></data>
   <data name="&amp;Favoriten-Menü anzeigen (Dateien merken, max. 200 Einträge)" xml:space="preserve"><value>Sho&amp;w the favorites menu (remember files, max. 200 entries)</value></data>
+  <!-- Textanmerkung-Dialog -->
+  <data name="Textanmerkung hinzufügen …" xml:space="preserve"><value>Add text annotation…</value></data>
+  <data name="Strg+T" xml:space="preserve"><value>Ctrl+T</value></data>
+  <data name="Textanmerkung einfügen" xml:space="preserve"><value>insert a text annotation</value></data>
+  <data name="Textanmerkung hinzufügen" xml:space="preserve"><value>Add text annotation</value></data>
+  <data name="Textanmerkung" xml:space="preserve"><value>Text annotation</value></data>
+  <data name="&amp;Text:" xml:space="preserve"><value>&amp;Text:</value></data>
+  <data name="&amp;Seite:" xml:space="preserve"><value>&amp;Page:</value></data>
+  <data name="Abstand von &amp;links (mm):" xml:space="preserve"><value>Distance from &amp;left (mm):</value></data>
+  <data name="Abstand von &amp;oben (mm):" xml:space="preserve"><value>Distance from t&amp;op (mm):</value></data>
+  <data name="Schrift&amp;größe (pt):" xml:space="preserve"><value>Font si&amp;ze (pt):</value></data>
+  <data name="Der Text erscheint als gelber Kasten; Maße ab der linken oberen Ecke der Seite." xml:space="preserve"><value>The text appears as a yellow box; distances from the top left corner of the page.</value></data>
+  <data name="Bitte gib einen Text ein." xml:space="preserve"><value>Please enter a text.</value></data>
+  <data name="Die Textanmerkung wurde auf Seite {0} eingefügt." xml:space="preserve"><value>The text annotation was inserted on page {0}.</value></data>
 </root>

@@ -253,6 +253,7 @@ internal static class TaskDlg
         ("Strg+O", "PDF-Datei öffnen", null),
         ("Strg+P", "Dokument drucken", null),
         ("Strg+R", "Seiten drehen", null),
+        ("Strg+T", "Textanmerkung einfügen", null),
         ("Strg+X", "Seiten als neue Datei extrahieren", null),
         ("Strg+Z", "Dokumentänderung rückgängig machen", null),
         // Strg + Sondertaste
