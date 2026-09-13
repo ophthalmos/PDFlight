@@ -107,7 +107,7 @@ public partial class AnnotationListForm : Form
         {
             Changed = true;
             LastPage = annotation.Page;
-            Reload();
+            Close(); // die Änderung ist gespeichert – zurück zum Dokument, das die Seite neu lädt
         }
     }
 
