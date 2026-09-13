@@ -176,10 +176,11 @@ public partial class AnnotationForm : Form
         if (fontPx < 3 || text.Length == 0) { return; }
         using Font font = new("Arial", fontPx, GraphicsUnit.Pixel);
         e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+        var format = StringFormat.GenericTypographic; // ohne den Zusatzabstand des Standardformats, sonst ragt der Text rechts über den Kasten
         var y = box.Y + (float)(PdfEditService.Padding * pxPerPt);
         foreach (var line in text.Replace("\r\n", "\n").Split('\n'))
         {
-            e.Graphics.DrawString(line, font, Brushes.Black, box.X + (float)(PdfEditService.Padding * pxPerPt), y);
+            e.Graphics.DrawString(line, font, Brushes.Black, box.X + (float)(PdfEditService.Padding * pxPerPt), y, format);
             y += (float)(FontSize * PdfEditService.LeadingFactor * pxPerPt);
         }
     }
