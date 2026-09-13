@@ -486,14 +486,13 @@ the latest version.</value></data>
   <data name="Abstand von &amp;links (mm):" xml:space="preserve"><value>Distance from &amp;left (mm):</value></data>
   <data name="Abstand von &amp;oben (mm):" xml:space="preserve"><value>Distance from t&amp;op (mm):</value></data>
   <data name="Schrift&amp;größe (pt):" xml:space="preserve"><value>Font si&amp;ze (pt):</value></data>
-  <data name="Maße ab der linken oberen Ecke der Seite." xml:space="preserve"><value>Distances from the top left corner of the page.</value></data>
+  <data name="Anmerkung.Info" xml:space="preserve"><value>Distances from the top left corner of the page.
+Clicking into the preview sets the position.</value></data>
   <data name="Bitte gib einen Text ein." xml:space="preserve"><value>Please enter a text.</value></data>
   <data name="Die Textanmerkung wurde auf Seite {0} eingefügt." xml:space="preserve"><value>The text annotation was inserted on page {0}.</value></data>
   <data name="Die Textanmerkung wurde auf Seite {0} geändert." xml:space="preserve"><value>The text annotation on page {0} was changed.</value></data>
   <data name="Seite {0} von {1}" xml:space="preserve"><value>Page {0} of {1}</value></data>
-  <data name="Vorschau wird erstellt …" xml:space="preserve"><value>Creating preview…</value></data>
   <data name="Vorschau nicht verfügbar" xml:space="preserve"><value>Preview not available</value></data>
-  <data name="Klick ins Vorschaubild setzt die Position." xml:space="preserve"><value>Click into the preview to set the position.</value></data>
   <data name="&amp;Hintergrund:" xml:space="preserve"><value>&amp;Background:</value></data>
   <data name="&amp;Rahmen" xml:space="preserve"><value>&amp;Border</value></data>
   <data name="Gelb" xml:space="preserve"><value>Yellow</value></data>
