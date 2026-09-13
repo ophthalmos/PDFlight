@@ -25,15 +25,16 @@ public partial class SettingsForm : Form
     [System.ComponentModel.Browsable(false)]
     public bool OpenNextAfterDelete => cbOpenNextAfterDelete.Checked;
 
-    /// <summary>Die Einträge der Symbolleisten-Auswahl (Reihenfolge wie im Dialog) und die drei Einstellungen dahinter:
-    /// große Symbole, Programm-Icons, Symbole überhaupt. Die Installer-Vorgabe (setup.default) kennt vier Stufen davon.</summary>
-    private static readonly (string Text, bool Large, bool Program, bool Icons)[] ToolbarLayouts =
+    /// <summary>Die Einträge der Symbolleisten-Auswahl (Reihenfolge wie im Dialog) und die vier Einstellungen dahinter:
+    /// große Symbole, Programm-Icons, Symbole überhaupt, Beschriftung. Die Installer-Vorgabe (setup.default) kennt vier Stufen davon.</summary>
+    private static readonly (string Text, bool Large, bool Program, bool Icons, bool Labels)[] ToolbarLayouts =
     [
-        ("Große Symbole und Programm-Icons", true, true, true),
-        ("Große Symbole, ohne Programm-Icons", true, false, true),
-        ("Kleine Symbole und Programm-Icons", false, true, true),
-        ("Kleine Symbole, ohne Programm-Icons", false, false, true),
-        ("Nur Text", false, false, false),
+        ("Große Symbole und Programm-Icons", true, true, true, true),
+        ("Große Symbole, ohne Programm-Icons", true, false, true, true),
+        ("Große Symbole und Icons, ohne Text", true, true, true, false),
+        ("Kleine Symbole und Programm-Icons", false, true, true, true),
+        ("Kleine Symbole, ohne Programm-Icons", false, false, true, true),
+        ("Nur Text", false, false, false, true),
     ];
 
     [System.ComponentModel.Browsable(false)]
@@ -44,6 +45,8 @@ public partial class SettingsForm : Form
 
     [System.ComponentModel.Browsable(false)]
     public bool ShowToolbarIcons => ToolbarLayouts[comboToolbar.SelectedIndex].Icons;
+    [System.ComponentModel.Browsable(false)]
+    public bool ShowToolbarText => ToolbarLayouts[comboToolbar.SelectedIndex].Labels;
 
     [System.ComponentModel.Browsable(false)]
     public bool CloseOnEscape => cbCloseOnEscape.Checked;
@@ -77,7 +80,7 @@ public partial class SettingsForm : Form
         cbConfirmDelete.Checked = source.ConfirmDelete;
         cbOpenNextAfterDelete.Checked = source.OpenNextAfterDelete;
         comboToolbar.Items.AddRange([.. ToolbarLayouts.Select(l => (object)Lng.T(l.Text))]);
-        var layout = Array.FindIndex(ToolbarLayouts, l => l.Large == source.LargeToolbarIcons && l.Program == source.ShowProgramIcons && l.Icons == source.ShowToolbarIcons);
+        var layout = Array.FindIndex(ToolbarLayouts, l => l.Large == source.LargeToolbarIcons && l.Program == source.ShowProgramIcons && l.Icons == source.ShowToolbarIcons && l.Labels == source.ShowToolbarText);
         comboToolbar.SelectedIndex = layout >= 0 ? layout : ToolbarLayouts.Length - 1; // Kombinationen ohne Listeneintrag (z.B. nur Text mit Programm-Icons) landen bei „Nur Text“
         cbCloseOnEscape.Checked = source.CloseOnEscape;
         cbReopenLast.Checked = source.ReopenLastFile;

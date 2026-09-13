@@ -23,6 +23,7 @@
   <data name="Layout der Hauptmenüleiste:" xml:space="preserve"><value>Estilo de la barra de iconos:</value></data>
   <data name="Große Symbole und Programm-Icons" xml:space="preserve"><value>Iconos grandes e iconos de programas</value></data>
   <data name="Große Symbole, ohne Programm-Icons" xml:space="preserve"><value>Iconos grandes, sin iconos de programas</value></data>
+  <data name="Große Symbole und Icons, ohne Text" xml:space="preserve"><value>Iconos grandes y de programas, sin texto</value></data>
   <data name="Kleine Symbole und Programm-Icons" xml:space="preserve"><value>Iconos pequeños e iconos de programas</value></data>
   <data name="Kleine Symbole, ohne Programm-Icons" xml:space="preserve"><value>Iconos pequeños, sin iconos de programas</value></data>
   <data name="Nur Text" xml:space="preserve"><value>Solo texto</value></data>

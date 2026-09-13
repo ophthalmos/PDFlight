@@ -929,6 +929,7 @@ public partial class MainForm : Form
             settings.ShowProgramIcons = dialog.ShowProgramIcons;
             settings.ShowToolbarIcons = dialog.ShowToolbarIcons;
             settings.LargeToolbarIcons = dialog.LargeToolbarIcons;
+            settings.ShowToolbarText = dialog.ShowToolbarText;
             settings.CloseOnEscape = dialog.CloseOnEscape;
             settings.ReopenLastFile = dialog.ReopenLastFile;
             settings.ShowFullPathInTitle = dialog.ShowFullPathInTitle;
@@ -959,11 +960,12 @@ public partial class MainForm : Form
         var showIcons = settings.ShowToolbarIcons && ToolbarIcons.FontAvailable;
         ToolbarIcons.MenuIconsEnabled = showIcons; // auch für die Kontextmenüs der Dialoge
         var size = toolStrip.ImageScalingSize;
+        var textless = showIcons && !settings.ShowToolbarText; // Layout „ohne Text“: alle Schaltflächen nur als Symbol, die Tooltips nennen die Funktion
         void Set(ToolStripItem item, char glyph, bool imageOnly = false)
         {
             item.Image = showIcons ? ToolbarIcons.Get(glyph, size) : null;
             item.DisplayStyle = showIcons
-                ? (imageOnly ? ToolStripItemDisplayStyle.Image : ToolStripItemDisplayStyle.ImageAndText)
+                ? (imageOnly || textless ? ToolStripItemDisplayStyle.Image : ToolStripItemDisplayStyle.ImageAndText)
                 : ToolStripItemDisplayStyle.Text;
         }
         Set(btnOpen, ToolbarIcons.OpenFile);
