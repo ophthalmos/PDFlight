@@ -66,7 +66,7 @@ namespace PDFLight.Forms
             // 
             // colPage
             // 
-            colPage.Text = "Seite";
+            colPage.Text = "Seitennr.";
             colPage.Width = 70;
             // 
             // colPosition

@@ -498,6 +498,7 @@ d'installation pour installer la dernière version.</value></data>
   <data name="Strg+Umschalt+T" xml:space="preserve"><value>Ctrl+Maj+T</value></data>
   <data name="Textanmerkungen verwalten (bearbeiten, löschen)" xml:space="preserve"><value>gérer les annotations de texte (modifier, supprimer)</value></data>
   <data name="Textanmerkungen" xml:space="preserve"><value>Annotations de texte</value></data>
+  <data name="Seitennr." xml:space="preserve"><value>Page n°</value></data>
   <data name="Position" xml:space="preserve"><value>Position</value></data>
   <data name="Text" xml:space="preserve"><value>Texte</value></data>
   <data name="&amp;Bearbeiten …" xml:space="preserve"><value>&amp;Modifier…</value></data>
