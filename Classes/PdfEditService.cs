@@ -92,17 +92,9 @@ internal static partial class PdfEditService
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         var pdfPage = document.Pages[page - 1];
-        var lines = text.Replace("\r\n", "\n").Split('\n');
-        const double Padding = 4;
-        var leading = fontSize * 1.25;
-        double textWidth;
-        using (var measure = XGraphics.CreateMeasureContext(new XSize(1000, 1000), XGraphicsUnit.Point, XPageDirection.Downwards))
-        {
-            var measureFont = new XFont("Arial", fontSize); // metrisch nahe an Helvetica
-            textWidth = lines.Max(line => measure.MeasureString(line, measureFont).Width);
-        }
-        var width = textWidth + 2 * Padding;
-        var height = lines.Length * leading + 2 * Padding;
+        var lines = SplitLines(text);
+        var leading = fontSize * LeadingFactor;
+        var (width, height) = MeasureAnnotation(text, fontSize);
         var left = leftMm * 72 / 25.4;
         var top = pdfPage.Height.Point - topMm * 72 / 25.4;
 
@@ -147,6 +139,49 @@ internal static partial class PdfEditService
         document.Internals.AddObject(annotation);
         pdfPage.Annotations.Elements.Add(annotation.Reference!); // nach AddObject hat das Objekt eine Referenz
         document.Save(path);
+    }
+
+    private const double Padding = 4;          // Innenabstand des Anmerkungskastens (Punkt)
+    private const double LeadingFactor = 1.25; // Zeilenabstand relativ zur Schriftgröße
+
+    private static string[] SplitLines(string text) => text.Replace("\r\n", "\n").Split('\n');
+
+    /// <summary>Größe des Anmerkungskastens in Punkt für Text und Schriftgröße – dieselbe Rechnung wie beim Einfügen,
+    /// damit die Vorschau im Dialog stimmt (Arial-Metriken stehen für Helvetica).</summary>
+    public static (double Width, double Height) MeasureAnnotation(string text, double fontSize)
+    {
+        var lines = SplitLines(text);
+        using var measure = XGraphics.CreateMeasureContext(new XSize(1000, 1000), XGraphicsUnit.Point, XPageDirection.Downwards);
+        var font = new XFont("Arial", fontSize);
+        var textWidth = lines.Max(line => measure.MeasureString(line, font).Width);
+        return (textWidth + 2 * Padding, lines.Length * fontSize * LeadingFactor + 2 * Padding);
+    }
+
+    /// <summary>Speichert eine Seite als Einzelseiten-PDF für die Vorschau im Anmerkungsdialog – mit einem magentafarbenen
+    /// Rahmen am Seitenrand, an dem der Dialog die Seitenfläche im abfotografierten Viewerbild sicher wiederfindet
+    /// (Weiß gegen den hellgrauen Viewerhintergrund wäre zu unsicher). Liefert die Seitengröße in Punkt.</summary>
+    public static (double Width, double Height) ExtractPageForPreview(string sourcePath, string destinationPath, int page)
+    {
+        using var source = PdfReader.Open(sourcePath, PdfDocumentOpenMode.Import);
+        using PdfDocument destination = new();
+        var copy = destination.AddPage(source.Pages[page - 1]);
+        var (width, height) = (copy.Width.Point, copy.Height.Point);
+        using (var gfx = XGraphics.FromPdfPage(copy, XGraphicsPdfPageOptions.Append))
+        {
+            gfx.DrawRectangle(new XPen(XColors.Magenta, PreviewFrameWidth), PreviewFrameWidth / 2, PreviewFrameWidth / 2, width - PreviewFrameWidth, height - PreviewFrameWidth);
+        }
+        destination.Save(destinationPath);
+        return (width, height);
+    }
+
+    private const double PreviewFrameWidth = 3; // Punkt – auch bei kleiner Vorschau noch ein erkennbarer Streifen
+
+    /// <summary>Breite und Höhe einer Seite in Punkt (1-basiert).</summary>
+    public static (double Width, double Height) GetPageSize(string path, int page)
+    {
+        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
+        var p = document.Pages[page - 1];
+        return (p.Width.Point, p.Height.Point);
     }
 
     /// <summary>Kodiert Text für einen Inhaltsstrom in WinAnsi: Latin-1 direkt, die Windows-1252-Sonderzeichen

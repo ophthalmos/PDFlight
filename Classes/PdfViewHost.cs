@@ -25,6 +25,10 @@ internal partial class PdfViewHost(WebView2 webView)
 
     public bool IsReady { get; private set; }
 
+    /// <summary>Die WebView2-Umgebung des Viewers – weitere WebViews im selben Prozess (Vorschau im Anmerkungsdialog)
+    /// müssen dieselbe verwenden, weil sie am selben Datenordner hängen.</summary>
+    public static CoreWebView2Environment? SharedEnvironment { get; private set; }
+
     /// <summary>Die Bytes des angezeigten Dokuments (null ohne Dokument) — z.B. um eine extern
     /// verschwundene Datei aus der Anzeige wiederherzustellen.</summary>
     public byte[]? DocumentBytes => currentBytes;
@@ -46,6 +50,7 @@ internal partial class PdfViewHost(WebView2 webView)
             AdditionalBrowserArguments = "--metrics-recording-only --disable-background-networking --disable-domain-reliability --disable-component-update",
         };
         var environment = await CoreWebView2Environment.CreateAsync(null, dataFolder, options);
+        SharedEnvironment = environment;
         await webView.EnsureCoreWebView2Async(environment);
 
         var core = webView.CoreWebView2;
