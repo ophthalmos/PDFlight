@@ -1304,8 +1304,13 @@ public partial class MainForm : Form
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
         var page = Math.Max(1, ClampedCurrentPage()); // immer die angezeigte Seite
         using AnnotationForm dialog = new(currentFile.FullName, currentPageCount, page);
+        dialog.SetStyle(new AnnotationStyle(settings.AnnotationBorder, AnnotationStyle.ParseHex(settings.AnnotationBackground))); // zuletzt gewählte Gestaltung
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
-        if (RunPdfEdit(() => PdfEditService.AddFreeTextAnnotation(currentFile.FullName, page, dialog.AnnotationText, dialog.LeftMm, dialog.TopMm, dialog.FontSize), Lng.T("Textanmerkung")))
+        var style = dialog.Style;
+        settings.AnnotationBorder = style.Border;
+        settings.AnnotationBackground = style.BackgroundHex;
+        settings.Save();
+        if (RunPdfEdit(() => PdfEditService.AddFreeTextAnnotation(currentFile.FullName, page, dialog.AnnotationText, dialog.LeftMm, dialog.TopMm, dialog.FontSize, style), Lng.T("Textanmerkung")))
         {
             LoadPdf(currentFile.FullName, page);
             statusPath.Text = string.Format(Lng.T("Die Textanmerkung wurde auf Seite {0} eingefügt."), page);

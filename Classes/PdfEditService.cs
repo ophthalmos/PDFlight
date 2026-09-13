@@ -16,7 +16,19 @@ internal record PdfInfo(string Title, string Author, string Subject, string Keyw
 /// <summary>Eine Anmerkung fürs Verwalten (s. PdfEditService.ListAnnotations): Index = Position im Annots-Array der Seite,
 /// ObjectNumber = PDF-Objektnummer (0 bei direkt eingebetteten Wörterbüchern) – sie identifiziert die Anmerkung beim
 /// erneuten Öffnen sicher, der Index dient nur als Rückfall.</summary>
-internal record AnnotationInfo(int Page, int Index, int ObjectNumber, string Subtype, string Contents, double LeftMm, double TopMm, double FontSize);
+internal record AnnotationInfo(int Page, int Index, int ObjectNumber, string Subtype, string Contents, double LeftMm, double TopMm, double FontSize, AnnotationStyle Style);
+
+/// <summary>Gestaltung einer Textanmerkung: Rahmen ja/nein und Hintergrundfarbe (null = transparent).</summary>
+internal sealed record AnnotationStyle(bool Border, Color? Background)
+{
+    public static readonly AnnotationStyle Default = new(true, Color.FromArgb(255, 255, 204));
+
+    /// <summary>Hintergrund als RRGGBB für die Einstellungen; leer = transparent.</summary>
+    public string BackgroundHex => Background is { } color ? $"{color.R:X2}{color.G:X2}{color.B:X2}" : string.Empty;
+
+    public static Color? ParseHex(string hex) =>
+        hex.Length == 6 && int.TryParse(hex, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var rgb) ? Color.FromArgb(rgb >> 16 & 0xFF, rgb >> 8 & 0xFF, rgb & 0xFF) : null;
+}
 
 internal record PdfStatus(int PageCount, string? Version, string? PdfALevel, double PageWidthPt = 0, double PageHeightPt = 0, int AnnotationCount = 0);
 
@@ -96,21 +108,21 @@ internal static partial class PdfEditService
     /// unrotierte Seite) mit eigenem Erscheinungsbild – der Chromium-Viewer zeichnet Anmerkungen ohne
     /// Darstellungsstrom nicht (PDFsharps PdfTextAnnotation bliebe dort ein stummes Symbol). Schrift Helvetica
     /// (Standardschrift, nichts einzubetten), Text in WinAnsi; die Anmerkung bleibt als solche entfernbar.</summary>
-    public static void AddFreeTextAnnotation(string path, int page, string text, double leftMm, double topMm, double fontSize)
+    public static void AddFreeTextAnnotation(string path, int page, string text, double leftMm, double topMm, double fontSize, AnnotationStyle style)
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
-        AppendFreeText(document, document.Pages[page - 1], text, leftMm, topMm, fontSize);
+        AppendFreeText(document, document.Pages[page - 1], text, leftMm, topMm, fontSize, style);
         document.Save(path);
     }
 
     /// <summary>Ersetzt eine FreeText-Anmerkung (Index im Annots-Array der Seite) durch eine neue mit geänderten Werten –
     /// auch fremde FreeText-Anmerkungen bekommen dabei PDFlights Kasten.</summary>
-    public static void UpdateFreeTextAnnotation(string path, int page, int index, int objectNumber, string text, double leftMm, double topMm, double fontSize)
+    public static void UpdateFreeTextAnnotation(string path, int page, int index, int objectNumber, string text, double leftMm, double topMm, double fontSize, AnnotationStyle style)
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         var pdfPage = document.Pages[page - 1];
         pdfPage.Annotations.Elements.RemoveAt(ResolveIndex(pdfPage.Annotations, objectNumber, index));
-        AppendFreeText(document, pdfPage, text, leftMm, topMm, fontSize);
+        AppendFreeText(document, pdfPage, text, leftMm, topMm, fontSize, style);
         document.Save(path);
     }
 
@@ -183,16 +195,31 @@ internal static partial class PdfEditService
                 var match = FontSizeInDa().Match(a.Elements.GetString("/DA"));
                 if (match.Success && double.TryParse(match.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var size) && size > 0) { fontSize = size; }
                 var objectNumber = (annotations.Elements[i] as PdfReference)?.ObjectNumber ?? 0;
-                result.Add(new AnnotationInfo(p + 1, i, objectNumber, subtype, a.Elements.GetString("/Contents"), rect.X1 * 25.4 / 72, (page.Height.Point - rect.Y2) * 25.4 / 72, fontSize));
+                result.Add(new AnnotationInfo(p + 1, i, objectNumber, subtype, a.Elements.GetString("/Contents"), rect.X1 * 25.4 / 72, (page.Height.Point - rect.Y2) * 25.4 / 72, fontSize, ReadStyle(a)));
             }
         }
         return result;
     }
 
+    /// <summary>Gestaltung aus /C (Hintergrund: drei Komponenten = RGB, leeres Array = transparent, sonst Standard) und /BS /W (0 = kein Rahmen).</summary>
+    private static AnnotationStyle ReadStyle(PdfAnnotation annotation)
+    {
+        var background = AnnotationStyle.Default.Background;
+        if (annotation.Elements.GetArray("/C") is { } c)
+        {
+            background = c.Elements.Count == 3 ? Color.FromArgb(Channel(c, 0), Channel(c, 1), Channel(c, 2)) : c.Elements.Count == 0 ? null : background;
+        }
+        var border = true;
+        if (annotation.Elements.GetDictionary("/BS") is { } bs && bs.Elements.ContainsKey("/W")) { border = bs.Elements.GetReal("/W") > 0; }
+        return new AnnotationStyle(border, background);
+    }
+
+    private static int Channel(PdfArray array, int index) => (int)Math.Round(Math.Clamp(array.Elements.GetReal(index), 0, 1) * 255);
+
     [GeneratedRegex(@"(\d+(?:\.\d+)?)\s+Tf")]
     private static partial Regex FontSizeInDa();
 
-    private static void AppendFreeText(PdfDocument document, PdfPage pdfPage, string text, double leftMm, double topMm, double fontSize)
+    private static void AppendFreeText(PdfDocument document, PdfPage pdfPage, string text, double leftMm, double topMm, double fontSize, AnnotationStyle style)
     {
         var lines = SplitLines(text);
         var leading = fontSize * LeadingFactor;
@@ -211,8 +238,16 @@ internal static partial class PdfEditService
         var resources = new PdfDictionary(document);
         resources.Elements.SetObject("/Font", fonts);
 
-        var content = new StringBuilder();
-        content.Append(CultureInfo.InvariantCulture, $"q 1 1 0.8 rg 0 0 {width:0.##} {height:0.##} re f 0.6 0.6 0.4 RG 0.5 w 0.25 0.25 {width - 0.5:0.##} {height - 0.5:0.##} re S Q ");
+        var content = new StringBuilder("q ");
+        if (style.Background is { } fill)
+        {
+            content.Append(CultureInfo.InvariantCulture, $"{fill.R / 255.0:0.###} {fill.G / 255.0:0.###} {fill.B / 255.0:0.###} rg 0 0 {width:0.##} {height:0.##} re f ");
+        }
+        if (style.Border)
+        {
+            content.Append(CultureInfo.InvariantCulture, $"0.6 0.6 0.4 RG 0.5 w 0.25 0.25 {width - 0.5:0.##} {height - 0.5:0.##} re S ");
+        }
+        content.Append("Q ");
         content.Append(CultureInfo.InvariantCulture, $"BT /Helv {fontSize:0.##} Tf 0 g {leading:0.##} TL {Padding:0.##} {height - Padding - fontSize * 0.8:0.##} Td ");
         foreach (var line in lines)
         {
@@ -236,6 +271,18 @@ internal static partial class PdfEditService
         annotation.Elements.SetString("/Contents", text);
         annotation.Elements.SetString("/DA", string.Create(CultureInfo.InvariantCulture, $"/Helv {fontSize:0.##} Tf 0 g"));
         annotation.Elements.SetInteger("/F", 4); // drucken
+        var color = new PdfArray(document); // /C = Hintergrund; leer = transparent (auch für Viewer, die das Erscheinungsbild neu aufbauen)
+        if (style.Background is { } background)
+        {
+            color.Elements.Add(new PdfReal(background.R / 255.0));
+            color.Elements.Add(new PdfReal(background.G / 255.0));
+            color.Elements.Add(new PdfReal(background.B / 255.0));
+        }
+        annotation.Elements.SetObject("/C", color);
+        var borderStyle = new PdfDictionary(document);
+        borderStyle.Elements.SetName("/Type", "/Border");
+        borderStyle.Elements.SetInteger("/W", style.Border ? 1 : 0);
+        annotation.Elements.SetObject("/BS", borderStyle);
         annotation.Elements.SetObject("/AP", appearances);
         annotation.Elements.SetDateTime("/M", DateTime.Now);
         document.Internals.AddObject(annotation);
