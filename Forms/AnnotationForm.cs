@@ -7,9 +7,9 @@ namespace PDFLight.Forms;
 /// Millimetern von der linken oberen Ecke). Rechts zeigt ein Vorschaubild die Seite mit dem geplanten Kasten;
 /// ein Klick ins Bild übernimmt die Position.
 /// Die Vorschau entsteht ohne eigenen PDF-Renderer: Ein zweites WebView2 (dieselbe Umgebung wie der Viewer) lädt die
-/// Seite als Einzelseiten-PDF ohne Werkzeugleiste, CapturePreview liefert das Bild, und die Seitenfläche darin wird
-/// über die Hintergrundfarbe erkannt. Danach übernimmt eine PictureBox mit eigenem Zeichnen (WinForms kann nichts
-/// über ein WebView2 legen).</summary>
+/// Seite als Einzelseiten-PDF ohne Werkzeugleiste, CapturePreview liefert das Bild, und ein magentafarbener Rahmen
+/// im Vorschau-PDF verrät die Seitenfläche. Das WebView liegt die ganze Zeit hinter der PictureBox, die zunächst nur
+/// den Hintergrund zeigt und nach dem Abfotografieren das fertig skalierte Bild – so flackert beim Laden nichts.</summary>
 public partial class AnnotationForm : Form
 {
     public string AnnotationText => textBoxText.Text.Trim();
@@ -22,8 +22,12 @@ public partial class AnnotationForm : Form
     private readonly int page;
     private readonly string previewPdf = Path.Combine(Path.GetTempPath(), $"pdflight-preview-{Environment.ProcessId}.pdf");
     private (double Width, double Height) pageSizePt;
-    private Bitmap? previewImage;
-    private Rectangle pageRect; // die Seitenfläche im Vorschaubild (Bildpixel)
+    private Bitmap? scaledImage;       // Vorschaubild, bereits auf die PictureBox skaliert (das Zeichnen bleibt billig)
+    private RectangleF scaledPageRect; // die Seitenfläche darin (PictureBox-Pixel, relativ zum Bild)
+    private PointF imageOffset;
+    private (double Width, double Height) boxPt; // Kastenmaß für den aktuellen Text (gemessen nur bei Änderung)
+    private string measuredText = string.Empty;
+    private double measuredSize;
 
     public AnnotationForm(string filePath, int pageCount, int page)
     {
@@ -78,15 +82,11 @@ public partial class AnnotationForm : Form
                 using MemoryStream stream = new();
                 await core.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, stream);
                 stream.Position = 0;
-                Bitmap bitmap = new(stream);
+                using Bitmap bitmap = new(stream);
                 var rect = FindPageRect(bitmap);
-                if (rect.Width < 20 || rect.Height < 20) { bitmap.Dispose(); continue; } // Seite noch nicht gezeichnet
-                previewImage?.Dispose();
-                previewImage = bitmap;
-                pageRect = rect;
+                if (rect.Width < 20 || rect.Height < 20) { continue; } // Seite noch nicht gezeichnet
+                PrepareScaledImage(bitmap, rect);
                 core.Navigate("about:blank"); // gibt die Temp-Datei frei, sonst hält Chromium sie bis zum Dispose gesperrt
-                previewWebView.Visible = false;
-                picturePreview.Visible = true;
                 labelPreviewState.Text = Lng.T("Klick ins Vorschaubild setzt die Position.");
                 picturePreview.Invalidate();
                 return;
@@ -120,28 +120,38 @@ public partial class AnnotationForm : Form
         return right < 0 ? Rectangle.Empty : Rectangle.FromLTRB(left, top, right + 1, bottom + 1);
     }
 
-    /// <summary>Bild samt Seitenrahmen so skaliert, dass es in die PictureBox passt (zentriert).</summary>
-    private (float Scale, PointF Offset) ImageLayout()
+    /// <summary>Skaliert das abfotografierte Bild einmal auf die PictureBox (zentriert) und rechnet die Seitenfläche mit um.</summary>
+    private void PrepareScaledImage(Bitmap bitmap, Rectangle pageRect)
     {
-        if (previewImage == null) { return (1, PointF.Empty); }
-        var scale = Math.Min((float)picturePreview.ClientSize.Width / previewImage.Width, (float)picturePreview.ClientSize.Height / previewImage.Height);
-        var offset = new PointF((picturePreview.ClientSize.Width - previewImage.Width * scale) / 2, (picturePreview.ClientSize.Height - previewImage.Height * scale) / 2);
-        return (scale, offset);
+        var scale = Math.Min((float)picturePreview.ClientSize.Width / bitmap.Width, (float)picturePreview.ClientSize.Height / bitmap.Height);
+        var size = new Size(Math.Max(1, (int)(bitmap.Width * scale)), Math.Max(1, (int)(bitmap.Height * scale)));
+        scaledImage?.Dispose();
+        scaledImage = new Bitmap(size.Width, size.Height);
+        using (var g = Graphics.FromImage(scaledImage))
+        {
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            g.DrawImage(bitmap, 0, 0, size.Width, size.Height);
+        }
+        imageOffset = new PointF((picturePreview.ClientSize.Width - size.Width) / 2f, (picturePreview.ClientSize.Height - size.Height) / 2f);
+        scaledPageRect = new RectangleF(pageRect.X * scale, pageRect.Y * scale, pageRect.Width * scale, pageRect.Height * scale);
     }
 
     private void PicturePreview_Paint(object? sender, PaintEventArgs e)
     {
-        if (previewImage == null || pageRect.IsEmpty || pageSizePt.Width <= 0) { return; }
-        var (scale, offset) = ImageLayout();
-        e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-        e.Graphics.DrawImage(previewImage, offset.X, offset.Y, previewImage.Width * scale, previewImage.Height * scale);
-        // Kasten der Anmerkung: Millimeter → Seitenpixel → Bildschirm (der Rahmen liegt innerhalb der Seite, daher die volle Seitenbreite)
-        var pxPerMm = pageRect.Width * scale / (pageSizePt.Width * MmPerPoint);
-        var (widthPt, heightPt) = PdfEditService.MeasureAnnotation(AnnotationText.Length > 0 ? AnnotationText : "Text", FontSize);
+        if (scaledImage == null || pageSizePt.Width <= 0) { return; }
+        e.Graphics.DrawImageUnscaled(scaledImage, (int)imageOffset.X, (int)imageOffset.Y);
+        var text = AnnotationText.Length > 0 ? AnnotationText : "Text";
+        if (text != measuredText || FontSize != measuredSize)
+        {
+            boxPt = PdfEditService.MeasureAnnotation(text, FontSize); // nur bei geändertem Text oder geänderter Größe messen
+            measuredText = text;
+            measuredSize = FontSize;
+        }
+        var pxPerMm = scaledPageRect.Width / (pageSizePt.Width * MmPerPoint);
         var box = new RectangleF(
-            offset.X + pageRect.X * scale + (float)(LeftMm * pxPerMm),
-            offset.Y + pageRect.Y * scale + (float)(TopMm * pxPerMm),
-            (float)(widthPt * MmPerPoint * pxPerMm), (float)(heightPt * MmPerPoint * pxPerMm));
+            imageOffset.X + scaledPageRect.X + (float)(LeftMm * pxPerMm),
+            imageOffset.Y + scaledPageRect.Y + (float)(TopMm * pxPerMm),
+            (float)(boxPt.Width * MmPerPoint * pxPerMm), (float)(boxPt.Height * MmPerPoint * pxPerMm));
         using SolidBrush fill = new(Color.FromArgb(200, 255, 255, 204));
         using Pen border = new(Color.FromArgb(153, 153, 102));
         e.Graphics.FillRectangle(fill, box);
@@ -150,20 +160,22 @@ public partial class AnnotationForm : Form
 
     private void PicturePreview_MouseClick(object? sender, MouseEventArgs e)
     {
-        if (previewImage == null || pageRect.IsEmpty || pageSizePt.Width <= 0) { return; }
-        var (scale, offset) = ImageLayout();
-        var pageX = (e.X - offset.X) / scale - pageRect.X; // Klick in Seitenpixel des Vorschaubilds
-        var pageY = (e.Y - offset.Y) / scale - pageRect.Y;
-        var mmPerPx = pageSizePt.Width * MmPerPoint / pageRect.Width;
+        if (scaledImage == null || pageSizePt.Width <= 0) { return; }
+        var mmPerPx = pageSizePt.Width * MmPerPoint / scaledPageRect.Width;
+        var pageX = e.X - imageOffset.X - scaledPageRect.X; // Klick in Seitenpixel der Vorschau
+        var pageY = e.Y - imageOffset.Y - scaledPageRect.Y;
         numLeft.Value = Math.Clamp((decimal)Math.Round(pageX * mmPerPx, 1), numLeft.Minimum, numLeft.Maximum);
         numTop.Value = Math.Clamp((decimal)Math.Round(pageY * mmPerPx, 1), numTop.Minimum, numTop.Maximum);
     }
 
-    private void Preview_Changed(object? sender, EventArgs e) => picturePreview.Invalidate(); // Text, Größe oder Position geändert
+    private void Preview_Changed(object? sender, EventArgs e)
+    {
+        if (scaledImage != null) { picturePreview.Invalidate(); } // Text, Größe oder Position geändert
+    }
 
     private void AnnotationForm_FormClosed(object? sender, FormClosedEventArgs e)
     {
-        previewImage?.Dispose();
+        scaledImage?.Dispose();
         try { File.Delete(previewPdf); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // Temp-Datei — notfalls räumt Windows auf
     }
