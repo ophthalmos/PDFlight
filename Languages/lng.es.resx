@@ -486,14 +486,13 @@ para instalar la última versión.</value></data>
   <data name="Abstand von &amp;links (mm):" xml:space="preserve"><value>Distancia desde la &amp;izquierda (mm):</value></data>
   <data name="Abstand von &amp;oben (mm):" xml:space="preserve"><value>Distancia desde &amp;arriba (mm):</value></data>
   <data name="Schrift&amp;größe (pt):" xml:space="preserve"><value>Tamaño de &amp;fuente (pt):</value></data>
-  <data name="Maße ab der linken oberen Ecke der Seite." xml:space="preserve"><value>Distancias desde la esquina superior izquierda de la página.</value></data>
+  <data name="Anmerkung.Info" xml:space="preserve"><value>Distancias desde la esquina superior izquierda de la página.
+Un clic en la vista previa fija la posición.</value></data>
   <data name="Bitte gib einen Text ein." xml:space="preserve"><value>Escribe un texto.</value></data>
   <data name="Die Textanmerkung wurde auf Seite {0} eingefügt." xml:space="preserve"><value>La anotación de texto se insertó en la página {0}.</value></data>
   <data name="Die Textanmerkung wurde auf Seite {0} geändert." xml:space="preserve"><value>La anotación de texto de la página {0} se modificó.</value></data>
   <data name="Seite {0} von {1}" xml:space="preserve"><value>Página {0} de {1}</value></data>
-  <data name="Vorschau wird erstellt …" xml:space="preserve"><value>Creando la vista previa…</value></data>
   <data name="Vorschau nicht verfügbar" xml:space="preserve"><value>Vista previa no disponible</value></data>
-  <data name="Klick ins Vorschaubild setzt die Position." xml:space="preserve"><value>Haz clic en la vista previa para fijar la posición.</value></data>
   <data name="&amp;Hintergrund:" xml:space="preserve"><value>&amp;Fondo:</value></data>
   <data name="&amp;Rahmen" xml:space="preserve"><value>&amp;Borde</value></data>
   <data name="Gelb" xml:space="preserve"><value>Amarillo</value></data>

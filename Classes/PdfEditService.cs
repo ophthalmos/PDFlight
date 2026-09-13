@@ -136,9 +136,9 @@ internal static partial class PdfEditService
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         var annotations = document.Pages[page - 1].Annotations;
         index = ResolveIndex(annotations, objectNumber, index);
-        var popup = annotations[index].Elements["/Popup"] as PdfReference; // vor dem Entfernen lesen – danach zeigt der Index ins Leere
+        var removed = annotations[index]; // VOR dem Entfernen greifen – danach zeigt der Index ins Leere (IDE-Umformungen haben das schon einmal vertauscht)
         annotations.Elements.RemoveAt(index);
-        if (popup != null)
+        if (removed.Elements["/Popup"] is PdfReference popup)
         {
             for (var i = annotations.Elements.Count - 1; i >= 0; i--)
             {

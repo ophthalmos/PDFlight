@@ -53,7 +53,7 @@ public partial class AnnotationForm : Form
         this.page = Math.Clamp(page, 1, Math.Max(1, pageCount));
         labelFileValue.Text = Path.GetFileName(filePath);
         labelPage.Text = string.Format(Lng.T("Seite {0} von {1}"), this.page, pageCount);
-        labelPreviewState.Text = Lng.T("Vorschau wird erstellt …");
+        labelInfo.Text = Lng.T("Anmerkung.Info", labelInfo.Text); // zweizeilig → expliziter Schlüssel (Zeilenumbrüche taugen nicht als resx-Schlüssel)
         comboBackground.Items.AddRange([.. Backgrounds.Select(bg => (object)Lng.T(bg.Name))]);
         comboTextColor.Items.AddRange([.. TextColors.Select(tc => (object)Lng.T(tc.Name))]);
         SetStyle(AnnotationStyle.Default);
@@ -118,16 +118,16 @@ public partial class AnnotationForm : Form
                 if (rect.Width < 20 || rect.Height < 20) { continue; } // Seite noch nicht gezeichnet
                 PrepareScaledImage(bitmap, rect);
                 core.Navigate("about:blank"); // gibt die Temp-Datei frei, sonst hält Chromium sie bis zum Dispose gesperrt
-                labelPreviewState.Text = Lng.T("Klick ins Vorschaubild setzt die Position.");
                 picturePreview.Invalidate();
                 return;
             }
-            labelPreviewState.Text = Lng.T("Vorschau nicht verfügbar");
+            picturePreview.Text = Lng.T("Vorschau nicht verfügbar");
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException
             or System.Runtime.InteropServices.COMException or WebView2RuntimeNotFoundException || PdfEditService.IsPdfReadError(ex))
         {
-            if (!IsDisposed) { labelPreviewState.Text = Lng.T("Vorschau nicht verfügbar"); }
+            if (!IsDisposed) { picturePreview.Text = Lng.T("Vorschau nicht verfügbar"); }
+        
         }
     }
 
