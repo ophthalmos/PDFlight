@@ -28,6 +28,7 @@ public partial class AnnotationForm : Form
     private (double Width, double Height) boxPt; // Kastenmaß für den aktuellen Text (gemessen nur bei Änderung)
     private string measuredText = string.Empty;
     private double measuredSize;
+    private int excludeAnnotationIndex = -1; // beim Bearbeiten: diese Anmerkung fehlt in der Vorschau
 
     public AnnotationForm(string filePath, int pageCount, int page)
     {
@@ -42,9 +43,10 @@ public partial class AnnotationForm : Form
     }
 
     /// <summary>Bearbeiten einer vorhandenen Anmerkung: Werte vorbelegen und den Titel anpassen.</summary>
-    public void Preset(string text, double leftMm, double topMm, double fontSize)
+    public void Preset(string text, double leftMm, double topMm, double fontSize, int annotationIndex)
     {
         Text = Lng.T("Textanmerkung bearbeiten");
+        excludeAnnotationIndex = annotationIndex;
         textBoxText.Text = text.Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
         numLeft.Value = Math.Clamp((decimal)leftMm, numLeft.Minimum, numLeft.Maximum);
         numTop.Value = Math.Clamp((decimal)topMm, numTop.Minimum, numTop.Maximum);
@@ -66,7 +68,7 @@ public partial class AnnotationForm : Form
     {
         try
         {
-            pageSizePt = PdfEditService.ExtractPageForPreview(filePath, previewPdf, page);
+            pageSizePt = PdfEditService.ExtractPageForPreview(filePath, previewPdf, page, excludeAnnotationIndex);
             if (PdfViewHost.SharedEnvironment == null) { throw new InvalidOperationException("WebView2-Umgebung fehlt"); }
             await previewWebView.EnsureCoreWebView2Async(PdfViewHost.SharedEnvironment);
             var core = previewWebView.CoreWebView2;
@@ -156,6 +158,18 @@ public partial class AnnotationForm : Form
         using Pen border = new(Color.FromArgb(153, 153, 102));
         e.Graphics.FillRectangle(fill, box);
         e.Graphics.DrawRectangle(border, box.X, box.Y, box.Width, box.Height);
+        // der Text im Kasten, im Maßstab der Vorschau (Arial steht für Helvetica – wie bei der Messung)
+        var pxPerPt = pxPerMm * MmPerPoint;
+        var fontPx = (float)(FontSize * pxPerPt);
+        if (fontPx < 3) { return; }
+        using Font font = new("Arial", fontPx, GraphicsUnit.Pixel);
+        e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+        var y = box.Y + (float)(PdfEditService.Padding * pxPerPt);
+        foreach (var line in text.Replace("\r\n", "\n").Split('\n'))
+        {
+            e.Graphics.DrawString(line, font, Brushes.Black, box.X + (float)(PdfEditService.Padding * pxPerPt), y);
+            y += (float)(FontSize * PdfEditService.LeadingFactor * pxPerPt);
+        }
     }
 
     private void PicturePreview_MouseClick(object? sender, MouseEventArgs e)
