@@ -259,6 +259,7 @@ public partial class AnnotationForm : Form
 
     private void Preview_Changed(object? sender, EventArgs e)
     {
+        (sender as ComboBox)?.Invalidate(); // selbst gezeichnete Auswahlfelder zeigen nach Tastaturwahl sonst noch den alten Eintrag
         if (scaledImage != null) { picturePreview.Invalidate(); } // Text, Größe oder Position geändert
     }
 
