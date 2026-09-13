@@ -114,7 +114,6 @@ public partial class AnnotationListForm : Form
     private void BtnDelete_Click(object? sender, EventArgs e)
     {
         if (Selected is not { } annotation) { return; }
-        if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Diese Anmerkung löschen?"), TypeName(annotation.Subtype) + ", " + string.Format(Lng.T("Seite {0}"), annotation.Page) + "\n" + FirstLine(annotation.Contents))) { return; }
         if (runEdit(() => PdfEditService.DeleteAnnotation(filePath, annotation.Page, annotation.Index, annotation.ObjectNumber), Lng.T("Anmerkung löschen")))
         {
             Changed = true;

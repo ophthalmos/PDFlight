@@ -506,8 +506,6 @@ the latest version.</value></data>
   <data name="Haftnotiz" xml:space="preserve"><value>Sticky note</value></data>
   <data name="Textanmerkung bearbeiten" xml:space="preserve"><value>Edit text annotation</value></data>
   <data name="(keine Anmerkungen)" xml:space="preserve"><value>(no annotations)</value></data>
-  <data name="Diese Anmerkung löschen?" xml:space="preserve"><value>Delete this annotation?</value></data>
   <data name="Anmerkung löschen" xml:space="preserve"><value>Delete annotation</value></data>
   <data name="links {0:0.#} mm, oben {1:0.#} mm" xml:space="preserve"><value>left {0:0.#} mm, top {1:0.#} mm</value></data>
-  <data name="Seite {0}" xml:space="preserve"><value>Page {0}</value></data>
 </root>
