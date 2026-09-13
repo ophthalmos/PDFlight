@@ -37,6 +37,16 @@ public partial class AnnotationForm : Form
         labelPreviewState.Text = Lng.T("Vorschau wird erstellt …");
     }
 
+    /// <summary>Bearbeiten einer vorhandenen Anmerkung: Werte vorbelegen und den Titel anpassen.</summary>
+    public void Preset(string text, double leftMm, double topMm, double fontSize)
+    {
+        Text = Lng.T("Textanmerkung bearbeiten");
+        textBoxText.Text = text.Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
+        numLeft.Value = Math.Clamp((decimal)leftMm, numLeft.Minimum, numLeft.Maximum);
+        numTop.Value = Math.Clamp((decimal)topMm, numTop.Minimum, numTop.Maximum);
+        numSize.Value = Math.Clamp((decimal)fontSize, numSize.Minimum, numSize.Maximum);
+    }
+
     private void ButtonOK_Click(object? sender, EventArgs e)
     {
         if (AnnotationText.Length == 0)

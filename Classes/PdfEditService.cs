@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
+using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
 
 namespace PDFLight.Classes;
@@ -10,6 +11,9 @@ namespace PDFLight.Classes;
 internal record PdfInfo(string Title, string Author, string Subject, string Keywords, int PageCount, string Version, string Creator, string Producer);
 
 /// <summary>Kenndaten einer Datei; PageWidthPt/PageHeightPt = Größe der ersten Seite in Punkt (Referenz für die Zoomanzeige; 0 = unbekannt).</summary>
+/// <summary>Eine Anmerkung fürs Verwalten (s. PdfEditService.ListAnnotations).</summary>
+internal record AnnotationInfo(int Page, int Index, string Subtype, string Contents, double LeftMm, double TopMm, double FontSize);
+
 internal record PdfStatus(int PageCount, string? Version, string? PdfALevel, double PageWidthPt = 0, double PageHeightPt = 0);
 
 /// <summary>Dokumentoperationen mit PDFsharp. Alle Methoden arbeiten direkt auf der Datei;
@@ -91,7 +95,68 @@ internal static partial class PdfEditService
     public static void AddFreeTextAnnotation(string path, int page, string text, double leftMm, double topMm, double fontSize)
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        AppendFreeText(document, document.Pages[page - 1], text, leftMm, topMm, fontSize);
+        document.Save(path);
+    }
+
+    /// <summary>Ersetzt eine FreeText-Anmerkung (Index im Annots-Array der Seite) durch eine neue mit geänderten Werten –
+    /// auch fremde FreeText-Anmerkungen bekommen dabei PDFlights Kasten.</summary>
+    public static void UpdateFreeTextAnnotation(string path, int page, int index, string text, double leftMm, double topMm, double fontSize)
+    {
+        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         var pdfPage = document.Pages[page - 1];
+        pdfPage.Annotations.Elements.RemoveAt(index);
+        AppendFreeText(document, pdfPage, text, leftMm, topMm, fontSize);
+        document.Save(path);
+    }
+
+    /// <summary>Entfernt eine Anmerkung (Index im Annots-Array der Seite) samt zugehörigem Popup.</summary>
+    public static void DeleteAnnotation(string path, int page, int index)
+    {
+        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        var annotations = document.Pages[page - 1].Annotations;
+        var popup = annotations[index].Elements["/Popup"] as PdfReference;
+        annotations.Elements.RemoveAt(index);
+        if (popup != null)
+        {
+            for (var i = annotations.Elements.Count - 1; i >= 0; i--)
+            {
+                if (annotations.Elements[i] is PdfReference reference && reference.ObjectID == popup.ObjectID) { annotations.Elements.RemoveAt(i); }
+            }
+        }
+        document.Save(path);
+    }
+
+    /// <summary>Alle Anmerkungen des Dokuments fürs Verwalten – ohne Links, Popups und Formularfelder. Index = Position im
+    /// Annots-Array der Seite (die übersprungenen Einträge zählen mit), Position in Millimetern von links/oben.</summary>
+    public static List<AnnotationInfo> ListAnnotations(string path)
+    {
+        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
+        List<AnnotationInfo> result = [];
+        for (var p = 0; p < document.PageCount; p++)
+        {
+            var page = document.Pages[p];
+            var annotations = page.Annotations;
+            for (var i = 0; i < annotations.Count; i++)
+            {
+                var a = annotations[i];
+                var subtype = a.Elements.GetName("/Subtype").TrimStart('/');
+                if (subtype is "Link" or "Popup" or "Widget") { continue; }
+                var rect = a.Elements.GetRectangle("/Rect");
+                var fontSize = 12.0;
+                var match = FontSizeInDa().Match(a.Elements.GetString("/DA"));
+                if (match.Success && double.TryParse(match.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var size) && size > 0) { fontSize = size; }
+                result.Add(new AnnotationInfo(p + 1, i, subtype, a.Elements.GetString("/Contents"), rect.X1 * 25.4 / 72, (page.Height.Point - rect.Y2) * 25.4 / 72, fontSize));
+            }
+        }
+        return result;
+    }
+
+    [GeneratedRegex(@"(\d+(?:\.\d+)?)\s+Tf")]
+    private static partial Regex FontSizeInDa();
+
+    private static void AppendFreeText(PdfDocument document, PdfPage pdfPage, string text, double leftMm, double topMm, double fontSize)
+    {
         var lines = SplitLines(text);
         var leading = fontSize * LeadingFactor;
         var (width, height) = MeasureAnnotation(text, fontSize);
@@ -138,7 +203,6 @@ internal static partial class PdfEditService
         annotation.Elements.SetDateTime("/M", DateTime.Now);
         document.Internals.AddObject(annotation);
         pdfPage.Annotations.Elements.Add(annotation.Reference!); // nach AddObject hat das Objekt eine Referenz
-        document.Save(path);
     }
 
     private const double Padding = 4;          // Innenabstand des Anmerkungskastens (Punkt)
