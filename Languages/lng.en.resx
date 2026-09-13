@@ -498,6 +498,7 @@ the latest version.</value></data>
   <data name="Strg+Umschalt+T" xml:space="preserve"><value>Ctrl+Shift+T</value></data>
   <data name="Textanmerkungen verwalten (bearbeiten, löschen)" xml:space="preserve"><value>manage text annotations (edit, delete)</value></data>
   <data name="Textanmerkungen" xml:space="preserve"><value>Text annotations</value></data>
+  <data name="Seitennr." xml:space="preserve"><value>Page no.</value></data>
   <data name="Position" xml:space="preserve"><value>Position</value></data>
   <data name="Text" xml:space="preserve"><value>Text</value></data>
   <data name="&amp;Bearbeiten …" xml:space="preserve"><value>&amp;Edit…</value></data>
