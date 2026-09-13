@@ -28,8 +28,8 @@ namespace PDFLight.Forms
         /// </summary>
         private void InitializeComponent()
         {
-            var resources = new System.ComponentModel.ComponentResourceManager(typeof(AnnotationListForm));
             components = new System.ComponentModel.Container();
+            var resources = new System.ComponentModel.ComponentResourceManager(typeof(AnnotationListForm));
             contextMenuList = new ContextMenuStrip(components);
             editMenuItem = new ToolStripMenuItem();
             deleteMenuItem = new ToolStripMenuItem();
@@ -48,21 +48,22 @@ namespace PDFLight.Forms
             // 
             contextMenuList.Items.AddRange(new ToolStripItem[] { editMenuItem, deleteMenuItem });
             contextMenuList.Name = "contextMenuList";
-            contextMenuList.Size = new Size(160, 48);
+            contextMenuList.Size = new Size(181, 70);
             contextMenuList.Opening += ContextMenuList_Opening;
             // 
             // editMenuItem
             // 
             editMenuItem.Name = "editMenuItem";
             editMenuItem.ShortcutKeyDisplayString = "Enter";
-            editMenuItem.Size = new Size(159, 22);
+            editMenuItem.Size = new Size(180, 22);
             editMenuItem.Text = "&Bearbeiten …";
             editMenuItem.Click += BtnEdit_Click;
             // 
             // deleteMenuItem
             // 
             deleteMenuItem.Name = "deleteMenuItem";
-            deleteMenuItem.Size = new Size(159, 22);
+            deleteMenuItem.ShortcutKeyDisplayString = "Entf";
+            deleteMenuItem.Size = new Size(180, 22);
             deleteMenuItem.Text = "Löschen";
             deleteMenuItem.Click += BtnDelete_Click;
             // 

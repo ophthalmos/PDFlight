@@ -112,6 +112,7 @@ public partial class AnnotationListForm : Form
     private void ListView_KeyDown(object? sender, KeyEventArgs e)
     {
         if (e.KeyCode == Keys.Enter && btnEdit.Enabled) { e.Handled = e.SuppressKeyPress = true; EditSelected(); } // Enter in der Liste = Bearbeiten (wie Doppelklick)
+        if (e.KeyCode == Keys.Delete && btnDelete.Enabled) { e.Handled = e.SuppressKeyPress = true; BtnDelete_Click(sender, e); } // Entf = Löschen
     }
 
     private void BtnEdit_Click(object? sender, EventArgs e) => EditSelected();
