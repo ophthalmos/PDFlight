@@ -26,6 +26,7 @@
   <data name="Große Symbole und Icons, ohne Text" xml:space="preserve"><value>Large icons and program icons, no text</value></data>
   <data name="Kleine Symbole und Programm-Icons" xml:space="preserve"><value>Small icons and program icons</value></data>
   <data name="Kleine Symbole, ohne Programm-Icons" xml:space="preserve"><value>Small icons, no program icons</value></data>
+  <data name="Kleine Symbole und Icons, ohne Text" xml:space="preserve"><value>Small icons and program icons, no text</value></data>
   <data name="Nur Text" xml:space="preserve"><value>Text only</value></data>
   <data name="Die Datei wurde in den Papierkorb verschoben." xml:space="preserve"><value>The file was moved to the Recycle Bin.</value></data>
   <data name="Vollständigen Dateipfad in der Titelleiste an&amp;zeigen" xml:space="preserve"><value>Show the full file path in the title &amp;bar</value></data>

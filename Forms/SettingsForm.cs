@@ -34,6 +34,7 @@ public partial class SettingsForm : Form
         ("Große Symbole und Icons, ohne Text", true, true, true, false),
         ("Kleine Symbole und Programm-Icons", false, true, true, true),
         ("Kleine Symbole, ohne Programm-Icons", false, false, true, true),
+        ("Kleine Symbole und Icons, ohne Text", false, true, true, false),
         ("Nur Text", false, false, false, true),
     ];
 
