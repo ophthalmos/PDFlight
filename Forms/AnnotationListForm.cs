@@ -14,16 +14,18 @@ public partial class AnnotationListForm : Form
     /// <summary>Seite der zuletzt geänderten Anmerkung (fürs Neuladen).</summary>
     public int LastPage { get; private set; } = 1;
 
+    /// <summary>Die Anmerkung, die der Benutzer bearbeiten will – „Bearbeiten“ schließt die Liste sofort, den Dialog
+    /// öffnet danach das Hauptfenster (so bleibt das Verhalten unabhängig davon, ob der Dialog bestätigt oder abgebrochen wird).</summary>
+    internal AnnotationInfo? EditRequested { get; private set; }
+
     private readonly string filePath;
-    private readonly int pageCount;
     private readonly Func<Action, string, bool> runEdit;
 
-    public AnnotationListForm(string filePath, int pageCount, Func<Action, string, bool> runEdit)
+    public AnnotationListForm(string filePath, Func<Action, string, bool> runEdit)
     {
         InitializeComponent();
         Lng.Apply(this);
         this.filePath = filePath;
-        this.pageCount = pageCount;
         this.runEdit = runEdit;
         labelFileValue.Text = Path.GetFileName(filePath);
         btnEdit.Image = ButtonIcon(ToolbarIcons.Edit);
@@ -101,15 +103,8 @@ public partial class AnnotationListForm : Form
     private void EditSelected()
     {
         if (Selected is not { Subtype: "FreeText" } annotation) { return; }
-        using AnnotationForm dialog = new(filePath, pageCount, annotation.Page);
-        dialog.Preset(annotation.Contents, annotation.LeftMm, annotation.TopMm, annotation.FontSize, annotation.Style, annotation.Index);
-        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
-        if (runEdit(() => PdfEditService.UpdateFreeTextAnnotation(filePath, annotation.Page, annotation.Index, annotation.ObjectNumber, dialog.AnnotationText, dialog.LeftMm, dialog.TopMm, dialog.FontSize, dialog.Style), Lng.T("Textanmerkung")))
-        {
-            Changed = true;
-            LastPage = annotation.Page;
-            Close(); // die Änderung ist gespeichert – zurück zum Dokument, das die Seite neu lädt
-        }
+        EditRequested = annotation;
+        Close();
     }
 
     private void BtnDelete_Click(object? sender, EventArgs e)
