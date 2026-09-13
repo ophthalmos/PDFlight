@@ -222,6 +222,23 @@ public partial class AnnotationForm : Form
         numTop.Value = Math.Clamp((decimal)Math.Round(pageY * mmPerPx, 1), numTop.Minimum, numTop.Maximum);
     }
 
+    /// <summary>Hintergrund-Auswahl mit Farbfeld vor dem Namen; „Transparent“ bekommt ein weißes Feld mit Diagonale.</summary>
+    private void ComboBackground_DrawItem(object? sender, DrawItemEventArgs e)
+    {
+        e.DrawBackground();
+        if (e.Index < 0 || e.Index >= Backgrounds.Length) { return; }
+        var (name, color) = Backgrounds[e.Index];
+        var edge = e.Bounds.Height - 4;
+        Rectangle swatch = new(e.Bounds.X + 2, e.Bounds.Y + 2, edge, edge);
+        using SolidBrush fill = new(color ?? Color.White);
+        e.Graphics.FillRectangle(fill, swatch);
+        if (color == null) { e.Graphics.DrawLine(Pens.Gray, swatch.Left, swatch.Bottom, swatch.Right, swatch.Top); }
+        e.Graphics.DrawRectangle(Pens.Gray, swatch);
+        var textColor = (e.State & DrawItemState.Selected) != 0 ? SystemColors.HighlightText : e.ForeColor;
+        TextRenderer.DrawText(e.Graphics, Lng.T(name), e.Font ?? Font, new Rectangle(swatch.Right + 6, e.Bounds.Y, e.Bounds.Width - edge - 8, e.Bounds.Height), textColor, TextFormatFlags.VerticalCenter | TextFormatFlags.Left);
+        e.DrawFocusRectangle();
+    }
+
     private void Preview_Changed(object? sender, EventArgs e)
     {
         if (scaledImage != null) { picturePreview.Invalidate(); } // Text, Größe oder Position geändert

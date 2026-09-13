@@ -174,11 +174,13 @@ namespace PDFLight.Forms
             // 
             // comboBackground
             // 
+            comboBackground.DrawMode = DrawMode.OwnerDrawFixed;
             comboBackground.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBackground.Location = new Point(495, 299);
             comboBackground.Name = "comboBackground";
             comboBackground.Size = new Size(120, 23);
             comboBackground.TabIndex = 12;
+            comboBackground.DrawItem += ComboBackground_DrawItem;
             comboBackground.SelectedIndexChanged += Preview_Changed;
             // 
             // cbBorder
