@@ -1322,9 +1322,26 @@ public partial class MainForm : Form
     {
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
-        using AnnotationListForm dialog = new(currentFile.FullName, currentPageCount, RunPdfEdit);
+        using AnnotationListForm dialog = new(currentFile.FullName, RunPdfEdit);
         dialog.ShowDialog(this);
         if (dialog.Changed) { LoadPdf(currentFile.FullName, dialog.LastPage); }
+        if (dialog.EditRequested is { } annotation) { EditAnnotation(annotation); } // die Liste hat sich dafür geschlossen
+    }
+
+    /// <summary>Textanmerkung bearbeiten: derselbe Dialog wie beim Einfügen, mit den Werten der Anmerkung vorbelegt;
+    /// die Anmerkung wird durch eine neue ersetzt.</summary>
+    private void EditAnnotation(AnnotationInfo annotation)
+    {
+        if (currentFile == null) { return; }
+        var file = currentFile.FullName;
+        using AnnotationForm dialog = new(file, currentPageCount, annotation.Page);
+        dialog.Preset(annotation.Contents, annotation.LeftMm, annotation.TopMm, annotation.FontSize, annotation.Style, annotation.Index);
+        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
+        if (RunPdfEdit(() => PdfEditService.UpdateFreeTextAnnotation(file, annotation.Page, annotation.Index, annotation.ObjectNumber, dialog.AnnotationText, dialog.LeftMm, dialog.TopMm, dialog.FontSize, dialog.Style), Lng.T("Textanmerkung")))
+        {
+            LoadPdf(file, annotation.Page);
+            statusPath.Text = string.Format(Lng.T("Die Textanmerkung wurde auf Seite {0} geändert."), annotation.Page);
+        }
     }
 
     private void AppendPdfDialog()
