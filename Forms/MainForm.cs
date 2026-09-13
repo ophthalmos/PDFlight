@@ -1300,9 +1300,9 @@ public partial class MainForm : Form
     {
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
-        using AnnotationForm dialog = new(currentFile.Name, currentPageCount, ClampedCurrentPage());
+        var page = Math.Max(1, ClampedCurrentPage()); // immer die angezeigte Seite
+        using AnnotationForm dialog = new(currentFile.FullName, currentPageCount, page);
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
-        var page = dialog.Page;
         if (RunPdfEdit(() => PdfEditService.AddFreeTextAnnotation(currentFile.FullName, page, dialog.AnnotationText, dialog.LeftMm, dialog.TopMm, dialog.FontSize), Lng.T("Textanmerkung")))
         {
             LoadPdf(currentFile.FullName, page);

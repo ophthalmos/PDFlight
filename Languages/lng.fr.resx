@@ -483,11 +483,14 @@ d'installation pour installer la dernière version.</value></data>
   <data name="Textanmerkung hinzufügen" xml:space="preserve"><value>Ajouter une annotation de texte</value></data>
   <data name="Textanmerkung" xml:space="preserve"><value>Annotation de texte</value></data>
   <data name="&amp;Text:" xml:space="preserve"><value>&amp;Texte :</value></data>
-  <data name="&amp;Seite:" xml:space="preserve"><value>&amp;Page :</value></data>
   <data name="Abstand von &amp;links (mm):" xml:space="preserve"><value>Distance du bord &amp;gauche (mm) :</value></data>
   <data name="Abstand von &amp;oben (mm):" xml:space="preserve"><value>Distance du bord &amp;haut (mm) :</value></data>
   <data name="Schrift&amp;größe (pt):" xml:space="preserve"><value>Taille de &amp;police (pt) :</value></data>
   <data name="Der Text erscheint als gelber Kasten; Maße ab der linken oberen Ecke der Seite." xml:space="preserve"><value>Le texte apparaît dans un cadre jaune ; distances depuis le coin supérieur gauche de la page.</value></data>
   <data name="Bitte gib einen Text ein." xml:space="preserve"><value>Entre un texte.</value></data>
   <data name="Die Textanmerkung wurde auf Seite {0} eingefügt." xml:space="preserve"><value>L'annotation de texte a été insérée à la page {0}.</value></data>
+  <data name="Seite {0} von {1}" xml:space="preserve"><value>Page {0} sur {1}</value></data>
+  <data name="Vorschau wird erstellt …" xml:space="preserve"><value>Création de l'aperçu…</value></data>
+  <data name="Vorschau nicht verfügbar" xml:space="preserve"><value>Aperçu non disponible</value></data>
+  <data name="Klick ins Vorschaubild setzt die Position." xml:space="preserve"><value>Clique dans l'aperçu pour définir la position.</value></data>
 </root>
