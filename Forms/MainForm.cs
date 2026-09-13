@@ -960,20 +960,20 @@ public partial class MainForm : Form
         var showIcons = settings.ShowToolbarIcons && ToolbarIcons.FontAvailable;
         ToolbarIcons.MenuIconsEnabled = showIcons; // auch für die Kontextmenüs der Dialoge
         var size = toolStrip.ImageScalingSize;
-        var textless = showIcons && !settings.ShowToolbarText; // Layout „ohne Text“: alle Schaltflächen nur als Symbol, die Tooltips nennen die Funktion
-        void Set(ToolStripItem item, char glyph, bool imageOnly = false)
+        var textless = showIcons && !settings.ShowToolbarText; // Layout „ohne Text“: Schaltflächen nur als Symbol, die Tooltips nennen die Funktion
+        void Set(ToolStripItem item, char glyph, bool imageOnly = false, bool keepText = false)
         {
             item.Image = showIcons ? ToolbarIcons.Get(glyph, size) : null;
             item.DisplayStyle = showIcons
-                ? (imageOnly || textless ? ToolStripItemDisplayStyle.Image : ToolStripItemDisplayStyle.ImageAndText)
+                ? (imageOnly || (textless && !keepText) ? ToolStripItemDisplayStyle.Image : ToolStripItemDisplayStyle.ImageAndText)
                 : ToolStripItemDisplayStyle.Text;
         }
-        Set(btnOpen, ToolbarIcons.OpenFile);
+        Set(btnOpen, ToolbarIcons.OpenFile, keepText: true); // die drei Kernfunktionen behalten ihre Beschriftung auch „ohne Text“
         Set(btnPrev, ToolbarIcons.Previous, imageOnly: true);
         Set(btnNext, ToolbarIcons.Next, imageOnly: true);
-        Set(splitButtonMove, ToolbarIcons.MoveToFolder);
+        Set(splitButtonMove, ToolbarIcons.MoveToFolder, keepText: true);
         Set(btnCopy, ToolbarIcons.Copy);
-        Set(btnRename, ToolbarIcons.Rename);
+        Set(btnRename, ToolbarIcons.Rename, keepText: true);
         Set(btnDelete, ToolbarIcons.Delete);
         Set(btnPrint, ToolbarIcons.Print);
         Set(btnEmail, ToolbarIcons.Mail);
