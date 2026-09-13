@@ -16,6 +16,14 @@ public partial class AnnotationForm : Form
     public double LeftMm => (double)numLeft.Value;
     public double TopMm => (double)numTop.Value;
     public double FontSize => (double)numSize.Value;
+    internal AnnotationStyle Style => new(cbBorder.Checked, Backgrounds[Math.Max(0, comboBackground.SelectedIndex)].Color);
+
+    /// <summary>Die wählbaren Hintergründe (Namen sind Lng-Schlüssel); null = transparent.</summary>
+    private static readonly (string Name, Color? Color)[] Backgrounds =
+    [
+        ("Gelb", Color.FromArgb(255, 255, 204)), ("Weiß", Color.White), ("Hellblau", Color.FromArgb(221, 238, 255)),
+        ("Hellgrün", Color.FromArgb(221, 255, 221)), ("Rosa", Color.FromArgb(255, 221, 238)), ("Transparent", null),
+    ];
 
     private const double MmPerPoint = 25.4 / 72;
     private readonly string filePath;
@@ -40,13 +48,25 @@ public partial class AnnotationForm : Form
         labelFileValue.Text = Path.GetFileName(filePath);
         labelPage.Text = string.Format(Lng.T("Seite {0} von {1}"), this.page, pageCount);
         labelPreviewState.Text = Lng.T("Vorschau wird erstellt …");
+        comboBackground.Items.AddRange([.. Backgrounds.Select(bg => (object)Lng.T(bg.Name))]);
+        SetStyle(AnnotationStyle.Default);
+    }
+
+    /// <summary>Rahmen und Hintergrund vorbelegen (zuletzt gewählte Werte bzw. die der bearbeiteten Anmerkung); eine fremde
+    /// Farbe außerhalb der Auswahl fällt auf Gelb zurück.</summary>
+    internal void SetStyle(AnnotationStyle style)
+    {
+        cbBorder.Checked = style.Border;
+        var index = Array.FindIndex(Backgrounds, bg => bg.Color?.ToArgb() == style.Background?.ToArgb());
+        comboBackground.SelectedIndex = index >= 0 ? index : 0;
     }
 
     /// <summary>Bearbeiten einer vorhandenen Anmerkung: Werte vorbelegen und den Titel anpassen.</summary>
-    public void Preset(string text, double leftMm, double topMm, double fontSize, int annotationIndex)
+    internal void Preset(string text, double leftMm, double topMm, double fontSize, AnnotationStyle style, int annotationIndex)
     {
         Text = Lng.T("Textanmerkung bearbeiten");
         excludeAnnotationIndex = annotationIndex;
+        SetStyle(style);
         textBoxText.Text = string.Join(Environment.NewLine, PdfEditService.SplitLines(text));
         numLeft.Value = Math.Clamp((decimal)leftMm, numLeft.Minimum, numLeft.Maximum);
         numTop.Value = Math.Clamp((decimal)topMm, numTop.Minimum, numTop.Maximum);
@@ -166,10 +186,17 @@ public partial class AnnotationForm : Form
             imageOffset.X + scaledPageRect.X + (float)(LeftMm * pxPerMm),
             imageOffset.Y + scaledPageRect.Y + (float)(TopMm * pxPerMm),
             (float)(boxPt.Width * MmPerPoint * pxPerMm), (float)(boxPt.Height * MmPerPoint * pxPerMm));
-        using SolidBrush fill = new(Color.FromArgb(200, 255, 255, 204));
-        using Pen border = new(Color.FromArgb(153, 153, 102));
-        e.Graphics.FillRectangle(fill, box);
-        e.Graphics.DrawRectangle(border, box.X, box.Y, box.Width, box.Height);
+        var style = Style;
+        if (style.Background is { } background)
+        {
+            using SolidBrush fill = new(Color.FromArgb(200, background));
+            e.Graphics.FillRectangle(fill, box);
+        }
+        if (style.Border)
+        {
+            using Pen border = new(Color.FromArgb(153, 153, 102));
+            e.Graphics.DrawRectangle(border, box.X, box.Y, box.Width, box.Height);
+        }
         // der Text im Kasten, im Maßstab der Vorschau (Arial steht für Helvetica – wie bei der Messung)
         var pxPerPt = pxPerMm * MmPerPoint;
         var fontPx = (float)(FontSize * pxPerPt);

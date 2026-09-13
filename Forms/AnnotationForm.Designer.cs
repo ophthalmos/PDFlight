@@ -39,6 +39,9 @@ namespace PDFLight.Forms
             numTop = new NumericUpDown();
             labelSize = new Label();
             numSize = new NumericUpDown();
+            labelBackground = new Label();
+            comboBackground = new ComboBox();
+            cbBorder = new CheckBox();
             previewWebView = new Microsoft.Web.WebView2.WinForms.WebView2();
             picturePreview = new PictureBox();
             labelPreviewState = new Label();
@@ -96,7 +99,7 @@ namespace PDFLight.Forms
             labelInfo.Name = "labelInfo";
             labelInfo.Size = new Size(258, 30);
             labelInfo.TabIndex = 4;
-            labelInfo.Text = "Der Text erscheint als gelber Kasten; Maße ab der linken oberen Ecke der Seite.";
+            labelInfo.Text = "Maße ab der linken oberen Ecke der Seite.";
             // 
             // labelLeft
             // 
@@ -160,6 +163,37 @@ namespace PDFLight.Forms
             numSize.Value = new decimal(new int[] { 12, 0, 0, 0 });
             numSize.ValueChanged += Preview_Changed;
             // 
+            // labelBackground
+            // 
+            labelBackground.AutoSize = true;
+            labelBackground.Location = new Point(358, 302);
+            labelBackground.Name = "labelBackground";
+            labelBackground.Size = new Size(75, 15);
+            labelBackground.TabIndex = 11;
+            labelBackground.Text = "&Hintergrund:";
+            // 
+            // comboBackground
+            // 
+            comboBackground.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBackground.Location = new Point(495, 299);
+            comboBackground.Name = "comboBackground";
+            comboBackground.Size = new Size(120, 23);
+            comboBackground.TabIndex = 12;
+            comboBackground.SelectedIndexChanged += Preview_Changed;
+            // 
+            // cbBorder
+            // 
+            cbBorder.AutoSize = true;
+            cbBorder.Checked = true;
+            cbBorder.CheckState = CheckState.Checked;
+            cbBorder.Location = new Point(358, 332);
+            cbBorder.Name = "cbBorder";
+            cbBorder.Size = new Size(70, 19);
+            cbBorder.TabIndex = 13;
+            cbBorder.Text = "&Rahmen";
+            cbBorder.UseVisualStyleBackColor = true;
+            cbBorder.CheckedChanged += Preview_Changed;
+            // 
             // previewWebView
             // 
             previewWebView.AllowExternalDrop = false;
@@ -168,7 +202,7 @@ namespace PDFLight.Forms
             previewWebView.Location = new Point(12, 12);
             previewWebView.Name = "previewWebView";
             previewWebView.Size = new Size(340, 415);
-            previewWebView.TabIndex = 11;
+            previewWebView.TabIndex = 14;
             previewWebView.TabStop = false;
             previewWebView.ZoomFactor = 1D;
             // 
@@ -180,7 +214,7 @@ namespace PDFLight.Forms
             picturePreview.Location = new Point(12, 12);
             picturePreview.Name = "picturePreview";
             picturePreview.Size = new Size(340, 415);
-            picturePreview.TabIndex = 12;
+            picturePreview.TabIndex = 15;
             picturePreview.TabStop = false;
             picturePreview.Paint += PicturePreview_Paint;
             picturePreview.MouseClick += PicturePreview_MouseClick;
@@ -191,7 +225,7 @@ namespace PDFLight.Forms
             labelPreviewState.Location = new Point(12, 430);
             labelPreviewState.Name = "labelPreviewState";
             labelPreviewState.Size = new Size(340, 15);
-            labelPreviewState.TabIndex = 13;
+            labelPreviewState.TabIndex = 16;
             labelPreviewState.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // buttonOK
@@ -200,7 +234,7 @@ namespace PDFLight.Forms
             buttonOK.Location = new Point(420, 424);
             buttonOK.Name = "buttonOK";
             buttonOK.Size = new Size(95, 27);
-            buttonOK.TabIndex = 14;
+            buttonOK.TabIndex = 17;
             buttonOK.Text = "OK";
             buttonOK.UseVisualStyleBackColor = true;
             buttonOK.Click += ButtonOK_Click;
@@ -212,7 +246,7 @@ namespace PDFLight.Forms
             buttonCancel.Location = new Point(521, 424);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new Size(95, 27);
-            buttonCancel.TabIndex = 15;
+            buttonCancel.TabIndex = 18;
             buttonCancel.Text = "Abbrechen";
             buttonCancel.UseVisualStyleBackColor = true;
             // 
@@ -228,6 +262,9 @@ namespace PDFLight.Forms
             Controls.Add(labelPreviewState);
             Controls.Add(picturePreview);
             Controls.Add(previewWebView);
+            Controls.Add(cbBorder);
+            Controls.Add(comboBackground);
+            Controls.Add(labelBackground);
             Controls.Add(numSize);
             Controls.Add(labelSize);
             Controls.Add(numTop);
@@ -270,6 +307,9 @@ namespace PDFLight.Forms
         private System.Windows.Forms.NumericUpDown numTop;
         private System.Windows.Forms.Label labelSize;
         private System.Windows.Forms.NumericUpDown numSize;
+        private System.Windows.Forms.Label labelBackground;
+        private System.Windows.Forms.ComboBox comboBackground;
+        private System.Windows.Forms.CheckBox cbBorder;
         private Microsoft.Web.WebView2.WinForms.WebView2 previewWebView;
         private System.Windows.Forms.PictureBox picturePreview;
         private System.Windows.Forms.Label labelPreviewState;
