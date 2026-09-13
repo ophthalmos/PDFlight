@@ -48,6 +48,7 @@ public class AppSettings
     public bool ShowProgramIcons { get; set; } = true;    // Symbole der externen Programme zusätzlich in der Symbolleiste
     public bool ShowToolbarIcons { get; set; } = true;    // Symbole auf den Schaltflächen der Symbolleiste
     public bool LargeToolbarIcons { get; set; } = true;   // 24 statt 16 Pixel (vor DPI-Skalierung)
+    public bool ShowToolbarText { get; set; } = true;     // Beschriftung der Schaltflächen; aus = nur Symbole (Layout „ohne Text“)
     public bool CloseOnEscape { get; set; }               // Programm mit 2× Esc beenden (Shift+Esc sofort)
     public bool ReopenLastFile { get; set; }              // zuletzt geöffnete Datei beim Start laden
     public bool ShowFullPathInTitle { get; set; }         // vollständigen Dateipfad statt nur des Dateinamens in der Titelleiste
@@ -110,6 +111,7 @@ public class AppSettings
                     settings.LargeToolbarIcons = level < 1;
                     settings.ShowProgramIcons = level < 2;
                     settings.ShowToolbarIcons = level < 3;
+                    settings.ShowToolbarText = true;
                 }
             }
         }

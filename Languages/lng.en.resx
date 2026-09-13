@@ -23,6 +23,7 @@
   <data name="Layout der Hauptmenüleiste:" xml:space="preserve"><value>Main toolbar layout:</value></data>
   <data name="Große Symbole und Programm-Icons" xml:space="preserve"><value>Large icons and program icons</value></data>
   <data name="Große Symbole, ohne Programm-Icons" xml:space="preserve"><value>Large icons, no program icons</value></data>
+  <data name="Große Symbole und Icons, ohne Text" xml:space="preserve"><value>Large icons and program icons, no text</value></data>
   <data name="Kleine Symbole und Programm-Icons" xml:space="preserve"><value>Small icons and program icons</value></data>
   <data name="Kleine Symbole, ohne Programm-Icons" xml:space="preserve"><value>Small icons, no program icons</value></data>
   <data name="Nur Text" xml:space="preserve"><value>Text only</value></data>
