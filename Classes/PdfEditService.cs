@@ -1,5 +1,7 @@
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
+using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 
@@ -80,6 +82,90 @@ internal static partial class PdfEditService
             p.Rotate = ((p.Rotate + delta) % 360 + 360) % 360;
         }
         document.Save(path);
+    }
+
+    /// <summary>Fügt eine FreeText-Anmerkung ein: ein gelber Textkasten an der Position (Millimeter von links/oben,
+    /// unrotierte Seite) mit eigenem Erscheinungsbild – der Chromium-Viewer zeichnet Anmerkungen ohne
+    /// Darstellungsstrom nicht (PDFsharps PdfTextAnnotation bliebe dort ein stummes Symbol). Schrift Helvetica
+    /// (Standardschrift, nichts einzubetten), Text in WinAnsi; die Anmerkung bleibt als solche entfernbar.</summary>
+    public static void AddFreeTextAnnotation(string path, int page, string text, double leftMm, double topMm, double fontSize)
+    {
+        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        var pdfPage = document.Pages[page - 1];
+        var lines = text.Replace("\r\n", "\n").Split('\n');
+        const double Padding = 4;
+        var leading = fontSize * 1.25;
+        double textWidth;
+        using (var measure = XGraphics.CreateMeasureContext(new XSize(1000, 1000), XGraphicsUnit.Point, XPageDirection.Downwards))
+        {
+            var measureFont = new XFont("Arial", fontSize); // metrisch nahe an Helvetica
+            textWidth = lines.Max(line => measure.MeasureString(line, measureFont).Width);
+        }
+        var width = textWidth + 2 * Padding;
+        var height = lines.Length * leading + 2 * Padding;
+        var left = leftMm * 72 / 25.4;
+        var top = pdfPage.Height.Point - topMm * 72 / 25.4;
+
+        var font = new PdfDictionary(document);
+        font.Elements.SetName("/Type", "/Font");
+        font.Elements.SetName("/Subtype", "/Type1");
+        font.Elements.SetName("/BaseFont", "/Helvetica");
+        font.Elements.SetName("/Encoding", "/WinAnsiEncoding");
+        document.Internals.AddObject(font);
+        var fonts = new PdfDictionary(document);
+        fonts.Elements.SetReference("/Helv", font);
+        var resources = new PdfDictionary(document);
+        resources.Elements.SetObject("/Font", fonts);
+
+        var content = new StringBuilder();
+        content.Append(CultureInfo.InvariantCulture, $"q 1 1 0.8 rg 0 0 {width:0.##} {height:0.##} re f 0.6 0.6 0.4 RG 0.5 w 0.25 0.25 {width - 0.5:0.##} {height - 0.5:0.##} re S Q ");
+        content.Append(CultureInfo.InvariantCulture, $"BT /Helv {fontSize:0.##} Tf 0 g {leading:0.##} TL {Padding:0.##} {height - Padding - fontSize * 0.8:0.##} Td ");
+        foreach (var line in lines)
+        {
+            content.Append('(').Append(line.Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)")).Append(") Tj T* ");
+        }
+        content.Append("ET");
+        var appearance = new PdfDictionary(document);
+        appearance.Elements.SetName("/Type", "/XObject");
+        appearance.Elements.SetName("/Subtype", "/Form");
+        appearance.Elements.SetRectangle("/BBox", new PdfRectangle(new XRect(0, 0, width, height)));
+        appearance.Elements.SetObject("/Resources", resources);
+        appearance.CreateStream(ToWinAnsi(content.ToString()));
+        document.Internals.AddObject(appearance);
+        var appearances = new PdfDictionary(document);
+        appearances.Elements.SetReference("/N", appearance);
+
+        var annotation = new PdfDictionary(document);
+        annotation.Elements.SetName("/Type", "/Annot");
+        annotation.Elements.SetName("/Subtype", "/FreeText");
+        annotation.Elements.SetRectangle("/Rect", new PdfRectangle(new XRect(left, top - height, width, height)));
+        annotation.Elements.SetString("/Contents", text);
+        annotation.Elements.SetString("/DA", string.Create(CultureInfo.InvariantCulture, $"/Helv {fontSize:0.##} Tf 0 g"));
+        annotation.Elements.SetInteger("/F", 4); // drucken
+        annotation.Elements.SetObject("/AP", appearances);
+        annotation.Elements.SetDateTime("/M", DateTime.Now);
+        document.Internals.AddObject(annotation);
+        pdfPage.Annotations.Elements.Add(annotation.Reference!); // nach AddObject hat das Objekt eine Referenz
+        document.Save(path);
+    }
+
+    /// <summary>Kodiert Text für einen Inhaltsstrom in WinAnsi: Latin-1 direkt, die Windows-1252-Sonderzeichen
+    /// (Euro, typografische Anführungszeichen, Gedankenstrich, Auslassungspunkte …) über die Tabelle, alles andere als „?“.</summary>
+    private static byte[] ToWinAnsi(string text)
+    {
+        var bytes = new byte[text.Length];
+        for (var i = 0; i < text.Length; i++)
+        {
+            var ch = text[i];
+            bytes[i] = ch < 0x80 || (ch >= 0xA0 && ch <= 0xFF) ? (byte)ch : (byte)(ch switch
+            {
+                '€' => 0x80, '‚' => 0x82, 'ƒ' => 0x83, '„' => 0x84, '…' => 0x85, '†' => 0x86, '‡' => 0x87, 'ˆ' => 0x88, '‰' => 0x89,
+                'Š' => 0x8A, '‹' => 0x8B, 'Œ' => 0x8C, 'Ž' => 0x8E, '‘' => 0x91, '’' => 0x92, '“' => 0x93, '”' => 0x94, '•' => 0x95,
+                '–' => 0x96, '—' => 0x97, '˜' => 0x98, '™' => 0x99, 'š' => 0x9A, '›' => 0x9B, 'œ' => 0x9C, 'ž' => 0x9E, 'Ÿ' => 0x9F,
+                _ => '?',
+            });
+        }
+        return bytes;
     }
 
     /// <summary>Hängt alle Seiten einer anderen PDF-Datei an; liefert die neue Gesamtseitenzahl.</summary>
