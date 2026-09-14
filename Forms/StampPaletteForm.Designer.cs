@@ -33,6 +33,7 @@
             labelHint = new Label();
             buttonOK = new Button();
             buttonCancel = new Button();
+            buttonEdit = new Button();
             SuspendLayout();
             // 
             // labelPage
@@ -91,6 +92,16 @@
             buttonCancel.Text = "Abbrechen";
             buttonCancel.UseVisualStyleBackColor = true;
             // 
+            // buttonEdit
+            // 
+            buttonEdit.Location = new Point(12, 322);
+            buttonEdit.Name = "buttonEdit";
+            buttonEdit.Size = new Size(130, 27);
+            buttonEdit.TabIndex = 5;
+            buttonEdit.Text = "Stempel bearbeiten";
+            buttonEdit.UseVisualStyleBackColor = true;
+            buttonEdit.Click += ButtonEdit_Click;
+            // 
             // StampPaletteForm
             // 
             AcceptButton = buttonOK;
@@ -98,6 +109,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonCancel;
             ClientSize = new Size(384, 361);
+            Controls.Add(buttonEdit);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
             Controls.Add(labelHint);
@@ -121,5 +133,6 @@
         private System.Windows.Forms.Label labelHint;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
+        private Button buttonEdit;
     }
 }

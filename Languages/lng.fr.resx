@@ -570,4 +570,5 @@ Un clic dans l'aperçu définit la position.</value></data>
   <data name="Stempel ersetzen" xml:space="preserve"><value>Remplacer le tampon</value></data>
   <data name="Der Stempel auf Seite {0} wird ersetzt durch:" xml:space="preserve"><value>Le tampon de la page {0} sera remplacé par :</value></data>
   <data name="Der Stempel auf Seite {0} wurde ersetzt." xml:space="preserve"><value>Le tampon de la page {0} a été remplacé.</value></data>
+  <data name="Stempel bearbeiten" xml:space="preserve"><value>Modifier les tampons</value></data>
 </root>

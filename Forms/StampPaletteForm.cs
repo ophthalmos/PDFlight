@@ -7,6 +7,9 @@ public partial class StampPaletteForm : Form
 {
     private readonly IReadOnlyList<Stamp> stamps;
 
+    /// <summary>True, wenn „Stempel bearbeiten“ gedrückt wurde: Der Aufrufer öffnet die Verwaltung und zeigt die Palette danach erneut.</summary>
+    public bool ManageRequested { get; private set; }
+
     /// <summary>Der gewählte Stempel, nach OK gesetzt.</summary>
     public Stamp? SelectedStamp => listStamps.SelectedIndex >= 0 && listStamps.SelectedIndex < stamps.Count ? stamps[listStamps.SelectedIndex] : null;
 
@@ -27,6 +30,12 @@ public partial class StampPaletteForm : Form
     {
         if (e.Index < 0 || e.Index >= stamps.Count) { return; }
         StampListPainter.Draw(e, stamps[e.Index], Font);
+    }
+
+    private void ButtonEdit_Click(object? sender, EventArgs e)
+    {
+        ManageRequested = true;
+        Close(); // Abbrechen als Ergebnis – der Aufrufer wertet ManageRequested aus
     }
 
     private void ListStamps_DoubleClick(object? sender, EventArgs e)
