@@ -1463,13 +1463,25 @@ public partial class MainForm : Form
             if (settings.Stamps.Count == 0) { return; }
         }
         var page = Math.Max(1, ClampedCurrentPage()); // immer die angezeigte Seite
-        using StampPaletteForm dialog = new(settings.Stamps, page);
-        if (dialog.ShowDialog(this) != DialogResult.OK || dialog.SelectedStamp is not { } stamp) { return; }
+        if (ChooseStamp(page, replace: false) is not { } stamp) { return; }
         if (RunPdfEdit(() => PdfEditService.AddStamp(currentFile.FullName, page, stamp), Lng.T("Stempel")))
         {
             LoadPdf(currentFile.FullName, page);
             statusPath.Text = string.Format(Lng.T("Der Stempel „{0}“ wurde auf Seite {1} gesetzt."), stamp.Text, page);
         }
+    }
+
+    /// <summary>Palette zeigen; „Stempel bearbeiten“ darin öffnet die Verwaltung und danach wieder die Palette. null = abgebrochen (auch bei leerer Palette).</summary>
+    private Stamp? ChooseStamp(int page, bool replace)
+    {
+        while (settings.Stamps.Count > 0)
+        {
+            using StampPaletteForm dialog = new(settings.Stamps, page, replace);
+            var result = dialog.ShowDialog(this);
+            if (dialog.ManageRequested) { ManageStampsDialog(); continue; }
+            return result == DialogResult.OK ? dialog.SelectedStamp : null;
+        }
+        return null;
     }
 
     /// <summary>Stempelpalette bearbeiten; die Liste landet in den Einstellungen.</summary>
@@ -1494,8 +1506,7 @@ public partial class MainForm : Form
             TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Stempelpalette ist leer."), null, TaskDialogIcon.Information);
             return;
         }
-        using StampPaletteForm dialog = new(settings.Stamps, annotation.Page, replace: true);
-        if (dialog.ShowDialog(this) != DialogResult.OK || dialog.SelectedStamp is not { } stamp) { return; }
+        if (ChooseStamp(annotation.Page, replace: true) is not { } stamp) { return; }
         if (RunPdfEdit(() => PdfEditService.UpdateStamp(file, annotation.Page, annotation.Index, annotation.ObjectNumber, stamp), Lng.T("Stempel")))
         {
             LoadPdf(file, annotation.Page);
