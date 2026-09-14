@@ -198,9 +198,9 @@
             cbBorder.CheckState = CheckState.Checked;
             cbBorder.Location = new Point(333, 207);
             cbBorder.Name = "cbBorder";
-            cbBorder.Size = new Size(70, 19);
+            cbBorder.Size = new Size(120, 19);
             cbBorder.TabIndex = 14;
-            cbBorder.Text = "&Rahmen";
+            cbBorder.Text = "&Rahmen zeichnen";
             cbBorder.UseVisualStyleBackColor = true;
             cbBorder.CheckedChanged += Field_Changed;
             // 
