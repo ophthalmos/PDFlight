@@ -53,5 +53,5 @@ internal static class StampListPainter
     }
 
     /// <summary>Hellgrau für die nicht markierten Einträge – der markierte hebt sich weiß davon ab (Versuch statt Hellblau).</summary>
-    private static readonly Color UnselectedColor = SystemColors.Control; // wie die BackColor der Listen im Designer, damit auch der leere Rest der Liste grau ist
+    private static readonly Color UnselectedColor = Color.FromArgb(228, 228, 228); // etwas dunkler als die Dialogfläche; gleich der BackColor der Listen im Designer, damit auch der leere Rest der Liste so aussieht
 }
