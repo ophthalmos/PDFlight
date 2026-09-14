@@ -575,4 +575,8 @@ Un clic dans l'aperçu définit la position.</value></data>
   <data name="Soll er entfernt werden? Bei „Nein“ kommt der neue Stempel zusätzlich dazu." xml:space="preserve"><value>Le supprimer ? Avec « Non », le nouveau tampon s’ajoute en plus.</value></data>
   <data name="Bearbeiter&amp;kürzel:" xml:space="preserve"><value>&amp;Initiales :</value></data>
   <data name="max. 3 Zeichen" xml:space="preserve"><value>3 caractères max.</value></data>
+  <data name="Alle löschen" xml:space="preserve"><value>Tout supprimer</value></data>
+  <data name="Alle {0} Anmerkungen löschen?" xml:space="preserve"><value>Supprimer les {0} annotations ?</value></data>
+  <data name="Das gilt für alle Seiten und lässt sich mit Strg+Z rückgängig machen." xml:space="preserve"><value>Cela concerne toutes les pages et peut être annulé avec Ctrl+Z.</value></data>
+  <data name="Anmerkungen löschen" xml:space="preserve"><value>Suppression des annotations</value></data>
 </root>

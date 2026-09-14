@@ -30,6 +30,7 @@ public partial class AnnotationListForm : Form
         labelFileValue.Text = Path.GetFileName(filePath);
         btnEdit.Image = ButtonIcon(ToolbarIcons.Edit);
         btnDelete.Image = ButtonIcon(ToolbarIcons.Delete);
+        btnDeleteAll.Image = ButtonIcon(ToolbarIcons.Clear);
         Lng.Apply(contextMenuList); // Kontextmenüs hängen nicht im Control-Baum
         editMenuItem.Image = ToolbarIcons.MenuIcon(ToolbarIcons.Edit, this);
         deleteMenuItem.Image = ToolbarIcons.MenuIcon(ToolbarIcons.Delete, this);
@@ -96,6 +97,7 @@ public partial class AnnotationListForm : Form
         var selected = Selected;
         btnEdit.Enabled = selected?.Subtype is "FreeText" or "Stamp"; // nur eigene Arten lassen sich neu zeichnen (Stempel: anderen Palettenstempel wählen)
         btnDelete.Enabled = selected != null;
+        btnDeleteAll.Enabled = listView.Items.Count > 0;
     }
 
     private void ListView_SelectedIndexChanged(object? sender, EventArgs e) => UpdateButtons();
@@ -123,6 +125,22 @@ public partial class AnnotationListForm : Form
         if (Selected is not { Subtype: "FreeText" or "Stamp" } annotation) { return; }
         EditRequested = annotation;
         Close();
+    }
+
+    /// <summary>Alle Anmerkungen der Datei auf einmal löschen (mit Rückfrage – hier geht mehr verloren als bei einem Eintrag);
+    /// danach ist nichts mehr zu verwalten, die Liste schließt sich.</summary>
+    private void BtnDeleteAll_Click(object? sender, EventArgs e)
+    {
+        var count = listView.Items.Count;
+        if (count == 0) { return; }
+        if (!TaskDlg.ConfirmTaskDlg(Handle, string.Format(Lng.T("Alle {0} Anmerkungen löschen?"), count), Lng.T("Das gilt für alle Seiten und lässt sich mit Strg+Z rückgängig machen."), TaskDialogIcon.Warning, defaultNo: true)) { return; }
+        var currentPage = Selected?.Page ?? LastPage;
+        if (runEdit(() => PdfEditService.DeleteAllAnnotations(filePath), Lng.T("Anmerkungen löschen")))
+        {
+            Changed = true;
+            LastPage = currentPage;
+            Close();
+        }
     }
 
     private void BtnDelete_Click(object? sender, EventArgs e)
