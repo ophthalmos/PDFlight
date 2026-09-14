@@ -51,6 +51,7 @@
             // 
             // listStamps
             // 
+            listStamps.BackColor = SystemColors.Control;
             listStamps.DrawMode = DrawMode.OwnerDrawFixed;
             listStamps.IntegralHeight = false;
             listStamps.ItemHeight = 44;

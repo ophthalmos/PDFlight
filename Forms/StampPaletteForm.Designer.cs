@@ -47,6 +47,7 @@
             // listStamps
             // 
             listStamps.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            listStamps.BackColor = SystemColors.Control;
             listStamps.DrawMode = DrawMode.OwnerDrawFixed;
             listStamps.IntegralHeight = false;
             listStamps.ItemHeight = 44;
