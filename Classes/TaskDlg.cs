@@ -247,9 +247,9 @@ internal static class TaskDlg
         ("Strg+E", "als E-Mail-Anhang senden", null),
         ("Strg+F", "im Dokument suchen", null),
         ("Strg+G", "Gehe zu Seite (Zahl tippen + Enter)", null),
+        ("Strg+H", "Stempel einfügen", null),
         ("Strg+I", "Dokumenteigenschaften", null),
         ("Strg+K", "Datei kopieren", null),
-        ("Strg+L", "Stempel einfügen", null),
         ("Strg+M / F4", "Datei verschieben", null),
         ("Strg+O", "PDF-Datei öffnen", null),
         ("Strg+P", "Dokument drucken", null),
@@ -264,6 +264,7 @@ internal static class TaskDlg
         // Strg + Umschalt + Buchstabe
         ("Strg+Umschalt+B", "Seite an Fensterbreite anpassen", null),
         ("Strg+Umschalt+C", "Dateipfad in die Zwischenablage kopieren", null),
+        ("Strg+Umschalt+H", "Stempel verwalten", null),
         ("Strg+Umschalt+I", "Inhalte-Leiste ein-/ausblenden", null),
         ("Strg+Umschalt+K", "sofort in den 1-Klick-Ordner kopieren", null),
         ("Strg+Umschalt+M / Strg+F4", "sofort in den 1-Klick-Ordner verschieben", null),

@@ -28,86 +28,86 @@
         /// </summary>
         private void InitializeComponent()
         {
-            labelPage = new System.Windows.Forms.Label();
-            listStamps = new System.Windows.Forms.ListBox();
-            labelHint = new System.Windows.Forms.Label();
-            buttonOK = new System.Windows.Forms.Button();
-            buttonCancel = new System.Windows.Forms.Button();
+            labelPage = new Label();
+            listStamps = new ListBox();
+            labelHint = new Label();
+            buttonOK = new Button();
+            buttonCancel = new Button();
             SuspendLayout();
-            //
+            // 
             // labelPage
-            //
+            // 
             labelPage.AutoSize = true;
-            labelPage.Location = new System.Drawing.Point(12, 12);
+            labelPage.Location = new Point(12, 12);
             labelPage.Name = "labelPage";
-            labelPage.Size = new System.Drawing.Size(170, 15);
+            labelPage.Size = new Size(181, 15);
             labelPage.TabIndex = 0;
             labelPage.Text = "Der Stempel kommt auf Seite {0}.";
-            //
+            // 
             // listStamps
-            //
-            listStamps.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            listStamps.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            // 
+            listStamps.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            listStamps.DrawMode = DrawMode.OwnerDrawFixed;
             listStamps.IntegralHeight = false;
             listStamps.ItemHeight = 44;
-            listStamps.Location = new System.Drawing.Point(12, 34);
+            listStamps.Location = new Point(12, 34);
             listStamps.Name = "listStamps";
-            listStamps.Size = new System.Drawing.Size(400, 226);
+            listStamps.Size = new Size(360, 254);
             listStamps.TabIndex = 1;
             listStamps.DrawItem += ListStamps_DrawItem;
             listStamps.DoubleClick += ListStamps_DoubleClick;
-            //
+            // 
             // labelHint
-            //
-            labelHint.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            // 
+            labelHint.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             labelHint.AutoSize = true;
-            labelHint.ForeColor = System.Drawing.SystemColors.GrayText;
-            labelHint.Location = new System.Drawing.Point(12, 268);
+            labelHint.ForeColor = SystemColors.GrayText;
+            labelHint.Location = new Point(12, 296);
             labelHint.Name = "labelHint";
-            labelHint.Size = new System.Drawing.Size(230, 15);
+            labelHint.Size = new Size(202, 15);
             labelHint.TabIndex = 2;
             labelHint.Text = "Doppelklick setzt den Stempel sofort.";
-            //
+            // 
             // buttonOK
-            //
-            buttonOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            buttonOK.Location = new System.Drawing.Point(216, 294);
+            // 
+            buttonOK.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonOK.DialogResult = DialogResult.OK;
+            buttonOK.Location = new Point(176, 322);
             buttonOK.Name = "buttonOK";
-            buttonOK.Size = new System.Drawing.Size(95, 27);
+            buttonOK.Size = new Size(95, 27);
             buttonOK.TabIndex = 3;
             buttonOK.Text = "Einfügen";
             buttonOK.UseVisualStyleBackColor = true;
-            //
+            // 
             // buttonCancel
-            //
-            buttonCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            buttonCancel.Location = new System.Drawing.Point(317, 294);
+            // 
+            buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonCancel.DialogResult = DialogResult.Cancel;
+            buttonCancel.Location = new Point(277, 322);
             buttonCancel.Name = "buttonCancel";
-            buttonCancel.Size = new System.Drawing.Size(95, 27);
+            buttonCancel.Size = new Size(95, 27);
             buttonCancel.TabIndex = 4;
             buttonCancel.Text = "Abbrechen";
             buttonCancel.UseVisualStyleBackColor = true;
-            //
+            // 
             // StampPaletteForm
-            //
+            // 
             AcceptButton = buttonOK;
-            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonCancel;
-            ClientSize = new System.Drawing.Size(424, 333);
+            ClientSize = new Size(384, 361);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
             Controls.Add(labelHint);
             Controls.Add(listStamps);
             Controls.Add(labelPage);
-            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "StampPaletteForm";
             ShowInTaskbar = false;
-            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            StartPosition = FormStartPosition.CenterParent;
             Text = "Stempel einfügen";
             ResumeLayout(false);
             PerformLayout();

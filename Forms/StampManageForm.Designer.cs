@@ -28,221 +28,221 @@
         /// </summary>
         private void InitializeComponent()
         {
-            listStamps = new System.Windows.Forms.ListBox();
-            buttonNew = new System.Windows.Forms.Button();
-            buttonDelete = new System.Windows.Forms.Button();
-            labelText = new System.Windows.Forms.Label();
-            textBoxText = new System.Windows.Forms.TextBox();
-            labelSize = new System.Windows.Forms.Label();
-            numSize = new System.Windows.Forms.NumericUpDown();
-            labelColor = new System.Windows.Forms.Label();
-            comboColor = new System.Windows.Forms.ComboBox();
-            labelBackground = new System.Windows.Forms.Label();
-            comboBackground = new System.Windows.Forms.ComboBox();
-            labelPosition = new System.Windows.Forms.Label();
-            comboPosition = new System.Windows.Forms.ComboBox();
-            cbDate = new System.Windows.Forms.CheckBox();
-            cbBorder = new System.Windows.Forms.CheckBox();
-            cbRounded = new System.Windows.Forms.CheckBox();
-            buttonOK = new System.Windows.Forms.Button();
-            buttonCancel = new System.Windows.Forms.Button();
+            listStamps = new ListBox();
+            buttonNew = new Button();
+            buttonDelete = new Button();
+            labelText = new Label();
+            textBoxText = new TextBox();
+            labelSize = new Label();
+            numSize = new NumericUpDown();
+            labelColor = new Label();
+            comboColor = new ComboBox();
+            labelBackground = new Label();
+            comboBackground = new ComboBox();
+            labelPosition = new Label();
+            comboPosition = new ComboBox();
+            cbDate = new CheckBox();
+            cbBorder = new CheckBox();
+            cbRounded = new CheckBox();
+            buttonOK = new Button();
+            buttonCancel = new Button();
             ((System.ComponentModel.ISupportInitialize)numSize).BeginInit();
             SuspendLayout();
-            //
+            // 
             // listStamps
-            //
-            listStamps.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            // 
+            listStamps.DrawMode = DrawMode.OwnerDrawFixed;
             listStamps.IntegralHeight = false;
             listStamps.ItemHeight = 44;
-            listStamps.Location = new System.Drawing.Point(12, 12);
+            listStamps.Location = new Point(12, 12);
             listStamps.Name = "listStamps";
-            listStamps.Size = new System.Drawing.Size(300, 270);
+            listStamps.Size = new Size(300, 270);
             listStamps.TabIndex = 0;
             listStamps.DrawItem += ListStamps_DrawItem;
             listStamps.SelectedIndexChanged += ListStamps_SelectedIndexChanged;
-            //
+            // 
             // buttonNew
-            //
-            buttonNew.Location = new System.Drawing.Point(12, 290);
+            // 
+            buttonNew.Location = new Point(12, 290);
             buttonNew.Name = "buttonNew";
-            buttonNew.Size = new System.Drawing.Size(95, 27);
+            buttonNew.Size = new Size(95, 27);
             buttonNew.TabIndex = 1;
             buttonNew.Text = "&Neu";
             buttonNew.UseVisualStyleBackColor = true;
             buttonNew.Click += ButtonNew_Click;
-            //
+            // 
             // buttonDelete
-            //
-            buttonDelete.Location = new System.Drawing.Point(113, 290);
+            // 
+            buttonDelete.Location = new Point(113, 290);
             buttonDelete.Name = "buttonDelete";
-            buttonDelete.Size = new System.Drawing.Size(95, 27);
+            buttonDelete.Size = new Size(95, 27);
             buttonDelete.TabIndex = 2;
             buttonDelete.Text = "&Löschen";
             buttonDelete.UseVisualStyleBackColor = true;
             buttonDelete.Click += ButtonDelete_Click;
-            //
+            // 
             // labelText
-            //
+            // 
             labelText.AutoSize = true;
-            labelText.Location = new System.Drawing.Point(330, 15);
+            labelText.Location = new Point(330, 15);
             labelText.Name = "labelText";
-            labelText.Size = new System.Drawing.Size(31, 15);
+            labelText.Size = new Size(31, 15);
             labelText.TabIndex = 3;
             labelText.Text = "&Text:";
-            //
+            // 
             // textBoxText
-            //
-            textBoxText.Location = new System.Drawing.Point(430, 12);
+            // 
+            textBoxText.Location = new Point(430, 12);
             textBoxText.Name = "textBoxText";
-            textBoxText.Size = new System.Drawing.Size(160, 23);
+            textBoxText.Size = new Size(160, 23);
             textBoxText.TabIndex = 4;
             textBoxText.TextChanged += Field_Changed;
             textBoxText.Leave += TextBoxText_Leave;
-            //
+            // 
             // labelSize
-            //
+            // 
             labelSize.AutoSize = true;
-            labelSize.Location = new System.Drawing.Point(330, 47);
+            labelSize.Location = new Point(330, 47);
             labelSize.Name = "labelSize";
-            labelSize.Size = new System.Drawing.Size(95, 15);
+            labelSize.Size = new Size(97, 15);
             labelSize.TabIndex = 5;
             labelSize.Text = "Schrift&größe (pt):";
-            //
+            // 
             // numSize
-            //
-            numSize.Location = new System.Drawing.Point(430, 45);
+            // 
+            numSize.Location = new Point(430, 45);
             numSize.Maximum = new decimal(new int[] { 72, 0, 0, 0 });
             numSize.Minimum = new decimal(new int[] { 8, 0, 0, 0 });
             numSize.Name = "numSize";
-            numSize.Size = new System.Drawing.Size(80, 23);
+            numSize.Size = new Size(80, 23);
             numSize.TabIndex = 6;
             numSize.Value = new decimal(new int[] { 24, 0, 0, 0 });
             numSize.ValueChanged += Field_Changed;
-            //
+            // 
             // labelColor
-            //
+            // 
             labelColor.AutoSize = true;
-            labelColor.Location = new System.Drawing.Point(330, 81);
+            labelColor.Location = new Point(330, 81);
             labelColor.Name = "labelColor";
-            labelColor.Size = new System.Drawing.Size(71, 15);
+            labelColor.Size = new Size(71, 15);
             labelColor.TabIndex = 7;
             labelColor.Text = "Schrift&farbe:";
-            //
+            // 
             // comboColor
-            //
-            comboColor.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-            comboColor.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            comboColor.Location = new System.Drawing.Point(430, 78);
+            // 
+            comboColor.DrawMode = DrawMode.OwnerDrawFixed;
+            comboColor.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboColor.Location = new Point(430, 78);
             comboColor.Name = "comboColor";
-            comboColor.Size = new System.Drawing.Size(160, 24);
+            comboColor.Size = new Size(160, 24);
             comboColor.TabIndex = 8;
             comboColor.DrawItem += ComboColor_DrawItem;
             comboColor.SelectedIndexChanged += Field_Changed;
-            //
+            // 
             // labelBackground
-            //
+            // 
             labelBackground.AutoSize = true;
-            labelBackground.Location = new System.Drawing.Point(330, 115);
+            labelBackground.Location = new Point(330, 115);
             labelBackground.Name = "labelBackground";
-            labelBackground.Size = new System.Drawing.Size(75, 15);
+            labelBackground.Size = new Size(75, 15);
             labelBackground.TabIndex = 9;
             labelBackground.Text = "&Hintergrund:";
-            //
+            // 
             // comboBackground
-            //
-            comboBackground.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-            comboBackground.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            comboBackground.Location = new System.Drawing.Point(430, 112);
+            // 
+            comboBackground.DrawMode = DrawMode.OwnerDrawFixed;
+            comboBackground.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBackground.Location = new Point(430, 112);
             comboBackground.Name = "comboBackground";
-            comboBackground.Size = new System.Drawing.Size(160, 24);
+            comboBackground.Size = new Size(160, 24);
             comboBackground.TabIndex = 10;
             comboBackground.DrawItem += ComboBackground_DrawItem;
             comboBackground.SelectedIndexChanged += Field_Changed;
-            //
+            // 
             // labelPosition
-            //
+            // 
             labelPosition.AutoSize = true;
-            labelPosition.Location = new System.Drawing.Point(330, 149);
+            labelPosition.Location = new Point(330, 149);
             labelPosition.Name = "labelPosition";
-            labelPosition.Size = new System.Drawing.Size(53, 15);
+            labelPosition.Size = new Size(53, 15);
             labelPosition.TabIndex = 11;
             labelPosition.Text = "&Position:";
-            //
+            // 
             // comboPosition
-            //
-            comboPosition.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            comboPosition.Location = new System.Drawing.Point(430, 146);
+            // 
+            comboPosition.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboPosition.Location = new Point(430, 146);
             comboPosition.Name = "comboPosition";
-            comboPosition.Size = new System.Drawing.Size(160, 23);
+            comboPosition.Size = new Size(160, 23);
             comboPosition.TabIndex = 12;
             comboPosition.SelectedIndexChanged += Field_Changed;
-            //
+            // 
             // cbDate
-            //
+            // 
             cbDate.AutoSize = true;
             cbDate.Checked = true;
-            cbDate.CheckState = System.Windows.Forms.CheckState.Checked;
-            cbDate.Location = new System.Drawing.Point(430, 182);
+            cbDate.CheckState = CheckState.Checked;
+            cbDate.Location = new Point(333, 182);
             cbDate.Name = "cbDate";
-            cbDate.Size = new System.Drawing.Size(160, 19);
+            cbDate.Size = new Size(173, 19);
             cbDate.TabIndex = 13;
             cbDate.Text = "&Datum und Uhrzeit anfügen";
             cbDate.UseVisualStyleBackColor = true;
             cbDate.CheckedChanged += Field_Changed;
-            //
+            // 
             // cbBorder
-            //
+            // 
             cbBorder.AutoSize = true;
             cbBorder.Checked = true;
-            cbBorder.CheckState = System.Windows.Forms.CheckState.Checked;
-            cbBorder.Location = new System.Drawing.Point(430, 207);
+            cbBorder.CheckState = CheckState.Checked;
+            cbBorder.Location = new Point(333, 207);
             cbBorder.Name = "cbBorder";
-            cbBorder.Size = new System.Drawing.Size(70, 19);
+            cbBorder.Size = new Size(70, 19);
             cbBorder.TabIndex = 14;
             cbBorder.Text = "&Rahmen";
             cbBorder.UseVisualStyleBackColor = true;
             cbBorder.CheckedChanged += Field_Changed;
-            //
+            // 
             // cbRounded
-            //
+            // 
             cbRounded.AutoSize = true;
-            cbRounded.Location = new System.Drawing.Point(430, 232);
+            cbRounded.Location = new Point(430, 207);
             cbRounded.Name = "cbRounded";
-            cbRounded.Size = new System.Drawing.Size(130, 19);
+            cbRounded.Size = new Size(129, 19);
             cbRounded.TabIndex = 15;
             cbRounded.Text = "Abgerundete &Ecken";
             cbRounded.UseVisualStyleBackColor = true;
             cbRounded.CheckedChanged += Field_Changed;
-            //
+            // 
             // buttonOK
-            //
-            buttonOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            buttonOK.Location = new System.Drawing.Point(364, 290);
+            // 
+            buttonOK.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonOK.Location = new Point(330, 290);
             buttonOK.Name = "buttonOK";
-            buttonOK.Size = new System.Drawing.Size(125, 27);
+            buttonOK.Size = new Size(159, 27);
             buttonOK.TabIndex = 16;
             buttonOK.Text = "Palette &speichern";
             buttonOK.UseVisualStyleBackColor = true;
             buttonOK.Click += ButtonOK_Click;
-            //
+            // 
             // buttonCancel
-            //
-            buttonCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            buttonCancel.Location = new System.Drawing.Point(495, 290);
+            // 
+            buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonCancel.DialogResult = DialogResult.Cancel;
+            buttonCancel.Location = new Point(495, 290);
             buttonCancel.Name = "buttonCancel";
-            buttonCancel.Size = new System.Drawing.Size(95, 27);
+            buttonCancel.Size = new Size(95, 27);
             buttonCancel.TabIndex = 17;
             buttonCancel.Text = "Abbrechen";
             buttonCancel.UseVisualStyleBackColor = true;
-            //
+            // 
             // StampManageForm
-            //
+            // 
             AcceptButton = buttonOK;
-            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonCancel;
-            ClientSize = new System.Drawing.Size(602, 329);
+            ClientSize = new Size(602, 329);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
             Controls.Add(cbRounded);
@@ -261,12 +261,12 @@
             Controls.Add(buttonDelete);
             Controls.Add(buttonNew);
             Controls.Add(listStamps);
-            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "StampManageForm";
             ShowInTaskbar = false;
-            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            StartPosition = FormStartPosition.CenterParent;
             Text = "Stempel verwalten";
             ((System.ComponentModel.ISupportInitialize)numSize).EndInit();
             ResumeLayout(false);

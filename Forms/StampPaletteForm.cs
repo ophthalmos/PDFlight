@@ -10,12 +10,14 @@ public partial class StampPaletteForm : Form
     /// <summary>Der gewählte Stempel, nach OK gesetzt.</summary>
     public Stamp? SelectedStamp => listStamps.SelectedIndex >= 0 && listStamps.SelectedIndex < stamps.Count ? stamps[listStamps.SelectedIndex] : null;
 
-    public StampPaletteForm(IReadOnlyList<Stamp> stamps, int page)
+    /// <param name="replace">Bearbeiten aus der Anmerkungsliste: Der gewählte Stempel ersetzt den vorhandenen.</param>
+    public StampPaletteForm(IReadOnlyList<Stamp> stamps, int page, bool replace = false)
     {
         InitializeComponent();
         Lng.Apply(this);
         this.stamps = stamps;
-        labelPage.Text = string.Format(Lng.T("Der Stempel kommt auf Seite {0}."), page);
+        labelPage.Text = string.Format(Lng.T(replace ? "Der Stempel auf Seite {0} wird ersetzt durch:" : "Der Stempel kommt auf Seite {0}."), page);
+        if (replace) { Text = Lng.T("Stempel ersetzen"); buttonOK.Text = Lng.T("Übernehmen"); }
         listStamps.Items.AddRange([.. stamps.Select(s => (object)s.Text)]);
         if (listStamps.Items.Count > 0) { listStamps.SelectedIndex = 0; }
         buttonOK.Enabled = listStamps.Items.Count > 0;

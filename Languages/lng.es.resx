@@ -566,4 +566,8 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="&amp;Rahmen" xml:space="preserve"><value>&amp;Borde</value></data>
   <data name="Abgerundete &amp;Ecken" xml:space="preserve"><value>&amp;Esquinas redondeadas</value></data>
   <data name="Palette &amp;speichern" xml:space="preserve"><value>&amp;Guardar paleta</value></data>
+  <data name="Strg+Umschalt+H" xml:space="preserve"><value>Ctrl+Mayús+H</value></data>
+  <data name="Stempel ersetzen" xml:space="preserve"><value>Reemplazar sello</value></data>
+  <data name="Der Stempel auf Seite {0} wird ersetzt durch:" xml:space="preserve"><value>El sello de la página {0} se reemplazará por:</value></data>
+  <data name="Der Stempel auf Seite {0} wurde ersetzt." xml:space="preserve"><value>El sello de la página {0} se ha reemplazado.</value></data>
 </root>
