@@ -246,12 +246,52 @@ internal static partial class PdfEditService
 
     /// <summary>Setzt einen Stempel der Palette auf eine Seite: Stamp-Anmerkung mit eigenem Darstellungsstrom (Helvetica-Bold,
     /// Rahmen in der Schriftfarbe, wahlweise Hintergrund) an einer der festen Positionen, 10 mm vom Rand der unrotierten Seite.</summary>
-    public static void AddStamp(string path, int page, Stamp stamp)
+    /// <param name="replaceIndex">≥ 0: dieser vorhandene Stempel (Index im Annots-Array, ObjectNumber als sichere Kennung) wird vorher entfernt.</param>
+    public static void AddStamp(string path, int page, Stamp stamp, int replaceIndex = -1, int replaceObjectNumber = 0)
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         var pdfPage = document.Pages[page - 1];
+        if (replaceIndex >= 0) { pdfPage.Annotations.Elements.RemoveAt(ResolveIndex(pdfPage.Annotations, replaceObjectNumber, replaceIndex)); }
         AppendStamp(document, pdfPage, stamp, stamp.WithDate ? Stamp.DateLine(DateTime.Now) : string.Empty); // Datum und Uhrzeit klein unter dem Text
         document.Save(path);
+    }
+
+    /// <summary>Sucht auf der Seite einen PDFlight-Stempel, der den Platz des neuen Stempels überlappt (gleiche feste Position);
+    /// null, wenn dort keiner liegt. Liefert Index, Objektnummer und Text für die Rückfrage vor dem Einfügen.</summary>
+    public static (int Index, int ObjectNumber, string Text)? FindStampAtPosition(string path, int page, Stamp stamp)
+    {
+        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
+        var pdfPage = document.Pages[page - 1];
+        var planned = StampRect(pdfPage, stamp, stamp.WithDate ? Stamp.DateLine(DateTime.Now) : string.Empty);
+        var annotations = pdfPage.Annotations;
+        for (var i = 0; i < annotations.Count; i++)
+        {
+            var a = annotations[i];
+            if (a.Elements.GetName("/Subtype") != "/Stamp" || a.Elements.GetName("/Name") != "/PDFlightStamp") { continue; }
+            var r = a.Elements.GetRectangle("/Rect");
+            XRect existing = new(Math.Min(r.X1, r.X2), Math.Min(r.Y1, r.Y2), Math.Abs(r.X2 - r.X1), Math.Abs(r.Y2 - r.Y1));
+            if (!existing.IntersectsWith(planned)) { continue; }
+            var objectNumber = annotations.Elements[i] is PdfReference reference ? reference.ObjectNumber : 0;
+            return (i, objectNumber, SplitLines(a.Elements.GetString("/Contents"))[0]);
+        }
+        return null;
+    }
+
+    /// <summary>Kasten des Stempels auf der Seite (PDF-Koordinaten, Ursprung links unten): feste Position, 10 mm vom Rand.</summary>
+    private static XRect StampRect(PdfPage pdfPage, Stamp stamp, string dateLine)
+    {
+        var (width, height, _, _) = MeasureStamp(stamp.Text, stamp.FontSize, dateLine);
+        const double margin = 10 * 72 / 25.4;
+        var pageWidth = pdfPage.Width.Point;
+        var pageHeight = pdfPage.Height.Point;
+        var left = stamp.Position switch
+        {
+            StampPosition.TopLeft => margin,
+            StampPosition.TopRight => pageWidth - margin - width,
+            _ => (pageWidth - width) / 2,
+        };
+        var top = stamp.Position == StampPosition.Center ? (pageHeight + height) / 2 : pageHeight - margin;
+        return new XRect(left, top - height, width, height);
     }
 
     /// <summary>Ersetzt einen Stempel durch einen (anderen) Stempel der Palette – wie beim Bearbeiten einer Textanmerkung wird der
@@ -272,16 +312,7 @@ internal static partial class PdfEditService
     {
         var dateSize = stamp.FontSize * Stamp.DateFactor;
         var (width, height, textWidth, dateWidth) = MeasureStamp(stamp.Text, stamp.FontSize, dateLine);
-        const double margin = 10 * 72 / 25.4;
-        var pageWidth = pdfPage.Width.Point;
-        var pageHeight = pdfPage.Height.Point;
-        var left = stamp.Position switch
-        {
-            StampPosition.TopLeft => margin,
-            StampPosition.TopRight => pageWidth - margin - width,
-            _ => (pageWidth - width) / 2,
-        };
-        var top = stamp.Position == StampPosition.Center ? (pageHeight + height) / 2 : pageHeight - margin;
+        var rect = StampRect(pdfPage, stamp, dateLine);
 
         var fonts = new PdfDictionary(document);
         foreach (var (key, baseFont) in new[] { ("/HeBo", "/Helvetica-Bold"), ("/Helv", "/Helvetica") })
@@ -335,7 +366,7 @@ internal static partial class PdfEditService
         annotation.Elements.SetName("/Type", "/Annot");
         annotation.Elements.SetName("/Subtype", "/Stamp");
         annotation.Elements.SetName("/Name", "/PDFlightStamp"); // kein Standardsymbol – Betrachter nehmen das Erscheinungsbild
-        annotation.Elements.SetRectangle("/Rect", new PdfRectangle(new XRect(left, top - height, width, height)));
+        annotation.Elements.SetRectangle("/Rect", new PdfRectangle(rect));
         annotation.Elements.SetString("/Contents", dateLine.Length > 0 ? stamp.Text + "\n" + dateLine : stamp.Text);
         annotation.Elements.SetInteger("/F", 4); // drucken
         var colorArray = new PdfArray(document);
