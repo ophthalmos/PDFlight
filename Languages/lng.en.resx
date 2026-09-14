@@ -537,4 +537,29 @@ Clicking into the preview sets the position.</value></data>
   <data name="Entfernen der Metadaten" xml:space="preserve"><value>Removing the metadata</value></data>
   <data name="Die Metadaten wurden entfernt." xml:space="preserve"><value>The metadata was removed.</value></data>
   <data name="Anwendung, Produzent, Daten und XMP werden mit entfernt." xml:space="preserve"><value>Application, producer, dates and XMP are removed as well.</value></data>
+
+  <!-- Stempel -->
+  <data name="&amp;Löschen" xml:space="preserve"><value>&amp;Delete</value></data>
+  <data name="&amp;Neu" xml:space="preserve"><value>&amp;New</value></data>
+  <data name="&amp;Position:" xml:space="preserve"><value>&amp;Position:</value></data>
+  <data name="Bitte gib für jeden Stempel einen Text ein." xml:space="preserve"><value>Please enter a text for every stamp.</value></data>
+  <data name="Der Stempel „{0}“ wurde auf Seite {1} gesetzt." xml:space="preserve"><value>The stamp &quot;{0}&quot; was placed on page {1}.</value></data>
+  <data name="Der Stempel kommt auf Seite {0}." xml:space="preserve"><value>The stamp goes on page {0}.</value></data>
+  <data name="Die Stempelpalette ist leer." xml:space="preserve"><value>The stamp palette is empty.</value></data>
+  <data name="Doppelklick setzt den Stempel sofort." xml:space="preserve"><value>Double-click places the stamp right away.</value></data>
+  <data name="Einfügen" xml:space="preserve"><value>Insert</value></data>
+  <data name="Jetzt einen Stempel anlegen?" xml:space="preserve"><value>Create a stamp now?</value></data>
+  <data name="Neu" xml:space="preserve"><value>New</value></data>
+  <data name="Stempel" xml:space="preserve"><value>Stamp</value></data>
+  <data name="Stempel einfügen" xml:space="preserve"><value>Insert stamp</value></data>
+  <data name="Stempel einfügen …" xml:space="preserve"><value>Insert stamp…</value></data>
+  <data name="Stempel verwalten" xml:space="preserve"><value>Manage stamps</value></data>
+  <data name="Stempel verwalten …" xml:space="preserve"><value>Manage stamps…</value></data>
+  <data name="oben links" xml:space="preserve"><value>top left</value></data>
+  <data name="oben mittig" xml:space="preserve"><value>top center</value></data>
+  <data name="oben rechts" xml:space="preserve"><value>top right</value></data>
+  <data name="Seitenmitte" xml:space="preserve"><value>page center</value></data>
+  <data name="Erledigt" xml:space="preserve"><value>Done</value></data>
+  <data name="Bezahlt" xml:space="preserve"><value>Paid</value></data>
+  <data name="Archiviert" xml:space="preserve"><value>Archived</value></data>
 </root>

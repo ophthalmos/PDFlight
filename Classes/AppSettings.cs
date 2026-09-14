@@ -42,6 +42,8 @@ public class AppSettings
     public List<string> RecentFiles { get; set; } = [];      // zuletzt geöffnete PDF-Dateien (Öffnen-Dropdown)
     public List<string> ExternalPrograms { get; set; } = []; // wird beim ersten Start automatisch gefüllt (ProgramFinder)
     public List<Favorite> Favorites { get; set; } = [];        // gemerkte Dateien (Favoriten-Menü, Option ShowFavorites)
+    public List<Stamp> Stamps { get; set; } = [];              // Stempelpalette (Bearbeiten → Stempel einfügen / verwalten)
+    public bool StampsInitialized { get; set; }                // Vorgabestempel wurden einmal eingetragen (auch wenn später alle gelöscht sind)
     public bool JumpToLastUsed { get; set; } = true;      // Ordnerdialog springt zum zuletzt verwendeten Ordner
     public bool ConfirmDelete { get; set; } = true;       // vor dem Verschieben in den Papierkorb nachfragen
     public bool OpenNextAfterDelete { get; set; } = true; // nach dem Löschen die nächste Datei des Ordners anzeigen (wie in PDFMover optional)
@@ -81,6 +83,16 @@ public class AppSettings
         }
         catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException) { } // defekte Datei → Standardwerte
         return ApplyInstallerDefaults(new AppSettings());
+    }
+
+    /// <summary>Beim ersten Start die Vorgabestempel eintragen – genau einmal, damit gelöschte nicht wiederkommen.
+    /// Erst nach Lng.Initialize aufrufen, die Vorgaben sind übersetzt. True = es gab etwas zu speichern.</summary>
+    public bool EnsureDefaultStamps()
+    {
+        if (StampsInitialized) { return false; }
+        Stamps = Stamp.Defaults();
+        StampsInitialized = true;
+        return true;
     }
 
     /// <summary>Übernimmt die Vorgaben des Installers (Datei setup.default neben der EXE, Zeilen „language=de“ und
@@ -181,5 +193,6 @@ public class AppSettings
         RecentFiles = fresh.RecentFiles;
         ExternalPrograms = fresh.ExternalPrograms;
         Favorites = fresh.Favorites;
+        Stamps = fresh.Stamps;
     }
 }

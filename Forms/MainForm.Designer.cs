@@ -57,6 +57,8 @@
             mnuExtractPages = new ToolStripMenuItem();
             mnuAddAnnotation = new ToolStripMenuItem();
             mnuManageAnnotations = new ToolStripMenuItem();
+            mnuAddStamp = new ToolStripMenuItem();
+            mnuManageStamps = new ToolStripMenuItem();
             toolStripSeparator6 = new ToolStripSeparator();
             mnuUndo = new ToolStripMenuItem();
             toolStripSeparator7 = new ToolStripSeparator();
@@ -252,7 +254,7 @@
             // ddbEdit
             // 
             ddbEdit.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuMovePage, toolStripSeparator15, mnuAppendPdf, mnuDuplex, mnuExtractPages, toolStripSeparator14, mnuAddAnnotation, mnuManageAnnotations, toolStripSeparator6, mnuUndo, toolStripSeparator7, mnuSetPassword, mnuRemovePassword, toolStripSeparator10, mnuProperties });
+            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuMovePage, toolStripSeparator15, mnuAppendPdf, mnuDuplex, mnuExtractPages, toolStripSeparator14, mnuAddAnnotation, mnuManageAnnotations, mnuAddStamp, mnuManageStamps, toolStripSeparator6, mnuUndo, toolStripSeparator7, mnuSetPassword, mnuRemovePassword, toolStripSeparator10, mnuProperties });
             ddbEdit.Enabled = false;
             ddbEdit.Name = "ddbEdit";
             ddbEdit.Size = new Size(76, 22);
@@ -319,6 +321,21 @@
             mnuManageAnnotations.Size = new Size(336, 22);
             mnuManageAnnotations.Text = "Textanmerkungen verwalten …";
             mnuManageAnnotations.Click += MnuManageAnnotations_Click;
+            //
+            // mnuAddStamp
+            //
+            mnuAddStamp.Name = "mnuAddStamp";
+            mnuAddStamp.ShortcutKeyDisplayString = "Strg+L";
+            mnuAddStamp.Size = new Size(336, 22);
+            mnuAddStamp.Text = "Stempel einfügen …";
+            mnuAddStamp.Click += MnuAddStamp_Click;
+            //
+            // mnuManageStamps
+            //
+            mnuManageStamps.Name = "mnuManageStamps";
+            mnuManageStamps.Size = new Size(336, 22);
+            mnuManageStamps.Text = "Stempel verwalten …";
+            mnuManageStamps.Click += MnuManageStamps_Click;
             // 
             // toolStripSeparator6
             // 
@@ -640,6 +657,8 @@
         private System.Windows.Forms.ToolStripMenuItem mnuExtractPages;
         private System.Windows.Forms.ToolStripMenuItem mnuAddAnnotation;
         private System.Windows.Forms.ToolStripMenuItem mnuManageAnnotations;
+        private System.Windows.Forms.ToolStripMenuItem mnuAddStamp;
+        private System.Windows.Forms.ToolStripMenuItem mnuManageStamps;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripMenuItem mnuUndo;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
