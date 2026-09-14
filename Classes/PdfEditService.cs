@@ -489,6 +489,43 @@ internal static partial class PdfEditService
         document.Save(path);
     }
 
+    /// <summary>Entfernt alle Metadaten: das gesamte Info-Wörterbuch (Titel, Autor, Betreff, Stichwörter, Anwendung, Produzent,
+    /// Datumsangaben und private Einträge) sowie die XMP-Metadaten von Katalog und Seiten; anschließend werden die vier
+    /// sichtbaren Felder neu gesetzt, sofern nicht leer. PDFsharp schreibt beim Speichern eigene XMP-Daten samt Produzent –
+    /// die nennen dann nur noch PDFsharp und das Speicherdatum, nichts aus der Herkunft der Datei.</summary>
+    public static void RemoveMetadata(string path, string title, string author, string subject, string keywords)
+    {
+        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        foreach (var key in document.Info.Elements.Keys.ToList()) { document.Info.Elements.Remove(key); }
+        StripXmp(document.Internals.Catalog);
+        foreach (var page in document.Pages) { StripXmp(page); }
+        if (title.Length > 0) { document.Info.Title = title; }
+        if (author.Length > 0) { document.Info.Author = author; }
+        if (subject.Length > 0) { document.Info.Subject = subject; }
+        if (keywords.Length > 0) { document.Info.Keywords = keywords; }
+        document.Save(path);
+    }
+
+    /// <summary>XMP-Strom eines Wörterbuchs entfernen. PDFsharp schreibt auch nicht mehr referenzierte Objekte in die Datei,
+    /// deshalb wird der Strom zusätzlich geleert – sonst stünde die alte Herkunft weiter lesbar als verwaistes Objekt darin.</summary>
+    private static void StripXmp(PdfDictionary owner)
+    {
+        if (owner.Elements.GetDictionary("/Metadata") is { Stream: { } stream } xmp)
+        {
+            stream.Value = [];
+            xmp.Elements.Remove("/Filter"); // der leere Inhalt ist nicht mehr komprimiert; /Length setzt PDFsharp beim Schreiben
+        }
+        owner.Elements.Remove("/Metadata");
+    }
+
+    /// <summary>Verschiebt eine Seite an eine andere Position (beide 1-basiert); die übrigen Seiten rücken auf.</summary>
+    public static void MovePage(string path, int page, int targetPage)
+    {
+        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        document.Pages.MovePage(page - 1, targetPage - 1);
+        document.Save(path);
+    }
+
     /// <summary>Parst Seitenangaben wie "3", "2-5" oder "1, 4, 7-9"; null bei ungültiger Eingabe.</summary>
     public static List<int>? ParsePageRange(string? input, int pageCount)
     {

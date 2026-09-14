@@ -27,6 +27,7 @@ internal static class ToolbarIcons
     public const char Info = '\uE946';
     public const char Eye = '\uE7B3';          // RedEye: Kennwort sichtbar machen
     public const char Rotate = '\uE7AD';       // Bearbeiten-Menü: Seiten drehen
+    public const char MovePage = '\uE8CB';     // Sort: aktuelle Seite verschieben (Bearbeiten-Menü)
     public const char Attach = '\uE723';       // PDF-Datei anhängen
     public const char Interleave = '\uE8AB';   // Switch: Rückseiten-Scan verzahnen
     public const char Page = '\uE7C3';         // Seiten extrahieren

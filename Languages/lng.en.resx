@@ -528,4 +528,13 @@ Clicking into the preview sets the position.</value></data>
   <data name="(keine Anmerkungen)" xml:space="preserve"><value>(no annotations)</value></data>
   <data name="Anmerkung löschen" xml:space="preserve"><value>Delete annotation</value></data>
   <data name="links {0:0.#} mm, oben {1:0.#} mm" xml:space="preserve"><value>left {0:0.#} mm, top {1:0.#} mm</value></data>
+  <data name="Aktuelle Seite verschieben …" xml:space="preserve"><value>Move current page…</value></data>
+  <data name="Seite verschieben" xml:space="preserve"><value>Move page</value></data>
+  <data name="Seite {0} an &amp;Position (1–{1}):" xml:space="preserve"><value>Page {0} to &amp;position (1–{1}):</value></data>
+  <data name="Die übrigen Seiten rücken entsprechend auf." xml:space="preserve"><value>The remaining pages shift accordingly.</value></data>
+  <data name="Seite {0} wurde an Position {1} verschoben." xml:space="preserve"><value>Page {0} was moved to position {1}.</value></data>
+  <data name="Metadaten &amp;entfernen" xml:space="preserve"><value>R&amp;emove metadata</value></data>
+  <data name="Entfernen der Metadaten" xml:space="preserve"><value>Removing the metadata</value></data>
+  <data name="Die Metadaten wurden entfernt." xml:space="preserve"><value>The metadata was removed.</value></data>
+  <data name="Anwendung, Produzent, Daten und XMP werden mit entfernt." xml:space="preserve"><value>Application, producer, dates and XMP are removed as well.</value></data>
 </root>
