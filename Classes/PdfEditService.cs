@@ -244,6 +244,99 @@ internal static partial class PdfEditService
     [GeneratedRegex(@"(\d+(?:\.\d+)?)\s+Tf")]
     private static partial Regex FontSizeInDa();
 
+    /// <summary>Setzt einen Stempel der Palette auf eine Seite: Stamp-Anmerkung mit eigenem Darstellungsstrom (Helvetica-Bold,
+    /// Rahmen in der Schriftfarbe, wahlweise Hintergrund) an einer der festen Positionen, 10 mm vom Rand der unrotierten Seite.</summary>
+    public static void AddStamp(string path, int page, Stamp stamp)
+    {
+        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        var pdfPage = document.Pages[page - 1];
+        var dateLine = Stamp.DateLine(DateTime.Now); // Datum und Uhrzeit stehen immer klein unter dem Text
+        var dateSize = stamp.FontSize * Stamp.DateFactor;
+        var (width, height, textWidth, dateWidth) = MeasureStamp(stamp.Text, stamp.FontSize, dateLine);
+        const double margin = 10 * 72 / 25.4;
+        var pageWidth = pdfPage.Width.Point;
+        var pageHeight = pdfPage.Height.Point;
+        var left = stamp.Position switch
+        {
+            StampPosition.TopLeft => margin,
+            StampPosition.TopRight => pageWidth - margin - width,
+            _ => (pageWidth - width) / 2,
+        };
+        var top = stamp.Position == StampPosition.Center ? (pageHeight + height) / 2 : pageHeight - margin;
+
+        var fonts = new PdfDictionary(document);
+        foreach (var (key, baseFont) in new[] { ("/HeBo", "/Helvetica-Bold"), ("/Helv", "/Helvetica") })
+        {
+            var font = new PdfDictionary(document);
+            font.Elements.SetName("/Type", "/Font");
+            font.Elements.SetName("/Subtype", "/Type1");
+            font.Elements.SetName("/BaseFont", baseFont);
+            font.Elements.SetName("/Encoding", "/WinAnsiEncoding");
+            document.Internals.AddObject(font);
+            fonts.Elements.SetReference(key, font);
+        }
+        var resources = new PdfDictionary(document);
+        resources.Elements.SetObject("/Font", fonts);
+
+        var color = stamp.Color;
+        var rgb = string.Create(CultureInfo.InvariantCulture, $"{color.R / 255.0:0.###} {color.G / 255.0:0.###} {color.B / 255.0:0.###}");
+        var content = new StringBuilder("q ");
+        if (stamp.BackgroundColor is { } fill)
+        {
+            content.Append(CultureInfo.InvariantCulture, $"{fill.R / 255.0:0.###} {fill.G / 255.0:0.###} {fill.B / 255.0:0.###} rg 0 0 {width:0.##} {height:0.##} re f ");
+        }
+        var stroke = Math.Max(1, stamp.FontSize / 12); // Rahmenstärke wächst mit der Schrift
+        content.Append(CultureInfo.InvariantCulture, $"{rgb} RG {stroke:0.##} w {stroke / 2:0.##} {stroke / 2:0.##} {width - stroke:0.##} {height - stroke:0.##} re S Q ");
+        var padding = stamp.FontSize * Stamp.PaddingFactor;
+        var textBaseline = height - padding - stamp.FontSize * 0.72; // Versalhöhe von Helvetica ≈ 0,72 em
+        var dateBaseline = padding + dateSize * 0.22;                  // Unterlänge ≈ 0,22 em
+        content.Append(CultureInfo.InvariantCulture, $"BT /HeBo {stamp.FontSize:0.##} Tf {rgb} rg {(width - textWidth) / 2:0.##} {textBaseline:0.##} Td (")
+               .Append(Escape(stamp.Text)).Append(") Tj ET ")
+               .Append(CultureInfo.InvariantCulture, $"BT /Helv {dateSize:0.##} Tf {rgb} rg {(width - dateWidth) / 2:0.##} {dateBaseline:0.##} Td (")
+               .Append(Escape(dateLine)).Append(") Tj ET");
+        var appearance = new PdfDictionary(document);
+        appearance.Elements.SetName("/Type", "/XObject");
+        appearance.Elements.SetName("/Subtype", "/Form");
+        appearance.Elements.SetRectangle("/BBox", new PdfRectangle(new XRect(0, 0, width, height)));
+        appearance.Elements.SetObject("/Resources", resources);
+        appearance.CreateStream(ToWinAnsi(content.ToString()));
+        document.Internals.AddObject(appearance);
+        var appearances = new PdfDictionary(document);
+        appearances.Elements.SetReference("/N", appearance);
+
+        var annotation = new PdfDictionary(document);
+        annotation.Elements.SetName("/Type", "/Annot");
+        annotation.Elements.SetName("/Subtype", "/Stamp");
+        annotation.Elements.SetName("/Name", "/PDFlightStamp"); // kein Standardsymbol – Betrachter nehmen das Erscheinungsbild
+        annotation.Elements.SetRectangle("/Rect", new PdfRectangle(new XRect(left, top - height, width, height)));
+        annotation.Elements.SetString("/Contents", stamp.Text + "\n" + dateLine);
+        annotation.Elements.SetInteger("/F", 4); // drucken
+        var colorArray = new PdfArray(document);
+        colorArray.Elements.Add(new PdfReal(color.R / 255.0));
+        colorArray.Elements.Add(new PdfReal(color.G / 255.0));
+        colorArray.Elements.Add(new PdfReal(color.B / 255.0));
+        annotation.Elements.SetObject("/C", colorArray);
+        annotation.Elements.SetObject("/AP", appearances);
+        annotation.Elements.SetDateTime("/M", DateTime.Now);
+        document.Internals.AddObject(annotation);
+        pdfPage.Annotations.Elements.Add(annotation.Reference!); // nach AddObject hat das Objekt eine Referenz
+        document.Save(path);
+    }
+
+    /// <summary>Kastenmaß eines Stempels in Punkt (Arial steht für Helvetica): fetter Text, darunter die Datumszeile in kleinerer
+    /// Schrift, plus Innenabstand relativ zur Schriftgröße.</summary>
+    public static (double Width, double Height, double TextWidth, double DateWidth) MeasureStamp(string text, double fontSize, string dateLine)
+    {
+        using var measure = XGraphics.CreateMeasureContext(new XSize(1000, 1000), XGraphicsUnit.Point, XPageDirection.Downwards);
+        var dateSize = fontSize * Stamp.DateFactor;
+        var textWidth = Math.Max(measure.MeasureString(text, new XFont("Arial", fontSize, XFontStyleEx.Bold)).Width, fontSize);
+        var dateWidth = measure.MeasureString(dateLine, new XFont("Arial", dateSize)).Width;
+        var padding = fontSize * Stamp.PaddingFactor;
+        return (Math.Max(textWidth, dateWidth) + 2 * padding, fontSize * 1.0 + dateSize * 1.3 + 2 * padding, textWidth, dateWidth);
+    }
+
+    private static string Escape(string text) => text.Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)");
+
     private static void AppendFreeText(PdfDocument document, PdfPage pdfPage, string text, double leftMm, double topMm, double fontSize, AnnotationStyle style)
     {
         var lines = SplitLines(text);

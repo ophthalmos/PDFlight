@@ -537,4 +537,29 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="Entfernen der Metadaten" xml:space="preserve"><value>Eliminación de los metadatos</value></data>
   <data name="Die Metadaten wurden entfernt." xml:space="preserve"><value>Los metadatos se han eliminado.</value></data>
   <data name="Anwendung, Produzent, Daten und XMP werden mit entfernt." xml:space="preserve"><value>AplicaciÃ³n, productor, fechas y XMP se eliminan tambiÃ©n.</value></data>
+
+  <!-- Stempel -->
+  <data name="&amp;Löschen" xml:space="preserve"><value>E&amp;liminar</value></data>
+  <data name="&amp;Neu" xml:space="preserve"><value>&amp;Nuevo</value></data>
+  <data name="&amp;Position:" xml:space="preserve"><value>&amp;Posición:</value></data>
+  <data name="Bitte gib für jeden Stempel einen Text ein." xml:space="preserve"><value>Introduce un texto para cada sello.</value></data>
+  <data name="Der Stempel „{0}“ wurde auf Seite {1} gesetzt." xml:space="preserve"><value>El sello «{0}» se ha colocado en la página {1}.</value></data>
+  <data name="Der Stempel kommt auf Seite {0}." xml:space="preserve"><value>El sello irá en la página {0}.</value></data>
+  <data name="Die Stempelpalette ist leer." xml:space="preserve"><value>La paleta de sellos está vacía.</value></data>
+  <data name="Doppelklick setzt den Stempel sofort." xml:space="preserve"><value>Un doble clic coloca el sello de inmediato.</value></data>
+  <data name="Einfügen" xml:space="preserve"><value>Insertar</value></data>
+  <data name="Jetzt einen Stempel anlegen?" xml:space="preserve"><value>¿Crear un sello ahora?</value></data>
+  <data name="Neu" xml:space="preserve"><value>Nuevo</value></data>
+  <data name="Stempel" xml:space="preserve"><value>Sello</value></data>
+  <data name="Stempel einfügen" xml:space="preserve"><value>Insertar sello</value></data>
+  <data name="Stempel einfügen …" xml:space="preserve"><value>Insertar sello…</value></data>
+  <data name="Stempel verwalten" xml:space="preserve"><value>Administrar sellos</value></data>
+  <data name="Stempel verwalten …" xml:space="preserve"><value>Administrar sellos…</value></data>
+  <data name="oben links" xml:space="preserve"><value>arriba a la izquierda</value></data>
+  <data name="oben mittig" xml:space="preserve"><value>arriba al centro</value></data>
+  <data name="oben rechts" xml:space="preserve"><value>arriba a la derecha</value></data>
+  <data name="Seitenmitte" xml:space="preserve"><value>centro de la página</value></data>
+  <data name="Erledigt" xml:space="preserve"><value>Hecho</value></data>
+  <data name="Bezahlt" xml:space="preserve"><value>Pagado</value></data>
+  <data name="Archiviert" xml:space="preserve"><value>Archivado</value></data>
 </root>

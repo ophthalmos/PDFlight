@@ -31,6 +31,7 @@ public partial class MainForm : Form
         InstanceRegistry.Cleanup(); // ebenso deren Meldungen, welche Datei sie anzeigten
         settings = AppSettings.Load();
         Lng.Initialize(settings.Language); // vor PdfViewHost (Viewer-Sprache) und vor allen Dialogen
+        if (settings.EnsureDefaultStamps()) { settings.Save(); } // Vorgabestempel in der eingestellten Sprache, einmalig
         Lng.Apply(this);
         // Mehrzeilige Tooltips brauchen explizite Schlüssel (Zeilenumbrüche taugen nicht als resx-Schlüssel)
         btnOpen.ToolTipText = Lng.T("Tooltip.Open", btnOpen.ToolTipText);
@@ -377,6 +378,7 @@ public partial class MainForm : Form
         pnlPdfA.Visible = hasFile && PdfALocked;
         mnuDeletePages.Enabled = mnuRotatePages.Enabled = mnuAppendPdf.Enabled = mnuDuplex.Enabled = mnuAddAnnotation.Enabled = !PdfALocked;
         mnuMovePage.Enabled = !PdfALocked && currentPageCount > 1; // mit einer Seite gibt es nichts zu verschieben
+        mnuAddStamp.Enabled = !PdfALocked;
         mnuManageAnnotations.Enabled = !PdfALocked && (currentPdfStatus?.AnnotationCount ?? 0) > 0; // ohne Anmerkungen gibt es nichts zu verwalten
         mnuSetPassword.Enabled = currentPageCount > 0 && !PdfALocked;  // nur ohne bestehenden Kennwortschutz
         mnuRemovePassword.Enabled = hasFile && currentPageCount <= 0;  // nur bei geschützter (oder unlesbarer) Datei
@@ -992,6 +994,8 @@ public partial class MainForm : Form
         mnuExtractPages.Image = MenuIcon(ToolbarIcons.Page);
         mnuAddAnnotation.Image = MenuIcon(ToolbarIcons.Comment);
         mnuManageAnnotations.Image = MenuIcon(ToolbarIcons.Edit);
+        mnuAddStamp.Image = MenuIcon(ToolbarIcons.Stamp);
+        mnuManageStamps.Image = MenuIcon(ToolbarIcons.List);
         mnuUndo.Image = MenuIcon(ToolbarIcons.Undo);
         mnuSetPassword.Image = MenuIcon(ToolbarIcons.Lock);
         mnuRemovePassword.Image = MenuIcon(ToolbarIcons.Unlock);
@@ -1445,6 +1449,38 @@ public partial class MainForm : Form
         }
     }
 
+    /// <summary>Stempelpalette zeigen und den gewählten Stempel auf die angezeigte Seite setzen (Strg+L).</summary>
+    private void AddStampDialog()
+    {
+        if (currentFile == null) { return; }
+        if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
+        settings.ReloadSharedLists();
+        if (settings.Stamps.Count == 0)
+        {
+            if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Die Stempelpalette ist leer."), Lng.T("Jetzt einen Stempel anlegen?"))) { return; }
+            ManageStampsDialog();
+            if (settings.Stamps.Count == 0) { return; }
+        }
+        var page = Math.Max(1, ClampedCurrentPage()); // immer die angezeigte Seite
+        using StampPaletteForm dialog = new(settings.Stamps, page);
+        if (dialog.ShowDialog(this) != DialogResult.OK || dialog.SelectedStamp is not { } stamp) { return; }
+        if (RunPdfEdit(() => PdfEditService.AddStamp(currentFile.FullName, page, stamp), Lng.T("Stempel")))
+        {
+            LoadPdf(currentFile.FullName, page);
+            statusPath.Text = string.Format(Lng.T("Der Stempel „{0}“ wurde auf Seite {1} gesetzt."), stamp.Text, page);
+        }
+    }
+
+    /// <summary>Stempelpalette bearbeiten; die Liste landet in den Einstellungen.</summary>
+    private void ManageStampsDialog()
+    {
+        settings.ReloadSharedLists();
+        using StampManageForm dialog = new(settings.Stamps);
+        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
+        settings.Stamps = dialog.Stamps;
+        settings.Save();
+    }
+
     /// <summary>Verschiebt die angezeigte Seite an eine andere Position (Bearbeiten-Menü).</summary>
     private void MovePageDialog()
     {
@@ -1833,6 +1869,7 @@ public partial class MainForm : Form
             case Keys.Delete | Keys.Control when !PdfALocked: BeginInvoke(DeletePagesDialog); return true;
             case Keys.X | Keys.Control: BeginInvoke(ExtractPagesDialog); return true; // eXtrahieren; nutzt ebenfalls die UIA-Seitenabfrage
             case Keys.T | Keys.Control when !PdfALocked: BeginInvoke(AddAnnotationDialog); return true; // Textanmerkung; ebenso
+            case Keys.L | Keys.Control when !PdfALocked: BeginInvoke(AddStampDialog); return true;      // Stempel; ebenso (UIA-Seitenabfrage)
             case Keys.T | Keys.Control | Keys.Shift when mnuManageAnnotations.Enabled: BeginInvoke(ManageAnnotationsDialog); return true; // BeginInvoke: das WebView2 der Vorschau ließe sich im Chromium-Tastatur-Callback nicht initialisieren
             case Keys.Delete | Keys.Control | Keys.Shift when currentFile != null: DeleteCurrent(); return true;
             case Keys.R | Keys.Control when !PdfALocked: BeginInvoke(RotatePagesDialog); return true; // BeginInvoke wegen der UIA-Seitenabfrage (s. Strg+Entf)
@@ -2009,6 +2046,14 @@ public partial class MainForm : Form
     private void MnuManageAnnotations_Click(object? sender, EventArgs e)
     {
         ManageAnnotationsDialog();
+    }
+    private void MnuAddStamp_Click(object? sender, EventArgs e)
+    {
+        AddStampDialog();
+    }
+    private void MnuManageStamps_Click(object? sender, EventArgs e)
+    {
+        ManageStampsDialog();
     }
     private void MnuDuplex_Click(object? sender, EventArgs e)
     {

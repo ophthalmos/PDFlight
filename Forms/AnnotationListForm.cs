@@ -80,6 +80,7 @@ public partial class AnnotationListForm : Form
     {
         "FreeText" => Lng.T("Textanmerkung"),
         "Text" => Lng.T("Haftnotiz"),
+        "Stamp" => Lng.T("Stempel"),
         _ => subtype, // andere Arten sprachneutral mit ihrem PDF-Namen (Highlight, Square, …)
     };
 

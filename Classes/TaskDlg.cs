@@ -249,6 +249,7 @@ internal static class TaskDlg
         ("Strg+G", "Gehe zu Seite (Zahl tippen + Enter)", null),
         ("Strg+I", "Dokumenteigenschaften", null),
         ("Strg+K", "Datei kopieren", null),
+        ("Strg+L", "Stempel einfügen", null),
         ("Strg+M / F4", "Datei verschieben", null),
         ("Strg+O", "PDF-Datei öffnen", null),
         ("Strg+P", "Dokument drucken", null),

@@ -18,24 +18,10 @@ public partial class AnnotationForm : Form
     public double FontSize => (double)numSize.Value;
     internal AnnotationStyle Style => new(Borders[Math.Max(0, comboBorder.SelectedIndex)].Color, Backgrounds[Math.Max(0, comboBackground.SelectedIndex)].Color, TextColors[Math.Max(0, comboTextColor.SelectedIndex)].Color);
 
-    /// <summary>Die wählbaren Rahmenfarben (Namen sind Lng-Schlüssel); null = kein Rahmen.</summary>
-    private static readonly (string Name, Color? Color)[] Borders =
-    [
-        ("Grau", Color.FromArgb(128, 128, 128)), ("Schwarz", Color.Black), ("Rot", Color.FromArgb(192, 0, 0)), ("Blau", Color.FromArgb(0, 0, 192)), ("Kein Rahmen", null),
-    ];
-
-    /// <summary>Die wählbaren Hintergründe (Namen sind Lng-Schlüssel); null = transparent.</summary>
-    private static readonly (string Name, Color? Color)[] Backgrounds =
-    [
-        ("Gelb", Color.FromArgb(255, 255, 204)), ("Weiß", Color.White), ("Hellblau", Color.FromArgb(221, 238, 255)),
-        ("Hellgrün", Color.FromArgb(221, 255, 221)), ("Rosa", Color.FromArgb(255, 221, 238)), ("Transparent", null),
-    ];
-
-    /// <summary>Die wählbaren Schriftfarben (Namen sind Lng-Schlüssel).</summary>
-    private static readonly (string Name, Color Color)[] TextColors =
-    [
-        ("Schwarz", Color.Black), ("Rot", Color.FromArgb(192, 0, 0)), ("Grün", Color.FromArgb(0, 128, 0)), ("Blau", Color.FromArgb(0, 0, 192)),
-    ];
+    // die Farbauswahlen teilt sich der Dialog mit den Stempeln (ColorPalette)
+    private static (string Name, Color? Color)[] Borders => ColorPalette.Borders;
+    private static (string Name, Color? Color)[] Backgrounds => ColorPalette.Backgrounds;
+    private static (string Name, Color Color)[] TextColors => ColorPalette.TextColors;
 
     private const double MmPerPoint = 25.4 / 72;
     private readonly string filePath;
@@ -256,20 +242,7 @@ public partial class AnnotationForm : Form
         if (e.Index >= 0 && e.Index < TextColors.Length) { DrawColorItem(e, TextColors[e.Index].Name, TextColors[e.Index].Color); }
     }
 
-    /// <summary>Listeneintrag mit Farbfeld vor dem Namen; „Transparent“ bzw. „Kein Rahmen“ (null) bekommt ein weißes Feld mit Diagonale.</summary>
-    private void DrawColorItem(DrawItemEventArgs e, string name, Color? color)
-    {
-        e.DrawBackground();
-        var edge = e.Bounds.Height - 4;
-        Rectangle swatch = new(e.Bounds.X + 2, e.Bounds.Y + 2, edge, edge);
-        using SolidBrush fill = new(color ?? Color.White);
-        e.Graphics.FillRectangle(fill, swatch);
-        if (color == null) { e.Graphics.DrawLine(Pens.Gray, swatch.Left, swatch.Bottom, swatch.Right, swatch.Top); }
-        e.Graphics.DrawRectangle(Pens.Gray, swatch);
-        var textColor = (e.State & DrawItemState.Selected) != 0 ? SystemColors.HighlightText : e.ForeColor;
-        TextRenderer.DrawText(e.Graphics, Lng.T(name), e.Font ?? Font, new Rectangle(swatch.Right + 6, e.Bounds.Y, e.Bounds.Width - edge - 8, e.Bounds.Height), textColor, TextFormatFlags.VerticalCenter | TextFormatFlags.Left);
-        e.DrawFocusRectangle();
-    }
+    private void DrawColorItem(DrawItemEventArgs e, string name, Color? color) => ColorPalette.DrawItem(e, name, color, Font);
 
     private void Preview_Changed(object? sender, EventArgs e)
     {
