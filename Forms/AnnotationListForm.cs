@@ -94,7 +94,7 @@ public partial class AnnotationListForm : Form
     private void UpdateButtons()
     {
         var selected = Selected;
-        btnEdit.Enabled = selected?.Subtype == "FreeText"; // nur Textanmerkungen bekommen PDFlights Kasten neu gezeichnet
+        btnEdit.Enabled = selected?.Subtype is "FreeText" or "Stamp"; // nur eigene Arten lassen sich neu zeichnen (Stempel: anderen Palettenstempel wählen)
         btnDelete.Enabled = selected != null;
     }
 
@@ -120,7 +120,7 @@ public partial class AnnotationListForm : Form
 
     private void EditSelected()
     {
-        if (Selected is not { Subtype: "FreeText" } annotation) { return; }
+        if (Selected is not { Subtype: "FreeText" or "Stamp" } annotation) { return; }
         EditRequested = annotation;
         Close();
     }

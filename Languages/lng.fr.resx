@@ -566,4 +566,8 @@ Un clic dans l'aperçu définit la position.</value></data>
   <data name="&amp;Rahmen" xml:space="preserve"><value>&amp;Cadre</value></data>
   <data name="Abgerundete &amp;Ecken" xml:space="preserve"><value>Coins arrondis</value></data>
   <data name="Palette &amp;speichern" xml:space="preserve"><value>&amp;Enregistrer la palette</value></data>
+  <data name="Strg+Umschalt+H" xml:space="preserve"><value>Ctrl+Maj+H</value></data>
+  <data name="Stempel ersetzen" xml:space="preserve"><value>Remplacer le tampon</value></data>
+  <data name="Der Stempel auf Seite {0} wird ersetzt durch:" xml:space="preserve"><value>Le tampon de la page {0} sera remplacé par :</value></data>
+  <data name="Der Stempel auf Seite {0} wurde ersetzt." xml:space="preserve"><value>Le tampon de la page {0} a été remplacé.</value></data>
 </root>

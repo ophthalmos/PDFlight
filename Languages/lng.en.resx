@@ -566,4 +566,8 @@ Clicking into the preview sets the position.</value></data>
   <data name="&amp;Rahmen" xml:space="preserve"><value>&amp;Border</value></data>
   <data name="Abgerundete &amp;Ecken" xml:space="preserve"><value>Rounded &amp;corners</value></data>
   <data name="Palette &amp;speichern" xml:space="preserve"><value>&amp;Save palette</value></data>
+  <data name="Strg+Umschalt+H" xml:space="preserve"><value>Ctrl+Shift+H</value></data>
+  <data name="Stempel ersetzen" xml:space="preserve"><value>Replace stamp</value></data>
+  <data name="Der Stempel auf Seite {0} wird ersetzt durch:" xml:space="preserve"><value>The stamp on page {0} will be replaced by:</value></data>
+  <data name="Der Stempel auf Seite {0} wurde ersetzt." xml:space="preserve"><value>The stamp on page {0} was replaced.</value></data>
 </root>

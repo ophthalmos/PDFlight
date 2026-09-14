@@ -1342,6 +1342,7 @@ public partial class MainForm : Form
     private void EditAnnotation(AnnotationInfo annotation)
     {
         if (currentFile == null) { return; }
+        if (annotation.Subtype == "Stamp") { EditStamp(annotation); return; } // Stempel: anderen Palettenstempel wählen
         var file = currentFile.FullName;
         using AnnotationForm dialog = new(file, currentPageCount, annotation.Page);
         dialog.Preset(annotation.Contents, annotation.LeftMm, annotation.TopMm, annotation.FontSize, annotation.Style, annotation.Index);
@@ -1479,6 +1480,27 @@ public partial class MainForm : Form
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         settings.Stamps = dialog.Stamps;
         settings.Save();
+    }
+
+    /// <summary>Bearbeiten eines Stempels aus der Anmerkungsliste: Der gewählte Palettenstempel ersetzt ihn an derselben Position
+    /// (die des neuen Stempels), die Datumszeile bleibt erhalten.</summary>
+    private void EditStamp(AnnotationInfo annotation)
+    {
+        if (currentFile == null) { return; }
+        var file = currentFile.FullName;
+        settings.ReloadSharedLists();
+        if (settings.Stamps.Count == 0)
+        {
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Stempelpalette ist leer."), null, TaskDialogIcon.Information);
+            return;
+        }
+        using StampPaletteForm dialog = new(settings.Stamps, annotation.Page, replace: true);
+        if (dialog.ShowDialog(this) != DialogResult.OK || dialog.SelectedStamp is not { } stamp) { return; }
+        if (RunPdfEdit(() => PdfEditService.UpdateStamp(file, annotation.Page, annotation.Index, annotation.ObjectNumber, stamp), Lng.T("Stempel")))
+        {
+            LoadPdf(file, annotation.Page);
+            statusPath.Text = string.Format(Lng.T("Der Stempel auf Seite {0} wurde ersetzt."), annotation.Page);
+        }
     }
 
     /// <summary>Verschiebt die angezeigte Seite an eine andere Position (Bearbeiten-Menü).</summary>
@@ -1869,7 +1891,8 @@ public partial class MainForm : Form
             case Keys.Delete | Keys.Control when !PdfALocked: BeginInvoke(DeletePagesDialog); return true;
             case Keys.X | Keys.Control: BeginInvoke(ExtractPagesDialog); return true; // eXtrahieren; nutzt ebenfalls die UIA-Seitenabfrage
             case Keys.T | Keys.Control when !PdfALocked: BeginInvoke(AddAnnotationDialog); return true; // Textanmerkung; ebenso
-            case Keys.L | Keys.Control when !PdfALocked: BeginInvoke(AddStampDialog); return true;      // Stempel; ebenso (UIA-Seitenabfrage)
+            case Keys.H | Keys.Control when !PdfALocked: BeginInvoke(AddStampDialog); return true;      // Stempel; ebenso (UIA-Seitenabfrage)
+            case Keys.H | Keys.Control | Keys.Shift: ManageStampsDialog(); return true;                    // Stempelpalette pflegen
             case Keys.T | Keys.Control | Keys.Shift when mnuManageAnnotations.Enabled: BeginInvoke(ManageAnnotationsDialog); return true; // BeginInvoke: das WebView2 der Vorschau ließe sich im Chromium-Tastatur-Callback nicht initialisieren
             case Keys.Delete | Keys.Control | Keys.Shift when currentFile != null: DeleteCurrent(); return true;
             case Keys.R | Keys.Control when !PdfALocked: BeginInvoke(RotatePagesDialog); return true; // BeginInvoke wegen der UIA-Seitenabfrage (s. Strg+Entf)

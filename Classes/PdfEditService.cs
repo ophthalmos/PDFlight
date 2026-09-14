@@ -250,7 +250,26 @@ internal static partial class PdfEditService
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         var pdfPage = document.Pages[page - 1];
-        var dateLine = stamp.WithDate ? Stamp.DateLine(DateTime.Now) : string.Empty; // Datum und Uhrzeit klein unter dem Text
+        AppendStamp(document, pdfPage, stamp, stamp.WithDate ? Stamp.DateLine(DateTime.Now) : string.Empty); // Datum und Uhrzeit klein unter dem Text
+        document.Save(path);
+    }
+
+    /// <summary>Ersetzt einen Stempel durch einen (anderen) Stempel der Palette – wie beim Bearbeiten einer Textanmerkung wird der
+    /// Eintrag neu gezeichnet. Die ursprüngliche Datumszeile bleibt erhalten, sofern der neue Stempel eine hat.</summary>
+    public static void UpdateStamp(string path, int page, int index, int objectNumber, Stamp stamp)
+    {
+        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        var pdfPage = document.Pages[page - 1];
+        index = ResolveIndex(pdfPage.Annotations, objectNumber, index);
+        var oldLines = SplitLines(pdfPage.Annotations[index].Elements.GetString("/Contents"));
+        var dateLine = !stamp.WithDate ? string.Empty : oldLines.Length > 1 ? oldLines[^1] : Stamp.DateLine(DateTime.Now);
+        pdfPage.Annotations.Elements.RemoveAt(index);
+        AppendStamp(document, pdfPage, stamp, dateLine);
+        document.Save(path);
+    }
+
+    private static void AppendStamp(PdfDocument document, PdfPage pdfPage, Stamp stamp, string dateLine)
+    {
         var dateSize = stamp.FontSize * Stamp.DateFactor;
         var (width, height, textWidth, dateWidth) = MeasureStamp(stamp.Text, stamp.FontSize, dateLine);
         const double margin = 10 * 72 / 25.4;
@@ -296,7 +315,7 @@ internal static partial class PdfEditService
         var textBaseline = height - padding - stamp.FontSize * 0.72; // Versalhöhe von Helvetica ≈ 0,72 em
         content.Append(CultureInfo.InvariantCulture, $"BT /HeBo {stamp.FontSize:0.##} Tf {rgb} rg {(width - textWidth) / 2:0.##} {textBaseline:0.##} Td (")
                .Append(Escape(stamp.Text)).Append(") Tj ET");
-        if (stamp.WithDate)
+        if (dateLine.Length > 0)
         {
             var dateBaseline = padding + dateSize * 0.22; // Unterlänge ≈ 0,22 em
             content.Append(CultureInfo.InvariantCulture, $" BT /Helv {dateSize:0.##} Tf {rgb} rg {(width - dateWidth) / 2:0.##} {dateBaseline:0.##} Td (")
@@ -317,7 +336,7 @@ internal static partial class PdfEditService
         annotation.Elements.SetName("/Subtype", "/Stamp");
         annotation.Elements.SetName("/Name", "/PDFlightStamp"); // kein Standardsymbol – Betrachter nehmen das Erscheinungsbild
         annotation.Elements.SetRectangle("/Rect", new PdfRectangle(new XRect(left, top - height, width, height)));
-        annotation.Elements.SetString("/Contents", stamp.WithDate ? stamp.Text + "\n" + dateLine : stamp.Text);
+        annotation.Elements.SetString("/Contents", dateLine.Length > 0 ? stamp.Text + "\n" + dateLine : stamp.Text);
         annotation.Elements.SetInteger("/F", 4); // drucken
         var colorArray = new PdfArray(document);
         colorArray.Elements.Add(new PdfReal(color.R / 255.0));
@@ -328,7 +347,6 @@ internal static partial class PdfEditService
         annotation.Elements.SetDateTime("/M", DateTime.Now);
         document.Internals.AddObject(annotation);
         pdfPage.Annotations.Elements.Add(annotation.Reference!); // nach AddObject hat das Objekt eine Referenz
-        document.Save(path);
     }
 
     /// <summary>Kastenmaß eines Stempels in Punkt (Arial steht für Helvetica): fetter Text, darunter die Datumszeile in kleinerer
