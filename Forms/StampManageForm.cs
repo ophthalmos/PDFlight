@@ -23,7 +23,7 @@ public partial class StampManageForm : Form
         numSize.Minimum = (decimal)Stamp.MinFontSize;
         numSize.Maximum = (decimal)Stamp.MaxFontSize;
         comboColor.Items.AddRange([.. ColorPalette.StampColors.Select(c => (object)Lng.T(c.Name))]);
-        comboBackground.Items.AddRange([.. ColorPalette.Backgrounds.Select(b => (object)Lng.T(b.Name))]);
+        comboBackground.Items.AddRange([.. ColorPalette.StampBackgrounds.Select(b => (object)Lng.T(b.Name))]);
         comboPosition.Items.AddRange([.. Stamp.PositionNames.Select(p => (object)Lng.T(p))]);
         foreach (var stamp in stamps) { listStamps.Items.Add(stamp.Text); }
         if (listStamps.Items.Count > 0) { listStamps.SelectedIndex = 0; }
@@ -46,7 +46,7 @@ public partial class StampManageForm : Form
         textBoxText.Text = stamp?.Text ?? string.Empty;
         numSize.Value = Math.Clamp((decimal)(stamp?.FontSize ?? 24), numSize.Minimum, numSize.Maximum);
         comboColor.SelectedIndex = ColorPalette.IndexOf(ColorPalette.StampColors, stamp?.Color ?? Color.Black);
-        comboBackground.SelectedIndex = ColorPalette.IndexOf(ColorPalette.Backgrounds, stamp?.BackgroundColor);
+        comboBackground.SelectedIndex = ColorPalette.IndexOf(ColorPalette.StampBackgrounds, stamp?.BackgroundColor);
         comboPosition.SelectedIndex = (int)(stamp?.Position ?? StampPosition.TopRight);
         loading = false;
     }
@@ -58,7 +58,7 @@ public partial class StampManageForm : Form
         stamp.Text = textBoxText.Text.Trim();
         stamp.FontSize = (double)numSize.Value;
         stamp.TextColor = AnnotationStyle.ToHex(ColorPalette.StampColors[Math.Max(0, comboColor.SelectedIndex)].Color);
-        stamp.Background = ColorPalette.Backgrounds[Math.Max(0, comboBackground.SelectedIndex)].Color is { } background ? AnnotationStyle.ToHex(background) : string.Empty;
+        stamp.Background = ColorPalette.StampBackgrounds[Math.Max(0, comboBackground.SelectedIndex)].Color is { } background ? AnnotationStyle.ToHex(background) : string.Empty;
         stamp.Position = (StampPosition)Math.Max(0, comboPosition.SelectedIndex);
         stamp.WithDate = cbDate.Checked;
         stamp.Border = cbBorder.Checked;
@@ -95,7 +95,7 @@ public partial class StampManageForm : Form
 
     private void ComboBackground_DrawItem(object? sender, DrawItemEventArgs e)
     {
-        if (e.Index >= 0 && e.Index < ColorPalette.Backgrounds.Length) { ColorPalette.DrawItem(e, ColorPalette.Backgrounds[e.Index].Name, ColorPalette.Backgrounds[e.Index].Color, Font); }
+        if (e.Index >= 0 && e.Index < ColorPalette.StampBackgrounds.Length) { ColorPalette.DrawItem(e, ColorPalette.StampBackgrounds[e.Index].Name, ColorPalette.StampBackgrounds[e.Index].Color, Font); }
     }
 
     private void ButtonNew_Click(object? sender, EventArgs e)
