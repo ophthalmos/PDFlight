@@ -573,4 +573,5 @@ Un clic dans l'aperçu définit la position.</value></data>
   <data name="Stempel bearbeiten" xml:space="preserve"><value>Modifier les tampons</value></data>
   <data name="An dieser Stelle steht schon der Stempel „{0}“." xml:space="preserve"><value>Le tampon « {0} » se trouve déjà à cet endroit.</value></data>
   <data name="Soll er entfernt werden? Bei „Nein“ kommt der neue Stempel zusätzlich dazu." xml:space="preserve"><value>Le supprimer ? Avec « Non », le nouveau tampon s’ajoute en plus.</value></data>
+  <data name="Bearbeiter&amp;kürzel:" xml:space="preserve"><value>&amp;Initiales :</value></data>
 </root>

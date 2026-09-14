@@ -244,6 +244,9 @@ internal static partial class PdfEditService
     [GeneratedRegex(@"(\d+(?:\.\d+)?)\s+Tf")]
     private static partial Regex FontSizeInDa();
 
+    [GeneratedRegex(@"\s*\([^)]*\)\s*$")] // „(WH)“ am Ende der Datumszeile eines Stempels
+    private static partial Regex InitialsSuffix();
+
     /// <summary>Setzt einen Stempel der Palette auf eine Seite: Stamp-Anmerkung mit eigenem Darstellungsstrom (Helvetica-Bold,
     /// Rahmen in der Schriftfarbe, wahlweise Hintergrund) an einer der festen Positionen, 10 mm vom Rand der unrotierten Seite.</summary>
     /// <param name="replaceIndex">≥ 0: dieser vorhandene Stempel (Index im Annots-Array, ObjectNumber als sichere Kennung) wird vorher entfernt.</param>
@@ -252,7 +255,7 @@ internal static partial class PdfEditService
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         var pdfPage = document.Pages[page - 1];
         if (replaceIndex >= 0) { pdfPage.Annotations.Elements.RemoveAt(ResolveIndex(pdfPage.Annotations, replaceObjectNumber, replaceIndex)); }
-        AppendStamp(document, pdfPage, stamp, stamp.WithDate ? Stamp.DateLine(DateTime.Now) : string.Empty); // Datum und Uhrzeit klein unter dem Text
+        AppendStamp(document, pdfPage, stamp, stamp.SecondLine(DateTime.Now)); // Datum, Uhrzeit und Kürzel klein unter dem Text
         document.Save(path);
     }
 
@@ -262,7 +265,7 @@ internal static partial class PdfEditService
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
         var pdfPage = document.Pages[page - 1];
-        var planned = StampRect(pdfPage, stamp, stamp.WithDate ? Stamp.DateLine(DateTime.Now) : string.Empty);
+        var planned = StampRect(pdfPage, stamp, stamp.SecondLine(DateTime.Now));
         var annotations = pdfPage.Annotations;
         for (var i = 0; i < annotations.Count; i++)
         {
@@ -302,7 +305,8 @@ internal static partial class PdfEditService
         var pdfPage = document.Pages[page - 1];
         index = ResolveIndex(pdfPage.Annotations, objectNumber, index);
         var oldLines = SplitLines(pdfPage.Annotations[index].Elements.GetString("/Contents"));
-        var dateLine = !stamp.WithDate ? string.Empty : oldLines.Length > 1 ? oldLines[^1] : Stamp.DateLine(DateTime.Now);
+        var oldDate = oldLines.Length > 1 ? InitialsSuffix().Replace(oldLines[^1], string.Empty).Trim() : string.Empty; // Datum ohne das alte Kürzel
+        var dateLine = stamp.SecondLine(oldDate.Length > 0 ? oldDate : Stamp.DateText(DateTime.Now));
         pdfPage.Annotations.Elements.RemoveAt(index);
         AppendStamp(document, pdfPage, stamp, dateLine);
         document.Save(path);

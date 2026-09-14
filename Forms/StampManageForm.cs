@@ -20,6 +20,7 @@ public partial class StampManageForm : Form
         TextBoxMargins.Apply(this);
         stamps = [.. source.Select(s => s.Clone())];
         textBoxText.MaxLength = Stamp.MaxTextLength;
+        textBoxInitials.MaxLength = Stamp.MaxInitialsLength;
         numSize.Minimum = (decimal)Stamp.MinFontSize;
         numSize.Maximum = (decimal)Stamp.MaxFontSize;
         comboColor.Items.AddRange([.. ColorPalette.StampColors.Select(c => (object)Lng.T(c.Name))]);
@@ -39,7 +40,8 @@ public partial class StampManageForm : Form
         var stamp = Selected;
         var enabled = stamp != null;
         textBoxText.Enabled = numSize.Enabled = comboColor.Enabled = comboBackground.Enabled = comboPosition.Enabled = buttonDelete.Enabled = enabled;
-        cbDate.Enabled = cbBorder.Enabled = cbRounded.Enabled = enabled;
+        cbDate.Enabled = cbBorder.Enabled = cbRounded.Enabled = textBoxInitials.Enabled = enabled;
+        textBoxInitials.Text = stamp?.Initials ?? string.Empty;
         cbDate.Checked = stamp?.WithDate ?? true;
         cbBorder.Checked = stamp?.Border ?? true;
         cbRounded.Checked = stamp?.Rounded ?? false;
@@ -63,6 +65,7 @@ public partial class StampManageForm : Form
         stamp.WithDate = cbDate.Checked;
         stamp.Border = cbBorder.Checked;
         stamp.Rounded = cbRounded.Checked;
+        stamp.Initials = textBoxInitials.Text.Trim();
         (sender as ComboBox)?.Invalidate(); // selbst gezeichnete Auswahlfelder zeigen nach Tastaturwahl sonst noch den alten Eintrag
         listStamps.Invalidate(); // die Vorschau zeichnet aus der Stempelliste; den Eintragstext selbst erst beim Verlassen des Feldes ändern
     }

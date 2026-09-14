@@ -41,6 +41,8 @@
             comboBackground = new ComboBox();
             labelPosition = new Label();
             comboPosition = new ComboBox();
+            labelInitials = new Label();
+            textBoxInitials = new TextBox();
             cbDate = new CheckBox();
             cbBorder = new CheckBox();
             cbRounded = new CheckBox();
@@ -178,15 +180,33 @@
             comboPosition.TabIndex = 12;
             comboPosition.SelectedIndexChanged += Field_Changed;
             // 
+            // labelInitials
+            // 
+            labelInitials.AutoSize = true;
+            labelInitials.Location = new Point(330, 183);
+            labelInitials.Name = "labelInitials";
+            labelInitials.Size = new Size(94, 15);
+            labelInitials.TabIndex = 13;
+            labelInitials.Text = "Bearbeiter&kürzel:";
+            // 
+            // textBoxInitials
+            // 
+            textBoxInitials.Location = new Point(430, 180);
+            textBoxInitials.MaxLength = 3;
+            textBoxInitials.Name = "textBoxInitials";
+            textBoxInitials.Size = new Size(60, 23);
+            textBoxInitials.TabIndex = 14;
+            textBoxInitials.TextChanged += Field_Changed;
+            // 
             // cbDate
             // 
             cbDate.AutoSize = true;
             cbDate.Checked = true;
             cbDate.CheckState = CheckState.Checked;
-            cbDate.Location = new Point(333, 182);
+            cbDate.Location = new Point(333, 216);
             cbDate.Name = "cbDate";
             cbDate.Size = new Size(173, 19);
-            cbDate.TabIndex = 13;
+            cbDate.TabIndex = 15;
             cbDate.Text = "&Datum und Uhrzeit anfügen";
             cbDate.UseVisualStyleBackColor = true;
             cbDate.CheckedChanged += Field_Changed;
@@ -196,10 +216,10 @@
             cbBorder.AutoSize = true;
             cbBorder.Checked = true;
             cbBorder.CheckState = CheckState.Checked;
-            cbBorder.Location = new Point(333, 207);
+            cbBorder.Location = new Point(333, 241);
             cbBorder.Name = "cbBorder";
             cbBorder.Size = new Size(120, 19);
-            cbBorder.TabIndex = 14;
+            cbBorder.TabIndex = 16;
             cbBorder.Text = "&Rahmen zeichnen";
             cbBorder.UseVisualStyleBackColor = true;
             cbBorder.CheckedChanged += Field_Changed;
@@ -207,10 +227,10 @@
             // cbRounded
             // 
             cbRounded.AutoSize = true;
-            cbRounded.Location = new Point(333, 232);
+            cbRounded.Location = new Point(333, 266);
             cbRounded.Name = "cbRounded";
             cbRounded.Size = new Size(129, 19);
-            cbRounded.TabIndex = 15;
+            cbRounded.TabIndex = 17;
             cbRounded.Text = "Abgerundete &Ecken";
             cbRounded.UseVisualStyleBackColor = true;
             cbRounded.CheckedChanged += Field_Changed;
@@ -221,7 +241,7 @@
             buttonOK.Location = new Point(330, 290);
             buttonOK.Name = "buttonOK";
             buttonOK.Size = new Size(159, 27);
-            buttonOK.TabIndex = 16;
+            buttonOK.TabIndex = 18;
             buttonOK.Text = "Palette &speichern";
             buttonOK.UseVisualStyleBackColor = true;
             buttonOK.Click += ButtonOK_Click;
@@ -233,7 +253,7 @@
             buttonCancel.Location = new Point(495, 290);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new Size(95, 27);
-            buttonCancel.TabIndex = 17;
+            buttonCancel.TabIndex = 19;
             buttonCancel.Text = "Abbrechen";
             buttonCancel.UseVisualStyleBackColor = true;
             // 
@@ -249,6 +269,8 @@
             Controls.Add(cbRounded);
             Controls.Add(cbBorder);
             Controls.Add(cbDate);
+            Controls.Add(textBoxInitials);
+            Controls.Add(labelInitials);
             Controls.Add(comboPosition);
             Controls.Add(labelPosition);
             Controls.Add(comboBackground);
@@ -289,6 +311,8 @@
         private System.Windows.Forms.ComboBox comboBackground;
         private System.Windows.Forms.Label labelPosition;
         private System.Windows.Forms.ComboBox comboPosition;
+        private System.Windows.Forms.Label labelInitials;
+        private System.Windows.Forms.TextBox textBoxInitials;
         private System.Windows.Forms.CheckBox cbDate;
         private System.Windows.Forms.CheckBox cbBorder;
         private System.Windows.Forms.CheckBox cbRounded;

@@ -573,4 +573,5 @@ Clicking into the preview sets the position.</value></data>
   <data name="Stempel bearbeiten" xml:space="preserve"><value>Edit stamps</value></data>
   <data name="An dieser Stelle steht schon der Stempel „{0}“." xml:space="preserve"><value>The stamp &quot;{0}&quot; is already at this spot.</value></data>
   <data name="Soll er entfernt werden? Bei „Nein“ kommt der neue Stempel zusätzlich dazu." xml:space="preserve"><value>Remove it? Choosing &quot;No&quot; adds the new stamp alongside.</value></data>
+  <data name="Bearbeiter&amp;kürzel:" xml:space="preserve"><value>&amp;Initials:</value></data>
 </root>
