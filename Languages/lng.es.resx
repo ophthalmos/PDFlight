@@ -563,7 +563,7 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="Bezahlt" xml:space="preserve"><value>Pagado</value></data>
   <data name="Archiviert" xml:space="preserve"><value>Archivado</value></data>
   <data name="&amp;Datum und Uhrzeit anfügen" xml:space="preserve"><value>Añadir fecha y &amp;hora</value></data>
-  <data name="&amp;Rahmen" xml:space="preserve"><value>&amp;Borde</value></data>
+  <data name="&amp;Rahmen zeichnen" xml:space="preserve"><value>Dibujar &amp;borde</value></data>
   <data name="Abgerundete &amp;Ecken" xml:space="preserve"><value>&amp;Esquinas redondeadas</value></data>
   <data name="Palette &amp;speichern" xml:space="preserve"><value>&amp;Guardar paleta</value></data>
   <data name="Strg+Umschalt+H" xml:space="preserve"><value>Ctrl+Mayús+H</value></data>
