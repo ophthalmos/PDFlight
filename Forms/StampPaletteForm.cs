@@ -42,7 +42,7 @@ internal static class StampListPainter
     {
         // zarte Markierung statt des kräftigen Systemblaus, damit die Stempelvorschau lesbar bleibt
         var selected = (e.State & DrawItemState.Selected) != 0;
-        using (SolidBrush background = new(selected ? SelectionColor : SystemColors.Window)) { e.Graphics.FillRectangle(background, e.Bounds); }
+        using (SolidBrush background = new(selected ? Color.White : UnselectedColor)) { e.Graphics.FillRectangle(background, e.Bounds); }
         var previewHeight = e.Bounds.Height - 10;
         Rectangle preview = new(e.Bounds.X + 6, e.Bounds.Y + 5, e.Bounds.Width / 2, previewHeight);
         stamp.DrawPreview(e.Graphics, preview);
@@ -52,6 +52,6 @@ internal static class StampListPainter
         if (selected && (e.State & DrawItemState.Focus) != 0) { ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds); }
     }
 
-    /// <summary>Hellblau für den markierten Eintrag (statt SystemColors.Highlight).</summary>
-    private static readonly Color SelectionColor = Color.FromArgb(0xCC, 0xE0, 0xF5); // etwas kräftiger als der Stempelhintergrund „Hellblau“, damit der sich noch abhebt
+    /// <summary>Hellgrau für die nicht markierten Einträge – der markierte hebt sich weiß davon ab (Versuch statt Hellblau).</summary>
+    private static readonly Color UnselectedColor = SystemColors.Control; // wie die BackColor der Listen im Designer, damit auch der leere Rest der Liste grau ist
 }
