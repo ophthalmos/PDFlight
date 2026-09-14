@@ -11,6 +11,9 @@ internal static class ColorPalette
         ("Hellgrün", Color.FromArgb(221, 255, 221)), ("Rosa", Color.FromArgb(255, 221, 238)), ("Transparent", null),
     ];
 
+    /// <summary>Dieselben Hintergründe für die Stempel, aber mit „Transparent“ voran – das ist dort die Vorgabe.</summary>
+    public static readonly (string Name, Color? Color)[] StampBackgrounds = [Backgrounds[^1], .. Backgrounds[..^1]];
+
     /// <summary>Rahmenfarben der Textanmerkung; null = kein Rahmen.</summary>
     public static readonly (string Name, Color? Color)[] Borders =
     [

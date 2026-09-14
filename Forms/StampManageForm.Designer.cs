@@ -207,7 +207,7 @@
             // cbRounded
             // 
             cbRounded.AutoSize = true;
-            cbRounded.Location = new Point(430, 207);
+            cbRounded.Location = new Point(333, 232);
             cbRounded.Name = "cbRounded";
             cbRounded.Size = new Size(129, 19);
             cbRounded.TabIndex = 15;
