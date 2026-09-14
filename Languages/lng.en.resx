@@ -562,4 +562,8 @@ Clicking into the preview sets the position.</value></data>
   <data name="Erledigt" xml:space="preserve"><value>Done</value></data>
   <data name="Bezahlt" xml:space="preserve"><value>Paid</value></data>
   <data name="Archiviert" xml:space="preserve"><value>Archived</value></data>
+  <data name="&amp;Datum und Uhrzeit anfügen" xml:space="preserve"><value>Append &amp;date and time</value></data>
+  <data name="&amp;Rahmen" xml:space="preserve"><value>&amp;Border</value></data>
+  <data name="Abgerundete &amp;Ecken" xml:space="preserve"><value>Rounded &amp;corners</value></data>
+  <data name="Palette &amp;speichern" xml:space="preserve"><value>&amp;Save palette</value></data>
 </root>

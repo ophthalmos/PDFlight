@@ -24,6 +24,12 @@ public sealed class Stamp
     public string Background { get; set; } = string.Empty;
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public StampPosition Position { get; set; } = StampPosition.TopRight;
+    public bool WithDate { get; set; } = true;  // Datum und Uhrzeit als zweite Zeile
+    public bool Border { get; set; } = true;    // Rahmen in der Schriftfarbe
+    public bool Rounded { get; set; }           // abgerundete Ecken (Rahmen und Hintergrund)
+
+    /// <summary>Eckenradius in Punkt relativ zur Schriftgröße (0 = eckig).</summary>
+    public double CornerRadius => Rounded ? FontSize * 0.35 : 0;
 
     /// <summary>Die Namen der Positionen in der Reihenfolge des Enums (Lng-Schlüssel).</summary>
     public static readonly string[] PositionNames = ["oben links", "oben mittig", "oben rechts", "Seitenmitte"];
@@ -49,22 +55,43 @@ public sealed class Stamp
     public void DrawPreview(Graphics g, Rectangle bounds)
     {
         var text = Text.Length > 0 ? Text : "…";
-        var dateLine = DateLine(DateTime.Now);
+        var dateLine = WithDate ? DateLine(DateTime.Now) : string.Empty;
         using Font font = new("Arial", Math.Max(6f, bounds.Height * 0.42f), FontStyle.Bold, GraphicsUnit.Pixel);
         using Font small = new("Arial", Math.Max(5f, bounds.Height * 0.42f * (float)DateFactor), FontStyle.Regular, GraphicsUnit.Pixel);
         var textSize = TextRenderer.MeasureText(g, text, font, Size.Empty, TextFormatFlags.NoPadding);
-        var dateSize = TextRenderer.MeasureText(g, dateLine, small, Size.Empty, TextFormatFlags.NoPadding);
+        var dateSize = WithDate ? TextRenderer.MeasureText(g, dateLine, small, Size.Empty, TextFormatFlags.NoPadding) : Size.Empty;
         var padX = (int)(bounds.Height * 0.25);
         Rectangle box = new(bounds.X, bounds.Y, Math.Min(bounds.Width, Math.Max(textSize.Width, dateSize.Width) + 2 * padX), bounds.Height);
+        using var path = RoundedPath(new RectangleF(box.X + 1, box.Y + 1, box.Width - 2, box.Height - 2), Rounded ? box.Height * 0.2f : 0);
+        var smoothing = g.SmoothingMode;
+        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
         if (BackgroundColor is { } background)
         {
             using SolidBrush fill = new(background);
-            g.FillRectangle(fill, box);
+            g.FillPath(fill, path);
         }
-        using Pen border = new(Color, 2);
-        g.DrawRectangle(border, box.X + 1, box.Y + 1, box.Width - 2, box.Height - 2);
-        var split = box.Y + (int)(box.Height * 0.62); // oben der Text, unten die Datumszeile
+        if (Border)
+        {
+            using Pen pen = new(Color, 2);
+            g.DrawPath(pen, path);
+        }
+        g.SmoothingMode = smoothing;
+        var split = WithDate ? box.Y + (int)(box.Height * 0.62) : box.Bottom; // oben der Text, unten die Datumszeile
         TextRenderer.DrawText(g, text, font, new Rectangle(box.X, box.Y + 2, box.Width, split - box.Y - 2), Color, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding | TextFormatFlags.EndEllipsis);
-        TextRenderer.DrawText(g, dateLine, small, new Rectangle(box.X, split, box.Width, box.Bottom - split - 2), Color, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding | TextFormatFlags.EndEllipsis);
+        if (WithDate) { TextRenderer.DrawText(g, dateLine, small, new Rectangle(box.X, split, box.Width, box.Bottom - split - 2), Color, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding | TextFormatFlags.EndEllipsis); }
+    }
+
+    /// <summary>Rechteck mit wahlweise abgerundeten Ecken als GDI+-Pfad.</summary>
+    public static System.Drawing.Drawing2D.GraphicsPath RoundedPath(RectangleF rect, float radius)
+    {
+        System.Drawing.Drawing2D.GraphicsPath path = new();
+        if (radius <= 0) { path.AddRectangle(rect); return path; }
+        var d = radius * 2;
+        path.AddArc(rect.X, rect.Y, d, d, 180, 90);
+        path.AddArc(rect.Right - d, rect.Y, d, d, 270, 90);
+        path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
+        path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
+        path.CloseFigure();
+        return path;
     }
 }

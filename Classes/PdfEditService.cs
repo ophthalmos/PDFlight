@@ -250,7 +250,7 @@ internal static partial class PdfEditService
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         var pdfPage = document.Pages[page - 1];
-        var dateLine = Stamp.DateLine(DateTime.Now); // Datum und Uhrzeit stehen immer klein unter dem Text
+        var dateLine = stamp.WithDate ? Stamp.DateLine(DateTime.Now) : string.Empty; // Datum und Uhrzeit klein unter dem Text
         var dateSize = stamp.FontSize * Stamp.DateFactor;
         var (width, height, textWidth, dateWidth) = MeasureStamp(stamp.Text, stamp.FontSize, dateLine);
         const double margin = 10 * 72 / 25.4;
@@ -281,19 +281,27 @@ internal static partial class PdfEditService
         var color = stamp.Color;
         var rgb = string.Create(CultureInfo.InvariantCulture, $"{color.R / 255.0:0.###} {color.G / 255.0:0.###} {color.B / 255.0:0.###}");
         var content = new StringBuilder("q ");
+        var radius = stamp.CornerRadius;
         if (stamp.BackgroundColor is { } fill)
         {
-            content.Append(CultureInfo.InvariantCulture, $"{fill.R / 255.0:0.###} {fill.G / 255.0:0.###} {fill.B / 255.0:0.###} rg 0 0 {width:0.##} {height:0.##} re f ");
+            content.Append(CultureInfo.InvariantCulture, $"{fill.R / 255.0:0.###} {fill.G / 255.0:0.###} {fill.B / 255.0:0.###} rg ").Append(RectanglePath(0, 0, width, height, radius)).Append("f ");
         }
-        var stroke = Math.Max(1, stamp.FontSize / 12); // Rahmenstärke wächst mit der Schrift
-        content.Append(CultureInfo.InvariantCulture, $"{rgb} RG {stroke:0.##} w {stroke / 2:0.##} {stroke / 2:0.##} {width - stroke:0.##} {height - stroke:0.##} re S Q ");
+        if (stamp.Border)
+        {
+            var stroke = Math.Max(1, stamp.FontSize / 12); // Rahmenstärke wächst mit der Schrift
+            content.Append(CultureInfo.InvariantCulture, $"{rgb} RG {stroke:0.##} w ").Append(RectanglePath(stroke / 2, stroke / 2, width - stroke, height - stroke, radius)).Append("S ");
+        }
+        content.Append("Q ");
         var padding = stamp.FontSize * Stamp.PaddingFactor;
         var textBaseline = height - padding - stamp.FontSize * 0.72; // Versalhöhe von Helvetica ≈ 0,72 em
-        var dateBaseline = padding + dateSize * 0.22;                  // Unterlänge ≈ 0,22 em
         content.Append(CultureInfo.InvariantCulture, $"BT /HeBo {stamp.FontSize:0.##} Tf {rgb} rg {(width - textWidth) / 2:0.##} {textBaseline:0.##} Td (")
-               .Append(Escape(stamp.Text)).Append(") Tj ET ")
-               .Append(CultureInfo.InvariantCulture, $"BT /Helv {dateSize:0.##} Tf {rgb} rg {(width - dateWidth) / 2:0.##} {dateBaseline:0.##} Td (")
-               .Append(Escape(dateLine)).Append(") Tj ET");
+               .Append(Escape(stamp.Text)).Append(") Tj ET");
+        if (stamp.WithDate)
+        {
+            var dateBaseline = padding + dateSize * 0.22; // Unterlänge ≈ 0,22 em
+            content.Append(CultureInfo.InvariantCulture, $" BT /Helv {dateSize:0.##} Tf {rgb} rg {(width - dateWidth) / 2:0.##} {dateBaseline:0.##} Td (")
+                   .Append(Escape(dateLine)).Append(") Tj ET");
+        }
         var appearance = new PdfDictionary(document);
         appearance.Elements.SetName("/Type", "/XObject");
         appearance.Elements.SetName("/Subtype", "/Form");
@@ -309,7 +317,7 @@ internal static partial class PdfEditService
         annotation.Elements.SetName("/Subtype", "/Stamp");
         annotation.Elements.SetName("/Name", "/PDFlightStamp"); // kein Standardsymbol – Betrachter nehmen das Erscheinungsbild
         annotation.Elements.SetRectangle("/Rect", new PdfRectangle(new XRect(left, top - height, width, height)));
-        annotation.Elements.SetString("/Contents", stamp.Text + "\n" + dateLine);
+        annotation.Elements.SetString("/Contents", stamp.WithDate ? stamp.Text + "\n" + dateLine : stamp.Text);
         annotation.Elements.SetInteger("/F", 4); // drucken
         var colorArray = new PdfArray(document);
         colorArray.Elements.Add(new PdfReal(color.R / 255.0));
@@ -328,14 +336,28 @@ internal static partial class PdfEditService
     public static (double Width, double Height, double TextWidth, double DateWidth) MeasureStamp(string text, double fontSize, string dateLine)
     {
         using var measure = XGraphics.CreateMeasureContext(new XSize(1000, 1000), XGraphicsUnit.Point, XPageDirection.Downwards);
-        var dateSize = fontSize * Stamp.DateFactor;
+        var dateSize = dateLine.Length > 0 ? fontSize * Stamp.DateFactor : 0;
         var textWidth = Math.Max(measure.MeasureString(text, new XFont("Arial", fontSize, XFontStyleEx.Bold)).Width, fontSize);
-        var dateWidth = measure.MeasureString(dateLine, new XFont("Arial", dateSize)).Width;
+        var dateWidth = dateSize > 0 ? measure.MeasureString(dateLine, new XFont("Arial", dateSize)).Width : 0;
         var padding = fontSize * Stamp.PaddingFactor;
         return (Math.Max(textWidth, dateWidth) + 2 * padding, fontSize * 1.0 + dateSize * 1.3 + 2 * padding, textWidth, dateWidth);
     }
 
     private static string Escape(string text) => text.Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)");
+
+    /// <summary>Pfad eines Rechtecks für den Inhaltsstrom, mit Radius als abgerundetes Rechteck aus vier Bézier-Bögen.</summary>
+    private static string RectanglePath(double x, double y, double w, double h, double radius)
+    {
+        if (radius <= 0) { return string.Create(CultureInfo.InvariantCulture, $"{x:0.##} {y:0.##} {w:0.##} {h:0.##} re "); }
+        var r = Math.Min(radius, Math.Min(w, h) / 2);
+        var k = r * 0.5523; // Kreisbogen-Näherung
+        var (x1, y1, x2, y2) = (x, y, x + w, y + h);
+        return string.Create(CultureInfo.InvariantCulture,
+            $"{x1 + r:0.##} {y1:0.##} m {x2 - r:0.##} {y1:0.##} l {x2 - r + k:0.##} {y1:0.##} {x2:0.##} {y1 + r - k:0.##} {x2:0.##} {y1 + r:0.##} c " +
+            $"{x2:0.##} {y2 - r:0.##} l {x2:0.##} {y2 - r + k:0.##} {x2 - r + k:0.##} {y2:0.##} {x2 - r:0.##} {y2:0.##} c " +
+            $"{x1 + r:0.##} {y2:0.##} l {x1 + r - k:0.##} {y2:0.##} {x1:0.##} {y2 - r + k:0.##} {x1:0.##} {y2 - r:0.##} c " +
+            $"{x1:0.##} {y1 + r:0.##} l {x1:0.##} {y1 + r - k:0.##} {x1 + r - k:0.##} {y1:0.##} {x1 + r:0.##} {y1:0.##} c h ");
+    }
 
     private static void AppendFreeText(PdfDocument document, PdfPage pdfPage, string text, double leftMm, double topMm, double fontSize, AnnotationStyle style)
     {
