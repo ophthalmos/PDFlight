@@ -16,7 +16,13 @@ public partial class AnnotationForm : Form
     public double LeftMm => (double)numLeft.Value;
     public double TopMm => (double)numTop.Value;
     public double FontSize => (double)numSize.Value;
-    internal AnnotationStyle Style => new(cbBorder.Checked, Backgrounds[Math.Max(0, comboBackground.SelectedIndex)].Color, TextColors[Math.Max(0, comboTextColor.SelectedIndex)].Color);
+    internal AnnotationStyle Style => new(Borders[Math.Max(0, comboBorder.SelectedIndex)].Color, Backgrounds[Math.Max(0, comboBackground.SelectedIndex)].Color, TextColors[Math.Max(0, comboTextColor.SelectedIndex)].Color);
+
+    /// <summary>Die wählbaren Rahmenfarben (Namen sind Lng-Schlüssel); null = kein Rahmen.</summary>
+    private static readonly (string Name, Color? Color)[] Borders =
+    [
+        ("Grau", Color.FromArgb(128, 128, 128)), ("Schwarz", Color.Black), ("Rot", Color.FromArgb(192, 0, 0)), ("Blau", Color.FromArgb(0, 0, 192)), ("Kein Rahmen", null),
+    ];
 
     /// <summary>Die wählbaren Hintergründe (Namen sind Lng-Schlüssel); null = transparent.</summary>
     private static readonly (string Name, Color? Color)[] Backgrounds =
@@ -54,16 +60,18 @@ public partial class AnnotationForm : Form
         labelFileValue.Text = Path.GetFileName(filePath);
         labelPage.Text = string.Format(Lng.T("Seite {0} von {1}"), this.page, pageCount);
         labelInfo.Text = Lng.T("Anmerkung.Info", labelInfo.Text); // zweizeilig → expliziter Schlüssel (Zeilenumbrüche taugen nicht als resx-Schlüssel)
+        comboBorder.Items.AddRange([.. Borders.Select(b => (object)Lng.T(b.Name))]);
         comboBackground.Items.AddRange([.. Backgrounds.Select(bg => (object)Lng.T(bg.Name))]);
         comboTextColor.Items.AddRange([.. TextColors.Select(tc => (object)Lng.T(tc.Name))]);
         SetStyle(AnnotationStyle.Default);
     }
 
-    /// <summary>Rahmen und Hintergrund vorbelegen (zuletzt gewählte Werte bzw. die der bearbeiteten Anmerkung); eine fremde
-    /// Farbe außerhalb der Auswahl fällt auf Gelb zurück.</summary>
+    /// <summary>Rahmen, Hintergrund und Schriftfarbe vorbelegen (zuletzt gewählte Werte bzw. die der bearbeiteten Anmerkung); eine
+    /// fremde Farbe außerhalb der Auswahl fällt auf den ersten Eintrag zurück.</summary>
     internal void SetStyle(AnnotationStyle style)
     {
-        cbBorder.Checked = style.Border;
+        var borderIndex = Array.FindIndex(Borders, b => b.Color?.ToArgb() == style.BorderColor?.ToArgb());
+        comboBorder.SelectedIndex = borderIndex >= 0 ? borderIndex : 0;
         var index = Array.FindIndex(Backgrounds, bg => bg.Color?.ToArgb() == style.Background?.ToArgb());
         comboBackground.SelectedIndex = index >= 0 ? index : 0;
         var textIndex = Array.FindIndex(TextColors, tc => tc.Color.ToArgb() == style.TextColor.ToArgb());
@@ -74,6 +82,7 @@ public partial class AnnotationForm : Form
     internal void Preset(string text, double leftMm, double topMm, double fontSize, AnnotationStyle style, int annotationIndex)
     {
         Text = Lng.T("Textanmerkung bearbeiten");
+        buttonOK.Text = Lng.T("Übernehmen"); // statt „Hinzufügen“
         excludeAnnotationIndex = annotationIndex;
         SetStyle(style);
         textBoxText.Text = string.Join(Environment.NewLine, PdfEditService.SplitLines(text));
@@ -201,9 +210,9 @@ public partial class AnnotationForm : Form
             using SolidBrush fill = new(Color.FromArgb(200, background));
             e.Graphics.FillRectangle(fill, box);
         }
-        if (style.Border)
+        if (style.BorderColor is { } borderColor)
         {
-            using Pen border = new(Color.FromArgb(153, 153, 102));
+            using Pen border = new(borderColor);
             e.Graphics.DrawRectangle(border, box.X, box.Y, box.Width, box.Height);
         }
         // der Text im Kasten, im Maßstab der Vorschau (Arial steht für Helvetica – wie bei der Messung)
@@ -232,6 +241,11 @@ public partial class AnnotationForm : Form
         numTop.Value = Math.Clamp((decimal)Math.Round(pageY * mmPerPx, 1), numTop.Minimum, numTop.Maximum);
     }
 
+    private void ComboBorder_DrawItem(object? sender, DrawItemEventArgs e)
+    {
+        if (e.Index >= 0 && e.Index < Borders.Length) { DrawColorItem(e, Borders[e.Index].Name, Borders[e.Index].Color); }
+    }
+
     private void ComboBackground_DrawItem(object? sender, DrawItemEventArgs e)
     {
         if (e.Index >= 0 && e.Index < Backgrounds.Length) { DrawColorItem(e, Backgrounds[e.Index].Name, Backgrounds[e.Index].Color); }
@@ -242,7 +256,7 @@ public partial class AnnotationForm : Form
         if (e.Index >= 0 && e.Index < TextColors.Length) { DrawColorItem(e, TextColors[e.Index].Name, TextColors[e.Index].Color); }
     }
 
-    /// <summary>Listeneintrag mit Farbfeld vor dem Namen; „Transparent“ (null) bekommt ein weißes Feld mit Diagonale.</summary>
+    /// <summary>Listeneintrag mit Farbfeld vor dem Namen; „Transparent“ bzw. „Kein Rahmen“ (null) bekommt ein weißes Feld mit Diagonale.</summary>
     private void DrawColorItem(DrawItemEventArgs e, string name, Color? color)
     {
         e.DrawBackground();

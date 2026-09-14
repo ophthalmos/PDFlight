@@ -41,7 +41,8 @@ namespace PDFLight.Forms
             numSize = new NumericUpDown();
             labelBackground = new Label();
             comboBackground = new ComboBox();
-            cbBorder = new CheckBox();
+            labelBorder = new Label();
+            comboBorder = new ComboBox();
             labelTextColor = new Label();
             comboTextColor = new ComboBox();
             previewWebView = new Microsoft.Web.WebView2.WinForms.WebView2();
@@ -59,7 +60,7 @@ namespace PDFLight.Forms
             // 
             labelFileValue.AutoEllipsis = true;
             labelFileValue.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            labelFileValue.Location = new Point(358, 9);
+            labelFileValue.Location = new Point(335, 9);
             labelFileValue.Name = "labelFileValue";
             labelFileValue.Size = new Size(269, 15);
             labelFileValue.TabIndex = 0;
@@ -67,16 +68,15 @@ namespace PDFLight.Forms
             // 
             // labelPage
             // 
-            labelPage.AutoSize = true;
-            labelPage.Location = new Point(357, 32);
+            labelPage.Location = new Point(335, 34);
             labelPage.Name = "labelPage";
-            labelPage.Size = new Size(0, 15);
+            labelPage.Size = new Size(269, 15);
             labelPage.TabIndex = 1;
             // 
             // labelText
             // 
             labelText.AutoSize = true;
-            labelText.Location = new Point(358, 62);
+            labelText.Location = new Point(335, 62);
             labelText.Name = "labelText";
             labelText.Size = new Size(31, 15);
             labelText.TabIndex = 2;
@@ -85,27 +85,27 @@ namespace PDFLight.Forms
             // textBoxText
             // 
             textBoxText.AcceptsReturn = true;
-            textBoxText.Location = new Point(358, 80);
+            textBoxText.Location = new Point(335, 80);
             textBoxText.Multiline = true;
             textBoxText.Name = "textBoxText";
             textBoxText.ScrollBars = ScrollBars.Vertical;
-            textBoxText.Size = new Size(257, 115);
+            textBoxText.Size = new Size(269, 115);
             textBoxText.TabIndex = 3;
             textBoxText.TextChanged += Preview_Changed;
             // 
             // labelInfo
             // 
             labelInfo.ForeColor = SystemColors.GrayText;
-            labelInfo.Location = new Point(358, 198);
+            labelInfo.Location = new Point(335, 198);
             labelInfo.Name = "labelInfo";
-            labelInfo.Size = new Size(258, 35);
+            labelInfo.Size = new Size(269, 35);
             labelInfo.TabIndex = 4;
             labelInfo.Text = "Maße ab der linken oberen Ecke der Seite.\r\nKlick ins Vorschaubild setzt die Position.";
             // 
             // labelLeft
             // 
             labelLeft.AutoSize = true;
-            labelLeft.Location = new Point(358, 238);
+            labelLeft.Location = new Point(335, 238);
             labelLeft.Name = "labelLeft";
             labelLeft.Size = new Size(137, 15);
             labelLeft.TabIndex = 5;
@@ -115,7 +115,7 @@ namespace PDFLight.Forms
             // 
             numLeft.DecimalPlaces = 1;
             numLeft.Increment = new decimal(new int[] { 5, 0, 0, 0 });
-            numLeft.Location = new Point(535, 236);
+            numLeft.Location = new Point(524, 236);
             numLeft.Maximum = new decimal(new int[] { 500, 0, 0, 0 });
             numLeft.Name = "numLeft";
             numLeft.Size = new Size(80, 23);
@@ -126,7 +126,7 @@ namespace PDFLight.Forms
             // labelTop
             // 
             labelTop.AutoSize = true;
-            labelTop.Location = new Point(358, 267);
+            labelTop.Location = new Point(335, 267);
             labelTop.Name = "labelTop";
             labelTop.Size = new Size(140, 15);
             labelTop.TabIndex = 7;
@@ -136,7 +136,7 @@ namespace PDFLight.Forms
             // 
             numTop.DecimalPlaces = 1;
             numTop.Increment = new decimal(new int[] { 5, 0, 0, 0 });
-            numTop.Location = new Point(535, 265);
+            numTop.Location = new Point(524, 265);
             numTop.Maximum = new decimal(new int[] { 500, 0, 0, 0 });
             numTop.Name = "numTop";
             numTop.Size = new Size(80, 23);
@@ -147,7 +147,7 @@ namespace PDFLight.Forms
             // labelSize
             // 
             labelSize.AutoSize = true;
-            labelSize.Location = new Point(358, 296);
+            labelSize.Location = new Point(335, 296);
             labelSize.Name = "labelSize";
             labelSize.Size = new Size(97, 15);
             labelSize.TabIndex = 9;
@@ -155,7 +155,7 @@ namespace PDFLight.Forms
             // 
             // numSize
             // 
-            numSize.Location = new Point(535, 294);
+            numSize.Location = new Point(524, 294);
             numSize.Maximum = new decimal(new int[] { 72, 0, 0, 0 });
             numSize.Minimum = new decimal(new int[] { 6, 0, 0, 0 });
             numSize.Name = "numSize";
@@ -167,7 +167,7 @@ namespace PDFLight.Forms
             // labelBackground
             // 
             labelBackground.AutoSize = true;
-            labelBackground.Location = new Point(358, 329);
+            labelBackground.Location = new Point(335, 329);
             labelBackground.Name = "labelBackground";
             labelBackground.Size = new Size(75, 15);
             labelBackground.TabIndex = 11;
@@ -177,30 +177,37 @@ namespace PDFLight.Forms
             // 
             comboBackground.DrawMode = DrawMode.OwnerDrawFixed;
             comboBackground.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBackground.Location = new Point(495, 326);
+            comboBackground.Location = new Point(483, 326);
             comboBackground.Name = "comboBackground";
             comboBackground.Size = new Size(121, 24);
             comboBackground.TabIndex = 12;
             comboBackground.DrawItem += ComboBackground_DrawItem;
             comboBackground.SelectedIndexChanged += Preview_Changed;
             // 
-            // cbBorder
-            // 
-            cbBorder.AutoSize = true;
-            cbBorder.Checked = true;
-            cbBorder.CheckState = CheckState.Checked;
-            cbBorder.Location = new Point(363, 391);
-            cbBorder.Name = "cbBorder";
-            cbBorder.Size = new Size(70, 19);
-            cbBorder.TabIndex = 15;
-            cbBorder.Text = "&Rahmen";
-            cbBorder.UseVisualStyleBackColor = true;
-            cbBorder.CheckedChanged += Preview_Changed;
+            // labelBorder
+            //
+            labelBorder.AutoSize = true;
+            labelBorder.Location = new Point(335, 389);
+            labelBorder.Name = "labelBorder";
+            labelBorder.Size = new Size(52, 15);
+            labelBorder.TabIndex = 15;
+            labelBorder.Text = "&Rahmen:";
+            //
+            // comboBorder
+            //
+            comboBorder.DrawMode = DrawMode.OwnerDrawFixed;
+            comboBorder.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBorder.Location = new Point(483, 386);
+            comboBorder.Name = "comboBorder";
+            comboBorder.Size = new Size(121, 24);
+            comboBorder.TabIndex = 16;
+            comboBorder.DrawItem += ComboBorder_DrawItem;
+            comboBorder.SelectedIndexChanged += Preview_Changed;
             // 
             // labelTextColor
             // 
             labelTextColor.AutoSize = true;
-            labelTextColor.Location = new Point(358, 359);
+            labelTextColor.Location = new Point(335, 359);
             labelTextColor.Name = "labelTextColor";
             labelTextColor.Size = new Size(71, 15);
             labelTextColor.TabIndex = 13;
@@ -210,7 +217,7 @@ namespace PDFLight.Forms
             // 
             comboTextColor.DrawMode = DrawMode.OwnerDrawFixed;
             comboTextColor.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboTextColor.Location = new Point(495, 356);
+            comboTextColor.Location = new Point(484, 356);
             comboTextColor.Name = "comboTextColor";
             comboTextColor.Size = new Size(120, 24);
             comboTextColor.TabIndex = 14;
@@ -224,7 +231,7 @@ namespace PDFLight.Forms
             previewWebView.DefaultBackgroundColor = Color.White;
             previewWebView.Location = new Point(1, 1);
             previewWebView.Name = "previewWebView";
-            previewWebView.Size = new Size(335, 460);
+            previewWebView.Size = new Size(316, 460);
             previewWebView.TabIndex = 14;
             previewWebView.TabStop = false;
             previewWebView.ZoomFactor = 1D;
@@ -236,7 +243,7 @@ namespace PDFLight.Forms
             picturePreview.Cursor = Cursors.Hand;
             picturePreview.Location = new Point(1, 1);
             picturePreview.Name = "picturePreview";
-            picturePreview.Size = new Size(335, 460);
+            picturePreview.Size = new Size(316, 460);
             picturePreview.TabIndex = 15;
             picturePreview.TabStop = false;
             picturePreview.Paint += PicturePreview_Paint;
@@ -245,11 +252,11 @@ namespace PDFLight.Forms
             // buttonOK
             // 
             buttonOK.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            buttonOK.Location = new Point(363, 424);
+            buttonOK.Location = new Point(335, 424);
             buttonOK.Name = "buttonOK";
-            buttonOK.Size = new Size(126, 27);
+            buttonOK.Size = new Size(142, 27);
             buttonOK.TabIndex = 17;
-            buttonOK.Text = "OK";
+            buttonOK.Text = "Hinzufügen";
             buttonOK.UseVisualStyleBackColor = true;
             buttonOK.Click += ButtonOK_Click;
             // 
@@ -257,9 +264,9 @@ namespace PDFLight.Forms
             // 
             buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             buttonCancel.DialogResult = DialogResult.Cancel;
-            buttonCancel.Location = new Point(495, 424);
+            buttonCancel.Location = new Point(483, 424);
             buttonCancel.Name = "buttonCancel";
-            buttonCancel.Size = new Size(120, 27);
+            buttonCancel.Size = new Size(121, 27);
             buttonCancel.TabIndex = 18;
             buttonCancel.Text = "Abbrechen";
             buttonCancel.UseVisualStyleBackColor = true;
@@ -270,14 +277,15 @@ namespace PDFLight.Forms
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonCancel;
-            ClientSize = new Size(627, 463);
+            ClientSize = new Size(616, 463);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
             Controls.Add(picturePreview);
             Controls.Add(previewWebView);
             Controls.Add(comboTextColor);
             Controls.Add(labelTextColor);
-            Controls.Add(cbBorder);
+            Controls.Add(comboBorder);
+            Controls.Add(labelBorder);
             Controls.Add(comboBackground);
             Controls.Add(labelBackground);
             Controls.Add(numSize);
@@ -324,7 +332,8 @@ namespace PDFLight.Forms
         private System.Windows.Forms.NumericUpDown numSize;
         private System.Windows.Forms.Label labelBackground;
         private System.Windows.Forms.ComboBox comboBackground;
-        private System.Windows.Forms.CheckBox cbBorder;
+        private System.Windows.Forms.Label labelBorder;
+        private System.Windows.Forms.ComboBox comboBorder;
         private System.Windows.Forms.Label labelTextColor;
         private System.Windows.Forms.ComboBox comboTextColor;
         private Microsoft.Web.WebView2.WinForms.WebView2 previewWebView;

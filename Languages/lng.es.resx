@@ -496,7 +496,11 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="Seite {0} von {1}" xml:space="preserve"><value>Página {0} de {1}</value></data>
   <data name="Vorschau nicht verfügbar" xml:space="preserve"><value>Vista previa no disponible</value></data>
   <data name="&amp;Hintergrund:" xml:space="preserve"><value>&amp;Fondo:</value></data>
-  <data name="&amp;Rahmen" xml:space="preserve"><value>&amp;Borde</value></data>
+  <data name="&amp;Rahmen:" xml:space="preserve"><value>&amp;Borde:</value></data>
+  <data name="Grau" xml:space="preserve"><value>Gris</value></data>
+  <data name="Kein Rahmen" xml:space="preserve"><value>Sin borde</value></data>
+  <data name="Hinzufügen" xml:space="preserve"><value>Añadir</value></data>
+  <data name="Übernehmen" xml:space="preserve"><value>Aplicar</value></data>
   <data name="Gelb" xml:space="preserve"><value>Amarillo</value></data>
   <data name="Weiß" xml:space="preserve"><value>Blanco</value></data>
   <data name="Hellblau" xml:space="preserve"><value>Azul claro</value></data>
