@@ -40,13 +40,18 @@ internal static class StampListPainter
 {
     public static void Draw(DrawItemEventArgs e, Stamp stamp, Font font)
     {
-        e.DrawBackground();
+        // zarte Markierung statt des kräftigen Systemblaus, damit die Stempelvorschau lesbar bleibt
+        var selected = (e.State & DrawItemState.Selected) != 0;
+        using (SolidBrush background = new(selected ? SelectionColor : SystemColors.Window)) { e.Graphics.FillRectangle(background, e.Bounds); }
         var previewHeight = e.Bounds.Height - 10;
         Rectangle preview = new(e.Bounds.X + 6, e.Bounds.Y + 5, e.Bounds.Width / 2, previewHeight);
         stamp.DrawPreview(e.Graphics, preview);
-        var textColor = (e.State & DrawItemState.Selected) != 0 ? SystemColors.HighlightText : SystemColors.GrayText;
+        var textColor = SystemColors.GrayText;
         var info = $"{stamp.FontSize:0.#} pt · {Lng.T(Stamp.PositionNames[(int)stamp.Position])}";
         TextRenderer.DrawText(e.Graphics, info, font, new Rectangle(preview.Right + 8, e.Bounds.Y, e.Bounds.Right - preview.Right - 10, e.Bounds.Height), textColor, TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.EndEllipsis);
-        e.DrawFocusRectangle();
+        if (selected && (e.State & DrawItemState.Focus) != 0) { ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds); }
     }
+
+    /// <summary>Hellblau für den markierten Eintrag (statt SystemColors.Highlight).</summary>
+    private static readonly Color SelectionColor = Color.FromArgb(0xCC, 0xE0, 0xF5); // etwas kräftiger als der Stempelhintergrund „Hellblau“, damit der sich noch abhebt
 }
