@@ -40,6 +40,7 @@ namespace PDFLight.Forms
             textBoxSubject = new System.Windows.Forms.TextBox();
             labelKeywords = new System.Windows.Forms.Label();
             textBoxKeywords = new System.Windows.Forms.TextBox();
+            buttonRemove = new System.Windows.Forms.Button();
             buttonOK = new System.Windows.Forms.Button();
             buttonCancel = new System.Windows.Forms.Button();
             SuspendLayout();
@@ -151,6 +152,17 @@ namespace PDFLight.Forms
             textBoxKeywords.Size = new System.Drawing.Size(392, 23);
             textBoxKeywords.TabIndex = 10;
             //
+            // buttonRemove
+            //
+            buttonRemove.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            buttonRemove.Location = new System.Drawing.Point(12, 216);
+            buttonRemove.Name = "buttonRemove";
+            buttonRemove.Size = new System.Drawing.Size(160, 27);
+            buttonRemove.TabIndex = 13;
+            buttonRemove.Text = "Metadaten &entfernen";
+            buttonRemove.UseVisualStyleBackColor = true;
+            buttonRemove.Click += ButtonRemove_Click;
+            //
             // buttonOK
             //
             buttonOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
@@ -182,6 +194,7 @@ namespace PDFLight.Forms
             ClientSize = new System.Drawing.Size(494, 255);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
+            Controls.Add(buttonRemove);
             Controls.Add(textBoxKeywords);
             Controls.Add(labelKeywords);
             Controls.Add(textBoxSubject);
@@ -219,6 +232,7 @@ namespace PDFLight.Forms
         private System.Windows.Forms.TextBox textBoxSubject;
         private System.Windows.Forms.Label labelKeywords;
         private System.Windows.Forms.TextBox textBoxKeywords;
+        private System.Windows.Forms.Button buttonRemove;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
     }

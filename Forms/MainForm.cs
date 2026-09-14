@@ -376,6 +376,7 @@ public partial class MainForm : Form
         // Extrahieren (neue Datei), Rückgängig (stellt alte Bytes wieder her) und Eigenschaften (dann nur lesend) bleiben frei
         pnlPdfA.Visible = hasFile && PdfALocked;
         mnuDeletePages.Enabled = mnuRotatePages.Enabled = mnuAppendPdf.Enabled = mnuDuplex.Enabled = mnuAddAnnotation.Enabled = !PdfALocked;
+        mnuMovePage.Enabled = !PdfALocked && currentPageCount > 1; // mit einer Seite gibt es nichts zu verschieben
         mnuManageAnnotations.Enabled = !PdfALocked && (currentPdfStatus?.AnnotationCount ?? 0) > 0; // ohne Anmerkungen gibt es nichts zu verwalten
         mnuSetPassword.Enabled = currentPageCount > 0 && !PdfALocked;  // nur ohne bestehenden Kennwortschutz
         mnuRemovePassword.Enabled = hasFile && currentPageCount <= 0;  // nur bei geschützter (oder unlesbarer) Datei
@@ -985,6 +986,7 @@ public partial class MainForm : Form
         Set(ddbInfo, ToolbarIcons.Help, imageOnly: true);
         mnuDeletePages.Image = MenuIcon(ToolbarIcons.Delete); // Bearbeiten-Menü (Menüsymbole bleiben 16 px)
         mnuRotatePages.Image = MenuIcon(ToolbarIcons.Rotate);
+        mnuMovePage.Image = MenuIcon(ToolbarIcons.MovePage);
         mnuAppendPdf.Image = MenuIcon(ToolbarIcons.Attach);
         mnuDuplex.Image = MenuIcon(ToolbarIcons.Interleave);
         mnuExtractPages.Image = MenuIcon(ToolbarIcons.Page);
@@ -1424,13 +1426,39 @@ public partial class MainForm : Form
         catch (Exception ex) when (PdfEditService.IsPdfReadError(ex)) { ShowNotEditableMessage(); return; }
         currentFile.Refresh();
         using PropertiesForm dialog = new(info, currentFile, PdfALocked);
-        if (dialog.ShowDialog(this) == DialogResult.OK && dialog.InfoChanged)
+        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
+        if (dialog.RemoveRequested) // alles weg, auch Anwendung, Produzent, Daten und XMP; danach eingetippte Felder bleiben
+        {
+            if (RunPdfEdit(() => PdfEditService.RemoveMetadata(currentFile.FullName, dialog.DocTitle, dialog.DocAuthor, dialog.DocSubject, dialog.DocKeywords), Lng.T("Entfernen der Metadaten")))
+            {
+                LoadPdf(currentFile.FullName);
+                statusPath.Text = Lng.T("Die Metadaten wurden entfernt.");
+            }
+        }
+        else if (dialog.InfoChanged)
         {
             if (RunPdfEdit(() => PdfEditService.WriteInfo(currentFile.FullName, dialog.DocTitle, dialog.DocAuthor, dialog.DocSubject, dialog.DocKeywords), Lng.T("Speichern der Eigenschaften")))
             {
                 LoadPdf(currentFile.FullName);
                 statusPath.Text = Lng.T("Die Dokumenteigenschaften wurden gespeichert.");
             }
+        }
+    }
+
+    /// <summary>Verschiebt die angezeigte Seite an eine andere Position (Bearbeiten-Menü).</summary>
+    private void MovePageDialog()
+    {
+        if (currentFile == null) { return; }
+        if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
+        var page = ClampedCurrentPage();
+        if (page <= 0 || currentPageCount < 2) { return; }
+        using MovePageForm dialog = new(page, currentPageCount);
+        if (dialog.ShowDialog(this) != DialogResult.OK || dialog.TargetPage == page) { return; }
+        var target = dialog.TargetPage;
+        if (RunPdfEdit(() => PdfEditService.MovePage(currentFile.FullName, page, target), Lng.T("Seite verschieben")))
+        {
+            LoadPdf(currentFile.FullName, target);
+            statusPath.Text = string.Format(Lng.T("Seite {0} wurde an Position {1} verschoben."), page, target);
         }
     }
 
@@ -1961,6 +1989,10 @@ public partial class MainForm : Form
     private void MnuRotatePages_Click(object? sender, EventArgs e)
     {
         RotatePagesDialog();
+    }
+    private void MnuMovePage_Click(object? sender, EventArgs e)
+    {
+        MovePageDialog();
     }
     private void MnuAppendPdf_Click(object? sender, EventArgs e)
     {
