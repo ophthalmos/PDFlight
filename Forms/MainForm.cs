@@ -1306,10 +1306,10 @@ public partial class MainForm : Form
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
         var page = Math.Max(1, ClampedCurrentPage()); // immer die angezeigte Seite
         using AnnotationForm dialog = new(currentFile.FullName, currentPageCount, page);
-        dialog.SetStyle(new AnnotationStyle(settings.AnnotationBorder, AnnotationStyle.ParseHex(settings.AnnotationBackground), AnnotationStyle.ParseHex(settings.AnnotationTextColor) ?? Color.Black)); // zuletzt gewählte Gestaltung
+        dialog.SetStyle(new AnnotationStyle(AnnotationStyle.ParseHex(settings.AnnotationBorderColor), AnnotationStyle.ParseHex(settings.AnnotationBackground), AnnotationStyle.ParseHex(settings.AnnotationTextColor) ?? Color.Black)); // zuletzt gewählte Gestaltung
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         var style = dialog.Style;
-        settings.AnnotationBorder = style.Border;
+        settings.AnnotationBorderColor = style.BorderColorHex;
         settings.AnnotationBackground = style.BackgroundHex;
         settings.AnnotationTextColor = style.TextColorHex;
         settings.Save();

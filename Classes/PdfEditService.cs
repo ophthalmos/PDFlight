@@ -5,6 +5,7 @@ using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Annotations;
+using PdfSharp.Pdf.Internal;
 using PdfSharp.Pdf.IO;
 
 namespace PDFLight.Classes;
@@ -18,10 +19,13 @@ internal record PdfInfo(string Title, string Author, string Subject, string Keyw
 /// erneuten Öffnen sicher, der Index dient nur als Rückfall.</summary>
 internal record AnnotationInfo(int Page, int Index, int ObjectNumber, string Subtype, string Contents, double LeftMm, double TopMm, double FontSize, AnnotationStyle Style);
 
-/// <summary>Gestaltung einer Textanmerkung: Rahmen ja/nein, Hintergrundfarbe (null = transparent) und Schriftfarbe.</summary>
-internal sealed record AnnotationStyle(bool Border, Color? Background, Color TextColor)
+/// <summary>Gestaltung einer Textanmerkung: Rahmenfarbe (null = kein Rahmen), Hintergrundfarbe (null = transparent) und Schriftfarbe.</summary>
+internal sealed record AnnotationStyle(Color? BorderColor, Color? Background, Color TextColor)
 {
-    public static readonly AnnotationStyle Default = new(true, Color.FromArgb(255, 255, 204), Color.Black);
+    public static readonly AnnotationStyle Default = new(Color.FromArgb(128, 128, 128), Color.FromArgb(255, 255, 204), Color.Black);
+
+    /// <summary>Rahmen als RRGGBB für die Einstellungen; leer = kein Rahmen.</summary>
+    public string BorderColorHex => BorderColor is { } color ? ToHex(color) : string.Empty;
 
     /// <summary>Hintergrund als RRGGBB für die Einstellungen; leer = transparent.</summary>
     public string BackgroundHex => Background is { } color ? ToHex(color) : string.Empty;
@@ -205,7 +209,8 @@ internal static partial class PdfEditService
         return result;
     }
 
-    /// <summary>Gestaltung aus /C (Hintergrund: drei Komponenten = RGB, leeres Array = transparent, sonst Standard) und /BS /W (0 = kein Rahmen).</summary>
+    /// <summary>Gestaltung aus /C (Hintergrund: drei Komponenten = RGB, leeres Array = transparent, sonst Standard), /BS /W (0 = kein Rahmen)
+    /// und der Rahmenfarbe aus dem eigenen Darstellungsstrom („r g b RG“ – die Anmerkung selbst kennt keine Rahmenfarbe).</summary>
     private static AnnotationStyle ReadStyle(PdfAnnotation annotation)
     {
         var background = AnnotationStyle.Default.Background;
@@ -213,12 +218,17 @@ internal static partial class PdfEditService
         {
             background = c.Elements.Count == 3 ? Color.FromArgb(Channel(c, 0), Channel(c, 1), Channel(c, 2)) : c.Elements.Count == 0 ? null : background;
         }
-        var border = true;
-        if (annotation.Elements.GetDictionary("/BS") is { } bs && bs.Elements.ContainsKey("/W")) { border = bs.Elements.GetReal("/W") > 0; }
+        var borderColor = AnnotationStyle.Default.BorderColor;
+        if (annotation.Elements.GetDictionary("/BS") is { } bs && bs.Elements.ContainsKey("/W") && bs.Elements.GetReal("/W") <= 0) { borderColor = null; }
+        else if (annotation.Elements.GetDictionary("/AP")?.Elements.GetDictionary("/N") is { Stream: { } stream })
+        {
+            var strokeColor = BorderColorInStream().Match(PdfEncoders.RawEncoding.GetString(stream.UnfilteredValue));
+            if (strokeColor.Success) { borderColor = Color.FromArgb(Component(strokeColor.Groups[1].Value), Component(strokeColor.Groups[2].Value), Component(strokeColor.Groups[3].Value)); }
+        }
         var textColor = Color.Black;
         var rgb = TextColorInDa().Match(annotation.Elements.GetString("/DA")); // „r g b rg“ im Standarderscheinungsbild; „g“ (Grau) bleibt Schwarz
         if (rgb.Success) { textColor = Color.FromArgb(Component(rgb.Groups[1].Value), Component(rgb.Groups[2].Value), Component(rgb.Groups[3].Value)); }
-        return new AnnotationStyle(border, background, textColor);
+        return new AnnotationStyle(borderColor, background, textColor);
     }
 
     private static int Channel(PdfArray array, int index) => (int)Math.Round(Math.Clamp(array.Elements.GetReal(index), 0, 1) * 255);
@@ -227,6 +237,9 @@ internal static partial class PdfEditService
 
     [GeneratedRegex(@"(\d*\.?\d+)\s+(\d*\.?\d+)\s+(\d*\.?\d+)\s+rg")]
     private static partial Regex TextColorInDa();
+
+    [GeneratedRegex(@"(\d*\.?\d+)\s+(\d*\.?\d+)\s+(\d*\.?\d+)\s+RG")]
+    private static partial Regex BorderColorInStream();
 
     [GeneratedRegex(@"(\d+(?:\.\d+)?)\s+Tf")]
     private static partial Regex FontSizeInDa();
@@ -255,9 +268,9 @@ internal static partial class PdfEditService
         {
             content.Append(CultureInfo.InvariantCulture, $"{fill.R / 255.0:0.###} {fill.G / 255.0:0.###} {fill.B / 255.0:0.###} rg 0 0 {width:0.##} {height:0.##} re f ");
         }
-        if (style.Border)
+        if (style.BorderColor is { } stroke)
         {
-            content.Append(CultureInfo.InvariantCulture, $"0.6 0.6 0.4 RG 0.5 w 0.25 0.25 {width - 0.5:0.##} {height - 0.5:0.##} re S ");
+            content.Append(CultureInfo.InvariantCulture, $"{stroke.R / 255.0:0.###} {stroke.G / 255.0:0.###} {stroke.B / 255.0:0.###} RG 0.5 w 0.25 0.25 {width - 0.5:0.##} {height - 0.5:0.##} re S ");
         }
         content.Append("Q ");
         var textColor = style.TextColor;
@@ -294,7 +307,7 @@ internal static partial class PdfEditService
         annotation.Elements.SetObject("/C", color);
         var borderStyle = new PdfDictionary(document);
         borderStyle.Elements.SetName("/Type", "/Border");
-        borderStyle.Elements.SetInteger("/W", style.Border ? 1 : 0);
+        borderStyle.Elements.SetInteger("/W", style.BorderColor != null ? 1 : 0);
         annotation.Elements.SetObject("/BS", borderStyle);
         annotation.Elements.SetObject("/AP", appearances);
         annotation.Elements.SetDateTime("/M", DateTime.Now);
