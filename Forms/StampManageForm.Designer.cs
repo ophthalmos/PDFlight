@@ -48,6 +48,7 @@
             cbRounded = new CheckBox();
             buttonOK = new Button();
             buttonCancel = new Button();
+            labelMaxInitials = new Label();
             ((System.ComponentModel.ISupportInitialize)numSize).BeginInit();
             SuspendLayout();
             // 
@@ -95,9 +96,9 @@
             // 
             // textBoxText
             // 
-            textBoxText.Location = new Point(430, 12);
+            textBoxText.Location = new Point(435, 12);
             textBoxText.Name = "textBoxText";
-            textBoxText.Size = new Size(160, 23);
+            textBoxText.Size = new Size(155, 23);
             textBoxText.TabIndex = 4;
             textBoxText.TextChanged += Field_Changed;
             textBoxText.Leave += TextBoxText_Leave;
@@ -105,7 +106,7 @@
             // labelSize
             // 
             labelSize.AutoSize = true;
-            labelSize.Location = new Point(330, 47);
+            labelSize.Location = new Point(330, 43);
             labelSize.Name = "labelSize";
             labelSize.Size = new Size(97, 15);
             labelSize.TabIndex = 5;
@@ -113,11 +114,11 @@
             // 
             // numSize
             // 
-            numSize.Location = new Point(430, 45);
+            numSize.Location = new Point(435, 41);
             numSize.Maximum = new decimal(new int[] { 72, 0, 0, 0 });
             numSize.Minimum = new decimal(new int[] { 8, 0, 0, 0 });
             numSize.Name = "numSize";
-            numSize.Size = new Size(80, 23);
+            numSize.Size = new Size(66, 23);
             numSize.TabIndex = 6;
             numSize.Value = new decimal(new int[] { 24, 0, 0, 0 });
             numSize.ValueChanged += Field_Changed;
@@ -125,7 +126,7 @@
             // labelColor
             // 
             labelColor.AutoSize = true;
-            labelColor.Location = new Point(330, 81);
+            labelColor.Location = new Point(330, 73);
             labelColor.Name = "labelColor";
             labelColor.Size = new Size(71, 15);
             labelColor.TabIndex = 7;
@@ -135,9 +136,9 @@
             // 
             comboColor.DrawMode = DrawMode.OwnerDrawFixed;
             comboColor.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboColor.Location = new Point(430, 78);
+            comboColor.Location = new Point(435, 70);
             comboColor.Name = "comboColor";
-            comboColor.Size = new Size(160, 24);
+            comboColor.Size = new Size(155, 24);
             comboColor.TabIndex = 8;
             comboColor.DrawItem += ComboColor_DrawItem;
             comboColor.SelectedIndexChanged += Field_Changed;
@@ -145,7 +146,7 @@
             // labelBackground
             // 
             labelBackground.AutoSize = true;
-            labelBackground.Location = new Point(330, 115);
+            labelBackground.Location = new Point(330, 103);
             labelBackground.Name = "labelBackground";
             labelBackground.Size = new Size(75, 15);
             labelBackground.TabIndex = 9;
@@ -155,9 +156,9 @@
             // 
             comboBackground.DrawMode = DrawMode.OwnerDrawFixed;
             comboBackground.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBackground.Location = new Point(430, 112);
+            comboBackground.Location = new Point(435, 100);
             comboBackground.Name = "comboBackground";
-            comboBackground.Size = new Size(160, 24);
+            comboBackground.Size = new Size(155, 24);
             comboBackground.TabIndex = 10;
             comboBackground.DrawItem += ComboBackground_DrawItem;
             comboBackground.SelectedIndexChanged += Field_Changed;
@@ -165,7 +166,7 @@
             // labelPosition
             // 
             labelPosition.AutoSize = true;
-            labelPosition.Location = new Point(330, 149);
+            labelPosition.Location = new Point(330, 133);
             labelPosition.Name = "labelPosition";
             labelPosition.Size = new Size(53, 15);
             labelPosition.TabIndex = 11;
@@ -174,16 +175,16 @@
             // comboPosition
             // 
             comboPosition.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboPosition.Location = new Point(430, 146);
+            comboPosition.Location = new Point(435, 130);
             comboPosition.Name = "comboPosition";
-            comboPosition.Size = new Size(160, 23);
+            comboPosition.Size = new Size(155, 23);
             comboPosition.TabIndex = 12;
             comboPosition.SelectedIndexChanged += Field_Changed;
             // 
             // labelInitials
             // 
             labelInitials.AutoSize = true;
-            labelInitials.Location = new Point(330, 183);
+            labelInitials.Location = new Point(330, 162);
             labelInitials.Name = "labelInitials";
             labelInitials.Size = new Size(94, 15);
             labelInitials.TabIndex = 13;
@@ -191,10 +192,10 @@
             // 
             // textBoxInitials
             // 
-            textBoxInitials.Location = new Point(430, 180);
+            textBoxInitials.Location = new Point(435, 159);
             textBoxInitials.MaxLength = 3;
             textBoxInitials.Name = "textBoxInitials";
-            textBoxInitials.Size = new Size(60, 23);
+            textBoxInitials.Size = new Size(55, 23);
             textBoxInitials.TabIndex = 14;
             textBoxInitials.TextChanged += Field_Changed;
             // 
@@ -203,7 +204,7 @@
             cbDate.AutoSize = true;
             cbDate.Checked = true;
             cbDate.CheckState = CheckState.Checked;
-            cbDate.Location = new Point(333, 216);
+            cbDate.Location = new Point(333, 191);
             cbDate.Name = "cbDate";
             cbDate.Size = new Size(173, 19);
             cbDate.TabIndex = 15;
@@ -216,7 +217,7 @@
             cbBorder.AutoSize = true;
             cbBorder.Checked = true;
             cbBorder.CheckState = CheckState.Checked;
-            cbBorder.Location = new Point(333, 241);
+            cbBorder.Location = new Point(333, 219);
             cbBorder.Name = "cbBorder";
             cbBorder.Size = new Size(120, 19);
             cbBorder.TabIndex = 16;
@@ -227,7 +228,7 @@
             // cbRounded
             // 
             cbRounded.AutoSize = true;
-            cbRounded.Location = new Point(333, 266);
+            cbRounded.Location = new Point(333, 247);
             cbRounded.Name = "cbRounded";
             cbRounded.Size = new Size(129, 19);
             cbRounded.TabIndex = 17;
@@ -257,6 +258,15 @@
             buttonCancel.Text = "Abbrechen";
             buttonCancel.UseVisualStyleBackColor = true;
             // 
+            // labelMaxInitials
+            // 
+            labelMaxInitials.AutoSize = true;
+            labelMaxInitials.Location = new Point(496, 162);
+            labelMaxInitials.Name = "labelMaxInitials";
+            labelMaxInitials.Size = new Size(86, 15);
+            labelMaxInitials.TabIndex = 20;
+            labelMaxInitials.Text = "max. 3 Zeichen";
+            // 
             // StampManageForm
             // 
             AcceptButton = buttonOK;
@@ -264,6 +274,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonCancel;
             ClientSize = new Size(602, 329);
+            Controls.Add(labelMaxInitials);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
             Controls.Add(cbRounded);
@@ -318,5 +329,6 @@
         private System.Windows.Forms.CheckBox cbRounded;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
+        private Label labelMaxInitials;
     }
 }
