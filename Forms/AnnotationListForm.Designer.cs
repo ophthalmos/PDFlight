@@ -41,6 +41,7 @@ namespace PDFLight.Forms
             btnEdit = new Button();
             btnDelete = new Button();
             buttonClose = new Button();
+            btnDeleteAll = new Button();
             contextMenuList.SuspendLayout();
             SuspendLayout();
             // 
@@ -48,14 +49,14 @@ namespace PDFLight.Forms
             // 
             contextMenuList.Items.AddRange(new ToolStripItem[] { editMenuItem, deleteMenuItem });
             contextMenuList.Name = "contextMenuList";
-            contextMenuList.Size = new Size(181, 70);
+            contextMenuList.Size = new Size(177, 48);
             contextMenuList.Opening += ContextMenuList_Opening;
             // 
             // editMenuItem
             // 
             editMenuItem.Name = "editMenuItem";
             editMenuItem.ShortcutKeyDisplayString = "Enter";
-            editMenuItem.Size = new Size(180, 22);
+            editMenuItem.Size = new Size(176, 22);
             editMenuItem.Text = "&Bearbeiten …";
             editMenuItem.Click += BtnEdit_Click;
             // 
@@ -63,7 +64,7 @@ namespace PDFLight.Forms
             // 
             deleteMenuItem.Name = "deleteMenuItem";
             deleteMenuItem.ShortcutKeyDisplayString = "Entf";
-            deleteMenuItem.Size = new Size(180, 22);
+            deleteMenuItem.Size = new Size(176, 22);
             deleteMenuItem.Text = "Löschen";
             deleteMenuItem.Click += BtnDelete_Click;
             // 
@@ -146,12 +147,24 @@ namespace PDFLight.Forms
             buttonClose.Text = "Schließen";
             buttonClose.UseVisualStyleBackColor = true;
             // 
+            // btnDeleteAll
+            // 
+            btnDeleteAll.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            btnDeleteAll.Location = new Point(284, 346);
+            btnDeleteAll.Name = "btnDeleteAll";
+            btnDeleteAll.Size = new Size(130, 27);
+            btnDeleteAll.TabIndex = 5;
+            btnDeleteAll.Text = "Alle löschen";
+            btnDeleteAll.UseVisualStyleBackColor = true;
+            btnDeleteAll.Click += BtnDeleteAll_Click;
+            // 
             // AnnotationListForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonClose;
             ClientSize = new Size(684, 385);
+            Controls.Add(btnDeleteAll);
             Controls.Add(buttonClose);
             Controls.Add(btnDelete);
             Controls.Add(btnEdit);
@@ -182,5 +195,6 @@ namespace PDFLight.Forms
         private System.Windows.Forms.Button btnEdit;
         private System.Windows.Forms.Button btnDelete;
         private System.Windows.Forms.Button buttonClose;
+        private Button btnDeleteAll;
     }
 }

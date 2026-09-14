@@ -152,6 +152,33 @@ internal static partial class PdfEditService
         document.Save(path);
     }
 
+    /// <summary>Löscht alle verwaltbaren Anmerkungen (s. ListAnnotations) auf allen Seiten – Links, Popups und Formularfelder bleiben,
+    /// Popups verschwinden nur mit ihrer Anmerkung. Ein Speichervorgang, also ein Rückgängig. Liefert die Anzahl.</summary>
+    public static int DeleteAllAnnotations(string path)
+    {
+        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        var count = 0;
+        for (var p = 0; p < document.PageCount; p++)
+        {
+            var annotations = document.Pages[p].Annotations;
+            List<PdfObjectID> popups = [];
+            for (var i = annotations.Count - 1; i >= 0; i--)
+            {
+                var annotation = annotations[i];
+                if (!IsManageable(annotation.Elements.GetName("/Subtype").TrimStart('/'))) { continue; }
+                if (annotation.Elements["/Popup"] is PdfReference popup) { popups.Add(popup.ObjectID); }
+                annotations.Elements.RemoveAt(i);
+                count++;
+            }
+            for (var i = annotations.Elements.Count - 1; i >= 0; i--)
+            {
+                if (annotations.Elements[i] is PdfReference reference && popups.Contains(reference.ObjectID)) { annotations.Elements.RemoveAt(i); }
+            }
+        }
+        if (count > 0) { document.Save(path); }
+        return count;
+    }
+
     private static bool IsManageable(string subtype) => subtype is not ("Link" or "Popup" or "Widget");
 
     private static int CountAnnotations(PdfDocument document)
