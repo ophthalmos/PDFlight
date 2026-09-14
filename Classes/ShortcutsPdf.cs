@@ -102,9 +102,9 @@ internal static partial class ShortcutsPdf
             DrawPageBackground(gfx, page);
             y = Margin;
         }
-        DrawNoteBox(gfx, Margin, y, width, noteLines, noteHeight);
+        DrawNoteBox(gfx, Margin - NotePad, y, width + 2 * NotePad, noteLines, noteHeight); // Kasten um die Polsterung breiter, damit sein Text bündig mit der Tabelle steht
         y += noteHeight + 8;
-        gfx.DrawString(Lng.T("Kommandozeile:") + " PDFlight.exe [" + Lng.T("Datei") + "] /max  /page:12  /print  /help   " + Lng.T("(auch mit „--“)"), detailFont, detailBrush, Margin + NotePad, y + 9);
+        gfx.DrawString(Lng.T("Kommandozeile:") + " PDFlight.exe [" + Lng.T("Datei") + "] /max  /page:12  /print  /help   " + Lng.T("(auch mit „--“)"), detailFont, detailBrush, Margin, y + 9);
         DrawFooter(gfx, page);
         gfx.Dispose();
         document.Save(path);
@@ -129,7 +129,7 @@ internal static partial class ShortcutsPdf
             Lng.T("Die Werkzeuge in der Anzeige (Zoom, Ansicht drehen, Suchen) verändern nur die Darstellung, nie die Datei. Alles, was du dort drehst, ist beim nächsten Öffnen wieder wie vorher."),
             Lng.T("Die Befehle im Menü „Bearbeiten“ und in der Symbolleiste (Seiten löschen oder drehen, anhängen, Kennwort, Eigenschaften) ändern die Datei dagegen wirklich – und zwar sofort, ohne gesonderten Speichern-Schritt. Einen Fehlgriff machst du mit Strg+Z rückgängig."),
         ];
-        return [.. paragraphs.Select(p => Wrap(gfx, p, NoteFont, width - 2 * NotePad))];
+        return [.. paragraphs.Select(p => Wrap(gfx, p, NoteFont, width))]; // der Text steht bündig mit der Tabelle, der Kasten ragt um NotePad darüber hinaus
     }
 
     private static double NoteBoxHeight(List<List<string>> lines) =>
