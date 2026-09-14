@@ -39,6 +39,10 @@ public partial class StampManageForm : Form
         var stamp = Selected;
         var enabled = stamp != null;
         textBoxText.Enabled = numSize.Enabled = comboColor.Enabled = comboBackground.Enabled = comboPosition.Enabled = buttonDelete.Enabled = enabled;
+        cbDate.Enabled = cbBorder.Enabled = cbRounded.Enabled = enabled;
+        cbDate.Checked = stamp?.WithDate ?? true;
+        cbBorder.Checked = stamp?.Border ?? true;
+        cbRounded.Checked = stamp?.Rounded ?? false;
         textBoxText.Text = stamp?.Text ?? string.Empty;
         numSize.Value = Math.Clamp((decimal)(stamp?.FontSize ?? 24), numSize.Minimum, numSize.Maximum);
         comboColor.SelectedIndex = ColorPalette.IndexOf(ColorPalette.StampColors, stamp?.Color ?? Color.Black);
@@ -56,6 +60,9 @@ public partial class StampManageForm : Form
         stamp.TextColor = AnnotationStyle.ToHex(ColorPalette.StampColors[Math.Max(0, comboColor.SelectedIndex)].Color);
         stamp.Background = ColorPalette.Backgrounds[Math.Max(0, comboBackground.SelectedIndex)].Color is { } background ? AnnotationStyle.ToHex(background) : string.Empty;
         stamp.Position = (StampPosition)Math.Max(0, comboPosition.SelectedIndex);
+        stamp.WithDate = cbDate.Checked;
+        stamp.Border = cbBorder.Checked;
+        stamp.Rounded = cbRounded.Checked;
         (sender as ComboBox)?.Invalidate(); // selbst gezeichnete Auswahlfelder zeigen nach Tastaturwahl sonst noch den alten Eintrag
         listStamps.Invalidate(); // die Vorschau zeichnet aus der Stempelliste; den Eintragstext selbst erst beim Verlassen des Feldes ändern
     }

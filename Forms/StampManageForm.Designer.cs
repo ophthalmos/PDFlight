@@ -41,6 +41,9 @@
             comboBackground = new System.Windows.Forms.ComboBox();
             labelPosition = new System.Windows.Forms.Label();
             comboPosition = new System.Windows.Forms.ComboBox();
+            cbDate = new System.Windows.Forms.CheckBox();
+            cbBorder = new System.Windows.Forms.CheckBox();
+            cbRounded = new System.Windows.Forms.CheckBox();
             buttonOK = new System.Windows.Forms.Button();
             buttonCancel = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)numSize).BeginInit();
@@ -53,14 +56,14 @@
             listStamps.ItemHeight = 44;
             listStamps.Location = new System.Drawing.Point(12, 12);
             listStamps.Name = "listStamps";
-            listStamps.Size = new System.Drawing.Size(300, 226);
+            listStamps.Size = new System.Drawing.Size(300, 270);
             listStamps.TabIndex = 0;
             listStamps.DrawItem += ListStamps_DrawItem;
             listStamps.SelectedIndexChanged += ListStamps_SelectedIndexChanged;
             //
             // buttonNew
             //
-            buttonNew.Location = new System.Drawing.Point(12, 246);
+            buttonNew.Location = new System.Drawing.Point(12, 290);
             buttonNew.Name = "buttonNew";
             buttonNew.Size = new System.Drawing.Size(95, 27);
             buttonNew.TabIndex = 1;
@@ -70,7 +73,7 @@
             //
             // buttonDelete
             //
-            buttonDelete.Location = new System.Drawing.Point(113, 246);
+            buttonDelete.Location = new System.Drawing.Point(113, 290);
             buttonDelete.Name = "buttonDelete";
             buttonDelete.Size = new System.Drawing.Size(95, 27);
             buttonDelete.TabIndex = 2;
@@ -174,14 +177,51 @@
             comboPosition.TabIndex = 12;
             comboPosition.SelectedIndexChanged += Field_Changed;
             //
+            // cbDate
+            //
+            cbDate.AutoSize = true;
+            cbDate.Checked = true;
+            cbDate.CheckState = System.Windows.Forms.CheckState.Checked;
+            cbDate.Location = new System.Drawing.Point(430, 182);
+            cbDate.Name = "cbDate";
+            cbDate.Size = new System.Drawing.Size(160, 19);
+            cbDate.TabIndex = 13;
+            cbDate.Text = "&Datum und Uhrzeit anfügen";
+            cbDate.UseVisualStyleBackColor = true;
+            cbDate.CheckedChanged += Field_Changed;
+            //
+            // cbBorder
+            //
+            cbBorder.AutoSize = true;
+            cbBorder.Checked = true;
+            cbBorder.CheckState = System.Windows.Forms.CheckState.Checked;
+            cbBorder.Location = new System.Drawing.Point(430, 207);
+            cbBorder.Name = "cbBorder";
+            cbBorder.Size = new System.Drawing.Size(70, 19);
+            cbBorder.TabIndex = 14;
+            cbBorder.Text = "&Rahmen";
+            cbBorder.UseVisualStyleBackColor = true;
+            cbBorder.CheckedChanged += Field_Changed;
+            //
+            // cbRounded
+            //
+            cbRounded.AutoSize = true;
+            cbRounded.Location = new System.Drawing.Point(430, 232);
+            cbRounded.Name = "cbRounded";
+            cbRounded.Size = new System.Drawing.Size(130, 19);
+            cbRounded.TabIndex = 15;
+            cbRounded.Text = "Abgerundete &Ecken";
+            cbRounded.UseVisualStyleBackColor = true;
+            cbRounded.CheckedChanged += Field_Changed;
+            //
             // buttonOK
             //
             buttonOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            buttonOK.Location = new System.Drawing.Point(394, 246);
+            buttonOK.Location = new System.Drawing.Point(364, 290);
             buttonOK.Name = "buttonOK";
-            buttonOK.Size = new System.Drawing.Size(95, 27);
-            buttonOK.TabIndex = 13;
-            buttonOK.Text = "OK";
+            buttonOK.Size = new System.Drawing.Size(125, 27);
+            buttonOK.TabIndex = 16;
+            buttonOK.Text = "Palette &speichern";
             buttonOK.UseVisualStyleBackColor = true;
             buttonOK.Click += ButtonOK_Click;
             //
@@ -189,10 +229,10 @@
             //
             buttonCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            buttonCancel.Location = new System.Drawing.Point(495, 246);
+            buttonCancel.Location = new System.Drawing.Point(495, 290);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new System.Drawing.Size(95, 27);
-            buttonCancel.TabIndex = 14;
+            buttonCancel.TabIndex = 17;
             buttonCancel.Text = "Abbrechen";
             buttonCancel.UseVisualStyleBackColor = true;
             //
@@ -202,9 +242,12 @@
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             CancelButton = buttonCancel;
-            ClientSize = new System.Drawing.Size(602, 285);
+            ClientSize = new System.Drawing.Size(602, 329);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
+            Controls.Add(cbRounded);
+            Controls.Add(cbBorder);
+            Controls.Add(cbDate);
             Controls.Add(comboPosition);
             Controls.Add(labelPosition);
             Controls.Add(comboBackground);
@@ -245,6 +288,9 @@
         private System.Windows.Forms.ComboBox comboBackground;
         private System.Windows.Forms.Label labelPosition;
         private System.Windows.Forms.ComboBox comboPosition;
+        private System.Windows.Forms.CheckBox cbDate;
+        private System.Windows.Forms.CheckBox cbBorder;
+        private System.Windows.Forms.CheckBox cbRounded;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
     }
