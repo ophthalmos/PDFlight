@@ -571,4 +571,6 @@ Clicking into the preview sets the position.</value></data>
   <data name="Der Stempel auf Seite {0} wird ersetzt durch:" xml:space="preserve"><value>The stamp on page {0} will be replaced by:</value></data>
   <data name="Der Stempel auf Seite {0} wurde ersetzt." xml:space="preserve"><value>The stamp on page {0} was replaced.</value></data>
   <data name="Stempel bearbeiten" xml:space="preserve"><value>Edit stamps</value></data>
+  <data name="An dieser Stelle steht schon der Stempel „{0}“." xml:space="preserve"><value>The stamp &quot;{0}&quot; is already at this spot.</value></data>
+  <data name="Soll er entfernt werden? Bei „Nein“ kommt der neue Stempel zusätzlich dazu." xml:space="preserve"><value>Remove it? Choosing &quot;No&quot; adds the new stamp alongside.</value></data>
 </root>

@@ -571,4 +571,6 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="Der Stempel auf Seite {0} wird ersetzt durch:" xml:space="preserve"><value>El sello de la página {0} se reemplazará por:</value></data>
   <data name="Der Stempel auf Seite {0} wurde ersetzt." xml:space="preserve"><value>El sello de la página {0} se ha reemplazado.</value></data>
   <data name="Stempel bearbeiten" xml:space="preserve"><value>Editar sellos</value></data>
+  <data name="An dieser Stelle steht schon der Stempel „{0}“." xml:space="preserve"><value>El sello «{0}» ya está en este lugar.</value></data>
+  <data name="Soll er entfernt werden? Bei „Nein“ kommt der neue Stempel zusätzlich dazu." xml:space="preserve"><value>¿Eliminarlo? Con «No», el sello nuevo se añade además.</value></data>
 </root>

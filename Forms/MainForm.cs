@@ -1464,7 +1464,16 @@ public partial class MainForm : Form
         }
         var page = Math.Max(1, ClampedCurrentPage()); // immer die angezeigte Seite
         if (ChooseStamp(page, replace: false) is not { } stamp) { return; }
-        if (RunPdfEdit(() => PdfEditService.AddStamp(currentFile.FullName, page, stamp), Lng.T("Stempel")))
+        var (replaceIndex, replaceObjectNumber) = (-1, 0);
+        (int Index, int ObjectNumber, string Text)? existing = null;
+        try { existing = PdfEditService.FindStampAtPosition(currentFile.FullName, page, stamp); }
+        catch (Exception ex) when (PdfEditService.IsPdfReadError(ex)) { } // dann eben ohne Rückfrage – das Einfügen selbst meldet den Fehler
+        if (existing is { } found && TaskDlg.ConfirmTaskDlg(Handle, string.Format(Lng.T("An dieser Stelle steht schon der Stempel „{0}“."), found.Text),
+            Lng.T("Soll er entfernt werden? Bei „Nein“ kommt der neue Stempel zusätzlich dazu."), TaskDialogIcon.Warning))
+        {
+            (replaceIndex, replaceObjectNumber) = (found.Index, found.ObjectNumber);
+        }
+        if (RunPdfEdit(() => PdfEditService.AddStamp(currentFile.FullName, page, stamp, replaceIndex, replaceObjectNumber), Lng.T("Stempel")))
         {
             LoadPdf(currentFile.FullName, page);
             statusPath.Text = string.Format(Lng.T("Der Stempel „{0}“ wurde auf Seite {1} gesetzt."), stamp.Text, page);
