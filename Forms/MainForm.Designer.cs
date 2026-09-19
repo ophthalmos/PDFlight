@@ -57,10 +57,10 @@
             mnuDuplex = new ToolStripMenuItem();
             mnuExtractPages = new ToolStripMenuItem();
             toolStripSeparator14 = new ToolStripSeparator();
-            mnuAddAnnotation = new ToolStripMenuItem();
-            mnuManageAnnotations = new ToolStripMenuItem();
             mnuAddStamp = new ToolStripMenuItem();
             mnuManageStamps = new ToolStripMenuItem();
+            mnuAddAnnotation = new ToolStripMenuItem();
+            mnuManageAnnotations = new ToolStripMenuItem();
             toolStripSeparator6 = new ToolStripSeparator();
             mnuUndo = new ToolStripMenuItem();
             toolStripSeparator7 = new ToolStripSeparator();
@@ -280,6 +280,7 @@
             // mnuMovePage
             // 
             mnuMovePage.Name = "mnuMovePage";
+            mnuMovePage.ShortcutKeyDisplayString = "Strg+Y";
             mnuMovePage.Size = new Size(336, 22);
             mnuMovePage.Text = "Aktuelle Seite verschieben …";
             mnuMovePage.Click += MnuMovePage_Click;
@@ -292,6 +293,7 @@
             // mnuAppendPdf
             // 
             mnuAppendPdf.Name = "mnuAppendPdf";
+            mnuAppendPdf.ShortcutKeyDisplayString = "Strg+N";
             mnuAppendPdf.Size = new Size(336, 22);
             mnuAppendPdf.Text = "PDF-Datei anhängen …";
             mnuAppendPdf.Click += MnuAppendPdf_Click;
@@ -316,22 +318,6 @@
             toolStripSeparator14.Name = "toolStripSeparator14";
             toolStripSeparator14.Size = new Size(333, 6);
             // 
-            // mnuAddAnnotation
-            // 
-            mnuAddAnnotation.Name = "mnuAddAnnotation";
-            mnuAddAnnotation.ShortcutKeyDisplayString = "Strg+T";
-            mnuAddAnnotation.Size = new Size(336, 22);
-            mnuAddAnnotation.Text = "Textanmerkung hinzufügen …";
-            mnuAddAnnotation.Click += MnuAddAnnotation_Click;
-            // 
-            // mnuManageAnnotations
-            // 
-            mnuManageAnnotations.Name = "mnuManageAnnotations";
-            mnuManageAnnotations.ShortcutKeyDisplayString = "Strg+Umschalt+T";
-            mnuManageAnnotations.Size = new Size(336, 22);
-            mnuManageAnnotations.Text = "Textanmerkungen verwalten …";
-            mnuManageAnnotations.Click += MnuManageAnnotations_Click;
-            // 
             // mnuAddStamp
             // 
             mnuAddStamp.Name = "mnuAddStamp";
@@ -347,6 +333,22 @@
             mnuManageStamps.Size = new Size(336, 22);
             mnuManageStamps.Text = "Stempel verwalten …";
             mnuManageStamps.Click += MnuManageStamps_Click;
+            // 
+            // mnuAddAnnotation
+            // 
+            mnuAddAnnotation.Name = "mnuAddAnnotation";
+            mnuAddAnnotation.ShortcutKeyDisplayString = "Strg+T";
+            mnuAddAnnotation.Size = new Size(336, 22);
+            mnuAddAnnotation.Text = "Textanmerkung hinzufügen …";
+            mnuAddAnnotation.Click += MnuAddAnnotation_Click;
+            // 
+            // mnuManageAnnotations
+            // 
+            mnuManageAnnotations.Name = "mnuManageAnnotations";
+            mnuManageAnnotations.ShortcutKeyDisplayString = "Strg+Umschalt+T";
+            mnuManageAnnotations.Size = new Size(336, 22);
+            mnuManageAnnotations.Text = "Textanmerkungen verwalten …";
+            mnuManageAnnotations.Click += MnuManageAnnotations_Click;
             // 
             // toolStripSeparator6
             // 

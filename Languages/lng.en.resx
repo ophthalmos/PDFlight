@@ -580,4 +580,6 @@ Clicking into the preview sets the position.</value></data>
   <data name="Das gilt für alle Seiten und lässt sich mit Strg+Z rückgängig machen." xml:space="preserve"><value>This applies to all pages and can be undone with Ctrl+Z.</value></data>
   <data name="Anmerkungen löschen" xml:space="preserve"><value>Deleting annotations</value></data>
   <data name="&amp;Vorgaben" xml:space="preserve"><value>&amp;Defaults</value></data>
+  <data name="Strg+Y" xml:space="preserve"><value>Ctrl+Y</value></data>
+  <data name="aktuelle Seite an eine andere Position verschieben" xml:space="preserve"><value>move the current page to another position</value></data>
 </root>

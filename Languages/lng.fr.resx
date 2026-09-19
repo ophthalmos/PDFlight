@@ -580,4 +580,6 @@ Un clic dans l'aperçu définit la position.</value></data>
   <data name="Das gilt für alle Seiten und lässt sich mit Strg+Z rückgängig machen." xml:space="preserve"><value>Cela concerne toutes les pages et peut être annulé avec Ctrl+Z.</value></data>
   <data name="Anmerkungen löschen" xml:space="preserve"><value>Suppression des annotations</value></data>
   <data name="&amp;Vorgaben" xml:space="preserve"><value>Par &amp;défaut</value></data>
+  <data name="Strg+Y" xml:space="preserve"><value>Ctrl+Y</value></data>
+  <data name="aktuelle Seite an eine andere Position verschieben" xml:space="preserve"><value>déplacer la page actuelle à une autre position</value></data>
 </root>

@@ -580,4 +580,6 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="Das gilt für alle Seiten und lässt sich mit Strg+Z rückgängig machen." xml:space="preserve"><value>Afecta a todas las páginas y se puede deshacer con Ctrl+Z.</value></data>
   <data name="Anmerkungen löschen" xml:space="preserve"><value>Eliminación de anotaciones</value></data>
   <data name="&amp;Vorgaben" xml:space="preserve"><value>&amp;Predefinidos</value></data>
+  <data name="Strg+Y" xml:space="preserve"><value>Ctrl+Y</value></data>
+  <data name="aktuelle Seite an eine andere Position verschieben" xml:space="preserve"><value>mover la página actual a otra posición</value></data>
 </root>
