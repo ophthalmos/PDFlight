@@ -3,12 +3,14 @@
 namespace PDFLight.Forms;
 
 /// <summary>Verwaltet die Stempelpalette: Liste links, rechts die Eigenschaften des markierten Stempels (Text, Größe,
-/// Schriftfarbe, Hintergrund, Position). Gearbeitet wird auf Kopien; erst OK liefert die neue Liste.</summary>
+/// Schriftfarbe, Hintergrund, Position). Gearbeitet wird auf Kopien; erst OK liefert die neue Liste. Der zweite Konstruktor
+/// bearbeitet einen einzelnen, schon gesetzten Stempel aus der Anmerkungsliste (ohne Neu/Löschen/Vorgaben).</summary>
 public partial class StampManageForm : Form
 {
     private readonly List<Stamp> stamps;
     private bool loading;  // beim Befüllen der Felder keine Änderungen zurückschreiben
     private bool renaming; // beim Nachziehen des Listeneintrags die Auswahl nicht neu laden
+    private readonly bool singleMode; // ein gesetzter Stempel wird bearbeitet – Neu/Löschen/Vorgaben bleiben gesperrt
 
     /// <summary>Die bearbeitete Palette (nach OK).</summary>
     public List<Stamp> Stamps => stamps;
@@ -27,6 +29,16 @@ public partial class StampManageForm : Form
         ShowSelected();
     }
 
+    /// <summary>Einen gesetzten Stempel bearbeiten: nur dieser eine steht in der Liste, OK heißt „Übernehmen“ und liefert ihn in
+    /// <see cref="Stamps"/>[0]; die Palette bleibt unberührt.</summary>
+    public StampManageForm(Stamp single, int page) : this([single])
+    {
+        Text = string.Format(Lng.T("Stempel auf Seite {0} bearbeiten"), page);
+        buttonOK.Text = Lng.T("Übernehmen");
+        buttonNew.Enabled = buttonDelete.Enabled = buttonDefaults.Enabled = false;
+        singleMode = true;
+    }
+
     private Stamp? Selected => listStamps.SelectedIndex >= 0 && listStamps.SelectedIndex < stamps.Count ? stamps[listStamps.SelectedIndex] : null;
 
     /// <summary>Felder mit dem markierten Stempel füllen (oder sperren, wenn keiner markiert ist).</summary>
@@ -35,10 +47,11 @@ public partial class StampManageForm : Form
         loading = true;
         var stamp = Selected;
         var enabled = stamp != null;
-        textBoxText.Enabled = numSize.Enabled = comboColor.Enabled = comboBackground.Enabled = comboPosition.Enabled = buttonDelete.Enabled = enabled;
+        textBoxText.Enabled = numSize.Enabled = comboColor.Enabled = comboBackground.Enabled = comboPosition.Enabled = enabled;
+        buttonDelete.Enabled = enabled && !singleMode;
         cbDate.Enabled = cbBorder.Enabled = cbRounded.Enabled = textBoxInitials.Enabled = numOpacity.Enabled = enabled;
         numOpacity.Value = Math.Clamp(stamp?.Opacity ?? Stamp.DefaultOpacity, (int)numOpacity.Minimum, (int)numOpacity.Maximum);
-        buttonDefaults.Enabled = stamps.Count == 0; // die Vorgaben gibt es nur in eine leere Palette
+        buttonDefaults.Enabled = stamps.Count == 0 && !singleMode; // die Vorgaben gibt es nur in eine leere Palette
         textBoxInitials.Text = stamp?.Initials ?? string.Empty;
         cbDate.Checked = stamp?.WithDate ?? true;
         cbBorder.Checked = stamp?.Border ?? true;

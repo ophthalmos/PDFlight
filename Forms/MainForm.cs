@@ -1358,7 +1358,7 @@ public partial class MainForm : Form
     private void EditAnnotation(AnnotationInfo annotation)
     {
         if (currentFile == null) { return; }
-        if (annotation.Subtype == "Stamp") { EditStamp(annotation); return; } // Stempel: anderen Palettenstempel wählen
+        if (annotation.Subtype == "Stamp") { EditStamp(annotation); return; } // Stempel: Eigenschaften im Verwalten-Dialog ändern
         var file = currentFile.FullName;
         using AnnotationForm dialog = new(file, currentPageCount, annotation.Page);
         dialog.Preset(annotation.Contents, annotation.LeftMm, annotation.TopMm, annotation.FontSize, annotation.Style, annotation.Index);
@@ -1479,7 +1479,7 @@ public partial class MainForm : Form
             if (settings.Stamps.Count == 0) { return; }
         }
         var page = Math.Max(1, ClampedCurrentPage()); // immer die angezeigte Seite
-        if (ChooseStamp(page, replace: false) is not { } stamp) { return; }
+        if (ChooseStamp(page) is not { } stamp) { return; }
         var (replaceIndex, replaceObjectNumber, top) = (-1, 0, (double?)null);
         List<PdfEditService.StampSlot> stack = [];
         double? freeTop = null;
@@ -1508,11 +1508,11 @@ public partial class MainForm : Form
     }
 
     /// <summary>Palette zeigen; „Stempel bearbeiten“ darin öffnet die Verwaltung und beendet den Vorgang. null = abgebrochen (auch bei leerer Palette).</summary>
-    private Stamp? ChooseStamp(int page, bool replace)
+    private Stamp? ChooseStamp(int page)
     {
         while (settings.Stamps.Count > 0)
         {
-            using StampPaletteForm dialog = new(settings.Stamps, page, replace);
+            using StampPaletteForm dialog = new(settings.Stamps, page);
             var result = dialog.ShowDialog(this);
             if (dialog.ManageRequested) { ManageStampsDialog(); return null; } // danach nicht erneut die Palette: der Einfügevorgang ist damit beendet (Wunsch vom 19.09.2026)
             return result == DialogResult.OK ? dialog.SelectedStamp : null;
@@ -1530,23 +1530,23 @@ public partial class MainForm : Form
         settings.Save();
     }
 
-    /// <summary>Bearbeiten eines Stempels aus der Anmerkungsliste: Der gewählte Palettenstempel ersetzt ihn an derselben Position
-    /// (die des neuen Stempels), die Datumszeile bleibt erhalten.</summary>
+    /// <summary>Bearbeiten eines Stempels aus der Anmerkungsliste: Der Verwalten-Dialog zeigt nur diesen Stempel mit seinen in der
+    /// Anmerkung gespeicherten Eigenschaften; „Übernehmen“ zeichnet ihn neu (Datumszeile bleibt), die Palette bleibt unberührt
+    /// (bis 19.09.2026 öffnete sich hier die Palette zum Ersetzen – das war nicht gemeint).</summary>
     private void EditStamp(AnnotationInfo annotation)
     {
         if (currentFile == null) { return; }
         var file = currentFile.FullName;
-        settings.ReloadSharedLists();
-        if (settings.Stamps.Count == 0)
-        {
-            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Stempelpalette ist leer."), null, TaskDialogIcon.Information);
-            return;
-        }
-        if (ChooseStamp(annotation.Page, replace: true) is not { } stamp) { return; }
+        Stamp stored;
+        try { stored = PdfEditService.ReadStamp(file, annotation.Page, annotation.Index, annotation.ObjectNumber); }
+        catch (Exception ex) when (PdfEditService.IsPdfReadError(ex)) { TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), Lng.T("Stempel")), ex); return; }
+        using StampManageForm dialog = new(stored, annotation.Page);
+        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
+        var stamp = dialog.Stamps[0];
         if (RunPdfEdit(() => PdfEditService.UpdateStamp(file, annotation.Page, annotation.Index, annotation.ObjectNumber, stamp), Lng.T("Stempel")))
         {
             LoadPdf(file, annotation.Page);
-            statusPath.Text = string.Format(Lng.T("Der Stempel auf Seite {0} wurde ersetzt."), annotation.Page);
+            statusPath.Text = string.Format(Lng.T("Der Stempel auf Seite {0} wurde geändert."), annotation.Page);
         }
     }
 

@@ -7,20 +7,18 @@ public partial class StampPaletteForm : Form
 {
     private readonly IReadOnlyList<Stamp> stamps;
 
-    /// <summary>True, wenn „Stempel bearbeiten“ gedrückt wurde: Der Aufrufer öffnet die Verwaltung und zeigt die Palette danach erneut.</summary>
+    /// <summary>True, wenn „Stempel bearbeiten“ gedrückt wurde: Der Aufrufer öffnet die Verwaltung; der Einfügevorgang ist damit beendet.</summary>
     public bool ManageRequested { get; private set; }
 
     /// <summary>Der gewählte Stempel, nach OK gesetzt.</summary>
     public Stamp? SelectedStamp => listStamps.SelectedIndex >= 0 && listStamps.SelectedIndex < stamps.Count ? stamps[listStamps.SelectedIndex] : null;
 
-    /// <param name="replace">Bearbeiten aus der Anmerkungsliste: Der gewählte Stempel ersetzt den vorhandenen.</param>
-    public StampPaletteForm(IReadOnlyList<Stamp> stamps, int page, bool replace = false)
+    public StampPaletteForm(IReadOnlyList<Stamp> stamps, int page)
     {
         InitializeComponent();
         Lng.Apply(this);
         this.stamps = stamps;
-        labelPage.Text = string.Format(Lng.T(replace ? "Der Stempel auf Seite {0} wird ersetzt durch:" : "Der Stempel kommt auf Seite {0}."), page);
-        if (replace) { Text = Lng.T("Stempel ersetzen"); buttonOK.Text = Lng.T("Übernehmen"); }
+        labelPage.Text = string.Format(Lng.T("Der Stempel kommt auf Seite {0}."), page);
         listStamps.Items.AddRange([.. stamps.Select(s => (object)s.Text)]);
         if (listStamps.Items.Count > 0) { listStamps.SelectedIndex = 0; }
         buttonOK.Enabled = listStamps.Items.Count > 0;
