@@ -596,8 +596,10 @@ Un clic dans l'aperçu définit la position.</value></data>
   <data name="Eine Seite mit dem Bild wurde als Seite {0} eingefügt." xml:space="preserve"><value>Une page avec l’image a été insérée comme page {0}.</value></data>
   <data name="Lesezeichen entfernen …" xml:space="preserve"><value>Supprimer les signets…</value></data>
   <data name="Alle {0} Lesezeichen entfernen?" xml:space="preserve"><value>Supprimer les {0} signets ?</value></data>
-  <data name="Lesezeichen bilden ein interaktives Inhaltsverzeichnis, das eine schnelle Navigation zu bestimmten Kapiteln, Überschriften oder Abschnitten ermöglicht." xml:space="preserve"><value>Les signets forment une table des matières interactive qui permet d’accéder rapidement à des chapitres, titres ou sections précis.</value></data>
-  <data name="Klicke auf das Inhaltsverzeichnis-Symbol in der PDF-Werkzeugleiste oder drücke Strg+Umschalt+I, um sie in der Seitenleiste anzuzeigen." xml:space="preserve"><value>Clique sur l’icône de table des matières dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I pour les afficher dans le volet latéral.</value></data>
+  <data name="Lesezeichen.Info" xml:space="preserve"><value>Les signets forment une table des matières interactive qui permet
+d’accéder rapidement à des chapitres, titres ou sections précis.
+Pour les afficher, clique sur l’icône de table des matières
+dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Lesezeichen entfernen" xml:space="preserve"><value>Suppression des signets</value></data>
   <data name="Die Lesezeichen wurden entfernt." xml:space="preserve"><value>Les signets ont été supprimés.</value></data>
   <data name="„{0}“ ersetzen" xml:space="preserve"><value>Remplacer « {0} »</value></data>

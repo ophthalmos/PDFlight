@@ -1557,8 +1557,11 @@ public partial class MainForm : Form
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
         var count = currentPdfStatus?.OutlineCount ?? 0;
         if (!TaskDlg.ConfirmTaskDlg(Handle, string.Format(Lng.T("Alle {0} Lesezeichen entfernen?"), count),
-            Lng.T("Lesezeichen bilden ein interaktives Inhaltsverzeichnis, das eine schnelle Navigation zu bestimmten Kapiteln, Überschriften oder Abschnitten ermöglicht.") + Environment.NewLine + Environment.NewLine // zwei Absätze; resx-Schlüssel dürfen keinen Zeilenumbruch enthalten
-            + Lng.T("Klicke auf das Inhaltsverzeichnis-Symbol in der PDF-Werkzeugleiste oder drücke Strg+Umschalt+I, um sie in der Seitenleiste anzuzeigen."), TaskDialogIcon.ShieldWarningYellowBar, defaultNo: true)) { return; }
+            Lng.T("Lesezeichen.Info", // mehrzeilig → expliziter Schlüssel (wie Drehen.Info)
+            "Lesezeichen bilden ein interaktives Inhaltsverzeichnis, das eine\n" +
+            "schnelle Navigation zu bestimmten Kapiteln, Überschriften oder\n" +
+            "Abschnitten ermöglicht. Um sie anzuzeigen, kannst du auf das\n" +
+            "Inhaltsverzeichnis-Symbol in der PDF-Werkzeugleiste klicken\noder Strg+Umschalt+I drücken."), TaskDialogIcon.ShieldWarningYellowBar, defaultNo: true)) { return; }
         var page = Math.Max(1, ClampedCurrentPage());
         if (RunPdfEdit(() => PdfEditService.RemoveOutlines(currentFile.FullName), Lng.T("Lesezeichen entfernen")))
         {
