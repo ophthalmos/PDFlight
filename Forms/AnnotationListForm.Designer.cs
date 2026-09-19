@@ -150,11 +150,13 @@ namespace PDFLight.Forms
             // btnDeleteAll
             // 
             btnDeleteAll.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            btnDeleteAll.ImageAlign = ContentAlignment.MiddleLeft;
             btnDeleteAll.Location = new Point(284, 346);
             btnDeleteAll.Name = "btnDeleteAll";
-            btnDeleteAll.Size = new Size(130, 27);
+            btnDeleteAll.Size = new Size(140, 27);
             btnDeleteAll.TabIndex = 5;
             btnDeleteAll.Text = "Alle löschen";
+            btnDeleteAll.TextImageRelation = TextImageRelation.ImageBeforeText;
             btnDeleteAll.UseVisualStyleBackColor = true;
             btnDeleteAll.Click += BtnDeleteAll_Click;
             // 

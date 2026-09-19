@@ -51,9 +51,9 @@ public sealed class Stamp
     /// <summary>Die Vorgaben beim ersten Start (in der eingestellten Sprache) – Text und Farbe frei änderbar.</summary>
     public static List<Stamp> Defaults() =>
     [
-        new() { Text = Lng.T("Erledigt"), TextColor = "008000" },
-        new() { Text = Lng.T("Bezahlt"), TextColor = "C00000" },
-        new() { Text = Lng.T("Archiviert"), TextColor = "000000" },
+        new() { Text = Lng.T("Erledigt"), TextColor = "008000", Position = StampPosition.TopLeft },
+        new() { Text = Lng.T("Bezahlt"), TextColor = "C00000", Position = StampPosition.TopRight },
+        new() { Text = Lng.T("Archiviert"), TextColor = "000000", Position = StampPosition.TopCenter },
     ];
 
     [JsonIgnore]

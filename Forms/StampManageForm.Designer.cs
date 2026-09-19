@@ -49,6 +49,7 @@
             buttonOK = new Button();
             buttonCancel = new Button();
             labelMaxInitials = new Label();
+            buttonDefaults = new Button();
             ((System.ComponentModel.ISupportInitialize)numSize).BeginInit();
             SuspendLayout();
             // 
@@ -267,6 +268,16 @@
             labelMaxInitials.TabIndex = 20;
             labelMaxInitials.Text = "max. 3 Zeichen";
             // 
+            // buttonDefaults
+            // 
+            buttonDefaults.Location = new Point(214, 288);
+            buttonDefaults.Name = "buttonDefaults";
+            buttonDefaults.Size = new Size(98, 27);
+            buttonDefaults.TabIndex = 21;
+            buttonDefaults.Text = "&Defaults";
+            buttonDefaults.UseVisualStyleBackColor = true;
+            buttonDefaults.Click += ButtonDefaults_Click;
+            // 
             // StampManageForm
             // 
             AcceptButton = buttonOK;
@@ -274,6 +285,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonCancel;
             ClientSize = new Size(602, 329);
+            Controls.Add(buttonDefaults);
             Controls.Add(labelMaxInitials);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
@@ -330,5 +342,6 @@
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
         private Label labelMaxInitials;
+        private Button buttonDefaults;
     }
 }

@@ -41,6 +41,7 @@ public partial class StampManageForm : Form
         var enabled = stamp != null;
         textBoxText.Enabled = numSize.Enabled = comboColor.Enabled = comboBackground.Enabled = comboPosition.Enabled = buttonDelete.Enabled = enabled;
         cbDate.Enabled = cbBorder.Enabled = cbRounded.Enabled = textBoxInitials.Enabled = enabled;
+        buttonDefaults.Enabled = stamps.Count == 0; // die Vorgaben gibt es nur in eine leere Palette
         textBoxInitials.Text = stamp?.Initials ?? string.Empty;
         cbDate.Checked = stamp?.WithDate ?? true;
         cbBorder.Checked = stamp?.Border ?? true;
@@ -110,6 +111,19 @@ public partial class StampManageForm : Form
         listStamps.SelectedIndex = listStamps.Items.Count - 1;
         textBoxText.SelectAll();
         textBoxText.Focus();
+    }
+
+    /// <summary>Die drei Vorgabestempel (in der eingestellten Sprache) in die leere Palette setzen.</summary>
+    private void ButtonDefaults_Click(object? sender, EventArgs e)
+    {
+        if (stamps.Count > 0) { return; }
+        foreach (var stamp in Stamp.Defaults())
+        {
+            stamps.Add(stamp);
+            listStamps.Items.Add(stamp.Text);
+        }
+        listStamps.SelectedIndex = 0;
+        ShowSelected();
     }
 
     private void ButtonDelete_Click(object? sender, EventArgs e)
