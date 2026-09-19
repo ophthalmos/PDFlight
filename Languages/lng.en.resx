@@ -479,9 +479,9 @@ the latest version.</value></data>
   <data name="&amp;Name (optional, bis 30 Zeichen):" xml:space="preserve"><value>&amp;Name (optional, up to 30 characters):</value></data>
   <data name="&amp;Favoriten-Menü anzeigen (Dateien merken, max. 200 Einträge)" xml:space="preserve"><value>Sho&amp;w the favorites menu (remember files, max. 200 entries)</value></data>
   <!-- Textanmerkung-Dialog -->
-  <data name="Textanmerkung hinzufügen …" xml:space="preserve"><value>Add text annotation…</value></data>
+  <data name="Freitext hinzufügen …" xml:space="preserve"><value>Add free text…</value></data>
   <data name="Strg+T" xml:space="preserve"><value>Ctrl+T</value></data>
-  <data name="Textanmerkung einfügen" xml:space="preserve"><value>insert a text annotation</value></data>
+  <data name="Freitext einfügen" xml:space="preserve"><value>insert free text</value></data>
   <data name="Textanmerkung hinzufügen" xml:space="preserve"><value>Add text annotation</value></data>
   <data name="Textanmerkung" xml:space="preserve"><value>Text annotation</value></data>
   <data name="&amp;Text:" xml:space="preserve"><value>&amp;Text:</value></data>
@@ -513,10 +513,10 @@ Clicking into the preview sets the position.</value></data>
   <data name="Grün" xml:space="preserve"><value>Green</value></data>
   <data name="Blau" xml:space="preserve"><value>Blue</value></data>
   <!-- Anmerkungen verwalten -->
-  <data name="Textanmerkungen verwalten …" xml:space="preserve"><value>Manage text annotations…</value></data>
+  <data name="Anmerkungen verwalten …" xml:space="preserve"><value>Manage annotations…</value></data>
   <data name="Strg+Umschalt+T" xml:space="preserve"><value>Ctrl+Shift+T</value></data>
   <data name="Enter" xml:space="preserve"><value>Enter</value></data>
-  <data name="Textanmerkungen verwalten (bearbeiten, löschen)" xml:space="preserve"><value>manage text annotations (edit, delete)</value></data>
+  <data name="Anmerkungen verwalten (bearbeiten, löschen)" xml:space="preserve"><value>manage annotations (edit, delete)</value></data>
   <data name="Textanmerkungen" xml:space="preserve"><value>Text annotations</value></data>
   <data name="Seitennr." xml:space="preserve"><value>Page no.</value></data>
   <data name="Position" xml:space="preserve"><value>Position</value></data>

@@ -339,7 +339,7 @@
             mnuAddAnnotation.Name = "mnuAddAnnotation";
             mnuAddAnnotation.ShortcutKeyDisplayString = "Strg+T";
             mnuAddAnnotation.Size = new Size(336, 22);
-            mnuAddAnnotation.Text = "Textanmerkung hinzufügen …";
+            mnuAddAnnotation.Text = "Freitext hinzufügen …";
             mnuAddAnnotation.Click += MnuAddAnnotation_Click;
             // 
             // mnuManageAnnotations
@@ -347,7 +347,7 @@
             mnuManageAnnotations.Name = "mnuManageAnnotations";
             mnuManageAnnotations.ShortcutKeyDisplayString = "Strg+Umschalt+T";
             mnuManageAnnotations.Size = new Size(336, 22);
-            mnuManageAnnotations.Text = "Textanmerkungen verwalten …";
+            mnuManageAnnotations.Text = "Anmerkungen verwalten …";
             mnuManageAnnotations.Click += MnuManageAnnotations_Click;
             // 
             // toolStripSeparator6

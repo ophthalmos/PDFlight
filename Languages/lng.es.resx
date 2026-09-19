@@ -479,9 +479,9 @@ para instalar la última versión.</value></data>
   <data name="&amp;Name (optional, bis 30 Zeichen):" xml:space="preserve"><value>&amp;Nombre (opcional, hasta 30 caracteres):</value></data>
   <data name="&amp;Favoriten-Menü anzeigen (Dateien merken, max. 200 Einträge)" xml:space="preserve"><value>Mostrar el menú de fa&amp;voritos (recordar archivos, máx. 200 entradas)</value></data>
   <!-- Textanmerkung-Dialog -->
-  <data name="Textanmerkung hinzufügen …" xml:space="preserve"><value>Añadir anotación de texto…</value></data>
+  <data name="Freitext hinzufügen …" xml:space="preserve"><value>Añadir texto libre…</value></data>
   <data name="Strg+T" xml:space="preserve"><value>Ctrl+T</value></data>
-  <data name="Textanmerkung einfügen" xml:space="preserve"><value>insertar una anotación de texto</value></data>
+  <data name="Freitext einfügen" xml:space="preserve"><value>insertar texto libre</value></data>
   <data name="Textanmerkung hinzufügen" xml:space="preserve"><value>Añadir anotación de texto</value></data>
   <data name="Textanmerkung" xml:space="preserve"><value>Anotación de texto</value></data>
   <data name="&amp;Text:" xml:space="preserve"><value>&amp;Texto:</value></data>
@@ -513,10 +513,10 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="Grün" xml:space="preserve"><value>Verde</value></data>
   <data name="Blau" xml:space="preserve"><value>Azul</value></data>
   <!-- Anmerkungen verwalten -->
-  <data name="Textanmerkungen verwalten …" xml:space="preserve"><value>Administrar anotaciones de texto…</value></data>
+  <data name="Anmerkungen verwalten …" xml:space="preserve"><value>Administrar anotaciones…</value></data>
   <data name="Strg+Umschalt+T" xml:space="preserve"><value>Ctrl+Mayús+T</value></data>
   <data name="Enter" xml:space="preserve"><value>Intro</value></data>
-  <data name="Textanmerkungen verwalten (bearbeiten, löschen)" xml:space="preserve"><value>administrar anotaciones de texto (editar, eliminar)</value></data>
+  <data name="Anmerkungen verwalten (bearbeiten, löschen)" xml:space="preserve"><value>administrar anotaciones (editar, eliminar)</value></data>
   <data name="Textanmerkungen" xml:space="preserve"><value>Anotaciones de texto</value></data>
   <data name="Seitennr." xml:space="preserve"><value>Página n.º</value></data>
   <data name="Position" xml:space="preserve"><value>Posición</value></data>

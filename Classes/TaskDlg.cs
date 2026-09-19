@@ -255,7 +255,7 @@ internal static class TaskDlg
         ("Strg+O", "PDF-Datei öffnen", null),
         ("Strg+P", "Dokument drucken", null),
         ("Strg+R", "Seiten drehen", null),
-        ("Strg+T", "Textanmerkung einfügen", null),
+        ("Strg+T", "Freitext einfügen", null),
         ("Strg+X", "Seiten als neue Datei extrahieren", null),
         ("Strg+Y", "aktuelle Seite an eine andere Position verschieben", null),
         ("Strg+Z", "Dokumentänderung rückgängig machen", null),
@@ -271,7 +271,7 @@ internal static class TaskDlg
         ("Strg+Umschalt+K", "sofort in den 1-Klick-Ordner kopieren", null),
         ("Strg+Umschalt+M / Strg+F4", "sofort in den 1-Klick-Ordner verschieben", null),
         ("Strg+Umschalt+R / L", "Ansicht drehen (ändert die Datei nicht)", null),
-        ("Strg+Umschalt+T", "Textanmerkungen verwalten (bearbeiten, löschen)", null),
+        ("Strg+Umschalt+T", "Anmerkungen verwalten (bearbeiten, löschen)", null),
         // Strg + Umschalt + Sondertaste
         ("Strg+Umschalt+Entf", "Datei in den Papierkorb verschieben", null),
         ("Strg+Umschalt+← / →", "vorherige / nächste Datei des Ordners anzeigen", null),
