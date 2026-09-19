@@ -251,11 +251,13 @@ internal static class TaskDlg
         ("Strg+I", "Dokumenteigenschaften", null),
         ("Strg+K", "Datei kopieren", null),
         ("Strg+M / F4", "Datei verschieben", null),
+        ("Strg+N", "PDF-Datei anhängen", null),
         ("Strg+O", "PDF-Datei öffnen", null),
         ("Strg+P", "Dokument drucken", null),
         ("Strg+R", "Seiten drehen", null),
         ("Strg+T", "Textanmerkung einfügen", null),
         ("Strg+X", "Seiten als neue Datei extrahieren", null),
+        ("Strg+Y", "aktuelle Seite an eine andere Position verschieben", null),
         ("Strg+Z", "Dokumentänderung rückgängig machen", null),
         // Strg + Sondertaste
         ("Strg+Entf", "Seiten löschen", null),

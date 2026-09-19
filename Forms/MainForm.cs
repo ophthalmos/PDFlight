@@ -176,7 +176,7 @@ public partial class MainForm : Form
                 "Sie wurde extern verschoben, umbenannt oder gelöscht.\nDie Anzeige stammt aus dem Speicher und bleibt erhalten."),
             AllowCancel = true,
             SizeToContent = true,
-            Buttons = { btnResave, btnViewOnly },
+            Buttons = { btnResave, btnViewOnly, TaskDialogButton.Close },
             DefaultButton = btnResave
         };
         if (TaskDialog.ShowDialog(Handle, page) == btnResave && viewHost.DocumentBytes is { } bytes)
@@ -1910,6 +1910,8 @@ public partial class MainForm : Form
             // auf unsere Antwort und kann die UIA-Seitenabfrage nicht bedienen (sie liefe in den Timeout)
             case Keys.Delete | Keys.Control when !PdfALocked: BeginInvoke(DeletePagesDialog); return true;
             case Keys.X | Keys.Control: BeginInvoke(ExtractPagesDialog); return true; // eXtrahieren; nutzt ebenfalls die UIA-Seitenabfrage
+            case Keys.Y | Keys.Control when mnuMovePage.Enabled: BeginInvoke(MovePageDialog); return true; // aktuelle Seite verschieben; ebenso
+            case Keys.N | Keys.Control when !PdfALocked: AppendPdfDialog(); return true;                  // PDF-Datei anhängen
             case Keys.T | Keys.Control when !PdfALocked: BeginInvoke(AddAnnotationDialog); return true; // Textanmerkung; ebenso
             case Keys.H | Keys.Control when !PdfALocked: BeginInvoke(AddStampDialog); return true;      // Stempel; ebenso (UIA-Seitenabfrage)
             case Keys.H | Keys.Control | Keys.Shift: ManageStampsDialog(); return true;                    // Stempelpalette pflegen

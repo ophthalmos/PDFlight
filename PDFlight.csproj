@@ -10,9 +10,9 @@
     <UseWindowsForms>true</UseWindowsForms>
     <UseWPF>true</UseWPF><!-- nur für UIAutomationClient (Seitenzahl aus der Viewer-Toolbar lesen) -->
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>1.0.2</AssemblyVersion>
-    <FileVersion>1.0.2</FileVersion>
-    <Version>1.0.2</Version>
+    <AssemblyVersion>1.0.3</AssemblyVersion>
+    <FileVersion>1.0.3</FileVersion>
+    <Version>1.0.3</Version>
     <SourceRevisionId>build$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</SourceRevisionId><!-- Builddatum für den Über-Dialog (TaskDlg.GetBuildDate) -->
     <Product>PDFlight</Product>
     <RootNamespace>PDFLight</RootNamespace><!-- Namespaces im Code bleiben PDFLight; nur der sichtbare Name ist PDFlight -->
