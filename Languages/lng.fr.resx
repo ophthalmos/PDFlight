@@ -579,5 +579,5 @@ Un clic dans l'aperçu définit la position.</value></data>
   <data name="Alle {0} Anmerkungen löschen?" xml:space="preserve"><value>Supprimer les {0} annotations ?</value></data>
   <data name="Das gilt für alle Seiten und lässt sich mit Strg+Z rückgängig machen." xml:space="preserve"><value>Cela concerne toutes les pages et peut être annulé avec Ctrl+Z.</value></data>
   <data name="Anmerkungen löschen" xml:space="preserve"><value>Suppression des annotations</value></data>
-  <data name="&amp;Defaults" xml:space="preserve"><value>Par &amp;défaut</value></data>
+  <data name="&amp;Vorgaben" xml:space="preserve"><value>Par &amp;défaut</value></data>
 </root>

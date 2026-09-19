@@ -579,5 +579,5 @@ Clicking into the preview sets the position.</value></data>
   <data name="Alle {0} Anmerkungen löschen?" xml:space="preserve"><value>Delete all {0} annotations?</value></data>
   <data name="Das gilt für alle Seiten und lässt sich mit Strg+Z rückgängig machen." xml:space="preserve"><value>This applies to all pages and can be undone with Ctrl+Z.</value></data>
   <data name="Anmerkungen löschen" xml:space="preserve"><value>Deleting annotations</value></data>
-  <data name="&amp;Defaults" xml:space="preserve"><value>&amp;Defaults</value></data>
+  <data name="&amp;Vorgaben" xml:space="preserve"><value>&amp;Defaults</value></data>
 </root>

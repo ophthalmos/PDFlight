@@ -274,7 +274,7 @@
             buttonDefaults.Name = "buttonDefaults";
             buttonDefaults.Size = new Size(98, 27);
             buttonDefaults.TabIndex = 21;
-            buttonDefaults.Text = "&Defaults";
+            buttonDefaults.Text = "&Vorgaben";
             buttonDefaults.UseVisualStyleBackColor = true;
             buttonDefaults.Click += ButtonDefaults_Click;
             // 
