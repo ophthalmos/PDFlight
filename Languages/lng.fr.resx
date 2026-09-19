@@ -479,9 +479,9 @@ d'installation pour installer la dernière version.</value></data>
   <data name="&amp;Name (optional, bis 30 Zeichen):" xml:space="preserve"><value>&amp;Nom (facultatif, 30 caractères max.) :</value></data>
   <data name="&amp;Favoriten-Menü anzeigen (Dateien merken, max. 200 Einträge)" xml:space="preserve"><value>Afficher le menu des fa&amp;voris (mémoriser des fichiers, 200 entrées max.)</value></data>
   <!-- Textanmerkung-Dialog -->
-  <data name="Textanmerkung hinzufügen …" xml:space="preserve"><value>Ajouter une annotation de texte…</value></data>
+  <data name="Freitext hinzufügen …" xml:space="preserve"><value>Ajouter un texte libre…</value></data>
   <data name="Strg+T" xml:space="preserve"><value>Ctrl+T</value></data>
-  <data name="Textanmerkung einfügen" xml:space="preserve"><value>insérer une annotation de texte</value></data>
+  <data name="Freitext einfügen" xml:space="preserve"><value>insérer un texte libre</value></data>
   <data name="Textanmerkung hinzufügen" xml:space="preserve"><value>Ajouter une annotation de texte</value></data>
   <data name="Textanmerkung" xml:space="preserve"><value>Annotation de texte</value></data>
   <data name="&amp;Text:" xml:space="preserve"><value>&amp;Texte :</value></data>
@@ -513,10 +513,10 @@ Un clic dans l'aperçu définit la position.</value></data>
   <data name="Grün" xml:space="preserve"><value>Vert</value></data>
   <data name="Blau" xml:space="preserve"><value>Bleu</value></data>
   <!-- Anmerkungen verwalten -->
-  <data name="Textanmerkungen verwalten …" xml:space="preserve"><value>Gérer les annotations de texte…</value></data>
+  <data name="Anmerkungen verwalten …" xml:space="preserve"><value>Gérer les annotations…</value></data>
   <data name="Strg+Umschalt+T" xml:space="preserve"><value>Ctrl+Maj+T</value></data>
   <data name="Enter" xml:space="preserve"><value>Entrée</value></data>
-  <data name="Textanmerkungen verwalten (bearbeiten, löschen)" xml:space="preserve"><value>gérer les annotations de texte (modifier, supprimer)</value></data>
+  <data name="Anmerkungen verwalten (bearbeiten, löschen)" xml:space="preserve"><value>gérer les annotations (modifier, supprimer)</value></data>
   <data name="Textanmerkungen" xml:space="preserve"><value>Annotations de texte</value></data>
   <data name="Seitennr." xml:space="preserve"><value>Page n°</value></data>
   <data name="Position" xml:space="preserve"><value>Position</value></data>
