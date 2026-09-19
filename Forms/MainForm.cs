@@ -1507,14 +1507,14 @@ public partial class MainForm : Form
         }
     }
 
-    /// <summary>Palette zeigen; „Stempel bearbeiten“ darin öffnet die Verwaltung und danach wieder die Palette. null = abgebrochen (auch bei leerer Palette).</summary>
+    /// <summary>Palette zeigen; „Stempel bearbeiten“ darin öffnet die Verwaltung und beendet den Vorgang. null = abgebrochen (auch bei leerer Palette).</summary>
     private Stamp? ChooseStamp(int page, bool replace)
     {
         while (settings.Stamps.Count > 0)
         {
             using StampPaletteForm dialog = new(settings.Stamps, page, replace);
             var result = dialog.ShowDialog(this);
-            if (dialog.ManageRequested) { ManageStampsDialog(); continue; }
+            if (dialog.ManageRequested) { ManageStampsDialog(); return null; } // danach nicht erneut die Palette: der Einfügevorgang ist damit beendet (Wunsch vom 19.09.2026)
             return result == DialogResult.OK ? dialog.SelectedStamp : null;
         }
         return null;
