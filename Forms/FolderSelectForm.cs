@@ -35,6 +35,7 @@ public partial class FolderSelectForm : Form
     public bool EditTargetsRequested { get; private set; }
 
     private readonly Image? clearIcon; // Symbol vor „Liste leeren“ (null, wenn Menüsymbole abgeschaltet sind)
+    private readonly Image? folderIcon; // Ordnersymbol der Shell vor jedem Ordner der beiden Listen (wie im Verschieben-Menü)
 
     /// <summary>Der letzte Eintrag der Zuletzt-Liste: „Liste leeren“. Eine ComboBox kennt keine Menüeinträge, deshalb ein
     /// eigener Typ, den SelectedIndexChanged als Befehl statt als Ordner erkennt.</summary>
@@ -85,6 +86,7 @@ public partial class FolderSelectForm : Form
         Lng.Apply(this);
         Lng.Apply(contextMenuTree); // Kontextmenüs hängen nicht im Control-Baum
         clearIcon = ToolbarIcons.MenuIcon(ToolbarIcons.Clear, this);
+        folderIcon = ShellInfo.GetTypeIcon(null, LogicalToDeviceUnits(16));
         newFolderMenuItem.Image = ToolbarIcons.MenuIcon(ToolbarIcons.NewFolder, this); // Symbole wie in den Hauptmenüs (Einstellung „Symbole anzeigen“)
         renameFolderMenuItem.Image = ToolbarIcons.MenuIcon(ToolbarIcons.Rename, this);
         deleteFolderMenuItem.Image = ToolbarIcons.MenuIcon(ToolbarIcons.Delete, this);
@@ -308,13 +310,13 @@ public partial class FolderSelectForm : Form
         DialogResult = DialogResult.Cancel; // der Dialog endet, das Hauptfenster öffnet die Einstellungen
     }
 
-    /// <summary>Zeichnet die Zuletzt-Liste selbst, damit „Liste leeren“ als letzter Eintrag durch eine Trennlinie
-    /// und das Leeren-Symbol vom Rest abgesetzt ist (in der Aufklappliste, nicht im Eingabefeld).</summary>
-    private void ComboBoxRecent_DrawItem(object? sender, DrawItemEventArgs e)
+    /// <summary>Zeichnet beide Ordnerlisten selbst: vor jedem Ordner das Ordnersymbol der Shell, und in der Zuletzt-Liste
+    /// „Liste leeren“ als letzter Eintrag durch eine Trennlinie und das Leeren-Symbol vom Rest abgesetzt (in der Aufklappliste, nicht im Eingabefeld).</summary>
+    private void ComboBoxFolders_DrawItem(object? sender, DrawItemEventArgs e)
     {
         e.DrawBackground();
-        if (e.Index < 0) { e.DrawFocusRectangle(); return; }
-        var item = comboBoxRecent.Items[e.Index] ?? string.Empty;
+        if (sender is not ComboBox combo || e.Index < 0) { e.DrawFocusRectangle(); return; }
+        var item = combo.Items[e.Index] ?? string.Empty;
         var font = e.Font ?? Font;
         const TextFormatFlags flags = TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis;
         if (item is ClearListEntry && (e.State & DrawItemState.ComboBoxEdit) == 0)
@@ -329,7 +331,16 @@ public partial class FolderSelectForm : Form
             }
             TextRenderer.DrawText(e.Graphics, item.ToString(), font, new Rectangle(x, e.Bounds.Top + 1, e.Bounds.Right - x, e.Bounds.Height - 1), e.ForeColor, flags);
         }
-        else { TextRenderer.DrawText(e.Graphics, item.ToString(), font, e.Bounds, e.ForeColor, flags); }
+        else
+        {
+            var x = e.Bounds.Left + 2;
+            if (folderIcon != null)
+            {
+                e.Graphics.DrawImage(folderIcon, x, e.Bounds.Top + (e.Bounds.Height - folderIcon.Height) / 2);
+                x += folderIcon.Width + 4;
+            }
+            TextRenderer.DrawText(e.Graphics, item.ToString(), font, new Rectangle(x, e.Bounds.Top, e.Bounds.Right - x, e.Bounds.Height), e.ForeColor, flags);
+        }
         e.DrawFocusRectangle();
     }
 
