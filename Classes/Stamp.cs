@@ -9,9 +9,6 @@ public enum StampPosition { TopLeft, TopCenter, TopRight, Center }
 /// Hintergrund. Gespeichert in settings.json; Farben als RRGGBB, leerer Hintergrund = transparent.</summary>
 public sealed class Stamp
 {
-    public const int MaxTextLength = 20;
-    public const double MinFontSize = 8;
-    public const double MaxFontSize = 72;
     public const double DateFactor = 0.4;    // Datumszeile relativ zur Schriftgröße
     public const double PaddingFactor = 0.35; // Innenabstand relativ zur Schriftgröße
 
@@ -48,7 +45,6 @@ public sealed class Stamp
     [JsonIgnore]
     public double Alpha => Math.Clamp(Opacity, MinOpacity, 100) / 100.0;
 
-    public const int MaxInitialsLength = 3;
 
     /// <summary>Eckenradius in Punkt relativ zur Schriftgröße (0 = eckig).</summary>
     public double CornerRadius => Rounded ? FontSize * 0.35 : 0;
@@ -93,7 +89,7 @@ public sealed class Stamp
         var hint = g.TextRenderingHint;
         g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
         g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-        var clip = g.Clip;
+        using var clip = g.Clip; // Kopie – nach dem Zurücksetzen freigeben, sonst bleibt je Zeichnen eine GDI-Region liegen
         g.SetClip(box, System.Drawing.Drawing2D.CombineMode.Intersect); // zu breite Texte enden am Kasten
         if (BackgroundColor is { } background)
         {

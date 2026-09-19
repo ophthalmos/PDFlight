@@ -606,4 +606,5 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="Die vorhandenen Stempel bleiben." xml:space="preserve"><value>Los sellos existentes se conservan.</value></data>
   <data name="An dieser Stelle stehen schon {0} Stempel." xml:space="preserve"><value>Ya hay {0} sellos en este lugar.</value></data>
   <data name="Mehr als drei Stempel je Position gibt es nicht." xml:space="preserve"><value>No caben más de tres sellos por posición.</value></data>
+  <data name="Die Bilddatei konnte nicht gelesen werden." xml:space="preserve"><value>No se pudo leer el archivo de imagen.</value></data>
 </root>

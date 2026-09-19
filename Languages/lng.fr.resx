@@ -606,4 +606,5 @@ Un clic dans l'aperçu définit la position.</value></data>
   <data name="Die vorhandenen Stempel bleiben." xml:space="preserve"><value>Les tampons existants restent.</value></data>
   <data name="An dieser Stelle stehen schon {0} Stempel." xml:space="preserve"><value>Il y a déjà {0} tampons à cet endroit.</value></data>
   <data name="Mehr als drei Stempel je Position gibt es nicht." xml:space="preserve"><value>Pas plus de trois tampons par position.</value></data>
+  <data name="Die Bilddatei konnte nicht gelesen werden." xml:space="preserve"><value>Le fichier image n’a pas pu être lu.</value></data>
 </root>

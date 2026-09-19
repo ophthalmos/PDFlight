@@ -606,4 +606,5 @@ Clicking into the preview sets the position.</value></data>
   <data name="Die vorhandenen Stempel bleiben." xml:space="preserve"><value>The existing stamps stay.</value></data>
   <data name="An dieser Stelle stehen schon {0} Stempel." xml:space="preserve"><value>There are already {0} stamps at this spot.</value></data>
   <data name="Mehr als drei Stempel je Position gibt es nicht." xml:space="preserve"><value>There is no room for more than three stamps per position.</value></data>
+  <data name="Die Bilddatei konnte nicht gelesen werden." xml:space="preserve"><value>The image file could not be read.</value></data>
 </root>
