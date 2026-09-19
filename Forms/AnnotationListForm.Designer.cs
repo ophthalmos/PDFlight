@@ -179,7 +179,7 @@ namespace PDFLight.Forms
             Name = "AnnotationListForm";
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;
-            Text = "Textanmerkungen";
+            Text = "Anmerkungen";
             contextMenuList.ResumeLayout(false);
             ResumeLayout(false);
         }

@@ -17,7 +17,7 @@ public partial class SettingsForm : Form
     public List<string> ExternalPrograms => [.. listPrograms.Items.Cast<string>()];
 
     [System.ComponentModel.Browsable(false)]
-    public bool JumpToLastUsed => cbJumpLastUsed.Checked;
+    public bool RememberLastPage => cbRememberPage.Checked;
 
     [System.ComponentModel.Browsable(false)]
     public bool ConfirmDelete => cbConfirmDelete.Checked;
@@ -77,7 +77,7 @@ public partial class SettingsForm : Form
         comboLanguage.SelectedIndex = Math.Max(0, Array.FindIndex(Languages, l => l.Code == source.Language));
         listTargets.Items.AddRange([.. source.TargetFolders.Where(f => !string.IsNullOrEmpty(f))]);
         listPrograms.Items.AddRange([.. source.ExternalPrograms.Where(f => !string.IsNullOrEmpty(f))]);
-        cbJumpLastUsed.Checked = source.JumpToLastUsed;
+        cbRememberPage.Checked = source.RememberLastPage;
         cbConfirmDelete.Checked = source.ConfirmDelete;
         cbOpenNextAfterDelete.Checked = source.OpenNextAfterDelete;
         comboToolbar.Items.AddRange([.. ToolbarLayouts.Select(l => (object)Lng.T(l.Text))]);

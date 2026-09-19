@@ -31,7 +31,7 @@
             var resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
             tabControl = new TabControl();
             tabGeneral = new TabPage();
-            cbJumpLastUsed = new CheckBox();
+            cbRememberPage = new CheckBox();
             cbConfirmDelete = new CheckBox();
             cbOpenNextAfterDelete = new CheckBox();
             labelToolbar = new Label();
@@ -89,7 +89,7 @@
             // 
             // tabGeneral
             // 
-            tabGeneral.Controls.Add(cbJumpLastUsed);
+            tabGeneral.Controls.Add(cbRememberPage);
             tabGeneral.Controls.Add(cbConfirmDelete);
             tabGeneral.Controls.Add(cbOpenNextAfterDelete);
             tabGeneral.Controls.Add(labelToolbar);
@@ -110,19 +110,21 @@
             tabGeneral.Text = "Allgemein";
             tabGeneral.UseVisualStyleBackColor = true;
             // 
-            // cbJumpLastUsed
+            // cbRememberPage
             // 
-            cbJumpLastUsed.AutoSize = true;
-            cbJumpLastUsed.Location = new Point(19, 74);
-            cbJumpLastUsed.Name = "cbJumpLastUsed";
-            cbJumpLastUsed.Size = new Size(310, 19);
-            cbJumpLastUsed.TabIndex = 1;
-            cbJumpLastUsed.Text = "Ordnerdialog springt zum zuletzt &verwendeten Ordner";
-            cbJumpLastUsed.UseVisualStyleBackColor = true;
+            cbRememberPage.AutoSize = true;
+            cbRememberPage.Location = new Point(19, 74);
+            cbRememberPage.Name = "cbRememberPage";
+            cbRememberPage.Size = new Size(299, 19);
+            cbRememberPage.TabIndex = 1;
+            cbRememberPage.Text = "Dokumente mit der zuletzt angezeigten &Seite öffnen";
+            cbRememberPage.UseVisualStyleBackColor = true;
             // 
             // cbConfirmDelete
             // 
             cbConfirmDelete.AutoSize = true;
+            cbConfirmDelete.Checked = true;
+            cbConfirmDelete.CheckState = CheckState.Checked;
             cbConfirmDelete.Location = new Point(19, 99);
             cbConfirmDelete.Name = "cbConfirmDelete";
             cbConfirmDelete.Size = new Size(295, 19);
@@ -550,7 +552,7 @@
         private System.Windows.Forms.Label labelProgramStatus;
         private System.Windows.Forms.Label labelProgramHint;
         private System.Windows.Forms.TabPage tabGeneral;
-        private System.Windows.Forms.CheckBox cbJumpLastUsed;
+        private System.Windows.Forms.CheckBox cbRememberPage;
         private System.Windows.Forms.CheckBox cbConfirmDelete;
         private System.Windows.Forms.CheckBox cbOpenNextAfterDelete;
         private System.Windows.Forms.Label labelLanguage;
