@@ -471,11 +471,18 @@ internal static partial class PdfEditService
         var old = AnnotationAt(pdfPage.Annotations, index);
         var oldLines = SplitLines(old.Elements.GetString("/Contents"));
         var oldRect = old.Elements.GetRectangle("/Rect");
-        var oldTop = Math.Max(oldRect.Y1, oldRect.Y2); // der neue Stempel bleibt an seinem Platz im Stapel
+        var oldTop = Math.Max(oldRect.Y1, oldRect.Y2);
+        var (oldLeft, oldRight) = (Math.Min(oldRect.X1, oldRect.X2), Math.Max(oldRect.X1, oldRect.X2));
         var oldDate = oldLines.Length > 1 ? InitialsSuffix().Replace(oldLines[^1], string.Empty).Trim() : string.Empty; // Datum ohne das alte Kürzel
         var dateLine = stamp.SecondLine(oldDate.Length > 0 ? oldDate : Stamp.DateText(DateTime.Now));
+        // Der Platz im Stapel bleibt nur, wenn der neue Stempel dieselbe Position hat wie der alte – erkennbar daran, dass der alte
+        // Kasten in der Spalte und im Stapelbereich des neuen liegt. Sonst (z.B. oben rechts → oben links) gilt die feste Position
+        // des neuen Stempels; ein Stempel oben links auf Stapelhöhe zwei wäre Unsinn (Fehlerbericht 19.09.2026).
+        var planned = StampRect(pdfPage, stamp, dateLine);
+        var sameColumn = oldRight > planned.X && oldLeft < planned.X + planned.Width;
+        var sameStack = sameColumn && Math.Abs(oldTop - (planned.Y + planned.Height)) <= StackLimit * (planned.Height + StackGap);
         pdfPage.Annotations.Elements.RemoveAt(index);
-        AppendStamp(document, pdfPage, stamp, dateLine, oldTop);
+        AppendStamp(document, pdfPage, stamp, dateLine, sameStack ? oldTop : null);
         document.Save(path);
     }
 
