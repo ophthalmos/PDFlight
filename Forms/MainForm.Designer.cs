@@ -95,6 +95,7 @@
             pnlPdfA = new Panel();
             btnPdfAEnable = new Button();
             lblPdfA = new Label();
+            toolStripSeparator16 = new ToolStripSeparator();
             ((System.ComponentModel.ISupportInitialize)webView).BeginInit();
             toolStrip.SuspendLayout();
             statusStrip.SuspendLayout();
@@ -256,7 +257,7 @@
             // ddbEdit
             // 
             ddbEdit.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuMovePage, mnuInsertPage, toolStripSeparator15, mnuAppendPdf, mnuDuplex, mnuExtractPages, toolStripSeparator14, mnuAddStamp, mnuManageStamps, mnuAddAnnotation, mnuManageAnnotations, mnuRemoveBookmarks, toolStripSeparator6, mnuUndo, toolStripSeparator7, mnuSetPassword, mnuRemovePassword, toolStripSeparator10, mnuProperties });
+            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuMovePage, mnuInsertPage, toolStripSeparator15, mnuAppendPdf, mnuDuplex, mnuExtractPages, toolStripSeparator14, mnuAddStamp, mnuManageStamps, mnuAddAnnotation, mnuManageAnnotations, toolStripSeparator16, mnuRemoveBookmarks, toolStripSeparator6, mnuUndo, toolStripSeparator7, mnuSetPassword, mnuRemovePassword, toolStripSeparator10, mnuProperties });
             ddbEdit.Enabled = false;
             ddbEdit.Name = "ddbEdit";
             ddbEdit.Size = new Size(76, 22);
@@ -267,7 +268,7 @@
             // 
             mnuDeletePages.Name = "mnuDeletePages";
             mnuDeletePages.ShortcutKeyDisplayString = "Strg+Entf";
-            mnuDeletePages.Size = new Size(336, 22);
+            mnuDeletePages.Size = new Size(317, 22);
             mnuDeletePages.Text = "Seiten löschen …";
             mnuDeletePages.Click += MnuDeletePages_Click;
             // 
@@ -275,7 +276,7 @@
             // 
             mnuRotatePages.Name = "mnuRotatePages";
             mnuRotatePages.ShortcutKeyDisplayString = "Strg+R";
-            mnuRotatePages.Size = new Size(336, 22);
+            mnuRotatePages.Size = new Size(317, 22);
             mnuRotatePages.Text = "Seiten drehen …";
             mnuRotatePages.Click += MnuRotatePages_Click;
             // 
@@ -283,34 +284,34 @@
             // 
             mnuMovePage.Name = "mnuMovePage";
             mnuMovePage.ShortcutKeyDisplayString = "Strg+Y";
-            mnuMovePage.Size = new Size(336, 22);
+            mnuMovePage.Size = new Size(317, 22);
             mnuMovePage.Text = "Aktuelle Seite verschieben …";
             mnuMovePage.Click += MnuMovePage_Click;
             // 
             // mnuInsertPage
             // 
             mnuInsertPage.Name = "mnuInsertPage";
-            mnuInsertPage.Size = new Size(336, 22);
+            mnuInsertPage.Size = new Size(317, 22);
             mnuInsertPage.Text = "Leere Seite einfügen …";
             mnuInsertPage.Click += MnuInsertPage_Click;
             // 
             // toolStripSeparator15
             // 
             toolStripSeparator15.Name = "toolStripSeparator15";
-            toolStripSeparator15.Size = new Size(333, 6);
+            toolStripSeparator15.Size = new Size(314, 6);
             // 
             // mnuAppendPdf
             // 
             mnuAppendPdf.Name = "mnuAppendPdf";
             mnuAppendPdf.ShortcutKeyDisplayString = "Strg+N";
-            mnuAppendPdf.Size = new Size(336, 22);
+            mnuAppendPdf.Size = new Size(317, 22);
             mnuAppendPdf.Text = "PDF-Datei anhängen …";
             mnuAppendPdf.Click += MnuAppendPdf_Click;
             // 
             // mnuDuplex
             // 
             mnuDuplex.Name = "mnuDuplex";
-            mnuDuplex.Size = new Size(336, 22);
+            mnuDuplex.Size = new Size(317, 22);
             mnuDuplex.Text = "Rückseiten-Scan einfügen …";
             mnuDuplex.Click += MnuDuplex_Click;
             // 
@@ -318,20 +319,20 @@
             // 
             mnuExtractPages.Name = "mnuExtractPages";
             mnuExtractPages.ShortcutKeyDisplayString = "Strg+X";
-            mnuExtractPages.Size = new Size(336, 22);
+            mnuExtractPages.Size = new Size(317, 22);
             mnuExtractPages.Text = "Seiten extrahieren …";
             mnuExtractPages.Click += MnuExtractPages_Click;
             // 
             // toolStripSeparator14
             // 
             toolStripSeparator14.Name = "toolStripSeparator14";
-            toolStripSeparator14.Size = new Size(333, 6);
+            toolStripSeparator14.Size = new Size(314, 6);
             // 
             // mnuAddStamp
             // 
             mnuAddStamp.Name = "mnuAddStamp";
             mnuAddStamp.ShortcutKeyDisplayString = "Strg+H";
-            mnuAddStamp.Size = new Size(336, 22);
+            mnuAddStamp.Size = new Size(317, 22);
             mnuAddStamp.Text = "Stempel einfügen …";
             mnuAddStamp.Click += MnuAddStamp_Click;
             // 
@@ -339,7 +340,7 @@
             // 
             mnuManageStamps.Name = "mnuManageStamps";
             mnuManageStamps.ShortcutKeyDisplayString = "Strg+Umschalt+H";
-            mnuManageStamps.Size = new Size(336, 22);
+            mnuManageStamps.Size = new Size(317, 22);
             mnuManageStamps.Text = "Stempel verwalten …";
             mnuManageStamps.Click += MnuManageStamps_Click;
             // 
@@ -347,7 +348,7 @@
             // 
             mnuAddAnnotation.Name = "mnuAddAnnotation";
             mnuAddAnnotation.ShortcutKeyDisplayString = "Strg+T";
-            mnuAddAnnotation.Size = new Size(336, 22);
+            mnuAddAnnotation.Size = new Size(317, 22);
             mnuAddAnnotation.Text = "Freitext hinzufügen …";
             mnuAddAnnotation.Click += MnuAddAnnotation_Click;
             // 
@@ -355,60 +356,60 @@
             // 
             mnuManageAnnotations.Name = "mnuManageAnnotations";
             mnuManageAnnotations.ShortcutKeyDisplayString = "Strg+Umschalt+T";
-            mnuManageAnnotations.Size = new Size(336, 22);
+            mnuManageAnnotations.Size = new Size(317, 22);
             mnuManageAnnotations.Text = "Anmerkungen verwalten …";
             mnuManageAnnotations.Click += MnuManageAnnotations_Click;
             // 
             // mnuRemoveBookmarks
             // 
             mnuRemoveBookmarks.Name = "mnuRemoveBookmarks";
-            mnuRemoveBookmarks.Size = new Size(336, 22);
+            mnuRemoveBookmarks.Size = new Size(317, 22);
             mnuRemoveBookmarks.Text = "Lesezeichen entfernen …";
             mnuRemoveBookmarks.Click += MnuRemoveBookmarks_Click;
             // 
             // toolStripSeparator6
             // 
             toolStripSeparator6.Name = "toolStripSeparator6";
-            toolStripSeparator6.Size = new Size(333, 6);
+            toolStripSeparator6.Size = new Size(314, 6);
             // 
             // mnuUndo
             // 
             mnuUndo.Enabled = false;
             mnuUndo.Name = "mnuUndo";
             mnuUndo.ShortcutKeyDisplayString = "Strg+Z";
-            mnuUndo.Size = new Size(336, 22);
+            mnuUndo.Size = new Size(317, 22);
             mnuUndo.Text = "Änderung rückgängig";
             mnuUndo.Click += MnuUndo_Click;
             // 
             // toolStripSeparator7
             // 
             toolStripSeparator7.Name = "toolStripSeparator7";
-            toolStripSeparator7.Size = new Size(333, 6);
+            toolStripSeparator7.Size = new Size(314, 6);
             // 
             // mnuSetPassword
             // 
             mnuSetPassword.Name = "mnuSetPassword";
-            mnuSetPassword.Size = new Size(336, 22);
+            mnuSetPassword.Size = new Size(317, 22);
             mnuSetPassword.Text = "Kennwort vergeben …";
             mnuSetPassword.Click += MnuSetPassword_Click;
             // 
             // mnuRemovePassword
             // 
             mnuRemovePassword.Name = "mnuRemovePassword";
-            mnuRemovePassword.Size = new Size(336, 22);
+            mnuRemovePassword.Size = new Size(317, 22);
             mnuRemovePassword.Text = "Kennwort entfernen …";
             mnuRemovePassword.Click += MnuRemovePassword_Click;
             // 
             // toolStripSeparator10
             // 
             toolStripSeparator10.Name = "toolStripSeparator10";
-            toolStripSeparator10.Size = new Size(333, 6);
+            toolStripSeparator10.Size = new Size(314, 6);
             // 
             // mnuProperties
             // 
             mnuProperties.Name = "mnuProperties";
             mnuProperties.ShortcutKeyDisplayString = "Strg+I";
-            mnuProperties.Size = new Size(336, 22);
+            mnuProperties.Size = new Size(317, 22);
             mnuProperties.Text = "Eigenschaften …";
             mnuProperties.Click += MnuProperties_Click;
             // 
@@ -519,7 +520,7 @@
             btnSettings.Alignment = ToolStripItemAlignment.Right;
             btnSettings.DisplayStyle = ToolStripItemDisplayStyle.Text;
             btnSettings.Name = "btnSettings";
-            btnSettings.Size = new Size(82, 22);
+            btnSettings.Size = new Size(82, 19);
             btnSettings.Text = "Einstellungen";
             btnSettings.ToolTipText = "Zielordner, Programme und Optionen verwalten (Strg+,)";
             btnSettings.Click += BtnSettings_Click;
@@ -618,6 +619,11 @@
             lblPdfA.TabIndex = 0;
             lblPdfA.Text = "Diese Datei entspricht dem PDF/A-Standard für die Langzeitarchivierung und wurde schreibgeschützt geöffnet.";
             // 
+            // toolStripSeparator16
+            // 
+            toolStripSeparator16.Name = "toolStripSeparator16";
+            toolStripSeparator16.Size = new Size(314, 6);
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
@@ -714,5 +720,6 @@
         private ToolStripSeparator toolStripSeparator10;
         private ToolStripSeparator toolStripSeparator15;
         private ToolStripSeparator toolStripSeparator14;
+        private ToolStripSeparator toolStripSeparator16;
     }
 }

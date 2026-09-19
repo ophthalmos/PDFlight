@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
@@ -461,7 +462,32 @@ internal static partial class PdfEditService
         return new XRect(left, top - height, width, height);
     }
 
-    /// <summary>Ersetzt einen Stempel durch einen (anderen) Stempel der Palette – wie beim Bearbeiten einer Textanmerkung wird der
+    /// <summary>Privater Schlüssel in der Stempel-Anmerkung mit der Stempeldefinition als JSON (Text, Größe, Farben, Position, Deckkraft …).</summary>
+    private const string StampDataKey = "/PDFlightStampData";
+
+    /// <summary>Liest die Stempeldefinition aus einer PDFlight-Stempel-Anmerkung. Ohne gespeicherte Definition (Stempel aus einer
+    /// früheren Fassung) entsteht ein Stempel aus Text und Farbe der Anmerkung.</summary>
+    public static Stamp ReadStamp(string path, int page, int index, int objectNumber)
+    {
+        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
+        var annotations = document.Pages[page - 1].Annotations;
+        var annotation = AnnotationAt(annotations, ResolveIndex(annotations, objectNumber, index));
+        var json = annotation.Elements.GetString(StampDataKey);
+        if (json.Length > 0)
+        {
+            try { if (JsonSerializer.Deserialize<Stamp>(json) is { } stored) { return stored; } }
+            catch (JsonException) { } // beschädigte Definition – dann der Rückfall aus den Anmerkungsdaten
+        }
+        var lines = SplitLines(annotation.Elements.GetString("/Contents"));
+        Stamp stamp = new() { Text = lines[0], WithDate = lines.Length > 1 };
+        if (annotation.Elements.GetArray("/C") is { Elements.Count: 3 } color)
+        {
+            stamp.TextColor = AnnotationStyle.ToHex(Color.FromArgb(Channel(color, 0), Channel(color, 1), Channel(color, 2)));
+        }
+        return stamp;
+    }
+
+    /// <summary>Ersetzt einen Stempel durch die (geänderte) Definition – wie beim Bearbeiten einer Textanmerkung wird der
     /// Eintrag neu gezeichnet. Die ursprüngliche Datumszeile bleibt erhalten, sofern der neue Stempel eine hat.</summary>
     public static void UpdateStamp(string path, int page, int index, int objectNumber, Stamp stamp)
     {
@@ -545,6 +571,7 @@ internal static partial class PdfEditService
         annotation.Elements.SetName("/Name", "/PDFlightStamp"); // kein Standardsymbol – Betrachter nehmen das Erscheinungsbild
         annotation.Elements.SetRectangle("/Rect", new PdfRectangle(rect));
         annotation.Elements.SetString("/Contents", dateLine.Length > 0 ? stamp.Text + "\n" + dateLine : stamp.Text);
+        annotation.Elements.SetString(StampDataKey, JsonSerializer.Serialize(stamp)); // damit „Bearbeiten“ in der Anmerkungsliste alle Eigenschaften wiederfindet
         annotation.Elements.SetInteger("/F", 4); // drucken
         var colorArray = new PdfArray(document);
         colorArray.Elements.Add(new PdfReal(color.R / 255.0));

@@ -47,6 +47,7 @@ public sealed class Stamp
 
 
     /// <summary>Eckenradius in Punkt relativ zur Schriftgröße (0 = eckig).</summary>
+    [JsonIgnore]
     public double CornerRadius => Rounded ? FontSize * 0.35 : 0;
 
     /// <summary>Die Namen der Positionen in der Reihenfolge des Enums (Lng-Schlüssel).</summary>

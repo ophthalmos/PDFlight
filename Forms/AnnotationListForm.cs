@@ -95,7 +95,7 @@ public partial class AnnotationListForm : Form
     private void UpdateButtons()
     {
         var selected = Selected;
-        btnEdit.Enabled = selected?.Subtype is "FreeText" or "Stamp"; // nur eigene Arten lassen sich neu zeichnen (Stempel: anderen Palettenstempel wählen)
+        btnEdit.Enabled = selected?.Subtype is "FreeText" or "Stamp"; // nur eigene Arten lassen sich neu zeichnen (Stempel: Eigenschaften im Verwalten-Dialog ändern)
         btnDelete.Enabled = selected != null;
         btnDeleteAll.Enabled = listView.Items.Count > 1;
     }
