@@ -58,12 +58,11 @@
             comboBoxRecent.DrawMode = DrawMode.OwnerDrawFixed;
             comboBoxRecent.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBoxRecent.FormattingEnabled = true;
-            comboBoxRecent.ItemHeight = 18;
             comboBoxRecent.Location = new Point(90, 13);
             comboBoxRecent.Name = "comboBoxRecent";
             comboBoxRecent.Size = new Size(260, 23);
             comboBoxRecent.TabIndex = 0;
-            comboBoxRecent.DrawItem += ComboBoxFolders_DrawItem;
+            comboBoxRecent.DrawItem += ComboBoxRecent_DrawItem;
             comboBoxRecent.SelectedIndexChanged += ComboBoxRecent_SelectedIndexChanged;
             // 
             // labelTarget
@@ -100,15 +99,12 @@
             // comboBoxTarget
             // 
             comboBoxTarget.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            comboBoxTarget.DrawMode = DrawMode.OwnerDrawFixed;
             comboBoxTarget.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBoxTarget.FormattingEnabled = true;
-            comboBoxTarget.ItemHeight = 18;
             comboBoxTarget.Location = new Point(90, 41);
             comboBoxTarget.Name = "comboBoxTarget";
             comboBoxTarget.Size = new Size(260, 23);
             comboBoxTarget.TabIndex = 1;
-            comboBoxTarget.DrawItem += ComboBoxFolders_DrawItem;
             comboBoxTarget.SelectedIndexChanged += ComboBoxTarget_SelectedIndexChanged;
             // 
             // shellTreeView
