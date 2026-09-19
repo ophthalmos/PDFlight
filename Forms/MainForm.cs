@@ -1330,6 +1330,7 @@ public partial class MainForm : Form
         dialog.SetStyle(new AnnotationStyle(AnnotationStyle.ParseHex(settings.AnnotationBorderColor), AnnotationStyle.ParseHex(settings.AnnotationBackground), AnnotationStyle.ParseHex(settings.AnnotationTextColor) ?? Color.Black)); // zuletzt gewählte Gestaltung
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         var style = dialog.Style;
+        settings.ReloadSharedLists(); // vor dem Speichern die Listen anderer Instanzen übernehmen, sonst würden sie überschrieben
         settings.AnnotationBorderColor = style.BorderColorHex;
         settings.AnnotationBackground = style.BackgroundHex;
         settings.AnnotationTextColor = style.TextColorHex;
@@ -1951,63 +1952,62 @@ public partial class MainForm : Form
 
     // ------------------------------------------------------------------ Tastenkürzel
 
-    private bool HandleShortcut(Keys keyData)
+    /// <summary>Die Aktion zu einem Tastenkürzel – null, wenn die Taste keins ist (dann läuft sie an den Viewer weiter). Hier fällt nur
+    /// die Entscheidung; ausgeführt wird die Aktion von den beiden Einstiegen unten. Aus dem Chromium-Tastatur-Callback (WebView_KeyDown)
+    /// grundsätzlich erst nach dessen Rückkehr per BeginInvoke: Solange er läuft, wartet Chromium auf unsere Antwort und kann weder die
+    /// UIA-Seitenabfrage (LoadPdf, Seitendialoge) bedienen noch ein weiteres WebView2 (Anmerkungsvorschau) initialisieren.</summary>
+    private Action? ResolveShortcut(Keys keyData)
     {
         switch (keyData)
         {
-            // Alles, was eine (andere) Datei lädt, erst nach der Rückkehr aus dem Chromium-Tastatur-Callback: LoadPdf merkt sich vorher
-            // die angezeigte Seite per UIA, und die liefe im Callback in den Timeout (s. auch die Seitendialoge unten)
-            case Keys.O | Keys.Control: BeginInvoke(OpenFile); return true;
+            case Keys.O | Keys.Control: return OpenFile;
             case Keys.F4:
-            case Keys.M | Keys.Control: BeginInvoke(() => MoveCopyDialog(copy: false)); return true;
-            case Keys.K | Keys.Control: BeginInvoke(() => MoveCopyDialog(copy: true)); return true;
+            case Keys.M | Keys.Control: return () => MoveCopyDialog(copy: false);
+            case Keys.K | Keys.Control: return () => MoveCopyDialog(copy: true);
             case Keys.M | Keys.Control | Keys.Shift:
-            case Keys.F4 | Keys.Control: BeginInvoke(() => { if (!OneClickAction(copy: false)) { MoveCopyDialog(copy: false); } }); return true;
-            case Keys.K | Keys.Control | Keys.Shift: BeginInvoke(() => { if (!OneClickAction(copy: true)) { MoveCopyDialog(copy: true); } }); return true;
+            case Keys.F4 | Keys.Control: return () => { if (!OneClickAction(copy: false)) { MoveCopyDialog(copy: false); } };
+            case Keys.K | Keys.Control | Keys.Shift: return () => { if (!OneClickAction(copy: true)) { MoveCopyDialog(copy: true); } };
             case Keys.F2:
-            case Keys.U | Keys.Control: BeginInvoke(RenameCurrent); return true;
-            // erst nach der Rückkehr aus dem Chromium-Tastatur-Callback: solange der läuft, wartet Chromium
-            // auf unsere Antwort und kann die UIA-Seitenabfrage nicht bedienen (sie liefe in den Timeout)
-            case Keys.Delete | Keys.Control when !PdfALocked: BeginInvoke(DeletePagesDialog); return true;
-            case Keys.X | Keys.Control: BeginInvoke(ExtractPagesDialog); return true; // eXtrahieren; nutzt ebenfalls die UIA-Seitenabfrage
-            case Keys.Y | Keys.Control when mnuMovePage.Enabled: BeginInvoke(MovePageDialog); return true; // aktuelle Seite verschieben; ebenso
-            case Keys.N | Keys.Control when !PdfALocked: AppendPdfDialog(); return true;                  // PDF-Datei anhängen
-            case Keys.T | Keys.Control when !PdfALocked: BeginInvoke(AddAnnotationDialog); return true; // Textanmerkung; ebenso
-            case Keys.H | Keys.Control when !PdfALocked: BeginInvoke(AddStampDialog); return true;      // Stempel; ebenso (UIA-Seitenabfrage)
-            case Keys.H | Keys.Control | Keys.Shift: ManageStampsDialog(); return true;                    // Stempelpalette pflegen
-            case Keys.T | Keys.Control | Keys.Shift when mnuManageAnnotations.Enabled: BeginInvoke(ManageAnnotationsDialog); return true; // BeginInvoke: das WebView2 der Vorschau ließe sich im Chromium-Tastatur-Callback nicht initialisieren
-            case Keys.Delete | Keys.Control | Keys.Shift when currentFile != null: BeginInvoke(DeleteCurrent); return true;
-            case Keys.R | Keys.Control when !PdfALocked: BeginInvoke(RotatePagesDialog); return true; // BeginInvoke wegen der UIA-Seitenabfrage (s. Strg+Entf)
-            // Ansicht drehen (das Viewer-Kürzel Strg+] ist auf deutschen Tastaturen unerreichbar);
-            // BeginInvoke: die UIA-Abfrage nicht im Chromium-Tastatur-Callback starten (s. Strg+Entf)
-            case Keys.R | Keys.Control | Keys.Shift: BeginInvoke(() => viewHost.RotateView(clockwise: true)); return true;
-            case Keys.L | Keys.Control | Keys.Shift: BeginInvoke(() => viewHost.RotateView(clockwise: false)); return true;
-            case Keys.G | Keys.Control: BeginInvoke(viewHost.FocusPageField); return true;              // Gehe zu Seite (Zahl + Enter)
-            case Keys.I | Keys.Control | Keys.Shift: BeginInvoke(viewHost.ToggleContents); return true; // Inhalte-Leiste
-            case Keys.B | Keys.Control | Keys.Shift: BeginInvoke(viewHost.FitToWidth); return true;     // Breite (Viewer-Kürzel Strg+\ ist auf deutschen Tastaturen unerreichbar)
-            case Keys.Space | Keys.Control: BeginInvoke(viewHost.ToggleLayout); return true;            // ein-/zweiseitiges Layout
-            case Keys.Z | Keys.Control when undoAction != null: BeginInvoke(UndoLastChange); return true;
-            case Keys.I | Keys.Control: ShowProperties(); return true;
-            case Keys.Oemcomma | Keys.Control: OpenSettings(SettingsForm.TabGeneral); return true; // Strg+, wie in vielen Editoren
-            case Keys.Enter | Keys.Alt when currentFile != null: ShellUtil.ShowFileProperties(currentFile.FullName); return true; // Windows-Dateieigenschaften, wie im Explorer
-            case Keys.C | Keys.Control | Keys.Shift when currentFile != null: CopyPathToClipboard(); return true; // wie im Windows-11-Explorer
-            case Keys.E | Keys.Control: EmailCurrent(); return true;
-            case Keys.D | Keys.Control when settings.ShowFavorites: ToggleFavorite(); return true; // Datei als Favorit merken / wieder austragen
-            case Keys.Right | Keys.Control | Keys.Shift: BeginInvoke(() => StepFile(1)); return true;   // Strg+Pfeile ohne Umschalt gehören dem Viewer (Zoom & Co.)
-            case Keys.Left | Keys.Control | Keys.Shift: BeginInvoke(() => StepFile(-1)); return true;
-            case Keys.F1: TaskDlg.ShowShortcutsPdf(Handle); return true;
-            case Keys.F11: SetFullScreen(!isFullScreen); return true;
-            case Keys.Escape | Keys.Shift when settings.CloseOnEscape: BeginInvoke(Close); return true; // Shift+Esc beendet sofort (wie in NetRadio); FormClosing merkt die Seite per UIA
-            case Keys.Escape when isFullScreen: SetFullScreen(false); return true;
-            case Keys.Escape when settings.CloseOnEscape: return HandleEscapeToClose();
+            case Keys.U | Keys.Control: return RenameCurrent;
+            case Keys.Delete | Keys.Control when !PdfALocked: return DeletePagesDialog;
+            case Keys.X | Keys.Control: return ExtractPagesDialog;                         // eXtrahieren
+            case Keys.Y | Keys.Control when mnuMovePage.Enabled: return MovePageDialog;    // aktuelle Seite verschieben
+            case Keys.N | Keys.Control when !PdfALocked: return AppendPdfDialog;           // PDF-Datei anhängen
+            case Keys.T | Keys.Control when !PdfALocked: return AddAnnotationDialog;       // Textanmerkung
+            case Keys.H | Keys.Control when !PdfALocked: return AddStampDialog;            // Stempel
+            case Keys.H | Keys.Control | Keys.Shift: return ManageStampsDialog;            // Stempelpalette pflegen
+            case Keys.T | Keys.Control | Keys.Shift when mnuManageAnnotations.Enabled: return ManageAnnotationsDialog;
+            case Keys.Delete | Keys.Control | Keys.Shift when currentFile != null: return DeleteCurrent;
+            case Keys.R | Keys.Control when !PdfALocked: return RotatePagesDialog;
+            // Ansicht drehen (das Viewer-Kürzel Strg+] ist auf deutschen Tastaturen unerreichbar)
+            case Keys.R | Keys.Control | Keys.Shift: return () => viewHost.RotateView(clockwise: true);
+            case Keys.L | Keys.Control | Keys.Shift: return () => viewHost.RotateView(clockwise: false);
+            case Keys.G | Keys.Control: return viewHost.FocusPageField;                    // Gehe zu Seite (Zahl + Enter)
+            case Keys.I | Keys.Control | Keys.Shift: return viewHost.ToggleContents;       // Inhalte-Leiste
+            case Keys.B | Keys.Control | Keys.Shift: return viewHost.FitToWidth;           // Breite (Viewer-Kürzel Strg+\ ist auf deutschen Tastaturen unerreichbar)
+            case Keys.Space | Keys.Control: return viewHost.ToggleLayout;                  // ein-/zweiseitiges Layout
+            case Keys.Z | Keys.Control when undoAction != null: return UndoLastChange;
+            case Keys.I | Keys.Control: return ShowProperties;
+            case Keys.Oemcomma | Keys.Control: return () => OpenSettings(SettingsForm.TabGeneral); // Strg+, wie in vielen Editoren
+            case Keys.Enter | Keys.Alt when currentFile != null: return () => { if (currentFile != null) { ShellUtil.ShowFileProperties(currentFile.FullName); } }; // Windows-Dateieigenschaften, wie im Explorer
+            case Keys.C | Keys.Control | Keys.Shift when currentFile != null: return CopyPathToClipboard; // wie im Windows-11-Explorer
+            case Keys.E | Keys.Control: return EmailCurrent;
+            case Keys.D | Keys.Control when settings.ShowFavorites: return ToggleFavorite; // Datei als Favorit merken / wieder austragen
+            case Keys.Right | Keys.Control | Keys.Shift: return () => StepFile(1);         // Strg+Pfeile ohne Umschalt gehören dem Viewer (Zoom & Co.)
+            case Keys.Left | Keys.Control | Keys.Shift: return () => StepFile(-1);
+            case Keys.F1: return () => TaskDlg.ShowShortcutsPdf(Handle);
+            case Keys.F11: return () => SetFullScreen(!isFullScreen);
+            case Keys.Escape | Keys.Shift when settings.CloseOnEscape: return Close;      // Shift+Esc beendet sofort (wie in NetRadio)
+            case Keys.Escape when isFullScreen: return () => SetFullScreen(false);
+            case Keys.Escape when settings.CloseOnEscape: return ResolveEscapeToClose();
         }
         if ((keyData & (Keys.Control | Keys.Alt | Keys.Shift)) == Keys.Control)
         {
             var key = keyData & Keys.KeyCode;
-            if (key is >= Keys.D1 and <= Keys.D9) { LaunchProgramByIndex(key - Keys.D1); return true; }             // Strg+1 … Strg+9: externe Programme
-            if (key is >= Keys.NumPad1 and <= Keys.NumPad9) { LaunchProgramByIndex(key - Keys.NumPad1); return true; } // dasselbe über den Ziffernblock
+            if (key is >= Keys.D1 and <= Keys.D9) { return () => LaunchProgramByIndex(key - Keys.D1); }             // Strg+1 … Strg+9: externe Programme
+            if (key is >= Keys.NumPad1 and <= Keys.NumPad9) { return () => LaunchProgramByIndex(key - Keys.NumPad1); } // dasselbe über den Ziffernblock
         }
-        return false;
+        return null;
     }
 
     /// <summary>Kopiert den vollständigen Pfad der angezeigten Datei in die Zwischenablage (Strg+Umschalt+C, wie im Explorer).</summary>
@@ -2029,18 +2029,19 @@ public partial class MainForm : Form
 
     /// <summary>Beenden erst beim zweiten Esc kurz hintereinander: Das erste Esc wird nicht verschluckt und
     /// schließt so einen eventuell offenen Viewer-Dialog (Suchleiste, Seitenansicht, Drucken) — deren Zustand
-    /// ist über die WebView2-API nicht abfragbar. Shift+Esc beendet sofort (s. HandleShortcut).</summary>
-    private bool HandleEscapeToClose()
+    /// ist über die WebView2-API nicht abfragbar. Shift+Esc beendet sofort (s. ResolveShortcut).</summary>
+    private Action? ResolveEscapeToClose()
     {
         var now = DateTime.UtcNow;
-        if ((now - lastEscape).TotalMilliseconds <= 1500) { BeginInvoke(Close); return true; } // nach dem Callback (FormClosing liest die Seite per UIA)
+        if ((now - lastEscape).TotalMilliseconds <= 1500) { return Close; }
         lastEscape = now;
-        return false; // das erste Esc geht an den Viewer
+        return null; // das erste Esc geht an den Viewer
     }
 
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
-        return HandleShortcut(keyData) || base.ProcessCmdKey(ref msg, keyData);
+        if (ResolveShortcut(keyData) is { } action) { action(); return true; } // außerhalb des Viewers läuft kein Chromium-Callback – sofort ausführen
+        return base.ProcessCmdKey(ref msg, keyData);
     }
 
     // Der Zustand der Viewer-Dialoge (Suchleiste, Seitenansicht, Drucken …) ist über die WebView2-API nicht
@@ -2059,7 +2060,7 @@ public partial class MainForm : Form
             viewHost.RequestZoomUpdate(); // Tastaturzoom: der Viewer meldet ihn nicht selbst – die Taste läuft weiter an ihn durch
             return;
         }
-        if (HandleShortcut(e.KeyData)) { e.Handled = true; }
+        if (ResolveShortcut(e.KeyData) is { } action) { e.Handled = true; BeginInvoke(action); } // erst nach dem Callback (s. ResolveShortcut)
     }
 
     private void ViewHost_ZoomChanged(object? sender, int percent)

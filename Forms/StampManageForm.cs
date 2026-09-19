@@ -19,11 +19,6 @@ public partial class StampManageForm : Form
         Lng.Apply(this);
         TextBoxMargins.Apply(this);
         stamps = [.. source.Select(s => s.Clone())];
-        textBoxText.MaxLength = Stamp.MaxTextLength;
-        textBoxInitials.MaxLength = Stamp.MaxInitialsLength;
-        numOpacity.Minimum = Stamp.MinOpacity;
-        numSize.Minimum = (decimal)Stamp.MinFontSize;
-        numSize.Maximum = (decimal)Stamp.MaxFontSize;
         comboColor.Items.AddRange([.. ColorPalette.StampColors.Select(c => (object)Lng.T(c.Name))]);
         comboBackground.Items.AddRange([.. ColorPalette.StampBackgrounds.Select(b => (object)Lng.T(b.Name))]);
         comboPosition.Items.AddRange([.. Stamp.PositionNames.Select(p => (object)Lng.T(p))]);

@@ -101,6 +101,7 @@
             // textBoxText
             // 
             textBoxText.Location = new Point(435, 12);
+            textBoxText.MaxLength = 20;
             textBoxText.Name = "textBoxText";
             textBoxText.Size = new Size(155, 23);
             textBoxText.TabIndex = 4;

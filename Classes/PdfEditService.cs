@@ -113,17 +113,18 @@ internal static partial class PdfEditService
 
         void Prune(PdfOutlineCollection outlines)
         {
-            for (var i = outlines.Count - 1; i >= 0; i--)
+            var i = 0;
+            while (i < outlines.Count)
             {
                 var outline = outlines[i];
-                Prune(outline.Outlines);
-                var target = DestinationPageId(document, outline);
-                if (target is { } id && removedPages.Contains(id))
+                Prune(outline.Outlines); // Unterpunkte zuerst – die hochgezogenen sind damit schon geprüft
+                if (DestinationPageId(document, outline) is { } id && removedPages.Contains(id))
                 {
                     var children = outline.Outlines.ToList();
                     outlines.RemoveAt(i);
-                    foreach (var child in children) { outline.Outlines.Remove(child); outlines.Insert(i++, child); }
+                    foreach (var child in children) { outline.Outlines.Remove(child); outlines.Insert(i++, child); } // i steht danach hinter den Kindern
                 }
+                else { i++; }
             }
         }
     }
@@ -379,6 +380,7 @@ internal static partial class PdfEditService
     /// <summary>Sucht auf der Seite einen PDFlight-Stempel, der den Platz des neuen Stempels überlappt (gleiche feste Position);
     /// null, wenn dort keiner liegt. Liefert Index, Objektnummer und Text für die Rückfrage vor dem Einfügen.</summary>
     public const int StackLimit = 3;                    // Stempel je Position: der erste plus zwei gestapelte
+    private const double PageMarginPt = 10 * 72 / 25.4; // Abstand vom Seitenrand für Stempel und eingefügte Bilder (10 mm)
     private const double StackGap = 3 * 72 / 25.4;      // Abstand zwischen gestapelten Stempeln (3 mm)
 
     /// <summary>Ein vorhandener PDFlight-Stempel am Platz des neuen (Index, Objektnummer, Text, Datumszeile, Oberkante).</summary>
@@ -415,8 +417,7 @@ internal static partial class PdfEditService
             var top = above ? anchor.Top + StackGap + planned.Height : (slot == 0 ? hit.Rect.Y : own.First(o => o.Index == anchor.Index).Rect.Y) - StackGap;
             probe = new XRect(planned.X, top - planned.Height, planned.Width, planned.Height);
         }
-        const double margin = 10 * 72 / 25.4;
-        var fits = probe.Y >= margin && probe.Y + probe.Height <= pdfPage.Height.Point - margin;
+        var fits = probe.Y >= PageMarginPt && probe.Y + probe.Height <= pdfPage.Height.Point - PageMarginPt;
         return (stack, stack.Count < StackLimit && fits ? probe.Y + probe.Height : null);
     }
 
@@ -424,16 +425,15 @@ internal static partial class PdfEditService
     private static XRect StampRect(PdfPage pdfPage, Stamp stamp, string dateLine, double? topOverride = null)
     {
         var (width, height, _, _) = MeasureStamp(stamp.Text, stamp.FontSize, dateLine);
-        const double margin = 10 * 72 / 25.4;
         var pageWidth = pdfPage.Width.Point;
         var pageHeight = pdfPage.Height.Point;
         var left = stamp.Position switch
         {
-            StampPosition.TopLeft => margin,
-            StampPosition.TopRight => pageWidth - margin - width,
+            StampPosition.TopLeft => PageMarginPt,
+            StampPosition.TopRight => pageWidth - PageMarginPt - width,
             _ => (pageWidth - width) / 2,
         };
-        var top = topOverride ?? (stamp.Position == StampPosition.Center ? (pageHeight + height) / 2 : pageHeight - margin);
+        var top = topOverride ?? (stamp.Position == StampPosition.Center ? (pageHeight + height) / 2 : pageHeight - PageMarginPt);
         return new XRect(left, top - height, width, height);
     }
 
@@ -462,16 +462,8 @@ internal static partial class PdfEditService
         var rect = StampRect(pdfPage, stamp, dateLine, top);
 
         var fonts = new PdfDictionary(document);
-        foreach (var (key, baseFont) in new[] { ("/HeBo", "/Helvetica-Bold"), ("/Helv", "/Helvetica") })
-        {
-            var font = new PdfDictionary(document);
-            font.Elements.SetName("/Type", "/Font");
-            font.Elements.SetName("/Subtype", "/Type1");
-            font.Elements.SetName("/BaseFont", baseFont);
-            font.Elements.SetName("/Encoding", "/WinAnsiEncoding");
-            document.Internals.AddObject(font);
-            fonts.Elements.SetReference(key, font);
-        }
+        fonts.Elements.SetReference("/HeBo", StandardFont(document, "/Helvetica-Bold"));
+        fonts.Elements.SetReference("/Helv", StandardFont(document, "/Helvetica"));
         var resources = new PdfDictionary(document);
         resources.Elements.SetObject("/Font", fonts);
         var graphicsState = new PdfDictionary(document); // Deckkraft für Füllung, Rahmen und Text (Extended Graphics State)
@@ -548,6 +540,18 @@ internal static partial class PdfEditService
 
     private static string Escape(string text) => text.Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)");
 
+    /// <summary>Eine der 14 Standardschriften (nichts einzubetten) mit WinAnsi-Kodierung, als eigenes Objekt im Dokument.</summary>
+    private static PdfDictionary StandardFont(PdfDocument document, string baseFont)
+    {
+        var font = new PdfDictionary(document);
+        font.Elements.SetName("/Type", "/Font");
+        font.Elements.SetName("/Subtype", "/Type1");
+        font.Elements.SetName("/BaseFont", baseFont);
+        font.Elements.SetName("/Encoding", "/WinAnsiEncoding");
+        document.Internals.AddObject(font);
+        return font;
+    }
+
     /// <summary>Pfad eines Rechtecks für den Inhaltsstrom, mit Radius als abgerundetes Rechteck aus vier Bézier-Bögen.</summary>
     private static string RectanglePath(double x, double y, double w, double h, double radius)
     {
@@ -570,14 +574,8 @@ internal static partial class PdfEditService
         var left = leftMm * 72 / 25.4;
         var top = pdfPage.Height.Point - topMm * 72 / 25.4;
 
-        var font = new PdfDictionary(document);
-        font.Elements.SetName("/Type", "/Font");
-        font.Elements.SetName("/Subtype", "/Type1");
-        font.Elements.SetName("/BaseFont", "/Helvetica");
-        font.Elements.SetName("/Encoding", "/WinAnsiEncoding");
-        document.Internals.AddObject(font);
         var fonts = new PdfDictionary(document);
-        fonts.Elements.SetReference("/Helv", font);
+        fonts.Elements.SetReference("/Helv", StandardFont(document, "/Helvetica"));
         var resources = new PdfDictionary(document);
         resources.Elements.SetObject("/Font", fonts);
 
@@ -595,7 +593,7 @@ internal static partial class PdfEditService
         content.Append(CultureInfo.InvariantCulture, $"BT /Helv {fontSize:0.##} Tf {textColor.R / 255.0:0.###} {textColor.G / 255.0:0.###} {textColor.B / 255.0:0.###} rg {leading:0.##} TL {Padding:0.##} {height - Padding - fontSize * 0.8:0.##} Td ");
         foreach (var line in lines)
         {
-            content.Append('(').Append(line.Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)")).Append(") Tj T* ");
+            content.Append('(').Append(Escape(line)).Append(") Tj T* ");
         }
         content.Append("ET");
         var appearance = new PdfDictionary(document);
@@ -850,10 +848,9 @@ internal static partial class PdfEditService
         newPage.Rotate = 0;
         if (imagePath != null)
         {
-            using var image = XImage.FromFile(imagePath);
+            using var image = LoadImage(imagePath);
             using var gfx = XGraphics.FromPdfPage(newPage);
-            const double margin = 10 * 72 / 25.4;
-            var box = new XRect(margin, margin, newPage.Width.Point - 2 * margin, newPage.Height.Point - 2 * margin);
+                var box = new XRect(PageMarginPt, PageMarginPt, newPage.Width.Point - 2 * PageMarginPt, newPage.Height.Point - 2 * PageMarginPt);
             var scale = Math.Min(box.Width / image.PointWidth, box.Height / image.PointHeight);
             var width = image.PointWidth * scale;
             var height = image.PointHeight * scale;
@@ -861,6 +858,17 @@ internal static partial class PdfEditService
         }
         document.Save(path);
         return after ? page + 1 : page;
+    }
+
+    /// <summary>Bild für eine neue Seite laden. GDI+ meldet unlesbare oder unbekannte Bilddaten als OutOfMemoryException – die
+    /// wird hier zu einer normalen Fehlermeldung, sonst käme sie ungefangen bis zum Absturz durch.</summary>
+    private static XImage LoadImage(string path)
+    {
+        try { return XImage.FromFile(path); }
+        catch (Exception ex) when (ex is OutOfMemoryException or System.Runtime.InteropServices.ExternalException)
+        {
+            throw new InvalidOperationException(Lng.T("Die Bilddatei konnte nicht gelesen werden.") + " " + path, ex);
+        }
     }
 
     /// <summary>Verschiebt eine Seite an eine andere Position (beide 1-basiert); die übrigen Seiten rücken auf.</summary>

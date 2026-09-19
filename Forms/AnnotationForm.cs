@@ -56,12 +56,9 @@ public partial class AnnotationForm : Form
     /// fremde Farbe außerhalb der Auswahl fällt auf den ersten Eintrag zurück.</summary>
     internal void SetStyle(AnnotationStyle style)
     {
-        var borderIndex = Array.FindIndex(Borders, b => b.Color?.ToArgb() == style.BorderColor?.ToArgb());
-        comboBorder.SelectedIndex = borderIndex >= 0 ? borderIndex : 0;
-        var index = Array.FindIndex(Backgrounds, bg => bg.Color?.ToArgb() == style.Background?.ToArgb());
-        comboBackground.SelectedIndex = index >= 0 ? index : 0;
-        var textIndex = Array.FindIndex(TextColors, tc => tc.Color.ToArgb() == style.TextColor.ToArgb());
-        comboTextColor.SelectedIndex = textIndex >= 0 ? textIndex : 0;
+        comboBorder.SelectedIndex = ColorPalette.IndexOf(Borders, style.BorderColor);
+        comboBackground.SelectedIndex = ColorPalette.IndexOf(Backgrounds, style.Background);
+        comboTextColor.SelectedIndex = ColorPalette.IndexOf(TextColors, style.TextColor);
     }
 
     /// <summary>Bearbeiten einer vorhandenen Anmerkung: Werte vorbelegen und den Titel anpassen.</summary>
