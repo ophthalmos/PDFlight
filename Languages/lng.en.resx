@@ -596,7 +596,8 @@ Clicking into the preview sets the position.</value></data>
   <data name="Eine Seite mit dem Bild wurde als Seite {0} eingefügt." xml:space="preserve"><value>A page with the image was inserted as page {0}.</value></data>
   <data name="Lesezeichen entfernen …" xml:space="preserve"><value>Remove bookmarks…</value></data>
   <data name="Alle {0} Lesezeichen entfernen?" xml:space="preserve"><value>Remove all {0} bookmarks?</value></data>
-  <data name="Die Seiten bleiben erhalten, nur die Gliederung in der Seitenleiste verschwindet. Strg+Z macht es rückgängig." xml:space="preserve"><value>The pages stay; only the outline in the side pane disappears. Ctrl+Z undoes it.</value></data>
+  <data name="Lesezeichen bilden ein interaktives Inhaltsverzeichnis, das eine schnelle Navigation zu bestimmten Kapiteln, Überschriften oder Abschnitten ermöglicht." xml:space="preserve"><value>Bookmarks form an interactive table of contents that lets you jump quickly to specific chapters, headings or sections.</value></data>
+  <data name="Klicke auf das Inhaltsverzeichnis-Symbol in der PDF-Werkzeugleiste oder drücke Strg+Umschalt+I, um sie in der Seitenleiste anzuzeigen." xml:space="preserve"><value>Click the table-of-contents icon in the PDF toolbar or press Ctrl+Shift+I to show them in the side pane.</value></data>
   <data name="Lesezeichen entfernen" xml:space="preserve"><value>Removing bookmarks</value></data>
   <data name="Die Lesezeichen wurden entfernt." xml:space="preserve"><value>The bookmarks were removed.</value></data>
   <data name="„{0}“ ersetzen" xml:space="preserve"><value>Replace &quot;{0}&quot;</value></data>
