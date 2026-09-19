@@ -64,9 +64,17 @@ internal static partial class PdfEditService
             using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
             var v = document.Version;
             var first = document.PageCount > 0 ? document.Pages[0] : null;
-            return new PdfStatus(document.PageCount, $"{v / 10}.{v % 10}", GetPdfALevel(document), first?.Width.Point ?? 0, first?.Height.Point ?? 0, CountAnnotations(document), CountOutlines(document));
+            return new PdfStatus(document.PageCount, $"{v / 10}.{v % 10}", GetPdfALevel(document), first?.Width.Point ?? 0, first?.Height.Point ?? 0, Guarded(() => CountAnnotations(document)), Guarded(() => CountOutlines(document)));
         }
         catch (Exception ex) when (IsPdfReadError(ex)) { return new PdfStatus(-1, null, null); }
+    }
+
+    /// <summary>Ein Zähler für die Statuszeile; bei einem Lesefehler in dem Teil 0 statt Abbruch – die Seitenzahl und damit die
+    /// Bearbeitung bleiben verfügbar (ein Canva-Export mit ungültigem /Annots-Eintrag ließ sonst die ganze Datei als unlesbar gelten, 19.09.2026).</summary>
+    private static int Guarded(Func<int> count)
+    {
+        try { return count(); }
+        catch (Exception ex) when (IsPdfReadError(ex)) { return 0; }
     }
 
     /// <summary>Liest die deklarierte PDF/A-Stufe (z.B. "2b") aus den XMP-Metadaten des Dokuments;
@@ -211,7 +219,7 @@ internal static partial class PdfEditService
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         var annotations = document.Pages[page - 1].Annotations;
         index = ResolveIndex(annotations, objectNumber, index);
-        var removed = annotations[index]; // VOR dem Entfernen greifen – danach zeigt der Index ins Leere (IDE-Umformungen haben das schon einmal vertauscht)
+        var removed = AnnotationAt(annotations, index); // VOR dem Entfernen greifen – danach zeigt der Index ins Leere (IDE-Umformungen haben das schon einmal vertauscht)
         annotations.Elements.RemoveAt(index);
         if (removed.Elements["/Popup"] is PdfReference popup)
         {
@@ -233,9 +241,8 @@ internal static partial class PdfEditService
         {
             var annotations = document.Pages[p].Annotations;
             List<PdfObjectID> popups = [];
-            for (var i = annotations.Count - 1; i >= 0; i--)
+            foreach (var (i, annotation) in AnnotationDictionaries(annotations).Reverse())
             {
-                var annotation = annotations[i];
                 if (!IsManageable(annotation.Elements.GetName("/Subtype").TrimStart('/'))) { continue; }
                 if (annotation.Elements["/Popup"] is PdfReference popup) { popups.Add(popup.ObjectID); }
                 annotations.Elements.RemoveAt(i);
@@ -251,6 +258,26 @@ internal static partial class PdfEditService
     }
 
     private static bool IsManageable(string subtype) => subtype is not ("Link" or "Popup" or "Widget");
+
+    /// <summary>Die Wörterbücher im /Annots-Array einer Seite mit ihrem Index – direkt aus den Elementen, denn PDFsharps
+    /// Indexer baut daraus PdfAnnotation-Objekte und stürzt über Einträge, die kein Wörterbuch sind (null-Objekt, Zahl, kaputte
+    /// Referenz – gesehen in einem Canva-Export). Solche Einträge werden übersprungen.</summary>
+    private static IEnumerable<(int Index, PdfDictionary Dictionary)> AnnotationDictionaries(PdfAnnotations annotations)
+    {
+        for (var i = 0; i < annotations.Elements.Count; i++)
+        {
+            var item = annotations.Elements[i];
+            var dictionary = item is PdfReference reference ? reference.Value as PdfDictionary : item as PdfDictionary;
+            if (dictionary != null) { yield return (i, dictionary); }
+        }
+    }
+
+    private static PdfDictionary AnnotationAt(PdfAnnotations annotations, int index)
+    {
+        var item = annotations.Elements[index];
+        return (item is PdfReference reference ? reference.Value as PdfDictionary : item as PdfDictionary)
+            ?? throw new InvalidOperationException("Die Anmerkung wurde in der Datei nicht mehr gefunden.");
+    }
 
     /// <summary>Zahl der Lesezeichen (Gliederung) samt Unterebenen – schaltet „Lesezeichen entfernen“ frei.</summary>
     private static int CountOutlines(PdfDocument document)
@@ -276,10 +303,9 @@ internal static partial class PdfEditService
         var count = 0;
         for (var p = 0; p < document.PageCount; p++)
         {
-            var annotations = document.Pages[p].Annotations;
-            for (var i = 0; i < annotations.Count; i++)
+            foreach (var (_, annotation) in AnnotationDictionaries(document.Pages[p].Annotations))
             {
-                if (IsManageable(annotations[i].Elements.GetName("/Subtype").TrimStart('/'))) { count++; }
+                if (IsManageable(annotation.Elements.GetName("/Subtype").TrimStart('/'))) { count++; }
             }
         }
         return count;
@@ -310,9 +336,8 @@ internal static partial class PdfEditService
         {
             var page = document.Pages[p];
             var annotations = page.Annotations;
-            for (var i = 0; i < annotations.Count; i++)
+            foreach (var (i, a) in AnnotationDictionaries(annotations))
             {
-                var a = annotations[i];
                 var subtype = a.Elements.GetName("/Subtype").TrimStart('/');
                 if (!IsManageable(subtype)) { continue; }
                 var rect = a.Elements.GetRectangle("/Rect");
@@ -328,7 +353,7 @@ internal static partial class PdfEditService
 
     /// <summary>Gestaltung aus /C (Hintergrund: drei Komponenten = RGB, leeres Array = transparent, sonst Standard), /BS /W (0 = kein Rahmen)
     /// und der Rahmenfarbe aus dem eigenen Darstellungsstrom („r g b RG“ – die Anmerkung selbst kennt keine Rahmenfarbe).</summary>
-    private static AnnotationStyle ReadStyle(PdfAnnotation annotation)
+    private static AnnotationStyle ReadStyle(PdfDictionary annotation)
     {
         var background = AnnotationStyle.Default.Background;
         if (annotation.Elements.GetArray("/C") is { } c)
@@ -396,9 +421,8 @@ internal static partial class PdfEditService
         var planned = StampRect(pdfPage, stamp, stamp.SecondLine(DateTime.Now));
         var annotations = pdfPage.Annotations;
         List<(int Index, int ObjectNumber, string Contents, XRect Rect)> own = [];
-        for (var i = 0; i < annotations.Count; i++)
+        foreach (var (i, a) in AnnotationDictionaries(annotations))
         {
-            var a = annotations[i];
             if (a.Elements.GetName("/Subtype") != "/Stamp" || a.Elements.GetName("/Name") != "/PDFlightStamp") { continue; }
             var r = a.Elements.GetRectangle("/Rect");
             var objectNumber = annotations.Elements[i] is PdfReference reference ? reference.ObjectNumber : 0;
@@ -444,7 +468,7 @@ internal static partial class PdfEditService
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         var pdfPage = document.Pages[page - 1];
         index = ResolveIndex(pdfPage.Annotations, objectNumber, index);
-        var old = pdfPage.Annotations[index];
+        var old = AnnotationAt(pdfPage.Annotations, index);
         var oldLines = SplitLines(old.Elements.GetString("/Contents"));
         var oldRect = old.Elements.GetRectangle("/Rect");
         var oldTop = Math.Max(oldRect.Y1, oldRect.Y2); // der neue Stempel bleibt an seinem Platz im Stapel
