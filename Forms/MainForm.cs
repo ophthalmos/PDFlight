@@ -1495,7 +1495,7 @@ public partial class MainForm : Form
                 choices.Add((above ? Lng.T("Darüber setzen") : Lng.T("Darunter setzen"), Lng.T("Die vorhandenen Stempel bleiben.")));
             }
             var heading = stack.Count == 1 ? string.Format(Lng.T("An dieser Stelle steht schon der Stempel „{0}“."), stack[0].Text) : string.Format(Lng.T("An dieser Stelle stehen schon {0} Stempel."), stack.Count);
-            var choice = TaskDlg.ChoiceTaskDlg(Handle, heading, freeTop == null && stack.Count >= PdfEditService.StackLimit ? Lng.T("Mehr als drei Stempel je Position gibt es nicht.") : null, choices, TaskDialogIcon.Information);
+            var choice = TaskDlg.ChoiceTaskDlg(Handle, heading, freeTop == null && stack.Count >= PdfEditService.StackLimit ? Lng.T("Mehr als drei Stempel je Position gibt es nicht.") : null, choices, TaskDialogIcon.None);
             if (choice < 0) { return; }
             if (choice < stack.Count) { (replaceIndex, replaceObjectNumber, top) = (stack[choice].Index, stack[choice].ObjectNumber, stack[choice].Top); }
             else { top = freeTop; }
@@ -1557,7 +1557,8 @@ public partial class MainForm : Form
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
         var count = currentPdfStatus?.OutlineCount ?? 0;
         if (!TaskDlg.ConfirmTaskDlg(Handle, string.Format(Lng.T("Alle {0} Lesezeichen entfernen?"), count),
-            Lng.T("Die Seiten bleiben erhalten, nur die Gliederung in der Seitenleiste verschwindet. Strg+Z macht es rückgängig."), TaskDialogIcon.Warning, defaultNo: true)) { return; }
+            Lng.T("Lesezeichen bilden ein interaktives Inhaltsverzeichnis, das eine schnelle Navigation zu bestimmten Kapiteln, Überschriften oder Abschnitten ermöglicht.") + Environment.NewLine + Environment.NewLine // zwei Absätze; resx-Schlüssel dürfen keinen Zeilenumbruch enthalten
+            + Lng.T("Klicke auf das Inhaltsverzeichnis-Symbol in der PDF-Werkzeugleiste oder drücke Strg+Umschalt+I, um sie in der Seitenleiste anzuzeigen."), TaskDialogIcon.ShieldWarningYellowBar, defaultNo: true)) { return; }
         var page = Math.Max(1, ClampedCurrentPage());
         if (RunPdfEdit(() => PdfEditService.RemoveOutlines(currentFile.FullName), Lng.T("Lesezeichen entfernen")))
         {

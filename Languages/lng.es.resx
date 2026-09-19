@@ -596,7 +596,8 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="Eine Seite mit dem Bild wurde als Seite {0} eingefügt." xml:space="preserve"><value>Se insertó una página con la imagen como página {0}.</value></data>
   <data name="Lesezeichen entfernen …" xml:space="preserve"><value>Eliminar marcadores…</value></data>
   <data name="Alle {0} Lesezeichen entfernen?" xml:space="preserve"><value>¿Eliminar los {0} marcadores?</value></data>
-  <data name="Die Seiten bleiben erhalten, nur die Gliederung in der Seitenleiste verschwindet. Strg+Z macht es rückgängig." xml:space="preserve"><value>Las páginas se conservan; solo desaparece el esquema del panel lateral. Ctrl+Z lo deshace.</value></data>
+  <data name="Lesezeichen bilden ein interaktives Inhaltsverzeichnis, das eine schnelle Navigation zu bestimmten Kapiteln, Überschriften oder Abschnitten ermöglicht." xml:space="preserve"><value>Los marcadores forman un índice interactivo que permite saltar rápidamente a capítulos, títulos o secciones concretos.</value></data>
+  <data name="Klicke auf das Inhaltsverzeichnis-Symbol in der PDF-Werkzeugleiste oder drücke Strg+Umschalt+I, um sie in der Seitenleiste anzuzeigen." xml:space="preserve"><value>Haz clic en el icono de índice de la barra de herramientas del PDF o pulsa Ctrl+Mayús+I para mostrarlos en el panel lateral.</value></data>
   <data name="Lesezeichen entfernen" xml:space="preserve"><value>Eliminación de marcadores</value></data>
   <data name="Die Lesezeichen wurden entfernt." xml:space="preserve"><value>Los marcadores se han eliminado.</value></data>
   <data name="„{0}“ ersetzen" xml:space="preserve"><value>Reemplazar «{0}»</value></data>
