@@ -129,6 +129,7 @@ public partial class MainForm : Form
         viewHost.ReleaseZoomHook();
         SetFullScreen(false); // sonst würden randlose Vollbild-Maße gespeichert
         settings.ReloadSharedLists(); // Listenänderungen anderer Instanzen nicht überschreiben
+        RememberCurrentPage();
         settings.LastFile = currentFile?.FullName ?? string.Empty;
         var bounds = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
         settings.WindowX = bounds.X;
@@ -343,6 +344,8 @@ public partial class MainForm : Form
     private void LoadPdf(string path, int page = 0, bool addToRecent = false)
     {
         if (addToRecent) { previousFolder = null; } // bewusstes Öffnen beendet den Verschieben-Kontext fürs Blättern
+        if (RememberCurrentPage()) { settings.Save(); } // die Seite der bisherigen Datei merken, bevor sie ersetzt wird
+        var rememberedPage = page <= 0 && settings.RememberLastPage ? settings.GetLastPage(path) : 0; // kommt erst nach dem Laden dran (s. GoToPageIfUntouchedAsync)
         viewerDialogOpen = false; // das Neuladen des Dokuments schließt auch offene Viewer-Dialoge
         try { viewHost.Load(path, page); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -350,6 +353,7 @@ public partial class MainForm : Form
             TaskDlg.ErrTaskDlg(Handle, Lng.T("Die Datei konnte nicht geladen werden."), ex);
             return;
         }
+        if (rememberedPage > 1) { _ = viewHost.GoToPageIfUntouchedAsync(rememberedPage); } // läuft im Hintergrund weiter; Fehler sind dort abgefangen
         currentFile = new FileInfo(path);
         loadedWriteTimeUtc = currentFile.LastWriteTimeUtc;
         currentPdfStatus = PdfEditService.TryReadStatus(path);
@@ -367,6 +371,18 @@ public partial class MainForm : Form
         UpdateUiState();
     }
 
+    /// <summary>Die angezeigte Seite der aktuellen Datei ins Wörterbuch schreiben (Option); true, wenn etwas zu speichern ist.
+    /// Nutzt die UIA-Seitenabfrage – Aufrufer aus dem Chromium-Tastatur-Callback müssen per BeginInvoke kommen.</summary>
+    private bool RememberCurrentPage()
+    {
+        if (!settings.RememberLastPage || currentFile == null || currentPageCount <= 1) { return false; }
+        var page = ClampedCurrentPage();
+        if (page <= 0) { return false; }
+        settings.ReloadSharedLists();
+        settings.SetLastPage(currentFile.FullName, page);
+        return true;
+    }
+
     private void UpdateUiState()
     {
         var hasFile = currentFile != null;
@@ -378,8 +394,10 @@ public partial class MainForm : Form
         pnlPdfA.Visible = hasFile && PdfALocked;
         mnuDeletePages.Enabled = mnuRotatePages.Enabled = mnuAppendPdf.Enabled = mnuDuplex.Enabled = mnuAddAnnotation.Enabled = !PdfALocked;
         mnuMovePage.Enabled = !PdfALocked && currentPageCount > 1; // mit einer Seite gibt es nichts zu verschieben
+        mnuInsertPage.Enabled = !PdfALocked;
         mnuAddStamp.Enabled = !PdfALocked;
         mnuManageAnnotations.Enabled = !PdfALocked && (currentPdfStatus?.AnnotationCount ?? 0) > 0; // ohne Anmerkungen gibt es nichts zu verwalten
+        mnuRemoveBookmarks.Enabled = !PdfALocked && (currentPdfStatus?.OutlineCount ?? 0) > 0;
         mnuSetPassword.Enabled = currentPageCount > 0 && !PdfALocked;  // nur ohne bestehenden Kennwortschutz
         mnuRemovePassword.Enabled = hasFile && currentPageCount <= 0;  // nur bei geschützter (oder unlesbarer) Datei
         foreach (var button in programIconButtons) { button.Enabled = hasFile; }
@@ -590,7 +608,7 @@ public partial class MainForm : Form
         // Die Zieldatei steht schon in einem anderen Fenster — nachfragen statt sie doppelt anzuzeigen
         var alternative = FindFreeFile(files, next, step, currentFile.FullName);
         var choice = TaskDlg.OpenConflictTaskDlg(Handle, step > 0 ? Lng.T("Die nächste Datei ist bereits geöffnet") : Lng.T("Die vorherige Datei ist bereits geöffnet"),
-            files[next], Lng.T("Dieses Fenster zeigt weiter die aktuelle Datei."), Lng.T("Datei überspringen"), alternative, restorePath: null, offerExit: false);
+            files[next], Lng.T("Anderes Fenster aktivieren"), Lng.T("Dieses Fenster zeigt weiter die aktuelle Datei."), Lng.T("Datei überspringen"), alternative);
         if (choice == TaskDlg.ConflictChoice.Activate && !InstanceRegistry.Activate(pid.Value)) { LoadPdf(files[next]); } // das andere Fenster ist inzwischen weg → hier anzeigen
         else if (choice == TaskDlg.ConflictChoice.Alternative) { LoadPdf(alternative!); } // Alternative wird nur mit Pfad angeboten
     }
@@ -605,21 +623,16 @@ public partial class MainForm : Form
         var next = files[nextIndex];
         var pid = InstanceRegistry.FindInstanceShowing(next);
         if (pid == null) { LoadPdf(next); return; }
-        var alternative = FindFreeFile(files, nextIndex, 1, null);
-        var restorePath = undoAction?.Kind == UndoKind.Delete ? undoAction.TargetFile : null; // Wiederherstellen nur mit Papierkorb-Eintrag
         currentFile = null; // sonst meldet MainForm_Activated nach dem Dialog die gelöschte Datei als extern verschwunden
-        switch (TaskDlg.OpenConflictTaskDlg(Handle, Lng.T("Die nächste Datei ist bereits geöffnet"), next, Lng.T("Dieses Fenster bleibt leer."),
-            Lng.T("Nächste freie Datei anzeigen"), alternative, restorePath, offerExit: true))
+        // bewusst nur zwei Wege (19.09.2026): zum anderen Fenster wechseln und dieses schließen – oder abbrechen (leeres Fenster, Strg+Z holt die Datei zurück)
+        var choice = TaskDlg.OpenConflictTaskDlg(Handle, Lng.T("Die nächste Datei ist bereits geöffnet"), next,
+            string.Format(Lng.T("{0} aktivieren"), Path.GetFileName(next)), Lng.T("Dieses Fenster wird geschlossen."));
+        if (choice == TaskDlg.ConflictChoice.Activate)
         {
-            case TaskDlg.ConflictChoice.Activate:
-                if (InstanceRegistry.Activate(pid.Value)) { ClearDisplay(Lng.T("Die Datei wurde in den Papierkorb verschoben.")); }
-                else { LoadPdf(next); } // das andere Fenster ist inzwischen weg → hier anzeigen
-                break;
-            case TaskDlg.ConflictChoice.Alternative: LoadPdf(alternative!); break; // Alternative wird nur mit Pfad angeboten
-            case TaskDlg.ConflictChoice.Undo: UndoLastChange(); break;
-            case TaskDlg.ConflictChoice.Exit: Close(); break;
-            default: ClearDisplay(Lng.T("Die Datei wurde in den Papierkorb verschoben.")); break; // Abbruch: leer, Strg+Z holt die Datei zurück
+            if (InstanceRegistry.Activate(pid.Value)) { Close(); }
+            else { LoadPdf(next); } // das andere Fenster ist inzwischen weg → hier anzeigen
         }
+        else { ClearDisplay(Lng.T("Die Datei wurde in den Papierkorb verschoben.")); }
     }
 
     /// <summary>Anzeige leeren (kein Dateibezug mehr) und den Grund in der Statusleiste nennen.</summary>
@@ -652,7 +665,7 @@ public partial class MainForm : Form
         Cursor.Current = Cursors.WaitCursor;
         settings.ReloadSharedLists(); // Ziel-/Zuletzt-Listen anderer Instanzen übernehmen
         var startFolder = settings.TargetFolders.FirstOrDefault(f => !string.IsNullOrEmpty(f) && Directory.Exists(f)) ?? string.Empty;
-        var jumpToLastUsed = settings.JumpToLastUsed && settings.RecentFolders.Count > 0
+        var jumpToLastUsed = settings.RecentFolders.Count > 0 // der Dialog springt immer zum zuletzt verwendeten Ordner (Option entfallen 19.09.2026)
             && Directory.Exists(settings.RecentFolders[0]) // sonst meldet der Dialog bei jedem Öffnen einen fehlenden Pfad
             && !string.Equals(startFolder, settings.RecentFolders[0], StringComparison.OrdinalIgnoreCase);
 
@@ -726,7 +739,7 @@ public partial class MainForm : Form
                 var sourcePath = currentFile.FullName;
                 File.Move(currentFile.FullName, destination, true);
                 RememberMoveForUndo(string.Format(Lng.T("Verschieben nach „{0}“"), new DirectoryInfo(folder).Name), sourcePath, destination);
-                UpdateFavorites(sourcePath, () => settings.MoveFavorites(sourcePath, destination));
+                UpdateFilePaths(sourcePath, destination);
                 LoadPdf(destination); // die verschobene Datei bleibt angezeigt — nun vom neuen Ort (wie in PDFMover)
                 CheckForDuplicate(new FileInfo(destination));
                 previousFolder = sourceFolder; // beim nächsten Blättern die Rückkehr in den bisherigen Ordner anbieten
@@ -825,7 +838,7 @@ public partial class MainForm : Form
     /// der Zielliste; null, wenn keiner davon existiert.</summary>
     private string? OneClickFolder()
     {
-        if (settings.JumpToLastUsed && settings.RecentFolders.Count > 0 && Directory.Exists(settings.RecentFolders[0]))
+        if (settings.RecentFolders.Count > 0 && Directory.Exists(settings.RecentFolders[0]))
         {
             return settings.RecentFolders[0];
         }
@@ -926,7 +939,7 @@ public partial class MainForm : Form
         {
             settings.TargetFolders = dialog.TargetFolders;
             settings.ExternalPrograms = dialog.ExternalPrograms;
-            settings.JumpToLastUsed = dialog.JumpToLastUsed;
+            settings.RememberLastPage = dialog.RememberLastPage;
             settings.ConfirmDelete = dialog.ConfirmDelete;
             settings.OpenNextAfterDelete = dialog.OpenNextAfterDelete;
             settings.ShowProgramIcons = dialog.ShowProgramIcons;
@@ -989,11 +1002,13 @@ public partial class MainForm : Form
         mnuDeletePages.Image = MenuIcon(ToolbarIcons.Delete); // Bearbeiten-Menü (Menüsymbole bleiben 16 px)
         mnuRotatePages.Image = MenuIcon(ToolbarIcons.Rotate);
         mnuMovePage.Image = MenuIcon(ToolbarIcons.MovePage);
+        mnuInsertPage.Image = MenuIcon(ToolbarIcons.NewPage);
         mnuAppendPdf.Image = MenuIcon(ToolbarIcons.Attach);
         mnuDuplex.Image = MenuIcon(ToolbarIcons.Interleave);
         mnuExtractPages.Image = MenuIcon(ToolbarIcons.Page);
         mnuAddAnnotation.Image = MenuIcon(ToolbarIcons.Comment);
         mnuManageAnnotations.Image = MenuIcon(ToolbarIcons.Edit);
+        mnuRemoveBookmarks.Image = MenuIcon(ToolbarIcons.Bookmarks);
         mnuAddStamp.Image = MenuIcon(ToolbarIcons.Stamp);
         mnuManageStamps.Image = MenuIcon(ToolbarIcons.List);
         mnuUndo.Image = MenuIcon(ToolbarIcons.Undo);
@@ -1032,7 +1047,7 @@ public partial class MainForm : Form
             var oldPath = currentFile.FullName;
             File.Move(currentFile.FullName, newPath);
             RememberMoveForUndo(Lng.T("Umbenennen"), oldPath, newPath);
-            UpdateFavorites(oldPath, () => settings.MoveFavorites(oldPath, newPath));
+            UpdateFilePaths(oldPath, newPath);
             if (!string.Equals(dialog.NewFolder, currentFile.DirectoryName, StringComparison.OrdinalIgnoreCase))
             {
                 settings.AddRecentFolder(dialog.NewFolder); // Umbenennen mit Ordnerwechsel zählt wie ein Verschieben
@@ -1464,16 +1479,27 @@ public partial class MainForm : Form
         }
         var page = Math.Max(1, ClampedCurrentPage()); // immer die angezeigte Seite
         if (ChooseStamp(page, replace: false) is not { } stamp) { return; }
-        var (replaceIndex, replaceObjectNumber) = (-1, 0);
-        (int Index, int ObjectNumber, string Text)? existing = null;
-        try { existing = PdfEditService.FindStampAtPosition(currentFile.FullName, page, stamp); }
+        var (replaceIndex, replaceObjectNumber, top) = (-1, 0, (double?)null);
+        List<PdfEditService.StampSlot> stack = [];
+        double? freeTop = null;
+        try { (stack, freeTop) = PdfEditService.FindStampStack(currentFile.FullName, page, stamp); }
         catch (Exception ex) when (PdfEditService.IsPdfReadError(ex)) { } // dann eben ohne Rückfrage – das Einfügen selbst meldet den Fehler
-        if (existing is { } found && TaskDlg.ConfirmTaskDlg(Handle, string.Format(Lng.T("An dieser Stelle steht schon der Stempel „{0}“."), found.Text),
-            Lng.T("Soll er entfernt werden? Bei „Nein“ kommt der neue Stempel zusätzlich dazu."), TaskDialogIcon.Warning))
+        if (stack.Count > 0)
         {
-            (replaceIndex, replaceObjectNumber) = (found.Index, found.ObjectNumber);
+            // Stapel an dieser Stelle: einen vorhandenen ersetzen (wählbar) oder den neuen dazustapeln (bis drei je Position)
+            List<(string Text, string? Detail)> choices = [.. stack.Select(s => (string.Format(Lng.T("„{0}“ ersetzen"), s.Text), s.SecondLine.Length > 0 ? s.SecondLine : null))];
+            if (freeTop != null)
+            {
+                var above = stamp.Position == StampPosition.Center && stack.Count == 1;
+                choices.Add((above ? Lng.T("Darüber setzen") : Lng.T("Darunter setzen"), Lng.T("Die vorhandenen Stempel bleiben.")));
+            }
+            var heading = stack.Count == 1 ? string.Format(Lng.T("An dieser Stelle steht schon der Stempel „{0}“."), stack[0].Text) : string.Format(Lng.T("An dieser Stelle stehen schon {0} Stempel."), stack.Count);
+            var choice = TaskDlg.ChoiceTaskDlg(Handle, heading, freeTop == null && stack.Count >= PdfEditService.StackLimit ? Lng.T("Mehr als drei Stempel je Position gibt es nicht.") : null, choices, TaskDialogIcon.Information);
+            if (choice < 0) { return; }
+            if (choice < stack.Count) { (replaceIndex, replaceObjectNumber, top) = (stack[choice].Index, stack[choice].ObjectNumber, stack[choice].Top); }
+            else { top = freeTop; }
         }
-        if (RunPdfEdit(() => PdfEditService.AddStamp(currentFile.FullName, page, stamp, replaceIndex, replaceObjectNumber), Lng.T("Stempel")))
+        if (RunPdfEdit(() => PdfEditService.AddStamp(currentFile.FullName, page, stamp, replaceIndex, replaceObjectNumber, top), Lng.T("Stempel")))
         {
             LoadPdf(currentFile.FullName, page);
             statusPath.Text = string.Format(Lng.T("Der Stempel „{0}“ wurde auf Seite {1} gesetzt."), stamp.Text, page);
@@ -1520,6 +1546,38 @@ public partial class MainForm : Form
         {
             LoadPdf(file, annotation.Page);
             statusPath.Text = string.Format(Lng.T("Der Stempel auf Seite {0} wurde ersetzt."), annotation.Page);
+        }
+    }
+
+    /// <summary>Alle Lesezeichen (Gliederung) der Datei entfernen – für automatisch erzeugte, unsinnige Gliederungen (Bearbeiten-Menü).</summary>
+    private void RemoveBookmarks()
+    {
+        if (currentFile == null) { return; }
+        if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
+        var count = currentPdfStatus?.OutlineCount ?? 0;
+        if (!TaskDlg.ConfirmTaskDlg(Handle, string.Format(Lng.T("Alle {0} Lesezeichen entfernen?"), count),
+            Lng.T("Die Seiten bleiben erhalten, nur die Gliederung in der Seitenleiste verschwindet. Strg+Z macht es rückgängig."), TaskDialogIcon.Warning, defaultNo: true)) { return; }
+        var page = Math.Max(1, ClampedCurrentPage());
+        if (RunPdfEdit(() => PdfEditService.RemoveOutlines(currentFile.FullName), Lng.T("Lesezeichen entfernen")))
+        {
+            LoadPdf(currentFile.FullName, page);
+            statusPath.Text = Lng.T("Die Lesezeichen wurden entfernt.");
+        }
+    }
+
+    /// <summary>Leere Seite vor oder nach der angezeigten Seite einfügen, wahlweise mit einem Bild darauf (Bearbeiten-Menü).</summary>
+    private void InsertPageDialog()
+    {
+        if (currentFile == null) { return; }
+        if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
+        var page = Math.Max(1, ClampedCurrentPage());
+        using InsertPageForm dialog = new(page);
+        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
+        var newPage = 0;
+        if (RunPdfEdit(() => newPage = PdfEditService.InsertBlankPage(currentFile.FullName, page, dialog.After, dialog.ImagePath), Lng.T("Seite einfügen")))
+        {
+            LoadPdf(currentFile.FullName, newPage);
+            statusPath.Text = string.Format(dialog.ImagePath == null ? Lng.T("Eine leere Seite wurde als Seite {0} eingefügt.") : Lng.T("Eine Seite mit dem Bild wurde als Seite {0} eingefügt."), newPage);
         }
     }
 
@@ -1585,7 +1643,7 @@ public partial class MainForm : Form
                     break;
                 case UndoKind.Move:
                     File.Move(action.TargetFile, action.Data); // ohne Überschreiben — eine inzwischen am alten Ort liegende Datei bleibt geschützt
-                    UpdateFavorites(action.TargetFile, () => settings.MoveFavorites(action.TargetFile, action.Data));
+                    UpdateFilePaths(action.TargetFile, action.Data);
                     break;
                 case UndoKind.Delete:
                     Cursor.Current = Cursors.WaitCursor;
@@ -1883,11 +1941,11 @@ public partial class MainForm : Form
 
     /// <summary>Nach Umbenennen oder Verschieben (auch per Rückgängig) folgt der Favorit der Datei auf den neuen Pfad –
     /// nur wenn es einen gibt, und auf dem frischen Stand der Platte.</summary>
-    private void UpdateFavorites(string file, Action change)
+    private void UpdateFilePaths(string oldPath, string newPath)
     {
         settings.ReloadSharedLists(); // parallel laufende Instanzen nicht überschreiben
-        if (!settings.Favorites.Any(f => f.IsFor(file))) { return; }
-        change();
+        settings.MoveFavorites(oldPath, newPath);
+        settings.MoveLastPage(oldPath, newPath);
         settings.Save();
     }
 
@@ -1897,15 +1955,17 @@ public partial class MainForm : Form
     {
         switch (keyData)
         {
-            case Keys.O | Keys.Control: OpenFile(); return true;
+            // Alles, was eine (andere) Datei lädt, erst nach der Rückkehr aus dem Chromium-Tastatur-Callback: LoadPdf merkt sich vorher
+            // die angezeigte Seite per UIA, und die liefe im Callback in den Timeout (s. auch die Seitendialoge unten)
+            case Keys.O | Keys.Control: BeginInvoke(OpenFile); return true;
             case Keys.F4:
-            case Keys.M | Keys.Control: MoveCopyDialog(copy: false); return true;
-            case Keys.K | Keys.Control: MoveCopyDialog(copy: true); return true;
+            case Keys.M | Keys.Control: BeginInvoke(() => MoveCopyDialog(copy: false)); return true;
+            case Keys.K | Keys.Control: BeginInvoke(() => MoveCopyDialog(copy: true)); return true;
             case Keys.M | Keys.Control | Keys.Shift:
-            case Keys.F4 | Keys.Control: if (!OneClickAction(copy: false)) { MoveCopyDialog(copy: false); } return true;
-            case Keys.K | Keys.Control | Keys.Shift: if (!OneClickAction(copy: true)) { MoveCopyDialog(copy: true); } return true;
+            case Keys.F4 | Keys.Control: BeginInvoke(() => { if (!OneClickAction(copy: false)) { MoveCopyDialog(copy: false); } }); return true;
+            case Keys.K | Keys.Control | Keys.Shift: BeginInvoke(() => { if (!OneClickAction(copy: true)) { MoveCopyDialog(copy: true); } }); return true;
             case Keys.F2:
-            case Keys.U | Keys.Control: RenameCurrent(); return true;
+            case Keys.U | Keys.Control: BeginInvoke(RenameCurrent); return true;
             // erst nach der Rückkehr aus dem Chromium-Tastatur-Callback: solange der läuft, wartet Chromium
             // auf unsere Antwort und kann die UIA-Seitenabfrage nicht bedienen (sie liefe in den Timeout)
             case Keys.Delete | Keys.Control when !PdfALocked: BeginInvoke(DeletePagesDialog); return true;
@@ -1916,7 +1976,7 @@ public partial class MainForm : Form
             case Keys.H | Keys.Control when !PdfALocked: BeginInvoke(AddStampDialog); return true;      // Stempel; ebenso (UIA-Seitenabfrage)
             case Keys.H | Keys.Control | Keys.Shift: ManageStampsDialog(); return true;                    // Stempelpalette pflegen
             case Keys.T | Keys.Control | Keys.Shift when mnuManageAnnotations.Enabled: BeginInvoke(ManageAnnotationsDialog); return true; // BeginInvoke: das WebView2 der Vorschau ließe sich im Chromium-Tastatur-Callback nicht initialisieren
-            case Keys.Delete | Keys.Control | Keys.Shift when currentFile != null: DeleteCurrent(); return true;
+            case Keys.Delete | Keys.Control | Keys.Shift when currentFile != null: BeginInvoke(DeleteCurrent); return true;
             case Keys.R | Keys.Control when !PdfALocked: BeginInvoke(RotatePagesDialog); return true; // BeginInvoke wegen der UIA-Seitenabfrage (s. Strg+Entf)
             // Ansicht drehen (das Viewer-Kürzel Strg+] ist auf deutschen Tastaturen unerreichbar);
             // BeginInvoke: die UIA-Abfrage nicht im Chromium-Tastatur-Callback starten (s. Strg+Entf)
@@ -1926,18 +1986,18 @@ public partial class MainForm : Form
             case Keys.I | Keys.Control | Keys.Shift: BeginInvoke(viewHost.ToggleContents); return true; // Inhalte-Leiste
             case Keys.B | Keys.Control | Keys.Shift: BeginInvoke(viewHost.FitToWidth); return true;     // Breite (Viewer-Kürzel Strg+\ ist auf deutschen Tastaturen unerreichbar)
             case Keys.Space | Keys.Control: BeginInvoke(viewHost.ToggleLayout); return true;            // ein-/zweiseitiges Layout
-            case Keys.Z | Keys.Control when undoAction != null: UndoLastChange(); return true;
+            case Keys.Z | Keys.Control when undoAction != null: BeginInvoke(UndoLastChange); return true;
             case Keys.I | Keys.Control: ShowProperties(); return true;
             case Keys.Oemcomma | Keys.Control: OpenSettings(SettingsForm.TabGeneral); return true; // Strg+, wie in vielen Editoren
             case Keys.Enter | Keys.Alt when currentFile != null: ShellUtil.ShowFileProperties(currentFile.FullName); return true; // Windows-Dateieigenschaften, wie im Explorer
             case Keys.C | Keys.Control | Keys.Shift when currentFile != null: CopyPathToClipboard(); return true; // wie im Windows-11-Explorer
             case Keys.E | Keys.Control: EmailCurrent(); return true;
             case Keys.D | Keys.Control when settings.ShowFavorites: ToggleFavorite(); return true; // Datei als Favorit merken / wieder austragen
-            case Keys.Right | Keys.Control | Keys.Shift: StepFile(1); return true;   // Strg+Pfeile ohne Umschalt gehören dem Viewer (Zoom & Co.)
-            case Keys.Left | Keys.Control | Keys.Shift: StepFile(-1); return true;
+            case Keys.Right | Keys.Control | Keys.Shift: BeginInvoke(() => StepFile(1)); return true;   // Strg+Pfeile ohne Umschalt gehören dem Viewer (Zoom & Co.)
+            case Keys.Left | Keys.Control | Keys.Shift: BeginInvoke(() => StepFile(-1)); return true;
             case Keys.F1: TaskDlg.ShowShortcutsPdf(Handle); return true;
             case Keys.F11: SetFullScreen(!isFullScreen); return true;
-            case Keys.Escape | Keys.Shift when settings.CloseOnEscape: Close(); return true; // Shift+Esc beendet sofort (wie in NetRadio)
+            case Keys.Escape | Keys.Shift when settings.CloseOnEscape: BeginInvoke(Close); return true; // Shift+Esc beendet sofort (wie in NetRadio); FormClosing merkt die Seite per UIA
             case Keys.Escape when isFullScreen: SetFullScreen(false); return true;
             case Keys.Escape when settings.CloseOnEscape: return HandleEscapeToClose();
         }
@@ -1973,7 +2033,7 @@ public partial class MainForm : Form
     private bool HandleEscapeToClose()
     {
         var now = DateTime.UtcNow;
-        if ((now - lastEscape).TotalMilliseconds <= 1500) { Close(); return true; }
+        if ((now - lastEscape).TotalMilliseconds <= 1500) { BeginInvoke(Close); return true; } // nach dem Callback (FormClosing liest die Seite per UIA)
         lastEscape = now;
         return false; // das erste Esc geht an den Viewer
     }
@@ -2076,6 +2136,10 @@ public partial class MainForm : Form
     {
         MovePageDialog();
     }
+    private void MnuInsertPage_Click(object? sender, EventArgs e)
+    {
+        InsertPageDialog();
+    }
     private void MnuAppendPdf_Click(object? sender, EventArgs e)
     {
         AppendPdfDialog();
@@ -2087,6 +2151,10 @@ public partial class MainForm : Form
     private void MnuAddAnnotation_Click(object? sender, EventArgs e)
     {
         AddAnnotationDialog();
+    }
+    private void MnuRemoveBookmarks_Click(object? sender, EventArgs e)
+    {
+        RemoveBookmarks();
     }
     private void MnuManageAnnotations_Click(object? sender, EventArgs e)
     {

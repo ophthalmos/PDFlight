@@ -52,6 +52,7 @@
             mnuDeletePages = new ToolStripMenuItem();
             mnuRotatePages = new ToolStripMenuItem();
             mnuMovePage = new ToolStripMenuItem();
+            mnuInsertPage = new ToolStripMenuItem();
             toolStripSeparator15 = new ToolStripSeparator();
             mnuAppendPdf = new ToolStripMenuItem();
             mnuDuplex = new ToolStripMenuItem();
@@ -61,6 +62,7 @@
             mnuManageStamps = new ToolStripMenuItem();
             mnuAddAnnotation = new ToolStripMenuItem();
             mnuManageAnnotations = new ToolStripMenuItem();
+            mnuRemoveBookmarks = new ToolStripMenuItem();
             toolStripSeparator6 = new ToolStripSeparator();
             mnuUndo = new ToolStripMenuItem();
             toolStripSeparator7 = new ToolStripSeparator();
@@ -254,7 +256,7 @@
             // ddbEdit
             // 
             ddbEdit.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuMovePage, toolStripSeparator15, mnuAppendPdf, mnuDuplex, mnuExtractPages, toolStripSeparator14, mnuAddStamp, mnuManageStamps, mnuAddAnnotation, mnuManageAnnotations, toolStripSeparator6, mnuUndo, toolStripSeparator7, mnuSetPassword, mnuRemovePassword, toolStripSeparator10, mnuProperties });
+            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuMovePage, mnuInsertPage, toolStripSeparator15, mnuAppendPdf, mnuDuplex, mnuExtractPages, toolStripSeparator14, mnuAddStamp, mnuManageStamps, mnuAddAnnotation, mnuManageAnnotations, mnuRemoveBookmarks, toolStripSeparator6, mnuUndo, toolStripSeparator7, mnuSetPassword, mnuRemovePassword, toolStripSeparator10, mnuProperties });
             ddbEdit.Enabled = false;
             ddbEdit.Name = "ddbEdit";
             ddbEdit.Size = new Size(76, 22);
@@ -284,6 +286,13 @@
             mnuMovePage.Size = new Size(336, 22);
             mnuMovePage.Text = "Aktuelle Seite verschieben …";
             mnuMovePage.Click += MnuMovePage_Click;
+            // 
+            // mnuInsertPage
+            // 
+            mnuInsertPage.Name = "mnuInsertPage";
+            mnuInsertPage.Size = new Size(336, 22);
+            mnuInsertPage.Text = "Leere Seite einfügen …";
+            mnuInsertPage.Click += MnuInsertPage_Click;
             // 
             // toolStripSeparator15
             // 
@@ -349,6 +358,13 @@
             mnuManageAnnotations.Size = new Size(336, 22);
             mnuManageAnnotations.Text = "Anmerkungen verwalten …";
             mnuManageAnnotations.Click += MnuManageAnnotations_Click;
+            // 
+            // mnuRemoveBookmarks
+            // 
+            mnuRemoveBookmarks.Name = "mnuRemoveBookmarks";
+            mnuRemoveBookmarks.Size = new Size(336, 22);
+            mnuRemoveBookmarks.Text = "Lesezeichen entfernen …";
+            mnuRemoveBookmarks.Click += MnuRemoveBookmarks_Click;
             // 
             // toolStripSeparator6
             // 
@@ -653,6 +669,7 @@
         private System.Windows.Forms.ToolStripMenuItem mnuDeletePages;
         private System.Windows.Forms.ToolStripMenuItem mnuRotatePages;
         private System.Windows.Forms.ToolStripMenuItem mnuMovePage;
+        private System.Windows.Forms.ToolStripMenuItem mnuInsertPage;
         private System.Windows.Forms.ToolStripMenuItem mnuAppendPdf;
         private System.Windows.Forms.ToolStripMenuItem mnuDuplex;
         private System.Windows.Forms.ToolStripMenuItem mnuSetPassword;
@@ -660,6 +677,7 @@
         private System.Windows.Forms.ToolStripMenuItem mnuExtractPages;
         private System.Windows.Forms.ToolStripMenuItem mnuAddAnnotation;
         private System.Windows.Forms.ToolStripMenuItem mnuManageAnnotations;
+        private System.Windows.Forms.ToolStripMenuItem mnuRemoveBookmarks;
         private System.Windows.Forms.ToolStripMenuItem mnuAddStamp;
         private System.Windows.Forms.ToolStripMenuItem mnuManageStamps;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;

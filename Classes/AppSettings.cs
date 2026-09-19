@@ -44,7 +44,8 @@ public class AppSettings
     public List<Favorite> Favorites { get; set; } = [];        // gemerkte Dateien (Favoriten-Menü, Option ShowFavorites)
     public List<Stamp> Stamps { get; set; } = [];              // Stempelpalette (Bearbeiten → Stempel einfügen / verwalten)
     public bool StampsInitialized { get; set; }                // Vorgabestempel wurden einmal eingetragen (auch wenn später alle gelöscht sind)
-    public bool JumpToLastUsed { get; set; } = true;      // Ordnerdialog springt zum zuletzt verwendeten Ordner
+    public bool RememberLastPage { get; set; } = true;    // Dokumente mit der zuletzt angezeigten Seite öffnen (Merker in LastPages)
+    public Dictionary<string, int> LastPages { get; set; } = []; // zuletzt angezeigte Seite je Datei – nur für Dateien der Zuletzt-Liste und der Favoriten
     public bool ConfirmDelete { get; set; } = true;       // vor dem Verschieben in den Papierkorb nachfragen
     public bool OpenNextAfterDelete { get; set; } = true; // nach dem Löschen die nächste Datei des Ordners anzeigen (wie in PDFMover optional)
     public bool ShowProgramIcons { get; set; } = true;    // Symbole der externen Programme zusätzlich in der Symbolleiste
@@ -161,6 +162,32 @@ public class AppSettings
         Trim(RecentFiles, MaxRecentFiles);
     }
 
+    // ------------------------------------------------------------------ zuletzt angezeigte Seiten
+
+    /// <summary>Zuletzt angezeigte Seite einer Datei; 0, wenn keine gemerkt ist.</summary>
+    public int GetLastPage(string path) => LastPageKey(path) is { } key ? LastPages[key] : 0;
+
+    /// <summary>Merkt die Seite – nur für Dateien der Zuletzt-Liste oder der Favoriten, damit das Wörterbuch klein bleibt
+    /// (Seite 1 wird nicht gemerkt). Einträge zu Dateien, die aus beiden Listen verschwunden sind, fliegen dabei raus.</summary>
+    public void SetLastPage(string path, int page)
+    {
+        if (LastPageKey(path) is { } old) { LastPages.Remove(old); }
+        if (page > 1 && IsTracked(path)) { LastPages[path] = page; }
+        foreach (var stale in LastPages.Keys.Where(k => !IsTracked(k)).ToList()) { LastPages.Remove(stale); }
+    }
+
+    /// <summary>Nach Umbenennen/Verschieben: der Eintrag folgt der Datei.</summary>
+    public void MoveLastPage(string oldFile, string newFile)
+    {
+        if (LastPageKey(oldFile) is { } key && LastPages.Remove(key, out var page)) { LastPages[newFile] = page; }
+    }
+
+    private bool IsTracked(string path) =>
+        RecentFiles.Any(f => string.Equals(f, path, StringComparison.OrdinalIgnoreCase)) || Favorites.Any(f => f.IsFor(path));
+
+    /// <summary>Der gespeicherte Schlüssel zur Datei (Pfadvergleich ohne Groß-/Kleinschreibung); null, wenn keiner da ist.</summary>
+    private string? LastPageKey(string path) => LastPages.Keys.FirstOrDefault(k => string.Equals(k, path, StringComparison.OrdinalIgnoreCase));
+
     // ------------------------------------------------------------------ Favoriten
 
     /// <summary>Der Favorit dieser Datei; null, wenn es keinen gibt.</summary>
@@ -190,6 +217,7 @@ public class AppSettings
         var fresh = Load();
         TargetFolders = fresh.TargetFolders;
         RecentFolders = fresh.RecentFolders;
+        LastPages = fresh.LastPages;
         RecentFiles = fresh.RecentFiles;
         ExternalPrograms = fresh.ExternalPrograms;
         Favorites = fresh.Favorites;

@@ -92,6 +92,23 @@ internal static class TaskDlg
         return confirmed;
     }
 
+    /// <summary>Auswahl aus Befehlsknöpfen (Text und Erläuterung) plus Abbrechen; liefert den Index des gewählten Knopfs, -1 bei Abbruch.</summary>
+    public static int ChoiceTaskDlg(nint hwnd, string heading, string? message, IReadOnlyList<(string Text, string? Detail)> choices, TaskDialogIcon? icon = null)
+    {
+        var page = new TaskDialogPage() { Caption = Application.ProductName, Heading = heading, Text = message, Icon = icon ?? TaskDialogIcon.None, AllowCancel = true, SizeToContent = true };
+        List<TaskDialogButton> buttons = [];
+        foreach (var (text, detail) in choices)
+        {
+            TaskDialogButton button = new TaskDialogCommandLinkButton(text, detail);
+            buttons.Add(button);
+            page.Buttons.Add(button);
+        }
+        page.Buttons.Add(TaskDialogButton.Cancel);
+        if (buttons.Count > 0) { page.DefaultButton = buttons[0]; }
+        var result = TaskDialog.ShowDialog(hwnd, page);
+        return buttons.IndexOf(result);
+    }
+
     // Updatesuche über die XML-Datei auf der Webseite des Autors (wie bei den übrigen Programmen);
     // erwartete Elemente unterhalb der Wurzel: <version>, <date>, <url64>
     private const string UpdateXmlUrl = "https://www.netradio.info/download/pdflight.xml";
@@ -281,18 +298,16 @@ internal static class TaskDlg
         ("2× Esc / Umschalt+Esc", "Programm beenden (Option)", null),
     ];
 
-    public enum ConflictChoice { Cancel, Activate, Alternative, Undo, Exit }
+    public enum ConflictChoice { Cancel, Activate, Alternative }
 
     /// <summary>Die gewünschte Datei zeigt schon eine andere PDFlight-Instanz an (Nachrücken nach dem Löschen,
     /// Blättern). Zur Wahl: das andere Fenster aktivieren (activateDetail sagt, was hier dann passiert), stattdessen
     /// die Datei alternative nehmen (null = keine freie Datei), die gelöschte Datei restorePath wiederherstellen
     /// (null = nicht möglich) und das Programm beenden (offerExit); Abbrechen lässt alles, wie es ist.</summary>
-    public static ConflictChoice OpenConflictTaskDlg(nint hwnd, string heading, string file, string activateDetail, string alternativeText, string? alternative, string? restorePath, bool offerExit)
+    public static ConflictChoice OpenConflictTaskDlg(nint hwnd, string heading, string file, string activateText, string activateDetail, string? alternativeText = null, string? alternative = null)
     {
-        TaskDialogButton activateButton = new TaskDialogCommandLinkButton(Lng.T("Anderes Fenster aktivieren"), activateDetail);
-        TaskDialogButton? alternativeButton = alternative == null ? null : new TaskDialogCommandLinkButton(alternativeText, alternative);
-        TaskDialogButton? restoreButton = restorePath == null ? null : new TaskDialogCommandLinkButton(Lng.T("Gelöschte Datei wiederherstellen"), restorePath);
-        TaskDialogButton? exitButton = offerExit ? new TaskDialogCommandLinkButton(Lng.T("Programm beenden"), Lng.T("PDFlight wird geschlossen.")) : null;
+        TaskDialogButton activateButton = new TaskDialogCommandLinkButton(activateText, activateDetail);
+        TaskDialogButton? alternativeButton = alternative == null || alternativeText == null ? null : new TaskDialogCommandLinkButton(alternativeText, alternative);
         var page = new TaskDialogPage()
         {
             Caption = Application.ProductName,
@@ -302,14 +317,12 @@ internal static class TaskDlg
             AllowCancel = true,
             SizeToContent = true
         };
-        foreach (var button in new[] { activateButton, alternativeButton, restoreButton, exitButton }.OfType<TaskDialogButton>()) { page.Buttons.Add(button); }
+        foreach (var button in new[] { activateButton, alternativeButton }.OfType<TaskDialogButton>()) { page.Buttons.Add(button); }
         page.Buttons.Add(TaskDialogButton.Cancel);
         page.DefaultButton = activateButton;
         var result = TaskDialog.ShowDialog(hwnd, page);
         return result == activateButton ? ConflictChoice.Activate
             : result == alternativeButton ? ConflictChoice.Alternative
-            : result == restoreButton ? ConflictChoice.Undo
-            : result == exitButton ? ConflictChoice.Exit
             : ConflictChoice.Cancel;
     }
 

@@ -28,6 +28,7 @@ internal static class ToolbarIcons
     public const char Eye = '\uE7B3';          // RedEye: Kennwort sichtbar machen
     public const char Rotate = '\uE7AD';       // Bearbeiten-Menü: Seiten drehen
     public const char MovePage = '\uE8CB';     // Sort: aktuelle Seite verschieben (Bearbeiten-Menü)
+    public const char NewPage = '\uE8A5';      // Document: leere Seite einfügen (Bearbeiten-Menü)
     public const char Stamp = '\uE7C1';        // Flag: Stempel einfügen (Bearbeiten-Menü)
     public const char List = '\uE8FD';         // Stempel verwalten
     public const char Attach = '\uE723';       // PDF-Datei anhängen
@@ -45,6 +46,7 @@ internal static class ToolbarIcons
     public const char NewFolder = '\uE8F4';    // Kontextmenü des Ordnerbaums
     public const char Comment = '\uE90A';      // Textanmerkung einfügen (Bearbeiten-Menü)
     public const char Favorite = '\uE734';     // FavoriteStar: Favoriten-Menü und Hinzufügen-Eintrag
+    public const char Bookmarks = '\uE8A4';    // Lesezeichen entfernen (Bearbeiten-Menü)
 
     private const string FontName = "Segoe MDL2 Assets";
     private static readonly Dictionary<(char Glyph, int Size), Image> cache = [];

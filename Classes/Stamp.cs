@@ -39,6 +39,14 @@ public sealed class Stamp
     public bool Border { get; set; } = true;    // Rahmen in der Schriftfarbe
     public bool Rounded { get; set; }           // abgerundete Ecken (Rahmen und Hintergrund)
     public string Initials { get; set; } = string.Empty; // Bearbeiterkürzel (max. 3 Zeichen), in Klammern hinter dem Datum
+    public int Opacity { get; set; } = DefaultOpacity; // Deckkraft in Prozent (ExtGState /CA und /ca im Darstellungsstrom)
+
+    public const int DefaultOpacity = 75; // mäßige Transparenz als Vorgabe – der Seiteninhalt bleibt unter dem Stempel lesbar
+    public const int MinOpacity = 10;
+
+    /// <summary>Deckkraft als Faktor 0…1, auf den erlaubten Bereich begrenzt.</summary>
+    [JsonIgnore]
+    public double Alpha => Math.Clamp(Opacity, MinOpacity, 100) / 100.0;
 
     public const int MaxInitialsLength = 3;
 
@@ -71,29 +79,39 @@ public sealed class Stamp
         var text = Text.Length > 0 ? Text : "…";
         var dateLine = SecondLine(DateTime.Now);
         var withSecond = dateLine.Length > 0;
+        var alpha = (int)Math.Round(Alpha * 255); // Deckkraft wie im PDF – GDI+-Text statt TextRenderer, weil der kein Alpha kennt
+        var color = Color.FromArgb(alpha, Color);
         using Font font = new("Arial", Math.Max(6f, bounds.Height * 0.42f), FontStyle.Bold, GraphicsUnit.Pixel);
         using Font small = new("Arial", Math.Max(5f, bounds.Height * 0.42f * (float)DateFactor), FontStyle.Regular, GraphicsUnit.Pixel);
-        var textSize = TextRenderer.MeasureText(g, text, font, Size.Empty, TextFormatFlags.NoPadding);
-        var dateSize = withSecond ? TextRenderer.MeasureText(g, dateLine, small, Size.Empty, TextFormatFlags.NoPadding) : Size.Empty;
+        var format = StringFormat.GenericTypographic;
+        var textSize = g.MeasureString(text, font, int.MaxValue, format);
+        var dateSize = withSecond ? g.MeasureString(dateLine, small, int.MaxValue, format) : SizeF.Empty;
         var padX = (int)(bounds.Height * 0.25);
-        Rectangle box = new(bounds.X, bounds.Y, Math.Min(bounds.Width, Math.Max(textSize.Width, dateSize.Width) + 2 * padX), bounds.Height);
+        Rectangle box = new(bounds.X, bounds.Y, Math.Min(bounds.Width, (int)Math.Ceiling(Math.Max(textSize.Width, dateSize.Width)) + 2 * padX), bounds.Height);
         using var path = RoundedPath(new RectangleF(box.X + 1, box.Y + 1, box.Width - 2, box.Height - 2), Rounded ? box.Height * 0.2f : 0);
         var smoothing = g.SmoothingMode;
+        var hint = g.TextRenderingHint;
         g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+        var clip = g.Clip;
+        g.SetClip(box, System.Drawing.Drawing2D.CombineMode.Intersect); // zu breite Texte enden am Kasten
         if (BackgroundColor is { } background)
         {
-            using SolidBrush fill = new(background);
+            using SolidBrush fill = new(Color.FromArgb(alpha, background));
             g.FillPath(fill, path);
         }
         if (Border)
         {
-            using Pen pen = new(Color, 2);
+            using Pen pen = new(color, 2);
             g.DrawPath(pen, path);
         }
+        using SolidBrush ink = new(color);
+        var split = withSecond ? box.Y + box.Height * 0.62f : box.Bottom; // oben der Text, unten die Datumszeile
+        g.DrawString(text, font, ink, box.X + (box.Width - textSize.Width) / 2, box.Y + 2 + (split - box.Y - 2 - textSize.Height) / 2, format);
+        if (withSecond) { g.DrawString(dateLine, small, ink, box.X + (box.Width - dateSize.Width) / 2, split + (box.Bottom - 2 - split - dateSize.Height) / 2, format); }
+        g.Clip = clip;
         g.SmoothingMode = smoothing;
-        var split = withSecond ? box.Y + (int)(box.Height * 0.62) : box.Bottom; // oben der Text, unten die Datumszeile
-        TextRenderer.DrawText(g, text, font, new Rectangle(box.X, box.Y + 2, box.Width, split - box.Y - 2), Color, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding | TextFormatFlags.EndEllipsis);
-        if (withSecond) { TextRenderer.DrawText(g, dateLine, small, new Rectangle(box.X, split, box.Width, box.Bottom - split - 2), Color, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding | TextFormatFlags.EndEllipsis); }
+        g.TextRenderingHint = hint;
     }
 
     /// <summary>Rechteck mit wahlweise abgerundeten Ecken als GDI+-Pfad.</summary>

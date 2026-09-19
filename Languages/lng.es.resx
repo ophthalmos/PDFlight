@@ -17,7 +17,7 @@
   <!-- Einstellungsdialog -->
   <data name="Einstellungen" xml:space="preserve"><value>Configuración</value></data>
   <data name="Allgemein" xml:space="preserve"><value>General</value></data>
-  <data name="Ordnerdialog springt zum zuletzt &amp;verwendeten Ordner" xml:space="preserve"><value>El diálogo de carpetas salta a la última carpeta &amp;utilizada</value></data>
+  <data name="Dokumente mit der zuletzt angezeigten &amp;Seite öffnen" xml:space="preserve"><value>Abrir los documentos en la última &amp;página vista</value></data>
   <data name="Vor dem Verschieben in den &amp;Papierkorb nachfragen" xml:space="preserve"><value>Preguntar antes de mover a la &amp;papelera</value></data>
   <data name="Nach dem Löschen die &amp;nächste Datei des Ordners anzeigen" xml:space="preserve"><value>Mostrar el siguie&amp;nte archivo de la carpeta tras eliminar</value></data>
   <data name="Layout der Hauptmenüleiste:" xml:space="preserve"><value>Estilo de la barra de iconos:</value></data>
@@ -412,13 +412,10 @@ para instalar la última versión.</value></data>
   <data name="Die vorherige Datei ist bereits geöffnet" xml:space="preserve"><value>El archivo anterior ya está abierto</value></data>
   <data name="Diese Datei wird bereits in einem anderen PDFlight-Fenster angezeigt:" xml:space="preserve"><value>Este archivo ya se muestra en otra ventana de PDFlight:</value></data>
   <data name="Anderes Fenster aktivieren" xml:space="preserve"><value>Activar la otra ventana</value></data>
-  <data name="Dieses Fenster bleibt leer." xml:space="preserve"><value>Esta ventana queda vacía.</value></data>
   <data name="Dieses Fenster zeigt weiter die aktuelle Datei." xml:space="preserve"><value>Esta ventana sigue mostrando el archivo actual.</value></data>
-  <data name="Nächste freie Datei anzeigen" xml:space="preserve"><value>Mostrar el siguiente archivo libre</value></data>
   <data name="Datei überspringen" xml:space="preserve"><value>Omitir este archivo</value></data>
-  <data name="Gelöschte Datei wiederherstellen" xml:space="preserve"><value>Restaurar el archivo eliminado</value></data>
-  <data name="Programm beenden" xml:space="preserve"><value>Salir del programa</value></data>
-  <data name="PDFlight wird geschlossen." xml:space="preserve"><value>PDFlight se cerrará.</value></data>
+  <data name="{0} aktivieren" xml:space="preserve"><value>Activar {0}</value></data>
+  <data name="Dieses Fenster wird geschlossen." xml:space="preserve"><value>Esta ventana se cerrará.</value></data>
   <data name="PDFlight-Hilfe" xml:space="preserve"><value>PDFlight-Ayuda</value></data>
   <data name="diese Hilfedatei (PDF)" xml:space="preserve"><value>este archivo de ayuda (PDF)</value></data>
   <data name="Hilfedatei (PDF) …" xml:space="preserve"><value>Archivo de ayuda (PDF)…</value></data>
@@ -517,7 +514,7 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="Strg+Umschalt+T" xml:space="preserve"><value>Ctrl+Mayús+T</value></data>
   <data name="Enter" xml:space="preserve"><value>Intro</value></data>
   <data name="Anmerkungen verwalten (bearbeiten, löschen)" xml:space="preserve"><value>administrar anotaciones (editar, eliminar)</value></data>
-  <data name="Textanmerkungen" xml:space="preserve"><value>Anotaciones de texto</value></data>
+  <data name="Anmerkungen" xml:space="preserve"><value>Anotaciones</value></data>
   <data name="Seitennr." xml:space="preserve"><value>Página n.º</value></data>
   <data name="Position" xml:space="preserve"><value>Posición</value></data>
   <data name="Text" xml:space="preserve"><value>Texto</value></data>
@@ -572,7 +569,6 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="Der Stempel auf Seite {0} wurde ersetzt." xml:space="preserve"><value>El sello de la página {0} se ha reemplazado.</value></data>
   <data name="Stempel bearbeiten" xml:space="preserve"><value>Editar sellos</value></data>
   <data name="An dieser Stelle steht schon der Stempel „{0}“." xml:space="preserve"><value>El sello «{0}» ya está en este lugar.</value></data>
-  <data name="Soll er entfernt werden? Bei „Nein“ kommt der neue Stempel zusätzlich dazu." xml:space="preserve"><value>¿Eliminarlo? Con «No», el sello nuevo se añade además.</value></data>
   <data name="Bearbeiter&amp;kürzel:" xml:space="preserve"><value>&amp;Iniciales:</value></data>
   <data name="max. 3 Zeichen" xml:space="preserve"><value>máx. 3 caracteres</value></data>
   <data name="Alle löschen" xml:space="preserve"><value>Eliminar todo</value></data>
@@ -582,4 +578,32 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="&amp;Vorgaben" xml:space="preserve"><value>&amp;Predefinidos</value></data>
   <data name="Strg+Y" xml:space="preserve"><value>Ctrl+Y</value></data>
   <data name="aktuelle Seite an eine andere Position verschieben" xml:space="preserve"><value>mover la página actual a otra posición</value></data>
+  <data name="&amp;Deckkraft (%):" xml:space="preserve"><value>&amp;Opacidad (%):</value></data>
+
+  <!-- Leere Seite einfügen -->
+  <data name="Leere Seite einfügen …" xml:space="preserve"><value>Insertar página vacía…</value></data>
+  <data name="Leere Seite einfügen" xml:space="preserve"><value>Insertar página vacía</value></data>
+  <data name="Die neue Seite übernimmt das Format von Seite {0}." xml:space="preserve"><value>La página nueva toma el formato de la página {0}.</value></data>
+  <data name="&amp;Vor der aktuellen Seite" xml:space="preserve"><value>&amp;Antes de la página actual</value></data>
+  <data name="&amp;Nach der aktuellen Seite" xml:space="preserve"><value>&amp;Después de la página actual</value></data>
+  <data name="&amp;Bild (optional):" xml:space="preserve"><value>&amp;Imagen (opcional):</value></data>
+  <data name="&amp;Durchsuchen …" xml:space="preserve"><value>&amp;Examinar…</value></data>
+  <data name="Das Bild wird mit 10 mm Rand eingepasst; ohne Bild bleibt die Seite leer." xml:space="preserve"><value>La imagen se ajusta con un margen de 10 mm; sin imagen, la página queda vacía.</value></data>
+  <data name="Bilddateien" xml:space="preserve"><value>Archivos de imagen</value></data>
+  <data name="Bild für die neue Seite wählen" xml:space="preserve"><value>Elegir una imagen para la página nueva</value></data>
+  <data name="Die Bilddatei wurde nicht gefunden." xml:space="preserve"><value>No se encontró el archivo de imagen.</value></data>
+  <data name="Seite einfügen" xml:space="preserve"><value>Inserción de una página</value></data>
+  <data name="Eine leere Seite wurde als Seite {0} eingefügt." xml:space="preserve"><value>Se insertó una página vacía como página {0}.</value></data>
+  <data name="Eine Seite mit dem Bild wurde als Seite {0} eingefügt." xml:space="preserve"><value>Se insertó una página con la imagen como página {0}.</value></data>
+  <data name="Lesezeichen entfernen …" xml:space="preserve"><value>Eliminar marcadores…</value></data>
+  <data name="Alle {0} Lesezeichen entfernen?" xml:space="preserve"><value>¿Eliminar los {0} marcadores?</value></data>
+  <data name="Die Seiten bleiben erhalten, nur die Gliederung in der Seitenleiste verschwindet. Strg+Z macht es rückgängig." xml:space="preserve"><value>Las páginas se conservan; solo desaparece el esquema del panel lateral. Ctrl+Z lo deshace.</value></data>
+  <data name="Lesezeichen entfernen" xml:space="preserve"><value>Eliminación de marcadores</value></data>
+  <data name="Die Lesezeichen wurden entfernt." xml:space="preserve"><value>Los marcadores se han eliminado.</value></data>
+  <data name="„{0}“ ersetzen" xml:space="preserve"><value>Reemplazar «{0}»</value></data>
+  <data name="Darüber setzen" xml:space="preserve"><value>Colocar encima</value></data>
+  <data name="Darunter setzen" xml:space="preserve"><value>Colocar debajo</value></data>
+  <data name="Die vorhandenen Stempel bleiben." xml:space="preserve"><value>Los sellos existentes se conservan.</value></data>
+  <data name="An dieser Stelle stehen schon {0} Stempel." xml:space="preserve"><value>Ya hay {0} sellos en este lugar.</value></data>
+  <data name="Mehr als drei Stempel je Position gibt es nicht." xml:space="preserve"><value>No caben más de tres sellos por posición.</value></data>
 </root>

@@ -17,7 +17,7 @@
   <!-- Einstellungsdialog -->
   <data name="Einstellungen" xml:space="preserve"><value>Paramètres</value></data>
   <data name="Allgemein" xml:space="preserve"><value>Général</value></data>
-  <data name="Ordnerdialog springt zum zuletzt &amp;verwendeten Ordner" xml:space="preserve"><value>La boîte de dialogue des dossiers ouvre le dernier dossier &amp;utilisé</value></data>
+  <data name="Dokumente mit der zuletzt angezeigten &amp;Seite öffnen" xml:space="preserve"><value>Ouvrir les documents à la dernière &amp;page affichée</value></data>
   <data name="Vor dem Verschieben in den &amp;Papierkorb nachfragen" xml:space="preserve"><value>Confirmer avant de déplacer vers la &amp;corbeille</value></data>
   <data name="Nach dem Löschen die &amp;nächste Datei des Ordners anzeigen" xml:space="preserve"><value>Afficher le fichier suiva&amp;nt du dossier après la suppression</value></data>
   <data name="Layout der Hauptmenüleiste:" xml:space="preserve"><value>Style de la barre d'outils :</value></data>
@@ -412,13 +412,10 @@ d'installation pour installer la dernière version.</value></data>
   <data name="Die vorherige Datei ist bereits geöffnet" xml:space="preserve"><value>Le fichier précédent est déjà ouvert</value></data>
   <data name="Diese Datei wird bereits in einem anderen PDFlight-Fenster angezeigt:" xml:space="preserve"><value>Ce fichier est déjà affiché dans une autre fenêtre PDFlight :</value></data>
   <data name="Anderes Fenster aktivieren" xml:space="preserve"><value>Activer l'autre fenêtre</value></data>
-  <data name="Dieses Fenster bleibt leer." xml:space="preserve"><value>Cette fenêtre reste vide.</value></data>
   <data name="Dieses Fenster zeigt weiter die aktuelle Datei." xml:space="preserve"><value>Cette fenêtre continue d'afficher le fichier actuel.</value></data>
-  <data name="Nächste freie Datei anzeigen" xml:space="preserve"><value>Afficher le prochain fichier libre</value></data>
   <data name="Datei überspringen" xml:space="preserve"><value>Ignorer ce fichier</value></data>
-  <data name="Gelöschte Datei wiederherstellen" xml:space="preserve"><value>Restaurer le fichier supprimé</value></data>
-  <data name="Programm beenden" xml:space="preserve"><value>Quitter le programme</value></data>
-  <data name="PDFlight wird geschlossen." xml:space="preserve"><value>PDFlight va se fermer.</value></data>
+  <data name="{0} aktivieren" xml:space="preserve"><value>Activer {0}</value></data>
+  <data name="Dieses Fenster wird geschlossen." xml:space="preserve"><value>Cette fenêtre sera fermée.</value></data>
   <data name="PDFlight-Hilfe" xml:space="preserve"><value>PDFlight-Aide</value></data>
   <data name="diese Hilfedatei (PDF)" xml:space="preserve"><value>ce fichier d'aide (PDF)</value></data>
   <data name="Hilfedatei (PDF) …" xml:space="preserve"><value>Fichier d'aide (PDF)…</value></data>
@@ -517,7 +514,7 @@ Un clic dans l'aperçu définit la position.</value></data>
   <data name="Strg+Umschalt+T" xml:space="preserve"><value>Ctrl+Maj+T</value></data>
   <data name="Enter" xml:space="preserve"><value>Entrée</value></data>
   <data name="Anmerkungen verwalten (bearbeiten, löschen)" xml:space="preserve"><value>gérer les annotations (modifier, supprimer)</value></data>
-  <data name="Textanmerkungen" xml:space="preserve"><value>Annotations de texte</value></data>
+  <data name="Anmerkungen" xml:space="preserve"><value>Annotations</value></data>
   <data name="Seitennr." xml:space="preserve"><value>Page n°</value></data>
   <data name="Position" xml:space="preserve"><value>Position</value></data>
   <data name="Text" xml:space="preserve"><value>Texte</value></data>
@@ -572,7 +569,6 @@ Un clic dans l'aperçu définit la position.</value></data>
   <data name="Der Stempel auf Seite {0} wurde ersetzt." xml:space="preserve"><value>Le tampon de la page {0} a été remplacé.</value></data>
   <data name="Stempel bearbeiten" xml:space="preserve"><value>Modifier les tampons</value></data>
   <data name="An dieser Stelle steht schon der Stempel „{0}“." xml:space="preserve"><value>Le tampon « {0} » se trouve déjà à cet endroit.</value></data>
-  <data name="Soll er entfernt werden? Bei „Nein“ kommt der neue Stempel zusätzlich dazu." xml:space="preserve"><value>Le supprimer ? Avec « Non », le nouveau tampon s’ajoute en plus.</value></data>
   <data name="Bearbeiter&amp;kürzel:" xml:space="preserve"><value>&amp;Initiales :</value></data>
   <data name="max. 3 Zeichen" xml:space="preserve"><value>3 caractères max.</value></data>
   <data name="Alle löschen" xml:space="preserve"><value>Tout supprimer</value></data>
@@ -582,4 +578,32 @@ Un clic dans l'aperçu définit la position.</value></data>
   <data name="&amp;Vorgaben" xml:space="preserve"><value>Par &amp;défaut</value></data>
   <data name="Strg+Y" xml:space="preserve"><value>Ctrl+Y</value></data>
   <data name="aktuelle Seite an eine andere Position verschieben" xml:space="preserve"><value>déplacer la page actuelle à une autre position</value></data>
+  <data name="&amp;Deckkraft (%):" xml:space="preserve"><value>&amp;Opacité (%) :</value></data>
+
+  <!-- Leere Seite einfügen -->
+  <data name="Leere Seite einfügen …" xml:space="preserve"><value>Insérer une page vide…</value></data>
+  <data name="Leere Seite einfügen" xml:space="preserve"><value>Insérer une page vide</value></data>
+  <data name="Die neue Seite übernimmt das Format von Seite {0}." xml:space="preserve"><value>La nouvelle page reprend le format de la page {0}.</value></data>
+  <data name="&amp;Vor der aktuellen Seite" xml:space="preserve"><value>A&amp;vant la page actuelle</value></data>
+  <data name="&amp;Nach der aktuellen Seite" xml:space="preserve"><value>A&amp;près la page actuelle</value></data>
+  <data name="&amp;Bild (optional):" xml:space="preserve"><value>&amp;Image (facultatif) :</value></data>
+  <data name="&amp;Durchsuchen …" xml:space="preserve"><value>&amp;Parcourir…</value></data>
+  <data name="Das Bild wird mit 10 mm Rand eingepasst; ohne Bild bleibt die Seite leer." xml:space="preserve"><value>L’image est ajustée avec une marge de 10 mm ; sans image, la page reste vide.</value></data>
+  <data name="Bilddateien" xml:space="preserve"><value>Fichiers image</value></data>
+  <data name="Bild für die neue Seite wählen" xml:space="preserve"><value>Choisir une image pour la nouvelle page</value></data>
+  <data name="Die Bilddatei wurde nicht gefunden." xml:space="preserve"><value>Le fichier image est introuvable.</value></data>
+  <data name="Seite einfügen" xml:space="preserve"><value>Insertion d’une page</value></data>
+  <data name="Eine leere Seite wurde als Seite {0} eingefügt." xml:space="preserve"><value>Une page vide a été insérée comme page {0}.</value></data>
+  <data name="Eine Seite mit dem Bild wurde als Seite {0} eingefügt." xml:space="preserve"><value>Une page avec l’image a été insérée comme page {0}.</value></data>
+  <data name="Lesezeichen entfernen …" xml:space="preserve"><value>Supprimer les signets…</value></data>
+  <data name="Alle {0} Lesezeichen entfernen?" xml:space="preserve"><value>Supprimer les {0} signets ?</value></data>
+  <data name="Die Seiten bleiben erhalten, nur die Gliederung in der Seitenleiste verschwindet. Strg+Z macht es rückgängig." xml:space="preserve"><value>Les pages restent ; seul le plan dans le volet latéral disparaît. Ctrl+Z annule.</value></data>
+  <data name="Lesezeichen entfernen" xml:space="preserve"><value>Suppression des signets</value></data>
+  <data name="Die Lesezeichen wurden entfernt." xml:space="preserve"><value>Les signets ont été supprimés.</value></data>
+  <data name="„{0}“ ersetzen" xml:space="preserve"><value>Remplacer « {0} »</value></data>
+  <data name="Darüber setzen" xml:space="preserve"><value>Placer au-dessus</value></data>
+  <data name="Darunter setzen" xml:space="preserve"><value>Placer en dessous</value></data>
+  <data name="Die vorhandenen Stempel bleiben." xml:space="preserve"><value>Les tampons existants restent.</value></data>
+  <data name="An dieser Stelle stehen schon {0} Stempel." xml:space="preserve"><value>Il y a déjà {0} tampons à cet endroit.</value></data>
+  <data name="Mehr als drei Stempel je Position gibt es nicht." xml:space="preserve"><value>Pas plus de trois tampons par position.</value></data>
 </root>

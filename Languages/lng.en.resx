@@ -17,7 +17,7 @@
   <!-- SettingsForm (Muster-Formular) -->
   <data name="Einstellungen" xml:space="preserve"><value>Settings</value></data>
   <data name="Allgemein" xml:space="preserve"><value>General</value></data>
-  <data name="Ordnerdialog springt zum zuletzt &amp;verwendeten Ordner" xml:space="preserve"><value>Folder dialog jumps to the most recently &amp;used folder</value></data>
+  <data name="Dokumente mit der zuletzt angezeigten &amp;Seite öffnen" xml:space="preserve"><value>Open documents at the last &amp;page viewed</value></data>
   <data name="Vor dem Verschieben in den &amp;Papierkorb nachfragen" xml:space="preserve"><value>Ask before moving to the &amp;Recycle Bin</value></data>
   <data name="Nach dem Löschen die &amp;nächste Datei des Ordners anzeigen" xml:space="preserve"><value>Show the &amp;next file of the folder after deleting</value></data>
   <data name="Layout der Hauptmenüleiste:" xml:space="preserve"><value>Main toolbar layout:</value></data>
@@ -412,13 +412,10 @@ the latest version.</value></data>
   <data name="Die vorherige Datei ist bereits geöffnet" xml:space="preserve"><value>The previous file is already open</value></data>
   <data name="Diese Datei wird bereits in einem anderen PDFlight-Fenster angezeigt:" xml:space="preserve"><value>This file is already displayed in another PDFlight window:</value></data>
   <data name="Anderes Fenster aktivieren" xml:space="preserve"><value>Activate the other window</value></data>
-  <data name="Dieses Fenster bleibt leer." xml:space="preserve"><value>This window stays empty.</value></data>
   <data name="Dieses Fenster zeigt weiter die aktuelle Datei." xml:space="preserve"><value>This window keeps showing the current file.</value></data>
-  <data name="Nächste freie Datei anzeigen" xml:space="preserve"><value>Show the next free file</value></data>
   <data name="Datei überspringen" xml:space="preserve"><value>Skip this file</value></data>
-  <data name="Gelöschte Datei wiederherstellen" xml:space="preserve"><value>Restore the deleted file</value></data>
-  <data name="Programm beenden" xml:space="preserve"><value>Exit the program</value></data>
-  <data name="PDFlight wird geschlossen." xml:space="preserve"><value>PDFlight will be closed.</value></data>
+  <data name="{0} aktivieren" xml:space="preserve"><value>Activate {0}</value></data>
+  <data name="Dieses Fenster wird geschlossen." xml:space="preserve"><value>This window will be closed.</value></data>
   <data name="PDFlight-Hilfe" xml:space="preserve"><value>PDFlight-Help</value></data>
   <data name="diese Hilfedatei (PDF)" xml:space="preserve"><value>this help file (PDF)</value></data>
   <data name="Hilfedatei (PDF) …" xml:space="preserve"><value>Help file (PDF)…</value></data>
@@ -517,7 +514,7 @@ Clicking into the preview sets the position.</value></data>
   <data name="Strg+Umschalt+T" xml:space="preserve"><value>Ctrl+Shift+T</value></data>
   <data name="Enter" xml:space="preserve"><value>Enter</value></data>
   <data name="Anmerkungen verwalten (bearbeiten, löschen)" xml:space="preserve"><value>manage annotations (edit, delete)</value></data>
-  <data name="Textanmerkungen" xml:space="preserve"><value>Text annotations</value></data>
+  <data name="Anmerkungen" xml:space="preserve"><value>Annotations</value></data>
   <data name="Seitennr." xml:space="preserve"><value>Page no.</value></data>
   <data name="Position" xml:space="preserve"><value>Position</value></data>
   <data name="Text" xml:space="preserve"><value>Text</value></data>
@@ -572,7 +569,6 @@ Clicking into the preview sets the position.</value></data>
   <data name="Der Stempel auf Seite {0} wurde ersetzt." xml:space="preserve"><value>The stamp on page {0} was replaced.</value></data>
   <data name="Stempel bearbeiten" xml:space="preserve"><value>Edit stamps</value></data>
   <data name="An dieser Stelle steht schon der Stempel „{0}“." xml:space="preserve"><value>The stamp &quot;{0}&quot; is already at this spot.</value></data>
-  <data name="Soll er entfernt werden? Bei „Nein“ kommt der neue Stempel zusätzlich dazu." xml:space="preserve"><value>Remove it? Choosing &quot;No&quot; adds the new stamp alongside.</value></data>
   <data name="Bearbeiter&amp;kürzel:" xml:space="preserve"><value>&amp;Initials:</value></data>
   <data name="max. 3 Zeichen" xml:space="preserve"><value>max. 3 characters</value></data>
   <data name="Alle löschen" xml:space="preserve"><value>Delete all</value></data>
@@ -582,4 +578,32 @@ Clicking into the preview sets the position.</value></data>
   <data name="&amp;Vorgaben" xml:space="preserve"><value>&amp;Defaults</value></data>
   <data name="Strg+Y" xml:space="preserve"><value>Ctrl+Y</value></data>
   <data name="aktuelle Seite an eine andere Position verschieben" xml:space="preserve"><value>move the current page to another position</value></data>
+  <data name="&amp;Deckkraft (%):" xml:space="preserve"><value>&amp;Opacity (%):</value></data>
+
+  <!-- Leere Seite einfügen -->
+  <data name="Leere Seite einfügen …" xml:space="preserve"><value>Insert blank page…</value></data>
+  <data name="Leere Seite einfügen" xml:space="preserve"><value>Insert blank page</value></data>
+  <data name="Die neue Seite übernimmt das Format von Seite {0}." xml:space="preserve"><value>The new page takes the format of page {0}.</value></data>
+  <data name="&amp;Vor der aktuellen Seite" xml:space="preserve"><value>&amp;Before the current page</value></data>
+  <data name="&amp;Nach der aktuellen Seite" xml:space="preserve"><value>&amp;After the current page</value></data>
+  <data name="&amp;Bild (optional):" xml:space="preserve"><value>&amp;Image (optional):</value></data>
+  <data name="&amp;Durchsuchen …" xml:space="preserve"><value>&amp;Browse…</value></data>
+  <data name="Das Bild wird mit 10 mm Rand eingepasst; ohne Bild bleibt die Seite leer." xml:space="preserve"><value>The image is fitted with a 10 mm margin; without an image the page stays blank.</value></data>
+  <data name="Bilddateien" xml:space="preserve"><value>Image files</value></data>
+  <data name="Bild für die neue Seite wählen" xml:space="preserve"><value>Choose an image for the new page</value></data>
+  <data name="Die Bilddatei wurde nicht gefunden." xml:space="preserve"><value>The image file was not found.</value></data>
+  <data name="Seite einfügen" xml:space="preserve"><value>Inserting a page</value></data>
+  <data name="Eine leere Seite wurde als Seite {0} eingefügt." xml:space="preserve"><value>A blank page was inserted as page {0}.</value></data>
+  <data name="Eine Seite mit dem Bild wurde als Seite {0} eingefügt." xml:space="preserve"><value>A page with the image was inserted as page {0}.</value></data>
+  <data name="Lesezeichen entfernen …" xml:space="preserve"><value>Remove bookmarks…</value></data>
+  <data name="Alle {0} Lesezeichen entfernen?" xml:space="preserve"><value>Remove all {0} bookmarks?</value></data>
+  <data name="Die Seiten bleiben erhalten, nur die Gliederung in der Seitenleiste verschwindet. Strg+Z macht es rückgängig." xml:space="preserve"><value>The pages stay; only the outline in the side pane disappears. Ctrl+Z undoes it.</value></data>
+  <data name="Lesezeichen entfernen" xml:space="preserve"><value>Removing bookmarks</value></data>
+  <data name="Die Lesezeichen wurden entfernt." xml:space="preserve"><value>The bookmarks were removed.</value></data>
+  <data name="„{0}“ ersetzen" xml:space="preserve"><value>Replace &quot;{0}&quot;</value></data>
+  <data name="Darüber setzen" xml:space="preserve"><value>Place above</value></data>
+  <data name="Darunter setzen" xml:space="preserve"><value>Place below</value></data>
+  <data name="Die vorhandenen Stempel bleiben." xml:space="preserve"><value>The existing stamps stay.</value></data>
+  <data name="An dieser Stelle stehen schon {0} Stempel." xml:space="preserve"><value>There are already {0} stamps at this spot.</value></data>
+  <data name="Mehr als drei Stempel je Position gibt es nicht." xml:space="preserve"><value>There is no room for more than three stamps per position.</value></data>
 </root>

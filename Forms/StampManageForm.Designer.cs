@@ -43,6 +43,8 @@
             comboPosition = new ComboBox();
             labelInitials = new Label();
             textBoxInitials = new TextBox();
+            labelOpacity = new Label();
+            numOpacity = new NumericUpDown();
             cbDate = new CheckBox();
             cbBorder = new CheckBox();
             cbRounded = new CheckBox();
@@ -51,6 +53,7 @@
             labelMaxInitials = new Label();
             buttonDefaults = new Button();
             ((System.ComponentModel.ISupportInitialize)numSize).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numOpacity).BeginInit();
             SuspendLayout();
             // 
             // listStamps
@@ -61,14 +64,14 @@
             listStamps.ItemHeight = 44;
             listStamps.Location = new Point(12, 12);
             listStamps.Name = "listStamps";
-            listStamps.Size = new Size(300, 270);
+            listStamps.Size = new Size(300, 298);
             listStamps.TabIndex = 0;
             listStamps.DrawItem += ListStamps_DrawItem;
             listStamps.SelectedIndexChanged += ListStamps_SelectedIndexChanged;
             // 
             // buttonNew
             // 
-            buttonNew.Location = new Point(12, 290);
+            buttonNew.Location = new Point(12, 318);
             buttonNew.Name = "buttonNew";
             buttonNew.Size = new Size(95, 27);
             buttonNew.TabIndex = 1;
@@ -78,7 +81,7 @@
             // 
             // buttonDelete
             // 
-            buttonDelete.Location = new Point(113, 290);
+            buttonDelete.Location = new Point(113, 318);
             buttonDelete.Name = "buttonDelete";
             buttonDelete.Size = new Size(95, 27);
             buttonDelete.TabIndex = 2;
@@ -200,12 +203,32 @@
             textBoxInitials.TabIndex = 14;
             textBoxInitials.TextChanged += Field_Changed;
             // 
+            // labelOpacity
+            // 
+            labelOpacity.AutoSize = true;
+            labelOpacity.Location = new Point(330, 191);
+            labelOpacity.Name = "labelOpacity";
+            labelOpacity.Size = new Size(82, 15);
+            labelOpacity.TabIndex = 22;
+            labelOpacity.Text = "&Deckkraft (%):";
+            // 
+            // numOpacity
+            // 
+            numOpacity.Increment = new decimal(new int[] { 5, 0, 0, 0 });
+            numOpacity.Location = new Point(435, 188);
+            numOpacity.Minimum = new decimal(new int[] { 10, 0, 0, 0 });
+            numOpacity.Name = "numOpacity";
+            numOpacity.Size = new Size(66, 23);
+            numOpacity.TabIndex = 23;
+            numOpacity.Value = new decimal(new int[] { 75, 0, 0, 0 });
+            numOpacity.ValueChanged += Field_Changed;
+            // 
             // cbDate
             // 
             cbDate.AutoSize = true;
             cbDate.Checked = true;
             cbDate.CheckState = CheckState.Checked;
-            cbDate.Location = new Point(333, 191);
+            cbDate.Location = new Point(333, 220);
             cbDate.Name = "cbDate";
             cbDate.Size = new Size(173, 19);
             cbDate.TabIndex = 15;
@@ -218,7 +241,7 @@
             cbBorder.AutoSize = true;
             cbBorder.Checked = true;
             cbBorder.CheckState = CheckState.Checked;
-            cbBorder.Location = new Point(333, 219);
+            cbBorder.Location = new Point(333, 248);
             cbBorder.Name = "cbBorder";
             cbBorder.Size = new Size(120, 19);
             cbBorder.TabIndex = 16;
@@ -229,7 +252,7 @@
             // cbRounded
             // 
             cbRounded.AutoSize = true;
-            cbRounded.Location = new Point(333, 247);
+            cbRounded.Location = new Point(333, 276);
             cbRounded.Name = "cbRounded";
             cbRounded.Size = new Size(129, 19);
             cbRounded.TabIndex = 17;
@@ -240,7 +263,7 @@
             // buttonOK
             // 
             buttonOK.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            buttonOK.Location = new Point(330, 290);
+            buttonOK.Location = new Point(330, 318);
             buttonOK.Name = "buttonOK";
             buttonOK.Size = new Size(159, 27);
             buttonOK.TabIndex = 18;
@@ -252,7 +275,7 @@
             // 
             buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             buttonCancel.DialogResult = DialogResult.Cancel;
-            buttonCancel.Location = new Point(495, 290);
+            buttonCancel.Location = new Point(495, 318);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new Size(95, 27);
             buttonCancel.TabIndex = 19;
@@ -270,7 +293,7 @@
             // 
             // buttonDefaults
             // 
-            buttonDefaults.Location = new Point(214, 288);
+            buttonDefaults.Location = new Point(214, 318);
             buttonDefaults.Name = "buttonDefaults";
             buttonDefaults.Size = new Size(98, 27);
             buttonDefaults.TabIndex = 21;
@@ -284,7 +307,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonCancel;
-            ClientSize = new Size(602, 329);
+            ClientSize = new Size(602, 357);
             Controls.Add(buttonDefaults);
             Controls.Add(labelMaxInitials);
             Controls.Add(buttonCancel);
@@ -292,6 +315,8 @@
             Controls.Add(cbRounded);
             Controls.Add(cbBorder);
             Controls.Add(cbDate);
+            Controls.Add(numOpacity);
+            Controls.Add(labelOpacity);
             Controls.Add(textBoxInitials);
             Controls.Add(labelInitials);
             Controls.Add(comboPosition);
@@ -315,6 +340,7 @@
             StartPosition = FormStartPosition.CenterParent;
             Text = "Stempel verwalten";
             ((System.ComponentModel.ISupportInitialize)numSize).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numOpacity).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -336,6 +362,8 @@
         private System.Windows.Forms.ComboBox comboPosition;
         private System.Windows.Forms.Label labelInitials;
         private System.Windows.Forms.TextBox textBoxInitials;
+        private System.Windows.Forms.Label labelOpacity;
+        private System.Windows.Forms.NumericUpDown numOpacity;
         private System.Windows.Forms.CheckBox cbDate;
         private System.Windows.Forms.CheckBox cbBorder;
         private System.Windows.Forms.CheckBox cbRounded;

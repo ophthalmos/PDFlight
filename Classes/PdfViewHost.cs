@@ -153,6 +153,40 @@ internal partial class PdfViewHost(WebView2 webView)
         webView.CoreWebView2.Navigate($"https://{VirtualHost}/{Uri.EscapeDataString(Path.GetFileName(filePath))}?t={DateTime.Now.Ticks}{fragment}");
     }
 
+    /// <summary>Springt nach dem Laden zur gemerkten Seite – aber nur, wenn der Viewer dann noch auf Seite 1 steht (der Nutzer also noch
+    /// nicht geblättert hat) und PDFlight im Vordergrund ist. Ein „#page=“-Fragment beim Laden wendet Chromium erst nach dem vollständigen
+    /// Laden an; bei großen Dateien zeigt er vorher Seite 1, und wer da schon scrollt, wird später überraschend weggeholt (19.09.2026).
+    /// Eine Fragment-Navigation im geladenen Dokument ignoriert der Viewer, und UIA-SetValue im Seitenfeld ändert nur den Text –
+    /// es bleibt der Weg über das Seitenfeld wie bei Strg+G: Fokus hinein, Zahl tippen, Enter.</summary>
+    public async Task GoToPageIfUntouchedAsync(int page)
+    {
+        if (page <= 1 || documentLoaded is not { } loaded || !IsReady) { return; }
+        await loaded.Task;
+        for (var attempt = 0; attempt < 50; attempt++) // bis 10 s auf das Seitenfeld warten (großes Dokument, kalte Laufzeit)
+        {
+            if (documentLoaded != loaded || currentBytes == null) { return; } // inzwischen ein anderes Dokument
+            var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
+            var current = chromium == IntPtr.Zero ? 0 : await Task.Run(() => ReadPageNumber(chromium));
+            if (current > 0)
+            {
+                if (current != 1 || documentLoaded != loaded) { return; } // schon geblättert oder anderes Dokument
+                if (webView.FindForm() is not { } form || NativeMethods.GetForegroundWindow() != form.Handle) { return; } // nicht den Nutzer aus einem anderen Programm holen
+                var edit = await Task.Run(() => FindPageNumberEdit(chromium));
+                if (edit == null || documentLoaded != loaded) { return; }
+                try
+                {
+                    webView.Focus();
+                    edit.SetFocus();
+                    if (edit.TryGetCurrentPattern(System.Windows.Automation.TextPattern.Pattern, out var text)) { ((System.Windows.Automation.TextPattern)text).DocumentRange.Select(); }
+                    SendKeys.SendWait(page.ToString(System.Globalization.CultureInfo.InvariantCulture) + "{ENTER}");
+                }
+                catch (Exception ex) when (ex is System.Windows.Automation.ElementNotAvailableException or System.Runtime.InteropServices.COMException or InvalidOperationException) { }
+                return;
+            }
+            await Task.Delay(200);
+        }
+    }
+
     public void CloseDocument()
     {
         currentBytes = null;

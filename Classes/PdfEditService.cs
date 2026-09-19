@@ -38,7 +38,7 @@ internal sealed record AnnotationStyle(Color? BorderColor, Color? Background, Co
         hex.Length == 6 && int.TryParse(hex, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var rgb) ? Color.FromArgb(rgb >> 16 & 0xFF, rgb >> 8 & 0xFF, rgb & 0xFF) : null;
 }
 
-internal record PdfStatus(int PageCount, string? Version, string? PdfALevel, double PageWidthPt = 0, double PageHeightPt = 0, int AnnotationCount = 0);
+internal record PdfStatus(int PageCount, string? Version, string? PdfALevel, double PageWidthPt = 0, double PageHeightPt = 0, int AnnotationCount = 0, int OutlineCount = 0);
 
 /// <summary>Dokumentoperationen mit PDFsharp. Alle Methoden arbeiten direkt auf der Datei;
 /// die Anzeige bleibt davon unberührt, weil der Viewer aus dem Speicher liest.</summary>
@@ -64,7 +64,7 @@ internal static partial class PdfEditService
             using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
             var v = document.Version;
             var first = document.PageCount > 0 ? document.Pages[0] : null;
-            return new PdfStatus(document.PageCount, $"{v / 10}.{v % 10}", GetPdfALevel(document), first?.Width.Point ?? 0, first?.Height.Point ?? 0, CountAnnotations(document));
+            return new PdfStatus(document.PageCount, $"{v / 10}.{v % 10}", GetPdfALevel(document), first?.Width.Point ?? 0, first?.Height.Point ?? 0, CountAnnotations(document), CountOutlines(document));
         }
         catch (Exception ex) when (IsPdfReadError(ex)) { return new PdfStatus(-1, null, null); }
     }
@@ -96,8 +96,78 @@ internal static partial class PdfEditService
     public static void DeletePages(string path, IReadOnlyList<int> pages)
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        var removedPages = pages.Select(p => document.Pages[p - 1].Reference?.ObjectID).OfType<PdfObjectID>().ToHashSet();
         foreach (var page in pages.OrderByDescending(p => p)) { document.Pages.RemoveAt(page - 1); }
+        PruneOutlines(document, removedPages);
         document.Save(path);
+    }
+
+    /// <summary>Nach dem Löschen von Seiten: Lesezeichen, die auf eine gelöschte Seite zeigen, werden entfernt – ihre Unterpunkte
+    /// rücken eine Ebene hoch. Sonst blieben Einträge ins Leere zurück (PDFsharp schreibt die verwaiste Seite sogar mit).
+    /// Ziele als /Dest oder GoTo-Aktion, jeweils als Array oder als benannte Zielmarke (Katalog /Dests bzw. /Names-Baum).</summary>
+    private static void PruneOutlines(PdfDocument document, HashSet<PdfObjectID> removedPages)
+    {
+        if (removedPages.Count == 0 || document.Internals.Catalog.Elements["/Outlines"] == null) { return; }
+        try { Prune(document.Outlines); }
+        catch (Exception ex) when (IsPdfReadError(ex)) { } // kaputte Gliederung: lieber unverändert lassen als den Vorgang abbrechen
+
+        void Prune(PdfOutlineCollection outlines)
+        {
+            for (var i = outlines.Count - 1; i >= 0; i--)
+            {
+                var outline = outlines[i];
+                Prune(outline.Outlines);
+                var target = DestinationPageId(document, outline);
+                if (target is { } id && removedPages.Contains(id))
+                {
+                    var children = outline.Outlines.ToList();
+                    outlines.RemoveAt(i);
+                    foreach (var child in children) { outline.Outlines.Remove(child); outlines.Insert(i++, child); }
+                }
+            }
+        }
+    }
+
+    /// <summary>Die Seite, auf die ein Lesezeichen zeigt (Objektkennung); null, wenn das Ziel nicht auflösbar ist.</summary>
+    private static PdfObjectID? DestinationPageId(PdfDocument document, PdfOutline outline)
+    {
+        var destination = outline.Elements["/Dest"];
+        if (destination == null && outline.Elements.GetDictionary("/A") is { } action && action.Elements.GetName("/S") == "/GoTo") { destination = action.Elements["/D"]; }
+        if (destination is PdfReference reference) { destination = reference.Value; }
+        if (destination is PdfString or PdfName) { destination = ResolveNamedDestination(document, destination is PdfName name ? name.Value.TrimStart('/') : ((PdfString)destination).Value); }
+        if (destination is PdfDictionary dictionary) { destination = dictionary.Elements["/D"]; } // benannte Ziele stehen oft als << /D [...] >>
+        return destination is PdfArray array && array.Elements.Count > 0 && array.Elements[0] is PdfReference page ? page.ObjectID : null;
+    }
+
+    /// <summary>Benannte Zielmarke auflösen: erst das alte /Dests-Wörterbuch des Katalogs, dann der /Names-Baum (/Dests, Kids/Names).</summary>
+    private static PdfItem? ResolveNamedDestination(PdfDocument document, string name)
+    {
+        var catalog = document.Internals.Catalog;
+        if (catalog.Elements.GetDictionary("/Dests") is { } dests && dests.Elements["/" + name] is { } direct) { return direct is PdfReference r ? r.Value : direct; }
+        return catalog.Elements.GetDictionary("/Names")?.Elements.GetDictionary("/Dests") is { } tree ? FindInNameTree(tree, name) : null;
+    }
+
+    private static PdfItem? FindInNameTree(PdfDictionary node, string name)
+    {
+        if (node.Elements.GetArray("/Names") is { } names)
+        {
+            for (var i = 0; i + 1 < names.Elements.Count; i += 2)
+            {
+                if (names.Elements[i] is PdfString key && key.Value == name) { return names.Elements[i + 1] is PdfReference r ? r.Value : names.Elements[i + 1]; }
+            }
+        }
+        if (node.Elements.GetArray("/Kids") is { } kids)
+        {
+            foreach (var kid in kids.Elements)
+            {
+                var child = kid is PdfReference kr ? kr.Value as PdfDictionary : kid as PdfDictionary;
+                if (child == null) { continue; }
+                if (child.Elements.GetArray("/Limits") is { Elements.Count: 2 } limits
+                    && (string.CompareOrdinal(name, (limits.Elements[0] as PdfString)?.Value) < 0 || string.CompareOrdinal(name, (limits.Elements[1] as PdfString)?.Value) > 0)) { continue; }
+                if (FindInNameTree(child, name) is { } found) { return found; }
+            }
+        }
+        return null;
     }
 
     /// <summary>Dreht die angegebenen Seiten (1-basiert) um delta Grad (±90 oder 180).</summary>
@@ -180,6 +250,25 @@ internal static partial class PdfEditService
     }
 
     private static bool IsManageable(string subtype) => subtype is not ("Link" or "Popup" or "Widget");
+
+    /// <summary>Zahl der Lesezeichen (Gliederung) samt Unterebenen – schaltet „Lesezeichen entfernen“ frei.</summary>
+    private static int CountOutlines(PdfDocument document)
+    {
+        try { return CountOutlines(document.Outlines); }
+        catch (Exception ex) when (IsPdfReadError(ex)) { return 0; } // kaputte Gliederung: dann eben keine
+    }
+
+    private static int CountOutlines(PdfOutlineCollection outlines) => outlines.Count + outlines.Sum(o => CountOutlines(o.Outlines));
+
+    /// <summary>Entfernt die komplette Gliederung (Lesezeichen) der Datei und schaltet den Seitenmodus auf „ohne Leiste“,
+    /// sonst zeigt der Viewer weiter eine leere Lesezeichenleiste. Die Seiten bleiben unberührt.</summary>
+    public static void RemoveOutlines(string path)
+    {
+        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        document.Internals.Catalog.Elements.Remove("/Outlines");
+        if (document.Internals.Catalog.Elements.GetName("/PageMode") == "/UseOutlines") { document.Internals.Catalog.Elements.Remove("/PageMode"); }
+        document.Save(path);
+    }
 
     private static int CountAnnotations(PdfDocument document)
     {
@@ -277,38 +366,62 @@ internal static partial class PdfEditService
     /// <summary>Setzt einen Stempel der Palette auf eine Seite: Stamp-Anmerkung mit eigenem Darstellungsstrom (Helvetica-Bold,
     /// Rahmen in der Schriftfarbe, wahlweise Hintergrund) an einer der festen Positionen, 10 mm vom Rand der unrotierten Seite.</summary>
     /// <param name="replaceIndex">≥ 0: dieser vorhandene Stempel (Index im Annots-Array, ObjectNumber als sichere Kennung) wird vorher entfernt.</param>
-    public static void AddStamp(string path, int page, Stamp stamp, int replaceIndex = -1, int replaceObjectNumber = 0)
+    /// <param name="top">Oberkante des Kastens in PDF-Koordinaten (Stapelplatz, s. FindStampStack); null = die feste Position des Stempels.</param>
+    public static void AddStamp(string path, int page, Stamp stamp, int replaceIndex = -1, int replaceObjectNumber = 0, double? top = null)
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         var pdfPage = document.Pages[page - 1];
         if (replaceIndex >= 0) { pdfPage.Annotations.Elements.RemoveAt(ResolveIndex(pdfPage.Annotations, replaceObjectNumber, replaceIndex)); }
-        AppendStamp(document, pdfPage, stamp, stamp.SecondLine(DateTime.Now)); // Datum, Uhrzeit und Kürzel klein unter dem Text
+        AppendStamp(document, pdfPage, stamp, stamp.SecondLine(DateTime.Now), top); // Datum, Uhrzeit und Kürzel klein unter dem Text
         document.Save(path);
     }
 
     /// <summary>Sucht auf der Seite einen PDFlight-Stempel, der den Platz des neuen Stempels überlappt (gleiche feste Position);
     /// null, wenn dort keiner liegt. Liefert Index, Objektnummer und Text für die Rückfrage vor dem Einfügen.</summary>
-    public static (int Index, int ObjectNumber, string Text)? FindStampAtPosition(string path, int page, Stamp stamp)
+    public const int StackLimit = 3;                    // Stempel je Position: der erste plus zwei gestapelte
+    private const double StackGap = 3 * 72 / 25.4;      // Abstand zwischen gestapelten Stempeln (3 mm)
+
+    /// <summary>Ein vorhandener PDFlight-Stempel am Platz des neuen (Index, Objektnummer, Text, Datumszeile, Oberkante).</summary>
+    internal sealed record StampSlot(int Index, int ObjectNumber, string Text, string SecondLine, double Top);
+
+    /// <summary>Der Stapel am Platz des neuen Stempels (leer, wenn dort nichts liegt) und die Oberkante des nächsten freien Platzes –
+    /// null, wenn der Stapel voll ist oder der nächste Platz nicht mehr auf die Seite passt. Gestapelt wird unter den vorhandenen
+    /// Stempel; bei der Seitenmitte kommt der zweite darüber und der dritte darunter.</summary>
+    public static (List<StampSlot> Stack, double? FreeTop) FindStampStack(string path, int page, Stamp stamp)
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
         var pdfPage = document.Pages[page - 1];
         var planned = StampRect(pdfPage, stamp, stamp.SecondLine(DateTime.Now));
         var annotations = pdfPage.Annotations;
+        List<(int Index, int ObjectNumber, string Contents, XRect Rect)> own = [];
         for (var i = 0; i < annotations.Count; i++)
         {
             var a = annotations[i];
             if (a.Elements.GetName("/Subtype") != "/Stamp" || a.Elements.GetName("/Name") != "/PDFlightStamp") { continue; }
             var r = a.Elements.GetRectangle("/Rect");
-            XRect existing = new(Math.Min(r.X1, r.X2), Math.Min(r.Y1, r.Y2), Math.Abs(r.X2 - r.X1), Math.Abs(r.Y2 - r.Y1));
-            if (!existing.IntersectsWith(planned)) { continue; }
             var objectNumber = annotations.Elements[i] is PdfReference reference ? reference.ObjectNumber : 0;
-            return (i, objectNumber, SplitLines(a.Elements.GetString("/Contents"))[0]);
+            own.Add((i, objectNumber, a.Elements.GetString("/Contents"), new XRect(Math.Min(r.X1, r.X2), Math.Min(r.Y1, r.Y2), Math.Abs(r.X2 - r.X1), Math.Abs(r.Y2 - r.Y1))));
         }
-        return null;
+        List<StampSlot> stack = [];
+        var probe = planned;
+        for (var slot = 0; slot < StackLimit; slot++)
+        {
+            var hit = own.FirstOrDefault(o => o.Rect.IntersectsWith(probe) && stack.All(s => s.Index != o.Index));
+            if (hit.Contents == null) { break; } // Platz frei
+            var lines = SplitLines(hit.Contents);
+            stack.Add(new StampSlot(hit.Index, hit.ObjectNumber, lines[0], lines.Length > 1 ? lines[^1] : string.Empty, hit.Rect.Y + hit.Rect.Height));
+            var anchor = stamp.Position == StampPosition.Center && slot == 1 ? stack[0] : stack[^1]; // Seitenmitte: 2. darüber, 3. unter dem 1.
+            var above = stamp.Position == StampPosition.Center && slot == 0;
+            var top = above ? anchor.Top + StackGap + planned.Height : (slot == 0 ? hit.Rect.Y : own.First(o => o.Index == anchor.Index).Rect.Y) - StackGap;
+            probe = new XRect(planned.X, top - planned.Height, planned.Width, planned.Height);
+        }
+        const double margin = 10 * 72 / 25.4;
+        var fits = probe.Y >= margin && probe.Y + probe.Height <= pdfPage.Height.Point - margin;
+        return (stack, stack.Count < StackLimit && fits ? probe.Y + probe.Height : null);
     }
 
     /// <summary>Kasten des Stempels auf der Seite (PDF-Koordinaten, Ursprung links unten): feste Position, 10 mm vom Rand.</summary>
-    private static XRect StampRect(PdfPage pdfPage, Stamp stamp, string dateLine)
+    private static XRect StampRect(PdfPage pdfPage, Stamp stamp, string dateLine, double? topOverride = null)
     {
         var (width, height, _, _) = MeasureStamp(stamp.Text, stamp.FontSize, dateLine);
         const double margin = 10 * 72 / 25.4;
@@ -320,7 +433,7 @@ internal static partial class PdfEditService
             StampPosition.TopRight => pageWidth - margin - width,
             _ => (pageWidth - width) / 2,
         };
-        var top = stamp.Position == StampPosition.Center ? (pageHeight + height) / 2 : pageHeight - margin;
+        var top = topOverride ?? (stamp.Position == StampPosition.Center ? (pageHeight + height) / 2 : pageHeight - margin);
         return new XRect(left, top - height, width, height);
     }
 
@@ -331,19 +444,22 @@ internal static partial class PdfEditService
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         var pdfPage = document.Pages[page - 1];
         index = ResolveIndex(pdfPage.Annotations, objectNumber, index);
-        var oldLines = SplitLines(pdfPage.Annotations[index].Elements.GetString("/Contents"));
+        var old = pdfPage.Annotations[index];
+        var oldLines = SplitLines(old.Elements.GetString("/Contents"));
+        var oldRect = old.Elements.GetRectangle("/Rect");
+        var oldTop = Math.Max(oldRect.Y1, oldRect.Y2); // der neue Stempel bleibt an seinem Platz im Stapel
         var oldDate = oldLines.Length > 1 ? InitialsSuffix().Replace(oldLines[^1], string.Empty).Trim() : string.Empty; // Datum ohne das alte Kürzel
         var dateLine = stamp.SecondLine(oldDate.Length > 0 ? oldDate : Stamp.DateText(DateTime.Now));
         pdfPage.Annotations.Elements.RemoveAt(index);
-        AppendStamp(document, pdfPage, stamp, dateLine);
+        AppendStamp(document, pdfPage, stamp, dateLine, oldTop);
         document.Save(path);
     }
 
-    private static void AppendStamp(PdfDocument document, PdfPage pdfPage, Stamp stamp, string dateLine)
+    private static void AppendStamp(PdfDocument document, PdfPage pdfPage, Stamp stamp, string dateLine, double? top = null)
     {
         var dateSize = stamp.FontSize * Stamp.DateFactor;
         var (width, height, textWidth, dateWidth) = MeasureStamp(stamp.Text, stamp.FontSize, dateLine);
-        var rect = StampRect(pdfPage, stamp, dateLine);
+        var rect = StampRect(pdfPage, stamp, dateLine, top);
 
         var fonts = new PdfDictionary(document);
         foreach (var (key, baseFont) in new[] { ("/HeBo", "/Helvetica-Bold"), ("/Helv", "/Helvetica") })
@@ -358,10 +474,17 @@ internal static partial class PdfEditService
         }
         var resources = new PdfDictionary(document);
         resources.Elements.SetObject("/Font", fonts);
+        var graphicsState = new PdfDictionary(document); // Deckkraft für Füllung, Rahmen und Text (Extended Graphics State)
+        graphicsState.Elements.SetName("/Type", "/ExtGState");
+        graphicsState.Elements.SetReal("/CA", stamp.Alpha);
+        graphicsState.Elements.SetReal("/ca", stamp.Alpha);
+        var graphicsStates = new PdfDictionary(document);
+        graphicsStates.Elements.SetObject("/GS0", graphicsState);
+        resources.Elements.SetObject("/ExtGState", graphicsStates);
 
         var color = stamp.Color;
         var rgb = string.Create(CultureInfo.InvariantCulture, $"{color.R / 255.0:0.###} {color.G / 255.0:0.###} {color.B / 255.0:0.###}");
-        var content = new StringBuilder("q ");
+        var content = new StringBuilder("/GS0 gs q "); // die Deckkraft gilt vor dem ersten q, damit sie auch den Text nach Q erfasst
         var radius = stamp.CornerRadius;
         if (stamp.BackgroundColor is { } fill)
         {
@@ -711,6 +834,33 @@ internal static partial class PdfEditService
             xmp.Elements.Remove("/Filter"); // der leere Inhalt ist nicht mehr komprimiert; /Length setzt PDFsharp beim Schreiben
         }
         owner.Elements.Remove("/Metadata");
+    }
+
+    /// <summary>Fügt eine leere Seite vor oder nach der Seite ein (1-basiert), im Format dieser Nachbarseite; eine gedrehte
+    /// Nachbarseite ergibt eine ungedrehte Seite mit vertauschten Maßen, damit die Anzeige gleich aussieht und ein Bild
+    /// aufrecht steht. Ein Bild wird mit 10 mm Rand seitenfüllend eingepasst (Seitenverhältnis bleibt). Liefert die neue Seitennummer.</summary>
+    public static int InsertBlankPage(string path, int page, bool after, string? imagePath)
+    {
+        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        var neighbour = document.Pages[page - 1];
+        var rotated = neighbour.Rotate % 180 != 0;
+        var newPage = document.Pages.Insert(after ? page : page - 1);
+        newPage.Width = rotated ? neighbour.Height : neighbour.Width;
+        newPage.Height = rotated ? neighbour.Width : neighbour.Height;
+        newPage.Rotate = 0;
+        if (imagePath != null)
+        {
+            using var image = XImage.FromFile(imagePath);
+            using var gfx = XGraphics.FromPdfPage(newPage);
+            const double margin = 10 * 72 / 25.4;
+            var box = new XRect(margin, margin, newPage.Width.Point - 2 * margin, newPage.Height.Point - 2 * margin);
+            var scale = Math.Min(box.Width / image.PointWidth, box.Height / image.PointHeight);
+            var width = image.PointWidth * scale;
+            var height = image.PointHeight * scale;
+            gfx.DrawImage(image, box.X + (box.Width - width) / 2, box.Y + (box.Height - height) / 2, width, height);
+        }
+        document.Save(path);
+        return after ? page + 1 : page;
     }
 
     /// <summary>Verschiebt eine Seite an eine andere Position (beide 1-basiert); die übrigen Seiten rücken auf.</summary>
