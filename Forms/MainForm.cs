@@ -1376,22 +1376,59 @@ public partial class MainForm : Form
         }
     }
 
+    /// <summary>„PDF-Datei anhängen“: erst die Frage, woher – Dateidialog, die in anderen PDFlight-Fenstern geöffneten Dateien oder
+    /// die PDF-Dateien des Ordners (die beiden Listen als Mehrfachauswahl in <see cref="FileListForm"/>, Wunsch vom 20.09.2026).</summary>
     private void AppendPdfDialog()
     {
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
-        using OpenFileDialog dialog = new() { Filter = Lng.T("PDF-Dateien (*.pdf)|*.pdf"), Title = Lng.T("PDF-Datei anhängen"), InitialDirectory = currentFile.DirectoryName };
-        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
-        if (string.Equals(dialog.FileName, currentFile.FullName, StringComparison.OrdinalIgnoreCase))
+        var file = currentFile.FullName;
+        (string Text, string? Detail)[] choices =
+        [
+            (Lng.T("Einzelne Datei auswählen"), Lng.T("Über den Dateidialog")),
+            (Lng.T("Geöffnete Dateien hinzufügen"), Lng.T("Dateien, die gerade in anderen PDFlight-Fenstern angezeigt werden")),
+            (Lng.T("Dateien desselben Ordners"), Lng.T("PDF-Dateien aus dem Ordner der angezeigten Datei")),
+        ];
+        var choice = TaskDlg.ChoiceTaskDlg(Handle, Lng.T("Was soll angehängt werden?"), null, choices);
+        List<string> files;
+        switch (choice)
         {
-            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei kann nicht an sich selbst angehängt werden."), null, TaskDialogIcon.Warning);
-            return;
+            case 0:
+                using (OpenFileDialog dialog = new() { Filter = Lng.T("PDF-Dateien (*.pdf)|*.pdf"), Title = Lng.T("PDF-Datei anhängen"), InitialDirectory = currentFile.DirectoryName })
+                {
+                    if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
+                    if (string.Equals(dialog.FileName, file, StringComparison.OrdinalIgnoreCase))
+                    {
+                        TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei kann nicht an sich selbst angehängt werden."), null, TaskDialogIcon.Warning);
+                        return;
+                    }
+                    files = [dialog.FileName];
+                }
+                break;
+            case 1:
+            case 2:
+                var candidates = (choice == 1 ? InstanceRegistry.ShownElsewhere() : FileUtil.GetPdfFilesInFolder(currentFile.DirectoryName ?? string.Empty))
+                    .Where(f => !string.Equals(f, file, StringComparison.OrdinalIgnoreCase)).ToList(); // die Datei selbst nie
+                if (candidates.Count == 0)
+                {
+                    TaskDlg.MsgTaskDlg(Handle, Lng.T("Keine weiteren PDF-Dateien gefunden."),
+                        Lng.T(choice == 1 ? "In anderen PDFlight-Fenstern ist keine Datei geöffnet." : "Der Ordner enthält keine weitere PDF-Datei."), TaskDialogIcon.Information);
+                    return;
+                }
+                using (FileListForm list = new(Lng.T(choice == 1 ? "Geöffnete PDF-Dateien" : "PDF-Dateien im Ordner"),
+                    choice == 1 ? Lng.T("Geöffnete PDF-Dateien:") : string.Format(Lng.T("PDF-Dateien im Ordner „{0}“:"), currentFile.Directory?.Name), candidates))
+                {
+                    if (list.ShowDialog(this) != DialogResult.OK || list.SelectedFiles.Count == 0) { return; }
+                    files = list.SelectedFiles;
+                }
+                break;
+            default: return;
         }
         var firstNewPage = currentPageCount + 1;
-        if (RunPdfEdit(() => PdfEditService.AppendPdf(currentFile.FullName, dialog.FileName), Lng.T("Anhängen")))
+        if (RunPdfEdit(() => PdfEditService.AppendPdfs(file, files), Lng.T("Anhängen")))
         {
-            LoadPdf(currentFile.FullName, firstNewPage);
-            statusPath.Text = string.Format(Lng.T("\"{0}\" wurde angehängt."), Path.GetFileName(dialog.FileName));
+            LoadPdf(file, firstNewPage);
+            statusPath.Text = files.Count == 1 ? string.Format(Lng.T("\"{0}\" wurde angehängt."), Path.GetFileName(files[0])) : string.Format(Lng.T("{0} Dateien wurden angehängt."), files.Count);
         }
     }
 
