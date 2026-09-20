@@ -20,6 +20,18 @@ internal class BookmarkTreeView : TreeView
         Invalidate(); // die Seitenspalte wandert mit dem rechten Rand (auch wenn eine Bildlaufleiste erscheint oder verschwindet)
     }
 
+    protected override void OnGotFocus(EventArgs e)
+    {
+        base.OnGotFocus(e);
+        Invalidate(); // die Auswahlfarbe hängt am Fokus
+    }
+
+    protected override void OnLostFocus(EventArgs e)
+    {
+        base.OnLostFocus(e);
+        Invalidate();
+    }
+
     protected override void OnAfterExpand(TreeViewEventArgs e)
     {
         base.OnAfterExpand(e);

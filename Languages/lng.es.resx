@@ -619,9 +619,12 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="Ebene &amp;höher" xml:space="preserve"><value>Nivel su&amp;perior</value></data>
   <data name="Ebene &amp;tiefer" xml:space="preserve"><value>Nivel in&amp;ferior</value></data>
   <data name="&amp;Speichern" xml:space="preserve"><value>&amp;Guardar</value></data>
-  <data name="F2 benennt um, Entf löscht, Einfg legt einen Eintrag an; Strg+Z macht das Speichern rückgängig." xml:space="preserve"><value>F2 renombra, Supr elimina, Insert añade una entrada; Ctrl+Z deshace el guardado.</value></data>
+  <data name="Entf löscht, Einfg legt einen Eintrag an, F2 springt zum Titel; Strg+Z macht das Speichern rückgängig." xml:space="preserve"><value>Supr elimina, Insert añade una entrada, F2 salta al título; Ctrl+Z deshace el guardado.</value></data>
   <data name="Neues Lesezeichen" xml:space="preserve"><value>Nuevo marcador</value></data>
   <data name="Seite {0}" xml:space="preserve"><value>Página {0}</value></data>
   <data name="Ohne Ziel" xml:space="preserve"><value>Sin destino</value></data>
   <data name="settings.json ist im Editor geöffnet – Änderungen gelten nach dem nächsten Start." xml:space="preserve"><value>settings.json está abierto en el editor; los cambios se aplican en el próximo inicio.</value></data>
+  <data name="&amp;Alle" xml:space="preserve"><value>&amp;Todo</value></data>
+  <data name="Aufklappen bis Ebene:" xml:space="preserve"><value>Desplegar hasta el nivel:</value></data>
+  <data name="Bitte gib für jedes Lesezeichen einen Titel ein." xml:space="preserve"><value>Escribe un título para cada marcador.</value></data>
 </root>

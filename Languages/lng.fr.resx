@@ -619,9 +619,12 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Ebene &amp;höher" xml:space="preserve"><value>Niveau su&amp;périeur</value></data>
   <data name="Ebene &amp;tiefer" xml:space="preserve"><value>Niveau in&amp;férieur</value></data>
   <data name="&amp;Speichern" xml:space="preserve"><value>&amp;Enregistrer</value></data>
-  <data name="F2 benennt um, Entf löscht, Einfg legt einen Eintrag an; Strg+Z macht das Speichern rückgängig." xml:space="preserve"><value>F2 renomme, Suppr supprime, Inser ajoute une entrée ; Ctrl+Z annule l’enregistrement.</value></data>
+  <data name="Entf löscht, Einfg legt einen Eintrag an, F2 springt zum Titel; Strg+Z macht das Speichern rückgängig." xml:space="preserve"><value>Suppr supprime, Inser ajoute une entrée, F2 va au titre ; Ctrl+Z annule l’enregistrement.</value></data>
   <data name="Neues Lesezeichen" xml:space="preserve"><value>Nouveau signet</value></data>
   <data name="Seite {0}" xml:space="preserve"><value>Page {0}</value></data>
   <data name="Ohne Ziel" xml:space="preserve"><value>Sans cible</value></data>
   <data name="settings.json ist im Editor geöffnet – Änderungen gelten nach dem nächsten Start." xml:space="preserve"><value>settings.json est ouvert dans l’éditeur – les modifications s’appliquent au prochain démarrage.</value></data>
+  <data name="&amp;Alle" xml:space="preserve"><value>&amp;Tout</value></data>
+  <data name="Aufklappen bis Ebene:" xml:space="preserve"><value>Déplier jusqu’au niveau :</value></data>
+  <data name="Bitte gib für jedes Lesezeichen einen Titel ein." xml:space="preserve"><value>Saisis un titre pour chaque signet.</value></data>
 </root>
