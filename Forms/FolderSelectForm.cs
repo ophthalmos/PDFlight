@@ -125,6 +125,7 @@ public partial class FolderSelectForm : Form
         shellTreeView.Controls.Add(btnNewFolder);
         pathEdit.TextBox.Focus();
         if (jumpToLastUsed) { LinkLabelRecent_LinkClicked(null, null); }
+        BeginInvoke(pathEdit.TextBox.SelectAll); // nach dem Befüllen (Baum, Zuletzt-Sprung) den ganzen Pfad markieren, damit Strg+V ihn ersetzt
     }
 
     private void ShellTreeView_PreviewKeyDown(object? sender, PreviewKeyDownEventArgs e) { e.IsInputKey = e.KeyCode is Keys.Return or Keys.Enter; }
@@ -213,6 +214,7 @@ public partial class FolderSelectForm : Form
         if (!string.IsNullOrEmpty(shellTreeView.SelectedPath))
         {
             pathEdit.Text = shellTreeView.SelectedPath;
+            if (pathEdit.TextBox.Focused) { pathEdit.TextBox.SelectAll(); } // der komplette Pfad bleibt markiert – Einfügen aus der Zwischenablage ersetzt ihn (Wunsch vom 20.09.2026)
             comboBoxTarget.SelectedIndex = comboBoxTarget.FindStringExact(shellTreeView.SelectedPath);
             comboBoxRecent.SelectedIndex = comboBoxRecent.FindStringExact(shellTreeView.SelectedPath);
             if (shellTreeView.SelectedNode is { } selected && selected.Nodes.Count > 0) { selected.Expand(); }
