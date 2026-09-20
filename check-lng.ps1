@@ -20,6 +20,7 @@ $ignore = @(
     "PDFlight", "Über PDFlight …", "PDF-Dateien (*.pdf)|*.pdf",
     "OK", "A–Z", "Z–A",
     "&1", "&2", "&3",  # Ebenen-Schaltflächen im Lesezeichen-Editor (Ziffern)
+    "↑", "↓",          # Reihenfolge-Schaltflächen in der Dateiliste (Pfeile)
     "&Seiten (1–99):", # Designer-Platzhalter; zur Laufzeit ersetzt durch "&Seiten (1–{0}):"
     "datei.pdf",       # Designer-Platzhalter; zur Laufzeit ersetzt durch den echten Dateinamen
     "Neuer Ordner",    # über die Konstante NewFolderName verwendet (FolderSelectForm/FolderTreeView)
