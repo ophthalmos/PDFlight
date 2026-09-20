@@ -645,4 +645,6 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Name" xml:space="preserve"><value>Nom</value></data>
   <data name="Dateien &amp;hinzufügen" xml:space="preserve"><value>Ajouter les &amp;fichiers</value></data>
   <data name="{0} Dateien wurden angehängt." xml:space="preserve"><value>{0} fichiers ont été ajoutés.</value></data>
+  <data name="1 Seite angehängt" xml:space="preserve"><value>1 page ajoutée</value></data>
+  <data name="{0} Seiten angehängt" xml:space="preserve"><value>{0} pages ajoutées</value></data>
 </root>
