@@ -619,9 +619,12 @@ or press Ctrl+Shift+I.</value></data>
   <data name="Ebene &amp;höher" xml:space="preserve"><value>Level &amp;up</value></data>
   <data name="Ebene &amp;tiefer" xml:space="preserve"><value>Level do&amp;wn</value></data>
   <data name="&amp;Speichern" xml:space="preserve"><value>&amp;Save</value></data>
-  <data name="F2 benennt um, Entf löscht, Einfg legt einen Eintrag an; Strg+Z macht das Speichern rückgängig." xml:space="preserve"><value>F2 renames, Del deletes, Ins adds an entry; Ctrl+Z undoes the save.</value></data>
+  <data name="Entf löscht, Einfg legt einen Eintrag an, F2 springt zum Titel; Strg+Z macht das Speichern rückgängig." xml:space="preserve"><value>Del deletes, Ins adds an entry, F2 jumps to the title; Ctrl+Z undoes the save.</value></data>
   <data name="Neues Lesezeichen" xml:space="preserve"><value>New bookmark</value></data>
   <data name="Seite {0}" xml:space="preserve"><value>Page {0}</value></data>
   <data name="Ohne Ziel" xml:space="preserve"><value>No target</value></data>
   <data name="settings.json ist im Editor geöffnet – Änderungen gelten nach dem nächsten Start." xml:space="preserve"><value>settings.json is open in the editor – changes take effect after the next start.</value></data>
+  <data name="&amp;Alle" xml:space="preserve"><value>&amp;All</value></data>
+  <data name="Aufklappen bis Ebene:" xml:space="preserve"><value>Expand to level:</value></data>
+  <data name="Bitte gib für jedes Lesezeichen einen Titel ein." xml:space="preserve"><value>Please enter a title for every bookmark.</value></data>
 </root>
