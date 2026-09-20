@@ -59,6 +59,7 @@ public partial class MainForm : Form
         RebuildProgramIconButtons();
         ApplyToolbarIcons();
         ApplyFavoritesOption();
+        mnuEditBookmarks.Visible = settings.ExperimentalFeatures; // nur von Hand in settings.json einschaltbar, kein Schalter in den Einstellungen
         toolStrip.Resize += (s, args) => UpdateProgramIconVisibility();
         RestoreWindowBounds();
     }
@@ -398,6 +399,7 @@ public partial class MainForm : Form
         mnuAddStamp.Enabled = !PdfALocked;
         mnuManageAnnotations.Enabled = !PdfALocked && (currentPdfStatus?.AnnotationCount ?? 0) > 0; // ohne Anmerkungen gibt es nichts zu verwalten
         mnuRemoveBookmarks.Enabled = !PdfALocked && (currentPdfStatus?.OutlineCount ?? 0) > 0;
+        mnuEditBookmarks.Enabled = !PdfALocked; // auch ohne Lesezeichen: dann legt der Editor welche an
         mnuSetPassword.Enabled = currentPageCount > 0 && !PdfALocked;  // nur ohne bestehenden Kennwortschutz
         mnuRemovePassword.Enabled = hasFile && currentPageCount <= 0;  // nur bei geschützter (oder unlesbarer) Datei
         foreach (var button in programIconButtons) { button.Enabled = hasFile; }
@@ -1009,6 +1011,7 @@ public partial class MainForm : Form
         mnuAddAnnotation.Image = MenuIcon(ToolbarIcons.Comment);
         mnuManageAnnotations.Image = MenuIcon(ToolbarIcons.Edit);
         mnuRemoveBookmarks.Image = MenuIcon(ToolbarIcons.Bookmarks);
+        mnuEditBookmarks.Image = MenuIcon(ToolbarIcons.Bookmarks);
         mnuAddStamp.Image = MenuIcon(ToolbarIcons.Stamp);
         mnuManageStamps.Image = MenuIcon(ToolbarIcons.List);
         mnuUndo.Image = MenuIcon(ToolbarIcons.Undo);
@@ -1547,6 +1550,30 @@ public partial class MainForm : Form
         {
             LoadPdf(file, annotation.Page);
             statusPath.Text = string.Format(Lng.T("Der Stempel auf Seite {0} wurde geändert."), annotation.Page);
+        }
+    }
+
+    /// <summary>Experimenteller Lesezeichen-Editor (Bearbeiten-Menü, nur mit „ExperimentalFeatures“ in settings.json sichtbar): die
+    /// Gliederung als Baum bearbeiten; „Speichern“ schreibt sie komplett neu, Rückgängig wie bei jeder Bearbeitung.</summary>
+    private void EditBookmarks()
+    {
+        if (currentFile == null) { return; }
+        if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
+        var file = currentFile.FullName;
+        List<Bookmark> bookmarks;
+        try { bookmarks = PdfEditService.ReadOutlines(file); }
+        catch (Exception ex) when (PdfEditService.IsPdfReadError(ex))
+        {
+            TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), Lng.T("Lesezeichen lesen")), ex);
+            return;
+        }
+        var page = Math.Max(1, ClampedCurrentPage());
+        using BookmarkForm dialog = new(bookmarks, currentPageCount, page);
+        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
+        if (RunPdfEdit(() => PdfEditService.WriteOutlines(file, dialog.Bookmarks), Lng.T("Lesezeichen speichern")))
+        {
+            LoadPdf(file, page);
+            statusPath.Text = Lng.T("Die Lesezeichen wurden gespeichert.");
         }
     }
 
@@ -2160,6 +2187,10 @@ public partial class MainForm : Form
     private void MnuRemoveBookmarks_Click(object? sender, EventArgs e)
     {
         RemoveBookmarks();
+    }
+    private void MnuEditBookmarks_Click(object? sender, EventArgs e)
+    {
+        EditBookmarks();
     }
     private void MnuManageAnnotations_Click(object? sender, EventArgs e)
     {
