@@ -2,7 +2,7 @@ using PDFLight.Classes;
 
 namespace PDFLight.Forms;
 
-/// <summary>Experimenteller Lesezeichen-Editor (nur mit „ExperimentalFeatures“ in settings.json erreichbar): die Gliederung als
+/// <summary>Lesezeichen-Editor (nur mit „ExperimentalFeatures“ in settings.json erreichbar): die Gliederung als
 /// Baum – Umbenennen (F2), Zielseite, neue Einträge (Nachbar oder Unterpunkt), Löschen, Verschieben und Ebenenwechsel. Der Baum
 /// zeichnet rechts die Zielseite in Grau (Owner-Draw), damit die Beschriftungsbearbeitung nur den Titel enthält. Gearbeitet wird am
 /// Modell in den Knoten-Tags; erst „Speichern“ liefert die neue Liste (<see cref="Bookmarks"/>), geschrieben wird sie vom
