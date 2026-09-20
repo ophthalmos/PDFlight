@@ -33,6 +33,8 @@ namespace PDFLight.Forms
             listView = new System.Windows.Forms.ListView();
             colName = new System.Windows.Forms.ColumnHeader();
             colDate = new System.Windows.Forms.ColumnHeader();
+            btnUp = new System.Windows.Forms.Button();
+            btnDown = new System.Windows.Forms.Button();
             btnOK = new System.Windows.Forms.Button();
             btnCancel = new System.Windows.Forms.Button();
             SuspendLayout();
@@ -48,6 +50,7 @@ namespace PDFLight.Forms
             //
             // listView
             //
+            listView.AllowDrop = true;
             listView.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             listView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] { colName, colDate });
             listView.FullRowSelect = true;
@@ -55,24 +58,51 @@ namespace PDFLight.Forms
             listView.Location = new System.Drawing.Point(12, 34);
             listView.Name = "listView";
             listView.ShowItemToolTips = true;
-            listView.Size = new System.Drawing.Size(460, 300);
+            listView.Size = new System.Drawing.Size(410, 300);
             listView.TabIndex = 1;
             listView.UseCompatibleStateImageBehavior = false;
             listView.View = System.Windows.Forms.View.Details;
+            listView.ItemDrag += ListView_ItemDrag;
             listView.SelectedIndexChanged += ListView_SelectedIndexChanged;
-            listView.Resize += ListView_Resize;
+            listView.DragDrop += ListView_DragDrop;
+            listView.DragEnter += ListView_DragEnter;
+            listView.DragOver += ListView_DragOver;
+            listView.DragLeave += ListView_DragLeave;
             listView.DoubleClick += ListView_DoubleClick;
             listView.KeyDown += ListView_KeyDown;
+            listView.Resize += ListView_Resize;
             //
             // colName
             //
             colName.Text = "Name";
-            colName.Width = 300;
+            colName.Width = 250;
             //
             // colDate
             //
             colDate.Text = "Datum";
             colDate.Width = 130;
+            //
+            // btnUp
+            //
+            btnUp.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            btnUp.Location = new System.Drawing.Point(428, 34);
+            btnUp.Name = "btnUp";
+            btnUp.Size = new System.Drawing.Size(44, 27);
+            btnUp.TabIndex = 2;
+            btnUp.Text = "↑";
+            btnUp.UseVisualStyleBackColor = true;
+            btnUp.Click += BtnUp_Click;
+            //
+            // btnDown
+            //
+            btnDown.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            btnDown.Location = new System.Drawing.Point(428, 67);
+            btnDown.Name = "btnDown";
+            btnDown.Size = new System.Drawing.Size(44, 27);
+            btnDown.TabIndex = 3;
+            btnDown.Text = "↓";
+            btnDown.UseVisualStyleBackColor = true;
+            btnDown.Click += BtnDown_Click;
             //
             // btnOK
             //
@@ -80,7 +110,7 @@ namespace PDFLight.Forms
             btnOK.Location = new System.Drawing.Point(226, 346);
             btnOK.Name = "btnOK";
             btnOK.Size = new System.Drawing.Size(145, 27);
-            btnOK.TabIndex = 2;
+            btnOK.TabIndex = 4;
             btnOK.Text = "Dateien &hinzufügen";
             btnOK.UseVisualStyleBackColor = true;
             btnOK.Click += BtnOK_Click;
@@ -92,7 +122,7 @@ namespace PDFLight.Forms
             btnCancel.Location = new System.Drawing.Point(377, 346);
             btnCancel.Name = "btnCancel";
             btnCancel.Size = new System.Drawing.Size(95, 27);
-            btnCancel.TabIndex = 3;
+            btnCancel.TabIndex = 5;
             btnCancel.Text = "Abbrechen";
             btnCancel.UseVisualStyleBackColor = true;
             //
@@ -104,6 +134,8 @@ namespace PDFLight.Forms
             ClientSize = new System.Drawing.Size(484, 385);
             Controls.Add(btnCancel);
             Controls.Add(btnOK);
+            Controls.Add(btnDown);
+            Controls.Add(btnUp);
             Controls.Add(listView);
             Controls.Add(labelPrompt);
             Icon = (Icon)resources.GetObject("$this.Icon");
@@ -123,6 +155,8 @@ namespace PDFLight.Forms
         private System.Windows.Forms.ListView listView;
         private System.Windows.Forms.ColumnHeader colName;
         private System.Windows.Forms.ColumnHeader colDate;
+        private System.Windows.Forms.Button btnUp;
+        private System.Windows.Forms.Button btnDown;
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancel;
     }
