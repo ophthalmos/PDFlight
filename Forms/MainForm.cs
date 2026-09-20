@@ -1578,6 +1578,7 @@ public partial class MainForm : Form
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
         var file = currentFile.FullName;
+        var stamp = FileStamp.Of(file); // vor dem Lesen, damit jede spätere Änderung auffällt
         List<Bookmark> bookmarks;
         try { bookmarks = PdfEditService.ReadOutlines(file); }
         catch (Exception ex) when (PdfEditService.IsPdfReadError(ex))
@@ -1586,7 +1587,7 @@ public partial class MainForm : Form
             return;
         }
         var page = Math.Max(1, ClampedCurrentPage());
-        using BookmarkForm dialog = new(bookmarks, currentPageCount, page);
+        using BookmarkForm dialog = new(file, stamp, bookmarks, currentPageCount, page);
         Rectangle remembered = new(settings.BookmarkWindowX, settings.BookmarkWindowY, settings.BookmarkWindowWidth, settings.BookmarkWindowHeight);
         if (remembered.Width >= dialog.MinimumSize.Width && remembered.Height >= dialog.MinimumSize.Height && Screen.AllScreens.Any(s => s.WorkingArea.IntersectsWith(remembered)))
         {

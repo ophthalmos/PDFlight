@@ -627,4 +627,6 @@ or press Ctrl+Shift+I.</value></data>
   <data name="&amp;Alle" xml:space="preserve"><value>&amp;All</value></data>
   <data name="Aufklappen bis Ebene:" xml:space="preserve"><value>Expand to level:</value></data>
   <data name="Bitte gib für jedes Lesezeichen einen Titel ein." xml:space="preserve"><value>Please enter a title for every bookmark.</value></data>
+  <data name="Die Datei wurde inzwischen verändert." xml:space="preserve"><value>The file has been modified in the meantime.</value></data>
+  <data name="Die Lesezeichen wurden nicht gespeichert – schließe den Editor mit „Abbrechen“ und öffne ihn erneut." xml:space="preserve"><value>The bookmarks were not saved – close the editor with &quot;Cancel&quot; and open it again.</value></data>
 </root>
