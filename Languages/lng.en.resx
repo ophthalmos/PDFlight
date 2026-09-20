@@ -632,4 +632,21 @@ or press Ctrl+Shift+I.</value></data>
   <data name="Anzeigehintergrund:" xml:space="preserve"><value>Viewer background:</value></data>
   <data name="&amp;hell" xml:space="preserve"><value>&amp;light</value></data>
   <data name="dun&amp;kel" xml:space="preserve"><value>&amp;dark</value></data>
+  <data name="Einzelne Datei auswählen" xml:space="preserve"><value>Select a single file</value></data>
+  <data name="Über den Dateidialog" xml:space="preserve"><value>Via the file dialog</value></data>
+  <data name="Geöffnete Dateien hinzufügen" xml:space="preserve"><value>Add open files</value></data>
+  <data name="Dateien, die gerade in anderen PDFlight-Fenstern angezeigt werden" xml:space="preserve"><value>Files currently shown in other PDFlight windows</value></data>
+  <data name="Dateien desselben Ordners" xml:space="preserve"><value>Files from the same folder</value></data>
+  <data name="PDF-Dateien aus dem Ordner der angezeigten Datei" xml:space="preserve"><value>PDF files from the folder of the displayed file</value></data>
+  <data name="Was soll angehängt werden?" xml:space="preserve"><value>What should be appended?</value></data>
+  <data name="Keine weiteren PDF-Dateien gefunden." xml:space="preserve"><value>No further PDF files found.</value></data>
+  <data name="In anderen PDFlight-Fenstern ist keine Datei geöffnet." xml:space="preserve"><value>No file is open in other PDFlight windows.</value></data>
+  <data name="Der Ordner enthält keine weitere PDF-Datei." xml:space="preserve"><value>The folder contains no other PDF file.</value></data>
+  <data name="Geöffnete PDF-Dateien" xml:space="preserve"><value>Open PDF files</value></data>
+  <data name="PDF-Dateien im Ordner" xml:space="preserve"><value>PDF files in folder</value></data>
+  <data name="Geöffnete PDF-Dateien:" xml:space="preserve"><value>Open PDF files:</value></data>
+  <data name="PDF-Dateien im Ordner „{0}“:" xml:space="preserve"><value>PDF files in folder „{0}“:</value></data>
+  <data name="Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Dateien &amp;hinzufügen" xml:space="preserve"><value>Add &amp;files</value></data>
+  <data name="{0} Dateien wurden angehängt." xml:space="preserve"><value>{0} files were appended.</value></data>
 </root>

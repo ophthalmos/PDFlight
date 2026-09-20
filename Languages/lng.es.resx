@@ -632,4 +632,21 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="Anzeigehintergrund:" xml:space="preserve"><value>Fondo de la vista:</value></data>
   <data name="&amp;hell" xml:space="preserve"><value>c&amp;laro</value></data>
   <data name="dun&amp;kel" xml:space="preserve"><value>&amp;oscuro</value></data>
+  <data name="Einzelne Datei auswählen" xml:space="preserve"><value>Elegir un solo archivo</value></data>
+  <data name="Über den Dateidialog" xml:space="preserve"><value>Mediante el diálogo de archivos</value></data>
+  <data name="Geöffnete Dateien hinzufügen" xml:space="preserve"><value>Añadir archivos abiertos</value></data>
+  <data name="Dateien, die gerade in anderen PDFlight-Fenstern angezeigt werden" xml:space="preserve"><value>Archivos que se muestran ahora en otras ventanas de PDFlight</value></data>
+  <data name="Dateien desselben Ordners" xml:space="preserve"><value>Archivos de la misma carpeta</value></data>
+  <data name="PDF-Dateien aus dem Ordner der angezeigten Datei" xml:space="preserve"><value>Archivos PDF de la carpeta del archivo mostrado</value></data>
+  <data name="Was soll angehängt werden?" xml:space="preserve"><value>¿Qué se debe añadir?</value></data>
+  <data name="Keine weiteren PDF-Dateien gefunden." xml:space="preserve"><value>No se han encontrado más archivos PDF.</value></data>
+  <data name="In anderen PDFlight-Fenstern ist keine Datei geöffnet." xml:space="preserve"><value>No hay ningún archivo abierto en otras ventanas de PDFlight.</value></data>
+  <data name="Der Ordner enthält keine weitere PDF-Datei." xml:space="preserve"><value>La carpeta no contiene ningún otro archivo PDF.</value></data>
+  <data name="Geöffnete PDF-Dateien" xml:space="preserve"><value>Archivos PDF abiertos</value></data>
+  <data name="PDF-Dateien im Ordner" xml:space="preserve"><value>Archivos PDF de la carpeta</value></data>
+  <data name="Geöffnete PDF-Dateien:" xml:space="preserve"><value>Archivos PDF abiertos:</value></data>
+  <data name="PDF-Dateien im Ordner „{0}“:" xml:space="preserve"><value>Archivos PDF de la carpeta «{0}»:</value></data>
+  <data name="Name" xml:space="preserve"><value>Nombre</value></data>
+  <data name="Dateien &amp;hinzufügen" xml:space="preserve"><value>Añadir &amp;archivos</value></data>
+  <data name="{0} Dateien wurden angehängt." xml:space="preserve"><value>Se han añadido {0} archivos.</value></data>
 </root>

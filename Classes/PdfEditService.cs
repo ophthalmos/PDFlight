@@ -860,11 +860,18 @@ internal static partial class PdfEditService
     }
 
     /// <summary>Hängt alle Seiten einer anderen PDF-Datei an; liefert die neue Gesamtseitenzahl.</summary>
-    public static int AppendPdf(string path, string otherPdf)
+    public static int AppendPdf(string path, string otherPdf) => AppendPdfs(path, [otherPdf]);
+
+    /// <summary>Hängt mehrere PDF-Dateien in der angegebenen Reihenfolge an – ein Öffnen und Speichern, also auch eine einzige
+    /// Rückgängig-Sicherung.</summary>
+    public static int AppendPdfs(string path, IReadOnlyList<string> otherPdfs)
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
-        using var other = PdfReader.Open(otherPdf, PdfDocumentOpenMode.Import);
-        foreach (var page in other.Pages) { document.AddPage(page); }
+        foreach (var otherPdf in otherPdfs)
+        {
+            using var other = PdfReader.Open(otherPdf, PdfDocumentOpenMode.Import);
+            foreach (var page in other.Pages) { document.AddPage(page); }
+        }
         var pageCount = document.PageCount; // muss vor Save() gelesen werden — danach ist das Dokument gesperrt
         document.Save(path);
         return pageCount;

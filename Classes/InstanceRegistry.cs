@@ -58,6 +58,22 @@ internal static class InstanceRegistry
 
     public static bool IsShownElsewhere(string path) => FindInstanceShowing(path) != null;
 
+    /// <summary>Die Dateien, die andere laufende Instanzen gerade anzeigen (nur vorhandene, ohne Doppelte) – für „Geöffnete
+    /// Dateien anhängen“.</summary>
+    public static List<string> ShownElsewhere()
+    {
+        List<string> result = [];
+        foreach (var (file, pid) in EnumerateOthers())
+        {
+            if (!ProcessExists(pid)) { continue; }
+            string shown;
+            try { shown = File.ReadAllText(file).Trim(); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { continue; }
+            if (shown.Length > 0 && File.Exists(shown) && !result.Contains(shown, StringComparer.OrdinalIgnoreCase)) { result.Add(shown); }
+        }
+        return result;
+    }
+
     /// <summary>Holt das Hauptfenster der Instanz nach vorn (das darf PDFlight, solange es selbst den Fokus hat).</summary>
     public static bool Activate(int pid)
     {

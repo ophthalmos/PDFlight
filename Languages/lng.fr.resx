@@ -632,4 +632,21 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Anzeigehintergrund:" xml:space="preserve"><value>Fond de l’affichage :</value></data>
   <data name="&amp;hell" xml:space="preserve"><value>c&amp;lair</value></data>
   <data name="dun&amp;kel" xml:space="preserve"><value>&amp;sombre</value></data>
+  <data name="Einzelne Datei auswählen" xml:space="preserve"><value>Choisir un seul fichier</value></data>
+  <data name="Über den Dateidialog" xml:space="preserve"><value>Via la boîte de dialogue</value></data>
+  <data name="Geöffnete Dateien hinzufügen" xml:space="preserve"><value>Ajouter les fichiers ouverts</value></data>
+  <data name="Dateien, die gerade in anderen PDFlight-Fenstern angezeigt werden" xml:space="preserve"><value>Fichiers affichés actuellement dans d’autres fenêtres PDFlight</value></data>
+  <data name="Dateien desselben Ordners" xml:space="preserve"><value>Fichiers du même dossier</value></data>
+  <data name="PDF-Dateien aus dem Ordner der angezeigten Datei" xml:space="preserve"><value>Fichiers PDF du dossier du fichier affiché</value></data>
+  <data name="Was soll angehängt werden?" xml:space="preserve"><value>Que faut-il ajouter ?</value></data>
+  <data name="Keine weiteren PDF-Dateien gefunden." xml:space="preserve"><value>Aucun autre fichier PDF trouvé.</value></data>
+  <data name="In anderen PDFlight-Fenstern ist keine Datei geöffnet." xml:space="preserve"><value>Aucun fichier n’est ouvert dans d’autres fenêtres PDFlight.</value></data>
+  <data name="Der Ordner enthält keine weitere PDF-Datei." xml:space="preserve"><value>Le dossier ne contient aucun autre fichier PDF.</value></data>
+  <data name="Geöffnete PDF-Dateien" xml:space="preserve"><value>Fichiers PDF ouverts</value></data>
+  <data name="PDF-Dateien im Ordner" xml:space="preserve"><value>Fichiers PDF du dossier</value></data>
+  <data name="Geöffnete PDF-Dateien:" xml:space="preserve"><value>Fichiers PDF ouverts :</value></data>
+  <data name="PDF-Dateien im Ordner „{0}“:" xml:space="preserve"><value>Fichiers PDF du dossier « {0} » :</value></data>
+  <data name="Name" xml:space="preserve"><value>Nom</value></data>
+  <data name="Dateien &amp;hinzufügen" xml:space="preserve"><value>Ajouter les &amp;fichiers</value></data>
+  <data name="{0} Dateien wurden angehängt." xml:space="preserve"><value>{0} fichiers ont été ajoutés.</value></data>
 </root>
