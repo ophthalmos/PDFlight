@@ -610,7 +610,7 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="Mehr als drei Stempel je Position gibt es nicht." xml:space="preserve"><value>No caben más de tres sellos por posición.</value></data>
   <data name="Die Bilddatei konnte nicht gelesen werden." xml:space="preserve"><value>No se pudo leer el archivo de imagen.</value></data>
   <data name="Lesezeichen bearbeiten …" xml:space="preserve"><value>Editar marcadores…</value></data>
-  <data name="Lesezeichen bearbeiten" xml:space="preserve"><value>Editar marcadores</value></data>
+  <data name="Lesezeichen bearbeiten (Entf löscht, Einfg legt einen Eintrag an, F2 springt zum Titel)" xml:space="preserve"><value>Editar marcadores (Supr elimina, Insert añade una entrada, F2 salta al título)</value></data>
   <data name="Lesezeichen lesen" xml:space="preserve"><value>Lectura de marcadores</value></data>
   <data name="Lesezeichen speichern" xml:space="preserve"><value>Guardado de marcadores</value></data>
   <data name="Die Lesezeichen wurden gespeichert." xml:space="preserve"><value>Los marcadores se han guardado.</value></data>
@@ -619,7 +619,6 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="Ebene &amp;höher" xml:space="preserve"><value>Nivel su&amp;perior</value></data>
   <data name="Ebene &amp;tiefer" xml:space="preserve"><value>Nivel in&amp;ferior</value></data>
   <data name="&amp;Speichern" xml:space="preserve"><value>&amp;Guardar</value></data>
-  <data name="Entf löscht, Einfg legt einen Eintrag an, F2 springt zum Titel; Strg+Z macht das Speichern rückgängig." xml:space="preserve"><value>Supr elimina, Insert añade una entrada, F2 salta al título; Ctrl+Z deshace el guardado.</value></data>
   <data name="Neues Lesezeichen" xml:space="preserve"><value>Nuevo marcador</value></data>
   <data name="Seite {0}" xml:space="preserve"><value>Página {0}</value></data>
   <data name="Ohne Ziel" xml:space="preserve"><value>Sin destino</value></data>

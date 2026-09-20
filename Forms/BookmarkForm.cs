@@ -1,17 +1,17 @@
-using System.Windows.Forms.VisualStyles;
 using PDFLight.Classes;
 
 namespace PDFLight.Forms;
 
 /// <summary>Lesezeichen-Editor (nur mit „ExperimentalFeatures“ in settings.json erreichbar): die Gliederung als Baum, rechts Titel
 /// und Zielseite des markierten Eintrags, dazu Neu (Nachbar oder Unterpunkt), Löschen, Verschieben, Ebenenwechsel und das
-/// Aufklappen bis zu einer Ebene. Der Baum zeichnet sich komplett selbst (OwnerDrawAll): Titel links, Zielseite rechts in Grau,
+/// Aufklappen bis zu einer Ebene. Der Baum zeichnet sich komplett selbst (OwnerDrawAll): Pfeil (Chevron) statt Plus/Minus, Titel links, Zielseite rechts in Grau,
 /// die Vorfahren des markierten Eintrags über die ganze Breite hellgrau hinterlegt. Gearbeitet wird am Modell in den Knoten-Tags;
 /// erst „Speichern“ liefert die neue Liste (<see cref="Bookmarks"/>), geschrieben wird sie vom Hauptfenster.</summary>
 public partial class BookmarkForm : Form
 {
     private readonly int currentPage;
     private bool loading; // beim Befüllen der Felder keine Änderungen zurückschreiben
+    private readonly Font? glyphFont; // Symbolschrift für die Aufklapp-Pfeile (null: Ersatzzeichnung)
 
     /// <summary>Die bearbeitete Gliederung (nach „Speichern“).</summary>
     public List<Bookmark> Bookmarks { get; private set; } = [];
@@ -24,25 +24,14 @@ public partial class BookmarkForm : Form
         pageCount = Math.Max(1, pageCount);
         this.currentPage = Math.Clamp(currentPage, 1, pageCount);
         numPage.Maximum = pageCount;
-        buttonNew.Image = ButtonIcon(ToolbarIcons.Add);
-        buttonDelete.Image = ButtonIcon(ToolbarIcons.Delete);
+        buttonNew.Image = ToolbarIcons.ButtonIcon(ToolbarIcons.Add, this);
+        buttonDelete.Image = ToolbarIcons.ButtonIcon(ToolbarIcons.Delete, this);
+        glyphFont = ToolbarIcons.GlyphFont(LogicalToDeviceUnits(9));
         treeView.BeginUpdate();
         Fill(treeView.Nodes, bookmarks);
         treeView.EndUpdate();
         if (treeView.Nodes.Count > 0) { treeView.SelectedNode = treeView.Nodes[0]; }
         ShowSelected();
-    }
-
-    /// <summary>Menüsymbol für einen Textbutton, ein paar Pixel nach unten gerückt (wie in der Anmerkungsliste).</summary>
-    private Image? ButtonIcon(char glyph)
-    {
-        var icon = ToolbarIcons.MenuIcon(glyph, this);
-        if (icon == null) { return null; }
-        var shift = LogicalToDeviceUnits(3);
-        Bitmap padded = new(icon.Width, icon.Height + shift);
-        using var g = Graphics.FromImage(padded);
-        g.DrawImageUnscaled(icon, 0, shift);
-        return padded;
     }
 
     private static void Fill(TreeNodeCollection nodes, IReadOnlyList<Bookmark> bookmarks)
@@ -153,6 +142,7 @@ public partial class BookmarkForm : Form
         treeView.SelectedNode?.EnsureVisible();
         treeView.EndUpdate();
         treeView.Focus();
+        ShowSelected(); // das Zuklappen kann die Auswahl auf einen sichtbaren Vorfahren verschieben – Felder nachziehen
 
         void Expand(TreeNodeCollection nodes, int depth)
         {
@@ -189,7 +179,7 @@ public partial class BookmarkForm : Form
         Rectangle row = new(0, e.Bounds.Y, treeView.ClientSize.Width, e.Bounds.Height);
         var back = selected ? (active ? SystemColors.Highlight : SystemColors.ControlLight) : IsAncestorOfSelection(e.Node) ? Color.FromArgb(232, 232, 232) : treeView.BackColor;
         using (SolidBrush brush = new(back)) { g.FillRectangle(brush, row); }
-        if (e.Node.Nodes.Count > 0) { DrawGlyph(g, new Rectangle(e.Node.Bounds.X - treeView.Indent, e.Bounds.Y, treeView.Indent, e.Bounds.Height), e.Node.IsExpanded); }
+        if (e.Node.Nodes.Count > 0) { DrawGlyph(g, new Rectangle(e.Node.Bounds.X - treeView.Indent, e.Bounds.Y, treeView.Indent, e.Bounds.Height), e.Node.IsExpanded, active ? SystemColors.HighlightText : SystemColors.GrayText); }
         var pageWidth = LogicalToDeviceUnits(44);
         Rectangle pageBounds = new(row.Right - pageWidth - LogicalToDeviceUnits(4), e.Bounds.Y, pageWidth, e.Bounds.Height);
         Rectangle textBounds = new(e.Node.Bounds.X, e.Bounds.Y, Math.Max(0, pageBounds.Left - e.Node.Bounds.X), e.Bounds.Height);
@@ -199,22 +189,21 @@ public partial class BookmarkForm : Form
             TextFormatFlags.VerticalCenter | TextFormatFlags.Right | TextFormatFlags.NoPrefix);
     }
 
-    /// <summary>Das Plus/Minus-Symbol des Systems (Visual Styles), sonst ein einfacher Kasten mit Strich bzw. Kreuz.</summary>
-    private static void DrawGlyph(Graphics g, Rectangle area, bool expanded)
+    /// <summary>Aufklapp-Pfeil wie im Explorer: „>“ für zu, gekippt für auf – als Glyphe der Symbolschrift; ohne die Schrift ein
+    /// mit Linien gezeichnetes Winkelzeichen.</summary>
+    private void DrawGlyph(Graphics g, Rectangle area, bool expanded, Color color)
     {
-        if (VisualStyleRenderer.IsSupported)
+        if (glyphFont != null)
         {
-            VisualStyleRenderer renderer = new(expanded ? VisualStyleElement.TreeView.Glyph.Opened : VisualStyleElement.TreeView.Glyph.Closed);
-            var size = renderer.GetPartSize(g, ThemeSizeType.True);
-            renderer.DrawBackground(g, new Rectangle(area.X + (area.Width - size.Width) / 2, area.Y + (area.Height - size.Height) / 2, size.Width, size.Height));
+            TextRenderer.DrawText(g, (expanded ? ToolbarIcons.ChevronDown : ToolbarIcons.Next).ToString(), glyphFont, area, color,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
             return;
         }
-        var side = Math.Min(9, area.Height - 2);
-        Rectangle box = new(area.X + (area.Width - side) / 2, area.Y + (area.Height - side) / 2, side, side);
-        g.DrawRectangle(SystemPens.GrayText, box);
-        var middle = box.Y + side / 2;
-        g.DrawLine(SystemPens.WindowText, box.X + 2, middle, box.Right - 2, middle);
-        if (!expanded) { g.DrawLine(SystemPens.WindowText, box.X + side / 2, box.Y + 2, box.X + side / 2, box.Bottom - 2); }
+        var half = Math.Max(2, LogicalToDeviceUnits(3));
+        var (cx, cy) = (area.X + area.Width / 2, area.Y + area.Height / 2);
+        using Pen pen = new(color, LogicalToDeviceUnits(1));
+        if (expanded) { g.DrawLines(pen, [new Point(cx - half, cy - half / 2), new Point(cx, cy + half / 2), new Point(cx + half, cy - half / 2)]); }
+        else { g.DrawLines(pen, [new Point(cx - half / 2, cy - half), new Point(cx + half / 2, cy), new Point(cx - half / 2, cy + half)]); }
     }
 
     private void TreeView_KeyDown(object? sender, KeyEventArgs e)
@@ -285,6 +274,7 @@ public partial class BookmarkForm : Form
         treeView.ExpandAll();
         treeView.SelectedNode?.EnsureVisible();
         treeView.Focus();
+        ShowSelected();
     }
 
     private void ButtonOK_Click(object? sender, EventArgs e)
