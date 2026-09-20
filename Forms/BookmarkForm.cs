@@ -2,7 +2,7 @@ using PDFLight.Classes;
 
 namespace PDFLight.Forms;
 
-/// <summary>Lesezeichen-Editor (nur mit „ExperimentalFeatures“ in settings.json erreichbar): die Gliederung als Baum, rechts Titel
+/// <summary>Lesezeichen-Editor (Bearbeiten-Menü, Strg+F2): die Gliederung als Baum, rechts Titel
 /// und Zielseite des markierten Eintrags, dazu Neu (Nachbar oder Unterpunkt), Löschen, Verschieben, Ebenenwechsel und das
 /// Aufklappen bis zu einer Ebene. Der Baum zeichnet sich komplett selbst (OwnerDrawAll): Pfeil (Chevron) statt Plus/Minus, Titel links, Zielseite rechts in Grau,
 /// die Vorfahren des markierten Eintrags über die ganze Breite hellgrau hinterlegt. Gearbeitet wird am Modell in den Knoten-Tags;

@@ -60,7 +60,6 @@ public partial class MainForm : Form
         RebuildProgramIconButtons();
         ApplyToolbarIcons();
         ApplyFavoritesOption();
-        mnuEditBookmarks.Visible = settings.ExperimentalFeatures; // nur von Hand in settings.json einschaltbar, kein Schalter in den Einstellungen
         toolStrip.Resize += (s, args) => UpdateProgramIconVisibility();
         RestoreWindowBounds();
     }
@@ -1553,14 +1552,11 @@ public partial class MainForm : Form
     /// <summary>Palette zeigen; „Stempel bearbeiten“ darin öffnet die Verwaltung und beendet den Vorgang. null = abgebrochen (auch bei leerer Palette).</summary>
     private Stamp? ChooseStamp(int page)
     {
-        while (settings.Stamps.Count > 0)
-        {
-            using StampPaletteForm dialog = new(settings.Stamps, page);
-            var result = dialog.ShowDialog(this);
-            if (dialog.ManageRequested) { ManageStampsDialog(); return null; } // danach nicht erneut die Palette: der Einfügevorgang ist damit beendet (Wunsch vom 19.09.2026)
-            return result == DialogResult.OK ? dialog.SelectedStamp : null;
-        }
-        return null;
+        if (settings.Stamps.Count == 0) { return null; }
+        using StampPaletteForm dialog = new(settings.Stamps, page);
+        var result = dialog.ShowDialog(this);
+        if (dialog.ManageRequested) { ManageStampsDialog(); return null; } // danach nicht erneut die Palette: der Einfügevorgang ist damit beendet (Wunsch vom 19.09.2026)
+        return result == DialogResult.OK ? dialog.SelectedStamp : null;
     }
 
     /// <summary>Stempelpalette bearbeiten; die Liste landet in den Einstellungen.</summary>
@@ -1611,8 +1607,8 @@ public partial class MainForm : Form
         }
     }
 
-    /// <summary>Experimenteller Lesezeichen-Editor (Bearbeiten-Menü, nur mit „ExperimentalFeatures“ in settings.json sichtbar): die
-    /// Gliederung als Baum bearbeiten; „Speichern“ schreibt sie komplett neu, Rückgängig wie bei jeder Bearbeitung.</summary>
+    /// <summary>Lesezeichen-Editor (Bearbeiten-Menü, Strg+F2): die Gliederung als Baum bearbeiten; „Speichern“ schreibt sie komplett neu,
+    /// Rückgängig wie bei jeder Bearbeitung.</summary>
     private void EditBookmarks()
     {
         if (currentFile == null) { return; }
@@ -2097,7 +2093,7 @@ public partial class MainForm : Form
             case Keys.Right | Keys.Control | Keys.Shift: return () => StepFile(1);         // Strg+Pfeile ohne Umschalt gehören dem Viewer (Zoom & Co.)
             case Keys.Left | Keys.Control | Keys.Shift: return () => StepFile(-1);
             case Keys.F1: return () => TaskDlg.ShowShortcutsPdf(Handle);
-            case Keys.F2 | Keys.Control when mnuEditBookmarks.Available && mnuEditBookmarks.Enabled: return EditBookmarks; // nur mit ExperimentalFeatures (Available: Visible ist bei zugeklapptem Menü immer false); bewusst nicht in der Kürzeltabelle (Platz)
+            case Keys.F2 | Keys.Control when mnuEditBookmarks.Enabled: return EditBookmarks; // Lesezeichen-Editor; bewusst nicht in der Kürzeltabelle (Platz) in der Kürzeltabelle (Platz)
             case Keys.F2 | Keys.Control | Keys.Shift: return OpenSettingsFile;             // settings.json im Editor – bewusst undokumentiert (Wunsch vom 20.09.2026)
             case Keys.F11: return () => SetFullScreen(!isFullScreen);
             case Keys.Escape | Keys.Shift when settings.CloseOnEscape: return Close;      // Shift+Esc beendet sofort (wie in NetRadio)
