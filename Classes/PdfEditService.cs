@@ -39,7 +39,9 @@ internal sealed record AnnotationStyle(Color? BorderColor, Color? Background, Co
         hex.Length == 6 && int.TryParse(hex, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var rgb) ? Color.FromArgb(rgb >> 16 & 0xFF, rgb >> 8 & 0xFF, rgb & 0xFF) : null;
 }
 
-internal record PdfStatus(int PageCount, string? Version, string? PdfALevel, double PageWidthPt = 0, double PageHeightPt = 0, int AnnotationCount = 0, int OutlineCount = 0);
+/// <param name="Encrypted">Die Datei ist verschlüsselt, lässt sich aber ohne Kennwort lesen (nur Besitzerkennwort): PDFsharp öffnet sie zum
+/// Bearbeiten nicht – jede Änderung braucht vorher „Kennwort entfernen“ (Fehlerbericht 20.09.2026).</param>
+internal record PdfStatus(int PageCount, string? Version, string? PdfALevel, double PageWidthPt = 0, double PageHeightPt = 0, int AnnotationCount = 0, int OutlineCount = 0, bool Encrypted = false);
 
 /// <summary>Dokumentoperationen mit PDFsharp. Alle Methoden arbeiten direkt auf der Datei;
 /// die Anzeige bleibt davon unberührt, weil der Viewer aus dem Speicher liest.</summary>
@@ -65,7 +67,8 @@ internal static partial class PdfEditService
             using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
             var v = document.Version;
             var first = document.PageCount > 0 ? document.Pages[0] : null;
-            return new PdfStatus(document.PageCount, $"{v / 10}.{v % 10}", GetPdfALevel(document), first?.Width.Point ?? 0, first?.Height.Point ?? 0, Guarded(() => CountAnnotations(document)), Guarded(() => CountOutlines(document)));
+            return new PdfStatus(document.PageCount, $"{v / 10}.{v % 10}", GetPdfALevel(document), first?.Width.Point ?? 0, first?.Height.Point ?? 0, Guarded(() => CountAnnotations(document)), Guarded(() => CountOutlines(document)),
+                Guarded(() => document.SecurityHandler.Elements.ContainsKey("/Filter") ? 1 : 0) == 1); // SecuritySettings.IsEncrypted liefert im Import-Lauf false (geprüft 20.09.2026) – der geladene Handler trägt dagegen das /Encrypt-Wörterbuch
         }
         catch (Exception ex) when (IsPdfReadError(ex)) { return new PdfStatus(-1, null, null); }
     }

@@ -9,6 +9,7 @@ public partial class MainForm : Form
 {
     private readonly AppSettings settings;
     private readonly PdfViewHost viewHost;
+    private readonly string pdfALabelText, pdfAButtonText; // die PDF/A-Texte der Sperr-Leiste; bei Kennwortschutz zeigt sie andere
     private readonly StartOptions options;  // Kommandozeile: Datei und Schalter (/help, /max, /page:N, /print)
     private readonly Dictionary<string, Image?> programIcons = new(StringComparer.OrdinalIgnoreCase);
     private FileInfo? currentFile;
@@ -39,6 +40,7 @@ public partial class MainForm : Form
         btnCopy.ToolTipText = Lng.T("Tooltip.Copy", btnCopy.ToolTipText);
         ddbEdit.ToolTipText = Lng.T("Tooltip.Edit", ddbEdit.ToolTipText);
         statusIndex.ToolTipText = Lng.T("Tooltip.StatusIndex", statusIndex.ToolTipText);
+        (pdfALabelText, pdfAButtonText) = (lblPdfA.Text, btnPdfAEnable.Text); // Designer-Texte der Sperr-Leiste (nach Lng.Apply); bei Kennwortschutz andere
         viewHost = new PdfViewHost(webView);
         viewHost.DarkScheme = settings.DarkViewer; // vor der Initialisierung, damit schon das erste Dokument im gewählten Hintergrund erscheint
         // Eigene (nicht auto-generierte) Menüs zuweisen: Auto-Menüs übernehmen in WinForms die
@@ -392,16 +394,19 @@ public partial class MainForm : Form
         splitButtonMove.Enabled = btnCopy.Enabled = btnRename.Enabled = btnDelete.Enabled = btnShowInFolder.Enabled = ddbEdit.Enabled = btnPrint.Enabled = btnEmail.Enabled = hasFile;
         // PDF/A-Schutz: verändernde Operationen bleiben gesperrt, bis „Bearbeitung aktivieren“ gedrückt wurde;
         // Extrahieren (neue Datei), Rückgängig (stellt alte Bytes wieder her) und Eigenschaften (dann nur lesend) bleiben frei
-        pnlPdfA.Visible = hasFile && PdfALocked;
-        mnuDeletePages.Enabled = mnuRotatePages.Enabled = mnuAppendPdf.Enabled = mnuDuplex.Enabled = mnuAddAnnotation.Enabled = !PdfALocked;
-        mnuMovePage.Enabled = !PdfALocked && currentPageCount > 1; // mit einer Seite gibt es nichts zu verschieben
-        mnuInsertPage.Enabled = !PdfALocked;
-        mnuAddStamp.Enabled = !PdfALocked;
-        mnuManageAnnotations.Enabled = !PdfALocked && (currentPdfStatus?.AnnotationCount ?? 0) > 0; // ohne Anmerkungen gibt es nichts zu verwalten
-        mnuRemoveBookmarks.Enabled = !PdfALocked && (currentPdfStatus?.OutlineCount ?? 0) > 0;
-        mnuEditBookmarks.Enabled = !PdfALocked; // auch ohne Lesezeichen: dann legt der Editor welche an
-        mnuSetPassword.Enabled = currentPageCount > 0 && !PdfALocked;  // nur ohne bestehenden Kennwortschutz
-        mnuRemovePassword.Enabled = hasFile && currentPageCount <= 0;  // nur bei geschützter (oder unlesbarer) Datei
+        // Die Leiste unter der Symbolleiste erklärt die Sperre: PDF/A (mit „Bearbeitung aktivieren“) oder Kennwortschutz (mit „Kennwort entfernen …“)
+        pnlPdfA.Visible = hasFile && EditLocked;
+        lblPdfA.Text = Encrypted ? Lng.T("Mit Kennwort geschützt: Bearbeiten ist erst nach dem Entfernen des Kennworts möglich.") : pdfALabelText;
+        btnPdfAEnable.Text = Encrypted ? Lng.T("Kennwort entfernen …") : pdfAButtonText;
+        mnuDeletePages.Enabled = mnuRotatePages.Enabled = mnuAppendPdf.Enabled = mnuDuplex.Enabled = mnuAddAnnotation.Enabled = !EditLocked;
+        mnuMovePage.Enabled = !EditLocked && currentPageCount > 1; // mit einer Seite gibt es nichts zu verschieben
+        mnuInsertPage.Enabled = !EditLocked;
+        mnuAddStamp.Enabled = !EditLocked;
+        mnuManageAnnotations.Enabled = !EditLocked && (currentPdfStatus?.AnnotationCount ?? 0) > 0; // ohne Anmerkungen gibt es nichts zu verwalten
+        mnuRemoveBookmarks.Enabled = !EditLocked && (currentPdfStatus?.OutlineCount ?? 0) > 0;
+        mnuEditBookmarks.Enabled = !EditLocked; // auch ohne Lesezeichen: dann legt der Editor welche an
+        mnuSetPassword.Enabled = currentPageCount > 0 && !EditLocked;  // nur ohne bestehenden Kennwortschutz
+        mnuRemovePassword.Enabled = hasFile && (currentPageCount <= 0 || Encrypted);  // bei geschützter (oder unlesbarer) Datei
         foreach (var button in programIconButtons) { button.Enabled = hasFile; }
         if (hasFile)
         {
@@ -429,11 +434,18 @@ public partial class MainForm : Form
     /// <summary>True, solange die angezeigte PDF/A-Datei schreibgeschützt ist (Banner sichtbar).</summary>
     private bool PdfALocked => currentPdfStatus?.PdfALevel != null && !pdfAEditingEnabled;
 
+    /// <summary>Verschlüsselt, aber ohne Kennwort lesbar (nur Besitzerkennwort): PDFsharp öffnet die Datei nicht zum Bearbeiten.</summary>
+    private bool Encrypted => currentPdfStatus?.Encrypted ?? false;
+
+    /// <summary>Bearbeiten gesperrt – wegen PDF/A (bis „Bearbeitung aktivieren“) oder wegen Kennwortschutz (bis „Kennwort entfernen“).</summary>
+    private bool EditLocked => PdfALocked || Encrypted;
+
     /// <summary>„Bearbeitung aktivieren“ im PDF/A-Banner: hebt nach einer Warnung den Schreibschutz
     /// für diese Datei auf. Die Datei selbst bleibt dabei unverändert — die PDF/A-Kennzeichnung geht
     /// erst verloren, wenn tatsächlich eine Bearbeitung ausgeführt und die Datei neu gespeichert wird.</summary>
     private void BtnPdfAEnable_Click(object? sender, EventArgs e)
     {
+        if (Encrypted) { RemovePasswordDialog(); return; } // dieselbe Leiste, andere Sperre
         if (!TaskDlg.ConfirmTaskDlg(Handle,
             Lng.T("Möchtest du den Vorgang fortsetzen?"),
             Lng.T("Das Bearbeiten führt dazu, dass die PDF-Datei nicht mehr dem PDF/A-Standard entspricht.") + "\n\n" +
@@ -1163,7 +1175,7 @@ public partial class MainForm : Form
     private void RemovePasswordDialog()
     {
         if (currentFile == null) { return; }
-        if (PdfEditService.CanOpen(currentFile.FullName, null))
+        if (!Encrypted && PdfEditService.CanOpen(currentFile.FullName, null)) // nur Besitzerkennwort: lesbar, trotzdem verschlüsselt
         {
             TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei ist nicht verschlüsselt."), null, TaskDialogIcon.Information);
             return;
@@ -1178,7 +1190,7 @@ public partial class MainForm : Form
                 TaskDlg.MsgTaskDlg(Handle, Lng.T("Das Kennwort ist falsch."), null, TaskDialogIcon.Warning);
                 continue; // erneut fragen
             }
-            if (RunPdfEdit(() => PdfEditService.RemovePassword(currentFile.FullName, password), Lng.T("Entfernen des Kennworts")))
+            if (RunPdfEdit(() => PdfEditService.RemovePassword(currentFile.FullName, password), Lng.T("Entfernen des Kennworts"), allowEncrypted: true))
             {
                 LoadPdf(currentFile.FullName); // jetzt sind auch Seitenzahl und Bearbeitung verfügbar
                 statusPath.Text = Lng.T("Das Kennwort wurde entfernt.");
@@ -1246,8 +1258,10 @@ public partial class MainForm : Form
     }
 
     /// <summary>Führt eine Dokumentänderung mit vorheriger Undo-Sicherung aus; false bei Fehler.</summary>
-    private bool RunPdfEdit(Action edit, string actionName)
+    /// <param name="allowEncrypted">Nur für „Kennwort entfernen“: Die Bearbeitung läuft trotz Verschlüsselung (mit dem eingegebenen Kennwort).</param>
+    private bool RunPdfEdit(Action edit, string actionName, bool allowEncrypted = false)
     {
+        if (!allowEncrypted && Encrypted) { ShowEncryptedMessage(); return false; } // Sicherheitsnetz – die Menüpunkte sind bei Kennwortschutz gesperrt, die Eigenschaften nicht
         if (!EnsureWritable(actionName)) { return false; }
         Cursor.Current = Cursors.WaitCursor;
         try
@@ -1256,12 +1270,24 @@ public partial class MainForm : Form
             edit();
             return true;
         }
+        catch (PdfSharp.Pdf.IO.PdfReaderException ex) when (ex.Message.Contains("owner password", StringComparison.OrdinalIgnoreCase)) // Rückfall, falls der Status es nicht erkannt hat
+        {
+            ShowEncryptedMessage();
+            return false;
+        }
         catch (Exception ex) when (PdfEditService.IsPdfReadError(ex))
         {
             TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), actionName), ex);
             return false;
         }
         finally { Cursor.Current = Cursors.Default; }
+    }
+
+    /// <summary>Verschlüsselte, aber ohne Kennwort lesbare Datei (nur Besitzerkennwort): Bearbeiten geht erst nach „Kennwort entfernen“.</summary>
+    private void ShowEncryptedMessage()
+    {
+        TaskDlg.MsgTaskDlg(Handle, string.Format(Lng.T("„{0}“ ist mit einem Kennwort geschützt."), currentFile?.Name),
+            Lng.T("Zum Bearbeiten hebst du den Schutz zuerst über Bearbeiten → „Kennwort entfernen …“ auf. Dafür brauchst du das Besitzerkennwort."), TaskDialogIcon.Warning);
     }
 
     private void ShowNotEditableMessage()
@@ -1353,7 +1379,7 @@ public partial class MainForm : Form
     {
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
-        using AnnotationListForm dialog = new(currentFile.FullName, RunPdfEdit);
+        using AnnotationListForm dialog = new(currentFile.FullName, (edit, name) => RunPdfEdit(edit, name)); // Methodengruppe passt wegen des optionalen Parameters nicht mehr
         dialog.ShowDialog(this);
         if (dialog.Changed) { LoadPdf(currentFile.FullName, dialog.LastPage); }
         if (dialog.EditRequested is { } annotation) { EditAnnotation(annotation); } // die Liste hat sich dafür geschlossen
@@ -1716,7 +1742,7 @@ public partial class MainForm : Form
         if (currentFile == null) { return false; }
         FileInfo info = new(currentFile.FullName);
         if (!info.Exists || !info.IsReadOnly) { return true; }
-        if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Die Datei ist schreibgeschützt."),
+        if (!TaskDlg.ConfirmTaskDlg(Handle, string.Format(Lng.T("„{0}“ ist schreibgeschützt."), currentFile.Name),
             string.Format(Lng.T("Soll der Schreibschutz aufgehoben werden, damit „{0}“ gespeichert werden kann?"), actionName))) { return false; }
         try { info.IsReadOnly = false; return true; }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -2087,16 +2113,16 @@ public partial class MainForm : Form
             case Keys.K | Keys.Control | Keys.Shift: return () => { if (!OneClickAction(copy: true)) { MoveCopyDialog(copy: true); } };
             case Keys.F2:
             case Keys.U | Keys.Control: return RenameCurrent;
-            case Keys.Delete | Keys.Control when !PdfALocked: return DeletePagesDialog;
+            case Keys.Delete | Keys.Control when !EditLocked: return DeletePagesDialog;
             case Keys.X | Keys.Control: return ExtractPagesDialog;                         // eXtrahieren
             case Keys.Y | Keys.Control when mnuMovePage.Enabled: return MovePageDialog;    // aktuelle Seite verschieben
-            case Keys.N | Keys.Control when !PdfALocked: return AppendPdfDialog;           // PDF-Datei anhängen
-            case Keys.T | Keys.Control when !PdfALocked: return AddAnnotationDialog;       // Textanmerkung
-            case Keys.H | Keys.Control when !PdfALocked: return AddStampDialog;            // Stempel
+            case Keys.N | Keys.Control when !EditLocked: return AppendPdfDialog;           // PDF-Datei anhängen
+            case Keys.T | Keys.Control when !EditLocked: return AddAnnotationDialog;       // Textanmerkung
+            case Keys.H | Keys.Control when !EditLocked: return AddStampDialog;            // Stempel
             case Keys.H | Keys.Control | Keys.Shift: return ManageStampsDialog;            // Stempelpalette pflegen
             case Keys.T | Keys.Control | Keys.Shift when mnuManageAnnotations.Enabled: return ManageAnnotationsDialog;
             case Keys.Delete | Keys.Control | Keys.Shift when currentFile != null: return DeleteCurrent;
-            case Keys.R | Keys.Control when !PdfALocked: return RotatePagesDialog;
+            case Keys.R | Keys.Control when !EditLocked: return RotatePagesDialog;
             // Ansicht drehen (das Viewer-Kürzel Strg+] ist auf deutschen Tastaturen unerreichbar)
             case Keys.R | Keys.Control | Keys.Shift: return () => viewHost.RotateView(clockwise: true);
             case Keys.L | Keys.Control | Keys.Shift: return () => viewHost.RotateView(clockwise: false);

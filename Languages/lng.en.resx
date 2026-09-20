@@ -647,6 +647,9 @@ or press Ctrl+Shift+I.</value></data>
   <data name="{0} Dateien wurden angehängt." xml:space="preserve"><value>{0} files were appended.</value></data>
   <data name="1 Seite angehängt" xml:space="preserve"><value>1 page appended</value></data>
   <data name="{0} Seiten angehängt" xml:space="preserve"><value>{0} pages appended</value></data>
-  <data name="Die Datei ist schreibgeschützt." xml:space="preserve"><value>The file is read-only.</value></data>
+  <data name="„{0}“ ist schreibgeschützt." xml:space="preserve"><value>„{0}“ is read-only.</value></data>
   <data name="Soll der Schreibschutz aufgehoben werden, damit „{0}“ gespeichert werden kann?" xml:space="preserve"><value>Remove the write protection so that „{0}“ can be saved?</value></data>
+  <data name="„{0}“ ist mit einem Kennwort geschützt." xml:space="preserve"><value>„{0}“ is protected by a password.</value></data>
+  <data name="Zum Bearbeiten hebst du den Schutz zuerst über Bearbeiten → „Kennwort entfernen …“ auf. Dafür brauchst du das Besitzerkennwort." xml:space="preserve"><value>To edit it, first remove the protection via Edit → „Remove password…“. You need the owner password for that.</value></data>
+  <data name="Mit Kennwort geschützt: Bearbeiten ist erst nach dem Entfernen des Kennworts möglich." xml:space="preserve"><value>Password-protected: editing is possible only after the password has been removed.</value></data>
 </root>
