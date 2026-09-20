@@ -1,4 +1,5 @@
 using PDFLight.Classes;
+using PDFLight.Controls; // ShellInfo.CompareNatural
 
 namespace PDFLight.Forms;
 
@@ -9,6 +10,12 @@ namespace PDFLight.Forms;
 /// liefert die angehakten Dateien in Listenreihenfolge, Enter bestätigt.</summary>
 public partial class FileListForm : Form
 {
+    /// <summary>Was ein Listeneintrag im Tag trägt: Pfad und Änderungsdatum (fürs Sortieren).</summary>
+    private sealed record FileEntry(string Path, DateTime? Modified);
+
+    private int sortColumn = -1; // zuletzt angeklickte Spalte; erneuter Klick kehrt die Richtung um
+    private bool sortAscending = true;
+
     /// <summary>Die angehakten Dateien in Listenreihenfolge (nach OK).</summary>
     public List<string> SelectedFiles { get; private set; } = [];
 
@@ -23,7 +30,7 @@ public partial class FileListForm : Form
             DateTime? modified = null;
             try { modified = File.GetLastWriteTime(file); }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // dann ohne Datum
-            ListViewItem item = new(Path.GetFileName(file)) { Tag = file, ToolTipText = file };
+            ListViewItem item = new(Path.GetFileName(file)) { Tag = new FileEntry(file, modified), ToolTipText = file };
             item.SubItems.Add(modified?.ToString("g") ?? string.Empty);
             listView.Items.Add(item);
         }
@@ -45,7 +52,7 @@ public partial class FileListForm : Form
     private void Accept()
     {
         if (listView.CheckedItems.Count == 0) { return; }
-        SelectedFiles = [.. listView.Items.OfType<ListViewItem>().Where(i => i.Checked).Select(i => (string)i.Tag!)]; // jeder Eintrag trägt seinen Pfad, Listenreihenfolge
+        SelectedFiles = [.. listView.Items.OfType<ListViewItem>().Where(i => i.Checked).Select(i => ((FileEntry)i.Tag!).Path)]; // jeder Eintrag trägt seinen Pfad, Listenreihenfolge
         DialogResult = DialogResult.OK;
     }
 
@@ -83,7 +90,27 @@ public partial class FileListForm : Form
         UpdateButtons();
     }
 
+    /// <summary>Nach Spalte sortieren (Name natürlich wie im Explorer, Datum zeitlich); Häkchen bleiben, die Einträge werden nur
+    /// umgeordnet – kein ListViewItemSorter, der würde jedes spätere Verschieben sofort wieder einsortieren.</summary>
+    private void SortBy(int column)
+    {
+        sortAscending = column == sortColumn ? !sortAscending : true;
+        sortColumn = column;
+        var items = listView.Items.OfType<ListViewItem>().ToList();
+        Comparison<ListViewItem> compare = column == 1
+            ? (a, b) => Nullable.Compare(((FileEntry)a.Tag!).Modified, ((FileEntry)b.Tag!).Modified)
+            : (a, b) => ShellInfo.CompareNatural(a.Text, b.Text);
+        items.Sort(sortAscending ? compare : (a, b) => compare(b, a));
+        listView.BeginUpdate();
+        listView.Items.Clear();
+        listView.Items.AddRange([.. items]);
+        listView.EndUpdate();
+        UpdateButtons();
+    }
+
     // ==== Ereignisse (verdrahtet in der Designer-Datei)
+
+    private void ListView_ColumnClick(object? sender, ColumnClickEventArgs e) => SortBy(e.Column);
 
     /// <summary>Die Namensspalte füllt die Breite, die Datumsspalte behält ihr Maß.</summary>
     private void ListView_Resize(object? sender, EventArgs e) => colName.Width = Math.Max(120, listView.ClientSize.Width - colDate.Width - 4);

@@ -62,6 +62,7 @@ namespace PDFLight.Forms
             listView.TabIndex = 1;
             listView.UseCompatibleStateImageBehavior = false;
             listView.View = View.Details;
+            listView.ColumnClick += ListView_ColumnClick;
             listView.ItemChecked += ListView_ItemChecked;
             listView.ItemDrag += ListView_ItemDrag;
             listView.SelectedIndexChanged += ListView_SelectedIndexChanged;
