@@ -609,4 +609,18 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="An dieser Stelle stehen schon {0} Stempel." xml:space="preserve"><value>Il y a déjà {0} tampons à cet endroit.</value></data>
   <data name="Mehr als drei Stempel je Position gibt es nicht." xml:space="preserve"><value>Pas plus de trois tampons par position.</value></data>
   <data name="Die Bilddatei konnte nicht gelesen werden." xml:space="preserve"><value>Le fichier image n’a pas pu être lu.</value></data>
+  <data name="Lesezeichen bearbeiten (experimentell) …" xml:space="preserve"><value>Modifier les signets (expérimental)…</value></data>
+  <data name="Lesezeichen bearbeiten" xml:space="preserve"><value>Modifier les signets</value></data>
+  <data name="Lesezeichen lesen" xml:space="preserve"><value>Lecture des signets</value></data>
+  <data name="Lesezeichen speichern" xml:space="preserve"><value>Enregistrement des signets</value></data>
+  <data name="Die Lesezeichen wurden gespeichert." xml:space="preserve"><value>Les signets ont été enregistrés.</value></data>
+  <data name="&amp;Zielseite:" xml:space="preserve"><value>Page &amp;cible :</value></data>
+  <data name="Neuer &amp;Unterpunkt" xml:space="preserve"><value>Nouveau so&amp;us-élément</value></data>
+  <data name="Ebene &amp;höher" xml:space="preserve"><value>Niveau su&amp;périeur</value></data>
+  <data name="Ebene &amp;tiefer" xml:space="preserve"><value>Niveau in&amp;férieur</value></data>
+  <data name="&amp;Speichern" xml:space="preserve"><value>&amp;Enregistrer</value></data>
+  <data name="Experimentelle Funktion – F2 benennt um, Entf löscht, Einfg legt einen Eintrag an; Strg+Z macht das Speichern rückgängig." xml:space="preserve"><value>Fonction expérimentale – F2 renomme, Suppr supprime, Inser ajoute une entrée ; Ctrl+Z annule l’enregistrement.</value></data>
+  <data name="Neues Lesezeichen" xml:space="preserve"><value>Nouveau signet</value></data>
+  <data name="Seite {0}" xml:space="preserve"><value>Page {0}</value></data>
+  <data name="Ohne Ziel" xml:space="preserve"><value>Sans cible</value></data>
 </root>

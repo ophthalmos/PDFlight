@@ -63,6 +63,7 @@
             mnuAddAnnotation = new ToolStripMenuItem();
             mnuManageAnnotations = new ToolStripMenuItem();
             mnuRemoveBookmarks = new ToolStripMenuItem();
+            mnuEditBookmarks = new ToolStripMenuItem();
             toolStripSeparator6 = new ToolStripSeparator();
             mnuUndo = new ToolStripMenuItem();
             toolStripSeparator7 = new ToolStripSeparator();
@@ -257,7 +258,7 @@
             // ddbEdit
             // 
             ddbEdit.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuMovePage, mnuInsertPage, toolStripSeparator15, mnuAppendPdf, mnuDuplex, mnuExtractPages, toolStripSeparator14, mnuAddStamp, mnuManageStamps, mnuAddAnnotation, mnuManageAnnotations, toolStripSeparator16, mnuRemoveBookmarks, toolStripSeparator6, mnuUndo, toolStripSeparator7, mnuSetPassword, mnuRemovePassword, toolStripSeparator10, mnuProperties });
+            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuMovePage, mnuInsertPage, toolStripSeparator15, mnuAppendPdf, mnuDuplex, mnuExtractPages, toolStripSeparator14, mnuAddStamp, mnuManageStamps, mnuAddAnnotation, mnuManageAnnotations, toolStripSeparator16, mnuRemoveBookmarks, mnuEditBookmarks, toolStripSeparator6, mnuUndo, toolStripSeparator7, mnuSetPassword, mnuRemovePassword, toolStripSeparator10, mnuProperties });
             ddbEdit.Enabled = false;
             ddbEdit.Name = "ddbEdit";
             ddbEdit.Size = new Size(76, 22);
@@ -366,6 +367,14 @@
             mnuRemoveBookmarks.Size = new Size(317, 22);
             mnuRemoveBookmarks.Text = "Lesezeichen entfernen …";
             mnuRemoveBookmarks.Click += MnuRemoveBookmarks_Click;
+            //
+            // mnuEditBookmarks
+            //
+            mnuEditBookmarks.Name = "mnuEditBookmarks";
+            mnuEditBookmarks.Size = new Size(317, 22);
+            mnuEditBookmarks.Text = "Lesezeichen bearbeiten (experimentell) …";
+            mnuEditBookmarks.Visible = false;
+            mnuEditBookmarks.Click += MnuEditBookmarks_Click;
             // 
             // toolStripSeparator6
             // 
@@ -684,6 +693,7 @@
         private System.Windows.Forms.ToolStripMenuItem mnuAddAnnotation;
         private System.Windows.Forms.ToolStripMenuItem mnuManageAnnotations;
         private System.Windows.Forms.ToolStripMenuItem mnuRemoveBookmarks;
+        private System.Windows.Forms.ToolStripMenuItem mnuEditBookmarks;
         private System.Windows.Forms.ToolStripMenuItem mnuAddStamp;
         private System.Windows.Forms.ToolStripMenuItem mnuManageStamps;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;

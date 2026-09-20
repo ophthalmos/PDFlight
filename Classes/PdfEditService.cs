@@ -299,6 +299,108 @@ internal static partial class PdfEditService
         document.Save(path);
     }
 
+    /// <summary>Liest die Gliederung (Lesezeichen) für den Editor: Titel, Zielseite (1-basiert; 0 = nicht auflösbar), Aufklappzustand
+    /// und Unterpunkte; ohne /Outlines eine leere Liste. <see cref="Bookmark.Id"/> zählt den Vorordnungs-Durchlauf mit – denselben
+    /// nimmt <see cref="WriteOutlines"/>, um Ziele, Farben und Schriftstile unveränderter Einträge zu übernehmen.</summary>
+    public static List<Bookmark> ReadOutlines(string path)
+    {
+        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
+        List<Bookmark> result = [];
+        if (document.Internals.Catalog.Elements["/Outlines"] == null) { return result; }
+        var pageNumbers = new Dictionary<PdfObjectID, int>();
+        for (var i = 0; i < document.PageCount; i++) { if (document.Pages[i].Reference is { } reference) { pageNumbers[reference.ObjectID] = i + 1; } }
+        var id = 0;
+        Read(document.Outlines, result);
+        return result;
+
+        void Read(PdfOutlineCollection outlines, List<Bookmark> target)
+        {
+            foreach (var outline in outlines)
+            {
+                var page = DestinationPageId(document, outline) is { } pageId && pageNumbers.TryGetValue(pageId, out var number) ? number : 0;
+                Bookmark bookmark = new() { Title = outline.Title, Page = page, OriginalPage = page, Open = outline.Elements.GetInteger("/Count") > 0, Id = id++ }; // PDFsharps Opened liest den Zustand nicht aus /Count
+                target.Add(bookmark);
+                Read(outline.Outlines, bookmark.Children);
+            }
+        }
+    }
+
+    /// <summary>Die übernehmbaren Teile eines vorhandenen Gliederungseintrags (Vorordnung wie in <see cref="ReadOutlines"/>).</summary>
+    private sealed record OutlineParts(PdfItem? Destination, PdfItem? Action, PdfItem? Color, PdfItem? Flags);
+
+    private static List<OutlineParts> CollectOutlineParts(PdfDocument document)
+    {
+        List<OutlineParts> parts = [];
+        if (document.Internals.Catalog.Elements["/Outlines"] == null) { return parts; }
+        try { Collect(document.Outlines); }
+        catch (Exception ex) when (IsPdfReadError(ex)) { parts.Clear(); } // kaputte Gliederung: dann ohne Übernahme, die Zuordnung wäre unsicher
+        return parts;
+
+        void Collect(PdfOutlineCollection outlines)
+        {
+            foreach (var outline in outlines)
+            {
+                parts.Add(new OutlineParts(outline.Elements["/Dest"], outline.Elements["/A"], outline.Elements["/C"], outline.Elements["/F"]));
+                Collect(outline.Outlines);
+            }
+        }
+    }
+
+    /// <summary>Schreibt die Gliederung aus dem Editor neu: /Outlines wird verworfen und aus dem Modell frisch aufgebaut (/Title als
+    /// Unicode, /Parent, /First, /Last, /Prev, /Next, /Count mit Vorzeichen für den Aufklappzustand). Einträge mit unveränderter
+    /// Zielseite behalten ihr ursprüngliches Ziel (/Dest oder GoTo-/A samt Position und Zoom) sowie Farbe (/C) und Schriftstil (/F);
+    /// neue oder umgehängte Ziele zeigen auf den Seitenanfang bei unverändertem Zoom (/XYZ null oben null). Ohne Lesezeichen wird
+    /// die Gliederung entfernt wie in <see cref="RemoveOutlines"/>.</summary>
+    public static void WriteOutlines(string path, IReadOnlyList<Bookmark> bookmarks)
+    {
+        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        var catalog = document.Internals.Catalog;
+        var original = CollectOutlineParts(document);
+        catalog.Elements.Remove("/Outlines");
+        if (bookmarks.Count == 0)
+        {
+            if (catalog.Elements.GetName("/PageMode") == "/UseOutlines") { catalog.Elements.Remove("/PageMode"); }
+            document.Save(path);
+            return;
+        }
+        var root = new PdfDictionary(document);
+        root.Elements.SetName("/Type", "/Outlines");
+        document.Internals.AddObject(root);
+        Write(root, bookmarks, open: true);
+        catalog.Elements.SetReference("/Outlines", root);
+        document.Save(path);
+
+        void Write(PdfDictionary parent, IReadOnlyList<Bookmark> items, bool open)
+        {
+            PdfDictionary? previous = null;
+            var visible = 0; // sichtbare Nachkommen, wenn der Elternknoten aufgeklappt ist (PDF-Referenz: /Count)
+            foreach (var item in items)
+            {
+                var entry = new PdfDictionary(document);
+                document.Internals.AddObject(entry);
+                entry.Elements["/Title"] = new PdfString(item.Title, PdfStringEncoding.Unicode);
+                entry.Elements.SetReference("/Parent", parent);
+                if (previous != null) { entry.Elements.SetReference("/Prev", previous); previous.Elements.SetReference("/Next", entry); }
+                else { parent.Elements.SetReference("/First", entry); }
+                var keep = item.Id >= 0 && item.Id < original.Count && item.Page > 0 && item.Page == item.OriginalPage ? original[item.Id] : null;
+                if (keep?.Destination != null) { entry.Elements["/Dest"] = keep.Destination; }
+                else if (keep?.Action != null) { entry.Elements["/A"] = keep.Action; }
+                else if (item.Page >= 1 && item.Page <= document.PageCount)
+                {
+                    var page = document.Pages[item.Page - 1];
+                    entry.Elements["/Dest"] = new PdfArray(document, page.Reference!, new PdfName("/XYZ"), PdfNull.Value, new PdfReal(page.Height.Point), PdfNull.Value); // Seiten sind indirekte Objekte
+                }
+                if (keep?.Color != null) { entry.Elements["/C"] = keep.Color; }
+                if (keep?.Flags != null) { entry.Elements["/F"] = keep.Flags; }
+                if (item.Children.Count > 0) { Write(entry, item.Children, item.Open); }
+                visible += 1 + (item.Open && item.Children.Count > 0 ? Math.Abs(entry.Elements.GetInteger("/Count")) : 0);
+                previous = entry;
+            }
+            if (previous != null) { parent.Elements.SetReference("/Last", previous); }
+            parent.Elements.SetInteger("/Count", open ? visible : -visible);
+        }
+    }
+
     private static int CountAnnotations(PdfDocument document)
     {
         var count = 0;
