@@ -61,6 +61,9 @@ public partial class SettingsForm : Form
     /// <summary>Favoriten-Menü in der Symbolleiste anzeigen (Strg+D merkt die Datei); Standard aus.</summary>
     public bool ShowFavorites => cbShowFavorites.Checked;
 
+    /// <summary>Anzeigehintergrund dunkel (Fläche und Leiste des PDF-Viewers).</summary>
+    public bool DarkViewer => rbBackgroundDark.Checked;
+
     [System.ComponentModel.Browsable(false)]
     public int MaxRecentFiles => (int)numMaxRecentFiles.Value; // 0 = kein Verlauf im Öffnen-Menü
 
@@ -87,6 +90,8 @@ public partial class SettingsForm : Form
         cbReopenLast.Checked = source.ReopenLastFile;
         cbFullPathTitle.Checked = source.ShowFullPathInTitle;
         cbShowFavorites.Checked = source.ShowFavorites;
+        rbBackgroundDark.Checked = source.DarkViewer;
+        rbBackgroundLight.Checked = !source.DarkViewer;
         numMaxRecentFiles.Value = Math.Clamp(source.MaxRecentFiles, (int)numMaxRecentFiles.Minimum, (int)numMaxRecentFiles.Maximum);
         if (listTargets.Items.Count > 0) { listTargets.SelectedIndex = 0; }
         if (listPrograms.Items.Count > 0) { listPrograms.SelectedIndex = 0; }

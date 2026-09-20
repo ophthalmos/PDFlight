@@ -25,6 +25,20 @@ internal partial class PdfViewHost(WebView2 webView)
 
     public bool IsReady { get; private set; }
 
+    /// <summary>Anzeigehintergrund dunkel: setzt das bevorzugte Farbschema des WebView2-Profils. Der Chromium-PDF-Viewer richtet
+    /// Leiste und Fläche neben den Seiten danach aus (die Seiten selbst bleiben unverändert). Vor <see cref="InitializeAsync"/>
+    /// gesetzt gilt es ab dem ersten Dokument; eine spätere Änderung wirkt sofort auf das geladene Dokument (geprüft 20.09.2026).</summary>
+    public bool DarkScheme
+    {
+        get => darkScheme;
+        set
+        {
+            darkScheme = value;
+            if (IsReady) { webView.CoreWebView2.Profile.PreferredColorScheme = value ? CoreWebView2PreferredColorScheme.Dark : CoreWebView2PreferredColorScheme.Light; }
+        }
+    }
+    private bool darkScheme;
+
     /// <summary>Die WebView2-Umgebung des Viewers – weitere WebViews im selben Prozess (Vorschau im Anmerkungsdialog)
     /// müssen dieselbe verwenden, weil sie am selben Datenordner hängen.</summary>
     public static CoreWebView2Environment? SharedEnvironment { get; private set; }
@@ -59,6 +73,7 @@ internal partial class PdfViewHost(WebView2 webView)
         core.Settings.IsGeneralAutofillEnabled = false;
         core.Settings.IsPasswordAutosaveEnabled = false;
         core.Settings.IsReputationCheckingRequired = false; // SmartScreen aus: PDFlight zeigt nur lokale Dateien, nichts geht zur Prüfung an Microsoft
+        core.Profile.PreferredColorScheme = darkScheme ? CoreWebView2PreferredColorScheme.Dark : CoreWebView2PreferredColorScheme.Light; // Anzeigehintergrund (Einstellungen), nie „Auto“ – sonst hinge er am Windows-Design
         core.Settings.HiddenPdfToolbarItems = CoreWebView2PdfToolbarItems.Save | CoreWebView2PdfToolbarItems.SaveAs // Speichern übernimmt PDFlight selbst
             | CoreWebView2PdfToolbarItems.FullScreen // der Chromium-Vollbildmodus ist im Host-Fenster kaum beendbar → PDFlight bietet stattdessen F11
             | CoreWebView2PdfToolbarItems.Print; // Drucken sitzt in der Hauptmenüleiste — die Viewer-Leiste bleibt den Ansichts-Funktionen vorbehalten

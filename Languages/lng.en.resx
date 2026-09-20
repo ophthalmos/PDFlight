@@ -629,4 +629,7 @@ or press Ctrl+Shift+I.</value></data>
   <data name="Bitte gib für jedes Lesezeichen einen Titel ein." xml:space="preserve"><value>Please enter a title for every bookmark.</value></data>
   <data name="Die Datei wurde inzwischen verändert." xml:space="preserve"><value>The file has been modified in the meantime.</value></data>
   <data name="Die Lesezeichen wurden nicht gespeichert – schließe den Editor mit „Abbrechen“ und öffne ihn erneut." xml:space="preserve"><value>The bookmarks were not saved – close the editor with &quot;Cancel&quot; and open it again.</value></data>
+  <data name="Anzeigehintergrund:" xml:space="preserve"><value>Viewer background:</value></data>
+  <data name="&amp;hell" xml:space="preserve"><value>&amp;light</value></data>
+  <data name="dun&amp;kel" xml:space="preserve"><value>&amp;dark</value></data>
 </root>
