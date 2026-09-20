@@ -647,4 +647,6 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="{0} Dateien wurden angehängt." xml:space="preserve"><value>Se han añadido {0} archivos.</value></data>
   <data name="1 Seite angehängt" xml:space="preserve"><value>1 página añadida</value></data>
   <data name="{0} Seiten angehängt" xml:space="preserve"><value>{0} páginas añadidas</value></data>
+  <data name="Die Datei ist schreibgeschützt." xml:space="preserve"><value>El archivo es de solo lectura.</value></data>
+  <data name="Soll der Schreibschutz aufgehoben werden, damit „{0}“ gespeichert werden kann?" xml:space="preserve"><value>¿Quitar la protección contra escritura para poder guardar «{0}»?</value></data>
 </root>

@@ -289,7 +289,7 @@ namespace PDFLight.Forms
             Controls.Add(treeView);
             Icon = (Icon)resources.GetObject("$this.Icon");
             MinimizeBox = false;
-            MinimumSize = new Size(560, 400);
+            MinimumSize = new Size(560, 510);
             Name = "BookmarkForm";
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;

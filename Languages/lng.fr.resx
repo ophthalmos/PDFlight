@@ -647,4 +647,6 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="{0} Dateien wurden angehängt." xml:space="preserve"><value>{0} fichiers ont été ajoutés.</value></data>
   <data name="1 Seite angehängt" xml:space="preserve"><value>1 page ajoutée</value></data>
   <data name="{0} Seiten angehängt" xml:space="preserve"><value>{0} pages ajoutées</value></data>
+  <data name="Die Datei ist schreibgeschützt." xml:space="preserve"><value>Le fichier est en lecture seule.</value></data>
+  <data name="Soll der Schreibschutz aufgehoben werden, damit „{0}“ gespeichert werden kann?" xml:space="preserve"><value>Supprimer la protection en écriture pour pouvoir enregistrer « {0} » ?</value></data>
 </root>
