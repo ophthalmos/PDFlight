@@ -62,6 +62,35 @@ internal static class ToolbarIcons
     public static Image? MenuIcon(char glyph, Control control) =>
         MenuIconsEnabled ? Get(glyph, control.LogicalToDeviceUnits(new Size(16, 16))) : null;
 
+    /// <summary>Menüsymbol für einen Textbutton (Anmerkungsliste, Lesezeichen-Editor): die Glyphe sitzt zentriert im Zeilenkasten
+    /// und wirkt neben dem Text zu hoch – ein paar Pixel Luft oben rücken sie optisch auf die Textmitte.</summary>
+    public static Bitmap? ButtonIcon(char glyph, Control control)
+    {
+        var icon = MenuIcon(glyph, control);
+        if (icon == null) { return null; }
+        var shift = control.LogicalToDeviceUnits(3);
+        Bitmap padded = new(icon.Width, icon.Height + shift);
+        using var g = Graphics.FromImage(padded);
+        g.DrawImageUnscaled(icon, 0, shift);
+        return padded;
+    }
+
+    public const char ChevronDown = '';  // aufgeklappter Zweig im Lesezeichen-Editor (ChevronRight = Next)
+
+    private static readonly Dictionary<int, Font> glyphFonts = []; // je Pixelgröße eine Schrift, lebt bis zum Programmende
+
+    /// <summary>Die Symbolschrift in der gewünschten Pixelgröße für Glyphen, die als Text gezeichnet werden (Aufklapp-Pfeile);
+    /// null, wenn „Segoe MDL2 Assets“ fehlt – der Aufrufer zeichnet dann einen Ersatz.</summary>
+    public static Font? GlyphFont(int pixelSize)
+    {
+        if (!FontAvailable) { return null; }
+        lock (glyphFonts)
+        {
+            if (!glyphFonts.TryGetValue(pixelSize, out var font)) { font = new Font(FontName, pixelSize, GraphicsUnit.Pixel); glyphFonts[pixelSize] = font; }
+            return font;
+        }
+    }
+
     private static bool CheckFontAvailable()
     {
         using Font font = new(FontName, 10f);

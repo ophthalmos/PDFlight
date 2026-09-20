@@ -28,26 +28,13 @@ public partial class AnnotationListForm : Form
         this.filePath = filePath;
         this.runEdit = runEdit;
         labelFileValue.Text = Path.GetFileName(filePath);
-        btnEdit.Image = ButtonIcon(ToolbarIcons.Edit);
-        btnDelete.Image = ButtonIcon(ToolbarIcons.Delete);
-        btnDeleteAll.Image = ButtonIcon(ToolbarIcons.Clear);
+        btnEdit.Image = ToolbarIcons.ButtonIcon(ToolbarIcons.Edit, this);
+        btnDelete.Image = ToolbarIcons.ButtonIcon(ToolbarIcons.Delete, this);
+        btnDeleteAll.Image = ToolbarIcons.ButtonIcon(ToolbarIcons.Clear, this);
         Lng.Apply(contextMenuList); // Kontextmenüs hängen nicht im Control-Baum
         editMenuItem.Image = ToolbarIcons.MenuIcon(ToolbarIcons.Edit, this);
         deleteMenuItem.Image = ToolbarIcons.MenuIcon(ToolbarIcons.Delete, this);
         Reload();
-    }
-
-    /// <summary>Menüsymbol für einen Textbutton: die Glyphe sitzt zentriert im Zeilenkasten und wirkt neben dem Text zu hoch –
-    /// ein paar Pixel Luft oben rücken sie optisch auf die Textmitte.</summary>
-    private Image? ButtonIcon(char glyph)
-    {
-        var icon = ToolbarIcons.MenuIcon(glyph, this);
-        if (icon == null) { return null; }
-        var shift = LogicalToDeviceUnits(3);
-        Bitmap padded = new(icon.Width, icon.Height + shift);
-        using var g = Graphics.FromImage(padded);
-        g.DrawImageUnscaled(icon, 0, shift);
-        return padded;
     }
 
     private AnnotationInfo? Selected => listView.SelectedItems.Count > 0 ? listView.SelectedItems[0].Tag as AnnotationInfo : null;

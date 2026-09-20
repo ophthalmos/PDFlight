@@ -610,7 +610,7 @@ or press Ctrl+Shift+I.</value></data>
   <data name="Mehr als drei Stempel je Position gibt es nicht." xml:space="preserve"><value>There is no room for more than three stamps per position.</value></data>
   <data name="Die Bilddatei konnte nicht gelesen werden." xml:space="preserve"><value>The image file could not be read.</value></data>
   <data name="Lesezeichen bearbeiten …" xml:space="preserve"><value>Edit bookmarks…</value></data>
-  <data name="Lesezeichen bearbeiten" xml:space="preserve"><value>Edit bookmarks</value></data>
+  <data name="Lesezeichen bearbeiten (Entf löscht, Einfg legt einen Eintrag an, F2 springt zum Titel)" xml:space="preserve"><value>Edit bookmarks (Del deletes, Ins adds an entry, F2 jumps to the title)</value></data>
   <data name="Lesezeichen lesen" xml:space="preserve"><value>Reading bookmarks</value></data>
   <data name="Lesezeichen speichern" xml:space="preserve"><value>Saving bookmarks</value></data>
   <data name="Die Lesezeichen wurden gespeichert." xml:space="preserve"><value>The bookmarks were saved.</value></data>
@@ -619,7 +619,6 @@ or press Ctrl+Shift+I.</value></data>
   <data name="Ebene &amp;höher" xml:space="preserve"><value>Level &amp;up</value></data>
   <data name="Ebene &amp;tiefer" xml:space="preserve"><value>Level do&amp;wn</value></data>
   <data name="&amp;Speichern" xml:space="preserve"><value>&amp;Save</value></data>
-  <data name="Entf löscht, Einfg legt einen Eintrag an, F2 springt zum Titel; Strg+Z macht das Speichern rückgängig." xml:space="preserve"><value>Del deletes, Ins adds an entry, F2 jumps to the title; Ctrl+Z undoes the save.</value></data>
   <data name="Neues Lesezeichen" xml:space="preserve"><value>New bookmark</value></data>
   <data name="Seite {0}" xml:space="preserve"><value>Page {0}</value></data>
   <data name="Ohne Ziel" xml:space="preserve"><value>No target</value></data>

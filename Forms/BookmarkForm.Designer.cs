@@ -30,259 +30,246 @@ namespace PDFLight.Forms
         {
             var resources = new System.ComponentModel.ComponentResourceManager(typeof(BookmarkForm));
             treeView = new PDFLight.Controls.BookmarkTreeView();
-            labelTitle = new System.Windows.Forms.Label();
-            textBoxTitle = new System.Windows.Forms.TextBox();
-            labelPage = new System.Windows.Forms.Label();
-            numPage = new System.Windows.Forms.NumericUpDown();
-            buttonNew = new System.Windows.Forms.Button();
-            buttonNewChild = new System.Windows.Forms.Button();
-            buttonDelete = new System.Windows.Forms.Button();
-            buttonUp = new System.Windows.Forms.Button();
-            buttonDown = new System.Windows.Forms.Button();
-            buttonOutdent = new System.Windows.Forms.Button();
-            buttonIndent = new System.Windows.Forms.Button();
-            labelExpand = new System.Windows.Forms.Label();
-            buttonLevel1 = new System.Windows.Forms.Button();
-            buttonLevel2 = new System.Windows.Forms.Button();
-            buttonLevel3 = new System.Windows.Forms.Button();
-            buttonLevelAll = new System.Windows.Forms.Button();
-            labelHint = new System.Windows.Forms.Label();
-            buttonOK = new System.Windows.Forms.Button();
-            buttonCancel = new System.Windows.Forms.Button();
+            labelTitle = new Label();
+            textBoxTitle = new TextBox();
+            labelPage = new Label();
+            numPage = new NumericUpDown();
+            buttonNew = new Button();
+            buttonNewChild = new Button();
+            buttonDelete = new Button();
+            buttonUp = new Button();
+            buttonDown = new Button();
+            buttonOutdent = new Button();
+            buttonIndent = new Button();
+            labelExpand = new Label();
+            buttonLevel1 = new Button();
+            buttonLevel2 = new Button();
+            buttonLevel3 = new Button();
+            buttonLevelAll = new Button();
+            buttonOK = new Button();
+            buttonCancel = new Button();
             ((System.ComponentModel.ISupportInitialize)numPage).BeginInit();
             SuspendLayout();
-            //
+            // 
             // treeView
-            //
-            treeView.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            treeView.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawAll;
+            // 
+            treeView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            treeView.DrawMode = TreeViewDrawMode.OwnerDrawAll;
             treeView.FullRowSelect = true;
             treeView.HideSelection = false;
-            treeView.Location = new System.Drawing.Point(12, 12);
+            treeView.Location = new Point(12, 12);
             treeView.Name = "treeView";
             treeView.ShowLines = false;
             treeView.ShowNodeToolTips = true;
-            treeView.Size = new System.Drawing.Size(440, 400);
+            treeView.Size = new Size(440, 447);
             treeView.TabIndex = 0;
             treeView.DrawNode += TreeView_DrawNode;
             treeView.AfterSelect += TreeView_AfterSelect;
             treeView.KeyDown += TreeView_KeyDown;
-            //
+            // 
             // labelTitle
-            //
-            labelTitle.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            // 
+            labelTitle.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             labelTitle.AutoSize = true;
-            labelTitle.Location = new System.Drawing.Point(464, 12);
+            labelTitle.Location = new Point(464, 12);
             labelTitle.Name = "labelTitle";
-            labelTitle.Size = new System.Drawing.Size(34, 15);
+            labelTitle.Size = new Size(33, 15);
             labelTitle.TabIndex = 1;
             labelTitle.Text = "&Titel:";
-            //
+            // 
             // textBoxTitle
-            //
-            textBoxTitle.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            textBoxTitle.Location = new System.Drawing.Point(464, 30);
+            // 
+            textBoxTitle.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            textBoxTitle.Location = new Point(464, 30);
             textBoxTitle.Name = "textBoxTitle";
-            textBoxTitle.Size = new System.Drawing.Size(188, 23);
+            textBoxTitle.Size = new Size(188, 23);
             textBoxTitle.TabIndex = 2;
             textBoxTitle.TextChanged += TextBoxTitle_TextChanged;
-            //
+            // 
             // labelPage
-            //
-            labelPage.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            // 
+            labelPage.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             labelPage.AutoSize = true;
-            labelPage.Location = new System.Drawing.Point(464, 62);
+            labelPage.Location = new Point(464, 62);
             labelPage.Name = "labelPage";
-            labelPage.Size = new System.Drawing.Size(58, 15);
+            labelPage.Size = new Size(53, 15);
             labelPage.TabIndex = 3;
             labelPage.Text = "&Zielseite:";
-            //
+            // 
             // numPage
-            //
-            numPage.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            numPage.Location = new System.Drawing.Point(464, 80);
+            // 
+            numPage.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            numPage.Location = new Point(464, 80);
             numPage.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             numPage.Name = "numPage";
-            numPage.Size = new System.Drawing.Size(80, 23);
+            numPage.Size = new Size(80, 23);
             numPage.TabIndex = 4;
             numPage.Value = new decimal(new int[] { 1, 0, 0, 0 });
             numPage.ValueChanged += NumPage_ValueChanged;
-            //
+            // 
             // buttonNew
-            //
-            buttonNew.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            buttonNew.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            buttonNew.Location = new System.Drawing.Point(464, 118);
+            // 
+            buttonNew.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonNew.ImageAlign = ContentAlignment.MiddleLeft;
+            buttonNew.Location = new Point(464, 118);
             buttonNew.Name = "buttonNew";
-            buttonNew.Size = new System.Drawing.Size(188, 27);
+            buttonNew.Size = new Size(188, 27);
             buttonNew.TabIndex = 5;
             buttonNew.Text = "&Neu";
             buttonNew.UseVisualStyleBackColor = true;
             buttonNew.Click += ButtonNew_Click;
-            //
+            // 
             // buttonNewChild
-            //
-            buttonNewChild.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            buttonNewChild.Location = new System.Drawing.Point(464, 151);
+            // 
+            buttonNewChild.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonNewChild.Location = new Point(464, 151);
             buttonNewChild.Name = "buttonNewChild";
-            buttonNewChild.Size = new System.Drawing.Size(188, 27);
+            buttonNewChild.Size = new Size(188, 27);
             buttonNewChild.TabIndex = 6;
             buttonNewChild.Text = "Neuer &Unterpunkt";
             buttonNewChild.UseVisualStyleBackColor = true;
             buttonNewChild.Click += ButtonNewChild_Click;
-            //
+            // 
             // buttonDelete
-            //
-            buttonDelete.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            buttonDelete.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            buttonDelete.Location = new System.Drawing.Point(464, 184);
+            // 
+            buttonDelete.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonDelete.ImageAlign = ContentAlignment.MiddleLeft;
+            buttonDelete.Location = new Point(464, 184);
             buttonDelete.Name = "buttonDelete";
-            buttonDelete.Size = new System.Drawing.Size(188, 27);
+            buttonDelete.Size = new Size(188, 27);
             buttonDelete.TabIndex = 7;
             buttonDelete.Text = "&Löschen";
             buttonDelete.UseVisualStyleBackColor = true;
             buttonDelete.Click += ButtonDelete_Click;
-            //
+            // 
             // buttonUp
-            //
-            buttonUp.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            buttonUp.Location = new System.Drawing.Point(464, 229);
+            // 
+            buttonUp.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonUp.Location = new Point(464, 229);
             buttonUp.Name = "buttonUp";
-            buttonUp.Size = new System.Drawing.Size(188, 27);
+            buttonUp.Size = new Size(188, 27);
             buttonUp.TabIndex = 8;
             buttonUp.Text = "Nach &oben";
             buttonUp.UseVisualStyleBackColor = true;
             buttonUp.Click += ButtonUp_Click;
-            //
+            // 
             // buttonDown
-            //
-            buttonDown.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            buttonDown.Location = new System.Drawing.Point(464, 262);
+            // 
+            buttonDown.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonDown.Location = new Point(464, 262);
             buttonDown.Name = "buttonDown";
-            buttonDown.Size = new System.Drawing.Size(188, 27);
+            buttonDown.Size = new Size(188, 27);
             buttonDown.TabIndex = 9;
             buttonDown.Text = "Nach &unten";
             buttonDown.UseVisualStyleBackColor = true;
             buttonDown.Click += ButtonDown_Click;
-            //
+            // 
             // buttonOutdent
-            //
-            buttonOutdent.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            buttonOutdent.Location = new System.Drawing.Point(464, 295);
+            // 
+            buttonOutdent.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonOutdent.Location = new Point(464, 295);
             buttonOutdent.Name = "buttonOutdent";
-            buttonOutdent.Size = new System.Drawing.Size(188, 27);
+            buttonOutdent.Size = new Size(188, 27);
             buttonOutdent.TabIndex = 10;
             buttonOutdent.Text = "Ebene &höher";
             buttonOutdent.UseVisualStyleBackColor = true;
             buttonOutdent.Click += ButtonOutdent_Click;
-            //
+            // 
             // buttonIndent
-            //
-            buttonIndent.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            buttonIndent.Location = new System.Drawing.Point(464, 328);
+            // 
+            buttonIndent.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonIndent.Location = new Point(464, 328);
             buttonIndent.Name = "buttonIndent";
-            buttonIndent.Size = new System.Drawing.Size(188, 27);
+            buttonIndent.Size = new Size(188, 27);
             buttonIndent.TabIndex = 11;
             buttonIndent.Text = "Ebene &tiefer";
             buttonIndent.UseVisualStyleBackColor = true;
             buttonIndent.Click += ButtonIndent_Click;
-            //
+            // 
             // labelExpand
-            //
-            labelExpand.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            // 
+            labelExpand.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             labelExpand.AutoSize = true;
-            labelExpand.Location = new System.Drawing.Point(464, 370);
+            labelExpand.Location = new Point(464, 370);
             labelExpand.Name = "labelExpand";
-            labelExpand.Size = new System.Drawing.Size(125, 15);
+            labelExpand.Size = new Size(124, 15);
             labelExpand.TabIndex = 12;
             labelExpand.Text = "Aufklappen bis Ebene:";
-            //
+            // 
             // buttonLevel1
-            //
-            buttonLevel1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            buttonLevel1.Location = new System.Drawing.Point(464, 388);
+            // 
+            buttonLevel1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonLevel1.Location = new Point(464, 388);
             buttonLevel1.Name = "buttonLevel1";
-            buttonLevel1.Size = new System.Drawing.Size(44, 27);
+            buttonLevel1.Size = new Size(44, 27);
             buttonLevel1.TabIndex = 13;
             buttonLevel1.Text = "&1";
             buttonLevel1.UseVisualStyleBackColor = true;
             buttonLevel1.Click += ButtonLevel1_Click;
-            //
+            // 
             // buttonLevel2
-            //
-            buttonLevel2.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            buttonLevel2.Location = new System.Drawing.Point(512, 388);
+            // 
+            buttonLevel2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonLevel2.Location = new Point(512, 388);
             buttonLevel2.Name = "buttonLevel2";
-            buttonLevel2.Size = new System.Drawing.Size(44, 27);
+            buttonLevel2.Size = new Size(44, 27);
             buttonLevel2.TabIndex = 14;
             buttonLevel2.Text = "&2";
             buttonLevel2.UseVisualStyleBackColor = true;
             buttonLevel2.Click += ButtonLevel2_Click;
-            //
+            // 
             // buttonLevel3
-            //
-            buttonLevel3.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            buttonLevel3.Location = new System.Drawing.Point(560, 388);
+            // 
+            buttonLevel3.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonLevel3.Location = new Point(560, 388);
             buttonLevel3.Name = "buttonLevel3";
-            buttonLevel3.Size = new System.Drawing.Size(44, 27);
+            buttonLevel3.Size = new Size(44, 27);
             buttonLevel3.TabIndex = 15;
             buttonLevel3.Text = "&3";
             buttonLevel3.UseVisualStyleBackColor = true;
             buttonLevel3.Click += ButtonLevel3_Click;
-            //
+            // 
             // buttonLevelAll
-            //
-            buttonLevelAll.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            buttonLevelAll.Location = new System.Drawing.Point(608, 388);
+            // 
+            buttonLevelAll.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonLevelAll.Location = new Point(608, 388);
             buttonLevelAll.Name = "buttonLevelAll";
-            buttonLevelAll.Size = new System.Drawing.Size(44, 27);
+            buttonLevelAll.Size = new Size(44, 27);
             buttonLevelAll.TabIndex = 16;
             buttonLevelAll.Text = "&Alle";
             buttonLevelAll.UseVisualStyleBackColor = true;
             buttonLevelAll.Click += ButtonLevelAll_Click;
-            //
-            // labelHint
-            //
-            labelHint.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            labelHint.AutoSize = true;
-            labelHint.ForeColor = System.Drawing.SystemColors.GrayText;
-            labelHint.Location = new System.Drawing.Point(12, 420);
-            labelHint.Name = "labelHint";
-            labelHint.Size = new System.Drawing.Size(450, 15);
-            labelHint.TabIndex = 17;
-            labelHint.Text = "Entf löscht, Einfg legt einen Eintrag an, F2 springt zum Titel; Strg+Z macht das Speichern rückgängig.";
-            //
+            // 
             // buttonOK
-            //
-            buttonOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            buttonOK.Location = new System.Drawing.Point(456, 442);
+            // 
+            buttonOK.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonOK.Location = new Point(458, 432);
             buttonOK.Name = "buttonOK";
-            buttonOK.Size = new System.Drawing.Size(95, 27);
+            buttonOK.Size = new Size(96, 27);
             buttonOK.TabIndex = 18;
             buttonOK.Text = "&Speichern";
             buttonOK.UseVisualStyleBackColor = true;
             buttonOK.Click += ButtonOK_Click;
-            //
+            // 
             // buttonCancel
-            //
-            buttonCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            buttonCancel.Location = new System.Drawing.Point(557, 442);
+            // 
+            buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonCancel.DialogResult = DialogResult.Cancel;
+            buttonCancel.Location = new Point(560, 432);
             buttonCancel.Name = "buttonCancel";
-            buttonCancel.Size = new System.Drawing.Size(95, 27);
+            buttonCancel.Size = new Size(92, 27);
             buttonCancel.TabIndex = 19;
             buttonCancel.Text = "Abbrechen";
             buttonCancel.UseVisualStyleBackColor = true;
-            //
+            // 
             // BookmarkForm
-            //
-            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonCancel;
-            ClientSize = new System.Drawing.Size(664, 481);
+            ClientSize = new Size(664, 471);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
-            Controls.Add(labelHint);
             Controls.Add(buttonLevelAll);
             Controls.Add(buttonLevel3);
             Controls.Add(buttonLevel2);
@@ -302,11 +289,11 @@ namespace PDFLight.Forms
             Controls.Add(treeView);
             Icon = (Icon)resources.GetObject("$this.Icon");
             MinimizeBox = false;
-            MinimumSize = new System.Drawing.Size(560, 400);
+            MinimumSize = new Size(560, 400);
             Name = "BookmarkForm";
             ShowInTaskbar = false;
-            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            Text = "Lesezeichen bearbeiten";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "Lesezeichen bearbeiten (Entf löscht, Einfg legt einen Eintrag an, F2 springt zum Titel)";
             ((System.ComponentModel.ISupportInitialize)numPage).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -331,7 +318,6 @@ namespace PDFLight.Forms
         private System.Windows.Forms.Button buttonLevel2;
         private System.Windows.Forms.Button buttonLevel3;
         private System.Windows.Forms.Button buttonLevelAll;
-        private System.Windows.Forms.Label labelHint;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
     }
