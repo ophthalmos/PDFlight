@@ -250,7 +250,7 @@
             // rbBackgroundDark
             // 
             rbBackgroundDark.AutoSize = true;
-            rbBackgroundDark.Location = new Point(270, 271);
+            rbBackgroundDark.Location = new Point(267, 271);
             rbBackgroundDark.Name = "rbBackgroundDark";
             rbBackgroundDark.Size = new Size(61, 19);
             rbBackgroundDark.TabIndex = 14;
