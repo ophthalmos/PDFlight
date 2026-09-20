@@ -119,7 +119,7 @@
             // cbRememberPage
             // 
             cbRememberPage.AutoSize = true;
-            cbRememberPage.Location = new Point(19, 74);
+            cbRememberPage.Location = new Point(19, 69);
             cbRememberPage.Name = "cbRememberPage";
             cbRememberPage.Size = new Size(299, 19);
             cbRememberPage.TabIndex = 1;
@@ -131,7 +131,7 @@
             cbConfirmDelete.AutoSize = true;
             cbConfirmDelete.Checked = true;
             cbConfirmDelete.CheckState = CheckState.Checked;
-            cbConfirmDelete.Location = new Point(19, 99);
+            cbConfirmDelete.Location = new Point(19, 94);
             cbConfirmDelete.Name = "cbConfirmDelete";
             cbConfirmDelete.Size = new Size(295, 19);
             cbConfirmDelete.TabIndex = 2;
@@ -143,7 +143,7 @@
             cbOpenNextAfterDelete.AutoSize = true;
             cbOpenNextAfterDelete.Checked = true;
             cbOpenNextAfterDelete.CheckState = CheckState.Checked;
-            cbOpenNextAfterDelete.Location = new Point(19, 124);
+            cbOpenNextAfterDelete.Location = new Point(19, 119);
             cbOpenNextAfterDelete.Name = "cbOpenNextAfterDelete";
             cbOpenNextAfterDelete.Size = new Size(337, 19);
             cbOpenNextAfterDelete.TabIndex = 3;
@@ -153,7 +153,7 @@
             // labelToolbar
             // 
             labelToolbar.AutoSize = true;
-            labelToolbar.Location = new Point(19, 48);
+            labelToolbar.Location = new Point(17, 43);
             labelToolbar.Name = "labelToolbar";
             labelToolbar.Size = new Size(160, 15);
             labelToolbar.TabIndex = 4;
@@ -162,7 +162,7 @@
             // comboToolbar
             // 
             comboToolbar.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboToolbar.Location = new Point(203, 45);
+            comboToolbar.Location = new Point(203, 40);
             comboToolbar.Name = "comboToolbar";
             comboToolbar.Size = new Size(269, 23);
             comboToolbar.TabIndex = 5;
@@ -170,7 +170,7 @@
             // cbCloseOnEscape
             // 
             cbCloseOnEscape.AutoSize = true;
-            cbCloseOnEscape.Location = new Point(19, 149);
+            cbCloseOnEscape.Location = new Point(19, 144);
             cbCloseOnEscape.Name = "cbCloseOnEscape";
             cbCloseOnEscape.Size = new Size(313, 19);
             cbCloseOnEscape.TabIndex = 6;
@@ -180,7 +180,7 @@
             // cbReopenLast
             // 
             cbReopenLast.AutoSize = true;
-            cbReopenLast.Location = new Point(19, 174);
+            cbReopenLast.Location = new Point(19, 169);
             cbReopenLast.Name = "cbReopenLast";
             cbReopenLast.Size = new Size(235, 19);
             cbReopenLast.TabIndex = 7;
@@ -190,7 +190,7 @@
             // cbFullPathTitle
             // 
             cbFullPathTitle.AutoSize = true;
-            cbFullPathTitle.Location = new Point(19, 199);
+            cbFullPathTitle.Location = new Point(19, 194);
             cbFullPathTitle.Name = "cbFullPathTitle";
             cbFullPathTitle.Size = new Size(287, 19);
             cbFullPathTitle.TabIndex = 8;
@@ -200,7 +200,7 @@
             // cbShowFavorites
             // 
             cbShowFavorites.AutoSize = true;
-            cbShowFavorites.Location = new Point(19, 224);
+            cbShowFavorites.Location = new Point(19, 219);
             cbShowFavorites.Name = "cbShowFavorites";
             cbShowFavorites.Size = new Size(353, 19);
             cbShowFavorites.TabIndex = 9;
@@ -210,7 +210,7 @@
             // labelMaxRecentFiles
             // 
             labelMaxRecentFiles.AutoSize = true;
-            labelMaxRecentFiles.Location = new Point(19, 251);
+            labelMaxRecentFiles.Location = new Point(17, 246);
             labelMaxRecentFiles.Name = "labelMaxRecentFiles";
             labelMaxRecentFiles.Size = new Size(245, 15);
             labelMaxRecentFiles.TabIndex = 10;
@@ -219,40 +219,40 @@
             // numMaxRecentFiles
             // 
             numMaxRecentFiles.Increment = new decimal(new int[] { 5, 0, 0, 0 });
-            numMaxRecentFiles.Location = new Point(334, 249);
+            numMaxRecentFiles.Location = new Point(334, 244);
             numMaxRecentFiles.Maximum = new decimal(new int[] { 50, 0, 0, 0 });
             numMaxRecentFiles.Name = "numMaxRecentFiles";
             numMaxRecentFiles.Size = new Size(60, 23);
             numMaxRecentFiles.TabIndex = 11;
             numMaxRecentFiles.Value = new decimal(new int[] { 20, 0, 0, 0 });
-            //
+            // 
             // labelBackground
-            //
+            // 
             labelBackground.AutoSize = true;
-            labelBackground.Location = new Point(19, 278);
+            labelBackground.Location = new Point(17, 273);
             labelBackground.Name = "labelBackground";
-            labelBackground.Size = new Size(118, 15);
+            labelBackground.Size = new Size(115, 15);
             labelBackground.TabIndex = 12;
             labelBackground.Text = "Anzeigehintergrund:";
-            //
+            // 
             // rbBackgroundLight
-            //
+            // 
             rbBackgroundLight.AutoSize = true;
             rbBackgroundLight.Checked = true;
-            rbBackgroundLight.Location = new Point(203, 276);
+            rbBackgroundLight.Location = new Point(203, 271);
             rbBackgroundLight.Name = "rbBackgroundLight";
-            rbBackgroundLight.Size = new Size(45, 19);
+            rbBackgroundLight.Size = new Size(44, 19);
             rbBackgroundLight.TabIndex = 13;
             rbBackgroundLight.TabStop = true;
             rbBackgroundLight.Text = "&hell";
             rbBackgroundLight.UseVisualStyleBackColor = true;
-            //
+            // 
             // rbBackgroundDark
-            //
+            // 
             rbBackgroundDark.AutoSize = true;
-            rbBackgroundDark.Location = new Point(270, 276);
+            rbBackgroundDark.Location = new Point(270, 271);
             rbBackgroundDark.Name = "rbBackgroundDark";
-            rbBackgroundDark.Size = new Size(60, 19);
+            rbBackgroundDark.Size = new Size(61, 19);
             rbBackgroundDark.TabIndex = 14;
             rbBackgroundDark.Text = "dun&kel";
             rbBackgroundDark.UseVisualStyleBackColor = true;
@@ -260,7 +260,7 @@
             // labelLanguage
             // 
             labelLanguage.AutoSize = true;
-            labelLanguage.Location = new Point(19, 19);
+            labelLanguage.Location = new Point(17, 14);
             labelLanguage.Name = "labelLanguage";
             labelLanguage.Size = new Size(213, 15);
             labelLanguage.TabIndex = 12;
@@ -269,7 +269,7 @@
             // comboLanguage
             // 
             comboLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboLanguage.Location = new Point(257, 16);
+            comboLanguage.Location = new Point(257, 11);
             comboLanguage.Name = "comboLanguage";
             comboLanguage.Size = new Size(215, 23);
             comboLanguage.TabIndex = 13;

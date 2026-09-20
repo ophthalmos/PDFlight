@@ -27,13 +27,15 @@ internal partial class PdfViewHost(WebView2 webView)
 
     /// <summary>Anzeigehintergrund dunkel: setzt das bevorzugte Farbschema des WebView2-Profils. Der Chromium-PDF-Viewer richtet
     /// Leiste und Fläche neben den Seiten danach aus (die Seiten selbst bleiben unverändert). Vor <see cref="InitializeAsync"/>
-    /// gesetzt gilt es ab dem ersten Dokument; eine spätere Änderung wirkt sofort auf das geladene Dokument (geprüft 20.09.2026).</summary>
+    /// gesetzt gilt es ab dem ersten Dokument; eine spätere Änderung wirkt sofort auf das geladene Dokument (geprüft 20.09.2026). Die eigene
+    /// Leerseite (<see cref="ShowEmptyPage"/>) folgt per prefers-color-scheme, die Hintergrundfarbe des Controls ebenfalls.</summary>
     public bool DarkScheme
     {
         get => darkScheme;
         set
         {
             darkScheme = value;
+            webView.DefaultBackgroundColor = value ? Color.FromArgb(51, 51, 51) : Color.White; // kein heller Blitz zwischen zwei Dokumenten
             if (IsReady) { webView.CoreWebView2.Profile.PreferredColorScheme = value ? CoreWebView2PreferredColorScheme.Dark : CoreWebView2PreferredColorScheme.Light; }
         }
     }
@@ -618,9 +620,12 @@ internal partial class PdfViewHost(WebView2 webView)
     private void ShowEmptyPage()
     {
         webView.CoreWebView2.NavigateToString("""
-            <!doctype html><html lang="de"><head><meta charset="utf-8"><title>PDFlight</title></head>
-            <body style="margin:0;font-family:'Segoe UI',sans-serif;background:#f3f3f3;color:#666;
-                         display:flex;align-items:center;justify-content:center;height:100vh">
+            <!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="color-scheme" content="light dark"><title>PDFlight</title>
+            <style>
+              body { margin:0; font-family:'Segoe UI',sans-serif; background:#f3f3f3; color:#666; display:flex; align-items:center; justify-content:center; height:100vh }
+              @media (prefers-color-scheme: dark) { body { background:#333333; color:#bbbbbb } } /* Anzeigehintergrund „dunkel“: wie die Fläche des PDF-Viewers (RGB 51) */
+            </style></head>
+            <body>
               <div id="hint" style="text-align:center;border:3px dashed transparent;border-radius:16px;padding:40px">
                 <div style="font-size:56px">&#128196;</div>
                 <h2 style="font-weight:600;margin:8px 0 4px">Kein Dokument ge&ouml;ffnet</h2>
