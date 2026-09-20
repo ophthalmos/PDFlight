@@ -179,7 +179,7 @@ public partial class BookmarkForm : Form
         Rectangle row = new(0, e.Bounds.Y, treeView.ClientSize.Width, e.Bounds.Height);
         var back = selected ? (active ? SystemColors.Highlight : SystemColors.ControlLight) : IsAncestorOfSelection(e.Node) ? Color.FromArgb(232, 232, 232) : treeView.BackColor;
         using (SolidBrush brush = new(back)) { g.FillRectangle(brush, row); }
-        if (e.Node.Nodes.Count > 0) { DrawGlyph(g, new Rectangle(e.Node.Bounds.X - treeView.Indent, e.Bounds.Y, treeView.Indent, e.Bounds.Height), e.Node.IsExpanded, active ? SystemColors.HighlightText : SystemColors.GrayText); }
+        if (e.Node.Nodes.Count > 0) { DrawGlyph(g, new Rectangle(e.Node.Bounds.X - treeView.Indent, e.Bounds.Y, treeView.Indent, e.Bounds.Height), e.Node.IsExpanded, active ? SystemColors.HighlightText : Color.FromArgb(96, 96, 96)); } // kräftiger als GrayText (Wunsch vom 20.09.2026)
         var pageWidth = LogicalToDeviceUnits(44);
         Rectangle pageBounds = new(row.Right - pageWidth - LogicalToDeviceUnits(4), e.Bounds.Y, pageWidth, e.Bounds.Height);
         Rectangle textBounds = new(e.Node.Bounds.X, e.Bounds.Y, Math.Max(0, pageBounds.Left - e.Node.Bounds.X), e.Bounds.Height);
