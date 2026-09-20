@@ -647,4 +647,6 @@ or press Ctrl+Shift+I.</value></data>
   <data name="{0} Dateien wurden angehängt." xml:space="preserve"><value>{0} files were appended.</value></data>
   <data name="1 Seite angehängt" xml:space="preserve"><value>1 page appended</value></data>
   <data name="{0} Seiten angehängt" xml:space="preserve"><value>{0} pages appended</value></data>
+  <data name="Die Datei ist schreibgeschützt." xml:space="preserve"><value>The file is read-only.</value></data>
+  <data name="Soll der Schreibschutz aufgehoben werden, damit „{0}“ gespeichert werden kann?" xml:space="preserve"><value>Remove the write protection so that „{0}“ can be saved?</value></data>
 </root>

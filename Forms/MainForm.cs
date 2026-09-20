@@ -1248,6 +1248,7 @@ public partial class MainForm : Form
     /// <summary>Führt eine Dokumentänderung mit vorheriger Undo-Sicherung aus; false bei Fehler.</summary>
     private bool RunPdfEdit(Action edit, string actionName)
     {
+        if (!EnsureWritable(actionName)) { return false; }
         Cursor.Current = Cursors.WaitCursor;
         try
         {
@@ -1707,10 +1708,30 @@ public partial class MainForm : Form
     private static string OwnUndoBackup => Path.Combine(UndoFolder, $"undo-{Environment.ProcessId}.pdf"); // je Instanz eine eigene Sicherung
 
     /// <summary>Merkt eine Dokument-Bearbeitung als rückgängig machbar (Sicherungskopie der Datei).</summary>
+    /// <summary>Schreibgeschützte Datei (Attribut „Schreibgeschützt“, z.B. von einem schreibgeschützten Medium kopiert): PDFsharps Save
+    /// scheitert sonst mit „Access denied“ (Fehlerbericht 20.09.2026). Nach Rückfrage wird das Attribut entfernt, sonst bleibt die
+    /// Aktion aus. PDFlight setzt das Attribut selbst nie.</summary>
+    private bool EnsureWritable(string actionName)
+    {
+        if (currentFile == null) { return false; }
+        FileInfo info = new(currentFile.FullName);
+        if (!info.Exists || !info.IsReadOnly) { return true; }
+        if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Die Datei ist schreibgeschützt."),
+            string.Format(Lng.T("Soll der Schreibschutz aufgehoben werden, damit „{0}“ gespeichert werden kann?"), actionName))) { return false; }
+        try { info.IsReadOnly = false; return true; }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), actionName), ex);
+            return false;
+        }
+    }
+
     private void BackupForUndo(string actionName)
     {
         Directory.CreateDirectory(UndoFolder);
+        if (File.Exists(OwnUndoBackup)) { File.SetAttributes(OwnUndoBackup, FileAttributes.Normal); } // eine frühere Sicherung einer schreibgeschützten Datei erbte das Attribut – Überschreiben schlüge fehl
         File.Copy(currentFile!.FullName, OwnUndoBackup, true);
+        File.SetAttributes(OwnUndoBackup, FileAttributes.Normal); // die Kopie erbt die Attribute des Originals
         SetUndoAction(new UndoAction(UndoKind.Edit, actionName, currentFile.FullName, OwnUndoBackup));
     }
 

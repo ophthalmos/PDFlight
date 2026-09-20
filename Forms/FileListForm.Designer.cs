@@ -44,21 +44,21 @@ namespace PDFLight.Forms
             labelPrompt.AutoSize = true;
             labelPrompt.Location = new Point(12, 12);
             labelPrompt.Name = "labelPrompt";
-            labelPrompt.Size = new Size(297, 15);
+            labelPrompt.Size = new Size(268, 15);
             labelPrompt.TabIndex = 0;
             labelPrompt.Text = "Wähle Dateien (Leertaste), ändere die Reihenfolge";
             // 
             // listView
             // 
             listView.AllowDrop = true;
-            listView.CheckBoxes = true;
             listView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            listView.CheckBoxes = true;
             listView.Columns.AddRange(new ColumnHeader[] { colName, colDate });
             listView.FullRowSelect = true;
             listView.Location = new Point(12, 34);
             listView.Name = "listView";
             listView.ShowItemToolTips = true;
-            listView.Size = new Size(460, 300);
+            listView.Size = new Size(384, 300);
             listView.TabIndex = 1;
             listView.UseCompatibleStateImageBehavior = false;
             listView.View = View.Details;
@@ -108,7 +108,7 @@ namespace PDFLight.Forms
             // btnOK
             // 
             btnOK.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnOK.Location = new Point(226, 346);
+            btnOK.Location = new Point(150, 346);
             btnOK.Name = "btnOK";
             btnOK.Size = new Size(145, 27);
             btnOK.TabIndex = 4;
@@ -120,7 +120,7 @@ namespace PDFLight.Forms
             // 
             btnCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             btnCancel.DialogResult = DialogResult.Cancel;
-            btnCancel.Location = new Point(377, 346);
+            btnCancel.Location = new Point(301, 346);
             btnCancel.Name = "btnCancel";
             btnCancel.Size = new Size(95, 27);
             btnCancel.TabIndex = 5;
@@ -132,7 +132,7 @@ namespace PDFLight.Forms
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = btnCancel;
-            ClientSize = new Size(484, 385);
+            ClientSize = new Size(408, 385);
             Controls.Add(btnCancel);
             Controls.Add(btnOK);
             Controls.Add(btnDown);
@@ -141,7 +141,7 @@ namespace PDFLight.Forms
             Controls.Add(labelPrompt);
             Icon = (Icon)resources.GetObject("$this.Icon");
             MinimizeBox = false;
-            MinimumSize = new Size(360, 260);
+            MinimumSize = new Size(370, 260);
             Name = "FileListForm";
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;
