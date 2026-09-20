@@ -647,6 +647,9 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="{0} Dateien wurden angehängt." xml:space="preserve"><value>{0} fichiers ont été ajoutés.</value></data>
   <data name="1 Seite angehängt" xml:space="preserve"><value>1 page ajoutée</value></data>
   <data name="{0} Seiten angehängt" xml:space="preserve"><value>{0} pages ajoutées</value></data>
-  <data name="Die Datei ist schreibgeschützt." xml:space="preserve"><value>Le fichier est en lecture seule.</value></data>
+  <data name="„{0}“ ist schreibgeschützt." xml:space="preserve"><value>« {0} » est en lecture seule.</value></data>
   <data name="Soll der Schreibschutz aufgehoben werden, damit „{0}“ gespeichert werden kann?" xml:space="preserve"><value>Supprimer la protection en écriture pour pouvoir enregistrer « {0} » ?</value></data>
+  <data name="„{0}“ ist mit einem Kennwort geschützt." xml:space="preserve"><value>« {0} » est protégé par un mot de passe.</value></data>
+  <data name="Zum Bearbeiten hebst du den Schutz zuerst über Bearbeiten → „Kennwort entfernen …“ auf. Dafür brauchst du das Besitzerkennwort." xml:space="preserve"><value>Pour le modifier, supprime d’abord la protection via Modifier → « Supprimer le mot de passe… ». Il te faut le mot de passe propriétaire.</value></data>
+  <data name="Mit Kennwort geschützt: Bearbeiten ist erst nach dem Entfernen des Kennworts möglich." xml:space="preserve"><value>Protégé par mot de passe : la modification n’est possible qu’après la suppression du mot de passe.</value></data>
 </root>

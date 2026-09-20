@@ -28,130 +28,130 @@ namespace PDFLight.Forms
         /// </summary>
         private void InitializeComponent()
         {
-            labelInfo = new System.Windows.Forms.Label();
-            labelPrompt = new System.Windows.Forms.Label();
-            textBoxPages = new System.Windows.Forms.TextBox();
-            labelHint = new System.Windows.Forms.Label();
-            groupRotation = new System.Windows.Forms.GroupBox();
-            radioRight = new System.Windows.Forms.RadioButton();
-            radioLeft = new System.Windows.Forms.RadioButton();
-            radioTurn = new System.Windows.Forms.RadioButton();
-            buttonOK = new System.Windows.Forms.Button();
-            buttonCancel = new System.Windows.Forms.Button();
+            labelInfo = new Label();
+            labelPrompt = new Label();
+            textBoxPages = new TextBox();
+            labelHint = new Label();
+            groupRotation = new GroupBox();
+            radioRight = new RadioButton();
+            radioLeft = new RadioButton();
+            radioTurn = new RadioButton();
+            buttonOK = new Button();
+            buttonCancel = new Button();
             groupRotation.SuspendLayout();
             SuspendLayout();
-            //
+            // 
             // labelInfo
-            //
+            // 
             labelInfo.AutoSize = true;
-            labelInfo.Location = new System.Drawing.Point(12, 12);
+            labelInfo.Location = new Point(12, 12);
             labelInfo.Name = "labelInfo";
-            labelInfo.Size = new System.Drawing.Size(300, 30);
+            labelInfo.Size = new Size(0, 15);
             labelInfo.TabIndex = 6;
             labelInfo.Visible = false;
-            //
+            // 
             // labelPrompt
-            //
+            // 
             labelPrompt.AutoSize = true;
-            labelPrompt.Location = new System.Drawing.Point(12, 15);
+            labelPrompt.Location = new Point(12, 15);
             labelPrompt.Name = "labelPrompt";
-            labelPrompt.Size = new System.Drawing.Size(80, 15);
+            labelPrompt.Size = new Size(77, 15);
             labelPrompt.TabIndex = 0;
             labelPrompt.Text = "&Seiten (1–99):";
-            //
+            // 
             // textBoxPages
-            //
-            textBoxPages.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            textBoxPages.Location = new System.Drawing.Point(12, 38);
+            // 
+            textBoxPages.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textBoxPages.Location = new Point(12, 38);
             textBoxPages.Name = "textBoxPages";
-            textBoxPages.Size = new System.Drawing.Size(360, 23);
+            textBoxPages.Size = new Size(269, 23);
             textBoxPages.TabIndex = 1;
-            //
+            // 
             // labelHint
-            //
+            // 
             labelHint.AutoSize = true;
-            labelHint.ForeColor = System.Drawing.SystemColors.GrayText;
-            labelHint.Location = new System.Drawing.Point(12, 66);
+            labelHint.ForeColor = SystemColors.GrayText;
+            labelHint.Location = new Point(12, 66);
             labelHint.Name = "labelHint";
-            labelHint.Size = new System.Drawing.Size(140, 15);
+            labelHint.Size = new Size(108, 15);
             labelHint.TabIndex = 2;
             labelHint.Text = "z.B.  3   oder   2-5, 8";
-            //
+            // 
             // groupRotation
-            //
-            groupRotation.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            // 
+            groupRotation.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupRotation.Controls.Add(radioRight);
             groupRotation.Controls.Add(radioLeft);
             groupRotation.Controls.Add(radioTurn);
-            groupRotation.Location = new System.Drawing.Point(12, 92);
+            groupRotation.Location = new Point(12, 92);
             groupRotation.Name = "groupRotation";
-            groupRotation.Size = new System.Drawing.Size(360, 56);
+            groupRotation.Size = new Size(269, 56);
             groupRotation.TabIndex = 3;
             groupRotation.TabStop = false;
             groupRotation.Text = "Drehung";
-            //
+            // 
             // radioRight
-            //
+            // 
             radioRight.AutoSize = true;
             radioRight.Checked = true;
-            radioRight.Location = new System.Drawing.Point(12, 22);
+            radioRight.Location = new Point(12, 22);
             radioRight.Name = "radioRight";
-            radioRight.Size = new System.Drawing.Size(80, 19);
+            radioRight.Size = new Size(77, 19);
             radioRight.TabIndex = 0;
             radioRight.TabStop = true;
             radioRight.Text = "90° &rechts";
             radioRight.UseVisualStyleBackColor = true;
-            //
+            // 
             // radioLeft
-            //
+            // 
             radioLeft.AutoSize = true;
-            radioLeft.Location = new System.Drawing.Point(120, 22);
+            radioLeft.Location = new Point(110, 22);
             radioLeft.Name = "radioLeft";
-            radioLeft.Size = new System.Drawing.Size(72, 19);
+            radioLeft.Size = new Size(69, 19);
             radioLeft.TabIndex = 1;
             radioLeft.Text = "90° &links";
             radioLeft.UseVisualStyleBackColor = true;
-            //
+            // 
             // radioTurn
-            //
+            // 
             radioTurn.AutoSize = true;
-            radioTurn.Location = new System.Drawing.Point(228, 22);
+            radioTurn.Location = new Point(208, 22);
             radioTurn.Name = "radioTurn";
-            radioTurn.Size = new System.Drawing.Size(50, 19);
+            radioTurn.Size = new Size(48, 19);
             radioTurn.TabIndex = 2;
             radioTurn.Text = "&180°";
             radioTurn.UseVisualStyleBackColor = true;
-            //
+            // 
             // buttonOK
-            //
-            buttonOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            buttonOK.Location = new System.Drawing.Point(176, 160);
+            // 
+            buttonOK.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonOK.DialogResult = DialogResult.OK;
+            buttonOK.Location = new Point(85, 160);
             buttonOK.Name = "buttonOK";
-            buttonOK.Size = new System.Drawing.Size(95, 27);
+            buttonOK.Size = new Size(95, 27);
             buttonOK.TabIndex = 4;
             buttonOK.Text = "OK";
             buttonOK.UseVisualStyleBackColor = true;
             buttonOK.Click += ButtonOK_Click;
-            //
+            // 
             // buttonCancel
-            //
-            buttonCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            buttonCancel.Location = new System.Drawing.Point(277, 160);
+            // 
+            buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonCancel.DialogResult = DialogResult.Cancel;
+            buttonCancel.Location = new Point(186, 160);
             buttonCancel.Name = "buttonCancel";
-            buttonCancel.Size = new System.Drawing.Size(95, 27);
+            buttonCancel.Size = new Size(95, 27);
             buttonCancel.TabIndex = 5;
             buttonCancel.Text = "Abbrechen";
             buttonCancel.UseVisualStyleBackColor = true;
-            //
+            // 
             // PageRangeForm
-            //
+            // 
             AcceptButton = buttonOK;
-            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonCancel;
-            ClientSize = new System.Drawing.Size(384, 199);
+            ClientSize = new Size(293, 199);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
             Controls.Add(groupRotation);
@@ -159,12 +159,12 @@ namespace PDFLight.Forms
             Controls.Add(textBoxPages);
             Controls.Add(labelPrompt);
             Controls.Add(labelInfo);
-            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "PageRangeForm";
             ShowInTaskbar = false;
-            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            StartPosition = FormStartPosition.CenterParent;
             Text = "Seiten";
             groupRotation.ResumeLayout(false);
             groupRotation.PerformLayout();

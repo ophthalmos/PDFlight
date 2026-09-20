@@ -647,6 +647,9 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="{0} Dateien wurden angehängt." xml:space="preserve"><value>Se han añadido {0} archivos.</value></data>
   <data name="1 Seite angehängt" xml:space="preserve"><value>1 página añadida</value></data>
   <data name="{0} Seiten angehängt" xml:space="preserve"><value>{0} páginas añadidas</value></data>
-  <data name="Die Datei ist schreibgeschützt." xml:space="preserve"><value>El archivo es de solo lectura.</value></data>
+  <data name="„{0}“ ist schreibgeschützt." xml:space="preserve"><value>«{0}» es de solo lectura.</value></data>
   <data name="Soll der Schreibschutz aufgehoben werden, damit „{0}“ gespeichert werden kann?" xml:space="preserve"><value>¿Quitar la protección contra escritura para poder guardar «{0}»?</value></data>
+  <data name="„{0}“ ist mit einem Kennwort geschützt." xml:space="preserve"><value>«{0}» está protegido con contraseña.</value></data>
+  <data name="Zum Bearbeiten hebst du den Schutz zuerst über Bearbeiten → „Kennwort entfernen …“ auf. Dafür brauchst du das Besitzerkennwort." xml:space="preserve"><value>Para editarlo, quita primero la protección en Editar → «Quitar contraseña…». Necesitas la contraseña de propietario.</value></data>
+  <data name="Mit Kennwort geschützt: Bearbeiten ist erst nach dem Entfernen des Kennworts möglich." xml:space="preserve"><value>Protegido con contraseña: solo se puede editar después de quitar la contraseña.</value></data>
 </root>
