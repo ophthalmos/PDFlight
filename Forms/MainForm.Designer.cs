@@ -372,7 +372,7 @@
             //
             mnuEditBookmarks.Name = "mnuEditBookmarks";
             mnuEditBookmarks.Size = new Size(317, 22);
-            mnuEditBookmarks.Text = "Lesezeichen bearbeiten (experimentell) …";
+            mnuEditBookmarks.Text = "Lesezeichen bearbeiten …";
             mnuEditBookmarks.Visible = false;
             mnuEditBookmarks.Click += MnuEditBookmarks_Click;
             // 

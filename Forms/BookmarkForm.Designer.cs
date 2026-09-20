@@ -28,7 +28,8 @@ namespace PDFLight.Forms
         /// </summary>
         private void InitializeComponent()
         {
-            treeView = new System.Windows.Forms.TreeView();
+            var resources = new System.ComponentModel.ComponentResourceManager(typeof(BookmarkForm));
+            treeView = new PDFLight.Controls.BookmarkTreeView();
             labelPage = new System.Windows.Forms.Label();
             numPage = new System.Windows.Forms.NumericUpDown();
             buttonNew = new System.Windows.Forms.Button();
@@ -183,7 +184,7 @@ namespace PDFLight.Forms
             labelHint.Name = "labelHint";
             labelHint.Size = new System.Drawing.Size(500, 15);
             labelHint.TabIndex = 11;
-            labelHint.Text = "Experimentelle Funktion – F2 benennt um, Entf löscht, Einfg legt einen Eintrag an; Strg+Z macht das Speichern rückgängig.";
+            labelHint.Text = "F2 benennt um, Entf löscht, Einfg legt einen Eintrag an; Strg+Z macht das Speichern rückgängig.";
             //
             // buttonOK
             //
@@ -213,6 +214,7 @@ namespace PDFLight.Forms
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             CancelButton = buttonCancel;
             ClientSize = new System.Drawing.Size(664, 481);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
             Controls.Add(labelHint);
@@ -240,7 +242,7 @@ namespace PDFLight.Forms
 
         #endregion
 
-        private System.Windows.Forms.TreeView treeView;
+        private PDFLight.Controls.BookmarkTreeView treeView;
         private System.Windows.Forms.Label labelPage;
         private System.Windows.Forms.NumericUpDown numPage;
         private System.Windows.Forms.Button buttonNew;
