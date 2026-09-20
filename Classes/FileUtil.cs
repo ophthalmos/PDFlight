@@ -8,6 +8,19 @@ using PDFLight.Controls;
 
 namespace PDFLight.Classes;
 
+/// <summary>Änderungszeit und Größe einer Datei als Stempel: Der Lesezeichen-Editor merkt ihn sich beim Lesen und speichert nur,
+/// wenn er noch stimmt – sonst hat inzwischen eine andere Instanz oder ein anderes Programm die Datei verändert.</summary>
+public readonly record struct FileStamp(DateTime LastWriteUtc, long Length)
+{
+    public static FileStamp Of(string path)
+    {
+        FileInfo info = new(path);
+        return new FileStamp(info.LastWriteTimeUtc, info.Exists ? info.Length : -1);
+    }
+
+    public bool Matches(string path) => Of(path) == this;
+}
+
 internal static class FileUtil
 {
     /// <summary>Ersetzt Umlaute/ß und entfernt alle übrigen diakritischen Zeichen ("Café" → "Cafe").</summary>

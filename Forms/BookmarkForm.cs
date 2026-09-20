@@ -10,15 +10,19 @@ namespace PDFLight.Forms;
 public partial class BookmarkForm : Form
 {
     private readonly int currentPage;
+    private readonly string filePath;
+    private readonly FileStamp stamp; // Zustand der Datei beim Lesen der Gliederung – Speichern nur, wenn sie unverändert ist
     private bool loading; // beim Befüllen der Felder keine Änderungen zurückschreiben
     private readonly Font? glyphFont; // Symbolschrift für die Aufklapp-Pfeile (null: Ersatzzeichnung)
 
     /// <summary>Die bearbeitete Gliederung (nach „Speichern“).</summary>
     public List<Bookmark> Bookmarks { get; private set; } = [];
 
-    public BookmarkForm(IReadOnlyList<Bookmark> bookmarks, int pageCount, int currentPage)
+    public BookmarkForm(string filePath, FileStamp stamp, IReadOnlyList<Bookmark> bookmarks, int pageCount, int currentPage)
     {
         InitializeComponent();
+        this.filePath = filePath;
+        this.stamp = stamp;
         Lng.Apply(this);
         TextBoxMargins.Apply(this);
         pageCount = Math.Max(1, pageCount);
@@ -296,6 +300,12 @@ public partial class BookmarkForm : Form
             empty.EnsureVisible();
             TaskDlg.MsgTaskDlg(Handle, Lng.T("Bitte gib für jedes Lesezeichen einen Titel ein."), null, TaskDialogIcon.Warning);
             textBoxTitle.Focus();
+            return;
+        }
+        if (!stamp.Matches(filePath)) // Änderungserkennung statt Dateisperre (Entscheidung vom 20.09.2026)
+        {
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei wurde inzwischen verändert."),
+                Lng.T("Die Lesezeichen wurden nicht gespeichert – schließe den Editor mit „Abbrechen“ und öffne ihn erneut."), TaskDialogIcon.Warning);
             return;
         }
         Bookmarks = Collect(treeView.Nodes);
