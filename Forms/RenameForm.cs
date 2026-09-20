@@ -181,7 +181,8 @@ public partial class RenameForm : Form
     // Tag-Monat-Jahr und Monat-Jahr, mit oder ohne Trennzeichen (- _ .) zwischen den Teilen, vom Namen durch Leerzeichen, _, - oder .
     // getrennt. Monat und Tag werden geprüft, damit Nummern wie „1234_“ oder „_4711“ stehen bleiben (erweitert 20.09.2026).
     private const string Year = @"(?:19|20)\d{2}", Month = @"(?:0[1-9]|1[012])", Day = @"(?:0[1-9]|[12]\d|3[01])";
-    private const string DateCore = Year + @"([-_.]?)" + Month + @"(?:\1" + Day + @")?|" + Day + @"([-_.]?)" + Month + @"\2" + Year + @"|" + Month + @"[-_.]?" + Year + @"|" + Year;
+    // Die Jahreszahl steht in jeder Form in der benannten Gruppe „y“ (benannte Gruppen zählen in .NET hinter den unbenannten, \1 und \2 bleiben die Trennzeichen).
+    private const string DateCore = @"(?<y>" + Year + @")([-_.]?)" + Month + @"(?:\1" + Day + @")?|" + Day + @"([-_.]?)" + Month + @"\2(?<y>" + Year + @")|" + Month + @"[-_.]?(?<y>" + Year + @")|(?<y>" + Year + @")";
 
     [GeneratedRegex(@"^(?:" + DateCore + @")[ _.-]+")]
     private static partial Regex DatePrefixRegex();
@@ -189,12 +190,14 @@ public partial class RenameForm : Form
     [GeneratedRegex(@"[ _.-]+(?:" + DateCore + @")$")]
     private static partial Regex DateSuffixRegex();
 
-    // eine alleinstehende Jahreszahl mitten im Namen samt dem Trennzeichen davor (nicht Teil eines längeren Datums wie 2026-09)
-    [GeneratedRegex(@"[ _.-]+(" + Year + @")(?=[ _.-](?!\d)|$)")]
-    private static partial Regex MiddleYearRegex();
+    // eine Datumsangabe mitten im Namen (jede Form von DateCore, auch die bloße Jahreszahl) samt dem Trennzeichen davor; entfernt
+    // wird sie nur, wenn ihr Jahr dem des neuen Datums entspricht
+    [GeneratedRegex(@"[ _.-]+(?:" + DateCore + @")(?=[ _.-](?!\d)|$)")]
+    private static partial Regex MiddleDateRegex();
 
-    [GeneratedRegex(Year)]
-    private static partial Regex YearRegex();
+    // der Menüeintrag selbst (z.B. „20260920_“ oder „_31122026“) – liefert dessen Jahr über die Gruppe „y“
+    [GeneratedRegex(@"^[ _.-]*(?:" + DateCore + @")[ _.-]*$")]
+    private static partial Regex DateItemRegex();
 
     private void BtnDateMenu_ItemClicked(object? sender, ToolStripItemClickedEventArgs e)
     {
@@ -205,8 +208,8 @@ public partial class RenameForm : Form
         var name = NameWithoutPdf();
         name = DatePrefixRegex().Replace(name, ""); // vorhandenes Datums-Präfix entfernen – es wird durch das gewählte ersetzt
         name = DateSuffixRegex().Replace(name, ""); // vorhandenes Datums-Suffix ebenso (auch am jeweils anderen Ende)
-        var year = YearRegex().Match(date).Value; // Jahreszahlen mitten im Namen nur, wenn sie dem neuen Datum entsprechen (Wunsch vom 20.09.2026)
-        name = MiddleYearRegex().Replace(name, m => m.Groups[1].Value == year ? string.Empty : m.Value);
+        var year = DateItemRegex().Match(date).Groups["y"].Value; // Datumsangaben mitten im Namen nur, wenn ihr Jahr dem neuen entspricht (Wunsch vom 20.09.2026)
+        name = MiddleDateRegex().Replace(name, m => m.Groups["y"].Value == year ? string.Empty : m.Value);
         if (name.Length == 0) { SetName(date.Trim('_')); return; } // der Name bestand nur aus dem Datum: kein Trennzeichen ins Leere
         if (index < split) { SetName(date + name); }
         else if (index > split) { SetName(name + date); }
