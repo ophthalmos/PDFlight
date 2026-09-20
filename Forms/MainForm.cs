@@ -1383,13 +1383,19 @@ public partial class MainForm : Form
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
         var file = currentFile.FullName;
-        (string Text, string? Detail)[] choices =
-        [
-            (Lng.T("Einzelne Datei auswählen"), Lng.T("Über den Dateidialog")),
-            (Lng.T("Geöffnete Dateien hinzufügen"), Lng.T("In anderen Instanzen angezeigte PDF-Dateien")),
-            (Lng.T("Dateien desselben Ordners"), Lng.T("PDF-Dateien aus dem Ordner der angezeigten Datei")),
-        ];
-        var choice = TaskDlg.ChoiceTaskDlg(Handle, Lng.T("Was soll angehängt werden?"), null, choices);
+        var shown = InstanceRegistry.ShownElsewhere().Where(f => !string.Equals(f, file, StringComparison.OrdinalIgnoreCase)).ToList(); // die Datei selbst nie
+        var siblings = FileUtil.GetPdfFilesInFolder(currentFile.DirectoryName ?? string.Empty).Where(f => !string.Equals(f, file, StringComparison.OrdinalIgnoreCase)).ToList();
+        // nur Optionen anbieten, die etwas liefern; bleibt allein der Dateidialog, erscheint er ohne Zwischenfrage (Wunsch vom 20.09.2026)
+        List<(int Kind, string Text, string? Detail)> choices = [(0, Lng.T("Einzelne Datei auswählen"), Lng.T("Über den Dateidialog"))];
+        if (shown.Count > 0) { choices.Add((1, Lng.T("Geöffnete Dateien hinzufügen"), Lng.T("In anderen Instanzen angezeigte PDF-Dateien"))); }
+        if (siblings.Count > 0) { choices.Add((2, Lng.T("Dateien desselben Ordners"), Lng.T("PDF-Dateien aus dem Ordner der angezeigten Datei"))); }
+        var choice = 0;
+        if (choices.Count > 1)
+        {
+            var picked = TaskDlg.ChoiceTaskDlg(Handle, Lng.T("Was soll angehängt werden?"), null, [.. choices.Select(c => (c.Text, c.Detail))]);
+            if (picked < 0) { return; }
+            choice = choices[picked].Kind;
+        }
         List<string> files;
         switch (choice)
         {
@@ -1407,15 +1413,7 @@ public partial class MainForm : Form
                 break;
             case 1:
             case 2:
-                var candidates = (choice == 1 ? InstanceRegistry.ShownElsewhere() : FileUtil.GetPdfFilesInFolder(currentFile.DirectoryName ?? string.Empty))
-                    .Where(f => !string.Equals(f, file, StringComparison.OrdinalIgnoreCase)).ToList(); // die Datei selbst nie
-                if (candidates.Count == 0)
-                {
-                    TaskDlg.MsgTaskDlg(Handle, Lng.T("Keine weiteren PDF-Dateien gefunden."),
-                        Lng.T(choice == 1 ? "In anderen PDFlight-Fenstern ist keine Datei geöffnet." : "Der Ordner enthält keine weitere PDF-Datei."), TaskDialogIcon.Information);
-                    return;
-                }
-                using (FileListForm list = new(choice == 1 ? Lng.T("Geöffnete PDF-Dateien") : string.Format(Lng.T("PDF-Dateien im Ordner „{0}“"), currentFile.Directory?.Name), candidates))
+                using (FileListForm list = new(choice == 1 ? Lng.T("Geöffnete PDF-Dateien") : string.Format(Lng.T("PDF-Dateien im Ordner „{0}“"), currentFile.Directory?.Name), choice == 1 ? shown : siblings))
                 {
                     if (list.ShowDialog(this) != DialogResult.OK || list.SelectedFiles.Count == 0) { return; }
                     files = list.SelectedFiles;

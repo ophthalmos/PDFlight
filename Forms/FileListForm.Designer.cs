@@ -46,11 +46,12 @@ namespace PDFLight.Forms
             labelPrompt.Name = "labelPrompt";
             labelPrompt.Size = new Size(297, 15);
             labelPrompt.TabIndex = 0;
-            labelPrompt.Text = "Wähle Dateien (Strg+Leertaste), ändere die Reihenfolge";
+            labelPrompt.Text = "Wähle Dateien (Leertaste), ändere die Reihenfolge";
             // 
             // listView
             // 
             listView.AllowDrop = true;
+            listView.CheckBoxes = true;
             listView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             listView.Columns.AddRange(new ColumnHeader[] { colName, colDate });
             listView.FullRowSelect = true;
@@ -61,13 +62,13 @@ namespace PDFLight.Forms
             listView.TabIndex = 1;
             listView.UseCompatibleStateImageBehavior = false;
             listView.View = View.Details;
+            listView.ItemChecked += ListView_ItemChecked;
             listView.ItemDrag += ListView_ItemDrag;
             listView.SelectedIndexChanged += ListView_SelectedIndexChanged;
             listView.DragDrop += ListView_DragDrop;
             listView.DragEnter += ListView_DragEnter;
             listView.DragOver += ListView_DragOver;
             listView.DragLeave += ListView_DragLeave;
-            listView.DoubleClick += ListView_DoubleClick;
             listView.KeyDown += ListView_KeyDown;
             listView.Resize += ListView_Resize;
             // 

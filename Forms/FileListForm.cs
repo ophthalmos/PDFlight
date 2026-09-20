@@ -3,12 +3,13 @@ using PDFLight.Classes;
 namespace PDFLight.Forms;
 
 /// <summary>Mehrfachauswahl aus einer Dateiliste (Name und Änderungsdatum) – für „PDF-Datei anhängen“: die in anderen
-/// PDFlight-Fenstern geöffneten Dateien oder die PDF-Dateien des Ordners. Nur mit der Tastatur: Strg+Pfeil bewegt den Fokus, Strg+Leertaste
-/// schaltet die Markierung um (Umschalt+Pfeil erweitert sie). Die Reihenfolge lässt sich mit ↑/↓, Alt+Pfeil und per Ziehen ändern (sie
-/// ist die Anhängereihenfolge). <see cref="SelectedFiles"/> liefert die markierten Dateien in Listenreihenfolge, Doppelklick oder Enter bestätigt.</summary>
+/// PDFlight-Fenstern geöffneten Dateien oder die PDF-Dateien des Ordners. Ausgewählt wird per Häkchen (Klick oder Leertaste auf dem
+/// fokussierten Eintrag, Strg+A alle) – die Häkchen bleiben, egal wohin Fokus und Markierung wandern (Wunsch vom 20.09.2026). Die Markierung
+/// dient nur dem Verschieben: ↑/↓, Alt+Pfeil und Ziehen ändern die Reihenfolge (sie ist die Anhängereihenfolge). <see cref="SelectedFiles"/>
+/// liefert die angehakten Dateien in Listenreihenfolge, Enter bestätigt.</summary>
 public partial class FileListForm : Form
 {
-    /// <summary>Die markierten Dateien in Listenreihenfolge (nach OK).</summary>
+    /// <summary>Die angehakten Dateien in Listenreihenfolge (nach OK).</summary>
     public List<string> SelectedFiles { get; private set; } = [];
 
     public FileListForm(string title, IReadOnlyList<string> files)
@@ -31,20 +32,20 @@ public partial class FileListForm : Form
         UpdateButtons();
     }
 
-    private List<ListViewItem> Selected => [.. listView.Items.Cast<ListViewItem>().Where(i => i.Selected)]; // in Listenreihenfolge
+    private List<ListViewItem> Selected => [.. listView.Items.OfType<ListViewItem>().Where(i => i.Selected)]; // in Listenreihenfolge; beim Anlegen des Handles feuert ItemChecked, während die Sammlung noch Lücken (null) hat
 
     private void UpdateButtons()
     {
         var selected = Selected;
-        btnOK.Enabled = selected.Count > 0;
+        btnOK.Enabled = listView.CheckedItems.Count > 0;
         btnUp.Enabled = selected.Count > 0 && selected[0].Index > 0;
         btnDown.Enabled = selected.Count > 0 && selected[^1].Index < listView.Items.Count - 1;
     }
 
     private void Accept()
     {
-        if (listView.SelectedItems.Count == 0) { return; }
-        SelectedFiles = [.. Selected.Select(i => (string)i.Tag!)]; // jeder Eintrag trägt seinen Pfad
+        if (listView.CheckedItems.Count == 0) { return; }
+        SelectedFiles = [.. listView.Items.OfType<ListViewItem>().Where(i => i.Checked).Select(i => (string)i.Tag!)]; // jeder Eintrag trägt seinen Pfad, Listenreihenfolge
         DialogResult = DialogResult.OK;
     }
 
@@ -89,15 +90,14 @@ public partial class FileListForm : Form
 
     private void ListView_SelectedIndexChanged(object? sender, EventArgs e) => UpdateButtons();
 
-    private void ListView_DoubleClick(object? sender, EventArgs e) => Accept();
+    private void ListView_ItemChecked(object? sender, ItemCheckedEventArgs e) => UpdateButtons();
 
     private void ListView_KeyDown(object? sender, KeyEventArgs e)
     {
         switch (e.KeyData)
         {
             case Keys.Enter: Accept(); break;
-            case Keys.Control | Keys.A: foreach (ListViewItem item in listView.Items) { item.Selected = true; } break;
-            case Keys.Control | Keys.Space: if (listView.FocusedItem is { } focused) { focused.Selected = !focused.Selected; } break; // Tastatur-Mehrfachauswahl (Wunsch vom 20.09.2026)
+            case Keys.Control | Keys.A: foreach (ListViewItem item in listView.Items) { item.Checked = true; } break; // die Leertaste schaltet das Häkchen des fokussierten Eintrags (ListView-Standard)
             case Keys.Alt | Keys.Up: MoveSelected(-1); break;   // Strg+Pfeil bleibt dem Fokuswechsel ohne Auswahländerung vorbehalten
             case Keys.Alt | Keys.Down: MoveSelected(1); break;
             default: return;
