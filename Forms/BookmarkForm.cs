@@ -75,9 +75,20 @@ public partial class BookmarkForm : Form
         return null;
     }
 
-    /// <summary>Felder und Schaltflächen auf den markierten Knoten einstellen.</summary>
+    /// <summary>Tiefe des Baums (1 = nur oberste Ebene, 0 = leer).</summary>
+    private static int Depth(TreeNodeCollection nodes)
+    {
+        var depth = 0;
+        foreach (TreeNode node in nodes) { depth = Math.Max(depth, 1 + Depth(node.Nodes)); }
+        return depth;
+    }
+
+    /// <summary>Felder und Schaltflächen auf den markierten Knoten einstellen; die Ebenen-Schaltflächen nach der Tiefe des Baums.</summary>
     private void ShowSelected()
     {
+        var depth = Depth(treeView.Nodes);
+        buttonLevel1.Enabled = buttonLevel2.Enabled = buttonLevelAll.Enabled = depth >= 2; // mit einer Ebene gibt es nichts auf- oder zuzuklappen
+        buttonLevel3.Enabled = depth >= 3;
         var node = treeView.SelectedNode;
         var siblings = node?.Parent?.Nodes ?? treeView.Nodes;
         textBoxTitle.Enabled = numPage.Enabled = buttonNewChild.Enabled = buttonDelete.Enabled = node != null;
