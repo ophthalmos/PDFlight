@@ -3,20 +3,19 @@ using PDFLight.Classes;
 namespace PDFLight.Forms;
 
 /// <summary>Mehrfachauswahl aus einer Dateiliste (Name und Änderungsdatum) – für „PDF-Datei anhängen“: die in anderen
-/// PDFlight-Fenstern geöffneten Dateien oder die PDF-Dateien des Ordners. Die Reihenfolge lässt sich mit ↑/↓ und per Ziehen
-/// ändern (sie ist die Anhängereihenfolge). <see cref="SelectedFiles"/> liefert die markierten Dateien in Listenreihenfolge,
-/// Doppelklick oder Enter bestätigt.</summary>
+/// PDFlight-Fenstern geöffneten Dateien oder die PDF-Dateien des Ordners. Nur mit der Tastatur: Strg+Pfeil bewegt den Fokus, Strg+Leertaste
+/// schaltet die Markierung um (Umschalt+Pfeil erweitert sie). Die Reihenfolge lässt sich mit ↑/↓, Alt+Pfeil und per Ziehen ändern (sie
+/// ist die Anhängereihenfolge). <see cref="SelectedFiles"/> liefert die markierten Dateien in Listenreihenfolge, Doppelklick oder Enter bestätigt.</summary>
 public partial class FileListForm : Form
 {
     /// <summary>Die markierten Dateien in Listenreihenfolge (nach OK).</summary>
     public List<string> SelectedFiles { get; private set; } = [];
 
-    public FileListForm(string title, string prompt, IReadOnlyList<string> files)
+    public FileListForm(string title, IReadOnlyList<string> files)
     {
         InitializeComponent();
-        Lng.Apply(this);
+        Lng.Apply(this); // der Hinweis über der Liste (Strg+Leertaste, Reihenfolge) kommt aus dem Designer
         Text = title;
-        labelPrompt.Text = prompt;
         listView.BeginUpdate();
         foreach (var file in files)
         {
@@ -98,8 +97,9 @@ public partial class FileListForm : Form
         {
             case Keys.Enter: Accept(); break;
             case Keys.Control | Keys.A: foreach (ListViewItem item in listView.Items) { item.Selected = true; } break;
-            case Keys.Control | Keys.Up: MoveSelected(-1); break;
-            case Keys.Control | Keys.Down: MoveSelected(1); break;
+            case Keys.Control | Keys.Space: if (listView.FocusedItem is { } focused) { focused.Selected = !focused.Selected; } break; // Tastatur-Mehrfachauswahl (Wunsch vom 20.09.2026)
+            case Keys.Alt | Keys.Up: MoveSelected(-1); break;   // Strg+Pfeil bleibt dem Fokuswechsel ohne Auswahländerung vorbehalten
+            case Keys.Alt | Keys.Down: MoveSelected(1); break;
             default: return;
         }
         e.Handled = e.SuppressKeyPress = true;
