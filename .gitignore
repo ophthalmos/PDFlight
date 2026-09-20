@@ -14,3 +14,4 @@ PDFlightSetup.exe
 
 # Persönliche Claude-Code-Einstellungen (nicht auf GitHub)
 .claude/settings.local.json
+/BookmarkEditor.pdf
