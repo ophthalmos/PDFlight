@@ -382,7 +382,7 @@ internal static partial class PdfEditService
                 entry.Elements.SetReference("/Parent", parent);
                 if (previous != null) { entry.Elements.SetReference("/Prev", previous); previous.Elements.SetReference("/Next", entry); }
                 else { parent.Elements.SetReference("/First", entry); }
-                var keep = item.Id >= 0 && item.Id < original.Count && item.Page > 0 && item.Page == item.OriginalPage ? original[item.Id] : null;
+                var keep = item.Id >= 0 && item.Id < original.Count && item.Page == item.OriginalPage ? original[item.Id] : null; // auch Einträge ohne Seitenziel (URI, GoToR, JavaScript) behalten ihre Aktion, solange keine Seite gesetzt wurde
                 if (keep?.Destination != null) { entry.Elements["/Dest"] = keep.Destination; }
                 else if (keep?.Action != null) { entry.Elements["/A"] = keep.Action; }
                 else if (item.Page >= 1 && item.Page <= document.PageCount)
