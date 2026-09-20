@@ -1422,10 +1422,13 @@ public partial class MainForm : Form
             default: return;
         }
         var firstNewPage = currentPageCount + 1;
-        if (RunPdfEdit(() => PdfEditService.AppendPdfs(file, files), Lng.T("Anhängen")))
+        var totalPages = 0;
+        if (RunPdfEdit(() => totalPages = PdfEditService.AppendPdfs(file, files), Lng.T("Anhängen")))
         {
             LoadPdf(file, firstNewPage);
             statusPath.Text = files.Count == 1 ? string.Format(Lng.T("\"{0}\" wurde angehängt."), Path.GetFileName(files[0])) : string.Format(Lng.T("{0} Dateien wurden angehängt."), files.Count);
+            var added = totalPages - firstNewPage + 1;
+            ShowSplash(added == 1 ? Lng.T("1 Seite angehängt") : string.Format(Lng.T("{0} Seiten angehängt"), added)); // die Anzeige ändert sich sonst kaum sichtbar (Wunsch vom 20.09.2026)
         }
     }
 

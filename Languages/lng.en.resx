@@ -645,4 +645,6 @@ or press Ctrl+Shift+I.</value></data>
   <data name="Name" xml:space="preserve"><value>Name</value></data>
   <data name="Dateien &amp;hinzufügen" xml:space="preserve"><value>Add &amp;files</value></data>
   <data name="{0} Dateien wurden angehängt." xml:space="preserve"><value>{0} files were appended.</value></data>
+  <data name="1 Seite angehängt" xml:space="preserve"><value>1 page appended</value></data>
+  <data name="{0} Seiten angehängt" xml:space="preserve"><value>{0} pages appended</value></data>
 </root>
