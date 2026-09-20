@@ -42,6 +42,9 @@
             cbShowFavorites = new CheckBox();
             labelMaxRecentFiles = new Label();
             numMaxRecentFiles = new NumericUpDown();
+            labelBackground = new Label();
+            rbBackgroundLight = new RadioButton();
+            rbBackgroundDark = new RadioButton();
             labelLanguage = new Label();
             comboLanguage = new ComboBox();
             tabTargets = new TabPage();
@@ -100,6 +103,9 @@
             tabGeneral.Controls.Add(cbShowFavorites);
             tabGeneral.Controls.Add(labelMaxRecentFiles);
             tabGeneral.Controls.Add(numMaxRecentFiles);
+            tabGeneral.Controls.Add(labelBackground);
+            tabGeneral.Controls.Add(rbBackgroundLight);
+            tabGeneral.Controls.Add(rbBackgroundDark);
             tabGeneral.Controls.Add(labelLanguage);
             tabGeneral.Controls.Add(comboLanguage);
             tabGeneral.Location = new Point(4, 24);
@@ -219,6 +225,37 @@
             numMaxRecentFiles.Size = new Size(60, 23);
             numMaxRecentFiles.TabIndex = 11;
             numMaxRecentFiles.Value = new decimal(new int[] { 20, 0, 0, 0 });
+            //
+            // labelBackground
+            //
+            labelBackground.AutoSize = true;
+            labelBackground.Location = new Point(19, 278);
+            labelBackground.Name = "labelBackground";
+            labelBackground.Size = new Size(118, 15);
+            labelBackground.TabIndex = 12;
+            labelBackground.Text = "Anzeigehintergrund:";
+            //
+            // rbBackgroundLight
+            //
+            rbBackgroundLight.AutoSize = true;
+            rbBackgroundLight.Checked = true;
+            rbBackgroundLight.Location = new Point(203, 276);
+            rbBackgroundLight.Name = "rbBackgroundLight";
+            rbBackgroundLight.Size = new Size(45, 19);
+            rbBackgroundLight.TabIndex = 13;
+            rbBackgroundLight.TabStop = true;
+            rbBackgroundLight.Text = "&hell";
+            rbBackgroundLight.UseVisualStyleBackColor = true;
+            //
+            // rbBackgroundDark
+            //
+            rbBackgroundDark.AutoSize = true;
+            rbBackgroundDark.Location = new Point(270, 276);
+            rbBackgroundDark.Name = "rbBackgroundDark";
+            rbBackgroundDark.Size = new Size(60, 19);
+            rbBackgroundDark.TabIndex = 14;
+            rbBackgroundDark.Text = "dun&kel";
+            rbBackgroundDark.UseVisualStyleBackColor = true;
             // 
             // labelLanguage
             // 
@@ -559,6 +596,9 @@
         private System.Windows.Forms.ComboBox comboLanguage;
         private System.Windows.Forms.Label labelMaxRecentFiles;
         private System.Windows.Forms.NumericUpDown numMaxRecentFiles;
+        private System.Windows.Forms.Label labelBackground;
+        private System.Windows.Forms.RadioButton rbBackgroundLight;
+        private System.Windows.Forms.RadioButton rbBackgroundDark;
         private System.Windows.Forms.Label labelToolbar;
         private System.Windows.Forms.ComboBox comboToolbar;
         private System.Windows.Forms.CheckBox cbCloseOnEscape;

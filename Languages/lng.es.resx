@@ -629,4 +629,7 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="Bitte gib für jedes Lesezeichen einen Titel ein." xml:space="preserve"><value>Escribe un título para cada marcador.</value></data>
   <data name="Die Datei wurde inzwischen verändert." xml:space="preserve"><value>El archivo se ha modificado entretanto.</value></data>
   <data name="Die Lesezeichen wurden nicht gespeichert – schließe den Editor mit „Abbrechen“ und öffne ihn erneut." xml:space="preserve"><value>Los marcadores no se han guardado; cierra el editor con «Cancelar» y vuelve a abrirlo.</value></data>
+  <data name="Anzeigehintergrund:" xml:space="preserve"><value>Fondo de la vista:</value></data>
+  <data name="&amp;hell" xml:space="preserve"><value>c&amp;laro</value></data>
+  <data name="dun&amp;kel" xml:space="preserve"><value>&amp;oscuro</value></data>
 </root>

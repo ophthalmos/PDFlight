@@ -629,4 +629,7 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Bitte gib für jedes Lesezeichen einen Titel ein." xml:space="preserve"><value>Saisis un titre pour chaque signet.</value></data>
   <data name="Die Datei wurde inzwischen verändert." xml:space="preserve"><value>Le fichier a été modifié entre-temps.</value></data>
   <data name="Die Lesezeichen wurden nicht gespeichert – schließe den Editor mit „Abbrechen“ und öffne ihn erneut." xml:space="preserve"><value>Les signets n’ont pas été enregistrés – ferme l’éditeur avec « Annuler » et rouvre-le.</value></data>
+  <data name="Anzeigehintergrund:" xml:space="preserve"><value>Fond de l’affichage :</value></data>
+  <data name="&amp;hell" xml:space="preserve"><value>c&amp;lair</value></data>
+  <data name="dun&amp;kel" xml:space="preserve"><value>&amp;sombre</value></data>
 </root>
