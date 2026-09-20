@@ -9,7 +9,6 @@ public partial class MainForm : Form
 {
     private readonly AppSettings settings;
     private readonly PdfViewHost viewHost;
-    private readonly string pdfALabelText, pdfAButtonText; // die PDF/A-Texte der Sperr-Leiste; bei Kennwortschutz zeigt sie andere
     private readonly StartOptions options;  // Kommandozeile: Datei und Schalter (/help, /max, /page:N, /print)
     private readonly Dictionary<string, Image?> programIcons = new(StringComparer.OrdinalIgnoreCase);
     private FileInfo? currentFile;
@@ -40,7 +39,6 @@ public partial class MainForm : Form
         btnCopy.ToolTipText = Lng.T("Tooltip.Copy", btnCopy.ToolTipText);
         ddbEdit.ToolTipText = Lng.T("Tooltip.Edit", ddbEdit.ToolTipText);
         statusIndex.ToolTipText = Lng.T("Tooltip.StatusIndex", statusIndex.ToolTipText);
-        (pdfALabelText, pdfAButtonText) = (lblPdfA.Text, btnPdfAEnable.Text); // Designer-Texte der Sperr-Leiste (nach Lng.Apply); bei Kennwortschutz andere
         viewHost = new PdfViewHost(webView);
         viewHost.DarkScheme = settings.DarkViewer; // vor der Initialisierung, damit schon das erste Dokument im gewählten Hintergrund erscheint
         // Eigene (nicht auto-generierte) Menüs zuweisen: Auto-Menüs übernehmen in WinForms die
@@ -394,10 +392,7 @@ public partial class MainForm : Form
         splitButtonMove.Enabled = btnCopy.Enabled = btnRename.Enabled = btnDelete.Enabled = btnShowInFolder.Enabled = ddbEdit.Enabled = btnPrint.Enabled = btnEmail.Enabled = hasFile;
         // PDF/A-Schutz: verändernde Operationen bleiben gesperrt, bis „Bearbeitung aktivieren“ gedrückt wurde;
         // Extrahieren (neue Datei), Rückgängig (stellt alte Bytes wieder her) und Eigenschaften (dann nur lesend) bleiben frei
-        // Die Leiste unter der Symbolleiste erklärt die Sperre: PDF/A (mit „Bearbeitung aktivieren“) oder Kennwortschutz (mit „Kennwort entfernen …“)
-        pnlPdfA.Visible = hasFile && EditLocked;
-        lblPdfA.Text = Encrypted ? Lng.T("Mit Kennwort geschützt: Bearbeiten ist erst nach dem Entfernen des Kennworts möglich.") : pdfALabelText;
-        btnPdfAEnable.Text = Encrypted ? Lng.T("Kennwort entfernen …") : pdfAButtonText;
+        pnlPdfA.Visible = hasFile && PdfALocked; // bei Kennwortschutz keine eigene Leiste – der Viewer zeigt selbst „eingeschränkte Berechtigungen“ (Wunsch vom 20.09.2026)
         mnuDeletePages.Enabled = mnuRotatePages.Enabled = mnuAppendPdf.Enabled = mnuDuplex.Enabled = mnuAddAnnotation.Enabled = !EditLocked;
         mnuMovePage.Enabled = !EditLocked && currentPageCount > 1; // mit einer Seite gibt es nichts zu verschieben
         mnuInsertPage.Enabled = !EditLocked;
@@ -445,7 +440,6 @@ public partial class MainForm : Form
     /// erst verloren, wenn tatsächlich eine Bearbeitung ausgeführt und die Datei neu gespeichert wird.</summary>
     private void BtnPdfAEnable_Click(object? sender, EventArgs e)
     {
-        if (Encrypted) { RemovePasswordDialog(); return; } // dieselbe Leiste, andere Sperre
         if (!TaskDlg.ConfirmTaskDlg(Handle,
             Lng.T("Möchtest du den Vorgang fortsetzen?"),
             Lng.T("Das Bearbeiten führt dazu, dass die PDF-Datei nicht mehr dem PDF/A-Standard entspricht.") + "\n\n" +
