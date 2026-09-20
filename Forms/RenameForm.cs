@@ -177,10 +177,16 @@ public partial class RenameForm : Form
 
     private void BtnDate_Click(object? sender, EventArgs e) { btnDateMenu.Show(btnDate.PointToScreen(new Point(0, btnDate.Height))); }
 
-    [GeneratedRegex(@"^\d{4}-?((0[1-9])|(1[012]))?((0[1-9]|[12]\d)|3[01])?(_|-)")]
+    // Datumsangaben am Anfang oder Ende des Namens, die das Datums-Menü ersetzt: Jahr (19xx/20xx), Jahr-Monat, Jahr-Monat-Tag,
+    // Tag-Monat-Jahr und Monat-Jahr, mit oder ohne Trennzeichen (- _ .) zwischen den Teilen, vom Namen durch Leerzeichen, _, - oder .
+    // getrennt. Monat und Tag werden geprüft, damit Nummern wie „1234_“ oder „_4711“ stehen bleiben (erweitert 20.09.2026).
+    private const string Year = @"(?:19|20)\d{2}", Month = @"(?:0[1-9]|1[012])", Day = @"(?:0[1-9]|[12]\d|3[01])";
+    private const string DateCore = Year + @"([-_.]?)" + Month + @"(?:\1" + Day + @")?|" + Day + @"([-_.]?)" + Month + @"\2" + Year + @"|" + Month + @"[-_.]?" + Year + @"|" + Year;
+
+    [GeneratedRegex(@"^(?:" + DateCore + @")[ _.-]+")]
     private static partial Regex DatePrefixRegex();
 
-    [GeneratedRegex(@"(_|-)((0[1-9]|[12]\d)|3[01])?((0[1-9])|(1[012]))?-?\d{4}$")]
+    [GeneratedRegex(@"[ _.-]+(?:" + DateCore + @")$")]
     private static partial Regex DateSuffixRegex();
 
     private void BtnDateMenu_ItemClicked(object? sender, ToolStripItemClickedEventArgs e)
@@ -190,8 +196,9 @@ public partial class RenameForm : Form
         var split = btnDateMenu.Items.Count / 2;
         var date = (e.ClickedItem.Text ?? string.Empty).Trim();
         var name = NameWithoutPdf();
-        name = DatePrefixRegex().Replace(name, ""); // vorhandenes Datums-Präfix ersetzen
-        name = DateSuffixRegex().Replace(name, ""); // vorhandenes Datums-Suffix ersetzen
+        name = DatePrefixRegex().Replace(name, ""); // vorhandenes Datums-Präfix entfernen – es wird durch das gewählte ersetzt
+        name = DateSuffixRegex().Replace(name, ""); // vorhandenes Datums-Suffix ebenso (auch am jeweils anderen Ende)
+        if (name.Length == 0) { SetName(date.Trim('_')); return; } // der Name bestand nur aus dem Datum: kein Trennzeichen ins Leere
         if (index < split) { SetName(date + name); }
         else if (index > split) { SetName(name + date); }
     }
