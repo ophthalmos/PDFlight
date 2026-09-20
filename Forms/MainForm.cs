@@ -1386,7 +1386,7 @@ public partial class MainForm : Form
         (string Text, string? Detail)[] choices =
         [
             (Lng.T("Einzelne Datei auswählen"), Lng.T("Über den Dateidialog")),
-            (Lng.T("Geöffnete Dateien hinzufügen"), Lng.T("Dateien, die gerade in anderen PDFlight-Fenstern angezeigt werden")),
+            (Lng.T("Geöffnete Dateien hinzufügen"), Lng.T("In anderen Instanzen angezeigte PDF-Dateien")),
             (Lng.T("Dateien desselben Ordners"), Lng.T("PDF-Dateien aus dem Ordner der angezeigten Datei")),
         ];
         var choice = TaskDlg.ChoiceTaskDlg(Handle, Lng.T("Was soll angehängt werden?"), null, choices);
@@ -1415,8 +1415,7 @@ public partial class MainForm : Form
                         Lng.T(choice == 1 ? "In anderen PDFlight-Fenstern ist keine Datei geöffnet." : "Der Ordner enthält keine weitere PDF-Datei."), TaskDialogIcon.Information);
                     return;
                 }
-                using (FileListForm list = new(Lng.T(choice == 1 ? "Geöffnete PDF-Dateien" : "PDF-Dateien im Ordner"),
-                    choice == 1 ? Lng.T("Geöffnete PDF-Dateien:") : string.Format(Lng.T("PDF-Dateien im Ordner „{0}“:"), currentFile.Directory?.Name), candidates))
+                using (FileListForm list = new(choice == 1 ? Lng.T("Geöffnete PDF-Dateien") : string.Format(Lng.T("PDF-Dateien im Ordner „{0}“"), currentFile.Directory?.Name), candidates))
                 {
                     if (list.ShowDialog(this) != DialogResult.OK || list.SelectedFiles.Count == 0) { return; }
                     files = list.SelectedFiles;
