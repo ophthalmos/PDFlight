@@ -57,7 +57,7 @@ public class AppSettings
     public bool ShowFullPathInTitle { get; set; }         // vollständigen Dateipfad statt nur des Dateinamens in der Titelleiste
     public bool ShowFavorites { get; set; }               // Favoriten-Menü in der Symbolleiste (Strg+D merkt die Datei); Standard aus
     public bool DarkViewer { get; set; }                  // Anzeigehintergrund dunkel (WebView2 PreferredColorScheme = Dark); Standard hell
-    public bool ExperimentalFeatures { get; set; }        // experimentelle Funktionen (Lesezeichen-Editor) – bewusst nur von Hand in settings.json einschaltbar
+    public bool ExperimentalFeatures { get; set; }        // ohne Wirkung seit 20.09.2026 (der Lesezeichen-Editor ist regulär); bleibt, damit vorhandene settings.json unverändert lesbar sind
     public string AnnotationBorderColor { get; set; } = "808080"; // Textanmerkung: zuletzt gewählte Rahmenfarbe als RRGGBB, leer = kein Rahmen
     public string AnnotationBackground { get; set; } = "FFFFCC"; // Textanmerkung: zuletzt gewählter Hintergrund als RRGGBB, leer = transparent
     public string AnnotationTextColor { get; set; } = "000000";  // Textanmerkung: zuletzt gewählte Schriftfarbe als RRGGBB
@@ -229,6 +229,5 @@ public class AppSettings
         ExternalPrograms = fresh.ExternalPrograms;
         Favorites = fresh.Favorites;
         Stamps = fresh.Stamps;
-        ExperimentalFeatures = fresh.ExperimentalFeatures; // von Hand in der Datei geändert (Strg+Umschalt+F2) – beim Beenden nicht überschreiben
     }
 }

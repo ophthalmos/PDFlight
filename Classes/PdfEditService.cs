@@ -139,7 +139,7 @@ internal static partial class PdfEditService
     }
 
     /// <summary>Die Seite, auf die ein Lesezeichen zeigt (Objektkennung); null, wenn das Ziel nicht auflösbar ist.</summary>
-    private static PdfObjectID? DestinationPageId(PdfDocument document, PdfOutline outline)
+    private static PdfObjectID? DestinationPageId(PdfDocument document, PdfDictionary outline)
     {
         var destination = outline.Elements["/Dest"];
         if (destination == null && outline.Elements.GetDictionary("/A") is { } action && action.Elements.GetName("/S") == "/GoTo") { destination = action.Elements["/D"]; }
@@ -294,9 +294,26 @@ internal static partial class PdfEditService
     public static void RemoveOutlines(string path)
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
-        document.Internals.Catalog.Elements.Remove("/Outlines");
-        if (document.Internals.Catalog.Elements.GetName("/PageMode") == "/UseOutlines") { document.Internals.Catalog.Elements.Remove("/PageMode"); }
+        RemoveOutlines(document);
         document.Save(path);
+    }
+
+    private static void RemoveOutlines(PdfDocument document)
+    {
+        var catalog = document.Internals.Catalog;
+        catalog.Elements.Remove("/Outlines");
+        if (catalog.Elements.GetName("/PageMode") == "/UseOutlines") { catalog.Elements.Remove("/PageMode"); }
+    }
+
+    /// <summary>Die Kinder eines Gliederungseintrags als rohe Wörterbücher (/First, dann die /Next-Kette) – bewusst nicht über PDFsharps
+    /// PdfOutlineCollection: die legt im Katalog ein Outline-Objekt an, das beim Speichern (PrepareForSave) /PageMode /UseOutlines und
+    /// die alte Verkettung wieder einträgt (Review 20.09.2026). Lesen und Schreiben nutzen denselben Durchlauf, damit
+    /// <see cref="Bookmark.Id"/> auf beiden Seiten dieselbe Position bezeichnet; ein Zyklus in /Next bricht über die besuchten Objekte ab.</summary>
+    private static List<PdfDictionary> OutlineChildren(PdfDictionary parent, HashSet<PdfDictionary> visited)
+    {
+        List<PdfDictionary> children = [];
+        for (var item = parent.Elements.GetDictionary("/First"); item != null && visited.Add(item); item = item.Elements.GetDictionary("/Next")) { children.Add(item); }
+        return children;
     }
 
     /// <summary>Liest die Gliederung (Lesezeichen) für den Editor: Titel, Zielseite (1-basiert; 0 = nicht auflösbar), Aufklappzustand
@@ -306,68 +323,69 @@ internal static partial class PdfEditService
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
         List<Bookmark> result = [];
-        if (document.Internals.Catalog.Elements["/Outlines"] == null) { return result; }
+        if (document.Internals.Catalog.Elements.GetDictionary("/Outlines") is not { } root) { return result; }
         var pageNumbers = new Dictionary<PdfObjectID, int>();
         for (var i = 0; i < document.PageCount; i++) { if (document.Pages[i].Reference is { } reference) { pageNumbers[reference.ObjectID] = i + 1; } }
+        HashSet<PdfDictionary> visited = [];
         var id = 0;
-        Read(document.Outlines, result);
+        Read(root, result);
         return result;
 
-        void Read(PdfOutlineCollection outlines, List<Bookmark> target)
+        void Read(PdfDictionary parent, List<Bookmark> target)
         {
-            foreach (var outline in outlines)
+            foreach (var item in OutlineChildren(parent, visited))
             {
-                var page = DestinationPageId(document, outline) is { } pageId && pageNumbers.TryGetValue(pageId, out var number) ? number : 0;
-                Bookmark bookmark = new() { Title = outline.Title, Page = page, OriginalPage = page, Open = outline.Elements.GetInteger("/Count") > 0, Id = id++ }; // PDFsharps Opened liest den Zustand nicht aus /Count
+                var page = DestinationPageId(document, item) is { } pageId && pageNumbers.TryGetValue(pageId, out var number) ? number : 0;
+                Bookmark bookmark = new() { Title = item.Elements.GetString("/Title"), Page = page, OriginalPage = page, Open = item.Elements.GetInteger("/Count") > 0, Id = id++ };
                 target.Add(bookmark);
-                Read(outline.Outlines, bookmark.Children);
+                Read(item, bookmark.Children);
             }
         }
     }
 
-    /// <summary>Die übernehmbaren Teile eines vorhandenen Gliederungseintrags (Vorordnung wie in <see cref="ReadOutlines"/>).</summary>
-    private sealed record OutlineParts(PdfItem? Destination, PdfItem? Action, PdfItem? Color, PdfItem? Flags);
-
-    private static List<OutlineParts> CollectOutlineParts(PdfDocument document)
+    /// <summary>Alle Gliederungseinträge in Vorordnung (wie <see cref="ReadOutlines"/>), samt Wurzel als erstem Element der Rückgabe.</summary>
+    private static (PdfDictionary? Root, List<PdfDictionary> Items) CollectOutlineItems(PdfDocument document)
     {
-        List<OutlineParts> parts = [];
-        if (document.Internals.Catalog.Elements["/Outlines"] == null) { return parts; }
-        try { Collect(document.Outlines); }
-        catch (Exception ex) when (IsPdfReadError(ex)) { parts.Clear(); } // kaputte Gliederung: dann ohne Übernahme, die Zuordnung wäre unsicher
-        return parts;
+        List<PdfDictionary> items = [];
+        if (document.Internals.Catalog.Elements.GetDictionary("/Outlines") is not { } root) { return (null, items); }
+        HashSet<PdfDictionary> visited = [];
+        Collect(root);
+        return (root, items);
 
-        void Collect(PdfOutlineCollection outlines)
+        void Collect(PdfDictionary parent)
         {
-            foreach (var outline in outlines)
-            {
-                parts.Add(new OutlineParts(outline.Elements["/Dest"], outline.Elements["/A"], outline.Elements["/C"], outline.Elements["/F"]));
-                Collect(outline.Outlines);
-            }
+            foreach (var item in OutlineChildren(parent, visited)) { items.Add(item); Collect(item); }
         }
     }
+
+    /// <summary>Die übernehmbaren Teile eines vorhandenen Gliederungseintrags.</summary>
+    private sealed record OutlineParts(PdfItem? Destination, PdfItem? Action, PdfItem? Color, PdfItem? Flags);
 
     /// <summary>Schreibt die Gliederung aus dem Editor neu: /Outlines wird verworfen und aus dem Modell frisch aufgebaut (/Title als
     /// Unicode, /Parent, /First, /Last, /Prev, /Next, /Count mit Vorzeichen für den Aufklappzustand). Einträge mit unveränderter
     /// Zielseite behalten ihr ursprüngliches Ziel (/Dest oder GoTo-/A samt Position und Zoom) sowie Farbe (/C) und Schriftstil (/F);
     /// neue oder umgehängte Ziele zeigen auf den Seitenanfang bei unverändertem Zoom (/XYZ null oben null). Ohne Lesezeichen wird
-    /// die Gliederung entfernt wie in <see cref="RemoveOutlines"/>.</summary>
+    /// die Gliederung entfernt wie in <see cref="RemoveOutlines(string)"/>. Die alten Wörterbücher werden geleert: PDFsharp schreibt
+    /// verwaiste Objekte mit, leer kosten sie nur wenige Byte und verraten nichts mehr (Review 20.09.2026).</summary>
     public static void WriteOutlines(string path, IReadOnlyList<Bookmark> bookmarks)
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
-        var catalog = document.Internals.Catalog;
-        var original = CollectOutlineParts(document);
-        catalog.Elements.Remove("/Outlines");
         if (bookmarks.Count == 0)
         {
-            if (catalog.Elements.GetName("/PageMode") == "/UseOutlines") { catalog.Elements.Remove("/PageMode"); }
+            RemoveOutlines(document);
             document.Save(path);
             return;
         }
+        var catalog = document.Internals.Catalog;
+        var (oldRoot, oldItems) = CollectOutlineItems(document);
+        var original = oldItems.Select(i => new OutlineParts(i.Elements["/Dest"], i.Elements["/A"], i.Elements["/C"], i.Elements["/F"])).ToList();
         var root = new PdfDictionary(document);
         root.Elements.SetName("/Type", "/Outlines");
         document.Internals.AddObject(root);
         Write(root, bookmarks, open: true);
         catalog.Elements.SetReference("/Outlines", root);
+        oldRoot?.Elements.Clear();
+        foreach (var item in oldItems) { item.Elements.Clear(); } // die übernommenen Teile hängen jetzt an den neuen Einträgen
         document.Save(path);
 
         void Write(PdfDictionary parent, IReadOnlyList<Bookmark> items, bool open)
@@ -859,11 +877,8 @@ internal static partial class PdfEditService
         return bytes;
     }
 
-    /// <summary>Hängt alle Seiten einer anderen PDF-Datei an; liefert die neue Gesamtseitenzahl.</summary>
-    public static int AppendPdf(string path, string otherPdf) => AppendPdfs(path, [otherPdf]);
-
     /// <summary>Hängt mehrere PDF-Dateien in der angegebenen Reihenfolge an – ein Öffnen und Speichern, also auch eine einzige
-    /// Rückgängig-Sicherung.</summary>
+    /// Rückgängig-Sicherung; liefert die neue Gesamtseitenzahl.</summary>
     public static int AppendPdfs(string path, IReadOnlyList<string> otherPdfs)
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);

@@ -97,7 +97,7 @@ public partial class FileListForm : Form
         sortAscending = column == sortColumn ? !sortAscending : true;
         sortColumn = column;
         var items = listView.Items.OfType<ListViewItem>().ToList();
-        Comparison<ListViewItem> compare = column == 1
+        Comparison<ListViewItem> compare = column == 1 // Tag ist bei jedem Eintrag ein FileEntry (Konstruktor)
             ? (a, b) => Nullable.Compare(((FileEntry)a.Tag!).Modified, ((FileEntry)b.Tag!).Modified)
             : (a, b) => ShellInfo.CompareNatural(a.Text, b.Text);
         items.Sort(sortAscending ? compare : (a, b) => compare(b, a));
