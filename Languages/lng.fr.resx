@@ -623,4 +623,5 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Neues Lesezeichen" xml:space="preserve"><value>Nouveau signet</value></data>
   <data name="Seite {0}" xml:space="preserve"><value>Page {0}</value></data>
   <data name="Ohne Ziel" xml:space="preserve"><value>Sans cible</value></data>
+  <data name="settings.json ist im Editor geöffnet – Änderungen gelten nach dem nächsten Start." xml:space="preserve"><value>settings.json est ouvert dans l’éditeur – les modifications s’appliquent au prochain démarrage.</value></data>
 </root>

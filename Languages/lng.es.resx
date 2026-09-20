@@ -623,4 +623,5 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="Neues Lesezeichen" xml:space="preserve"><value>Nuevo marcador</value></data>
   <data name="Seite {0}" xml:space="preserve"><value>Página {0}</value></data>
   <data name="Ohne Ziel" xml:space="preserve"><value>Sin destino</value></data>
+  <data name="settings.json ist im Editor geöffnet – Änderungen gelten nach dem nächsten Start." xml:space="preserve"><value>settings.json está abierto en el editor; los cambios se aplican en el próximo inicio.</value></data>
 </root>

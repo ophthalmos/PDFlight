@@ -623,4 +623,5 @@ or press Ctrl+Shift+I.</value></data>
   <data name="Neues Lesezeichen" xml:space="preserve"><value>New bookmark</value></data>
   <data name="Seite {0}" xml:space="preserve"><value>Page {0}</value></data>
   <data name="Ohne Ziel" xml:space="preserve"><value>No target</value></data>
+  <data name="settings.json ist im Editor geöffnet – Änderungen gelten nach dem nächsten Start." xml:space="preserve"><value>settings.json is open in the editor – changes take effect after the next start.</value></data>
 </root>

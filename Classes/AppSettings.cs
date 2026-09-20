@@ -70,7 +70,8 @@ public class AppSettings
     public int WindowHeight { get; set; }
     public bool WindowMaximized { get; set; }
 
-    private static string SettingsPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PDFlight", "settings.json");
+    /// <summary>Voller Pfad der settings.json (Strg+Umschalt+F2 öffnet sie im zugeordneten Editor).</summary>
+    public static string SettingsPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PDFlight", "settings.json");
 
     public static AppSettings Load()
     {
@@ -223,5 +224,6 @@ public class AppSettings
         ExternalPrograms = fresh.ExternalPrograms;
         Favorites = fresh.Favorites;
         Stamps = fresh.Stamps;
+        ExperimentalFeatures = fresh.ExperimentalFeatures; // von Hand in der Datei geändert (Strg+Umschalt+F2) – beim Beenden nicht überschreiben
     }
 }

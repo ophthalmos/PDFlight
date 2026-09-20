@@ -1553,6 +1553,24 @@ public partial class MainForm : Form
         }
     }
 
+    /// <summary>Strg+Umschalt+F2: settings.json im zugeordneten Editor öffnen – vorher speichern, damit die Datei den aktuellen Stand
+    /// (und alle Schlüssel, etwa ExperimentalFeatures) enthält. Handänderungen überlebt das Beenden, weil ReloadSharedLists sie
+    /// vorher wieder einliest.</summary>
+    private void OpenSettingsFile()
+    {
+        settings.ReloadSharedLists();
+        settings.Save();
+        try
+        {
+            Process.Start(new ProcessStartInfo(AppSettings.SettingsPath) { UseShellExecute = true });
+            statusPath.Text = Lng.T("settings.json ist im Editor geöffnet – Änderungen gelten nach dem nächsten Start.");
+        }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or IOException or InvalidOperationException)
+        {
+            TaskDlg.ErrTaskDlg(Handle, ex);
+        }
+    }
+
     /// <summary>Experimenteller Lesezeichen-Editor (Bearbeiten-Menü, nur mit „ExperimentalFeatures“ in settings.json sichtbar): die
     /// Gliederung als Baum bearbeiten; „Speichern“ schreibt sie komplett neu, Rückgängig wie bei jeder Bearbeitung.</summary>
     private void EditBookmarks()
@@ -2027,6 +2045,7 @@ public partial class MainForm : Form
             case Keys.Right | Keys.Control | Keys.Shift: return () => StepFile(1);         // Strg+Pfeile ohne Umschalt gehören dem Viewer (Zoom & Co.)
             case Keys.Left | Keys.Control | Keys.Shift: return () => StepFile(-1);
             case Keys.F1: return () => TaskDlg.ShowShortcutsPdf(Handle);
+            case Keys.F2 | Keys.Control | Keys.Shift: return OpenSettingsFile;             // settings.json im Editor – bewusst undokumentiert (Wunsch vom 20.09.2026)
             case Keys.F11: return () => SetFullScreen(!isFullScreen);
             case Keys.Escape | Keys.Shift when settings.CloseOnEscape: return Close;      // Shift+Esc beendet sofort (wie in NetRadio)
             case Keys.Escape when isFullScreen: return () => SetFullScreen(false);
