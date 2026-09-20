@@ -7,6 +7,19 @@ namespace PDFLight.Controls;
 internal class BookmarkTreeView : TreeView
 {
     private const int WM_HSCROLL = 0x0114, WM_MOUSEWHEEL = 0x020A, WM_MOUSEHWHEEL = 0x020E;
+    private const int TVS_NOHSCROLL = 0x8000;
+
+    /// <summary>Ohne waagerechte Bildlaufleiste (TVS_NOHSCROLL): lange Titel werden mit „…“ gekürzt, der Benutzer zieht das Fenster breiter.</summary>
+    protected override CreateParams CreateParams
+    {
+        get
+        {
+            var parameters = base.CreateParams;
+            parameters.Style |= TVS_NOHSCROLL;
+            return parameters;
+        }
+    }
+
 
     protected override void WndProc(ref Message m)
     {
