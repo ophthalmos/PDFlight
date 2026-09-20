@@ -35,7 +35,9 @@ internal partial class PdfViewHost(WebView2 webView)
         set
         {
             darkScheme = value;
-            webView.DefaultBackgroundColor = value ? Color.FromArgb(51, 51, 51) : Color.White; // kein heller Blitz zwischen zwei Dokumenten
+            var background = value ? Color.FromArgb(51, 51, 51) : Color.FromArgb(243, 243, 243); // wie die Leerseite
+            webView.BackColor = background;               // das Control selbst, bevor Chromium überhaupt zeichnet – sonst blitzt beim Start erst „Control“-Grau auf (Wunsch vom 20.09.2026)
+            webView.DefaultBackgroundColor = background;  // Chromiums Hintergrund zwischen zwei Dokumenten
             if (IsReady) { webView.CoreWebView2.Profile.PreferredColorScheme = value ? CoreWebView2PreferredColorScheme.Dark : CoreWebView2PreferredColorScheme.Light; }
         }
     }
