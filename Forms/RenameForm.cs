@@ -189,6 +189,13 @@ public partial class RenameForm : Form
     [GeneratedRegex(@"[ _.-]+(?:" + DateCore + @")$")]
     private static partial Regex DateSuffixRegex();
 
+    // eine alleinstehende Jahreszahl mitten im Namen samt dem Trennzeichen davor (nicht Teil eines längeren Datums wie 2026-09)
+    [GeneratedRegex(@"[ _.-]+(" + Year + @")(?=[ _.-](?!\d)|$)")]
+    private static partial Regex MiddleYearRegex();
+
+    [GeneratedRegex(Year)]
+    private static partial Regex YearRegex();
+
     private void BtnDateMenu_ItemClicked(object? sender, ToolStripItemClickedEventArgs e)
     {
         if (e.ClickedItem == null) { return; }
@@ -198,6 +205,8 @@ public partial class RenameForm : Form
         var name = NameWithoutPdf();
         name = DatePrefixRegex().Replace(name, ""); // vorhandenes Datums-Präfix entfernen – es wird durch das gewählte ersetzt
         name = DateSuffixRegex().Replace(name, ""); // vorhandenes Datums-Suffix ebenso (auch am jeweils anderen Ende)
+        var year = YearRegex().Match(date).Value; // Jahreszahlen mitten im Namen nur, wenn sie dem neuen Datum entsprechen (Wunsch vom 20.09.2026)
+        name = MiddleYearRegex().Replace(name, m => m.Groups[1].Value == year ? string.Empty : m.Value);
         if (name.Length == 0) { SetName(date.Trim('_')); return; } // der Name bestand nur aus dem Datum: kein Trennzeichen ins Leere
         if (index < split) { SetName(date + name); }
         else if (index > split) { SetName(name + date); }
