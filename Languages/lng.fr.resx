@@ -156,6 +156,7 @@ extraire des pages, propriétés (raccourcis dans le menu)</value></data>
   <data name="Strg+Umschalt+← / →" xml:space="preserve"><value>Ctrl+Maj+← / →</value></data>
   <data name="Strg+Umschalt+R / L" xml:space="preserve"><value>Ctrl+Maj+R / L</value></data>
   <data name="Ansicht drehen (ändert die Datei nicht)" xml:space="preserve"><value>Pivoter l'affichage (ne modifie pas le fichier)</value></data>
+  <data name="Strg+F2" xml:space="preserve"><value>Ctrl+F2</value></data>
   <data name="Strg+Umschalt+I" xml:space="preserve"><value>Ctrl+Maj+I</value></data>
   <data name="Strg+Leertaste" xml:space="preserve"><value>Ctrl+Espace</value></data>
   <data name="Datei" xml:space="preserve"><value>Fichier</value></data>

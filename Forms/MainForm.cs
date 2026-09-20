@@ -2045,6 +2045,7 @@ public partial class MainForm : Form
             case Keys.Right | Keys.Control | Keys.Shift: return () => StepFile(1);         // Strg+Pfeile ohne Umschalt gehören dem Viewer (Zoom & Co.)
             case Keys.Left | Keys.Control | Keys.Shift: return () => StepFile(-1);
             case Keys.F1: return () => TaskDlg.ShowShortcutsPdf(Handle);
+            case Keys.F2 | Keys.Control when mnuEditBookmarks.Available && mnuEditBookmarks.Enabled: return EditBookmarks; // nur mit ExperimentalFeatures (Available: Visible ist bei zugeklapptem Menü immer false); bewusst nicht in der Kürzeltabelle (Platz)
             case Keys.F2 | Keys.Control | Keys.Shift: return OpenSettingsFile;             // settings.json im Editor – bewusst undokumentiert (Wunsch vom 20.09.2026)
             case Keys.F11: return () => SetFullScreen(!isFullScreen);
             case Keys.Escape | Keys.Shift when settings.CloseOnEscape: return Close;      // Shift+Esc beendet sofort (wie in NetRadio)
