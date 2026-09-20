@@ -1587,7 +1587,18 @@ public partial class MainForm : Form
         }
         var page = Math.Max(1, ClampedCurrentPage());
         using BookmarkForm dialog = new(bookmarks, currentPageCount, page);
-        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
+        Rectangle remembered = new(settings.BookmarkWindowX, settings.BookmarkWindowY, settings.BookmarkWindowWidth, settings.BookmarkWindowHeight);
+        if (remembered.Width >= dialog.MinimumSize.Width && remembered.Height >= dialog.MinimumSize.Height && Screen.AllScreens.Any(s => s.WorkingArea.IntersectsWith(remembered)))
+        {
+            dialog.StartPosition = FormStartPosition.Manual; // wie beim Hauptfenster: nicht auf einem abgesteckten Monitor wiederherstellen
+            dialog.Bounds = remembered;
+        }
+        var result = dialog.ShowDialog(this);
+        var bounds = dialog.WindowState == FormWindowState.Normal ? dialog.Bounds : dialog.RestoreBounds; // auch nach Abbrechen merken
+        (settings.BookmarkWindowX, settings.BookmarkWindowY, settings.BookmarkWindowWidth, settings.BookmarkWindowHeight) = (bounds.X, bounds.Y, bounds.Width, bounds.Height);
+        settings.ReloadSharedLists();
+        settings.Save();
+        if (result != DialogResult.OK) { return; }
         if (RunPdfEdit(() => PdfEditService.WriteOutlines(file, dialog.Bookmarks), Lng.T("Lesezeichen speichern")))
         {
             LoadPdf(file, page);

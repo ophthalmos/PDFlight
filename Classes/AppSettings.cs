@@ -69,6 +69,10 @@ public class AppSettings
     public int WindowWidth { get; set; }
     public int WindowHeight { get; set; }
     public bool WindowMaximized { get; set; }
+    public int BookmarkWindowX { get; set; } = -1;   // Lesezeichen-Editor: zuletzt genutzte Lage und Größe (Breite 0 = noch nie gemerkt)
+    public int BookmarkWindowY { get; set; } = -1;
+    public int BookmarkWindowWidth { get; set; }
+    public int BookmarkWindowHeight { get; set; }
 
     /// <summary>Voller Pfad der settings.json (Strg+Umschalt+F2 öffnet sie im zugeordneten Editor).</summary>
     public static string SettingsPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PDFlight", "settings.json");
