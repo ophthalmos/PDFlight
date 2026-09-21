@@ -18,7 +18,7 @@ public partial class PasswordForm : Form
         this.confirm = confirm;
         if (confirm)
         {
-            Text = "Benutzer-Kennwort vergeben";
+            Text = Lng.T("Benutzer-Kennwort vergeben");
             buttonOK.DialogResult = DialogResult.None; // erst nach Prüfung schließen
             labelInfo.Text = Lng.T("Kennwort.Info",
                 "Die Datei wird mit AES-256 (PDF 2.0) verschlüsselt." + Environment.NewLine +
