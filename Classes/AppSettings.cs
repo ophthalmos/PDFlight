@@ -158,18 +158,43 @@ public class AppSettings
 
     private static readonly JsonSerializerOptions SerializerOptions = new() { WriteIndented = true }; // gecacht (CA1869)
 
-    /// <summary>Schreibt erst eine Nachbardatei und tauscht sie dann ein – eine gleichzeitig lesende Instanz sieht nie eine halbe Datei.</summary>
+    /// <summary>Schreibt erst eine Nachbardatei und tauscht sie dann ein – eine gleichzeitig lesende Instanz sieht nie eine halbe Datei.
+    /// Vorher sichert <see cref="RotateBackups"/> beim ersten Speichern eines Tages den bisherigen Stand.</summary>
     public void Save()
     {
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(SettingsPath)!); // SettingsPath ist immer ein voller Dateipfad
+            RotateBackups();
             var temp = SettingsPath + ".tmp";
             File.WriteAllText(temp, JsonSerializer.Serialize(this, SerializerOptions));
             File.Move(temp, SettingsPath, overwrite: true);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // Speichern darf das Programm nie blockieren
     }
+
+    /// <summary>Drei Tagesgenerationen: Beim ersten Speichern eines Tages wandert die bisherige settings.json nach settings.bak1.json,
+    /// die älteren rücken nach bak2 und bak3. So bleibt der Endstand der letzten drei Tage mit Änderungen erhalten (Wunsch vom
+    /// 21.09.2026 nach dem Listenverlust vom Vortag). Zurückspielen von Hand: Programm beenden, Sicherung nach settings.json kopieren.
+    /// Speichern zwei Instanzen am selben Morgen, sichert nur die erste (bak1 trägt dann schon den Zeitstempel der Quelle).</summary>
+    private static void RotateBackups()
+    {
+        try
+        {
+            if (!File.Exists(SettingsPath)) { return; }
+            var stamp = File.GetLastWriteTime(SettingsPath);
+            if (stamp.Date == DateTime.Today) { return; } // heute schon gespeichert – die Sicherung von heute Morgen bleibt
+            if (File.Exists(BackupPath(1)) && File.GetLastWriteTime(BackupPath(1)) == stamp) { return; }
+            for (var generation = 3; generation >= 2; generation--)
+            {
+                if (File.Exists(BackupPath(generation - 1))) { File.Move(BackupPath(generation - 1), BackupPath(generation), overwrite: true); }
+            }
+            File.Copy(SettingsPath, BackupPath(1), overwrite: true); // Copy behält den Zeitstempel der Quelle
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // die Sicherung darf das Speichern nie verhindern
+    }
+
+    private static string BackupPath(int generation) => Path.ChangeExtension(SettingsPath, $".bak{generation}.json");
 
     /// <summary>Trägt einen Ordner vorne in die Zuletzt-Liste ein (ohne Duplikate, begrenzte Länge).</summary>
     public void AddRecentFolder(string path)
