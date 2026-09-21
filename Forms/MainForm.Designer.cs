@@ -70,6 +70,7 @@
             toolStripSeparator7 = new ToolStripSeparator();
             mnuSetPassword = new ToolStripMenuItem();
             mnuRemovePassword = new ToolStripMenuItem();
+            mnuRemoveRestrictions = new ToolStripMenuItem();
             toolStripSeparator10 = new ToolStripSeparator();
             mnuProperties = new ToolStripMenuItem();
             toolStripSeparator9 = new ToolStripSeparator();
@@ -258,7 +259,7 @@
             // ddbEdit
             // 
             ddbEdit.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuMovePage, mnuInsertPage, toolStripSeparator15, mnuAppendPdf, mnuDuplex, mnuExtractPages, toolStripSeparator14, mnuAddStamp, mnuManageStamps, mnuAddAnnotation, mnuManageAnnotations, toolStripSeparator16, mnuRemoveBookmarks, mnuEditBookmarks, toolStripSeparator6, mnuUndo, toolStripSeparator7, mnuSetPassword, mnuRemovePassword, toolStripSeparator10, mnuProperties });
+            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuMovePage, mnuInsertPage, toolStripSeparator15, mnuAppendPdf, mnuDuplex, mnuExtractPages, toolStripSeparator14, mnuAddStamp, mnuManageStamps, mnuAddAnnotation, mnuManageAnnotations, toolStripSeparator16, mnuRemoveBookmarks, mnuEditBookmarks, toolStripSeparator6, mnuUndo, toolStripSeparator7, mnuSetPassword, mnuRemovePassword, mnuRemoveRestrictions, toolStripSeparator10, mnuProperties });
             ddbEdit.Enabled = false;
             ddbEdit.Name = "ddbEdit";
             ddbEdit.Size = new Size(76, 22);
@@ -413,6 +414,13 @@
             mnuRemovePassword.Size = new Size(317, 22);
             mnuRemovePassword.Text = "Kennwort entfernen …";
             mnuRemovePassword.Click += MnuRemovePassword_Click;
+            //
+            // mnuRemoveRestrictions
+            //
+            mnuRemoveRestrictions.Name = "mnuRemoveRestrictions";
+            mnuRemoveRestrictions.Size = new Size(317, 22);
+            mnuRemoveRestrictions.Text = "Einschränkungen entfernen …";
+            mnuRemoveRestrictions.Click += MnuRemoveRestrictions_Click;
             // 
             // toolStripSeparator10
             // 
@@ -689,6 +697,7 @@
         private System.Windows.Forms.ToolStripMenuItem mnuDuplex;
         private System.Windows.Forms.ToolStripMenuItem mnuSetPassword;
         private System.Windows.Forms.ToolStripMenuItem mnuRemovePassword;
+        private System.Windows.Forms.ToolStripMenuItem mnuRemoveRestrictions;
         private System.Windows.Forms.ToolStripMenuItem mnuExtractPages;
         private System.Windows.Forms.ToolStripMenuItem mnuAddAnnotation;
         private System.Windows.Forms.ToolStripMenuItem mnuManageAnnotations;

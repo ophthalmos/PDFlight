@@ -650,5 +650,10 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="„{0}“ ist schreibgeschützt." xml:space="preserve"><value>« {0} » est en lecture seule.</value></data>
   <data name="Soll der Schreibschutz aufgehoben werden, damit „{0}“ gespeichert werden kann?" xml:space="preserve"><value>Supprimer la protection en écriture pour pouvoir enregistrer « {0} » ?</value></data>
   <data name="„{0}“ ist mit einem Kennwort geschützt." xml:space="preserve"><value>« {0} » est protégé par un mot de passe.</value></data>
-  <data name="Zum Bearbeiten hebst du den Schutz zuerst über Bearbeiten → „Kennwort entfernen …“ auf. Dafür brauchst du das Besitzerkennwort." xml:space="preserve"><value>Pour le modifier, supprime d’abord la protection via Modifier → « Supprimer le mot de passe… ». Il te faut le mot de passe propriétaire.</value></data>
+  <data name="Einschränkungen entfernen …" xml:space="preserve"><value>Supprimer les restrictions…</value></data>
+  <data name="Einschränkungen von „{0}“ entfernen?" xml:space="preserve"><value>Supprimer les restrictions de « {0} » ?</value></data>
+  <data name="Die Datei ist nur mit einem Besitzerkennwort geschützt, das Berechtigungen wie Drucken oder Ändern einschränkt. Ohne das Kennwort wird die Datei neu aufgebaut – Lesezeichen und Formularfelder gehen dabei verloren." xml:space="preserve"><value>Le fichier n’est protégé que par un mot de passe propriétaire qui limite des autorisations comme l’impression ou la modification. Sans le mot de passe, le fichier est reconstruit – les signets et les champs de formulaire sont perdus.</value></data>
+  <data name="Entfernen der Einschränkungen" xml:space="preserve"><value>Suppression des restrictions</value></data>
+  <data name="Die Einschränkungen wurden entfernt." xml:space="preserve"><value>Les restrictions ont été supprimées.</value></data>
+  <data name="Zum Bearbeiten hebst du den Schutz zuerst über Bearbeiten → „Einschränkungen entfernen …“ auf." xml:space="preserve"><value>Pour le modifier, supprime d’abord la protection via Modifier → « Supprimer les restrictions… ».</value></data>
 </root>
