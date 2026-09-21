@@ -106,7 +106,6 @@
             // webView
             // 
             webView.AllowExternalDrop = true;
-            webView.BackColor = SystemColors.ControlDarkDark;
             webView.CreationProperties = null;
             webView.DefaultBackgroundColor = Color.White;
             webView.Dock = DockStyle.Fill;
@@ -562,7 +561,7 @@
             // 
             statusPath.Name = "statusPath";
             statusPath.Padding = new Padding(4, 0, 4, 0);
-            statusPath.Size = new Size(894, 19);
+            statusPath.Size = new Size(937, 19);
             statusPath.Spring = true;
             statusPath.Text = "Keine Datei geöffnet";
             statusPath.TextAlign = ContentAlignment.MiddleLeft;
