@@ -534,7 +534,7 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="Metadaten &amp;entfernen" xml:space="preserve"><value>&amp;Eliminar metadatos</value></data>
   <data name="Entfernen der Metadaten" xml:space="preserve"><value>Eliminación de los metadatos</value></data>
   <data name="Die Metadaten wurden entfernt." xml:space="preserve"><value>Los metadatos se han eliminado.</value></data>
-  <data name="Anwendung, Produzent, Daten und XMP werden mit entfernt." xml:space="preserve"><value>AplicaciÃ³n, productor, fechas y XMP se eliminan tambiÃ©n.</value></data>
+  <data name="Anwendung, Produzent, Daten und XMP werden mit entfernt." xml:space="preserve"><value>Aplicación, productor, fechas y XMP se eliminan también.</value></data>
 
   <!-- Stempel -->
   <data name="&amp;Löschen" xml:space="preserve"><value>E&amp;liminar</value></data>
