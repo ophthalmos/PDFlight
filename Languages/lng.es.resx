@@ -650,5 +650,10 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="„{0}“ ist schreibgeschützt." xml:space="preserve"><value>«{0}» es de solo lectura.</value></data>
   <data name="Soll der Schreibschutz aufgehoben werden, damit „{0}“ gespeichert werden kann?" xml:space="preserve"><value>¿Quitar la protección contra escritura para poder guardar «{0}»?</value></data>
   <data name="„{0}“ ist mit einem Kennwort geschützt." xml:space="preserve"><value>«{0}» está protegido con contraseña.</value></data>
-  <data name="Zum Bearbeiten hebst du den Schutz zuerst über Bearbeiten → „Kennwort entfernen …“ auf. Dafür brauchst du das Besitzerkennwort." xml:space="preserve"><value>Para editarlo, quita primero la protección en Editar → «Quitar contraseña…». Necesitas la contraseña de propietario.</value></data>
+  <data name="Einschränkungen entfernen …" xml:space="preserve"><value>Quitar las restricciones…</value></data>
+  <data name="Einschränkungen von „{0}“ entfernen?" xml:space="preserve"><value>¿Quitar las restricciones de «{0}»?</value></data>
+  <data name="Die Datei ist nur mit einem Besitzerkennwort geschützt, das Berechtigungen wie Drucken oder Ändern einschränkt. Ohne das Kennwort wird die Datei neu aufgebaut – Lesezeichen und Formularfelder gehen dabei verloren." xml:space="preserve"><value>El archivo solo está protegido con una contraseña de propietario que limita permisos como imprimir o editar. Sin la contraseña, el archivo se reconstruye – los marcadores y los campos de formulario se pierden.</value></data>
+  <data name="Entfernen der Einschränkungen" xml:space="preserve"><value>Quitar las restricciones</value></data>
+  <data name="Die Einschränkungen wurden entfernt." xml:space="preserve"><value>Se quitaron las restricciones.</value></data>
+  <data name="Zum Bearbeiten hebst du den Schutz zuerst über Bearbeiten → „Einschränkungen entfernen …“ auf." xml:space="preserve"><value>Para editarlo, quita primero la protección en Editar → «Quitar las restricciones…».</value></data>
 </root>

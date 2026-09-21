@@ -917,11 +917,30 @@ internal static partial class PdfEditService
         catch (Exception ex) when (IsPdfReadError(ex)) { return false; }
     }
 
-    /// <summary>Speichert die Datei ohne Kennwortschutz neu: Seiten und Metadaten werden in ein
-    /// unverschlüsseltes Dokument übernommen — unabhängig vom Verschlüsselungsverfahren der Quelle.</summary>
+    /// <summary>Speichert die Datei ohne Kennwortschutz neu. Mit dem Besitzerkennwort öffnet PDFsharp zum Ändern, dann wird nur die
+    /// Verschlüsselung abgeschaltet und alles bleibt (Lesezeichen, Formulare, Metadaten). Ist das Kennwort bloß das Benutzerkennwort,
+    /// verweigert PDFsharp das Ändern – dann Rückfall auf den Neuaufbau (<see cref="Rebuild"/>). Geprüft 21.09.2026.</summary>
     public static void RemovePassword(string path, string password)
     {
         var bytes = File.ReadAllBytes(path); // Quelle in den Speicher, damit dieselbe Datei überschrieben werden kann
+        try
+        {
+            using MemoryStream stream = new(bytes);
+            using var document = PdfReader.Open(stream, password, PdfDocumentOpenMode.Modify);
+            document.SecurityHandler.SetEncryptionToNoneAndResetPasswords();
+            document.Save(path);
+        }
+        catch (PdfReaderException) { Rebuild(bytes, path, password); } // „owner password required“: nur Benutzerrechte
+    }
+
+    /// <summary>Nur mit Besitzerkennwort geschützte, ohne Kennwort lesbare Datei (Berechtigungen eingeschränkt) ohne das Kennwort
+    /// entsperren: Neuaufbau aus den Seiten wie beim Drucken „Als PDF speichern“, nur ohne Rendering. Lesezeichen und Formularfelder
+    /// hängen am Katalog und gehen verloren, Anmerkungen und Metadaten bleiben (Wunsch vom 21.09.2026).</summary>
+    public static void RemoveRestrictions(string path) => Rebuild(File.ReadAllBytes(path), path, string.Empty);
+
+    /// <summary>Seiten und Metadaten in ein neues, unverschlüsseltes Dokument übernehmen – unabhängig vom Verfahren der Quelle.</summary>
+    private static void Rebuild(byte[] bytes, string path, string password)
+    {
         using MemoryStream stream = new(bytes);
         using var source = PdfReader.Open(stream, password, PdfDocumentOpenMode.Import);
         using PdfDocument target = new();

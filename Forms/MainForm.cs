@@ -405,6 +405,7 @@ public partial class MainForm : Form
         mnuEditBookmarks.Enabled = !EditLocked; // auch ohne Lesezeichen: dann legt der Editor welche an
         mnuSetPassword.Enabled = currentPageCount > 0 && !EditLocked;  // nur ohne bestehenden Kennwortschutz
         mnuRemovePassword.Enabled = hasFile && (currentPageCount <= 0 || Encrypted);  // bei geschützter (oder unlesbarer) Datei
+        mnuRemoveRestrictions.Available = hasFile && Encrypted; // nur bei lesbaren, aber besitzergeschützten Dateien überhaupt im Menü (Wunsch vom 21.09.2026)
         foreach (var button in programIconButtons) { button.Enabled = hasFile; }
         if (hasFile)
         {
@@ -1028,6 +1029,7 @@ public partial class MainForm : Form
         mnuUndo.Image = MenuIcon(ToolbarIcons.Undo);
         mnuSetPassword.Image = MenuIcon(ToolbarIcons.Lock);
         mnuRemovePassword.Image = MenuIcon(ToolbarIcons.Unlock);
+        mnuRemoveRestrictions.Image = MenuIcon(ToolbarIcons.Unlock);
         mnuProperties.Image = MenuIcon(ToolbarIcons.Info);
         mnuFavoriteAdd.Image = MenuIcon(ToolbarIcons.Favorite); // Favoriten-Menü
         mnuFavoriteRemove.Image = MenuIcon(ToolbarIcons.Delete); // schlicht – der Stern steht schon am Menü selbst
@@ -1169,6 +1171,21 @@ public partial class MainForm : Form
     }
 
     /// <summary>Entfernt den Kennwortschutz der aktuellen Datei (fragt das Kennwort ab, mit Undo-Sicherung).</summary>
+    /// <summary>Nur mit Besitzerkennwort geschützte Datei (Berechtigungen wie Drucken/Ändern eingeschränkt) ohne Kennwort neu aufbauen –
+    /// wie „Als PDF speichern“ im Druckdialog, nur ohne Rendering. Lesezeichen und Formularfelder gehen dabei verloren (Rückfrage).</summary>
+    private void RemoveRestrictionsDialog()
+    {
+        if (currentFile == null || !Encrypted) { return; }
+        if (!TaskDlg.ConfirmTaskDlg(Handle, string.Format(Lng.T("Einschränkungen von „{0}“ entfernen?"), currentFile.Name),
+            Lng.T("Die Datei ist nur mit einem Besitzerkennwort geschützt, das Berechtigungen wie Drucken oder Ändern einschränkt. Ohne das Kennwort wird die Datei neu aufgebaut – Lesezeichen und Formularfelder gehen dabei verloren."),
+            TaskDialogIcon.Warning)) { return; }
+        if (RunPdfEdit(() => PdfEditService.RemoveRestrictions(currentFile.FullName), Lng.T("Entfernen der Einschränkungen"), allowEncrypted: true))
+        {
+            LoadPdf(currentFile.FullName); // jetzt ist auch die Bearbeitung frei
+            statusPath.Text = Lng.T("Die Einschränkungen wurden entfernt.");
+        }
+    }
+
     private void RemovePasswordDialog()
     {
         if (currentFile == null) { return; }
@@ -1182,6 +1199,11 @@ public partial class MainForm : Form
             using PasswordForm dialog = new(currentFile.Name);
             if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
             var password = dialog.Password;
+            if (password.Length == 0) // leer würde eine besitzergeschützte Datei stillschweigend neu aufbauen – dafür gibt es „Einschränkungen entfernen“
+            {
+                TaskDlg.MsgTaskDlg(Handle, Lng.T("Bitte gib ein Kennwort ein."), null, TaskDialogIcon.Warning);
+                continue;
+            }
             if (!PdfEditService.CanOpen(currentFile.FullName, password))
             {
                 TaskDlg.MsgTaskDlg(Handle, Lng.T("Das Kennwort ist falsch."), null, TaskDialogIcon.Warning);
@@ -1284,7 +1306,7 @@ public partial class MainForm : Form
     private void ShowEncryptedMessage()
     {
         TaskDlg.MsgTaskDlg(Handle, string.Format(Lng.T("„{0}“ ist mit einem Kennwort geschützt."), currentFile?.Name),
-            Lng.T("Zum Bearbeiten hebst du den Schutz zuerst über Bearbeiten → „Kennwort entfernen …“ auf. Dafür brauchst du das Besitzerkennwort."), TaskDialogIcon.Warning);
+            Lng.T("Zum Bearbeiten hebst du den Schutz zuerst über Bearbeiten → „Einschränkungen entfernen …“ auf."), TaskDialogIcon.Warning);
     }
 
     private void ShowNotEditableMessage()
@@ -2327,6 +2349,11 @@ public partial class MainForm : Form
     private void MnuRemovePassword_Click(object? sender, EventArgs e)
     {
         RemovePasswordDialog();
+    }
+
+    private void MnuRemoveRestrictions_Click(object? sender, EventArgs e)
+    {
+        RemoveRestrictionsDialog();
     }
     private void MnuUndo_Click(object? sender, EventArgs e)
     {
