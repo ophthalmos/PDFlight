@@ -137,7 +137,7 @@ namespace PDFLight.Forms
             Name = "PasswordForm";
             ShowInTaskbar = false;
             StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            Text = "Benutzer-Kennwort entfernen";
+            Text = "Kennwort entfernen";
             ResumeLayout(false);
             PerformLayout();
         }

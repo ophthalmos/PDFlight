@@ -263,7 +263,7 @@ Le bouton de rotation de l'afficheur, lui, ne change que l'affichage.</value></d
   <data name="Die Datei ist bereits verschlüsselt." xml:space="preserve"><value>Le fichier est déjà chiffré.</value></data>
   <data name="Vergeben des Kennworts" xml:space="preserve"><value>Définition du mot de passe</value></data>
   <data name="Die Datei ist jetzt mit AES-256 verschlüsselt." xml:space="preserve"><value>Le fichier est maintenant chiffré en AES-256.</value></data>
-  <data name="Benutzer-Kennwort entfernen" xml:space="preserve"><value>Supprimer le mot de passe utilisateur</value></data>
+  <data name="Kennwort entfernen" xml:space="preserve"><value>Supprimer le mot de passe</value></data>
   <data name="&amp;Kennwort:" xml:space="preserve"><value>&amp;Mot de passe :</value></data>
   <data name="Die Datei ist nicht verschlüsselt." xml:space="preserve"><value>Le fichier n'est pas chiffré.</value></data>
   <data name="Das Kennwort ist falsch." xml:space="preserve"><value>Le mot de passe est incorrect.</value></data>
