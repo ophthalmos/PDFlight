@@ -107,8 +107,8 @@ internal static partial class ShellUtil
 
     // ------------------------------------------------------------------ Papierkorb (Rückgängig nach dem Löschen)
 
-    /// <summary>Hat das Laufwerk der Datei einen Papierkorb? Billiger Test fÃ¼r das RÃ¼ckgÃ¤ngig-Angebot nach dem LÃ¶schen â
-    /// die eigentliche Suche im Papierkorb (Shell-AufzÃ¤hlung, je nach FÃ¼llstand Sekunden) lÃ¤uft erst bei Strg+Z.</summary>
+    /// <summary>Hat das Laufwerk der Datei einen Papierkorb? Billiger Test für das Rückgängig-Angebot nach dem Löschen –
+    /// die eigentliche Suche im Papierkorb (Shell-Aufzählung, je nach Füllstand Sekunden) läuft erst bei Strg+Z.</summary>
     public static bool HasRecycleBin(string path)
     {
         try
@@ -119,10 +119,10 @@ internal static partial class ShellUtil
         catch (Exception ex) when (ex is ArgumentException or IOException or UnauthorizedAccessException) { return false; }
     }
 
-    /// <summary>Stellt die zuletzt gelÃ¶schte Datei mit diesem Ursprungspfad aus dem Papierkorb wieder her â primÃ¤r Ã¼ber
-    /// das kanonische Shell-Verb âundeleteâ, sonst Ã¼ber den lokalisierten Wiederherstellen-Eintrag des KontextmenÃ¼s.
-    /// Bei mehreren EintrÃ¤gen gleichen Namens gewinnt der zuletzt gelÃ¶schte (ModifyDate = LÃ¶schdatum). Eine einzige
-    /// AufzÃ¤hlung des Papierkorbs; true, sobald die Datei wieder existiert.</summary>
+    /// <summary>Stellt die zuletzt gelöschte Datei mit diesem Ursprungspfad aus dem Papierkorb wieder her – primär über
+    /// das kanonische Shell-Verb „undelete“, sonst über den lokalisierten Wiederherstellen-Eintrag des Kontextmenüs.
+    /// Bei mehreren Einträgen gleichen Namens gewinnt der zuletzt gelöschte (ModifyDate = Löschdatum). Eine einzige
+    /// Aufzählung des Papierkorbs; true, sobald die Datei wieder existiert.</summary>
     public static bool RestoreFromRecycleBin(string originalPath)
     {
         try
@@ -137,17 +137,17 @@ internal static partial class ShellUtil
             var bestDate = DateTime.MinValue;
             foreach (var item in bin.Items())
             {
-                string shownName = bin.GetDetailsOf(item, 0); // Anzeigename â je nach Explorer-Einstellung ohne Erweiterung
+                string shownName = bin.GetDetailsOf(item, 0); // Anzeigename – je nach Explorer-Einstellung ohne Erweiterung
                 if (!string.Equals(shownName, name, StringComparison.OrdinalIgnoreCase)
                     && !string.Equals(shownName, stem, StringComparison.OrdinalIgnoreCase)) { continue; }
                 if (!string.Equals((string)bin.GetDetailsOf(item, 1), folder, StringComparison.OrdinalIgnoreCase)) { continue; } // Ursprungsordner
-                DateTime deleted = item.ModifyDate; // bei Papierkorb-EintrÃ¤gen das LÃ¶schdatum
+                DateTime deleted = item.ModifyDate; // bei Papierkorb-Einträgen das Löschdatum
                 if (deleted > bestDate) { bestDate = deleted; best = item; }
             }
             if (best == null) { return false; }
             best.InvokeVerb("undelete");
             if (WaitForFile(originalPath)) { return true; }
-            foreach (var verb in best.Verbs()) // Fallback: lokalisierter MenÃ¼eintrag (Programmsprachen des OS)
+            foreach (var verb in best.Verbs()) // Fallback: lokalisierter Menüeintrag (Programmsprachen des OS)
             {
                 var caption = ((string)verb.Name).Replace("&", string.Empty).Trim();
                 if (caption is "Wiederherstellen" or "Restore" or "Restaurer" or "Restaurar")
