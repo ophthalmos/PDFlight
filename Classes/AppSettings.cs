@@ -78,19 +78,36 @@ public class AppSettings
     /// <summary>Voller Pfad der settings.json (Strg+Umschalt+F2 öffnet sie im zugeordneten Editor).</summary>
     public static string SettingsPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PDFlight", "settings.json");
 
+    /// <summary>Beim Programmstart: Standardwerte, wenn es keine Datei gibt. Eine vorhandene, aber unlesbare Datei (defektes JSON,
+    /// Sperre) wird als settings.unreadable.json beiseitegelegt, damit nichts stillschweigend verloren geht (s. TryLoad).</summary>
     public static AppSettings Load()
     {
-        try
-        {
-            if (File.Exists(SettingsPath))
-            {
-                var loaded = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(SettingsPath)) ?? new AppSettings();
-                loaded.TrimRecentLists();
-                return ApplyInstallerDefaults(loaded);
-            }
-        }
-        catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException) { } // defekte Datei → Standardwerte
+        if (!File.Exists(SettingsPath)) { return ApplyInstallerDefaults(new AppSettings()); }
+        if (TryLoad(out var loaded)) { return ApplyInstallerDefaults(loaded); }
+        try { File.Copy(SettingsPath, Path.ChangeExtension(SettingsPath, ".unreadable.json"), overwrite: true); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
         return ApplyInstallerDefaults(new AppSettings());
+    }
+
+    /// <summary>Liest die Datei; false, wenn sie fehlt, gesperrt oder kein gültiges JSON ist. Eine Sperre (eine andere Instanz oder ein
+    /// Editor schreibt gerade) wird kurz abgewartet. Die Aufrufer entscheiden, was dann gilt – nie stillschweigend leere Listen:
+    /// Am 20.09.2026 gingen so alle gemeinsamen Listen verloren, weil <see cref="ReloadSharedLists"/> bei einem Lesefehler die
+    /// Standardwerte übernahm und das nächste Speichern sie festschrieb.</summary>
+    private static bool TryLoad(out AppSettings settings)
+    {
+        for (var attempt = 0; ; attempt++)
+        {
+            try
+            {
+                settings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(SettingsPath)) ?? new AppSettings();
+                settings.TrimRecentLists();
+                return true;
+            }
+            catch (IOException) when (attempt < 5) { Thread.Sleep(40); } // Sperre: gleich noch einmal
+            catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException) { break; }
+        }
+        settings = new AppSettings();
+        return false;
     }
 
     /// <summary>Beim ersten Start die Vorgabestempel eintragen – genau einmal, damit gelöschte nicht wiederkommen.
@@ -141,12 +158,15 @@ public class AppSettings
 
     private static readonly JsonSerializerOptions SerializerOptions = new() { WriteIndented = true }; // gecacht (CA1869)
 
+    /// <summary>Schreibt erst eine Nachbardatei und tauscht sie dann ein – eine gleichzeitig lesende Instanz sieht nie eine halbe Datei.</summary>
     public void Save()
     {
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(SettingsPath)!); // SettingsPath ist immer ein voller Dateipfad
-            File.WriteAllText(SettingsPath, JsonSerializer.Serialize(this, SerializerOptions));
+            var temp = SettingsPath + ".tmp";
+            File.WriteAllText(temp, JsonSerializer.Serialize(this, SerializerOptions));
+            File.Move(temp, SettingsPath, overwrite: true);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // Speichern darf das Programm nie blockieren
     }
@@ -221,7 +241,7 @@ public class AppSettings
     /// und vor dem Speichern; die Fenster-/Anzeigeoptionen bleiben instanzlokal).</summary>
     public void ReloadSharedLists()
     {
-        var fresh = Load();
+        if (!TryLoad(out var fresh)) { return; } // Datei gerade gesperrt oder defekt: die eigenen Listen behalten, nie durch leere ersetzen
         TargetFolders = fresh.TargetFolders;
         RecentFolders = fresh.RecentFolders;
         LastPages = fresh.LastPages;
