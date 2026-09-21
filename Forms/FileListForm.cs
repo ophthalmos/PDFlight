@@ -94,7 +94,7 @@ public partial class FileListForm : Form
     /// umgeordnet – kein ListViewItemSorter, der würde jedes spätere Verschieben sofort wieder einsortieren.</summary>
     private void SortBy(int column)
     {
-        sortAscending = column == sortColumn ? !sortAscending : true;
+        sortAscending = column != sortColumn || !sortAscending;
         sortColumn = column;
         var items = listView.Items.OfType<ListViewItem>().ToList();
         Comparison<ListViewItem> compare = column == 1 // Tag ist bei jedem Eintrag ein FileEntry (Konstruktor)
