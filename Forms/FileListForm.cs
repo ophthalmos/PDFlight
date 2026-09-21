@@ -6,7 +6,7 @@ namespace PDFLight.Forms;
 /// <summary>Mehrfachauswahl aus einer Dateiliste (Name und Änderungsdatum) – für „PDF-Datei anhängen“: die in anderen
 /// PDFlight-Fenstern geöffneten Dateien oder die PDF-Dateien des Ordners. Ausgewählt wird per Häkchen (Klick oder Leertaste auf dem
 /// fokussierten Eintrag, Strg+A alle) – die Häkchen bleiben, egal wohin Fokus und Markierung wandern (Wunsch vom 20.09.2026). Die Markierung
-/// dient nur dem Verschieben: ↑/↓, Alt+Pfeil und Ziehen ändern die Reihenfolge (sie ist die Anhängereihenfolge). <see cref="SelectedFiles"/>
+/// dient nur dem Verschieben: ↑/↓, Strg+Pfeil (auch Alt+Pfeil) und Ziehen ändern die Reihenfolge (sie ist die Anhängereihenfolge). <see cref="SelectedFiles"/>
 /// liefert die angehakten Dateien in Listenreihenfolge, Enter bestätigt.</summary>
 public partial class FileListForm : Form
 {
@@ -125,8 +125,8 @@ public partial class FileListForm : Form
         {
             case Keys.Enter: Accept(); break;
             case Keys.Control | Keys.A: foreach (ListViewItem item in listView.Items) { item.Checked = true; } break; // die Leertaste schaltet das Häkchen des fokussierten Eintrags (ListView-Standard)
-            case Keys.Alt | Keys.Up: MoveSelected(-1); break;   // Strg+Pfeil bleibt dem Fokuswechsel ohne Auswahländerung vorbehalten
-            case Keys.Alt | Keys.Down: MoveSelected(1); break;
+            case Keys.Control | Keys.Up: case Keys.Alt | Keys.Up: MoveSelected(-1); break;     // Strg+Pfeil wie ursprünglich (Wunsch vom 21.09.2026); seit der Auswahl
+            case Keys.Control | Keys.Down: case Keys.Alt | Keys.Down: MoveSelected(1); break;  // per Häkchen braucht niemand mehr den Fokuswechsel ohne Markierung
             default: return;
         }
         e.Handled = e.SuppressKeyPress = true;
