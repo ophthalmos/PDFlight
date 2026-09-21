@@ -62,6 +62,7 @@
             mnuManageStamps = new ToolStripMenuItem();
             mnuAddAnnotation = new ToolStripMenuItem();
             mnuManageAnnotations = new ToolStripMenuItem();
+            toolStripSeparator16 = new ToolStripSeparator();
             mnuRemoveBookmarks = new ToolStripMenuItem();
             mnuEditBookmarks = new ToolStripMenuItem();
             toolStripSeparator6 = new ToolStripSeparator();
@@ -96,7 +97,6 @@
             pnlPdfA = new Panel();
             btnPdfAEnable = new Button();
             lblPdfA = new Label();
-            toolStripSeparator16 = new ToolStripSeparator();
             ((System.ComponentModel.ISupportInitialize)webView).BeginInit();
             toolStrip.SuspendLayout();
             statusStrip.SuspendLayout();
@@ -106,6 +106,7 @@
             // webView
             // 
             webView.AllowExternalDrop = true;
+            webView.BackColor = SystemColors.ControlDarkDark;
             webView.CreationProperties = null;
             webView.DefaultBackgroundColor = Color.White;
             webView.Dock = DockStyle.Fill;
@@ -361,18 +362,23 @@
             mnuManageAnnotations.Text = "Anmerkungen verwalten …";
             mnuManageAnnotations.Click += MnuManageAnnotations_Click;
             // 
+            // toolStripSeparator16
+            // 
+            toolStripSeparator16.Name = "toolStripSeparator16";
+            toolStripSeparator16.Size = new Size(314, 6);
+            // 
             // mnuRemoveBookmarks
             // 
             mnuRemoveBookmarks.Name = "mnuRemoveBookmarks";
             mnuRemoveBookmarks.Size = new Size(317, 22);
             mnuRemoveBookmarks.Text = "Lesezeichen entfernen …";
             mnuRemoveBookmarks.Click += MnuRemoveBookmarks_Click;
-            //
+            // 
             // mnuEditBookmarks
-            //
+            // 
             mnuEditBookmarks.Name = "mnuEditBookmarks";
-            mnuEditBookmarks.Size = new Size(317, 22);
             mnuEditBookmarks.ShortcutKeyDisplayString = "Strg+F2";
+            mnuEditBookmarks.Size = new Size(317, 22);
             mnuEditBookmarks.Text = "Lesezeichen bearbeiten …";
             mnuEditBookmarks.Click += MnuEditBookmarks_Click;
             // 
@@ -529,7 +535,7 @@
             btnSettings.Alignment = ToolStripItemAlignment.Right;
             btnSettings.DisplayStyle = ToolStripItemDisplayStyle.Text;
             btnSettings.Name = "btnSettings";
-            btnSettings.Size = new Size(82, 19);
+            btnSettings.Size = new Size(82, 22);
             btnSettings.Text = "Einstellungen";
             btnSettings.ToolTipText = "Zielordner, Programme und Optionen verwalten (Strg+,)";
             btnSettings.Click += BtnSettings_Click;
@@ -556,7 +562,7 @@
             // 
             statusPath.Name = "statusPath";
             statusPath.Padding = new Padding(4, 0, 4, 0);
-            statusPath.Size = new Size(937, 19);
+            statusPath.Size = new Size(894, 19);
             statusPath.Spring = true;
             statusPath.Text = "Keine Datei geöffnet";
             statusPath.TextAlign = ContentAlignment.MiddleLeft;
@@ -627,11 +633,6 @@
             lblPdfA.Size = new Size(685, 19);
             lblPdfA.TabIndex = 0;
             lblPdfA.Text = "Diese Datei entspricht dem PDF/A-Standard für die Langzeitarchivierung und wurde schreibgeschützt geöffnet.";
-            // 
-            // toolStripSeparator16
-            // 
-            toolStripSeparator16.Name = "toolStripSeparator16";
-            toolStripSeparator16.Size = new Size(314, 6);
             // 
             // MainForm
             // 
