@@ -549,6 +549,7 @@
             // 
             // statusStrip
             // 
+            statusStrip.BackColor = SystemColors.Control;
             statusStrip.Items.AddRange(new ToolStripItem[] { statusIndex, statusPath, statusOneClick, statusFormat, statusZoom, statusInfo });
             statusStrip.Location = new Point(0, 725);
             statusStrip.Name = "statusStrip";
