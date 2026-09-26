@@ -653,7 +653,7 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
 Adobe recibe entonces tu dirección IP y datos técnicos del navegador, guarda cookies y comprueba la licencia del programa. El archivo PDF solo se muestra en tu equipo y no se sube. PDFlight no envía el registro de uso de Adobe.</value></data>
   <data name="Datenschutzerklärung von Adobe" xml:space="preserve"><value>Política de privacidad de Adobe</value></data>
   <data name="Ich bin damit &amp;einverstanden und möchte PDF Embed API nutzen" xml:space="preserve"><value>Estoy de &amp;acuerdo y quiero usar la API PDF Embed</value></data>
-  <data name="Schaltfläche „Adobe“ in der Hauptmenüleiste an&amp;zeigen" xml:space="preserve"><value>Mostrar el &amp;botón «Adobe» en la barra principal</value></data>
+  <data name="Schaltfläche „Adobe“ mit Symbol und Text an&amp;zeigen (andernfalls nur Symbol)" xml:space="preserve"><value>Mostrar el &amp;botón «Adobe» con icono y texto (si no, solo icono)</value></data>
   <data name="Adobe-Client-ID gefunden (adobe-clientid.txt)." xml:space="preserve"><value>ID de cliente de Adobe encontrado (adobe-clientid.txt).</value></data>
   <data name="Adobe-Client-ID fehlt: Datei adobe-clientid.txt neben PDFlight.exe anlegen – bis dahin bleibt die Ansicht gesperrt." xml:space="preserve"><value>Falta el ID de cliente de Adobe: crea el archivo adobe-clientid.txt junto a PDFlight.exe; hasta entonces la vista permanece bloqueada.</value></data>
   <data name="Der Browser konnte nicht geöffnet werden." xml:space="preserve"><value>No se pudo abrir el navegador.</value></data>

@@ -58,7 +58,7 @@ public class AppSettings
     public bool ShowFavorites { get; set; }               // Favoriten-Menü in der Symbolleiste (Strg+D merkt die Datei); Standard aus
     public bool DarkViewer { get; set; }                  // Anzeigehintergrund dunkel (WebView2 PreferredColorScheme = Dark); Standard hell
     public bool AdobeEmbedEnabled { get; set; }           // Zustimmung zur optionalen Adobe-Ansicht (Einstellungen → Adobe PDF Embed API); Standard aus – erst dann geht etwas zu Adobe
-    public bool AdobeEmbedButton { get; set; } = true;    // Schaltfläche „Adobe“ in der Symbolleiste (nur mit AdobeEmbedEnabled); ohne sie bleibt F8
+    public bool AdobeEmbedButton { get; set; } = true;    // Schaltfläche „Adobe“ mit Symbol und Text, sonst nur Symbol (sichtbar ist sie mit AdobeEmbedEnabled immer; bis 26.09.2026: ein/aus)
     public bool ExperimentalFeatures { get; set; }        // ohne Wirkung seit 20.09.2026 (der Lesezeichen-Editor ist regulär); bleibt, damit vorhandene settings.json unverändert lesbar sind
     public string AnnotationBorderColor { get; set; } = "808080"; // Textanmerkung: zuletzt gewählte Rahmenfarbe als RRGGBB, leer = kein Rahmen
     public string AnnotationBackground { get; set; } = "FFFFCC"; // Textanmerkung: zuletzt gewählter Hintergrund als RRGGBB, leer = transparent

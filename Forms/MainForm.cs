@@ -1021,7 +1021,7 @@ public partial class MainForm : Form
         Set(ddbEdit, ToolbarIcons.Edit);
         Set(ddbPrograms, ToolbarIcons.AllApps);
         Set(ddbFavorites, ToolbarIcons.Favorite);
-        Set(btnAdobe, ToolbarIcons.Highlight);
+        Set(btnAdobe, ToolbarIcons.Highlight, imageOnly: !settings.AdobeEmbedButton); // Option „mit Symbol und Text“; ohne Symbole bleibt es beim Text
         Set(btnShowInFolder, ToolbarIcons.FolderOpen);
         Set(btnSettings, ToolbarIcons.Settings);
         Set(ddbInfo, ToolbarIcons.Help, imageOnly: true);
@@ -2131,10 +2131,11 @@ public partial class MainForm : Form
     /// Kennwort) – dieselbe Sperre wie für die übrigen Bearbeitungsfunktionen, denn „Speichern“ schreibt Adobes Anmerkungen in die Datei.</summary>
     private bool AdobeViewAllowed => settings.AdobeEmbedEnabled && currentFile != null && !EditLocked;
 
-    /// <summary>Schaltfläche „Adobe“ samt Trenner nur mit Zustimmung und Option; F8 geht auch ohne Schaltfläche.</summary>
+    /// <summary>Schaltfläche „Adobe“ samt Trenner, sobald die Adobe-Ansicht freigegeben ist – ganz ausblenden lässt sie sich nicht mehr
+    /// (Wunsch vom 26.09.2026: nicht anwenderfreundlich); die Option wählt nur Symbol mit Text oder nur Symbol (s. ApplyToolbarIcons).</summary>
     private void ApplyAdobeOption()
     {
-        btnAdobe.Visible = toolStripSeparator17.Visible = settings.AdobeEmbedEnabled && settings.AdobeEmbedButton;
+        btnAdobe.Visible = toolStripSeparator17.Visible = settings.AdobeEmbedEnabled;
     }
 
     /// <summary>F8 und Schaltfläche „Adobe“: zwischen dem Chromium-Viewer und der Adobe-Ansicht wechseln.</summary>
