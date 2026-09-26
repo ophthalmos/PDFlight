@@ -666,7 +666,8 @@ Adobe receives your IP address and technical details about the browser, stores c
   <data name="Adobe-Client-ID fehlt: Datei adobe-clientid.txt neben PDFlight.exe anlegen – bis dahin bleibt die Ansicht gesperrt." xml:space="preserve"><value>Adobe client ID missing: create the file adobe-clientid.txt next to PDFlight.exe – until then the view stays locked.</value></data>
   <data name="Der Browser konnte nicht geöffnet werden." xml:space="preserve"><value>The browser could not be opened.</value></data>
   <data name="Tooltip.Adobe" xml:space="preserve"><value>Display with the Adobe PDF Embed API on/off (F8)
-for highlighting and commenting; save via the Adobe toolbar</value></data>
+for highlighting and commenting;
+save via the Adobe toolbar</value></data>
   <data name="Ungespeicherte Änderungen in der Adobe-Ansicht" xml:space="preserve"><value>Unsaved changes in the Adobe view</value></data>
   <data name="Speichere Hervorhebungen und Kommentare zuerst mit „Speichern“ in der Adobe-Leiste. Beim Verlassen der Ansicht gehen sie sonst verloren." xml:space="preserve"><value>Save highlights and comments first with “Save” in the Adobe toolbar. Otherwise they are lost when you leave the view.</value></data>
   <data name="Zurück zur Adobe-Ansicht" xml:space="preserve"><value>Back to the Adobe view</value></data>
