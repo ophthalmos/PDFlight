@@ -8,7 +8,10 @@ public partial class StampPaletteForm : Form
     private readonly IReadOnlyList<Stamp> stamps;
 
     /// <summary>True, wenn „Stempel bearbeiten“ gedrückt wurde: Der Aufrufer öffnet die Verwaltung; der Einfügevorgang ist damit beendet.</summary>
-    public bool ManageRequested { get; private set; }
+    public bool ManageRequested
+    {
+        get; private set;
+    }
 
     /// <summary>Der gewählte Stempel, nach OK gesetzt.</summary>
     public Stamp? SelectedStamp => listStamps.SelectedIndex >= 0 && listStamps.SelectedIndex < stamps.Count ? stamps[listStamps.SelectedIndex] : null;
@@ -53,9 +56,9 @@ internal static class StampListPainter
         var previewHeight = e.Bounds.Height - 10;
         Rectangle preview = new(e.Bounds.X + 6, e.Bounds.Y + 5, e.Bounds.Width / 2, previewHeight);
         stamp.DrawPreview(e.Graphics, preview);
-        var textColor = SystemColors.GrayText;
         var info = $"{stamp.FontSize:0.#} pt · {Lng.T(Stamp.PositionNames[(int)stamp.Position])}";
-        TextRenderer.DrawText(e.Graphics, info, font, new Rectangle(preview.Right + 8, e.Bounds.Y, e.Bounds.Right - preview.Right - 10, e.Bounds.Height), textColor, TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.EndEllipsis);
+        using Font infoFont = new(font.FontFamily, font.Size + 2f, font.Style, font.Unit); // zwei Punkt größer als die Dialogschrift – die Angabe ist sonst neben der Vorschau zu klein
+        TextRenderer.DrawText(e.Graphics, info, infoFont, new Rectangle(preview.Right + 8, e.Bounds.Y, e.Bounds.Right - preview.Right - 10, e.Bounds.Height), SystemColors.GrayText, TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.EndEllipsis);
         if (selected && (e.State & DrawItemState.Focus) != 0) { ControlPaint.DrawFocusRectangle(e.Graphics, e.Bounds); }
     }
 
