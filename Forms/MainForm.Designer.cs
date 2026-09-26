@@ -80,6 +80,8 @@
             mnuFavoriteCleanup = new ToolStripMenuItem();
             toolStripSeparator13 = new ToolStripSeparator();
             toolStripSeparator12 = new ToolStripSeparator();
+            btnAdobe = new ToolStripButton();
+            toolStripSeparator17 = new ToolStripSeparator();
             ddbPrograms = new ToolStripDropDownButton();
             toolStripSeparator5 = new ToolStripSeparator();
             ddbInfo = new ToolStripDropDownButton();
@@ -124,7 +126,7 @@
             // toolStrip
             // 
             toolStrip.GripStyle = ToolStripGripStyle.Hidden;
-            toolStrip.Items.AddRange(new ToolStripItem[] { btnOpen, toolStripSeparator1, btnPrev, btnNext, toolStripSeparator2, splitButtonMove, btnCopy, toolStripSeparator3, btnRename, btnDelete, btnShowInFolder, toolStripSeparator8, btnPrint, btnEmail, toolStripSeparator4, ddbEdit, toolStripSeparator9, ddbFavorites, toolStripSeparator12, ddbPrograms, toolStripSeparator5, ddbInfo, btnSettings });
+            toolStrip.Items.AddRange(new ToolStripItem[] { btnOpen, toolStripSeparator1, btnPrev, btnNext, toolStripSeparator2, splitButtonMove, btnCopy, toolStripSeparator3, btnRename, btnDelete, btnShowInFolder, toolStripSeparator8, btnPrint, btnEmail, toolStripSeparator4, ddbEdit, toolStripSeparator9, ddbFavorites, toolStripSeparator12, btnAdobe, toolStripSeparator17, ddbPrograms, toolStripSeparator5, ddbInfo, btnSettings });
             toolStrip.Location = new Point(0, 0);
             toolStrip.Name = "toolStrip";
             toolStrip.Size = new Size(984, 25);
@@ -486,9 +488,26 @@
             toolStripSeparator12.Name = "toolStripSeparator12";
             toolStripSeparator12.Size = new Size(6, 25);
             toolStripSeparator12.Visible = false;
-            // 
+            //
+            // btnAdobe
+            //
+            btnAdobe.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            btnAdobe.Enabled = false;
+            btnAdobe.Name = "btnAdobe";
+            btnAdobe.Size = new Size(44, 22);
+            btnAdobe.Text = "Adobe";
+            btnAdobe.ToolTipText = "Anzeige mit der Adobe PDF Embed API ein/aus (F8)\r\nzum Hervorheben und Kommentieren; Speichern über die Adobe-Leiste";
+            btnAdobe.Visible = false;
+            btnAdobe.Click += BtnAdobe_Click;
+            //
+            // toolStripSeparator17
+            //
+            toolStripSeparator17.Name = "toolStripSeparator17";
+            toolStripSeparator17.Size = new Size(6, 25);
+            toolStripSeparator17.Visible = false;
+            //
             // ddbPrograms
-            // 
+            //
             ddbPrograms.DisplayStyle = ToolStripItemDisplayStyle.Text;
             ddbPrograms.Name = "ddbPrograms";
             ddbPrograms.Size = new Size(83, 22);
@@ -713,6 +732,8 @@
         private System.Windows.Forms.ToolStripDropDownButton ddbPrograms;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator12;
+        private System.Windows.Forms.ToolStripButton btnAdobe;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator17;
         private System.Windows.Forms.ToolStripDropDownButton ddbFavorites;
         private System.Windows.Forms.ToolStripMenuItem mnuFavoriteAdd;
         private System.Windows.Forms.ToolStripMenuItem mnuFavoriteRemove;

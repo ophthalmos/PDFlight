@@ -9,6 +9,7 @@ public partial class SettingsForm : Form
     public const int TabGeneral = 0;
     public const int TabTargets = 1;
     public const int TabPrograms = 2;
+    public const int TabAdobe = 3;
 
     [System.ComponentModel.Browsable(false), System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
     public List<string> TargetFolders => [.. listTargets.Items.Cast<string>()];
@@ -64,6 +65,14 @@ public partial class SettingsForm : Form
     /// <summary>Anzeigehintergrund dunkel (Fläche und Leiste des PDF-Viewers).</summary>
     public bool DarkViewer => rbBackgroundDark.Checked;
 
+    /// <summary>Zustimmung zur optionalen Adobe-Ansicht (Adobe PDF Embed API, Seite „Adobe PDF Embed API“); Standard aus.</summary>
+    [System.ComponentModel.Browsable(false)]
+    public bool AdobeEmbedEnabled => cbAdobeEnabled.Checked;
+
+    /// <summary>Schaltfläche „Adobe“ in der Symbolleiste (nur mit Zustimmung wirksam; F8 geht auch ohne).</summary>
+    [System.ComponentModel.Browsable(false)]
+    public bool AdobeEmbedButton => cbAdobeButton.Checked;
+
     [System.ComponentModel.Browsable(false)]
     public int MaxRecentFiles => (int)numMaxRecentFiles.Value; // 0 = kein Verlauf im Öffnen-Menü
 
@@ -92,12 +101,48 @@ public partial class SettingsForm : Form
         cbShowFavorites.Checked = source.ShowFavorites;
         rbBackgroundDark.Checked = source.DarkViewer;
         rbBackgroundLight.Checked = !source.DarkViewer;
+        labelAdobeText.Text = Lng.T("Adobe.Consent", labelAdobeText.Text); // mehrzeilig → expliziter Schlüssel (wie die Tooltips des Hauptfensters)
+        cbAdobeEnabled.Checked = source.AdobeEmbedEnabled;
+        cbAdobeButton.Checked = source.AdobeEmbedButton;
+        cbAdobeButton.Enabled = cbAdobeEnabled.Checked;
+        labelAdobeClientId.Text = AdobeEmbed.IsAvailable
+            ? Lng.T("Adobe-Client-ID gefunden (adobe-clientid.txt).")
+            : Lng.T("Adobe-Client-ID fehlt: Datei adobe-clientid.txt neben PDFlight.exe anlegen – bis dahin bleibt die Ansicht gesperrt.");
+        LayoutAdobeTab();
         numMaxRecentFiles.Value = Math.Clamp(source.MaxRecentFiles, (int)numMaxRecentFiles.Minimum, (int)numMaxRecentFiles.Maximum);
         if (listTargets.Items.Count > 0) { listTargets.SelectedIndex = 0; }
         if (listPrograms.Items.Count > 0) { listPrograms.SelectedIndex = 0; }
         tabControl.SelectedIndex = Math.Clamp(initialTab, 0, tabControl.TabCount - 1);
         UpdateTargetButtons();
         UpdateProgramButtons();
+    }
+
+    // ------------------------------------------------------------------ Adobe PDF Embed API
+
+    /// <summary>Der Zustimmungstext ist je nach Sprache und Dialogbreite unterschiedlich hoch – die Höhe wird gemessen, Link,
+    /// Häkchen und Client-ID-Zeile rücken nach (das kann der Designer nicht; er hält nur die Vorgabe für Deutsch bei 488 px).</summary>
+    private void LayoutAdobeTab()
+    {
+        var height = TextRenderer.MeasureText(labelAdobeText.Text, labelAdobeText.Font, new Size(labelAdobeText.Width, 0), TextFormatFlags.WordBreak).Height;
+        labelAdobeText.Height = height + LogicalToDeviceUnits(4);
+        var gap = LogicalToDeviceUnits(6);
+        linkAdobePrivacy.Top = labelAdobeText.Bottom + gap;
+        cbAdobeEnabled.Top = linkAdobePrivacy.Bottom + gap;
+        cbAdobeButton.Top = cbAdobeEnabled.Bottom + gap;
+        labelAdobeClientId.Top = cbAdobeButton.Bottom + gap;
+    }
+
+    private void TabAdobe_Resize(object? sender, EventArgs e) { LayoutAdobeTab(); }
+
+    private void CbAdobeEnabled_CheckedChanged(object? sender, EventArgs e) { cbAdobeButton.Enabled = cbAdobeEnabled.Checked; }
+
+    private void LinkAdobePrivacy_LinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
+    {
+        try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(AdobeEmbed.PrivacyUrl) { UseShellExecute = true }); }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
+        {
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Der Browser konnte nicht geöffnet werden."), ex);
+        }
     }
 
     // ------------------------------------------------------------------ gemeinsame Listenhelfer

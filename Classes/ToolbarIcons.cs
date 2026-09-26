@@ -48,6 +48,8 @@ internal static class ToolbarIcons
     public const char Favorite = '\uE734';     // FavoriteStar: Favoriten-Menü und Hinzufügen-Eintrag
     public const char Bookmarks = '\uE8A4';    // Lesezeichen entfernen (Bearbeiten-Menü)
 
+    public const char Highlight = '';    // Textmarker: Schaltfläche „Adobe“ (optionale Ansicht zum Hervorheben)
+
     private const string FontName = "Segoe MDL2 Assets";
     private static readonly Dictionary<(char Glyph, int Size), Image> cache = [];
 

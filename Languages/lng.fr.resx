@@ -656,4 +656,36 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Entfernen der Einschränkungen" xml:space="preserve"><value>Suppression des restrictions</value></data>
   <data name="Die Einschränkungen wurden entfernt." xml:space="preserve"><value>Les restrictions ont été supprimées.</value></data>
   <data name="Zum Bearbeiten hebst du den Schutz zuerst über Bearbeiten → „Einschränkungen entfernen …“ auf." xml:space="preserve"><value>Pour le modifier, supprime d’abord la protection via Modifier → « Supprimer les restrictions… ».</value></data>
+  <data name="Adobe.Consent" xml:space="preserve"><value>L'API Adobe PDF Embed est un service web d'Adobe pour l'affichage de documents PDF. Elle comprend des outils de texte interactifs comme le surlignage et les commentaires, qui ne sont pas possibles dans l'affichage normal de PDFlight pour des raisons techniques. Si tu as besoin de ces fonctions, tu peux activer ici cet affichage optionnel. L'activation ajoute à la barre principale un bouton pour l'allumer et l'éteindre. La touche F8 permet de passer rapidement d'un affichage à l'autre.
+
+Adobe reçoit alors ton adresse IP et des informations techniques sur le navigateur, enregistre des cookies et vérifie la licence du programme. Le fichier PDF lui-même n'est affiché que sur ton appareil et n'est pas transféré. PDFlight n'envoie pas le journal d'utilisation d'Adobe.</value></data>
+  <data name="Datenschutzerklärung von Adobe" xml:space="preserve"><value>Politique de confidentialité d'Adobe</value></data>
+  <data name="Ich bin damit &amp;einverstanden und möchte PDF Embed API nutzen" xml:space="preserve"><value>J'&amp;accepte et je souhaite utiliser l'API PDF Embed</value></data>
+  <data name="Schaltfläche „Adobe“ in der Hauptmenüleiste an&amp;zeigen" xml:space="preserve"><value>Afficher le &amp;bouton « Adobe » dans la barre principale</value></data>
+  <data name="Adobe-Client-ID gefunden (adobe-clientid.txt)." xml:space="preserve"><value>ID client Adobe trouvé (adobe-clientid.txt).</value></data>
+  <data name="Adobe-Client-ID fehlt: Datei adobe-clientid.txt neben PDFlight.exe anlegen – bis dahin bleibt die Ansicht gesperrt." xml:space="preserve"><value>ID client Adobe manquant : crée le fichier adobe-clientid.txt à côté de PDFlight.exe – d'ici là, l'affichage reste verrouillé.</value></data>
+  <data name="Der Browser konnte nicht geöffnet werden." xml:space="preserve"><value>Le navigateur n'a pas pu être ouvert.</value></data>
+  <data name="Tooltip.Adobe" xml:space="preserve"><value>Affichage avec l'API Adobe PDF Embed activé/désactivé (F8)
+pour surligner et commenter ; enregistrement via la barre Adobe</value></data>
+  <data name="Ungespeicherte Änderungen in der Adobe-Ansicht" xml:space="preserve"><value>Modifications non enregistrées dans l'affichage Adobe</value></data>
+  <data name="Speichere Hervorhebungen und Kommentare zuerst mit „Speichern“ in der Adobe-Leiste. Beim Verlassen der Ansicht gehen sie sonst verloren." xml:space="preserve"><value>Enregistre d'abord les surlignages et commentaires avec « Enregistrer » dans la barre Adobe. Sinon, ils seront perdus en quittant l'affichage.</value></data>
+  <data name="Zurück zur Adobe-Ansicht" xml:space="preserve"><value>Retour à l'affichage Adobe</value></data>
+  <data name="Verwerfen" xml:space="preserve"><value>Abandonner</value></data>
+  <data name="Speichern der Adobe-Anmerkungen" xml:space="preserve"><value>Enregistrement des annotations Adobe</value></data>
+  <data name="Adobe-Ansicht wird geladen …" xml:space="preserve"><value>Chargement de l'affichage Adobe …</value></data>
+  <data name="Das Adobe-SDK ist nicht erreichbar (Internetverbindung?)" xml:space="preserve"><value>Le SDK Adobe n'est pas accessible (connexion Internet ?)</value></data>
+  <data name="Die Anmerkungen aus der Adobe-Ansicht wurden gespeichert." xml:space="preserve"><value>Les annotations de l'affichage Adobe ont été enregistrées.</value></data>
+  <data name="Fehler in der Adobe-Ansicht: {0}" xml:space="preserve"><value>Erreur dans l'affichage Adobe : {0}</value></data>
+  <data name="Adobe-Client-ID fehlt" xml:space="preserve"><value>ID client Adobe manquant</value></data>
+  <data name="Lege neben PDFlight.exe die Datei „adobe-clientid.txt“ mit der Client-ID der Adobe PDF Embed API an (Vorlage: adobe-clientid.example.txt)." xml:space="preserve"><value>Crée à côté de PDFlight.exe le fichier « adobe-clientid.txt » avec l'ID client de l'API Adobe PDF Embed (modèle : adobe-clientid.example.txt).</value></data>
+  <data name="Adobe-Ansicht ein/aus (Option: Hervorheben und Kommentieren)" xml:space="preserve"><value>Affichage Adobe activé/désactivé (option : surligner et commenter)</value></data>
+  <data name="Formular speichern" xml:space="preserve"><value>Enregistrer le formulaire</value></data>
+  <data name="Die Formulareingaben wurden gespeichert." xml:space="preserve"><value>Les saisies du formulaire ont été enregistrées.</value></data>
+  <data name="Die Formulareingaben konnten nicht gespeichert werden." xml:space="preserve"><value>Les saisies du formulaire n'ont pas pu être enregistrées.</value></data>
+  <data name="Der Viewer hat die Datei nicht geliefert. Versuche es über die Speichern-Schaltfläche in der Viewer-Leiste." xml:space="preserve"><value>L'afficheur n'a pas fourni le fichier. Essaie avec le bouton Enregistrer de la barre de l'afficheur.</value></data>
+  <data name="Nicht speichern" xml:space="preserve"><value>Ne pas enregistrer</value></data>
+  <data name="Die ausgefüllten Formularfelder sind noch nicht in der Datei gespeichert." xml:space="preserve"><value>Les champs de formulaire remplis ne sont pas encore enregistrés dans le fichier.</value></data>
+  <data name="Die Datei ist als PDF/A gekennzeichnet – nach dem Speichern entspricht sie dem Standard nicht mehr." xml:space="preserve"><value>Le fichier est marqué PDF/A – après l'enregistrement, il ne sera plus conforme à la norme.</value></data>
+  <data name="Formulareingaben in „{0}“ speichern?" xml:space="preserve"><value>Enregistrer les saisies du formulaire dans « {0} » ?</value></data>
+  <data name="Der Speichern-Dialog des Viewers ist offen. Speichere die Datei dort unter ihrem bisherigen Namen – PDFlight übernimmt sie danach." xml:space="preserve"><value>La boîte de dialogue d'enregistrement de l'afficheur est ouverte. Enregistre le fichier là sous son nom actuel – PDFlight le reprendra ensuite.</value></data>
 </root>

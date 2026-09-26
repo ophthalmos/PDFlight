@@ -67,6 +67,12 @@
             btnProgramSort = new Button();
             labelProgramStatus = new Label();
             labelProgramHint = new Label();
+            tabAdobe = new TabPage();
+            labelAdobeText = new Label();
+            linkAdobePrivacy = new LinkLabel();
+            cbAdobeEnabled = new CheckBox();
+            cbAdobeButton = new CheckBox();
+            labelAdobeClientId = new Label();
             buttonOK = new Button();
             buttonCancel = new Button();
             panelButtons = new Panel();
@@ -75,6 +81,7 @@
             ((System.ComponentModel.ISupportInitialize)numMaxRecentFiles).BeginInit();
             tabTargets.SuspendLayout();
             tabPrograms.SuspendLayout();
+            tabAdobe.SuspendLayout();
             panelButtons.SuspendLayout();
             SuspendLayout();
             // 
@@ -83,6 +90,7 @@
             tabControl.Controls.Add(tabGeneral);
             tabControl.Controls.Add(tabTargets);
             tabControl.Controls.Add(tabPrograms);
+            tabControl.Controls.Add(tabAdobe);
             tabControl.Dock = DockStyle.Fill;
             tabControl.Location = new Point(0, 0);
             tabControl.Name = "tabControl";
@@ -503,9 +511,78 @@
             labelProgramHint.Size = new Size(472, 19);
             labelProgramHint.TabIndex = 7;
             labelProgramHint.Text = "Die Reihenfolge bestimmt die Tastenkürzel Strg+1 bis Strg+9 im Programme-Menü.";
-            // 
+            //
+            // tabAdobe
+            //
+            tabAdobe.Controls.Add(labelAdobeText);
+            tabAdobe.Controls.Add(linkAdobePrivacy);
+            tabAdobe.Controls.Add(cbAdobeEnabled);
+            tabAdobe.Controls.Add(cbAdobeButton);
+            tabAdobe.Controls.Add(labelAdobeClientId);
+            tabAdobe.Location = new Point(4, 24);
+            tabAdobe.Name = "tabAdobe";
+            tabAdobe.Padding = new Padding(3);
+            tabAdobe.Size = new Size(480, 298);
+            tabAdobe.TabIndex = 3;
+            tabAdobe.Text = "Adobe PDF Embed API";
+            tabAdobe.UseVisualStyleBackColor = true;
+            tabAdobe.Resize += TabAdobe_Resize;
+            //
+            // labelAdobeText
+            //
+            labelAdobeText.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            labelAdobeText.Location = new Point(8, 8);
+            labelAdobeText.Name = "labelAdobeText";
+            labelAdobeText.Size = new Size(464, 180);
+            labelAdobeText.TabIndex = 0;
+            labelAdobeText.Text = "Die Adobe PDF Embed API ist ein Webservice von Adobe zur Anzeige von PDF-Dokumenten. Sie beinhaltet interaktive Textwerkzeuge wie Hervorhebungen und Kommentare, die aus technischen Gründen in der normalen PDFlight-Ansicht nicht möglich sind. Wenn diese Funktionen benötigt werden, kannst du diese optionale Ansicht hier aktivieren. Durch die Aktivierung wird ein zusätzlicher Button zum Ein- und Ausschalten in der Hauptmenüleiste angezeigt. Ein schneller Wechsel zwischen den Ansichten gelingt mit der F8-Taste.\r\n\r\nAdobe erhält dabei deine IP-Adresse sowie technische Angaben zum Browser, speichert Cookies und prüft die Lizenz des Programms. Die PDF-Datei selbst wird nur auf deinem Gerät angezeigt und nicht hochgeladen. Adobes Nutzungsprotokoll schickt PDFlight nicht ab.";
+            //
+            // linkAdobePrivacy
+            //
+            linkAdobePrivacy.AutoSize = true;
+            linkAdobePrivacy.Location = new Point(8, 194);
+            linkAdobePrivacy.Name = "linkAdobePrivacy";
+            linkAdobePrivacy.Size = new Size(176, 15);
+            linkAdobePrivacy.TabIndex = 1;
+            linkAdobePrivacy.TabStop = true;
+            linkAdobePrivacy.Text = "Datenschutzerklärung von Adobe";
+            linkAdobePrivacy.LinkClicked += LinkAdobePrivacy_LinkClicked;
+            //
+            // cbAdobeEnabled
+            //
+            cbAdobeEnabled.AutoSize = true;
+            cbAdobeEnabled.Location = new Point(11, 217);
+            cbAdobeEnabled.Name = "cbAdobeEnabled";
+            cbAdobeEnabled.Size = new Size(372, 19);
+            cbAdobeEnabled.TabIndex = 2;
+            cbAdobeEnabled.Text = "Ich bin damit &einverstanden und möchte PDF Embed API nutzen";
+            cbAdobeEnabled.UseVisualStyleBackColor = true;
+            cbAdobeEnabled.CheckedChanged += CbAdobeEnabled_CheckedChanged;
+            //
+            // cbAdobeButton
+            //
+            cbAdobeButton.AutoSize = true;
+            cbAdobeButton.Checked = true;
+            cbAdobeButton.CheckState = CheckState.Checked;
+            cbAdobeButton.Enabled = false;
+            cbAdobeButton.Location = new Point(30, 242);
+            cbAdobeButton.Name = "cbAdobeButton";
+            cbAdobeButton.Size = new Size(316, 19);
+            cbAdobeButton.TabIndex = 3;
+            cbAdobeButton.Text = "Schaltfläche „Adobe“ in der Hauptmenüleiste an&zeigen";
+            cbAdobeButton.UseVisualStyleBackColor = true;
+            //
+            // labelAdobeClientId
+            //
+            labelAdobeClientId.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            labelAdobeClientId.ForeColor = SystemColors.GrayText;
+            labelAdobeClientId.Location = new Point(8, 268);
+            labelAdobeClientId.Name = "labelAdobeClientId";
+            labelAdobeClientId.Size = new Size(464, 28);
+            labelAdobeClientId.TabIndex = 4;
+            //
             // buttonOK
-            // 
+            //
             buttonOK.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             buttonOK.DialogResult = DialogResult.OK;
             buttonOK.Location = new Point(207, 6);
@@ -560,6 +637,8 @@
             ((System.ComponentModel.ISupportInitialize)numMaxRecentFiles).EndInit();
             tabTargets.ResumeLayout(false);
             tabPrograms.ResumeLayout(false);
+            tabAdobe.ResumeLayout(false);
+            tabAdobe.PerformLayout();
             panelButtons.ResumeLayout(false);
             ResumeLayout(false);
         }
@@ -605,6 +684,12 @@
         private System.Windows.Forms.CheckBox cbReopenLast;
         private System.Windows.Forms.CheckBox cbFullPathTitle;
         private System.Windows.Forms.CheckBox cbShowFavorites;
+        private System.Windows.Forms.TabPage tabAdobe;
+        private System.Windows.Forms.Label labelAdobeText;
+        private System.Windows.Forms.LinkLabel linkAdobePrivacy;
+        private System.Windows.Forms.CheckBox cbAdobeEnabled;
+        private System.Windows.Forms.CheckBox cbAdobeButton;
+        private System.Windows.Forms.Label labelAdobeClientId;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
     }

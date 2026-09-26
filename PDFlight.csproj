@@ -34,6 +34,10 @@
     <Using Include="System.IO" />
     <None Include="pdffile.ico" CopyToOutputDirectory="PreserveNewest" /><!-- Explorer-Dateisymbol, s. ShellUtil.RegisterFileType -->
     <Using Include="System.Net.Http" />
+    <!-- Optionale Adobe-Ansicht (Classes\AdobeEmbed.cs): die Seite, die das Adobe-SDK einbettet, und die Client-ID (git-ignoriert;
+         fehlt sie, bleibt die Ansicht gesperrt). Der Installer nimmt beides aus dem Release-Ordner mit. -->
+    <None Include="adobe\**" CopyToOutputDirectory="PreserveNewest" LinkBase="adobe" />
+    <None Include="adobe-clientid.txt" CopyToOutputDirectory="PreserveNewest" Condition="Exists('adobe-clientid.txt')" />
   </ItemGroup>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />

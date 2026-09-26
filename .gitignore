@@ -15,3 +15,7 @@ PDFlightSetup.exe
 # Persönliche Claude-Code-Einstellungen (nicht auf GitHub)
 .claude/settings.local.json
 /BookmarkEditor.pdf
+/Kennwortschutz.pdf
+
+# Adobe-Client-ID bleibt privat (Vorlage: adobe-clientid.example.txt)
+adobe-clientid.txt

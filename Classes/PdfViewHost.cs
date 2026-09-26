@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text.Json;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
@@ -85,14 +86,22 @@ internal partial class PdfViewHost(WebView2 webView)
         core.Settings.IsGeneralAutofillEnabled = false;
         core.Settings.IsPasswordAutosaveEnabled = false;
         core.Settings.IsReputationCheckingRequired = false; // SmartScreen aus: PDFlight zeigt nur lokale Dateien, nichts geht zur Prüfung an Microsoft
+        core.Settings.AreDefaultScriptDialogsEnabled = false; // s. Core_ScriptDialogOpening
+        core.ScriptDialogOpening += Core_ScriptDialogOpening;
         core.Profile.PreferredColorScheme = darkScheme ? CoreWebView2PreferredColorScheme.Dark : CoreWebView2PreferredColorScheme.Light; // Anzeigehintergrund (Einstellungen), nie „Auto“ – sonst hinge er am Windows-Design
-        core.Settings.HiddenPdfToolbarItems = CoreWebView2PdfToolbarItems.Save | CoreWebView2PdfToolbarItems.SaveAs // Speichern übernimmt PDFlight selbst
-            | CoreWebView2PdfToolbarItems.FullScreen // der Chromium-Vollbildmodus ist im Host-Fenster kaum beendbar → PDFlight bietet stattdessen F11
+        // Save/SaveAs bleiben sichtbar: Die Save-Schaltfläche des Viewers ist der einzige Weg, ausgefüllte Formularfelder aus dem Viewer
+        // herauszubekommen (s. Abschnitt Formularfelder) – ihr Download landet nicht in der Download-Leiste, sondern in der angezeigten Datei
+        core.Settings.HiddenPdfToolbarItems = CoreWebView2PdfToolbarItems.FullScreen // der Chromium-Vollbildmodus ist im Host-Fenster kaum beendbar → PDFlight bietet stattdessen F11
             | CoreWebView2PdfToolbarItems.Print; // Drucken sitzt in der Hauptmenüleiste — die Viewer-Leiste bleibt den Ansichts-Funktionen vorbehalten
+        core.DownloadStarting += Core_DownloadStarting;
         core.AddWebResourceRequestedFilter("https://" + VirtualHost + "/*", CoreWebView2WebResourceContext.All);
+        // Optionale Adobe-Ansicht (s. AdobeEmbed): die Seite mit dem SDK unter ihrem eigenen Ursprung, Adobes Nutzungsprotokoll aus allen
+        // Frames abgefangen. Ohne Zustimmung und Knopfdruck wird die Seite nie geladen – bis dahin geht nichts zu Adobe.
+        if (Directory.Exists(AdobeEmbed.PageFolder)) { core.SetVirtualHostNameToFolderMapping(AdobeEmbed.Host, AdobeEmbed.PageFolder, CoreWebView2HostResourceAccessKind.Allow); }
+        core.AddWebResourceRequestedFilter(AdobeEmbed.BlockedLogUrl + "*", CoreWebView2WebResourceContext.All, CoreWebView2WebResourceRequestSourceKinds.All);
         core.WebResourceRequested += Core_WebResourceRequested;
         core.NavigationStarting += Core_NavigationStarting;
-        core.NavigationCompleted += (s, e) => { if (startCover != null) { RemoveStartCoverLater(); } twoPageActive = false; documentLoaded?.TrySetResult(); RequestZoomUpdate(); }; // jedes Dokumentladen startet im einseitigen Viewer-Standard
+        core.NavigationCompleted += Core_NavigationCompleted;
         core.NewWindowRequested += Core_NewWindowRequested;
         core.WebMessageReceived += Core_WebMessageReceived; // Drop-Meldungen der Leerseite
         webView.AllowExternalDrop = true; // Drops aufs Dokument landen als file://-Navigation in Core_NavigationStarting
@@ -102,9 +111,30 @@ internal partial class PdfViewHost(WebView2 webView)
         WarmUpAutomation(); // Chromiums Accessibility-Baum schon jetzt aktivieren, nicht erst beim ersten Strg+Entf
     }
 
+    private void Core_NavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
+    {
+        if (startCover != null) { RemoveStartCoverLater(); }
+        twoPageActive = false; // jedes Dokumentladen startet im einseitigen Viewer-Standard
+        documentLoaded?.TrySetResult();
+        if (AdobeActive) { PostAdobeFile(); } else { RequestZoomUpdate(); ArmFormEventsLater(); } // die Adobe-Seite steht: jetzt die Datei hinüberreichen
+    }
+
+    /// <summary>JavaScript-Dialoge des WebView: Die Adobe-Seite meldet bei ungespeicherten Anmerkungen ein beforeunload, das Chromium als
+    /// „Website verlassen?“ zeigte und die Navigation anhielt (geprüft 26.09.2026) – die Rückfrage stellt PDFlight vorher selbst, also hier
+    /// durchwinken. alert/confirm/prompt kommen in PDFlights Seiten nicht vor; auch sie werden bestätigt, statt das WebView anzuhalten.</summary>
+    private void Core_ScriptDialogOpening(object? sender, CoreWebView2ScriptDialogOpeningEventArgs e)
+    {
+        e.Accept();
+    }
+
     /// <summary>Drop auf die Leerseite: deren Skript meldet die Dateien per postMessageWithAdditionalObjects mit echten Pfaden.</summary>
     private void Core_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
     {
+        if (AdobeActive && (e.Source ?? string.Empty).StartsWith("https://" + AdobeEmbed.Host + "/", StringComparison.OrdinalIgnoreCase))
+        {
+            HandleAdobeMessage(e.WebMessageAsJson); // JSON-Objekte – TryGetWebMessageAsString würde daran scheitern
+            return;
+        }
         if (e.AdditionalObjects == null)
         {
             if (e.TryGetWebMessageAsString() == "painted") { RemoveStartCover(); } // erstes Bild der Leerseite steht
@@ -139,6 +169,9 @@ internal partial class PdfViewHost(WebView2 webView)
 
     private void RaisePdfFileDropped(string path)
     {
+        // Die Save-Schaltfläche des Viewers navigiert nach dem Schreiben zur gespeicherten Datei (Chromium öffnet sie) – das ist kein Drop:
+        // PDFlight öffnete sonst seine eigene Temp-Datei in einem zweiten Fenster (geprüft 26.09.2026)
+        if (path.StartsWith(FormTempFolder, StringComparison.OrdinalIgnoreCase)) { return; }
         // nicht innerhalb eines WebView2-Ereignisses neu navigieren → entkoppeln
         webView.BeginInvoke(new Action(() => PdfFileDropped?.Invoke(this, path)));
     }
@@ -149,7 +182,8 @@ internal partial class PdfViewHost(WebView2 webView)
         var uri = e.Uri ?? string.Empty;
         if (uri.StartsWith("https://" + VirtualHost + "/", StringComparison.OrdinalIgnoreCase)
             || uri.StartsWith("about:", StringComparison.OrdinalIgnoreCase)
-            || uri.StartsWith("data:", StringComparison.OrdinalIgnoreCase)) { return; }
+            || uri.StartsWith("data:", StringComparison.OrdinalIgnoreCase)
+            || (AdobeActive && uri.StartsWith("https://" + AdobeEmbed.Host + "/", StringComparison.OrdinalIgnoreCase))) { return; } // Adobes iframes sind keine Hauptnavigation
 
         e.Cancel = true;
         if (uri.StartsWith("file:", StringComparison.OrdinalIgnoreCase))
@@ -176,11 +210,17 @@ internal partial class PdfViewHost(WebView2 webView)
 
     /// <summary>Lädt die PDF-Datei in den Speicher und zeigt sie an; die Datei bleibt danach ungesperrt.
     /// Mit page &gt; 0 springt der Viewer direkt zu dieser Seite (z.B. nach dem Löschen von Seiten).</summary>
-    public void Load(string filePath, int page = 0)
+    public void Load(string filePath, int page = 0, int zoomPercent = 0)
     {
         documentLoaded = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        ResetAdobe(); // ein Dokumentladen beendet die Adobe-Ansicht (die Rückfrage bei ungespeicherten Anmerkungen stellt das Hauptfenster vorher)
+        ResetForm();  // und verwirft Formulareingaben des Viewers (das Hauptfenster hat sie vorher gespeichert oder nachgefragt)
         currentBytes = File.ReadAllBytes(filePath); // wirft IOException etc. → behandelt der Aufrufer
-        var fragment = page > 0 ? "#page=" + page : string.Empty;
+        // Öffnen-Parameter des Chromium-Viewers: page (1-basiert) und zoom (Prozent) – beide erst nach dem vollständigen Laden wirksam
+        var parameters = new List<string>();
+        if (page > 0) { parameters.Add("page=" + page); }
+        if (zoomPercent > 0) { parameters.Add("zoom=" + zoomPercent); pendingZoomPercent = zoomPercent; }
+        var fragment = parameters.Count > 0 ? "#" + string.Join("&", parameters) : string.Empty;
         webView.CoreWebView2.Navigate($"https://{VirtualHost}/{Uri.EscapeDataString(Path.GetFileName(filePath))}?t={DateTime.Now.Ticks}{fragment}");
     }
 
@@ -221,6 +261,8 @@ internal partial class PdfViewHost(WebView2 webView)
     public void CloseDocument()
     {
         currentBytes = null;
+        ResetAdobe();
+        ResetForm();
         if (IsReady) { ShowEmptyPage(); }
     }
 
@@ -285,7 +327,7 @@ internal partial class PdfViewHost(WebView2 webView)
     /// klappt das Seitenansicht-Menü per UIA auf und wählt den jeweils anderen Eintrag.</summary>
     public void ToggleLayout()
     {
-        if (!IsReady || currentBytes == null) { return; }
+        if (!IsReady || currentBytes == null || AdobeActive) { return; }
         var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
         if (chromium == IntPtr.Zero) { return; }
         var wantTwoPages = !twoPageActive;
@@ -366,7 +408,7 @@ internal partial class PdfViewHost(WebView2 webView)
     /// Hintergrund-Task am Chromium-Kindfenster.</summary>
     private void InvokeViewerButton(string automationId, int clicks)
     {
-        if (!IsReady || currentBytes == null) { return; }
+        if (!IsReady || currentBytes == null || AdobeActive) { return; }
         var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
         if (chromium == IntPtr.Zero) { return; }
         _ = Task.Run(() => InvokeButton(chromium, automationId, clicks));
@@ -419,9 +461,13 @@ internal partial class PdfViewHost(WebView2 webView)
     private double pageAreaPt;     // Fläche der ersten Seite in Punkt² (Referenz für 100 %); 0 = keine Anzeige
     private int zoomPercent;       // zuletzt gemeldete Zoomstufe (0 = unbekannt)
     private int zoomRequests;      // laufende Nummer, damit nur die jüngste Abfrage meldet
+    private int pendingZoomPercent; // Zoom-Parameter des letzten Load: Chromium wendet ihn erst nach dem Laden an, die Messung wartet darauf
 
     /// <summary>Zoomstufe des Viewers in Prozent – gemeldet auf dem UI-Thread nach jeder erkannten Änderung.</summary>
     public event EventHandler<int>? ZoomChanged;
+
+    /// <summary>Zuletzt gemessene Zoomstufe des Chromium-Viewers in Prozent (0 = unbekannt) – Startwert für die Adobe-Ansicht.</summary>
+    public int ZoomPercent => zoomPercent;
 
     /// <summary>Größe der ersten Seite in Punkt (aus der PDF-Datei) – die Referenz, aus der die Zoomstufe berechnet wird;
     /// vor dem Laden setzen. 0 schaltet die Anzeige ab (z.B. verschlüsselte Datei).</summary>
@@ -436,7 +482,7 @@ internal partial class PdfViewHost(WebView2 webView)
     /// sich der Wert geändert hat (höchstens ~1 s): ein einmaliges Nachfassen je Auslöser, kein laufender Timer.</summary>
     public void RequestZoomUpdate()
     {
-        if (!IsReady || currentBytes == null || pageAreaPt <= 0) { return; }
+        if (!IsReady || currentBytes == null || pageAreaPt <= 0 || AdobeActive) { return; } // in der Adobe-Ansicht gibt es keine Chromium-Zoomstufe
         var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
         if (chromium == IntPtr.Zero) { return; }
         EnsureZoomHook(chromium);
@@ -444,13 +490,15 @@ internal partial class PdfViewHost(WebView2 webView)
         var request = ++zoomRequests;
         var dpiScale = webView.DeviceDpi / 72.0;                 // Punkt → Gerätepixel bei 100 %
         var referenceArea = pageAreaPt * dpiScale * dpiScale;
+        var expected = pendingZoomPercent; // nach Load mit Zoom-Parameter: bis zu 3 s nachfassen, bis der Viewer ihn angewendet hat (sonst bliebe „100 %“ stehen)
+        pendingZoomPercent = 0;
         _ = Task.Run(() =>
         {
             var percent = 0;
-            for (var i = 0; i < 20; i++)
+            for (var i = 0; i < (expected > 0 ? 60 : 20); i++)
             {
                 percent = ReadZoomPercent(chromium, referenceArea);
-                if (percent > 0 && percent != previous) { break; }
+                if (percent > 0 && percent != previous && (expected == 0 || Math.Abs(percent - expected) <= 2)) { break; }
                 if (request != zoomRequests) { return; } // ein neuerer Auslöser übernimmt
                 Thread.Sleep(50);
             }
@@ -477,14 +525,27 @@ internal partial class PdfViewHost(WebView2 webView)
         };
         zoomHook = NativeMethods.SetWinEventHook(EVENT_OBJECT_LIVEREGIONCHANGED, EVENT_OBJECT_LIVEREGIONCHANGED, 0, zoomHookProc, browserProcess, 0, WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
         zoomHookWindow = zoomHook != 0 ? chromium : 0;
+        formHookProc ??= FormEventCallback; // dieselben Regeln: Referenz halten, nur der Browserprozess, gefiltert auf das Chromium-Fenster
+        foreach (var eventType in new[] { EVENT_OBJECT_SELECTION, EVENT_OBJECT_STATECHANGE, EVENT_OBJECT_VALUECHANGE }) // drei einzelne Hooks – ein Bereich schlösse LOCATIONCHANGE (Dauerfeuer) ein
+        {
+            var hook = NativeMethods.SetWinEventHook(eventType, eventType, 0, formHookProc, browserProcess, 0, WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
+            if (hook != 0) { formHooks.Add(hook); }
+        }
+        // Der „Speichern unter“-Dialog der Save-Schaltfläche (s. HandleSaveDialog) kommt nicht aus dem Browserprozess – Chromium zeigt
+        // Dateidialoge in einem eigenen Hilfsprozess –, deshalb ohne Prozessfilter; der Rückruf prüft den Besitzer des Dialogs
+        dialogHookProc ??= DialogEventCallback;
+        var dialogHook = NativeMethods.SetWinEventHook(EVENT_SYSTEM_DIALOGSTART, EVENT_SYSTEM_DIALOGSTART, 0, dialogHookProc, 0, 0, WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
+        if (dialogHook != 0) { formHooks.Add(dialogHook); }
     }
 
-    /// <summary>Löst den WinEvent-Hook (beim Beenden).</summary>
+    /// <summary>Löst die WinEvent-Hooks (beim Beenden und vor dem Neuanlegen).</summary>
     public void ReleaseZoomHook()
     {
         if (zoomHook != 0) { NativeMethods.UnhookWinEvent(zoomHook); }
         zoomHook = 0;
         zoomHookWindow = 0;
+        foreach (var hook in formHooks) { NativeMethods.UnhookWinEvent(hook); }
+        formHooks.Clear();
     }
 
     /// <summary>Zoomstufe aus der Fläche des ersten Seitenelements (erste Gruppe unter dem Dokument-Element) gegen die
@@ -524,6 +585,7 @@ internal partial class PdfViewHost(WebView2 webView)
     public int TryGetCurrentPage()
     {
         if (webView.CoreWebView2 == null) { return 0; }
+        if (AdobeActive) { return AdobePage; } // die Adobe-Seite meldet ihre Seite selbst; ihr Seitenfeld ist nicht das des Chromium-Viewers
         var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
         if (chromium == IntPtr.Zero) { return 0; }
         var task = Task.Run(() => ReadPageNumber(chromium));
@@ -565,7 +627,7 @@ internal partial class PdfViewHost(WebView2 webView)
     /// Zahl eintippen und Enter springt (die native Sprungfunktion des Viewers).</summary>
     public void FocusPageField()
     {
-        if (!IsReady || currentBytes == null) { return; }
+        if (!IsReady || currentBytes == null || AdobeActive) { return; }
         var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
         if (chromium == IntPtr.Zero) { return; }
         webView.Focus(); // Windows-Fokus zum Viewer, sonst landet die Eingabe woanders
@@ -642,6 +704,377 @@ internal partial class PdfViewHost(WebView2 webView)
     [System.Runtime.InteropServices.LibraryImport("user32.dll", EntryPoint = "GetClassNameW")]
     private static unsafe partial int GetClassName(IntPtr hWnd, char* buffer, int maxCount);
 
+    // ------------------------------------------------------------------ Formularfelder des Chromium-Viewers
+
+    // Der Chromium-Viewer füllt Formularfelder selbst aus (auch bei PDF/A – die Sperre kennt nur PDFlight), aber PDFlight erfuhr davon nichts:
+    // Keine WebView2-API meldet Änderungen, und die Save-Schaltfläche des Viewers war ausgeblendet (Fehlerbericht 26.09.2026). Deshalb:
+    // Erkennung über die MSAA-WinEvents VALUECHANGE/STATECHANGE/SELECTION des Chromium-Fensters (wie der Zoom-Hook), aufgelöst per
+    // AccessibleObjectFromEvent – ein Feld gilt als Formularfeld, wenn es unter dem verschachtelten PDF-Dokument liegt (mindestens zwei
+    // Dokument-Vorfahren; Seitenfeld und Zoomauswahl der Viewer-Leiste haben nur einen). Speichern geht nur über die Save-Schaltfläche des
+    // Viewers: Sie schreibt die PDF samt Feldwerten über einen „Speichern unter“-Dialog des Browserprozesses (chrome.fileSystem.chooseEntry –
+    // kein Download, DownloadStarting bleibt stumm; geprüft 26.09.2026). PDFlight fängt den Dialog per WinEvent DIALOGSTART ab, trägt eine
+    // Temp-Datei ein, drückt Speichern und schreibt die Temp-Datei in die angezeigte Datei (MainForm.WriteFormFile) – ob der Nutzer die
+    // Schaltfläche drückt oder PDFlight sie per UIA drückt (SaveFormAsync).
+    private const uint EVENT_SYSTEM_DIALOGSTART = 0x0010;
+    private const uint EVENT_OBJECT_SELECTION = 0x8006;
+    private const uint EVENT_OBJECT_STATECHANGE = 0x800A;
+    private const uint EVENT_OBJECT_VALUECHANGE = 0x800E;
+    private const int RoleDocument = 0x0F, RoleList = 0x21, RoleListItem = 0x22, RoleText = 0x2A, RoleCheckButton = 0x2C, RoleRadioButton = 0x2D, RoleComboBox = 0x2E; // ROLE_SYSTEM_*
+    private readonly List<nint> formHooks = [];
+    private NativeMethods.WinEventProc? formHookProc;
+    private NativeMethods.WinEventProc? dialogHookProc;
+    private bool formEventsArmed;   // erst kurz nach dem Laden – Ereignisse des Seitenaufbaus zählen nicht
+    private int formCheckRunning;   // höchstens eine Auflösung gleichzeitig (STATECHANGE kommt gehäuft)
+    private TaskCompletionSource<string?>? formSave; // wartet auf die Temp-Datei, die SaveFormAsync über die Save-Schaltfläche angestoßen hat
+    private TaskCompletionSource<bool>? formDialogSeen; // der „Speichern unter“-Dialog ist erschienen (SaveFormAsync wartet sonst nicht lange)
+
+    /// <summary>Ergebnis von <see cref="SaveFormAsync"/>: die Temp-Datei mit der PDF samt Feldwerten (null = nicht bekommen) und ob der
+    /// Speichern-Dialog des Viewers überhaupt erschienen ist – dann steht er noch offen und der Nutzer kann selbst speichern.</summary>
+    public readonly record struct FormSaveResult(string? Path, bool DialogShown);
+
+    /// <summary>Ungespeicherte Formulareingaben im Chromium-Viewer (seit dem Laden bzw. dem letzten Speichern).</summary>
+    public bool FormDirty { get; private set; }
+
+    /// <summary>FormDirty hat gewechselt (auf dem UI-Thread) – fürs „*“ im Fenstertitel.</summary>
+    public event EventHandler? FormDirtyChanged;
+
+    /// <summary>Der Nutzer hat die Save-Schaltfläche des Viewers gedrückt: Temp-Datei mit der PDF samt Feldwerten – das Hauptfenster
+    /// schreibt sie in die angezeigte Datei.</summary>
+    public event EventHandler<string>? FormDownloaded;
+
+    /// <summary>Formulareingaben als erledigt betrachten (nach dem Schreiben in die Datei oder bewusstem Verwerfen).</summary>
+    public void DiscardForm()
+    {
+        if (!FormDirty) { return; }
+        FormDirty = false;
+        FormDirtyChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void ResetForm()
+    {
+        formEventsArmed = false;
+        formSave?.TrySetResult(null);
+        formSave = null;
+        DiscardForm();
+    }
+
+    /// <summary>Formularereignisse erst 1,5 s nach dem Laden werten – bis dahin baut Chromium den Accessibility-Baum auf.</summary>
+    private async void ArmFormEventsLater()
+    {
+        var loaded = documentLoaded;
+        await Task.Delay(1500);
+        if (documentLoaded != loaded || currentBytes == null || AdobeActive) { return; }
+        var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
+        if (chromium != IntPtr.Zero) { EnsureZoomHook(chromium); } // auch ohne Zoomanzeige (verschlüsselte Datei) die Hooks setzen
+        formEventsArmed = true;
+    }
+
+    private void FormEventCallback(nint hook, uint eventType, nint hwnd, int idObject, int idChild, uint thread, uint time)
+    {
+        if (hwnd != zoomHookWindow || !formEventsArmed || FormDirty || AdobeActive || currentBytes == null) { return; }
+        if (Interlocked.CompareExchange(ref formCheckRunning, 1, 0) != 0) { return; }
+        _ = Task.Run(() =>
+        {
+            try { if (IsPdfFormFieldEvent(hwnd, idObject, idChild, eventType)) { webView.BeginInvoke(MarkFormDirty); } }
+            finally { formCheckRunning = 0; }
+        });
+    }
+
+    private void MarkFormDirty()
+    {
+        if (FormDirty || !formEventsArmed) { return; }
+        FormDirty = true;
+        FormDirtyChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>Gehört das Ereignis zu einem Formularfeld der PDF? Rolle passend zur Ereignisart und mindestens zwei Dokument-Vorfahren
+    /// (Viewer-Seite → „PDF Document“ → PDF); läuft im Hintergrund, COM-Aufrufe in den Browserprozess.</summary>
+    private static bool IsPdfFormFieldEvent(nint hwnd, int idObject, int idChild, uint eventType)
+    {
+        try
+        {
+            if (AccessibleObjectFromEvent(hwnd, (uint)idObject, (uint)idChild, out var accessible, out var child) != 0 || accessible == null) { return false; }
+            var role = accessible.get_accRole(child) as int? ?? 0;
+            var matches = eventType switch
+            {
+                EVENT_OBJECT_VALUECHANGE => role is RoleText or RoleComboBox or RoleList,
+                EVENT_OBJECT_STATECHANGE => role is RoleCheckButton or RoleRadioButton,
+                _ => role is RoleListItem or RoleList,
+            };
+            if (!matches) { return false; }
+            var documents = 0;
+            object? parent = child is int id && id != 0 ? accessible : accessible.accParent; // ein einfaches Kind hängt an seinem Container
+            for (var depth = 0; depth < 40 && parent is Accessibility.IAccessible element; depth++)
+            {
+                if ((element.get_accRole(0) as int? ?? 0) == RoleDocument) { documents++; }
+                parent = element.accParent;
+            }
+            return documents >= 2;
+        }
+        catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidCastException or ArgumentException or NotImplementedException) { return false; }
+    }
+
+    // DllImport statt LibraryImport: IAccessible ist eine IDispatch-Schnittstelle der eingebauten COM-Interop (Accessibility.dll), die der
+    // Quellgenerator nicht marshallt
+    [System.Runtime.InteropServices.DllImport("oleacc.dll")]
+    private static extern int AccessibleObjectFromEvent(nint hwnd, uint idObject, uint idChild, out Accessibility.IAccessible accessible, out object childId);
+
+    /// <summary>Downloads gibt es in PDFlight nicht (die Save-Schaltfläche geht über den Dateidialog) – keine Download-Leiste, nichts speichern.</summary>
+    private void Core_DownloadStarting(object? sender, CoreWebView2DownloadStartingEventArgs e)
+    {
+        e.Handled = true;
+        e.Cancel = true;
+    }
+
+    private static readonly string FormTempFolder = Path.Combine(Path.GetTempPath(), "PDFlight");
+
+    private static string NewFormTempPath()
+    {
+        Directory.CreateDirectory(FormTempFolder);
+        return Path.Combine(FormTempFolder, $"form-{Guid.NewGuid():N}.pdf");
+    }
+
+    /// <summary>Ein Dialog des Browserprozesses geht auf – bei offenen Formulareingaben ist es der „Speichern unter“-Dialog der Save-Schaltfläche.</summary>
+    private void DialogEventCallback(nint hook, uint eventType, nint hwnd, int idObject, int idChild, uint thread, uint time)
+    {
+        if (!IsReady || currentBytes == null || AdobeActive || (!FormDirty && formSave == null)) { return; }
+        var owner = GetAncestor(GetWindow(hwnd, 4), 2); // GW_OWNER, GA_ROOT: der Dialog gehört zu PDFlights Fenster
+        if (owner != 0 && webView.FindForm() is { } form && owner != form.Handle) { return; }
+        _ = Task.Run(() => HandleSaveDialog(hwnd));
+    }
+
+    [System.Runtime.InteropServices.LibraryImport("user32.dll")]
+    private static partial nint GetWindow(nint hWnd, uint cmd);
+
+    [System.Runtime.InteropServices.LibraryImport("user32.dll")]
+    private static partial nint GetAncestor(nint hWnd, uint flags);
+
+    /// <summary>Den „Speichern unter“-Dialog des Viewers ausfüllen: Temp-Datei ins Dateinamenfeld (AutomationId 1001 des gemeinsamen
+    /// Dateidialogs), Speichern (AutomationId 1) drücken, auf die fertig geschriebene Datei warten. Andere Dialoge (Drucken) bleiben unberührt.</summary>
+    private void HandleSaveDialog(nint hwnd)
+    {
+        try
+        {
+            System.Windows.Automation.AutomationElement? dialog = null;
+            for (var i = 0; i < 20 && dialog == null; i++) // die Steuerelemente stehen kurz nach DIALOGSTART
+            {
+                Thread.Sleep(100);
+                var candidate = System.Windows.Automation.AutomationElement.FromHandle(hwnd);
+                // Erkennung über die Steuerelemente statt über den (sprachabhängigen) Titel: Dateinamenfeld und Speichern-Knopf des
+                // gemeinsamen Dateidialogs – Besitzer und offene Formulareingaben hat der Rückruf schon geprüft
+                if (FindAutomationId(candidate, "1001") != null && FindAutomationId(candidate, "1", System.Windows.Automation.ControlType.Button) != null) { dialog = candidate; }
+            }
+            if (dialog == null) { return; }
+            formDialogSeen?.TrySetResult(true);
+            var temp = NewFormTempPath();
+            var fileName = FindAutomationId(dialog, "1001")!;
+            if (!fileName.TryGetCurrentPattern(System.Windows.Automation.ValuePattern.Pattern, out var value)) { FinishFormDownload(null); return; }
+            ((System.Windows.Automation.ValuePattern)value).SetValue(temp);
+            Thread.Sleep(150);
+            var saveButton = FindAutomationId(dialog, "1", System.Windows.Automation.ControlType.Button); // die Dateiliste hat Gruppen mit derselben Id
+            if (saveButton == null || !saveButton.TryGetCurrentPattern(System.Windows.Automation.InvokePattern.Pattern, out var invoke)) { FinishFormDownload(null); return; }
+            ((System.Windows.Automation.InvokePattern)invoke).Invoke();
+            for (var i = 0; i < 100; i++) // bis 10 s, bis der Viewer die Datei geschrieben und geschlossen hat
+            {
+                Thread.Sleep(100);
+                if (!File.Exists(temp)) { continue; }
+                try { using var probe = new FileStream(temp, FileMode.Open, FileAccess.Read, FileShare.None); if (probe.Length > 0) { FinishFormDownload(temp); return; } }
+                catch (IOException) { } // noch in Arbeit
+            }
+            FinishFormDownload(null);
+        }
+        catch (Exception ex) when (ex is System.Windows.Automation.ElementNotAvailableException or System.Runtime.InteropServices.COMException
+            or InvalidOperationException or IOException or UnauthorizedAccessException)
+        {
+            FinishFormDownload(null);
+        }
+    }
+
+    private static System.Windows.Automation.AutomationElement? FindAutomationId(System.Windows.Automation.AutomationElement root, string automationId, System.Windows.Automation.ControlType? type = null)
+    {
+        System.Windows.Automation.Condition condition = new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.AutomationIdProperty, automationId);
+        if (type != null) { condition = new System.Windows.Automation.AndCondition(condition, new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.ControlTypeProperty, type)); }
+        return root.FindFirst(System.Windows.Automation.TreeScope.Descendants, condition);
+    }
+
+    private void FinishFormDownload(string? temp)
+    {
+        var pending = formSave;
+        formSave = null;
+        if (pending != null) { pending.TrySetResult(temp); }
+        else if (temp != null) { webView.BeginInvoke(() => FormDownloaded?.Invoke(this, temp)); } // nicht im WebView2-Rückruf weiterarbeiten
+    }
+
+    /// <summary>Formulareingaben aus dem Viewer holen: drückt die Save-Schaltfläche der Viewer-Leiste per UIA (bei Änderungen öffnet sie ein
+    /// Menü – dort den Eintrag „mit Änderungen“); den Dateidialog füllt <see cref="HandleSaveDialog"/>. Liefert die Temp-Datei, null bei
+    /// Fehlschlag oder ohne Eingaben.</summary>
+    public async Task<FormSaveResult> SaveFormAsync()
+    {
+        if (!IsReady || !FormDirty || AdobeActive || currentBytes == null) { return new(null, false); }
+        var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
+        if (chromium == IntPtr.Zero) { return new(null, false); }
+        var pending = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var seen = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        formSave = pending;
+        formDialogSeen = seen;
+        _ = Task.Run(() => ClickViewerSave(chromium));
+        // Erscheint binnen 4 s kein Dialog, hat die Schaltfläche nicht reagiert (etwa nach einer Änderung der Viewer-IDs) – nicht länger warten
+        var first = await Task.WhenAny(seen.Task, pending.Task, Task.Delay(4000));
+        var shown = first == seen.Task || (first == pending.Task && seen.Task.IsCompleted);
+        if (first != pending.Task && !shown) { formSave = null; formDialogSeen = null; return new(null, false); }
+        var finished = await Task.WhenAny(pending.Task, Task.Delay(15000)); // Dialog ausfüllen, Datei schreiben
+        formDialogSeen = null;
+        if (finished != pending.Task) { formSave = null; return new(null, true); }
+        return new(pending.Task.Result, true);
+    }
+
+    private static void ClickViewerSave(IntPtr chromiumHandle)
+    {
+        try
+        {
+            var root = System.Windows.Automation.AutomationElement.FromHandle(chromiumHandle);
+            var save = root.FindFirst(System.Windows.Automation.TreeScope.Descendants,
+                new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.AutomationIdProperty, "save"));
+            if (save == null || !save.TryGetCurrentPattern(System.Windows.Automation.InvokePattern.Pattern, out var invoke)) { return; }
+            ((System.Windows.Automation.InvokePattern)invoke).Invoke();
+            for (var i = 0; i < 20; i++) // bei Änderungen öffnet sich ein Menü (Original / mit Änderungen)
+            {
+                Thread.Sleep(100);
+                var edited = root.FindFirst(System.Windows.Automation.TreeScope.Descendants,
+                    new System.Windows.Automation.PropertyCondition(System.Windows.Automation.AutomationElement.AutomationIdProperty, "save-edited"));
+                if (edited != null && edited.TryGetCurrentPattern(System.Windows.Automation.InvokePattern.Pattern, out var invokeEdited))
+                {
+                    ((System.Windows.Automation.InvokePattern)invokeEdited).Invoke();
+                    return;
+                }
+            }
+        }
+        catch (Exception ex) when (ex is System.Windows.Automation.ElementNotAvailableException
+            or System.Runtime.InteropServices.COMException or InvalidOperationException) { }
+    }
+
+    // ------------------------------------------------------------------ Adobe PDF Embed API (optionale Ansicht, s. AdobeEmbed)
+
+    // Dieselbe WebView2-Instanz zeigt statt des Chromium-Viewers die Seite adobe\index.html (virtueller Host AdobeEmbed.Host), die das
+    // Adobe-SDK lädt und die Datei als SharedBuffer bekommt – genau wie im Testprojekt PdfEmbed. Solange AdobeActive gilt, sind die
+    // UIA-Funktionen des Chromium-Viewers (Seitenfeld, Zoom, Drehen, Layout) abgeschaltet; Load und CloseDocument beenden die Ansicht.
+
+    /// <summary>True, solange das WebView die Adobe-Seite statt des Chromium-Viewers zeigt (bis zum nächsten Load/CloseDocument).</summary>
+    public bool AdobeActive { get; private set; }
+
+    /// <summary>Ungespeicherte Anmerkungen in der Adobe-Ansicht: gesetzt bei jedem Hinzufügen, Ändern oder Löschen einer Anmerkung
+    /// (Ereignisse des Annotation-Managers), zurückgesetzt nach dem Speichern und beim Laden. Konservativ – wer eine Anmerkung hinzufügt
+    /// und wieder löscht, gilt als geändert. Das Hauptfenster setzt es zurück auf true, wenn das Schreiben der Datei scheitert.</summary>
+    public bool AdobeDirty { get; set; }
+
+    /// <summary>Zuletzt gemeldete Seite der Adobe-Ansicht (PAGE_VIEW), anfangs die Startseite – damit der Chromium-Viewer beim
+    /// Zurückwechseln dieselbe Seite zeigt.</summary>
+    public int AdobePage { get; private set; }
+
+    /// <summary>Zuletzt gemeldete Zoomstufe der Adobe-Ansicht, umgerechnet in Chromium-Prozent (ZOOM_LEVEL bzw. getPageZoom; 0 = unbekannt) –
+    /// damit der Chromium-Viewer beim Zurückwechseln etwa gleich groß zeigt.</summary>
+    public int AdobeZoomPercent { get; private set; }
+
+    /// <summary>Adobes Zoomstufe 1 ist 1 px je Punkt (72 dpi), Chromiums 100 % sind 96 dpi (1,333 px je Punkt) – gemessen 26.09.2026 bei
+    /// 100 % Windows-Skalierung an der Seitenbreite (612 pt: Adobe 1,5 → 918 px, Chromium 100 % → 816 px). Der Faktor rechnet um.</summary>
+    private const double AdobeZoomBase = 1.0 / (96.0 / 72.0);
+
+    /// <summary>Die Adobe-Seite zeigt das Dokument.</summary>
+    public event EventHandler? AdobeReady;
+
+    /// <summary>„Speichern“ in der Adobe-Leiste: die PDF samt Anmerkungen – das Hauptfenster schreibt sie in die angezeigte Datei.</summary>
+    public event EventHandler<byte[]>? AdobeSaveRequested;
+
+    /// <summary>Fehlermeldung der Adobe-Seite (SDK nicht erreichbar, Viewer-Fehler).</summary>
+    public event EventHandler<string>? AdobeError;
+
+    private string? adobeInfo; // Begleitdaten für PostSharedBufferToScript, bis die Seite geladen ist
+
+    /// <summary>Zeigt die Datei in der Adobe-Ansicht: lädt die Adobe-Seite; sobald sie steht (NavigationCompleted), geht die Datei als
+    /// SharedBuffer hinüber – mit Dateiname, Client-ID, Startseite, Sprache und den Hinweistexten. Wirft IOException usw. wie Load.</summary>
+    public void ShowAdobe(string filePath, string clientId, int page, int zoomPercent, string loadingText, string offlineText)
+    {
+        documentLoaded = new(TaskCreationOptions.RunContinuationsAsynchronously); // eine laufende GoToPageIfUntouchedAsync sieht ein anderes Dokument und hört auf
+        currentBytes = File.ReadAllBytes(filePath);
+        ResetForm(); // Formulareingaben hat das Hauptfenster vorher gespeichert
+        AdobeActive = true;
+        AdobeDirty = false;
+        AdobePage = Math.Max(page, 1);
+        AdobeZoomPercent = zoomPercent;
+        zoomRequests++;  // eine laufende Zoomabfrage meldet nichts mehr
+        this.zoomPercent = 0; // nach dem Zurückwechseln meldet die nächste Messung auch eine unveränderte Zoomstufe wieder (Statusleiste)
+        adobeInfo = JsonSerializer.Serialize(new { fileName = Path.GetFileName(filePath), clientId, page = AdobePage, zoom = zoomPercent > 0 ? zoomPercent / 100.0 / AdobeZoomBase : (double?)null,
+            locale = AdobeEmbed.Locale, loadingText, offlineText });
+        webView.CoreWebView2.Navigate($"https://{AdobeEmbed.Host}/index.html");
+    }
+
+    private void ResetAdobe()
+    {
+        AdobeActive = false;
+        AdobeDirty = false;
+        adobeInfo = null;
+    }
+
+    private void PostAdobeFile()
+    {
+        if (adobeInfo == null || currentBytes == null) { return; }
+        var core = webView.CoreWebView2;
+        using var buffer = core.Environment.CreateSharedBuffer((ulong)Math.Max(currentBytes.Length, 1));
+        using (var stream = buffer.OpenStream()) { stream.Write(currentBytes); }
+        core.PostSharedBufferToScript(buffer, CoreWebView2SharedBufferAccess.ReadOnly, adobeInfo);
+        adobeInfo = null;
+    }
+
+    /// <summary>Meldungen der Adobe-Seite: ready, page, changed, save (PDF samt Anmerkungen als Base64), error, log. Die Ereignisse gehen
+    /// per BeginInvoke ans Hauptfenster – dort folgen Dialoge, und die haben in einem WebView2-Rückruf nichts verloren.</summary>
+    private void HandleAdobeMessage(string json)
+    {
+        try
+        {
+            using var message = JsonDocument.Parse(json);
+            var root = message.RootElement;
+            if (root.ValueKind != JsonValueKind.Object) { return; }
+            switch (root.TryGetProperty("type", out var t) ? t.GetString() : null)
+            {
+                case "ready":
+                    webView.BeginInvoke(() => AdobeReady?.Invoke(this, EventArgs.Empty));
+                    break;
+                case "page":
+                    if (root.TryGetProperty("page", out var p) && p.ValueKind == JsonValueKind.Number) { AdobePage = p.GetInt32(); }
+                    break;
+                case "zoom":
+                    if (root.TryGetProperty("zoom", out var z) && z.ValueKind == JsonValueKind.Number) { AdobeZoomPercent = (int)Math.Round(z.GetDouble() * AdobeZoomBase * 100); }                    break;
+                case "changed":
+                    AdobeDirty = true;
+                    break;
+                case "save":
+                    var bytes = Convert.FromBase64String(root.GetProperty("data").GetString() ?? string.Empty);
+                    currentBytes = bytes; // DocumentBytes bleibt der gespeicherte Stand
+                    AdobeDirty = false;
+                    webView.BeginInvoke(() => AdobeSaveRequested?.Invoke(this, bytes));
+                    break;
+                case "error":
+                    var text = root.TryGetProperty("message", out var m) ? m.GetString() ?? string.Empty : string.Empty;
+                    webView.BeginInvoke(() => AdobeError?.Invoke(this, text));
+                    break;
+            }
+        }
+        catch (Exception ex) when (ex is JsonException or KeyNotFoundException or InvalidOperationException or FormatException) { }
+    }
+
+    /// <summary>Adobes Nutzungsprotokoll: Die Anfragen gehen nicht ins Netz, sondern bekommen hier ein leeres „204 No Content“. Sie kommen
+    /// aus Adobes iframe (anderer Ursprung), deshalb mit passenden CORS-Kopfzeilen – sonst sähe das SDK einen Netzwerkfehler statt einer
+    /// erfolgreichen, leeren Antwort (geprüft im Testprojekt PdfEmbed, 24.09.2026).</summary>
+    private void BlockAdobeLog(CoreWebView2WebResourceRequestedEventArgs e)
+    {
+        var request = e.Request.Headers;
+        var origin = request.Contains("Origin") ? request.GetHeader("Origin") : "*";
+        var allowHeaders = request.Contains("Access-Control-Request-Headers") ? request.GetHeader("Access-Control-Request-Headers") : "Content-Type";
+        var headers = $"Access-Control-Allow-Origin: {origin}\nAccess-Control-Allow-Credentials: true\nAccess-Control-Allow-Methods: POST, OPTIONS\n"
+            + $"Access-Control-Allow-Headers: {allowHeaders}\nContent-Length: 0";
+        e.Response = webView.CoreWebView2.Environment.CreateWebResourceResponse(null, 204, "No Content", headers);
+    }
+
     private void ShowEmptyPage()
     {
         webView.CoreWebView2.NavigateToString("""
@@ -676,6 +1109,7 @@ internal partial class PdfViewHost(WebView2 webView)
     private void Core_WebResourceRequested(object? sender, CoreWebView2WebResourceRequestedEventArgs e)
     {
         var environment = webView.CoreWebView2.Environment;
+        if (e.Request.Uri.StartsWith(AdobeEmbed.BlockedLogUrl, StringComparison.OrdinalIgnoreCase)) { BlockAdobeLog(e); return; }
         e.Response = currentBytes == null
             ? environment.CreateWebResourceResponse(null, 404, "Not Found", string.Empty)
             : environment.CreateWebResourceResponse(new MemoryStream(currentBytes), 200, "OK", "Content-Type: application/pdf\nCache-Control: no-store");

@@ -18,6 +18,7 @@ $languages = "en", "fr", "es"
 # Verwendung der Scanner nicht sehen kann (Konstanten)
 $ignore = @(
     "PDFlight", "Über PDFlight …", "PDF-Dateien (*.pdf)|*.pdf",
+    "Adobe", "Adobe PDF Embed API", # Markennamen: Schaltfläche und Einstellungsseite der Adobe-Ansicht
     "OK", "A–Z", "Z–A",
     "&1", "&2", "&3",  # Ebenen-Schaltflächen im Lesezeichen-Editor (Ziffern)
     "↑", "↓",          # Reihenfolge-Schaltflächen in der Dateiliste (Pfeile)
