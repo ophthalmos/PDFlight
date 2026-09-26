@@ -496,7 +496,7 @@
             btnAdobe.Name = "btnAdobe";
             btnAdobe.Size = new Size(44, 22);
             btnAdobe.Text = "Adobe";
-            btnAdobe.ToolTipText = "Anzeige mit der Adobe PDF Embed API ein/aus (F8)\r\nzum Hervorheben und Kommentieren;\r\nSpeichern über die Adobe-Leiste";
+            btnAdobe.ToolTipText = "Adobe PDF Embed API ein/aus (F8)\r\n➤ Hervorheben und Kommentieren\r\n🛈: Speichern über die Adobe-Leiste";
             btnAdobe.Visible = false;
             btnAdobe.Click += BtnAdobe_Click;
             //
