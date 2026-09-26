@@ -300,15 +300,16 @@ internal static class TaskDlg
     ];
 
     /// <summary>Hilfedatei (F1 und Hilfe-Menü): zeigt die PDF aus dem Downloads-Ordner in einer neuen
-    /// PDFlight-Instanz an — das aktuelle Dokument bleibt ungestört. Fehlt die Datei, wird sie erstellt;
-    /// nach einem Update erzeugt sie der Installer-Start mit /help ohnehin neu.</summary>
-    public static void ShowShortcutsPdf(nint hwnd)
+    /// PDFlight-Instanz an — das aktuelle Dokument bleibt ungestört. Mit showHere zeigt sie der Aufrufer selbst an
+    /// (das Hauptfenster ohne Dokument – eine zweite Instanz wäre dann überflüssig, Wunsch vom 26.09.2026).
+    /// Fehlt die Datei, wird sie erstellt; nach einem Update erzeugt sie der Installer-Start mit /help ohnehin neu.</summary>
+    public static void ShowShortcutsPdf(nint hwnd, Action<string>? showHere = null)
     {
         try
         {
             var path = ShortcutsPdf.DefaultPath;
             if (!File.Exists(path)) { path = ShortcutsPdf.Create(); }
-            OpenInNewInstance(hwnd, path);
+            if (showHere != null) { showHere(path); } else { OpenInNewInstance(hwnd, path); }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or PdfSharp.PdfSharpException)
         {

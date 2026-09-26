@@ -56,7 +56,7 @@ internal static partial class ShortcutsPdf
         // Erklärungszeilen (nur wo hinterlegt, z.B. F7) und der Kasten haben feste Höhe
         var rows = TaskDlg.ShortcutRows;
         var detailLines = rows.Select(r => r.Detail == null ? null : Wrap(gfx, Lng.T(r.Detail), detailFont, width - DetailIndent)).ToList();
-        var detailHeight = detailLines.Sum(l => l == null ? 0 : l.Count * 12 + 4);
+        var detailHeight = detailLines.Sum(l => l == null ? 0 : l.Count * 12);
         var noteLines = NoteBoxLines(gfx, width);
         var noteHeight = NoteBoxHeight(noteLines);
         var footerTop = page.Height.Point - FooterHeight - 6;
@@ -69,7 +69,7 @@ internal static partial class ShortcutsPdf
         {
             var (key, text, _) = rows[i];
             var lines = detailLines[i];
-            var blockHeight = rowHeight + (lines == null ? 0 : lines.Count * 12 + 4);
+            var blockHeight = rowHeight + (lines == null ? 0 : lines.Count * 12);
             if (y + blockHeight > footerTop) // Seitenumbruch (zur Sicherheit — planmäßig eine Seite)
             {
                 DrawFooter(gfx, page);
@@ -84,12 +84,14 @@ internal static partial class ShortcutsPdf
             y += rowHeight;
             if (lines != null)
             {
+                // Erklärung direkt unter ihre Zeile: erste Grundlinie 12 pt unter der des Kurztexts (wie die Erklärungszeilen
+                // untereinander); die nächste Zeile folgt im normalen Zeilenabstand (Grundlinie + rowHeight). Vorher lagen
+                // 16 pt über der Erklärung, und sie wirkte wie zur folgenden Zeile gehörig (26.09.2026)
                 foreach (var line in lines)
                 {
-                    gfx.DrawString(line, detailFont, detailBrush, Margin + DetailIndent, y + 10);
+                    gfx.DrawString(line, detailFont, detailBrush, Margin + DetailIndent, y + 6);
                     y += 12;
                 }
-                y += 4;
             }
         }
         y += NoteGap;
