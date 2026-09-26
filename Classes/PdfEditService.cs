@@ -41,7 +41,7 @@ internal sealed record AnnotationStyle(Color? BorderColor, Color? Background, Co
 
 /// <param name="Encrypted">Die Datei ist verschlüsselt, lässt sich aber ohne Kennwort lesen (nur Besitzerkennwort): PDFsharp öffnet sie zum
 /// Bearbeiten nicht – jede Änderung braucht vorher „Kennwort entfernen“ (Fehlerbericht 20.09.2026).</param>
-internal record PdfStatus(int PageCount, string? Version, string? PdfALevel, double PageWidthPt = 0, double PageHeightPt = 0, int AnnotationCount = 0, int OutlineCount = 0, bool Encrypted = false);
+internal record PdfStatus(int PageCount, string? Version, string? PdfALevel, double PageWidthPt = 0, double PageHeightPt = 0, int AnnotationCount = 0, int OutlineCount = 0, bool Encrypted = false, int FormFieldCount = -1);
 
 /// <summary>Dokumentoperationen mit PDFsharp. Alle Methoden arbeiten direkt auf der Datei;
 /// die Anzeige bleibt davon unberührt, weil der Viewer aus dem Speicher liest.</summary>
@@ -65,20 +65,63 @@ internal static partial class PdfEditService
         try
         {
             using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
-            var v = document.Version;
-            var first = document.PageCount > 0 ? document.Pages[0] : null;
-            return new PdfStatus(document.PageCount, $"{v / 10}.{v % 10}", GetPdfALevel(document), first?.Width.Point ?? 0, first?.Height.Point ?? 0, Guarded(() => CountAnnotations(document)), Guarded(() => CountOutlines(document)),
-                Guarded(() => document.SecurityHandler.Elements.ContainsKey("/Filter") ? 1 : 0) == 1); // SecuritySettings.IsEncrypted liefert im Import-Lauf false (geprüft 20.09.2026) – der geladene Handler trägt dagegen das /Encrypt-Wörterbuch
+            return ReadStatus(document);
         }
         catch (Exception ex) when (IsPdfReadError(ex)) { return new PdfStatus(-1, null, null); }
     }
 
+    private static PdfStatus ReadStatus(PdfDocument document)
+    {
+        var v = document.Version;
+        var first = document.PageCount > 0 ? document.Pages[0] : null;
+        return new PdfStatus(document.PageCount, $"{v / 10}.{v % 10}", GetPdfALevel(document), first?.Width.Point ?? 0, first?.Height.Point ?? 0, Guarded(() => CountAnnotations(document)), Guarded(() => CountOutlines(document)),
+            Guarded(() => document.SecurityHandler.Elements.ContainsKey("/Filter") ? 1 : 0) == 1, // SecuritySettings.IsEncrypted liefert im Import-Lauf false (geprüft 20.09.2026) – der geladene Handler trägt dagegen das /Encrypt-Wörterbuch
+            Guarded(() => CountFormFields(document), fallback: -1)); // -1 = unbekannt: die Save-Schaltfläche des Viewers bleibt dann sichtbar
+    }
+
+    /// <summary>PDFsharp beim Programmstart im Hintergrund vorbereiten: eine kleine PDF im Speicher schreiben und wie <see cref="TryReadStatus"/>
+    /// lesen. Sonst kosteten Laden und JIT-Übersetzung beim ersten Dokument ≈ 150 ms – und seit TryReadStatus vor dem Laden läuft (die
+    /// Save-Schaltfläche des Viewers hängt an den Formularfeldern), verzögerte das die erste Anzeige (gemessen 26.09.2026).</summary>
+    public static void WarmUp()
+    {
+        try
+        {
+            using var stream = new MemoryStream();
+            using (var source = new PdfDocument())
+            {
+                source.AddPage();
+                source.Save(stream, false);
+            }
+            stream.Position = 0;
+            using var document = PdfReader.Open(stream, PdfDocumentOpenMode.Import);
+            ReadStatus(document);
+        }
+        catch (Exception ex) when (IsPdfReadError(ex)) { } // nur eine Vorbereitung – ein Fehler zeigt sich beim echten Dokument
+    }
+
     /// <summary>Ein Zähler für die Statuszeile; bei einem Lesefehler in dem Teil 0 statt Abbruch – die Seitenzahl und damit die
     /// Bearbeitung bleiben verfügbar (ein Canva-Export mit ungültigem /Annots-Eintrag ließ sonst die ganze Datei als unlesbar gelten, 19.09.2026).</summary>
-    private static int Guarded(Func<int> count)
+    private static int Guarded(Func<int> count, int fallback = 0)
     {
         try { return count(); }
-        catch (Exception ex) when (IsPdfReadError(ex)) { return 0; }
+        catch (Exception ex) when (IsPdfReadError(ex)) { return fallback; }
+    }
+
+    /// <summary>Formularfelder der Datei: Einträge in /AcroForm /Fields; ist das Array leer oder fehlt es, die Widget-Anmerkungen der
+    /// Seiten (manche Erzeuger hängen Felder nur dort an). Entscheidet, ob der Viewer seine Save-Schaltfläche zeigt.</summary>
+    private static int CountFormFields(PdfDocument document)
+    {
+        var fields = document.Internals.Catalog.Elements.GetDictionary("/AcroForm")?.Elements.GetArray("/Fields");
+        if (fields is { Elements.Count: > 0 }) { return fields.Elements.Count; }
+        var widgets = 0;
+        for (var p = 0; p < document.PageCount; p++)
+        {
+            foreach (var (_, annotation) in AnnotationDictionaries(document.Pages[p].Annotations))
+            {
+                if (annotation.Elements.GetName("/Subtype") == "/Widget") { widgets++; }
+            }
+        }
+        return widgets;
     }
 
     /// <summary>Liest die deklarierte PDF/A-Stufe (z.B. "2b") aus den XMP-Metadaten des Dokuments;

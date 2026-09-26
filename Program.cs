@@ -6,6 +6,7 @@ internal static class Program
     [STAThread]
     private static void Main(string[] args)
     {
+        _ = Task.Run(Classes.PdfEditService.WarmUp); // PDFsharp vorbereiten, während Fenster und WebView2 starten
         ApplicationConfiguration.Initialize();
         Application.Run(new Forms.MainForm(Classes.StartOptions.Parse(args)));
     }

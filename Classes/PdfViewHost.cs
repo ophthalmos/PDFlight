@@ -89,10 +89,7 @@ internal partial class PdfViewHost(WebView2 webView)
         core.Settings.AreDefaultScriptDialogsEnabled = false; // s. Core_ScriptDialogOpening
         core.ScriptDialogOpening += Core_ScriptDialogOpening;
         core.Profile.PreferredColorScheme = darkScheme ? CoreWebView2PreferredColorScheme.Dark : CoreWebView2PreferredColorScheme.Light; // Anzeigehintergrund (Einstellungen), nie „Auto“ – sonst hinge er am Windows-Design
-        // Save/SaveAs bleiben sichtbar: Die Save-Schaltfläche des Viewers ist der einzige Weg, ausgefüllte Formularfelder aus dem Viewer
-        // herauszubekommen (s. Abschnitt Formularfelder) – ihr Download landet nicht in der Download-Leiste, sondern in der angezeigten Datei
-        core.Settings.HiddenPdfToolbarItems = CoreWebView2PdfToolbarItems.FullScreen // der Chromium-Vollbildmodus ist im Host-Fenster kaum beendbar → PDFlight bietet stattdessen F11
-            | CoreWebView2PdfToolbarItems.Print; // Drucken sitzt in der Hauptmenüleiste — die Viewer-Leiste bleibt den Ansichts-Funktionen vorbehalten
+        core.Settings.HiddenPdfToolbarItems = HiddenToolbarItems(saveButtonVisible);
         core.DownloadStarting += Core_DownloadStarting;
         core.AddWebResourceRequestedFilter("https://" + VirtualHost + "/*", CoreWebView2WebResourceContext.All);
         // Optionale Adobe-Ansicht (s. AdobeEmbed): die Seite mit dem SDK unter ihrem eigenen Ursprung, Adobes Nutzungsprotokoll aus allen
@@ -207,6 +204,23 @@ internal partial class PdfViewHost(WebView2 webView)
         try { Process.Start(new ProcessStartInfo(uri) { UseShellExecute = true }); }
         catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { }
     }
+
+    private bool saveButtonVisible;
+
+    /// <summary>Save/SaveAs der Viewer-Leiste nur bei PDFs mit Formularfeldern (Wunsch vom 26.09.2026): Die Save-Schaltfläche ist der einzige
+    /// Weg, ausgefüllte Felder aus dem Viewer zu holen (s. Abschnitt Formularfelder; ausgeblendet fehlt sie auch für UIA, Strg+S wirkt
+    /// dann nicht – geprüft 26.09.2026). Sonst bleibt die Leiste wie früher ohne sie – Speichern übernimmt PDFlight selbst. Die Einstellung
+    /// greift erst bei der nächsten Navigation, deshalb setzt das Hauptfenster sie vor <see cref="Load"/>.</summary>
+    public void SetSaveButtonVisible(bool visible)
+    {
+        saveButtonVisible = visible;
+        if (IsReady && webView.CoreWebView2.Settings.HiddenPdfToolbarItems != HiddenToolbarItems(visible)) { webView.CoreWebView2.Settings.HiddenPdfToolbarItems = HiddenToolbarItems(visible); }
+    }
+
+    private static CoreWebView2PdfToolbarItems HiddenToolbarItems(bool saveVisible) =>
+        CoreWebView2PdfToolbarItems.FullScreen // der Chromium-Vollbildmodus ist im Host-Fenster kaum beendbar → PDFlight bietet stattdessen F11
+        | CoreWebView2PdfToolbarItems.Print    // Drucken sitzt in der Hauptmenüleiste — die Viewer-Leiste bleibt den Ansichts-Funktionen vorbehalten
+        | (saveVisible ? CoreWebView2PdfToolbarItems.None : CoreWebView2PdfToolbarItems.Save | CoreWebView2PdfToolbarItems.SaveAs);
 
     /// <summary>Lädt die PDF-Datei in den Speicher und zeigt sie an; die Datei bleibt danach ungesperrt.
     /// Mit page &gt; 0 springt der Viewer direkt zu dieser Seite (z.B. nach dem Löschen von Seiten).</summary>
@@ -546,6 +560,7 @@ internal partial class PdfViewHost(WebView2 webView)
         zoomHookWindow = 0;
         foreach (var hook in formHooks) { NativeMethods.UnhookWinEvent(hook); }
         formHooks.Clear();
+        if (createHook != 0) { NativeMethods.UnhookWinEvent(createHook); createHook = 0; }
     }
 
     /// <summary>Zoomstufe aus der Fläche des ersten Seitenelements (erste Gruppe unter dem Dokument-Element) gegen die
@@ -750,6 +765,7 @@ internal partial class PdfViewHost(WebView2 webView)
     {
         if (!FormDirty) { return; }
         FormDirty = false;
+        UpdateDialogCloak();
         FormDirtyChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -759,6 +775,7 @@ internal partial class PdfViewHost(WebView2 webView)
         formSave?.TrySetResult(null);
         formSave = null;
         DiscardForm();
+        UpdateDialogCloak();
     }
 
     /// <summary>Formularereignisse erst 1,5 s nach dem Laden werten – bis dahin baut Chromium den Accessibility-Baum auf.</summary>
@@ -787,8 +804,80 @@ internal partial class PdfViewHost(WebView2 webView)
     {
         if (FormDirty || !formEventsArmed) { return; }
         FormDirty = true;
+        UpdateDialogCloak();
         FormDirtyChanged?.Invoke(this, EventArgs.Empty);
     }
+
+    // Der „Speichern unter“-Dialog soll beim automatischen Speichern nicht sichtbar auf- und wieder zugehen (Wunsch vom 26.09.2026: „wie
+    // von Geisterhand“). DIALOGSTART kommt erst, wenn er schon zu sehen ist; deshalb beobachtet PDFlight, solange Eingaben offen sind,
+    // zusätzlich das Anlegen von Fenstern (EVENT_OBJECT_CREATE, ohne Prozessfilter – der Dialog kommt aus einem Hilfsprozess) und macht
+    // jeden Dialog (#32770), dessen Besitzer PDFlights Fenster ist, sofort vollständig transparent (WS_EX_LAYERED, Alpha 0) – das Anlegen
+    // des Dateidialogs dauert deutlich länger als die Zustellung des Ereignisses. HandleSaveDialog füllt ihn unsichtbar aus. Jeder
+    // andere Ausgang macht ihn wieder sichtbar (Uncloak): ein fremder Dialog (Systemdruckdialog), ein gescheitertes Ausfüllen, eine
+    // Zeitüberschreitung – nie darf ein unsichtbarer modaler Dialog stehen bleiben. Der Hook läuft nur bei offenen Eingaben, weil
+    // OBJECT_CREATE systemweit häufig ist.
+    private const uint EVENT_OBJECT_CREATE = 0x8000;
+    private nint createHook;
+    private NativeMethods.WinEventProc? createHookProc;
+    private nint cloakedDialog; // der zuletzt verborgene Dialog – für Uncloak nach einem Fehlschlag
+
+    /// <summary>Den Hook fürs Verbergen an- oder abmelden, je nachdem, ob ein Speichern der Formulareingaben ansteht (UI-Thread).</summary>
+    private void UpdateDialogCloak()
+    {
+        var wanted = FormDirty || formSave != null;
+        if (wanted == (createHook != 0)) { return; }
+        if (wanted)
+        {
+            createHookProc ??= CreateEventCallback;
+            createHook = NativeMethods.SetWinEventHook(EVENT_OBJECT_CREATE, EVENT_OBJECT_CREATE, 0, createHookProc, 0, 0, WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
+        }
+        else
+        {
+            NativeMethods.UnhookWinEvent(createHook);
+            createHook = 0;
+        }
+    }
+
+    private void CreateEventCallback(nint hook, uint eventType, nint hwnd, int idObject, int idChild, uint thread, uint time)
+    {
+        if (idObject != 0 || idChild != 0 || !(FormDirty || formSave != null)) { return; } // nur Fenster selbst (OBJID_WINDOW, CHILDID_SELF)
+        if (!IsDialogWindow(hwnd)) { return; }
+        var owner = GetAncestor(GetWindow(hwnd, 4), 2); // GW_OWNER, GA_ROOT – Kindfenster haben keinen Besitzer
+        if (owner == 0 || webView.FindForm() is not { } form || owner != form.Handle) { return; }
+        SetWindowLongPtr(hwnd, GWL_EXSTYLE, GetWindowLongPtr(hwnd, GWL_EXSTYLE) | WS_EX_LAYERED);
+        SetLayeredWindowAttributes(hwnd, 0, 0, LWA_ALPHA);
+        cloakedDialog = hwnd;
+    }
+
+    /// <summary>Einen verborgenen Dialog wieder sichtbar machen (aus jedem Thread; ein inzwischen geschlossenes Fenster schadet nicht).</summary>
+    private void Uncloak(nint hwnd)
+    {
+        if (hwnd == 0 || hwnd != cloakedDialog) { return; }
+        cloakedDialog = 0;
+        SetLayeredWindowAttributes(hwnd, 0, 255, LWA_ALPHA);
+        SetWindowLongPtr(hwnd, GWL_EXSTYLE, GetWindowLongPtr(hwnd, GWL_EXSTYLE) & ~WS_EX_LAYERED);
+    }
+
+    private static unsafe bool IsDialogWindow(nint hwnd)
+    {
+        var buffer = stackalloc char[16];
+        var length = GetClassName(hwnd, buffer, 16);
+        return new ReadOnlySpan<char>(buffer, length).SequenceEqual("#32770");
+    }
+
+    private const int GWL_EXSTYLE = -20;
+    private const nint WS_EX_LAYERED = 0x80000;
+    private const uint LWA_ALPHA = 0x2;
+
+    [System.Runtime.InteropServices.LibraryImport("user32.dll", EntryPoint = "GetWindowLongPtrW")]
+    private static partial nint GetWindowLongPtr(nint hWnd, int index);
+
+    [System.Runtime.InteropServices.LibraryImport("user32.dll", EntryPoint = "SetWindowLongPtrW")]
+    private static partial nint SetWindowLongPtr(nint hWnd, int index, nint value);
+
+    [System.Runtime.InteropServices.LibraryImport("user32.dll")]
+    [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+    private static partial bool SetLayeredWindowAttributes(nint hWnd, uint colorKey, byte alpha, uint flags);
 
     /// <summary>Gehört das Ereignis zu einem Formularfeld der PDF? Rolle passend zur Ereignisart, mindestens zwei Dokument-Vorfahren
     /// (Viewer-Seite → „PDF Document“ → PDF) und kein Toolbar-Vorfahr (Viewer-Leiste); läuft im Hintergrund, COM-Aufrufe in den
@@ -870,7 +959,7 @@ internal partial class PdfViewHost(WebView2 webView)
                 // gemeinsamen Dateidialogs – Besitzer und offene Formulareingaben hat der Rückruf schon geprüft
                 if (FindAutomationId(candidate, "1001") != null && FindAutomationId(candidate, "1", System.Windows.Automation.ControlType.Button) != null) { dialog = candidate; }
             }
-            if (dialog == null) { return; }
+            if (dialog == null) { Uncloak(hwnd); return; } // kein Speichern-Dialog (etwa der Systemdruckdialog): wieder zeigen
             formDialogSeen?.TrySetResult(true);
             var temp = NewFormTempPath();
             var fileName = FindAutomationId(dialog, "1001")!;
@@ -905,6 +994,7 @@ internal partial class PdfViewHost(WebView2 webView)
 
     private void FinishFormDownload(string? temp)
     {
+        if (temp == null) { Uncloak(cloakedDialog); } // gescheitert: steht der Dialog noch, muss der Nutzer ihn sehen
         var pending = formSave;
         formSave = null;
         if (pending != null) { pending.TrySetResult(temp); }
@@ -930,7 +1020,7 @@ internal partial class PdfViewHost(WebView2 webView)
         if (first != pending.Task && !shown) { formSave = null; formDialogSeen = null; return new(null, false); }
         var finished = await Task.WhenAny(pending.Task, Task.Delay(15000)); // Dialog ausfüllen, Datei schreiben
         formDialogSeen = null;
-        if (finished != pending.Task) { formSave = null; return new(null, true); }
+        if (finished != pending.Task) { formSave = null; Uncloak(cloakedDialog); return new(null, true); } // der Dialog steht offen – sichtbar machen
         return new(pending.Task.Result, true);
     }
 
