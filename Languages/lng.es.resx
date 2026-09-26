@@ -657,9 +657,9 @@ Adobe recibe entonces tu dirección IP y datos técnicos del navegador, guarda c
   <data name="Adobe-Client-ID gefunden (adobe-clientid.txt)." xml:space="preserve"><value>ID de cliente de Adobe encontrado (adobe-clientid.txt).</value></data>
   <data name="Adobe-Client-ID fehlt: Datei adobe-clientid.txt neben PDFlight.exe anlegen – bis dahin bleibt die Ansicht gesperrt." xml:space="preserve"><value>Falta el ID de cliente de Adobe: crea el archivo adobe-clientid.txt junto a PDFlight.exe; hasta entonces la vista permanece bloqueada.</value></data>
   <data name="Der Browser konnte nicht geöffnet werden." xml:space="preserve"><value>No se pudo abrir el navegador.</value></data>
-  <data name="Tooltip.Adobe" xml:space="preserve"><value>Vista con la API Adobe PDF Embed activada/desactivada (F8)
-para resaltar y comentar;
-guardar mediante la barra de Adobe</value></data>
+  <data name="Tooltip.Adobe" xml:space="preserve"><value>Adobe PDF Embed API activada/desactivada (F8)
+➤ Resaltar y comentar
+🛈: Guardar mediante la barra de Adobe</value></data>
   <data name="Ungespeicherte Änderungen in der Adobe-Ansicht" xml:space="preserve"><value>Cambios sin guardar en la vista de Adobe</value></data>
   <data name="Speichere Hervorhebungen und Kommentare zuerst mit „Speichern“ in der Adobe-Leiste. Beim Verlassen der Ansicht gehen sie sonst verloren." xml:space="preserve"><value>Guarda primero los resaltados y comentarios con «Guardar» en la barra de Adobe. De lo contrario se perderán al salir de la vista.</value></data>
   <data name="Zurück zur Adobe-Ansicht" xml:space="preserve"><value>Volver a la vista de Adobe</value></data>
