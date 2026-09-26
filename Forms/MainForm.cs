@@ -2399,7 +2399,7 @@ public partial class MainForm : Form
             case Keys.D | Keys.Control when settings.ShowFavorites: return ToggleFavorite; // Datei als Favorit merken / wieder austragen
             case Keys.Right | Keys.Control | Keys.Shift: return () => StepFile(1);         // Strg+Pfeile ohne Umschalt gehören dem Viewer (Zoom & Co.)
             case Keys.Left | Keys.Control | Keys.Shift: return () => StepFile(-1);
-            case Keys.F1: return () => TaskDlg.ShowShortcutsPdf(Handle);
+            case Keys.F1: return ShowHelp;
             case Keys.F2 | Keys.Control when mnuEditBookmarks.Enabled: return EditBookmarks; // Lesezeichen-Editor; bewusst nicht in der Kürzeltabelle (Platz) in der Kürzeltabelle (Platz)
             case Keys.F2 | Keys.Control | Keys.Shift: return OpenSettingsFile;             // settings.json im Editor – bewusst undokumentiert (Wunsch vom 20.09.2026)
             case Keys.F8 when viewHost.AdobeActive || AdobeViewAllowed: return ToggleAdobeView; // Adobe-Ansicht (Option)
@@ -2520,7 +2520,14 @@ public partial class MainForm : Form
     }
     private void MnuShortcuts_Click(object? sender, EventArgs e)
     {
-        TaskDlg.ShowShortcutsPdf(Handle);
+        ShowHelp();
+    }
+
+    /// <summary>F1 und Hilfe-Menü: ohne Dokument zeigt dieses Fenster die Hilfedatei selbst, sonst eine neue Instanz
+    /// (das angezeigte Dokument bleibt ungestört).</summary>
+    private void ShowHelp()
+    {
+        TaskDlg.ShowShortcutsPdf(Handle, currentFile == null ? path => LoadPdf(path) : null);
     }
     private async void MnuCheckUpdate_Click(object? sender, EventArgs e)
     {
