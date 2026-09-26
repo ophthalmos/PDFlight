@@ -41,7 +41,7 @@ internal sealed record AnnotationStyle(Color? BorderColor, Color? Background, Co
 
 /// <param name="Encrypted">Die Datei ist verschlüsselt, lässt sich aber ohne Kennwort lesen (nur Besitzerkennwort): PDFsharp öffnet sie zum
 /// Bearbeiten nicht – jede Änderung braucht vorher „Kennwort entfernen“ (Fehlerbericht 20.09.2026).</param>
-internal record PdfStatus(int PageCount, string? Version, string? PdfALevel, double PageWidthPt = 0, double PageHeightPt = 0, int AnnotationCount = 0, int OutlineCount = 0, bool Encrypted = false, int FormFieldCount = -1);
+internal record PdfStatus(int PageCount, string? Version, string? PdfALevel, double PageWidthPt = 0, double PageHeightPt = 0, int AnnotationCount = 0, int OutlineCount = 0, bool Encrypted = false, int FormFieldCount = -1, int OpenPage = 0);
 
 /// <summary>Dokumentoperationen mit PDFsharp. Alle Methoden arbeiten direkt auf der Datei;
 /// die Anzeige bleibt davon unberührt, weil der Viewer aus dem Speicher liest.</summary>
@@ -76,8 +76,29 @@ internal static partial class PdfEditService
         var first = document.PageCount > 0 ? document.Pages[0] : null;
         return new PdfStatus(document.PageCount, $"{v / 10}.{v % 10}", GetPdfALevel(document), first?.Width.Point ?? 0, first?.Height.Point ?? 0, Guarded(() => CountAnnotations(document)), Guarded(() => CountOutlines(document)),
             Guarded(() => document.SecurityHandler.Elements.ContainsKey("/Filter") ? 1 : 0) == 1, // SecuritySettings.IsEncrypted liefert im Import-Lauf false (geprüft 20.09.2026) – der geladene Handler trägt dagegen das /Encrypt-Wörterbuch
-            Guarded(() => CountFormFields(document), fallback: -1)); // -1 = unbekannt: die Save-Schaltfläche des Viewers bleibt dann sichtbar
+            Guarded(() => CountFormFields(document), fallback: -1), // -1 = unbekannt: die Save-Schaltfläche des Viewers bleibt dann sichtbar
+            Guarded(() => OpenActionPage(document)));
     }
+
+    /// <summary>Zielseite (1-basiert) einer Öffnungsaktion mit Höhenangabe – /OpenAction [Seite /XYZ links oben zoom] mit „oben“ ≠ null,
+    /// direkt oder als GoTo-Aktion; sonst 0. Der Chromium-Viewer wendet die Höhe falsch an und landet eine Seite zu weit unten
+    /// (Fehlerbericht 26.09.2026: Jahressteuerbescheinigungen der Deutschen Bank mit [Seite 1 /XYZ 0 841,9 0] öffneten auf Seite 2;
+    /// ohne Höhe oder mit „#page=1“ stimmt es). LoadPdf öffnet solche Dateien deshalb mit dem Fragment „#page=N“.
+    /// Roh über den Katalog gelesen: PDFsharps GetValue("/OpenAction") wirft NotImplementedException (Array oder Wörterbuch).</summary>
+    private static int OpenActionPage(PdfDocument document)
+    {
+        var action = Resolve(document.Internals.Catalog.Elements["/OpenAction"]);
+        if (action is PdfDictionary dictionary && dictionary.Elements.GetName("/S") == "/GoTo") { action = Resolve(dictionary.Elements["/D"]); }
+        if (action is not PdfArray { Elements.Count: >= 4 } destination || destination.Elements[0] is not PdfReference target
+            || (destination.Elements[1] as PdfName)?.Value != "/XYZ" || Resolve(destination.Elements[3]) is null or PdfNull) { return 0; }
+        for (var i = 0; i < document.PageCount; i++)
+        {
+            if (document.Pages[i].Reference?.ObjectID == target.ObjectID) { return i + 1; }
+        }
+        return 0;
+    }
+
+    private static PdfItem? Resolve(PdfItem? item) => item is PdfReference reference ? reference.Value : item;
 
     /// <summary>PDFsharp beim Programmstart im Hintergrund vorbereiten: eine kleine PDF im Speicher schreiben und wie <see cref="TryReadStatus"/>
     /// lesen. Sonst kosteten Laden und JIT-Übersetzung beim ersten Dokument ≈ 150 ms – und seit TryReadStatus vor dem Laden läuft (die

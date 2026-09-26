@@ -409,14 +409,6 @@ the latest version.</value></data>
   <data name="geändert" xml:space="preserve"><value>modified</value></data>
   <data name="Anwendung:" xml:space="preserve"><value>Application:</value></data>
   <data name="PDF-Produzent:" xml:space="preserve"><value>PDF producer:</value></data>
-  <data name="Die nächste Datei ist bereits geöffnet" xml:space="preserve"><value>The next file is already open</value></data>
-  <data name="Die vorherige Datei ist bereits geöffnet" xml:space="preserve"><value>The previous file is already open</value></data>
-  <data name="Diese Datei wird bereits in einem anderen PDFlight-Fenster angezeigt:" xml:space="preserve"><value>This file is already displayed in another PDFlight window:</value></data>
-  <data name="Anderes Fenster aktivieren" xml:space="preserve"><value>Activate the other window</value></data>
-  <data name="Dieses Fenster zeigt weiter die aktuelle Datei." xml:space="preserve"><value>This window keeps showing the current file.</value></data>
-  <data name="Datei überspringen" xml:space="preserve"><value>Skip this file</value></data>
-  <data name="{0} aktivieren" xml:space="preserve"><value>Activate {0}</value></data>
-  <data name="Dieses Fenster wird geschlossen." xml:space="preserve"><value>This window will be closed.</value></data>
   <data name="PDFlight-Hilfe" xml:space="preserve"><value>PDFlight-Help</value></data>
   <data name="diese Hilfedatei (PDF)" xml:space="preserve"><value>this help file (PDF)</value></data>
   <data name="Hilfedatei (PDF) …" xml:space="preserve"><value>Help file (PDF)…</value></data>
