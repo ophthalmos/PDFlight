@@ -363,6 +363,8 @@ public partial class MainForm : Form
         if (RememberCurrentPage()) { settings.Save(); } // die Seite der bisherigen Datei merken, bevor sie ersetzt wird
         var rememberedPage = page <= 0 && settings.RememberLastPage ? settings.GetLastPage(path) : 0; // kommt erst nach dem Laden dran (s. GoToPageIfUntouchedAsync)
         viewerDialogOpen = false; // das Neuladen des Dokuments schließt auch offene Viewer-Dialoge
+        var status = PdfEditService.TryReadStatus(path); // vor dem Laden: die Save-Schaltfläche des Viewers hängt an den Formularfeldern
+        viewHost.SetSaveButtonVisible(status.FormFieldCount != 0); // -1 (unlesbar, etwa Kennwortschutz): sicherheitshalber zeigen
         try { viewHost.Load(path, page); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
@@ -372,7 +374,7 @@ public partial class MainForm : Form
         if (rememberedPage > 1) { _ = viewHost.GoToPageIfUntouchedAsync(rememberedPage); } // läuft im Hintergrund weiter; Fehler sind dort abgefangen
         currentFile = new FileInfo(path);
         loadedWriteTimeUtc = currentFile.LastWriteTimeUtc;
-        currentPdfStatus = PdfEditService.TryReadStatus(path);
+        currentPdfStatus = status;
         currentPageCount = currentPdfStatus.PageCount;
         viewHost.SetPageSize(currentPdfStatus.PageWidthPt, currentPdfStatus.PageHeightPt); // Referenz für die Zoomanzeige
         statusZoom.Visible = false; // bis der Viewer die Zoomstufe des neuen Dokuments meldet
@@ -2355,6 +2357,7 @@ public partial class MainForm : Form
         currentPdfStatus = PdfEditService.TryReadStatus(currentFile.FullName);
         currentPageCount = currentPdfStatus.PageCount;
         viewHost.SetPageSize(currentPdfStatus.PageWidthPt, currentPdfStatus.PageHeightPt);
+        viewHost.SetSaveButtonVisible(currentPdfStatus.FormFieldCount != 0); // wirkt beim nächsten Laden (etwa dem Zurückwechseln aus der Adobe-Ansicht)
         UpdateUiState();
     }
 
