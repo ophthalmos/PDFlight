@@ -39,6 +39,7 @@ public partial class MainForm : Form
         btnCopy.ToolTipText = Lng.T("Tooltip.Copy", btnCopy.ToolTipText);
         ddbEdit.ToolTipText = Lng.T("Tooltip.Edit", ddbEdit.ToolTipText);
         statusIndex.ToolTipText = Lng.T("Tooltip.StatusIndex", statusIndex.ToolTipText);
+        btnAdobe.ToolTipText = Lng.T("Tooltip.Adobe", btnAdobe.ToolTipText);
         BackColor = settings.DarkViewer ? Color.FromArgb(51, 51, 51) : Color.FromArgb(243, 243, 243); // wie die Leerseite
         viewHost = new PdfViewHost(webView)
         {
@@ -63,6 +64,7 @@ public partial class MainForm : Form
         RebuildProgramIconButtons();
         ApplyToolbarIcons();
         ApplyFavoritesOption();
+        ApplyAdobeOption();
         toolStrip.Resize += (s, args) => UpdateProgramIconVisibility();
         RestoreWindowBounds();
     }
@@ -85,7 +87,12 @@ public partial class MainForm : Form
         }
         webView.KeyDown += WebView_KeyDown; // Tastenkürzel funktionieren auch, wenn der Viewer den Fokus hat
         viewHost.ZoomChanged += ViewHost_ZoomChanged;
-        viewHost.PdfFileDropped += (s, path) => OpenDroppedFiles([path]); // Drop auf das Viewer-Areal
+        viewHost.PdfFileDropped += ViewHost_PdfFileDropped; // Drop auf das Viewer-Areal
+        viewHost.FormDirtyChanged += ViewHost_FormDirtyChanged;            // Formulareingaben im Viewer: „*“ im Titel
+        viewHost.FormDownloaded += ViewHost_FormDownloaded;                // Save-Schaltfläche des Viewers
+        viewHost.AdobeReady += ViewHost_AdobeReady;                       // optionale Adobe-Ansicht (s. AdobeEmbed)
+        viewHost.AdobeSaveRequested += ViewHost_AdobeSaveRequested;
+        viewHost.AdobeError += ViewHost_AdobeError;
         InitDropDownClickShield();
         EnableClassicDragDrop();
         ShellUtil.RegisterFileType(); // Datei-Icon und Öffnen-Befehl je Benutzer, unabhängig vom Installer-Task
@@ -127,6 +134,8 @@ public partial class MainForm : Form
 
     private void MainForm_FormClosing(object? sender, FormClosingEventArgs e)
     {
+        if (!ConfirmDiscardAdobe()) { e.Cancel = true; return; } // ungespeicherte Anmerkungen in der Adobe-Ansicht
+        if (!closeApproved && viewHost.FormDirty) { e.Cancel = true; BeginInvoke(AskSaveFormBeforeClose); return; } // Formulareingaben: Rückfrage, dann erneut schließen
         try { File.Delete(OwnUndoBackup); } // die eigene Undo-Sicherung wird beim Beenden entsorgt
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // sonst räumt sie der nächste Start ab
         InstanceRegistry.Clear(); // diese Instanz zeigt nichts mehr an
@@ -151,8 +160,10 @@ public partial class MainForm : Form
         {
             // Datei wurde extern verschoben, umbenannt oder gelöscht → fragen, wie es weitergehen soll
             if (!File.Exists(currentFile.FullName)) { HandleMissingFile(); return; }
-            // Datei wurde extern geändert (z.B. in einem anderen Programm gespeichert) → Anzeige aktualisieren
-            if (File.GetLastWriteTimeUtc(currentFile.FullName) != loadedWriteTimeUtc)
+            // Datei wurde extern geändert (z.B. in einem anderen Programm gespeichert) → Anzeige aktualisieren. Nicht in der Adobe-Ansicht:
+            // die zeigt nicht die Datei von der Platte, und ein Neuladen würfe ungespeicherte Anmerkungen weg (die Rückfrage käme bei
+            // jedem Aktivieren wieder); beim Zurückwechseln lädt der Chromium-Viewer ohnehin frisch von der Platte
+            if (!viewHost.AdobeActive && !viewHost.FormDirty && File.GetLastWriteTimeUtc(currentFile.FullName) != loadedWriteTimeUtc) // offene Formulareingaben nicht wegwerfen
             {
                 LoadPdf(currentFile.FullName);
             }
@@ -347,6 +358,7 @@ public partial class MainForm : Form
 
     private void LoadPdf(string path, int page = 0, bool addToRecent = false)
     {
+        if (!EnsureNativeView(reload: false)) { return; } // aus der Adobe-Ansicht zurück (Rückfrage bei ungespeicherten Anmerkungen); das Laden unten ersetzt sie
         if (addToRecent) { previousFolder = null; } // bewusstes Öffnen beendet den Verschieben-Kontext fürs Blättern
         if (RememberCurrentPage()) { settings.Save(); } // die Seite der bisherigen Datei merken, bevor sie ersetzt wird
         var rememberedPage = page <= 0 && settings.RememberLastPage ? settings.GetLastPage(path) : 0; // kommt erst nach dem Laden dran (s. GoToPageIfUntouchedAsync)
@@ -391,7 +403,7 @@ public partial class MainForm : Form
     {
         var hasFile = currentFile != null;
         InstanceRegistry.Publish(currentFile?.FullName); // den anderen Instanzen melden, welche Datei hier offen ist
-        Text = hasFile ? (settings.ShowFullPathInTitle ? currentFile!.FullName : currentFile!.Name) + " – PDFlight" : "PDFlight";
+        Text = hasFile ? (viewHost.FormDirty ? "* " : string.Empty) + (settings.ShowFullPathInTitle ? currentFile!.FullName : currentFile!.Name) + " – PDFlight" : "PDFlight"; // „*“: ungespeicherte Formulareingaben
         splitButtonMove.Enabled = btnCopy.Enabled = btnRename.Enabled = btnDelete.Enabled = btnShowInFolder.Enabled = ddbEdit.Enabled = btnPrint.Enabled = btnEmail.Enabled = hasFile;
         // PDF/A-Schutz: verändernde Operationen bleiben gesperrt, bis „Bearbeitung aktivieren“ gedrückt wurde;
         // Extrahieren (neue Datei), Rückgängig (stellt alte Bytes wieder her) und Eigenschaften (dann nur lesend) bleiben frei
@@ -407,6 +419,8 @@ public partial class MainForm : Form
         mnuRemovePassword.Enabled = hasFile && (currentPageCount <= 0 || Encrypted);  // bei geschützter (oder unlesbarer) Datei
         mnuRemoveRestrictions.Available = hasFile && Encrypted; // nur bei lesbaren, aber besitzergeschützten Dateien überhaupt im Menü (Wunsch vom 21.09.2026)
         foreach (var button in programIconButtons) { button.Enabled = hasFile; }
+        btnAdobe.Enabled = viewHost.AdobeActive || AdobeViewAllowed; // zurückschalten immer, einschalten nur mit Datei und ohne Sperre
+        btnAdobe.Checked = viewHost.AdobeActive;
         if (hasFile)
         {
             var files = FileUtil.GetPdfFilesInFolder(currentFile!.DirectoryName!);
@@ -485,7 +499,7 @@ public partial class MainForm : Form
                 Tag = file,
                 Image = ShellInfo.GetTypeIcon(".pdf", LogicalToDeviceUnits(16)),
             };
-            item.Click += (s, args) => LoadPdf((string)((ToolStripMenuItem)s!).Tag!, addToRecent: true);
+            item.Click += (s, args) => InNativeView(() => LoadPdf((string)((ToolStripMenuItem)s!).Tag!, addToRecent: true));
             btnOpen.DropDownItems.Add(item);
         }
         if (btnOpen.DropDownItems.Count == 0)
@@ -522,9 +536,23 @@ public partial class MainForm : Form
         e.Effect = GetDroppedPdfs(e).Count > 0 ? DragDropEffects.Copy : DragDropEffects.None;
     }
 
+    /// <summary>Datei aufs Viewer-Areal gezogen – oder der Viewer hat nach „Speichern unter“ die angezeigte Datei selbst überschrieben
+    /// (er navigiert danach zu ihr): dann ist es kein Drop, sondern die gespeicherten Formulareingaben – neu laden statt zweites Fenster.</summary>
+    private void ViewHost_PdfFileDropped(object? sender, string path)
+    {
+        if (currentFile != null && string.Equals(path, currentFile.FullName, StringComparison.OrdinalIgnoreCase))
+        {
+            viewHost.DiscardForm();
+            LoadPdf(path);
+            return;
+        }
+        InNativeView(() => OpenDroppedFiles([path]));
+    }
+
     private void HandleDragDrop(object? sender, DragEventArgs e)
     {
-        OpenDroppedFiles(GetDroppedPdfs(e));
+        var files = GetDroppedPdfs(e); // die Drag-Daten gelten nur während des Ereignisses
+        InNativeView(() => OpenDroppedFiles(files));
     }
 
     private static List<string> GetDroppedPdfs(DragEventArgs e)
@@ -907,9 +935,9 @@ public partial class MainForm : Form
 
     private void SplitButtonMove_ButtonClick(object? sender, EventArgs e)
     {
+        var oneClick = (ModifierKeys & Keys.Control) == Keys.Control; // vor dem Wechsel/Speichern lesen (s. InNativeView)
         // Strg+Klick: direkt in den 1-Klick-Ordner verschieben (Schnell-Verschieben wie in PDFMover)
-        if ((ModifierKeys & Keys.Control) == Keys.Control && OneClickAction(copy: false)) { return; }
-        MoveCopyDialog(copy: false);
+        InNativeView(() => { if (oneClick && OneClickAction(copy: false)) { return; } MoveCopyDialog(copy: false); });
     }
 
     /// <summary>Schnell-Verschieben/-Kopieren in den 1-Klick-Ordner, ohne Dialog.
@@ -930,7 +958,7 @@ public partial class MainForm : Form
         foreach (var folder in targets)
         {
             ToolStripMenuItem item = new(folder.Replace("&", "&&")) { Enabled = Directory.Exists(folder), Tag = folder, Image = ShellInfo.GetTypeIcon(null, LogicalToDeviceUnits(16)) };
-            item.Click += (s, args) => MoveOrCopyTo((string)((ToolStripMenuItem)s!).Tag!, copy: false);
+            item.Click += (s, args) => InNativeView(() => MoveOrCopyTo((string)((ToolStripMenuItem)s!).Tag!, copy: false));
             splitButtonMove.DropDownItems.Add(item);
         }
         if (splitButtonMove.DropDownItems.Count == 0)
@@ -964,6 +992,8 @@ public partial class MainForm : Form
             settings.ShowFavorites = dialog.ShowFavorites;
             settings.DarkViewer = dialog.DarkViewer;
             viewHost.DarkScheme = settings.DarkViewer; // wirkt sofort auf das geladene Dokument
+            settings.AdobeEmbedEnabled = dialog.AdobeEmbedEnabled;
+            settings.AdobeEmbedButton = dialog.AdobeEmbedButton;
             settings.MaxRecentFiles = dialog.MaxRecentFiles;
             settings.TrimRecentLists(); // eine kleinere Höchstzahl (bis hin zu 0) wirft überzählige Einträge sofort weg
             var languageChanged = dialog.Language != settings.Language;
@@ -976,6 +1006,8 @@ public partial class MainForm : Form
             RebuildProgramIconButtons();
             ApplyToolbarIcons();
             ApplyFavoritesOption();
+            ApplyAdobeOption();
+            if (!settings.AdobeEmbedEnabled) { EnsureNativeView(); } // Zustimmung zurückgenommen: die Adobe-Ansicht verlassen (Rückfrage bei ungespeicherten Anmerkungen)
             UpdateUiState(); // übernimmt z.B. die Titelleisten-Option sofort
         }
     }
@@ -1010,6 +1042,7 @@ public partial class MainForm : Form
         Set(ddbEdit, ToolbarIcons.Edit);
         Set(ddbPrograms, ToolbarIcons.AllApps);
         Set(ddbFavorites, ToolbarIcons.Favorite);
+        Set(btnAdobe, ToolbarIcons.Highlight);
         Set(btnShowInFolder, ToolbarIcons.FolderOpen);
         Set(btnSettings, ToolbarIcons.Settings);
         Set(ddbInfo, ToolbarIcons.Help, imageOnly: true);
@@ -1881,7 +1914,7 @@ public partial class MainForm : Form
                 ToolTipText = exe,
                 Enabled = currentFile != null,
             };
-            item.Click += (s, args) => LaunchExternalProgram((string)((ToolStripMenuItem)s!).Tag!);
+            item.Click += (s, args) => InNativeView(() => LaunchExternalProgram((string)((ToolStripMenuItem)s!).Tag!));
             ddbPrograms.DropDownItems.Add(item);
             number++;
         }
@@ -1891,7 +1924,7 @@ public partial class MainForm : Form
         }
         ddbPrograms.DropDownItems.Add(new ToolStripSeparator());
         ToolStripMenuItem openWith = new(Lng.T("Öffnen mit …")) { Enabled = currentFile != null, Image = MenuIcon(ToolbarIcons.OpenWith) };
-        openWith.Click += (s, args) => OpenWithDialog();
+        openWith.Click += (s, args) => InNativeView(OpenWithDialog);
         ddbPrograms.DropDownItems.Add(openWith);
         ddbPrograms.DropDownItems.Add(new ToolStripSeparator());
         ToolStripMenuItem managePrograms = new(Lng.T("Programme verwalten …")) { Image = MenuIcon(ToolbarIcons.Settings) };
@@ -1944,7 +1977,7 @@ public partial class MainForm : Form
                     ToolTipText = ProgramFinder.GetDisplayName(exe) + " (" + Lng.T("Strg+") + number + ")",
                     Enabled = currentFile != null,
                 };
-                button.Click += (s, e) => LaunchExternalProgram((string)((ToolStripItem)s!).Tag!);
+                button.Click += (s, e) => InNativeView(() => LaunchExternalProgram((string)((ToolStripItem)s!).Tag!));
                 toolStrip.Items.Insert(insertIndex++, button);
                 programIconButtons.Add(button);
             }
@@ -2054,7 +2087,7 @@ public partial class MainForm : Form
             TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei existiert nicht mehr."), favorite.File, TaskDialogIcon.Warning);
             return;
         }
-        LoadPdf(favorite.File, addToRecent: true);
+        InNativeView(() => LoadPdf(favorite.File, addToRecent: true));
     }
 
     private void MnuFavoriteAdd_Click(object? sender, EventArgs e) { AddFavorite(); }
@@ -2113,7 +2146,234 @@ public partial class MainForm : Form
         settings.Save();
     }
 
+    // ------------------------------------------------------------------ Adobe PDF Embed API (optionale Ansicht, s. AdobeEmbed)
+
+    /// <summary>Die Adobe-Ansicht darf eingeschaltet werden: Zustimmung in den Einstellungen, Datei geladen und nicht gesperrt (PDF/A,
+    /// Kennwort) – dieselbe Sperre wie für die übrigen Bearbeitungsfunktionen, denn „Speichern“ schreibt Adobes Anmerkungen in die Datei.</summary>
+    private bool AdobeViewAllowed => settings.AdobeEmbedEnabled && currentFile != null && !EditLocked;
+
+    /// <summary>Schaltfläche „Adobe“ samt Trenner nur mit Zustimmung und Option; F8 geht auch ohne Schaltfläche.</summary>
+    private void ApplyAdobeOption()
+    {
+        btnAdobe.Visible = toolStripSeparator17.Visible = settings.AdobeEmbedEnabled && settings.AdobeEmbedButton;
+    }
+
+    /// <summary>F8 und Schaltfläche „Adobe“: zwischen dem Chromium-Viewer und der Adobe-Ansicht wechseln.</summary>
+    private async void ToggleAdobeView()
+    {
+        if (viewHost.AdobeActive) { EnsureNativeView(); return; }
+        if (!await CommitFormAsync()) { return; } // Formulareingaben zuerst in die Datei – die Adobe-Ansicht lädt von der Platte
+        EnterAdobeView();
+    }
+
+    /// <summary>Zeigt die angezeigte Datei in der Adobe-Ansicht – auf derselben Seite wie im Chromium-Viewer.</summary>
+    private void EnterAdobeView()
+    {
+        if (!AdobeViewAllowed || currentFile == null) { return; }
+        if (!AdobeEmbed.IsAvailable)
+        {
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Adobe-Client-ID fehlt"),
+                Lng.T("Lege neben PDFlight.exe die Datei „adobe-clientid.txt“ mit der Client-ID der Adobe PDF Embed API an (Vorlage: adobe-clientid.example.txt)."), TaskDialogIcon.Warning);
+            return;
+        }
+        var page = ClampedCurrentPage(); // UIA-Abfrage – aus dem Chromium-Tastatur-Callback kommt der Aufruf per BeginInvoke (s. ResolveShortcut)
+        try
+        {
+            viewHost.ShowAdobe(currentFile.FullName, AdobeEmbed.ClientId!, page, viewHost.ZoomPercent, // IsAvailable garantiert die Client-ID; Seite und Zoom wie hier
+                Lng.T("Adobe-Ansicht wird geladen …"), Lng.T("Das Adobe-SDK ist nicht erreichbar (Internetverbindung?)"));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Die Datei konnte nicht geladen werden."), ex);
+            return;
+        }
+        btnAdobe.Checked = true;
+        statusZoom.Visible = false; // die Zoomstufe kennt nur der Chromium-Viewer
+        statusPath.Text = Lng.T("Adobe-Ansicht wird geladen …");
+    }
+
+    /// <summary>Einstieg für Schaltflächen und Menüs (die Kürzel kommen über <see cref="ResolveViewShortcut"/>): Jede andere Programmfunktion
+    /// wechselt stillschweigend zurück zum Chromium-Viewer, und offene Formulareingaben des Viewers werden vorher still in die Datei
+    /// geschrieben – wie jede andere Änderung sofort gespeichert wird (Wünsche vom 26.09.2026). Scheitert das Schreiben, unterbleibt die Funktion.</summary>
+    private async void InNativeView(Action action)
+    {
+        if (!EnsureNativeView()) { return; }
+        if (!await CommitFormAsync()) { return; }
+        action();
+    }
+
+    // ------------------------------------------------------------------ Formularfelder des Chromium-Viewers (s. PdfViewHost)
+
+    private bool closeApproved; // Rückfrage zu den Formulareingaben beim Schließen erledigt: das nächste Schließen läuft durch
+
+    private void ViewHost_FormDirtyChanged(object? sender, EventArgs e)
+    {
+        UpdateUiState(); // „*“ vor dem Dateinamen
+    }
+
+    /// <summary>Offene Formulareingaben in die Datei schreiben; true = nichts offen oder geschrieben. Bei einem Fehlschlag (der Viewer
+    /// liefert nichts) bleibt die Eingabe im Viewer stehen und der Aufrufer bricht ab.</summary>
+    private async Task<bool> CommitFormAsync()
+    {
+        if (!viewHost.FormDirty || currentFile == null) { return true; }
+        var result = await viewHost.SaveFormAsync();
+        if (result.Path == null)
+        {
+            // Die Automatik hat versagt: Steht der Dialog des Viewers, kann der Nutzer dort selbst speichern (unter dem alten Namen – PDFlight
+            // übernimmt die Datei dann wie eine externe Änderung); sonst bleibt die Speichern-Schaltfläche der Viewer-Leiste
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Formulareingaben konnten nicht gespeichert werden."), result.DialogShown
+                ? Lng.T("Der Speichern-Dialog des Viewers ist offen. Speichere die Datei dort unter ihrem bisherigen Namen – PDFlight übernimmt sie danach.")
+                : Lng.T("Der Viewer hat die Datei nicht geliefert. Versuche es über die Speichern-Schaltfläche in der Viewer-Leiste."), TaskDialogIcon.Warning);
+            return false;
+        }
+        return WriteFormFile(result.Path);
+    }
+
+    /// <summary>Die vom Viewer gelieferte PDF (samt Feldwerten) in die angezeigte Datei übernehmen – wie jede Bearbeitung mit
+    /// Rückgängig-Sicherung und Schreibschutzprüfung, ohne PDFsharp (deshalb auch bei Kennwortschutz). Der Viewer behält seine Anzeige,
+    /// nur die Dateidaten werden nachgezogen.</summary>
+    private bool WriteFormFile(string temp)
+    {
+        try
+        {
+            if (currentFile == null) { return false; }
+            var path = currentFile.FullName;
+            if (!RunPdfEdit(() => File.Copy(temp, path, overwrite: true), Lng.T("Formular speichern"), allowEncrypted: true)) { return false; }
+            viewHost.DiscardForm();
+            RefreshCurrentFile();
+            statusPath.Text = Lng.T("Die Formulareingaben wurden gespeichert.");
+            return true;
+        }
+        finally
+        {
+            try { File.Delete(temp); } catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+        }
+    }
+
+    private void ViewHost_FormDownloaded(object? sender, string temp)
+    {
+        WriteFormFile(temp); // Save-Schaltfläche des Viewers: dasselbe wie das stille Speichern
+    }
+
+    /// <summary>Schließen mit offenen Formulareingaben: Speichern / Nicht speichern / Abbrechen (Wunsch vom 26.09.2026); danach erneut schließen.</summary>
+    private async void AskSaveFormBeforeClose()
+    {
+        var save = new TaskDialogButton(Lng.T("Speichern"));
+        var discard = new TaskDialogButton(Lng.T("Nicht speichern"));
+        var text = Lng.T("Die ausgefüllten Formularfelder sind noch nicht in der Datei gespeichert.");
+        if (PdfALocked) { text += Environment.NewLine + Environment.NewLine + Lng.T("Die Datei ist als PDF/A gekennzeichnet – nach dem Speichern entspricht sie dem Standard nicht mehr."); }
+        var page = new TaskDialogPage
+        {
+            Caption = Application.ProductName,
+            Heading = string.Format(Lng.T("Formulareingaben in „{0}“ speichern?"), currentFile?.Name),
+            Text = text,
+            Icon = TaskDialogIcon.Warning,
+            AllowCancel = true,
+            Buttons = { save, discard, TaskDialogButton.Cancel },
+            DefaultButton = save,
+        };
+        var result = TaskDialog.ShowDialog(Handle, page);
+        if (result == save) { if (!await CommitFormAsync()) { return; } }
+        else if (result == discard) { viewHost.DiscardForm(); }
+        else { return; }
+        closeApproved = true;
+        Close();
+    }
+
+    /// <summary>Die Adobe-Ansicht verlassen und den Chromium-Viewer wieder zeigen – auf der zuletzt in Adobe gesehenen Seite. Bei
+    /// ungespeicherten Anmerkungen zuerst die Rückfrage; false = der Nutzer bleibt in der Adobe-Ansicht, die Funktion unterbleibt.
+    /// reload = false, wenn der Aufrufer gleich selbst ein Dokument lädt (LoadPdf). Ohne Adobe-Ansicht immer true.</summary>
+    private bool EnsureNativeView(bool reload = true)
+    {
+        if (!viewHost.AdobeActive) { return true; }
+        if (!ConfirmDiscardAdobe()) { return false; }
+        if (!reload) { return true; } // das folgende Load beendet die Adobe-Ansicht
+        var page = viewHost.AdobePage;
+        if (currentFile != null && File.Exists(currentFile.FullName))
+        {
+            try { viewHost.Load(currentFile.FullName, page, viewHost.AdobeZoomPercent); } // dieselbe Seite etwa gleich groß
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { TaskDlg.ErrTaskDlg(Handle, Lng.T("Die Datei konnte nicht geladen werden."), ex); }
+        }
+        else { viewHost.CloseDocument(); }
+        UpdateUiState();
+        return true;
+    }
+
+    /// <summary>Ungespeicherte Anmerkungen in der Adobe-Ansicht: Speichern geht nur über deren eigene Leiste – die Embed API bietet
+    /// keinen Speichern-Aufruf von außen –, deshalb die Wahl zwischen Zurück (Vorgabe, auch Esc) und Verwerfen. True = weiter.</summary>
+    private bool ConfirmDiscardAdobe()
+    {
+        if (!viewHost.AdobeActive || !viewHost.AdobeDirty) { return true; }
+        var back = new TaskDialogButton(Lng.T("Zurück zur Adobe-Ansicht"));
+        var discard = new TaskDialogButton(Lng.T("Verwerfen"));
+        var page = new TaskDialogPage
+        {
+            Caption = Application.ProductName,
+            Heading = Lng.T("Ungespeicherte Änderungen in der Adobe-Ansicht"),
+            Text = Lng.T("Speichere Hervorhebungen und Kommentare zuerst mit „Speichern“ in der Adobe-Leiste. Beim Verlassen der Ansicht gehen sie sonst verloren."),
+            Icon = TaskDialogIcon.Warning,
+            AllowCancel = true,
+            Buttons = { back, discard },
+            DefaultButton = back,
+        };
+        return TaskDialog.ShowDialog(Handle, page) == discard;
+    }
+
+    /// <summary>„Speichern“ in der Adobe-Leiste: die PDF samt Anmerkungen in die angezeigte Datei schreiben – wie jede Bearbeitung mit
+    /// Rückgängig-Sicherung und Schreibschutz-Prüfung, aber ohne PDFsharp (deshalb auch bei Kennwortschutz). Die Adobe-Ansicht bleibt
+    /// stehen, nur die Dateidaten werden nachgezogen. Kommt per BeginInvoke aus PdfViewHost, nicht aus dem WebView2-Rückruf.</summary>
+    private void ViewHost_AdobeSaveRequested(object? sender, byte[] bytes)
+    {
+        if (currentFile == null || !viewHost.AdobeActive) { return; }
+        var path = currentFile.FullName;
+        if (!RunPdfEdit(() => File.WriteAllBytes(path, bytes), Lng.T("Speichern der Adobe-Anmerkungen"), allowEncrypted: true))
+        {
+            viewHost.AdobeDirty = true; // nichts geschrieben – die Anmerkungen gelten weiter als ungespeichert
+            return;
+        }
+        RefreshCurrentFile();
+        statusPath.Text = Lng.T("Die Anmerkungen aus der Adobe-Ansicht wurden gespeichert.");
+    }
+
+    private void ViewHost_AdobeError(object? sender, string message)
+    {
+        statusPath.Text = string.Format(Lng.T("Fehler in der Adobe-Ansicht: {0}"), message);
+    }
+
+    private void ViewHost_AdobeReady(object? sender, EventArgs e)
+    {
+        if (viewHost.AdobeActive) { UpdateUiState(); } // „wird geladen …“ in der Statuszeile durch den Pfad ersetzen
+    }
+
+    /// <summary>Dateidaten der angezeigten Datei neu einlesen (Größe, Änderungszeit, Seitenzahl, PDF-Status), ohne die Anzeige zu laden –
+    /// nach dem Speichern aus der Adobe-Ansicht. Die Änderungszeit muss mitziehen, sonst lüde MainForm_Activated die Datei neu.</summary>
+    private void RefreshCurrentFile()
+    {
+        if (currentFile == null) { return; }
+        currentFile = new FileInfo(currentFile.FullName);
+        loadedWriteTimeUtc = currentFile.LastWriteTimeUtc;
+        currentPdfStatus = PdfEditService.TryReadStatus(currentFile.FullName);
+        currentPageCount = currentPdfStatus.PageCount;
+        viewHost.SetPageSize(currentPdfStatus.PageWidthPt, currentPdfStatus.PageHeightPt);
+        UpdateUiState();
+    }
+
     // ------------------------------------------------------------------ Tastenkürzel
+
+    /// <summary>Wie <see cref="ResolveShortcut"/>, aber in der Adobe-Ansicht wechselt die Aktion zuerst zurück zum Chromium-Viewer
+    /// (Rückfrage bei ungespeicherten Anmerkungen) – außer bei Tasten, die die Anzeige nicht berühren.</summary>
+    private Action? ResolveViewShortcut(Keys keyData)
+    {
+        var action = ResolveShortcut(keyData);
+        if (action == null || (!viewHost.AdobeActive && !viewHost.FormDirty) || IsViewNeutral(keyData)) { return action; }
+        return () => InNativeView(action); // auch offene Formulareingaben zuerst in die Datei
+    }
+
+    /// <summary>Kürzel, die auch in der Adobe-Ansicht ohne Wechsel laufen: Hilfe, F8 selbst, Vollbild, Esc (Beenden fragt selbst nach),
+    /// Einstellungen (auch die Datei), Pfad kopieren, Favorit, Windows-Dateieigenschaften.</summary>
+    private static bool IsViewNeutral(Keys keyData) => keyData is Keys.F1 or Keys.F8 or Keys.F11 or Keys.Escape or (Keys.Escape | Keys.Shift)
+        or (Keys.Oemcomma | Keys.Control) or (Keys.F2 | Keys.Control | Keys.Shift) or (Keys.C | Keys.Control | Keys.Shift)
+        or (Keys.D | Keys.Control) or (Keys.Enter | Keys.Alt);
 
     /// <summary>Die Aktion zu einem Tastenkürzel – null, wenn die Taste keins ist (dann läuft sie an den Viewer weiter). Hier fällt nur
     /// die Entscheidung; ausgeführt wird die Aktion von den beiden Einstiegen unten. Aus dem Chromium-Tastatur-Callback (WebView_KeyDown)
@@ -2161,6 +2421,7 @@ public partial class MainForm : Form
             case Keys.F1: return () => TaskDlg.ShowShortcutsPdf(Handle);
             case Keys.F2 | Keys.Control when mnuEditBookmarks.Enabled: return EditBookmarks; // Lesezeichen-Editor; bewusst nicht in der Kürzeltabelle (Platz) in der Kürzeltabelle (Platz)
             case Keys.F2 | Keys.Control | Keys.Shift: return OpenSettingsFile;             // settings.json im Editor – bewusst undokumentiert (Wunsch vom 20.09.2026)
+            case Keys.F8 when viewHost.AdobeActive || AdobeViewAllowed: return ToggleAdobeView; // Adobe-Ansicht (Option)
             case Keys.F11: return () => SetFullScreen(!isFullScreen);
             case Keys.Escape | Keys.Shift when settings.CloseOnEscape: return Close;      // Shift+Esc beendet sofort (wie in NetRadio)
             case Keys.Escape when isFullScreen: return () => SetFullScreen(false);
@@ -2205,7 +2466,7 @@ public partial class MainForm : Form
 
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
-        if (ResolveShortcut(keyData) is { } action) { action(); return true; } // außerhalb des Viewers läuft kein Chromium-Callback – sofort ausführen
+        if (ResolveViewShortcut(keyData) is { } action) { action(); return true; } // außerhalb des Viewers läuft kein Chromium-Callback – sofort ausführen
         return base.ProcessCmdKey(ref msg, keyData);
     }
 
@@ -2225,7 +2486,7 @@ public partial class MainForm : Form
             viewHost.RequestZoomUpdate(); // Tastaturzoom: der Viewer meldet ihn nicht selbst – die Taste läuft weiter an ihn durch
             return;
         }
-        if (ResolveShortcut(e.KeyData) is { } action) { e.Handled = true; BeginInvoke(action); } // erst nach dem Callback (s. ResolveShortcut)
+        if (ResolveViewShortcut(e.KeyData) is { } action) { e.Handled = true; BeginInvoke(action); } // erst nach dem Callback (s. ResolveShortcut)
     }
 
     private void ViewHost_ZoomChanged(object? sender, int percent)
@@ -2236,31 +2497,37 @@ public partial class MainForm : Form
 
     // ------------------------------------------------------------------ Toolbar-Klicks
 
+    // Datei- und Dokumentfunktionen laufen über InNativeView: In der Adobe-Ansicht wechseln sie zuerst zurück zum Chromium-Viewer
+    // (Wunsch vom 26.09.2026); Einstellungen, Hilfe, Ordner öffnen und die Favoriten-Pflege berühren die Anzeige nicht.
     private void BtnOpen_Click(object? sender, EventArgs e)
     {
-        OpenFile();
+        InNativeView(OpenFile);
     }
     private void BtnPrev_Click(object? sender, EventArgs e)
     {
-        StepFile(-1);
+        InNativeView(() => StepFile(-1));
     }
     private void BtnNext_Click(object? sender, EventArgs e)
     {
-        StepFile(1);
+        InNativeView(() => StepFile(1));
     }
     private void BtnCopy_Click(object? sender, EventArgs e)
     {
+        var oneClick = (ModifierKeys & Keys.Control) == Keys.Control; // vor dem Wechsel/Speichern lesen – danach kann die Taste los sein
         // Strg+Klick: direkt in den 1-Klick-Ordner kopieren (Schnell-Kopieren, analog zum Verschieben)
-        if ((ModifierKeys & Keys.Control) == Keys.Control && OneClickAction(copy: true)) { return; }
-        MoveCopyDialog(copy: true);
+        InNativeView(() => { if (oneClick && OneClickAction(copy: true)) { return; } MoveCopyDialog(copy: true); });
     }
     private void BtnRename_Click(object? sender, EventArgs e)
     {
-        RenameCurrent();
+        InNativeView(RenameCurrent);
     }
     private void BtnDelete_Click(object? sender, EventArgs e)
     {
-        DeleteCurrent();
+        InNativeView(DeleteCurrent);
+    }
+    private void BtnAdobe_Click(object? sender, EventArgs e)
+    {
+        ToggleAdobeView();
     }
     private void BtnShowInFolder_Click(object? sender, EventArgs e)
     {
@@ -2284,83 +2551,83 @@ public partial class MainForm : Form
     }
     private void BtnPrint_Click(object? sender, EventArgs e)
     {
-        viewHost.ShowPrintDialog();
+        InNativeView(viewHost.ShowPrintDialog); // der Druckdialog gehört zum Chromium-Viewer (die Adobe-Leiste hat ihren eigenen)
     }
     private void BtnEmail_Click(object? sender, EventArgs e)
     {
-        EmailCurrent();
+        InNativeView(EmailCurrent);
     }
     private void MnuDeletePages_Click(object? sender, EventArgs e)
     {
-        DeletePagesDialog();
+        InNativeView(DeletePagesDialog);
     }
     private void MnuRotatePages_Click(object? sender, EventArgs e)
     {
-        RotatePagesDialog();
+        InNativeView(RotatePagesDialog);
     }
     private void MnuMovePage_Click(object? sender, EventArgs e)
     {
-        MovePageDialog();
+        InNativeView(MovePageDialog);
     }
     private void MnuInsertPage_Click(object? sender, EventArgs e)
     {
-        InsertPageDialog();
+        InNativeView(InsertPageDialog);
     }
     private void MnuAppendPdf_Click(object? sender, EventArgs e)
     {
-        AppendPdfDialog();
+        InNativeView(AppendPdfDialog);
     }
     private void MnuExtractPages_Click(object? sender, EventArgs e)
     {
-        ExtractPagesDialog();
+        InNativeView(ExtractPagesDialog);
     }
     private void MnuAddAnnotation_Click(object? sender, EventArgs e)
     {
-        AddAnnotationDialog();
+        InNativeView(AddAnnotationDialog);
     }
     private void MnuRemoveBookmarks_Click(object? sender, EventArgs e)
     {
-        RemoveBookmarks();
+        InNativeView(RemoveBookmarks);
     }
     private void MnuEditBookmarks_Click(object? sender, EventArgs e)
     {
-        EditBookmarks();
+        InNativeView(EditBookmarks);
     }
     private void MnuManageAnnotations_Click(object? sender, EventArgs e)
     {
-        ManageAnnotationsDialog();
+        InNativeView(ManageAnnotationsDialog);
     }
     private void MnuAddStamp_Click(object? sender, EventArgs e)
     {
-        AddStampDialog();
+        InNativeView(AddStampDialog);
     }
     private void MnuManageStamps_Click(object? sender, EventArgs e)
     {
-        ManageStampsDialog();
+        InNativeView(ManageStampsDialog);
     }
     private void MnuDuplex_Click(object? sender, EventArgs e)
     {
-        MergeDuplexDialog();
+        InNativeView(MergeDuplexDialog);
     }
     private void MnuSetPassword_Click(object? sender, EventArgs e)
     {
-        SetPasswordDialog();
+        InNativeView(SetPasswordDialog);
     }
     private void MnuRemovePassword_Click(object? sender, EventArgs e)
     {
-        RemovePasswordDialog();
+        InNativeView(RemovePasswordDialog);
     }
 
     private void MnuRemoveRestrictions_Click(object? sender, EventArgs e)
     {
-        RemoveRestrictionsDialog();
+        InNativeView(RemoveRestrictionsDialog);
     }
     private void MnuUndo_Click(object? sender, EventArgs e)
     {
-        UndoLastChange();
+        InNativeView(UndoLastChange);
     }
     private void MnuProperties_Click(object? sender, EventArgs e)
     {
-        ShowProperties();
+        InNativeView(ShowProperties);
     }
 }

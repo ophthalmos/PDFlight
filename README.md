@@ -16,6 +16,13 @@ The displayed file is never locked; other programs can change it at any time. Th
 tools – deleting or rotating pages, extracting pages into a new file, appending PDFs,
 changing document properties or the password – save immediately. A slip can be undone
 with Ctrl+Z. PDFlight recognises PDF/A files and protects them from accidental editing.
+Form fields filled in the viewer are marked with an asterisk in the title bar; PDFlight asks
+before closing and writes them into the file silently before any other action.
+
+For highlighting and commenting, PDFlight offers an optional second view based on the
+Adobe PDF Embed API (Settings → "Adobe PDF Embed API", button "Adobe" or F8). It is off by
+default because it loads Adobe's viewer from the web; the PDF itself stays on your device.
+Any other command switches back to the built-in viewer.
 
 PDFlight is open source (MIT), runs on Windows 10 and 11 and speaks German, English,
 French and Spanish.

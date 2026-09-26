@@ -656,4 +656,36 @@ or press Ctrl+Shift+I.</value></data>
   <data name="Entfernen der Einschränkungen" xml:space="preserve"><value>Removing the restrictions</value></data>
   <data name="Die Einschränkungen wurden entfernt." xml:space="preserve"><value>The restrictions were removed.</value></data>
   <data name="Zum Bearbeiten hebst du den Schutz zuerst über Bearbeiten → „Einschränkungen entfernen …“ auf." xml:space="preserve"><value>To edit it, first remove the protection via Edit → „Remove restrictions…“.</value></data>
+  <data name="Adobe.Consent" xml:space="preserve"><value>The Adobe PDF Embed API is a web service from Adobe for displaying PDF documents. It includes interactive text tools such as highlights and comments, which are not possible in the normal PDFlight view for technical reasons. If you need these functions, you can enable this optional view here. Enabling it adds a button to the main toolbar for switching it on and off. The F8 key switches quickly between the two views.
+
+Adobe receives your IP address and technical details about the browser, stores cookies and checks the program's licence. The PDF file itself is only displayed on your device and is not uploaded. PDFlight does not send Adobe's usage log.</value></data>
+  <data name="Datenschutzerklärung von Adobe" xml:space="preserve"><value>Adobe privacy policy</value></data>
+  <data name="Ich bin damit &amp;einverstanden und möchte PDF Embed API nutzen" xml:space="preserve"><value>I &amp;agree and want to use the PDF Embed API</value></data>
+  <data name="Schaltfläche „Adobe“ in der Hauptmenüleiste an&amp;zeigen" xml:space="preserve"><value>Show the “Adobe” &amp;button in the main toolbar</value></data>
+  <data name="Adobe-Client-ID gefunden (adobe-clientid.txt)." xml:space="preserve"><value>Adobe client ID found (adobe-clientid.txt).</value></data>
+  <data name="Adobe-Client-ID fehlt: Datei adobe-clientid.txt neben PDFlight.exe anlegen – bis dahin bleibt die Ansicht gesperrt." xml:space="preserve"><value>Adobe client ID missing: create the file adobe-clientid.txt next to PDFlight.exe – until then the view stays locked.</value></data>
+  <data name="Der Browser konnte nicht geöffnet werden." xml:space="preserve"><value>The browser could not be opened.</value></data>
+  <data name="Tooltip.Adobe" xml:space="preserve"><value>Display with the Adobe PDF Embed API on/off (F8)
+for highlighting and commenting; save via the Adobe toolbar</value></data>
+  <data name="Ungespeicherte Änderungen in der Adobe-Ansicht" xml:space="preserve"><value>Unsaved changes in the Adobe view</value></data>
+  <data name="Speichere Hervorhebungen und Kommentare zuerst mit „Speichern“ in der Adobe-Leiste. Beim Verlassen der Ansicht gehen sie sonst verloren." xml:space="preserve"><value>Save highlights and comments first with “Save” in the Adobe toolbar. Otherwise they are lost when you leave the view.</value></data>
+  <data name="Zurück zur Adobe-Ansicht" xml:space="preserve"><value>Back to the Adobe view</value></data>
+  <data name="Verwerfen" xml:space="preserve"><value>Discard</value></data>
+  <data name="Speichern der Adobe-Anmerkungen" xml:space="preserve"><value>Saving the Adobe annotations</value></data>
+  <data name="Adobe-Ansicht wird geladen …" xml:space="preserve"><value>Loading the Adobe view …</value></data>
+  <data name="Das Adobe-SDK ist nicht erreichbar (Internetverbindung?)" xml:space="preserve"><value>The Adobe SDK is not reachable (internet connection?)</value></data>
+  <data name="Die Anmerkungen aus der Adobe-Ansicht wurden gespeichert." xml:space="preserve"><value>The annotations from the Adobe view have been saved.</value></data>
+  <data name="Fehler in der Adobe-Ansicht: {0}" xml:space="preserve"><value>Error in the Adobe view: {0}</value></data>
+  <data name="Adobe-Client-ID fehlt" xml:space="preserve"><value>Adobe client ID missing</value></data>
+  <data name="Lege neben PDFlight.exe die Datei „adobe-clientid.txt“ mit der Client-ID der Adobe PDF Embed API an (Vorlage: adobe-clientid.example.txt)." xml:space="preserve"><value>Create the file “adobe-clientid.txt” next to PDFlight.exe with the client ID of the Adobe PDF Embed API (template: adobe-clientid.example.txt).</value></data>
+  <data name="Adobe-Ansicht ein/aus (Option: Hervorheben und Kommentieren)" xml:space="preserve"><value>Adobe view on/off (option: highlighting and commenting)</value></data>
+  <data name="Formular speichern" xml:space="preserve"><value>Save form</value></data>
+  <data name="Die Formulareingaben wurden gespeichert." xml:space="preserve"><value>The form entries have been saved.</value></data>
+  <data name="Die Formulareingaben konnten nicht gespeichert werden." xml:space="preserve"><value>The form entries could not be saved.</value></data>
+  <data name="Der Viewer hat die Datei nicht geliefert. Versuche es über die Speichern-Schaltfläche in der Viewer-Leiste." xml:space="preserve"><value>The viewer did not deliver the file. Try the Save button in the viewer toolbar.</value></data>
+  <data name="Nicht speichern" xml:space="preserve"><value>Don't save</value></data>
+  <data name="Die ausgefüllten Formularfelder sind noch nicht in der Datei gespeichert." xml:space="preserve"><value>The filled-in form fields are not yet saved in the file.</value></data>
+  <data name="Die Datei ist als PDF/A gekennzeichnet – nach dem Speichern entspricht sie dem Standard nicht mehr." xml:space="preserve"><value>The file is marked as PDF/A – after saving it no longer conforms to the standard.</value></data>
+  <data name="Formulareingaben in „{0}“ speichern?" xml:space="preserve"><value>Save form entries in “{0}”?</value></data>
+  <data name="Der Speichern-Dialog des Viewers ist offen. Speichere die Datei dort unter ihrem bisherigen Namen – PDFlight übernimmt sie danach." xml:space="preserve"><value>The viewer's save dialog is open. Save the file there under its current name – PDFlight will pick it up afterwards.</value></data>
 </root>

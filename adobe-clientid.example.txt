@@ -1,0 +1,5 @@
+# Vorlage für die Client-ID der Adobe PDF Embed API (optionale Ansicht zum Hervorheben, Einstellungen → „Adobe PDF Embed API“).
+# Kopiere diese Datei nach "adobe-clientid.txt" (gleicher Ordner) und ersetze die Zeile unten durch deine eigene ID.
+# Die ID gibt es kostenlos in der Adobe Developer Console (Anwendungsdomäne: localhost).
+# adobe-clientid.txt ist git-ignoriert, wird beim Bauen neben die EXE kopiert und landet so auch im Installer. Zeilen mit # sind Kommentare.
+HIER-DEINE-CLIENT-ID-EINTRAGEN

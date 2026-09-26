@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <title>PDFlight</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #f3f3f3; color: #666 }
+    @media (prefers-color-scheme: dark) { html, body { background: #333333; color: #bbbbbb } } /* Anzeigehintergrund „dunkel“ wie die Leerseite */
+    #adobe-dc-view { height: 100% }
+    #hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 40px }
+  </style>
+</head>
+<body>
+  <div id="hint"><div></div></div>
+  <div id="adobe-dc-view"></div>
+  <script>
+    // PDFlight: optionale Anzeige mit der Adobe PDF Embed API (Zustimmung in den Einstellungen; s. Classes\AdobeEmbed.cs).
+    // Die Seite lädt das Adobe-SDK erst, wenn die Datei kommt – sie kommt als SharedBuffer von PdfViewHost.ShowAdobe (keine Kopie auf
+    // der Platte), dazu Dateiname, Client-ID, Startseite, Sprache und die Texte für Hinweise. Meldungen an PDFlight (postMessage):
+    // ready, page (aktuelle Seite), changed (Anmerkung hinzugefügt/geändert/gelöscht), save (PDF samt Anmerkungen als Base64), error.
+    const SDK_URL = "https://acrobatservices.adobe.com/view-sdk/viewer.js";
+    const post = (type, extra) => chrome.webview.postMessage(Object.assign({ type }, extra || {}));
+    const describe = e => (e && e.message) ? e.message : JSON.stringify(e);
+    const hint = text => { const h = document.getElementById("hint"); h.firstElementChild.textContent = text || ""; h.style.display = text ? "flex" : "none"; };
+    let sdk = null;
+
+    function loadSdk(offlineText) {
+      sdk ??= new Promise((resolve, reject) => {
+        document.addEventListener("adobe_dc_view_sdk.ready", () => resolve(), { once: true });
+        const script = document.createElement("script");
+        script.src = SDK_URL;
+        script.onerror = () => { sdk = null; reject(new Error(offlineText || "Adobe SDK not reachable")); };
+        document.head.appendChild(script);
+      });
+      return sdk;
+    }
+
+    function toBase64(buffer) {
+      const bytes = new Uint8Array(buffer); let s = "";
+      for (let i = 0; i < bytes.length; i += 0x8000) { s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); }
+      return btoa(s);
+    }
+
+    async function show(data, info) {
+      hint(info.loadingText);
+      try { await loadSdk(info.offlineText); }
+      catch (e) { hint(describe(e)); post("error", { message: describe(e) }); return; }
+      hint("");
+      document.getElementById("adobe-dc-view").innerHTML = ""; // frische Ansicht
+      const view = new AdobeDC.View({ clientId: info.clientId, divId: "adobe-dc-view", locale: info.locale || "de-DE" });
+      const E = AdobeDC.View.Enum;
+      let apis = null; // nach previewFile: Seiten- und Zoom-Abfragen des Viewers
+      let startApplied = false;
+      // Zoomstufe und Seite wie zuvor im Chromium-Viewer – erst wenn der Viewer fertig gerendert hat (APP_RENDERING_DONE), sonst setzt seine
+      // Anfangsansicht den Zoom wieder zurück. Zoom zuerst (er verschiebt das Layout), innerhalb der Grenzen des Adobe-Viewers; eine zu große
+      // Seite ignoriert der Viewer stillschweigend.
+      const applyStart = async () => {
+        if (startApplied || !apis) { return; }
+        startApplied = true;
+        try {
+          if (info.zoom) {
+            const zoom = await apis.getZoomAPIs();
+            const limits = await zoom.getZoomLimits().catch(() => null);
+            await zoom.setZoomLevel(limits ? Math.min(Math.max(info.zoom, limits.minZoom), limits.maxZoom) : info.zoom);
+          }
+          if (info.page > 1) { await apis.gotoLocation(info.page); }
+        } catch (e) { post("log", { message: "Startansicht: " + describe(e) }); }
+        reportZoom(apis);
+        reportPage(apis); // die PAGE_VIEW-Ereignisse vor diesem Punkt kamen ohne apis an
+      };
+      // Speichern-Knopf der Adobe-Leiste: PDF samt Anmerkungen an PDFlight, das schreibt sie in die angezeigte Datei (mit Rückgängig)
+      view.registerCallback(E.CallbackType.SAVE_API, (metaData, content) => {
+        post("save", { data: toBase64(content) });
+        return Promise.resolve({ code: E.ApiResponseCode.SUCCESS, data: { metaData: Object.assign(metaData, { updatedAt: Date.now() }) } });
+      }, { autoSaveFrequency: 0, enableFocusPolling: false, showSaveButton: true });
+      // Seite und Zoomstufe mitverfolgen, damit der Chromium-Viewer beim Zurückwechseln dieselbe Stelle etwa gleich groß zeigt (PAGE_VIEW und
+      // ZOOM_LEVEL brauchen enablePDFAnalytics; die Ereignisse bleiben lokal – Adobes Nutzungsprotokoll fängt PDFlight ohnehin ab)
+      view.registerCallback(E.CallbackType.EVENT_LISTENER, event => {
+        if (event.type === "PAGE_VIEW") { reportPage(apis); }
+        if (event.type === "ZOOM_LEVEL") { reportZoom(apis, event.data && event.data.zoomLevel); }
+        if (event.type === "APP_RENDERING_DONE") { applyStart(); }
+      }, { enablePDFAnalytics: true }); // ohne listenOn: alle Ereignisse, gefiltert nach Typ
+      // enableFormFilling aus: Formulareingaben lösen kein Anmerkungsereignis aus – PDFlight bekäme ungespeicherte Änderungen nicht mit
+      const options = { embedMode: "FULL_WINDOW", showAnnotationTools: true, enableAnnotationAPIs: true, includePDFAnnotations: true,
+                        enableFormFilling: false, showDownloadPDF: false, showPrintPDF: true };
+      try {
+        const viewer = await view.previewFile({ content: { promise: Promise.resolve(data) }, metaData: { fileName: info.fileName, id: info.fileName + "-" + Date.now() } }, options);
+        // Änderungen an Anmerkungen melden, damit PDFlight vor dem Verlassen der Ansicht nachfragen kann (nur über den Annotation-Manager)
+        const manager = await viewer.getAnnotationManager();
+        manager.registerEventListener(event => post("changed", { event: event.type }),
+          { listenOn: ["ANNOTATION_ADDED", "ANNOTATION_UPDATED", "ANNOTATION_DELETED"] });
+        apis = await viewer.getAPIs();
+        applyStart(); // falls APP_RENDERING_DONE schon vorbei ist; sonst übernimmt das Ereignis
+        post("ready");
+      }
+      catch (e) { hint(describe(e)); post("error", { message: describe(e) }); }
+    }
+
+    // Aktuelle Seite an PDFlight melden – vom Viewer erfragt, nicht aus PAGE_VIEW: das Ereignis meldet jede sichtbar werdende Seite, bei
+    // zwei sichtbaren Seiten also auch die zweite (geprüft 26.09.2026)
+    async function reportPage(apis) {
+      try { if (apis) { const page = await apis.getCurrentPage(); if (page > 0) { post("page", { page }); } } } catch (e) { }
+    }
+
+    // Zoomstufe als Faktor (1 = 100 %) an PDFlight melden – aus dem Ereignis, sonst vom Viewer erfragt
+    async function reportZoom(apis, level) {
+      try {
+        if (!level && apis) { level = await apis.getPageZoom(await apis.getCurrentPage()); }
+        if (level > 0) { post("zoom", { zoom: level }); }
+      } catch (e) { }
+    }
+
+    chrome.webview.addEventListener("sharedbufferreceived", e => {
+      const shared = e.getBuffer();
+      const data = shared.slice(0);               // eigene Kopie – der geteilte Puffer wird gleich freigegeben
+      chrome.webview.releaseBuffer(shared);
+      show(data, e.additionalData || {});
+    });
+    window.addEventListener("error", e => post("error", { message: e.message }));
+    window.addEventListener("unhandledrejection", e => post("error", { message: describe(e.reason) }));
+  </script>
+</body>
+</html>
