@@ -666,7 +666,8 @@ Adobe reçoit alors ton adresse IP et des informations techniques sur le navigat
   <data name="Adobe-Client-ID fehlt: Datei adobe-clientid.txt neben PDFlight.exe anlegen – bis dahin bleibt die Ansicht gesperrt." xml:space="preserve"><value>ID client Adobe manquant : crée le fichier adobe-clientid.txt à côté de PDFlight.exe – d'ici là, l'affichage reste verrouillé.</value></data>
   <data name="Der Browser konnte nicht geöffnet werden." xml:space="preserve"><value>Le navigateur n'a pas pu être ouvert.</value></data>
   <data name="Tooltip.Adobe" xml:space="preserve"><value>Affichage avec l'API Adobe PDF Embed activé/désactivé (F8)
-pour surligner et commenter ; enregistrement via la barre Adobe</value></data>
+pour surligner et commenter ;
+enregistrement via la barre Adobe</value></data>
   <data name="Ungespeicherte Änderungen in der Adobe-Ansicht" xml:space="preserve"><value>Modifications non enregistrées dans l'affichage Adobe</value></data>
   <data name="Speichere Hervorhebungen und Kommentare zuerst mit „Speichern“ in der Adobe-Leiste. Beim Verlassen der Ansicht gehen sie sonst verloren." xml:space="preserve"><value>Enregistre d'abord les surlignages et commentaires avec « Enregistrer » dans la barre Adobe. Sinon, ils seront perdus en quittant l'affichage.</value></data>
   <data name="Zurück zur Adobe-Ansicht" xml:space="preserve"><value>Retour à l'affichage Adobe</value></data>
