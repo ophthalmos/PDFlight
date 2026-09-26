@@ -409,14 +409,6 @@ para instalar la última versión.</value></data>
   <data name="geändert" xml:space="preserve"><value>modificado</value></data>
   <data name="Anwendung:" xml:space="preserve"><value>Aplicación:</value></data>
   <data name="PDF-Produzent:" xml:space="preserve"><value>Productor de PDF:</value></data>
-  <data name="Die nächste Datei ist bereits geöffnet" xml:space="preserve"><value>El siguiente archivo ya está abierto</value></data>
-  <data name="Die vorherige Datei ist bereits geöffnet" xml:space="preserve"><value>El archivo anterior ya está abierto</value></data>
-  <data name="Diese Datei wird bereits in einem anderen PDFlight-Fenster angezeigt:" xml:space="preserve"><value>Este archivo ya se muestra en otra ventana de PDFlight:</value></data>
-  <data name="Anderes Fenster aktivieren" xml:space="preserve"><value>Activar la otra ventana</value></data>
-  <data name="Dieses Fenster zeigt weiter die aktuelle Datei." xml:space="preserve"><value>Esta ventana sigue mostrando el archivo actual.</value></data>
-  <data name="Datei überspringen" xml:space="preserve"><value>Omitir este archivo</value></data>
-  <data name="{0} aktivieren" xml:space="preserve"><value>Activar {0}</value></data>
-  <data name="Dieses Fenster wird geschlossen." xml:space="preserve"><value>Esta ventana se cerrará.</value></data>
   <data name="PDFlight-Hilfe" xml:space="preserve"><value>PDFlight-Ayuda</value></data>
   <data name="diese Hilfedatei (PDF)" xml:space="preserve"><value>este archivo de ayuda (PDF)</value></data>
   <data name="Hilfedatei (PDF) …" xml:space="preserve"><value>Archivo de ayuda (PDF)…</value></data>

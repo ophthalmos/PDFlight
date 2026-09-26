@@ -56,8 +56,6 @@ internal static class InstanceRegistry
         return null;
     }
 
-    public static bool IsShownElsewhere(string path) => FindInstanceShowing(path) != null;
-
     /// <summary>Die Dateien, die andere laufende Instanzen gerade anzeigen (nur vorhandene, ohne Doppelte) – für „Geöffnete
     /// Dateien anhängen“.</summary>
     public static List<string> ShownElsewhere()

@@ -299,34 +299,6 @@ internal static class TaskDlg
         ("2× Esc / Umschalt+Esc", "Programm beenden (Option)", null),
     ];
 
-    public enum ConflictChoice { Cancel, Activate, Alternative }
-
-    /// <summary>Die gewünschte Datei zeigt schon eine andere PDFlight-Instanz an (Nachrücken nach dem Löschen,
-    /// Blättern). Zur Wahl: das andere Fenster aktivieren (activateDetail sagt, was hier dann passiert), stattdessen
-    /// die Datei alternative nehmen (null = keine freie Datei), die gelöschte Datei restorePath wiederherstellen
-    /// (null = nicht möglich) und das Programm beenden (offerExit); Abbrechen lässt alles, wie es ist.</summary>
-    public static ConflictChoice OpenConflictTaskDlg(nint hwnd, string heading, string file, string activateText, string activateDetail, string? alternativeText = null, string? alternative = null)
-    {
-        TaskDialogButton activateButton = new TaskDialogCommandLinkButton(activateText, activateDetail);
-        TaskDialogButton? alternativeButton = alternative == null || alternativeText == null ? null : new TaskDialogCommandLinkButton(alternativeText, alternative);
-        var page = new TaskDialogPage()
-        {
-            Caption = Application.ProductName,
-            Heading = heading,
-            Text = Lng.T("Diese Datei wird bereits in einem anderen PDFlight-Fenster angezeigt:") + "\n" + file,
-            Icon = TaskDialogIcon.Information,
-            AllowCancel = true,
-            SizeToContent = true
-        };
-        foreach (var button in new[] { activateButton, alternativeButton }.OfType<TaskDialogButton>()) { page.Buttons.Add(button); }
-        page.Buttons.Add(TaskDialogButton.Cancel);
-        page.DefaultButton = activateButton;
-        var result = TaskDialog.ShowDialog(hwnd, page);
-        return result == activateButton ? ConflictChoice.Activate
-            : result == alternativeButton ? ConflictChoice.Alternative
-            : ConflictChoice.Cancel;
-    }
-
     /// <summary>Hilfedatei (F1 und Hilfe-Menü): zeigt die PDF aus dem Downloads-Ordner in einer neuen
     /// PDFlight-Instanz an — das aktuelle Dokument bleibt ungestört. Fehlt die Datei, wird sie erstellt;
     /// nach einem Update erzeugt sie der Installer-Start mit /help ohnehin neu.</summary>

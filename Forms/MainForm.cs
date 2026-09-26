@@ -365,7 +365,8 @@ public partial class MainForm : Form
         viewerDialogOpen = false; // das Neuladen des Dokuments schließt auch offene Viewer-Dialoge
         var status = PdfEditService.TryReadStatus(path); // vor dem Laden: die Save-Schaltfläche des Viewers hängt an den Formularfeldern
         viewHost.SetSaveButtonVisible(status.FormFieldCount != 0); // -1 (unlesbar, etwa Kennwortschutz): sicherheitshalber zeigen
-        try { viewHost.Load(path, page); }
+        // Öffnungsaktion mit Höhenangabe: Chromium landete eine Seite zu weit unten – „#page=N“ hat Vorrang (s. PdfEditService.OpenActionPage)
+        try { viewHost.Load(path, page > 0 ? page : status.OpenPage); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             TaskDlg.ErrTaskDlg(Handle, Lng.T("Die Datei konnte nicht geladen werden."), ex);
@@ -645,18 +646,15 @@ public partial class MainForm : Form
         }
         var next = (index + step + files.Count) % files.Count;
         if (next == index || string.Equals(files[next], currentFile.FullName, StringComparison.OrdinalIgnoreCase)) { return; }
+        // Steht die Zieldatei schon in einem anderen Fenster, kommt dieses nach vorn und hier bleibt die aktuelle Datei – ohne Rückfrage
+        // (Wunsch vom 26.09.2026; vorher ein Dialog mit „Anderes Fenster aktivieren“ als Vorgabe). Ist das Fenster inzwischen weg: hier anzeigen.
         var pid = InstanceRegistry.FindInstanceShowing(files[next]);
-        if (pid == null) { LoadPdf(files[next]); return; }
-        // Die Zieldatei steht schon in einem anderen Fenster — nachfragen statt sie doppelt anzuzeigen
-        var alternative = FindFreeFile(files, next, step, currentFile.FullName);
-        var choice = TaskDlg.OpenConflictTaskDlg(Handle, step > 0 ? Lng.T("Die nächste Datei ist bereits geöffnet") : Lng.T("Die vorherige Datei ist bereits geöffnet"),
-            files[next], Lng.T("Anderes Fenster aktivieren"), Lng.T("Dieses Fenster zeigt weiter die aktuelle Datei."), Lng.T("Datei überspringen"), alternative);
-        if (choice == TaskDlg.ConflictChoice.Activate && !InstanceRegistry.Activate(pid.Value)) { LoadPdf(files[next]); } // das andere Fenster ist inzwischen weg → hier anzeigen
-        else if (choice == TaskDlg.ConflictChoice.Alternative) { LoadPdf(alternative!); } // Alternative wird nur mit Pfad angeboten
+        if (pid == null || !InstanceRegistry.Activate(pid.Value)) { LoadPdf(files[next]); }
     }
 
-    /// <summary>Nach dem Löschen: nächste Datei an gleicher Position laden oder Anzeige leeren. Zeigt eine
-    /// andere Instanz die nachrückende Datei bereits an, entscheidet ein Dialog, wie es weitergeht.</summary>
+    /// <summary>Nach dem Löschen: nächste Datei an gleicher Position laden oder Anzeige leeren. Zeigt eine andere Instanz die
+    /// nachrückende Datei bereits an, kommt diese nach vorn und dieses Fenster schließt sich – ohne Rückfrage (Wunsch vom 26.09.2026;
+    /// vorher ein Dialog mit diesem Weg als Vorgabe). Ist das andere Fenster inzwischen weg: hier anzeigen.</summary>
     private void LoadNextAfterRemoval(List<string> files, int removedIndex)
     {
         if (removedIndex >= 0) { files.RemoveAt(removedIndex); } else { removedIndex = 0; }
@@ -664,17 +662,9 @@ public partial class MainForm : Form
         var nextIndex = removedIndex % files.Count;
         var next = files[nextIndex];
         var pid = InstanceRegistry.FindInstanceShowing(next);
-        if (pid == null) { LoadPdf(next); return; }
-        currentFile = null; // sonst meldet MainForm_Activated nach dem Dialog die gelöschte Datei als extern verschwunden
-        // bewusst nur zwei Wege (19.09.2026): zum anderen Fenster wechseln und dieses schließen – oder abbrechen (leeres Fenster, Strg+Z holt die Datei zurück)
-        var choice = TaskDlg.OpenConflictTaskDlg(Handle, Lng.T("Die nächste Datei ist bereits geöffnet"), next,
-            string.Format(Lng.T("{0} aktivieren"), Path.GetFileName(next)), Lng.T("Dieses Fenster wird geschlossen."));
-        if (choice == TaskDlg.ConflictChoice.Activate)
-        {
-            if (InstanceRegistry.Activate(pid.Value)) { Close(); }
-            else { LoadPdf(next); } // das andere Fenster ist inzwischen weg → hier anzeigen
-        }
-        else { ClearDisplay(Lng.T("Die Datei wurde in den Papierkorb verschoben.")); }
+        if (pid == null || !InstanceRegistry.Activate(pid.Value)) { LoadPdf(next); return; }
+        currentFile = null; // sonst meldet MainForm_Activated beim Schließen die gelöschte Datei als extern verschwunden
+        Close();
     }
 
     /// <summary>Anzeige leeren (kein Dateibezug mehr) und den Grund in der Statusleiste nennen.</summary>
@@ -684,19 +674,6 @@ public partial class MainForm : Form
         viewHost.CloseDocument();
         UpdateUiState();
         statusPath.Text = status;
-    }
-
-    /// <summary>Erste Datei ab start in Schrittrichtung (mit Umlauf), die keine andere Instanz anzeigt
-    /// und nicht exclude ist — null, wenn es keine gibt.</summary>
-    private static string? FindFreeFile(List<string> files, int start, int step, string? exclude)
-    {
-        for (var i = 1; i < files.Count; i++)
-        {
-            var candidate = files[((start + i * step) % files.Count + files.Count) % files.Count];
-            if (string.Equals(candidate, exclude, StringComparison.OrdinalIgnoreCase)) { continue; }
-            if (!InstanceRegistry.IsShownElsewhere(candidate)) { return candidate; }
-        }
-        return null;
     }
 
     // ------------------------------------------------------------------ Verschieben / Kopieren
