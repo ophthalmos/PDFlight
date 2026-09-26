@@ -97,7 +97,7 @@ public class AppSettings
     /// Standardwerte übernahm und das nächste Speichern sie festschrieb.</summary>
     private static bool TryLoad(out AppSettings settings)
     {
-        for (var attempt = 0; ; attempt++)
+        for (var attempt = 0; attempt <= 5; attempt++) // beim 6. Versuch greift der Sperr-Filter nicht mehr: break unten
         {
             try
             {

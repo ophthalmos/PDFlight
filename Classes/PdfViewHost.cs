@@ -882,11 +882,16 @@ internal partial class PdfViewHost(WebView2 webView)
     /// <summary>Gehört das Ereignis zu einem Formularfeld der PDF? Rolle passend zur Ereignisart, mindestens zwei Dokument-Vorfahren
     /// (Viewer-Seite → „PDF Document“ → PDF) und kein Toolbar-Vorfahr (Viewer-Leiste); läuft im Hintergrund, COM-Aufrufe in den
     /// Browserprozess.</summary>
-    private static bool IsPdfFormFieldEvent(nint hwnd, int idObject, int idChild, uint eventType)
+    private static unsafe bool IsPdfFormFieldEvent(nint hwnd, int idObject, int idChild, uint eventType)
     {
+        var variant = stackalloc byte[VariantSize]; // die Kind-ID kommt als VARIANT
+        new Span<byte>(variant, VariantSize).Clear();
+        nint pointer = 0;
         try
         {
-            if (AccessibleObjectFromEvent(hwnd, (uint)idObject, (uint)idChild, out var accessible, out var child) != 0 || accessible == null) { return false; }
+            if (AccessibleObjectFromEvent(hwnd, (uint)idObject, (uint)idChild, out pointer, variant) != 0 || pointer == 0) { return false; }
+            var accessible = (Accessibility.IAccessible)System.Runtime.InteropServices.Marshal.GetObjectForIUnknown(pointer);
+            object child = *(ushort*)variant == VT_I4 ? *(int*)(variant + 8) : 0; // MSAA liefert die Kind-ID als VT_I4 (Wert ab Byte 8)
             var role = accessible.get_accRole(child) as int? ?? 0;
             var matches = eventType switch
             {
@@ -896,7 +901,7 @@ internal partial class PdfViewHost(WebView2 webView)
             };
             if (!matches) { return false; }
             var documents = 0;
-            object? parent = child is int id && id != 0 ? accessible : accessible.accParent; // ein einfaches Kind hängt an seinem Container
+            var parent = child is int id && id != 0 ? accessible : accessible.accParent; // ein einfaches Kind hängt an seinem Container
             for (var depth = 0; depth < 40 && parent is Accessibility.IAccessible element; depth++)
             {
                 var parentRole = element.get_accRole(0) as int? ?? 0;
@@ -907,12 +912,23 @@ internal partial class PdfViewHost(WebView2 webView)
             return documents >= 2;
         }
         catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidCastException or ArgumentException or NotImplementedException) { return false; }
+        finally
+        {
+            if (pointer != 0) { System.Runtime.InteropServices.Marshal.Release(pointer); } // das RCW hält seine eigene Referenz
+            _ = VariantClear(variant); // bei einer Ganzzahl-ID gibt es nichts freizugeben; ein Fehler wäre hier nicht behandelbar
+        }
     }
 
-    // DllImport statt LibraryImport: IAccessible ist eine IDispatch-Schnittstelle der eingebauten COM-Interop (Accessibility.dll), die der
-    // Quellgenerator nicht marshallt
-    [System.Runtime.InteropServices.DllImport("oleacc.dll")]
-    private static extern int AccessibleObjectFromEvent(nint hwnd, uint idObject, uint idChild, out Accessibility.IAccessible accessible, out object childId);
+    private const int VariantSize = 24; // sizeof(VARIANT) unter x64 (x86: 16 – der größere Puffer passt für beide)
+    private const ushort VT_I4 = 3;
+
+    // IAccessible ist eine IDispatch-Schnittstelle der eingebauten COM-Interop (Accessibility.dll), die der Quellgenerator nicht marshallt –
+    // deshalb liefert der Aufruf den rohen Zeiger (Marshal.GetObjectForIUnknown baut das RCW) und die Kind-ID in einen VARIANT-Puffer
+    [System.Runtime.InteropServices.LibraryImport("oleacc.dll")]
+    private static unsafe partial int AccessibleObjectFromEvent(nint hwnd, uint idObject, uint idChild, out nint accessible, byte* childId);
+
+    [System.Runtime.InteropServices.LibraryImport("oleaut32.dll")]
+    private static unsafe partial int VariantClear(byte* variant);
 
     /// <summary>Downloads gibt es in PDFlight nicht (die Save-Schaltfläche geht über den Dateidialog) – keine Download-Leiste, nichts speichern.</summary>
     private void Core_DownloadStarting(object? sender, CoreWebView2DownloadStartingEventArgs e)
