@@ -710,7 +710,10 @@ internal partial class PdfViewHost(WebView2 webView)
     // Keine WebView2-API meldet Änderungen, und die Save-Schaltfläche des Viewers war ausgeblendet (Fehlerbericht 26.09.2026). Deshalb:
     // Erkennung über die MSAA-WinEvents VALUECHANGE/STATECHANGE/SELECTION des Chromium-Fensters (wie der Zoom-Hook), aufgelöst per
     // AccessibleObjectFromEvent – ein Feld gilt als Formularfeld, wenn es unter dem verschachtelten PDF-Dokument liegt (mindestens zwei
-    // Dokument-Vorfahren; Seitenfeld und Zoomauswahl der Viewer-Leiste haben nur einen). Speichern geht nur über die Save-Schaltfläche des
+    // Dokument-Vorfahren) und nicht in der Viewer-Leiste (kein Toolbar-Vorfahr). Die Zahl der Dokument-Ebenen allein trennt nicht: Das
+    // Seitenfeld der Leiste hat inzwischen ebenfalls zwei und meldet beim Blättern jede neue Seitenzahl als VALUECHANGE – PDFlight hielt
+    // das für eine Formulareingabe (Fehlerbericht 26.09.2026; gemessen: Seitenfeld 2 Dokumente unter einer Toolbar, PDF-Felder 3–4
+    // ohne). Speichern geht nur über die Save-Schaltfläche des
     // Viewers: Sie schreibt die PDF samt Feldwerten über einen „Speichern unter“-Dialog des Browserprozesses (chrome.fileSystem.chooseEntry –
     // kein Download, DownloadStarting bleibt stumm; geprüft 26.09.2026). PDFlight fängt den Dialog per WinEvent DIALOGSTART ab, trägt eine
     // Temp-Datei ein, drückt Speichern und schreibt die Temp-Datei in die angezeigte Datei (MainForm.WriteFormFile) – ob der Nutzer die
@@ -719,7 +722,7 @@ internal partial class PdfViewHost(WebView2 webView)
     private const uint EVENT_OBJECT_SELECTION = 0x8006;
     private const uint EVENT_OBJECT_STATECHANGE = 0x800A;
     private const uint EVENT_OBJECT_VALUECHANGE = 0x800E;
-    private const int RoleDocument = 0x0F, RoleList = 0x21, RoleListItem = 0x22, RoleText = 0x2A, RoleCheckButton = 0x2C, RoleRadioButton = 0x2D, RoleComboBox = 0x2E; // ROLE_SYSTEM_*
+    private const int RoleDocument = 0x0F, RoleToolBar = 0x16, RoleList = 0x21, RoleListItem = 0x22, RoleText = 0x2A, RoleCheckButton = 0x2C, RoleRadioButton = 0x2D, RoleComboBox = 0x2E; // ROLE_SYSTEM_*
     private readonly List<nint> formHooks = [];
     private NativeMethods.WinEventProc? formHookProc;
     private NativeMethods.WinEventProc? dialogHookProc;
@@ -787,8 +790,9 @@ internal partial class PdfViewHost(WebView2 webView)
         FormDirtyChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    /// <summary>Gehört das Ereignis zu einem Formularfeld der PDF? Rolle passend zur Ereignisart und mindestens zwei Dokument-Vorfahren
-    /// (Viewer-Seite → „PDF Document“ → PDF); läuft im Hintergrund, COM-Aufrufe in den Browserprozess.</summary>
+    /// <summary>Gehört das Ereignis zu einem Formularfeld der PDF? Rolle passend zur Ereignisart, mindestens zwei Dokument-Vorfahren
+    /// (Viewer-Seite → „PDF Document“ → PDF) und kein Toolbar-Vorfahr (Viewer-Leiste); läuft im Hintergrund, COM-Aufrufe in den
+    /// Browserprozess.</summary>
     private static bool IsPdfFormFieldEvent(nint hwnd, int idObject, int idChild, uint eventType)
     {
         try
@@ -806,7 +810,9 @@ internal partial class PdfViewHost(WebView2 webView)
             object? parent = child is int id && id != 0 ? accessible : accessible.accParent; // ein einfaches Kind hängt an seinem Container
             for (var depth = 0; depth < 40 && parent is Accessibility.IAccessible element; depth++)
             {
-                if ((element.get_accRole(0) as int? ?? 0) == RoleDocument) { documents++; }
+                var parentRole = element.get_accRole(0) as int? ?? 0;
+                if (parentRole == RoleToolBar) { return false; } // Bedienelement des Viewers (Seitenfeld, Zoomauswahl), kein Feld der PDF
+                if (parentRole == RoleDocument) { documents++; }
                 parent = element.accParent;
             }
             return documents >= 2;
