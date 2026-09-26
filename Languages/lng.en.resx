@@ -653,7 +653,7 @@ or press Ctrl+Shift+I.</value></data>
 Adobe receives your IP address and technical details about the browser, stores cookies and checks the program's licence. The PDF file itself is only displayed on your device and is not uploaded. PDFlight does not send Adobe's usage log.</value></data>
   <data name="Datenschutzerklärung von Adobe" xml:space="preserve"><value>Adobe privacy policy</value></data>
   <data name="Ich bin damit &amp;einverstanden und möchte PDF Embed API nutzen" xml:space="preserve"><value>I &amp;agree and want to use the PDF Embed API</value></data>
-  <data name="Schaltfläche „Adobe“ in der Hauptmenüleiste an&amp;zeigen" xml:space="preserve"><value>Show the “Adobe” &amp;button in the main toolbar</value></data>
+  <data name="Schaltfläche „Adobe“ mit Symbol und Text an&amp;zeigen (andernfalls nur Symbol)" xml:space="preserve"><value>Show the “Adobe” &amp;button with icon and text (otherwise icon only)</value></data>
   <data name="Adobe-Client-ID gefunden (adobe-clientid.txt)." xml:space="preserve"><value>Adobe client ID found (adobe-clientid.txt).</value></data>
   <data name="Adobe-Client-ID fehlt: Datei adobe-clientid.txt neben PDFlight.exe anlegen – bis dahin bleibt die Ansicht gesperrt." xml:space="preserve"><value>Adobe client ID missing: create the file adobe-clientid.txt next to PDFlight.exe – until then the view stays locked.</value></data>
   <data name="Der Browser konnte nicht geöffnet werden." xml:space="preserve"><value>The browser could not be opened.</value></data>
