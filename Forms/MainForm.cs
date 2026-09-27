@@ -173,16 +173,15 @@ public partial class MainForm : Form
 
     /// <summary>Die angezeigte Datei ist von der Platte verschwunden. Die Anzeige stammt aus dem
     /// Speicher und funktioniert weiter — der Dialog bietet an, die Datei daraus am alten Ort neu zu
-    /// speichern (für weitere Bearbeitung) oder sie nur noch anzuzeigen (Datei- und
-    /// Bearbeitungsfunktionen deaktiviert, bis eine andere Datei geöffnet wird).</summary>
+    /// speichern (für weitere Bearbeitung); „Schließen“ (oder Esc) zeigt sie nur noch an (Datei- und
+    /// Bearbeitungsfunktionen deaktiviert, bis eine andere Datei geöffnet wird). Ein eigener Knopf „Nur weiter anzeigen“
+    /// entfiel am 27.09.2026 – er tat dasselbe wie „Schließen“.</summary>
     private void HandleMissingFile()
     {
         if (missingFileNoticeShown || currentFile == null) { return; }
         missingFileNoticeShown = true; // vor dem Dialog setzen — sein Schließen aktiviert das Formular erneut
         TaskDialogButton btnResave = new TaskDialogCommandLinkButton(Lng.T("Datei neu speichern"),
             Lng.T("Stellt die Datei am alten Ort wieder her"));
-        TaskDialogButton btnViewOnly = new TaskDialogCommandLinkButton(Lng.T("Nur weiter anzeigen"),
-            Lng.T("Bearbeitungsfunktionen werden deaktiviert"));
         var page = new TaskDialogPage()
         {
             Icon = TaskDialogIcon.ShieldWarningYellowBar,
@@ -192,7 +191,7 @@ public partial class MainForm : Form
                 "Sie wurde extern verschoben, umbenannt oder gelöscht.\nDie Anzeige stammt aus dem Speicher und bleibt erhalten."),
             AllowCancel = true,
             SizeToContent = true,
-            Buttons = { btnResave, btnViewOnly, TaskDialogButton.Close },
+            Buttons = { btnResave, TaskDialogButton.Close },
             DefaultButton = btnResave
         };
         if (TaskDialog.ShowDialog(Handle, page) == btnResave && viewHost.DocumentBytes is { } bytes)

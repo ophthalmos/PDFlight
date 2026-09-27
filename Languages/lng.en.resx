@@ -118,8 +118,6 @@ The display comes from memory and remains available.</value></data>
   <data name="Strg+G" xml:space="preserve"><value>Ctrl+G</value></data>
   <data name="E-Mail" xml:space="preserve"><value>E-mail</value></data>
   <data name="in" xml:space="preserve"><value>in</value></data>
-  <data name="Nur weiter anzeigen" xml:space="preserve"><value>Just keep displaying it</value></data>
-  <data name="Bearbeitungsfunktionen werden deaktiviert" xml:space="preserve"><value>editing functions will be disabled</value></data>
   <data name="Die Datei wurde aus der Anzeige neu gespeichert." xml:space="preserve"><value>The file was saved again from the current view.</value></data>
   <data name="Die Datei konnte nicht gespeichert werden." xml:space="preserve"><value>The file could not be saved.</value></data>
   <data name="Die Datei wurde verschoben oder gelöscht; die Anzeige stammt aus dem Speicher." xml:space="preserve"><value>The file was moved or deleted; the display comes from memory.</value></data>
