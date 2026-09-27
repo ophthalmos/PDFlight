@@ -119,10 +119,7 @@ internal partial class PdfViewHost(WebView2 webView)
     /// <summary>JavaScript-Dialoge des WebView: Die Adobe-Seite meldet bei ungespeicherten Anmerkungen ein beforeunload, das Chromium als
     /// „Website verlassen?“ zeigte und die Navigation anhielt (geprüft 26.09.2026) – die Rückfrage stellt PDFlight vorher selbst, also hier
     /// durchwinken. alert/confirm/prompt kommen in PDFlights Seiten nicht vor; auch sie werden bestätigt, statt das WebView anzuhalten.</summary>
-    private void Core_ScriptDialogOpening(object? sender, CoreWebView2ScriptDialogOpeningEventArgs e)
-    {
-        e.Accept();
-    }
+    private void Core_ScriptDialogOpening(object? sender, CoreWebView2ScriptDialogOpeningEventArgs e) => e.Accept();
 
     /// <summary>Drop auf die Leerseite: deren Skript meldet die Dateien per postMessageWithAdditionalObjects mit echten Pfaden.</summary>
     private void Core_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
@@ -288,7 +285,11 @@ internal partial class PdfViewHost(WebView2 webView)
 
     private Panel? startCover; // deckt das WebView beim Start ab, bis die Leerseite ihr erstes Bild gezeichnet hat (s. InitializeAsync)
 
-    private void RemoveStartCover() { startCover?.Dispose(); startCover = null; }
+    private void RemoveStartCover()
+    {
+        startCover?.Dispose(); 
+        startCover = null;
+    }
 
     /// <summary>Rückfall für den Start mit Dokument: Die Leerseite wird sofort ersetzt, ihr „painted“ kommt nie – dann fällt die
     /// Abdeckung kurz nach dem ersten NavigationCompleted (Chromium zeichnet längst, die Fläche vom Anlegen des Fensters ist vorbei).</summary>
@@ -316,22 +317,13 @@ internal partial class PdfViewHost(WebView2 webView)
     /// Tastaturen unerreichbar, und über die WebView2-API bzw. das DevTools-Protokoll ist der Viewer
     /// (ein isoliertes Gast-Dokument) nicht ansprechbar — der Automation-Baum schon, mit den gleichen
     /// Regeln wie bei der Seitenabfrage: Hintergrund-Task am Chromium-Kindfenster.</summary>
-    public void RotateView(bool clockwise)
-    {
-        InvokeViewerButton("rotate", clockwise ? 1 : 3); // der Viewer kennt nur rechtsherum — dreimal rechts ist einmal links
-    }
+    public void RotateView(bool clockwise) => InvokeViewerButton("rotate", clockwise ? 1 : 3); // der Viewer kennt nur rechtsherum — dreimal rechts ist einmal links
 
     /// <summary>Blendet die Inhalte-Leiste am linken Rand ein oder aus.</summary>
-    public void ToggleContents()
-    {
-        InvokeViewerButton("contents", 1);
-    }
+    public void ToggleContents() => InvokeViewerButton("contents", 1);
 
     /// <summary>Passt die Seite an die Fensterbreite an (bzw. zurück auf ganze Seite — der Button wechselt).</summary>
-    public void FitToWidth()
-    {
-        InvokeViewerButton("pagefit", 1);
-    }
+    public void FitToWidth() => InvokeViewerButton("pagefit", 1);
 
     // Der Viewer verrät sein aktuelles Layout nicht zuverlässig (IsSelected der Radio-Einträge ist
     // nicht belastbar) — deshalb führt PDFlight den Zustand selbst; jedes Dokumentladen setzt ihn zurück.
