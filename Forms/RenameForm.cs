@@ -33,9 +33,9 @@ public partial class RenameForm : Form
         directoryTextBox.Text = fileInfo.DirectoryName;
 
         // Datums-Menü: obere Hälfte = Präfixe, untere Hälfte = Suffixe (wie in PDFMover)
-        btnDateMenu.Items.Add(DateTime.Now.ToString("yyyyMMdd_"));
-        btnDateMenu.Items.Add(DateTime.Now.AddDays(-1).ToString("yyyyMMdd_"));
-        btnDateMenu.Items.Add(DateTime.Now.AddDays(-2).ToString("yyyyMMdd_"));
+        btnDateMenu.Items.Add(DateTime.Now.ToString("yyyy-MM-dd_"));
+        btnDateMenu.Items.Add(DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd_"));
+        btnDateMenu.Items.Add(DateTime.Now.AddDays(-2).ToString("yyyy-MM-dd_"));
         btnDateMenu.Items.Add("-");
         btnDateMenu.Items.Add(DateTime.Now.ToString("yyyy-MM_"));
         btnDateMenu.Items.Add(DateTime.Now.AddMonths(-1).ToString("yyyy-MM_"));
@@ -43,9 +43,9 @@ public partial class RenameForm : Form
         btnDateMenu.Items.Add(DateTime.Now.ToString("yyyy_"));
         btnDateMenu.Items.Add(DateTime.Now.AddYears(-1).ToString("yyyy_"));
         btnDateMenu.Items.Add(new ExtendedToolStripSeparator());
-        btnDateMenu.Items.Add(DateTime.Now.ToString("       _ddMMyyyy"));
-        btnDateMenu.Items.Add(DateTime.Now.AddDays(-1).ToString("       _ddMMyyyy"));
-        btnDateMenu.Items.Add(DateTime.Now.AddDays(-2).ToString("       _ddMMyyyy"));
+        btnDateMenu.Items.Add(DateTime.Now.ToString("       _dd-MM-yyyy"));
+        btnDateMenu.Items.Add(DateTime.Now.AddDays(-1).ToString("       _dd-MM-yyyy"));
+        btnDateMenu.Items.Add(DateTime.Now.AddDays(-2).ToString("       _dd-MM-yyyy"));
         btnDateMenu.Items.Add("-");
         btnDateMenu.Items.Add(DateTime.Now.ToString("         _MM-yyyy"));
         btnDateMenu.Items.Add(DateTime.Now.AddMonths(-1).ToString("         _MM-yyyy"));
