@@ -330,6 +330,8 @@ the latest version.</value></data>
   <data name="im Dokument suchen" xml:space="preserve"><value>search in the document</value></data>
   <data name="Dokument drucken" xml:space="preserve"><value>print document</value></data>
   <data name="Vollbild ein/aus" xml:space="preserve"><value>full screen on/off</value></data>
+  <data name="Zum Beenden des Vollbildmodus Esc gedrückt halten" xml:space="preserve"><value>Press and hold Esc to exit full screen</value></data>
+  <data name="Beenden auch durch Gedrückthalten von Esc – ein kurzes Esc schließt im Vollbild nur offene Viewer-Dialoge." xml:space="preserve"><value>Holding Esc also exits – in full screen a short press of Esc only closes open viewer dialogs.</value></data>
   <data name="Programm beenden (Option)" xml:space="preserve"><value>close program (option)</value></data>
 
   <!-- Umbenennen-Dialog -->

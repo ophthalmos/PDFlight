@@ -32,6 +32,7 @@
             var resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             webView = new Microsoft.Web.WebView2.WinForms.WebView2();
             splashTimer = new System.Windows.Forms.Timer(components);
+            escHoldTimer = new System.Windows.Forms.Timer(components);
             toolStrip = new ToolStrip();
             btnOpen = new ToolStripSplitButton();
             toolStripSeparator1 = new ToolStripSeparator();
@@ -122,7 +123,11 @@
             // 
             splashTimer.Interval = 1000;
             splashTimer.Tick += SplashTimer_Tick;
-            // 
+            //
+            // escHoldTimer
+            //
+            escHoldTimer.Tick += EscHoldTimer_Tick;
+            //
             // toolStrip
             // 
             toolStrip.GripStyle = ToolStripGripStyle.Hidden;
@@ -694,6 +699,7 @@
 
         private Microsoft.Web.WebView2.WinForms.WebView2 webView;
         private System.Windows.Forms.Timer splashTimer;
+        private System.Windows.Forms.Timer escHoldTimer;
         private System.Windows.Forms.ToolStrip toolStrip;
         private System.Windows.Forms.ToolStripSplitButton btnOpen;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;

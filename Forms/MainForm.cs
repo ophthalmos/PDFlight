@@ -285,20 +285,28 @@ public partial class MainForm : Form
 
     private SplashLabelForm? splashLabel;
 
-    /// <summary>Zeigt eine Einblend-Meldung mittig über dem Viewer; splashTimer blendet sie nach 1 s aus.</summary>
-    private void ShowSplash(string text)
+    /// <summary>Zeigt eine Einblend-Meldung mittig über dem Viewer; splashTimer blendet sie nach der Anzeigedauer (Vorgabe 1 s) aus.
+    /// atTop: knapp unter dem Oberrand wie der Vollbild-Hinweis von Chrome und Edge.</summary>
+    private void ShowSplash(string text, int milliseconds = 1000, bool atTop = false)
     {
+        splashTimer.Interval = milliseconds;
         splashLabel ??= new SplashLabelForm();
         splashLabel.SetMessage(text);
         var host = webView.PointToScreen(Point.Empty);
         var size = splashLabel.PreferredSize;
-        splashLabel.Location = new Point(host.X + (webView.Width - size.Width) / 2, host.Y + (webView.Height - size.Height) / 3); // im oberen Drittel: dort verdeckt sie kaum Inhalt und fällt trotzdem auf
+        var top = atTop ? LogicalToDeviceUnits(48) : (webView.Height - size.Height) / 3; // sonst im oberen Drittel: dort verdeckt sie kaum Inhalt und fällt trotzdem auf
+        splashLabel.Location = new Point(host.X + (webView.Width - size.Width) / 2, host.Y + top);
         splashLabel.Show(this);
         splashTimer.Stop(); // eine laufende Anzeige beginnt von vorn
         splashTimer.Start();
     }
 
     private void SplashTimer_Tick(object? sender, EventArgs e)
+    {
+        HideSplash();
+    }
+
+    private void HideSplash()
     {
         splashTimer.Stop();
         splashLabel?.Hide();
@@ -329,7 +337,8 @@ public partial class MainForm : Form
         clickShield?.Hide();
     }
 
-    /// <summary>F11-Vollbild wie im Browser: randlos maximiert, Tool- und Statusleiste ausgeblendet; Esc oder F11 beendet.</summary>
+    /// <summary>F11-Vollbild wie im Browser: randlos maximiert, Tool- und Statusleiste ausgeblendet; F11 oder gedrückt gehaltenes Esc
+    /// beendet (s. <see cref="WatchEscapeHold"/>). Beim Einschalten blendet es wie Chrome und Edge den Hinweis darauf ein.</summary>
     private void SetFullScreen(bool enable)
     {
         if (isFullScreen == enable) { return; }
@@ -351,6 +360,31 @@ public partial class MainForm : Form
             WindowState = fullScreenPreviousState;
         }
         ResumeLayout();
+        if (enable) { ShowSplash(Lng.T("Zum Beenden des Vollbildmodus Esc gedrückt halten"), 3000, atTop: true); }
+        else { HideSplash(); } // ein noch stehender Hinweis passte nicht mehr zur Fenstergröße
+    }
+
+    private static readonly TimeSpan EscHoldTime = TimeSpan.FromSeconds(1.5);
+    private DateTime escHoldStart;
+
+    /// <summary>Esc im Vollbild wie in Chrome: Ein kurzer Druck geht an den Viewer und schließt dessen Dialoge (etwa die
+    /// Dokumenteigenschaften aus dem Viewer-Menü – deren Zustand ist über die WebView2-API nicht abfragbar); erst gedrückt halten
+    /// beendet den Vollbildmodus. escHoldTimer fragt die Taste ab, bis sie losgelassen ist. Nach dem Verlassen schluckt es die
+    /// Tastenwiederholung, sonst löste sie gleich das Beenden per Doppel-Esc aus.</summary>
+    private Action? WatchEscapeHold()
+    {
+        if (!escHoldTimer.Enabled) // die Tastenwiederholung beim Halten startet nicht von vorn
+        {
+            escHoldStart = DateTime.UtcNow;
+            escHoldTimer.Start();
+        }
+        return isFullScreen ? null : () => { };
+    }
+
+    private void EscHoldTimer_Tick(object? sender, EventArgs e)
+    {
+        if ((NativeMethods.GetAsyncKeyState(NativeMethods.VK_ESCAPE) & 0x8000) == 0) { escHoldTimer.Stop(); return; } // losgelassen
+        if (isFullScreen && DateTime.UtcNow - escHoldStart >= EscHoldTime) { SetFullScreen(false); } // der Timer läuft bis zum Loslassen weiter
     }
 
     // ------------------------------------------------------------------ Laden & Navigation
@@ -2404,7 +2438,7 @@ public partial class MainForm : Form
             case Keys.F8 when viewHost.AdobeActive || AdobeViewAllowed: return ToggleAdobeView; // Adobe-Ansicht (Option)
             case Keys.F11: return () => SetFullScreen(!isFullScreen);
             case Keys.Escape | Keys.Shift when settings.CloseOnEscape: return Close;      // Shift+Esc beendet sofort (wie in NetRadio)
-            case Keys.Escape when isFullScreen: return () => SetFullScreen(false);
+            case Keys.Escape when isFullScreen || escHoldTimer.Enabled: return WatchEscapeHold(); // Vollbild: erst gedrückt halten beendet
             case Keys.Escape when settings.CloseOnEscape: return ResolveEscapeToClose();
         }
         if ((keyData & (Keys.Control | Keys.Alt | Keys.Shift)) == Keys.Control)
@@ -2452,14 +2486,19 @@ public partial class MainForm : Form
 
     // Der Zustand der Viewer-Dialoge (Suchleiste, Seitenansicht, Drucken …) ist über die WebView2-API nicht
     // abfragbar. Wird aber SICHER einer geöffnet — per Tastatur, die läuft hier durch —, setzt das nächste Esc
-    // das Beenden/Vollbild-Verlassen aus und geht stattdessen an Chromium, das den Dialog schließt.
+    // das Beenden aus und geht stattdessen an Chromium, das den Dialog schließt.
     // Per Maus geöffnete Viewer-Dialoge (Toolbar-Buttons) bleiben unsichtbar; dort beendet Esc wie gewohnt.
+    // Im Vollbild geht ein kurzes Esc immer an den Viewer, beendet wird dort nur durch Gedrückthalten (WatchEscapeHold).
     private bool viewerDialogOpen;
 
     private void WebView_KeyDown(object? sender, KeyEventArgs e)
     {
         if (e.KeyData is (Keys.Control | Keys.F) or Keys.F3 or (Keys.Control | Keys.P)) { viewerDialogOpen = true; return; } // Suche bzw. Drucken — an Chromium durchreichen
-        if (e.KeyData == Keys.Escape && viewerDialogOpen) { viewerDialogOpen = false; return; }
+        if (e.KeyData == Keys.Escape && viewerDialogOpen)
+        {
+            viewerDialogOpen = false;
+            if (!isFullScreen) { return; } // im Vollbild geht Esc ohnehin an den Viewer – dort zählt es aber für das Gedrückthalten
+        }
         if (e.KeyData is (Keys.Control | Keys.Add) or (Keys.Control | Keys.Oemplus) or (Keys.Control | Keys.Subtract) or (Keys.Control | Keys.OemMinus)
             or (Keys.Control | Keys.D0) or (Keys.Control | Keys.NumPad0))
         {

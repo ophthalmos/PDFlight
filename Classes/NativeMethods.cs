@@ -42,4 +42,10 @@ internal static partial class NativeMethods
 
     [LibraryImport("user32.dll")]
     public static partial uint GetWindowThreadProcessId(nint hWnd, out uint processId);
+
+    // Esc gedrückt halten beendet den Vollbildmodus (MainForm.WatchEscapeHold)
+    public const int VK_ESCAPE = 0x1B;
+
+    [LibraryImport("user32.dll")]
+    public static partial short GetAsyncKeyState(int vKey);
 }
