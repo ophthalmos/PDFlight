@@ -6,10 +6,12 @@ namespace PDFLight.Classes;
 /// <summary>Zeigt den Windows-Eigenschaften-Dialog einer Datei (portiert aus PDFMover NativeMethods).</summary>
 internal static partial class ShellUtil
 {
-    /// <summary>Registriert die PDF-Verknüpfung (ProgID mit pdffile.ico und Öffnen-Befehl) bei jedem
+    /// <summary>Registriert die PDF-Verknüpfung (ProgID mit Dokumentsymbol und Öffnen-Befehl) bei jedem
     /// Start unter HKCU – unabhängig vom Installer-Task. So gilt das neutrale Dateisymbol auch dann,
     /// wenn der Anwender PDFlight erst nachträglich zum Standardprogramm für PDFs macht. Die
-    /// Standard-Wahl selbst bleibt unberührt (die trifft seit Windows 10 allein der Benutzer).</summary>
+    /// Standard-Wahl selbst bleibt unberührt (die trifft seit Windows 10 allein der Benutzer).
+    /// Das Dokumentsymbol (pdffile.ico) steckt seit 28.09.2026 als zweites Icon in der Release-EXE (Post-Build-Schritt
+    /// InsertIcons); HKCU hat Vorrang vor dem HKLM-Eintrag des Installers und muss deshalb ebenfalls auf EXE,1 zeigen.</summary>
     public static void RegisterFileType()
     {
         try
@@ -17,12 +19,11 @@ internal static partial class ShellUtil
             // die PDFlight-EXE neben der Programm-Assembly – auch aus Test-Treibern heraus korrekt
             var exe = Path.ChangeExtension(typeof(ShellUtil).Assembly.Location, ".exe");
             if (!File.Exists(exe)) { exe = Application.ExecutablePath; }
-            var icon = Path.Combine(Path.GetDirectoryName(exe)!, "pdffile.ico");
             using var progId = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\Classes\PDFlight.Document");
             progId.SetValue(null, Lng.T("PDF-Datei"));
             using (var iconKey = progId.CreateSubKey("DefaultIcon"))
             {
-                iconKey.SetValue(null, File.Exists(icon) ? icon : exe + ",0"); // ohne ico-Datei (z.B. Debug-Lauf) das EXE-Icon
+                iconKey.SetValue(null, exe + (HasSecondIcon(exe) ? ",1" : ",0")); // ohne Dokumentsymbol (Debug-Build) das Programm-Icon
             }
             using (var command = progId.CreateSubKey(@"shell\open\command"))
             {
@@ -39,6 +40,17 @@ internal static partial class ShellUtil
         {
             // ohne Registrierung läuft das Programm normal weiter – es fehlt nur das Datei-Icon
         }
+    }
+
+    /// <summary>Enthält die EXE ein zweites Icon (Index 1)? Nur die Release-EXE – der Post-Build-Schritt fügt pdffile.ico ein.</summary>
+    private static bool HasSecondIcon(string exe)
+    {
+        try
+        {
+            using var icon = Icon.ExtractIcon(exe, 1, 16);
+            return icon != null;
+        }
+        catch (Exception ex) when (ex is IOException or ArgumentException or System.ComponentModel.Win32Exception) { return false; }
     }
 
     /// <summary>Zeigt die Datei im Dateimanager an – in Directory Opus, falls installiert, sonst im Explorer (wie in PDFMover).</summary>

@@ -32,7 +32,6 @@
   <!-- UseWPF entfernt System.IO und System.Net.Http aus den impliziten Usings — hier wiederherstellen -->
   <ItemGroup>
     <Using Include="System.IO" />
-    <None Include="pdffile.ico" CopyToOutputDirectory="PreserveNewest" /><!-- Explorer-Dateisymbol, s. ShellUtil.RegisterFileType -->
     <Using Include="System.Net.Http" />
     <!-- Optionale Adobe-Ansicht (Classes\AdobeEmbed.cs): die Seite, die das Adobe-SDK einbettet, und die Client-ID (git-ignoriert;
          fehlt sie, bleibt die Ansicht gesperrt). Der Installer nimmt beides aus dem Release-Ordner mit. -->
@@ -57,5 +56,10 @@
   <ItemGroup>
     <Reference Remove="@(Reference-&gt;WithMetadataValue('Filename', 'Microsoft.Web.WebView2.Wpf'))" />
   </ItemGroup>
+  <!-- Release: pdffile.ico (Explorer-Symbol für PDF-Dateien) als zweites Icon in die EXE einfügen – Installer und
+       ShellUtil.RegisterFileType verweisen auf PDFlight.exe,1; die ico-Datei selbst wird nicht mehr ausgeliefert -->
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if $(ConfigurationName) == Release (E:\OneDrive\Code\CodeSigning\InsertIcons.exe $(TargetDir)$(TargetName).exe $(ProjectDir)pdffile.ico)" />
+  </Target>
 
 </Project>

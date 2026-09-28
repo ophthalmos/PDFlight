@@ -78,7 +78,6 @@ Name: desktopicon; Description: "{cm:DesktopIcon}"; Flags: unchecked
 [Files]
 Source: "{#releaseDir}\*"; Excludes: "*.pdb"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
-Source: "pdffile.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\{#appName}"; Filename: "{app}\{#appName}.exe"
@@ -91,8 +90,9 @@ Root: HKLM; Subkey: "Software\Classes\{#appName}.Document"; ValueType: string; V
 ; wird hier nur zum Deinstallieren vorgemerkt
 Root: HKCU; Subkey: "Software\Classes\{#appName}.Document"; ValueType: none; Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Classes\.pdf\OpenWithProgids"; ValueType: none; ValueName: "{#appName}.Document"; Flags: uninsdeletevalue
-; neutrales Dokument-Icon für PDF-Dateien im Explorer (statt des Programm-Icons der EXE)
-Root: HKLM; Subkey: "Software\Classes\{#appName}.Document\DefaultIcon"; ValueType: string; ValueData: "{app}\pdffile.ico"
+; neutrales Dokument-Icon für PDF-Dateien im Explorer (statt des Programm-Icons): pdffile.ico steckt als zweites Icon
+; in der EXE (Post-Build-Schritt InsertIcons im Release-Build), deshalb Index 1
+Root: HKLM; Subkey: "Software\Classes\{#appName}.Document\DefaultIcon"; ValueType: string; ValueData: "{app}\{#appName}.exe,1"
 Root: HKLM; Subkey: "Software\Classes\{#appName}.Document\shell\open\command"; ValueType: string; ValueData: """{app}\{#appName}.exe"" ""%1"""
 Root: HKLM; Subkey: "Software\Classes\.pdf\OpenWithProgids"; ValueType: string; ValueName: "{#appName}.Document"; ValueData: ""; Flags: uninsdeletevalue
 Root: HKLM; Subkey: "Software\Classes\Applications\{#appName}.exe\shell\open\command"; ValueType: string; ValueData: """{app}\{#appName}.exe"" ""%1"""; Flags: uninsdeletekey
@@ -107,6 +107,8 @@ Filename: "{app}\{#appName}.exe"; Parameters: "--help"; Description: "{cm:Run}";
 [InstallDelete]
 ; Vorgänger von setup.default aus früheren Versionen
 Type: files; Name: "{app}\language.default"
+; früher separat ausgeliefertes Dokumentsymbol – steckt jetzt in der EXE
+Type: files; Name: "{app}\pdffile.ico"
 
 [UninstallDelete]
 Type: files; Name: "{app}\setup.default"
