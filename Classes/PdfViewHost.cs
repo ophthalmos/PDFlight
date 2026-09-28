@@ -246,7 +246,7 @@ internal partial class PdfViewHost(WebView2 webView)
         await loaded.Task;
         for (var attempt = 0; attempt < 50; attempt++) // bis 10 s auf das Seitenfeld warten (großes Dokument, kalte Laufzeit)
         {
-            if (documentLoaded != loaded || currentBytes == null) { return; } // inzwischen ein anderes Dokument
+            if (webView.IsDisposed || documentLoaded != loaded || currentBytes == null) { return; } // inzwischen ein anderes Dokument oder das Fenster geschlossen
             var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
             var current = chromium == IntPtr.Zero ? 0 : await Task.Run(() => ReadPageNumber(chromium));
             if (current > 0)
@@ -307,6 +307,7 @@ internal partial class PdfViewHost(WebView2 webView)
         if (!IsReady || currentBytes == null) { return CoreWebView2PrintStatus.OtherError; }
         if (documentLoaded != null) { await documentLoaded.Task; }
         await Task.Delay(1500);
+        if (webView.IsDisposed) { return CoreWebView2PrintStatus.OtherError; } // in der Wartezeit geschlossen
         var settings = webView.CoreWebView2.Environment.CreatePrintSettings();
         if (!string.IsNullOrEmpty(printerName)) { settings.PrinterName = printerName; }
         return await webView.CoreWebView2.PrintAsync(settings);
@@ -775,7 +776,7 @@ internal partial class PdfViewHost(WebView2 webView)
     {
         var loaded = documentLoaded;
         await Task.Delay(1500);
-        if (documentLoaded != loaded || currentBytes == null || AdobeActive) { return; }
+        if (webView.IsDisposed || documentLoaded != loaded || currentBytes == null || AdobeActive) { return; } // Fenster in der Wartezeit geschlossen: Handle legte es neu an → ObjectDisposedException
         var chromium = FindDescendant(webView.Handle, "Chrome_RenderWidgetHostHWND", 4);
         if (chromium != IntPtr.Zero) { EnsureZoomHook(chromium); } // auch ohne Zoomanzeige (verschlüsselte Datei) die Hooks setzen
         formEventsArmed = true;
