@@ -585,6 +585,10 @@ Clicking into the preview sets the position.</value></data>
   <data name="Am &amp;Anfang" xml:space="preserve"><value>At the s&amp;tart</value></data>
   <data name="Am &amp;Ende" xml:space="preserve"><value>At the &amp;end</value></data>
   <data name="Bild (optional)" xml:space="preserve"><value>Image (optional)</value></data>
+  <data name="Vorschau" xml:space="preserve"><value>Preview</value></data>
+  <data name="auf {0:0} % verkleinert" xml:space="preserve"><value>reduced to {0:0} %</value></data>
+  <data name="(aus der Bilddatei)" xml:space="preserve"><value>(from the image file)</value></data>
+  <data name="(Bilddatei: {0} dpi)" xml:space="preserve"><value>(image file: {0} dpi)</value></data>
   <data name="Mehr dpi = kleineres Bild. Scans meist 300 dpi, Screenshots 96 dpi." xml:space="preserve"><value>More dpi = smaller image. Scans usually 300 dpi, screenshots 96 dpi.</value></data>
   <data name="&amp;Originalgröße bei" xml:space="preserve"><value>&amp;Original size at</value></data>
   <data name="An die Seite an&amp;passen (10 mm Rand)" xml:space="preserve"><value>&amp;Fit to page (10 mm margin)</value></data>

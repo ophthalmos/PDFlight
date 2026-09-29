@@ -28,163 +28,171 @@ namespace PDFLight.Forms
         /// </summary>
         private void InitializeComponent()
         {
-            groupFormat = new System.Windows.Forms.GroupBox();
-            radioLikePage = new System.Windows.Forms.RadioButton();
-            radioA4 = new System.Windows.Forms.RadioButton();
-            radioLetter = new System.Windows.Forms.RadioButton();
-            comboOrientation = new System.Windows.Forms.ComboBox();
-            radioFromImage = new System.Windows.Forms.RadioButton();
-            groupPosition = new System.Windows.Forms.GroupBox();
-            radioAfter = new System.Windows.Forms.RadioButton();
-            radioBefore = new System.Windows.Forms.RadioButton();
-            radioFirst = new System.Windows.Forms.RadioButton();
-            radioLast = new System.Windows.Forms.RadioButton();
-            groupImage = new System.Windows.Forms.GroupBox();
-            textBoxImage = new System.Windows.Forms.TextBox();
-            buttonBrowse = new System.Windows.Forms.Button();
-            radioOriginal = new System.Windows.Forms.RadioButton();
-            comboDpi = new System.Windows.Forms.ComboBox();
-            labelDpi = new System.Windows.Forms.Label();
-            radioFit = new System.Windows.Forms.RadioButton();
-            labelImageSize = new System.Windows.Forms.Label();
-            labelDpiHint = new System.Windows.Forms.Label();
-            buttonOK = new System.Windows.Forms.Button();
-            buttonCancel = new System.Windows.Forms.Button();
+            groupFormat = new GroupBox();
+            radioLikePage = new RadioButton();
+            radioA4 = new RadioButton();
+            radioLetter = new RadioButton();
+            comboOrientation = new ComboBox();
+            radioFromImage = new RadioButton();
+            groupPosition = new GroupBox();
+            radioAfter = new RadioButton();
+            radioBefore = new RadioButton();
+            radioFirst = new RadioButton();
+            radioLast = new RadioButton();
+            groupImage = new GroupBox();
+            textBoxImage = new TextBox();
+            buttonBrowse = new Button();
+            radioOriginal = new RadioButton();
+            comboDpi = new ComboBox();
+            labelDpi = new Label();
+            radioFit = new RadioButton();
+            labelImageSize = new Label();
+            labelDpiHint = new Label();
+            labelDpiSource = new Label();
+            groupPreview = new GroupBox();
+            pictureBoxPreview = new PictureBox();
+            labelPreviewPage = new Label();
+            labelPreviewScale = new Label();
+            buttonOK = new Button();
+            buttonCancel = new Button();
             groupFormat.SuspendLayout();
             groupPosition.SuspendLayout();
             groupImage.SuspendLayout();
+            groupPreview.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxPreview).BeginInit();
             SuspendLayout();
-            //
+            // 
             // groupFormat
-            //
-            groupFormat.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            // 
+            groupFormat.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupFormat.Controls.Add(radioLikePage);
             groupFormat.Controls.Add(radioA4);
             groupFormat.Controls.Add(radioLetter);
             groupFormat.Controls.Add(comboOrientation);
             groupFormat.Controls.Add(radioFromImage);
-            groupFormat.Location = new System.Drawing.Point(12, 12);
+            groupFormat.Location = new Point(12, 12);
             groupFormat.Name = "groupFormat";
-            groupFormat.Size = new System.Drawing.Size(416, 104);
+            groupFormat.Size = new Size(281, 104);
             groupFormat.TabIndex = 0;
             groupFormat.TabStop = false;
             groupFormat.Text = "Format";
-            //
+            // 
             // radioLikePage
-            //
+            // 
             radioLikePage.AutoSize = true;
             radioLikePage.Checked = true;
-            radioLikePage.Location = new System.Drawing.Point(12, 22);
+            radioLikePage.Location = new Point(12, 22);
             radioLikePage.Name = "radioLikePage";
-            radioLikePage.Size = new System.Drawing.Size(250, 19);
+            radioLikePage.Size = new Size(110, 19);
             radioLikePage.TabIndex = 0;
             radioLikePage.TabStop = true;
             radioLikePage.Text = "&Wie Seite {0}: {1}";
             radioLikePage.UseVisualStyleBackColor = true;
             radioLikePage.CheckedChanged += Option_CheckedChanged;
-            //
+            // 
             // radioA4
-            //
+            // 
             radioA4.AutoSize = true;
-            radioA4.Location = new System.Drawing.Point(12, 48);
+            radioA4.Location = new Point(12, 48);
             radioA4.Name = "radioA4";
-            radioA4.Size = new System.Drawing.Size(65, 19);
+            radioA4.Size = new Size(62, 19);
             radioA4.TabIndex = 1;
             radioA4.Text = "DIN A&4";
             radioA4.UseVisualStyleBackColor = true;
             radioA4.CheckedChanged += Option_CheckedChanged;
-            //
+            // 
             // radioLetter
-            //
+            // 
             radioLetter.AutoSize = true;
-            radioLetter.Location = new System.Drawing.Point(110, 48);
+            radioLetter.Location = new Point(85, 48);
             radioLetter.Name = "radioLetter";
-            radioLetter.Size = new System.Drawing.Size(80, 19);
+            radioLetter.Size = new Size(72, 19);
             radioLetter.TabIndex = 2;
             radioLetter.Text = "US &Letter";
             radioLetter.UseVisualStyleBackColor = true;
             radioLetter.CheckedChanged += Option_CheckedChanged;
-            //
+            // 
             // comboOrientation
-            //
-            comboOrientation.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            // 
+            comboOrientation.DropDownStyle = ComboBoxStyle.DropDownList;
             comboOrientation.Enabled = false;
-            comboOrientation.Location = new System.Drawing.Point(220, 46);
+            comboOrientation.Location = new Point(170, 47);
             comboOrientation.Name = "comboOrientation";
-            comboOrientation.Size = new System.Drawing.Size(140, 23);
+            comboOrientation.Size = new Size(105, 23);
             comboOrientation.TabIndex = 3;
-            //
+            comboOrientation.SelectedIndexChanged += ComboOrientation_SelectedIndexChanged;
+            // 
             // radioFromImage
-            //
+            // 
             radioFromImage.AutoSize = true;
             radioFromImage.Enabled = false;
-            radioFromImage.Location = new System.Drawing.Point(12, 74);
+            radioFromImage.Location = new Point(12, 74);
             radioFromImage.Name = "radioFromImage";
-            radioFromImage.Size = new System.Drawing.Size(170, 19);
+            radioFromImage.Size = new Size(157, 19);
             radioFromImage.TabIndex = 4;
             radioFromImage.Text = "Wie das &Bild (ohne Rand)";
             radioFromImage.UseVisualStyleBackColor = true;
             radioFromImage.CheckedChanged += Option_CheckedChanged;
-            //
+            // 
             // groupPosition
-            //
-            groupPosition.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            // 
+            groupPosition.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupPosition.Controls.Add(radioAfter);
             groupPosition.Controls.Add(radioBefore);
             groupPosition.Controls.Add(radioFirst);
             groupPosition.Controls.Add(radioLast);
-            groupPosition.Location = new System.Drawing.Point(12, 124);
+            groupPosition.Location = new Point(12, 124);
             groupPosition.Name = "groupPosition";
-            groupPosition.Size = new System.Drawing.Size(416, 78);
+            groupPosition.Size = new Size(281, 78);
             groupPosition.TabIndex = 1;
             groupPosition.TabStop = false;
             groupPosition.Text = "Position";
-            //
+            // 
             // radioAfter
-            //
+            // 
             radioAfter.AutoSize = true;
             radioAfter.Checked = true;
-            radioAfter.Location = new System.Drawing.Point(12, 22);
+            radioAfter.Location = new Point(12, 22);
             radioAfter.Name = "radioAfter";
-            radioAfter.Size = new System.Drawing.Size(110, 19);
+            radioAfter.Size = new Size(98, 19);
             radioAfter.TabIndex = 0;
             radioAfter.TabStop = true;
             radioAfter.Text = "&Nach Seite {0}";
             radioAfter.UseVisualStyleBackColor = true;
-            //
+            // 
             // radioBefore
-            //
+            // 
             radioBefore.AutoSize = true;
-            radioBefore.Location = new System.Drawing.Point(220, 22);
+            radioBefore.Location = new Point(170, 22);
             radioBefore.Name = "radioBefore";
-            radioBefore.Size = new System.Drawing.Size(100, 19);
+            radioBefore.Size = new Size(87, 19);
             radioBefore.TabIndex = 1;
             radioBefore.Text = "&Vor Seite {0}";
             radioBefore.UseVisualStyleBackColor = true;
-            //
+            // 
             // radioFirst
-            //
+            // 
             radioFirst.AutoSize = true;
-            radioFirst.Location = new System.Drawing.Point(12, 48);
+            radioFirst.Location = new Point(12, 48);
             radioFirst.Name = "radioFirst";
-            radioFirst.Size = new System.Drawing.Size(85, 19);
+            radioFirst.Size = new Size(86, 19);
             radioFirst.TabIndex = 2;
             radioFirst.Text = "Am &Anfang";
             radioFirst.UseVisualStyleBackColor = true;
-            //
+            // 
             // radioLast
-            //
+            // 
             radioLast.AutoSize = true;
-            radioLast.Location = new System.Drawing.Point(220, 48);
+            radioLast.Location = new Point(170, 48);
             radioLast.Name = "radioLast";
-            radioLast.Size = new System.Drawing.Size(70, 19);
+            radioLast.Size = new Size(73, 19);
             radioLast.TabIndex = 3;
             radioLast.Text = "Am &Ende";
             radioLast.UseVisualStyleBackColor = true;
-            //
+            // 
             // groupImage
-            //
-            groupImage.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            // 
+            groupImage.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupImage.Controls.Add(textBoxImage);
             groupImage.Controls.Add(buttonBrowse);
             groupImage.Controls.Add(radioOriginal);
@@ -193,147 +201,202 @@ namespace PDFLight.Forms
             groupImage.Controls.Add(radioFit);
             groupImage.Controls.Add(labelImageSize);
             groupImage.Controls.Add(labelDpiHint);
-            groupImage.Location = new System.Drawing.Point(12, 210);
+            groupImage.Controls.Add(labelDpiSource);
+            groupImage.Location = new Point(12, 210);
             groupImage.Name = "groupImage";
-            groupImage.Size = new System.Drawing.Size(416, 150);
+            groupImage.Size = new Size(434, 150);
             groupImage.TabIndex = 2;
             groupImage.TabStop = false;
             groupImage.Text = "Bild (optional)";
-            //
+            // 
             // textBoxImage
-            //
-            textBoxImage.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            textBoxImage.Location = new System.Drawing.Point(12, 24);
+            // 
+            textBoxImage.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textBoxImage.Location = new Point(12, 24);
             textBoxImage.Name = "textBoxImage";
-            textBoxImage.Size = new System.Drawing.Size(270, 23);
+            textBoxImage.Size = new Size(269, 23);
             textBoxImage.TabIndex = 0;
             textBoxImage.TextChanged += TextBoxImage_TextChanged;
-            //
+            // 
             // buttonBrowse
-            //
-            buttonBrowse.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            buttonBrowse.Location = new System.Drawing.Point(288, 22);
+            // 
+            buttonBrowse.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonBrowse.Location = new Point(287, 22);
             buttonBrowse.Name = "buttonBrowse";
-            buttonBrowse.Size = new System.Drawing.Size(116, 27);
+            buttonBrowse.Size = new Size(139, 27);
             buttonBrowse.TabIndex = 1;
             buttonBrowse.Text = "&Durchsuchen …";
             buttonBrowse.UseVisualStyleBackColor = true;
             buttonBrowse.Click += ButtonBrowse_Click;
-            //
+            // 
             // radioOriginal
-            //
+            // 
             radioOriginal.AutoSize = true;
             radioOriginal.Checked = true;
             radioOriginal.Enabled = false;
-            radioOriginal.Location = new System.Drawing.Point(12, 58);
+            radioOriginal.Location = new Point(12, 58);
             radioOriginal.Name = "radioOriginal";
-            radioOriginal.Size = new System.Drawing.Size(120, 19);
+            radioOriginal.Size = new Size(117, 19);
             radioOriginal.TabIndex = 2;
             radioOriginal.TabStop = true;
             radioOriginal.Text = "&Originalgröße bei";
             radioOriginal.UseVisualStyleBackColor = true;
             radioOriginal.CheckedChanged += Option_CheckedChanged;
-            //
+            // 
             // comboDpi
-            //
+            // 
             comboDpi.Enabled = false;
             comboDpi.Items.AddRange(new object[] { "72", "96", "150", "200", "300", "600" });
-            comboDpi.Location = new System.Drawing.Point(150, 56);
+            comboDpi.Location = new Point(150, 56);
             comboDpi.Name = "comboDpi";
-            comboDpi.Size = new System.Drawing.Size(64, 23);
+            comboDpi.Size = new Size(64, 23);
             comboDpi.TabIndex = 3;
             comboDpi.Text = "300";
             comboDpi.TextChanged += ComboDpi_TextChanged;
-            //
+            // 
             // labelDpi
-            //
+            // 
             labelDpi.AutoSize = true;
             labelDpi.Enabled = false;
-            labelDpi.Location = new System.Drawing.Point(220, 60);
+            labelDpi.Location = new Point(220, 60);
             labelDpi.Name = "labelDpi";
-            labelDpi.Size = new System.Drawing.Size(24, 15);
+            labelDpi.Size = new Size(24, 15);
             labelDpi.TabIndex = 4;
             labelDpi.Text = "dpi";
-            //
+            // 
             // radioFit
-            //
+            // 
             radioFit.AutoSize = true;
             radioFit.Enabled = false;
-            radioFit.Location = new System.Drawing.Point(12, 84);
+            radioFit.Location = new Point(12, 84);
             radioFit.Name = "radioFit";
-            radioFit.Size = new System.Drawing.Size(230, 19);
+            radioFit.Size = new Size(217, 19);
             radioFit.TabIndex = 5;
             radioFit.Text = "An die Seite an&passen (10 mm Rand)";
             radioFit.UseVisualStyleBackColor = true;
             radioFit.CheckedChanged += Option_CheckedChanged;
-            //
+            // 
             // labelImageSize
-            //
+            // 
             labelImageSize.AutoSize = true;
-            labelImageSize.ForeColor = System.Drawing.SystemColors.GrayText;
-            labelImageSize.Location = new System.Drawing.Point(12, 108);
+            labelImageSize.ForeColor = SystemColors.GrayText;
+            labelImageSize.Location = new Point(12, 108);
             labelImageSize.Name = "labelImageSize";
-            labelImageSize.Size = new System.Drawing.Size(0, 15);
+            labelImageSize.Size = new Size(0, 15);
             labelImageSize.TabIndex = 6;
-            //
+            // 
             // labelDpiHint
-            //
+            // 
             labelDpiHint.AutoSize = true;
             labelDpiHint.Enabled = false;
-            labelDpiHint.ForeColor = System.Drawing.SystemColors.GrayText;
-            labelDpiHint.Location = new System.Drawing.Point(12, 126);
+            labelDpiHint.ForeColor = SystemColors.GrayText;
+            labelDpiHint.Location = new Point(12, 126);
             labelDpiHint.Name = "labelDpiHint";
-            labelDpiHint.Size = new System.Drawing.Size(360, 15);
+            labelDpiHint.Size = new Size(354, 15);
             labelDpiHint.TabIndex = 7;
             labelDpiHint.Text = "Mehr dpi = kleineres Bild. Scans meist 300 dpi, Screenshots 96 dpi.";
-            //
+            // 
+            // labelDpiSource
+            // 
+            labelDpiSource.AutoSize = true;
+            labelDpiSource.ForeColor = SystemColors.GrayText;
+            labelDpiSource.Location = new Point(250, 60);
+            labelDpiSource.Name = "labelDpiSource";
+            labelDpiSource.Size = new Size(0, 15);
+            labelDpiSource.TabIndex = 8;
+            // 
+            // groupPreview
+            // 
+            groupPreview.Controls.Add(pictureBoxPreview);
+            groupPreview.Controls.Add(labelPreviewPage);
+            groupPreview.Controls.Add(labelPreviewScale);
+            groupPreview.Location = new Point(299, 12);
+            groupPreview.Name = "groupPreview";
+            groupPreview.Size = new Size(147, 190);
+            groupPreview.TabIndex = 3;
+            groupPreview.TabStop = false;
+            groupPreview.Text = "Vorschau";
+            // 
+            // pictureBoxPreview
+            // 
+            pictureBoxPreview.BackColor = Color.FromArgb(210, 210, 210);
+            pictureBoxPreview.Location = new Point(8, 22);
+            pictureBoxPreview.Name = "pictureBoxPreview";
+            pictureBoxPreview.Size = new Size(132, 128);
+            pictureBoxPreview.TabIndex = 0;
+            pictureBoxPreview.TabStop = false;
+            pictureBoxPreview.Paint += PictureBoxPreview_Paint;
+            // 
+            // labelPreviewPage
+            // 
+            labelPreviewPage.AutoSize = true;
+            labelPreviewPage.ForeColor = SystemColors.GrayText;
+            labelPreviewPage.Location = new Point(8, 153);
+            labelPreviewPage.Name = "labelPreviewPage";
+            labelPreviewPage.Size = new Size(0, 15);
+            labelPreviewPage.TabIndex = 1;
+            // 
+            // labelPreviewScale
+            // 
+            labelPreviewScale.AutoSize = true;
+            labelPreviewScale.ForeColor = SystemColors.GrayText;
+            labelPreviewScale.Location = new Point(8, 169);
+            labelPreviewScale.Name = "labelPreviewScale";
+            labelPreviewScale.Size = new Size(0, 15);
+            labelPreviewScale.TabIndex = 2;
+            // 
             // buttonOK
-            //
-            buttonOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            buttonOK.Location = new System.Drawing.Point(232, 372);
+            // 
+            buttonOK.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonOK.Location = new Point(250, 372);
             buttonOK.Name = "buttonOK";
-            buttonOK.Size = new System.Drawing.Size(95, 27);
-            buttonOK.TabIndex = 3;
+            buttonOK.Size = new Size(95, 27);
+            buttonOK.TabIndex = 4;
             buttonOK.Text = "Einfügen";
             buttonOK.UseVisualStyleBackColor = true;
             buttonOK.Click += ButtonOK_Click;
-            //
+            // 
             // buttonCancel
-            //
-            buttonCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            buttonCancel.Location = new System.Drawing.Point(333, 372);
+            // 
+            buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            buttonCancel.DialogResult = DialogResult.Cancel;
+            buttonCancel.Location = new Point(351, 372);
             buttonCancel.Name = "buttonCancel";
-            buttonCancel.Size = new System.Drawing.Size(95, 27);
-            buttonCancel.TabIndex = 4;
+            buttonCancel.Size = new Size(95, 27);
+            buttonCancel.TabIndex = 5;
             buttonCancel.Text = "Abbrechen";
             buttonCancel.UseVisualStyleBackColor = true;
-            //
+            // 
             // InsertPageForm
-            //
+            // 
             AcceptButton = buttonOK;
-            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonCancel;
-            ClientSize = new System.Drawing.Size(440, 411);
+            ClientSize = new Size(458, 411);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
+            Controls.Add(groupPreview);
             Controls.Add(groupImage);
             Controls.Add(groupPosition);
             Controls.Add(groupFormat);
-            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "InsertPageForm";
             ShowInTaskbar = false;
-            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            StartPosition = FormStartPosition.CenterParent;
             Text = "Leere Seite einfügen";
+            FormClosed += InsertPageForm_FormClosed;
             groupFormat.ResumeLayout(false);
             groupFormat.PerformLayout();
             groupPosition.ResumeLayout(false);
             groupPosition.PerformLayout();
             groupImage.ResumeLayout(false);
             groupImage.PerformLayout();
+            groupPreview.ResumeLayout(false);
+            groupPreview.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBoxPreview).EndInit();
             ResumeLayout(false);
         }
 
@@ -359,6 +422,11 @@ namespace PDFLight.Forms
         private System.Windows.Forms.RadioButton radioFit;
         private System.Windows.Forms.Label labelImageSize;
         private System.Windows.Forms.Label labelDpiHint;
+        private System.Windows.Forms.Label labelDpiSource;
+        private System.Windows.Forms.GroupBox groupPreview;
+        private System.Windows.Forms.PictureBox pictureBoxPreview;
+        private System.Windows.Forms.Label labelPreviewPage;
+        private System.Windows.Forms.Label labelPreviewScale;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
     }

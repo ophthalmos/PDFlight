@@ -585,6 +585,10 @@ Un clic dans l'aperçu définit la position.</value></data>
   <data name="Am &amp;Anfang" xml:space="preserve"><value>Au &amp;début</value></data>
   <data name="Am &amp;Ende" xml:space="preserve"><value>À la &amp;fin</value></data>
   <data name="Bild (optional)" xml:space="preserve"><value>Image (facultatif)</value></data>
+  <data name="Vorschau" xml:space="preserve"><value>Aperçu</value></data>
+  <data name="auf {0:0} % verkleinert" xml:space="preserve"><value>réduite à {0:0} %</value></data>
+  <data name="(aus der Bilddatei)" xml:space="preserve"><value>(du fichier image)</value></data>
+  <data name="(Bilddatei: {0} dpi)" xml:space="preserve"><value>(fichier image : {0} dpi)</value></data>
   <data name="Mehr dpi = kleineres Bild. Scans meist 300 dpi, Screenshots 96 dpi." xml:space="preserve"><value>Plus de dpi = image plus petite. Scans 300 dpi, captures 96 dpi.</value></data>
   <data name="&amp;Originalgröße bei" xml:space="preserve"><value>Taille d’&amp;origine à</value></data>
   <data name="An die Seite an&amp;passen (10 mm Rand)" xml:space="preserve"><value>&amp;Ajuster à la page (marge de 10 mm)</value></data>

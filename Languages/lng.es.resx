@@ -585,6 +585,10 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="Am &amp;Anfang" xml:space="preserve"><value>Al p&amp;rincipio</value></data>
   <data name="Am &amp;Ende" xml:space="preserve"><value>Al &amp;final</value></data>
   <data name="Bild (optional)" xml:space="preserve"><value>Imagen (opcional)</value></data>
+  <data name="Vorschau" xml:space="preserve"><value>Vista previa</value></data>
+  <data name="auf {0:0} % verkleinert" xml:space="preserve"><value>reducida al {0:0} %</value></data>
+  <data name="(aus der Bilddatei)" xml:space="preserve"><value>(del archivo de imagen)</value></data>
+  <data name="(Bilddatei: {0} dpi)" xml:space="preserve"><value>(archivo de imagen: {0} dpi)</value></data>
   <data name="Mehr dpi = kleineres Bild. Scans meist 300 dpi, Screenshots 96 dpi." xml:space="preserve"><value>Más dpi = imagen más pequeña. Escaneos: 300 dpi, capturas: 96 dpi.</value></data>
   <data name="&amp;Originalgröße bei" xml:space="preserve"><value>Tamaño &amp;original a</value></data>
   <data name="An die Seite an&amp;passen (10 mm Rand)" xml:space="preserve"><value>Ajustar a la &amp;página (margen de 10 mm)</value></data>

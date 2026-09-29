@@ -54,6 +54,9 @@ internal enum NewPageFormat { LikePage, A4, Letter, FromImage }
 /// (<paramref name="FitImage"/>, auch vergrößert); bei <see cref="NewPageFormat.FromImage"/> bestimmen Pixel und Dpi die Seitengröße.</summary>
 internal sealed record NewPageOptions(InsertPosition Position, NewPageFormat Format, bool Landscape, string? ImagePath, bool FitImage, double Dpi);
 
+/// <summary>Ergebnis von <see cref="PdfEditService.LayoutNewPage"/>: Seitenmaße und Bildlage in Punkt (Ursprung links oben).</summary>
+internal readonly record struct NewPageLayout(double Width, double Height, XRect? Image, double Scale);
+
 /// <summary>Dokumentoperationen mit PDFsharp. Alle Methoden arbeiten direkt auf der Datei;
 /// die Anzeige bleibt davon unberührt, weil der Viewer aus dem Speicher liest.</summary>
 internal static partial class PdfEditService
@@ -1121,14 +1124,8 @@ internal static partial class PdfEditService
         using var image = options.ImagePath == null ? null : LoadImage(options.ImagePath); // vor dem Öffnen: ein unlesbares Bild bricht ab, bevor etwas geändert ist
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         var reference = document.Pages[page - 1];
-        var (width, height) = options.Format switch
-        {
-            NewPageFormat.A4 => PaperFormat.A4,
-            NewPageFormat.Letter => PaperFormat.Letter,
-            NewPageFormat.FromImage when image != null => LimitPageSize(ImageSizePt(image, options.Dpi)),
-            _ => reference.Rotate % 180 != 0 ? (reference.Height.Point, reference.Width.Point) : (reference.Width.Point, reference.Height.Point),
-        };
-        if (options.Landscape && options.Format is NewPageFormat.A4 or NewPageFormat.Letter) { (width, height) = (height, width); }
+        var (referenceWidth, referenceHeight) = reference.Rotate % 180 != 0 ? (reference.Height.Point, reference.Width.Point) : (reference.Width.Point, reference.Height.Point);
+        var layout = LayoutNewPage(options, referenceWidth, referenceHeight, image?.PixelWidth ?? 0, image?.PixelHeight ?? 0);
         var index = options.Position switch
         {
             InsertPosition.Before => page - 1,
@@ -1137,31 +1134,46 @@ internal static partial class PdfEditService
             _ => page,
         };
         var newPage = document.Pages.Insert(index);
-        newPage.Width = XUnit.FromPoint(width);
-        newPage.Height = XUnit.FromPoint(height);
+        newPage.Width = XUnit.FromPoint(layout.Width);
+        newPage.Height = XUnit.FromPoint(layout.Height);
         newPage.Rotate = 0;
-        if (image != null)
+        if (image != null && layout.Image is { } rect)
         {
             using var gfx = XGraphics.FromPdfPage(newPage);
-            if (options.Format == NewPageFormat.FromImage)
-            {
-                gfx.DrawImage(image, 0, 0, width, height);
-            }
-            else
-            {
-                var box = new XRect(PageMarginPt, PageMarginPt, width - 2 * PageMarginPt, height - 2 * PageMarginPt);
-                var (imageWidth, imageHeight) = ImageSizePt(image, options.Dpi);
-                var scale = Math.Min(box.Width / imageWidth, box.Height / imageHeight);
-                if (!options.FitImage) { scale = Math.Min(scale, 1); } // Originalgröße: nur verkleinern, wenn es nicht passt
-                gfx.DrawImage(image, box.X + (box.Width - imageWidth * scale) / 2, box.Y + (box.Height - imageHeight * scale) / 2, imageWidth * scale, imageHeight * scale);
-            }
+            gfx.DrawImage(image, rect);
         }
         document.Save(path);
         return index + 1;
     }
 
-    /// <summary>Druckgröße eines Bildes in Punkt bei der gewählten Auflösung – nicht die DPI-Angabe der Datei (Handyfotos tragen oft 72 DPI).</summary>
-    private static (double Width, double Height) ImageSizePt(XImage image, double dpi) => (image.PixelWidth * 72 / dpi, image.PixelHeight * 72 / dpi);
+    /// <summary>Maße der neuen Seite und Lage des Bildes darauf (Punkt, Ursprung links oben) – dieselbe Rechnung für das Einfügen und die
+    /// Vorschau im Dialog, damit beide übereinstimmen. <paramref name="referenceWidth"/>/<paramref name="referenceHeight"/>: sichtbare Maße
+    /// der angezeigten Seite; ohne Bild (Pixel 0) bleibt <see cref="NewPageLayout.Image"/> leer. Scale = Faktor gegenüber der Größe bei
+    /// der gewählten Auflösung (&lt; 1: verkleinert).</summary>
+    public static NewPageLayout LayoutNewPage(NewPageOptions options, double referenceWidth, double referenceHeight, int imagePixelWidth, int imagePixelHeight)
+    {
+        var hasImage = imagePixelWidth > 0 && imagePixelHeight > 0;
+        var dpi = options.Dpi > 0 ? options.Dpi : 72; // beim Einpassen spielt die Auflösung keine Rolle, das Feld ist dann ausgegraut
+        var (imageWidth, imageHeight) = (imagePixelWidth * 72 / dpi, imagePixelHeight * 72 / dpi); // Druckgröße bei der gewählten Auflösung, nicht der Datei-Angabe
+        var (width, height) = options.Format switch
+        {
+            NewPageFormat.A4 => PaperFormat.A4,
+            NewPageFormat.Letter => PaperFormat.Letter,
+            NewPageFormat.FromImage when hasImage => LimitPageSize((imageWidth, imageHeight)),
+            _ => (referenceWidth, referenceHeight),
+        };
+        if (options.Landscape && options.Format is NewPageFormat.A4 or NewPageFormat.Letter) { (width, height) = (height, width); }
+        if (!hasImage) { return new NewPageLayout(width, height, null, 1); }
+        if (options.Format == NewPageFormat.FromImage) { return new NewPageLayout(width, height, new XRect(0, 0, width, height), width / imageWidth); }
+        var box = new XRect(PageMarginPt, PageMarginPt, width - 2 * PageMarginPt, height - 2 * PageMarginPt);
+        var scale = Math.Min(box.Width / imageWidth, box.Height / imageHeight);
+        if (!options.FitImage) { scale = Math.Min(scale, 1); } // Originalgröße: nur verkleinern, wenn es nicht passt
+        var rect = new XRect(box.X + (box.Width - imageWidth * scale) / 2, box.Y + (box.Height - imageHeight * scale) / 2, imageWidth * scale, imageHeight * scale);
+        return new NewPageLayout(width, height, rect, scale);
+    }
+
+    /// <summary>Rand für eingepasste Bilder in Punkt (10 mm) – auch für die gestrichelte Linie in der Vorschau.</summary>
+    public static double ImageMarginPt => PageMarginPt;
 
     /// <summary>PDF-Seiten dürfen höchstens 14 400 pt (200 Zoll) messen (ohne /UserUnit) – größere proportional verkleinern.</summary>
     private static (double Width, double Height) LimitPageSize((double Width, double Height) size)
