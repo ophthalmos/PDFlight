@@ -1754,16 +1754,17 @@ public partial class MainForm : Form
         }
     }
 
-    /// <summary>Leere Seite vor oder nach der angezeigten Seite einfügen, wahlweise mit einem Bild darauf (Bearbeiten-Menü).</summary>
+    /// <summary>Leere Seite einfügen – Format, Position und wahlweise ein Bild wählt der Dialog (Bearbeiten-Menü).</summary>
     private void InsertPageDialog()
     {
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
         var page = Math.Max(1, ClampedCurrentPage());
-        using InsertPageForm dialog = new(page);
+        var (width, height) = PdfEditService.PageSizePt(currentFile.FullName, page); // für die Formatangabe „Wie Seite N: DIN A4, Hochformat“
+        using InsertPageForm dialog = new(page, width, height);
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         var newPage = 0;
-        if (RunPdfEdit(() => newPage = PdfEditService.InsertBlankPage(currentFile.FullName, page, dialog.After, dialog.ImagePath), Lng.T("Seite einfügen")))
+        if (RunPdfEdit(() => newPage = PdfEditService.InsertBlankPage(currentFile.FullName, page, dialog.Options), Lng.T("Seite einfügen")))
         {
             LoadPdf(currentFile.FullName, newPage);
             statusPath.Text = string.Format(dialog.ImagePath == null ? Lng.T("Eine leere Seite wurde als Seite {0} eingefügt.") : Lng.T("Eine Seite mit dem Bild wurde als Seite {0} eingefügt."), newPage);

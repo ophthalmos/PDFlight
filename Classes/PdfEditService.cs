@@ -43,6 +43,17 @@ internal sealed record AnnotationStyle(Color? BorderColor, Color? Background, Co
 /// Bearbeiten nicht – jede Änderung braucht vorher „Kennwort entfernen“ (Fehlerbericht 20.09.2026).</param>
 internal record PdfStatus(int PageCount, string? Version, string? PdfALevel, double PageWidthPt = 0, double PageHeightPt = 0, int AnnotationCount = 0, int OutlineCount = 0, bool Encrypted = false, int FormFieldCount = -1, int OpenPage = 0);
 
+/// <summary>Wohin die neue Seite kommt (<see cref="PdfEditService.InsertBlankPage"/>): relativ zur angezeigten Seite oder ans Ende.</summary>
+internal enum InsertPosition { After, Before, First, Last }
+
+/// <summary>Format der neuen Seite: wie die angezeigte Seite, DIN A4, US Letter oder in den Maßen des Bildes (ohne Rand).</summary>
+internal enum NewPageFormat { LikePage, A4, Letter, FromImage }
+
+/// <summary>Einstellungen aus dem Dialog „Leere Seite einfügen“. Landscape gilt nur für A4/Letter. Das Bild steht in Originalgröße
+/// (Maße aus den Pixeln und <paramref name="Dpi"/>, nur verkleinert, wenn es nicht passt) oder mit 10 mm Rand eingepasst
+/// (<paramref name="FitImage"/>, auch vergrößert); bei <see cref="NewPageFormat.FromImage"/> bestimmen Pixel und Dpi die Seitengröße.</summary>
+internal sealed record NewPageOptions(InsertPosition Position, NewPageFormat Format, bool Landscape, string? ImagePath, bool FitImage, double Dpi);
+
 /// <summary>Dokumentoperationen mit PDFsharp. Alle Methoden arbeiten direkt auf der Datei;
 /// die Anzeige bleibt davon unberührt, weil der Viewer aus dem Speicher liest.</summary>
 internal static partial class PdfEditService
@@ -1102,30 +1113,75 @@ internal static partial class PdfEditService
         owner.Elements.Remove("/Metadata");
     }
 
-    /// <summary>Fügt eine leere Seite vor oder nach der Seite ein (1-basiert), im Format dieser Nachbarseite; eine gedrehte
-    /// Nachbarseite ergibt eine ungedrehte Seite mit vertauschten Maßen, damit die Anzeige gleich aussieht und ein Bild
-    /// aufrecht steht. Ein Bild wird mit 10 mm Rand seitenfüllend eingepasst (Seitenverhältnis bleibt). Liefert die neue Seitennummer.</summary>
-    public static int InsertBlankPage(string path, int page, bool after, string? imagePath)
+    /// <summary>Fügt eine leere Seite ein – vor oder nach der angezeigten Seite (1-basiert), am Anfang oder am Ende. Format „wie die Seite“:
+    /// eine gedrehte Seite ergibt eine ungedrehte mit vertauschten Maßen, damit die Anzeige gleich aussieht und ein Bild aufrecht steht.
+    /// Ein Bild steht zentriert, das Seitenverhältnis bleibt (s. <see cref="NewPageOptions"/>). Liefert die neue Seitennummer.</summary>
+    public static int InsertBlankPage(string path, int page, NewPageOptions options)
     {
+        using var image = options.ImagePath == null ? null : LoadImage(options.ImagePath); // vor dem Öffnen: ein unlesbares Bild bricht ab, bevor etwas geändert ist
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
-        var neighbour = document.Pages[page - 1];
-        var rotated = neighbour.Rotate % 180 != 0;
-        var newPage = document.Pages.Insert(after ? page : page - 1);
-        newPage.Width = rotated ? neighbour.Height : neighbour.Width;
-        newPage.Height = rotated ? neighbour.Width : neighbour.Height;
-        newPage.Rotate = 0;
-        if (imagePath != null)
+        var reference = document.Pages[page - 1];
+        var (width, height) = options.Format switch
         {
-            using var image = LoadImage(imagePath);
+            NewPageFormat.A4 => PaperFormat.A4,
+            NewPageFormat.Letter => PaperFormat.Letter,
+            NewPageFormat.FromImage when image != null => LimitPageSize(ImageSizePt(image, options.Dpi)),
+            _ => reference.Rotate % 180 != 0 ? (reference.Height.Point, reference.Width.Point) : (reference.Width.Point, reference.Height.Point),
+        };
+        if (options.Landscape && options.Format is NewPageFormat.A4 or NewPageFormat.Letter) { (width, height) = (height, width); }
+        var index = options.Position switch
+        {
+            InsertPosition.Before => page - 1,
+            InsertPosition.First => 0,
+            InsertPosition.Last => document.PageCount,
+            _ => page,
+        };
+        var newPage = document.Pages.Insert(index);
+        newPage.Width = XUnit.FromPoint(width);
+        newPage.Height = XUnit.FromPoint(height);
+        newPage.Rotate = 0;
+        if (image != null)
+        {
             using var gfx = XGraphics.FromPdfPage(newPage);
-                var box = new XRect(PageMarginPt, PageMarginPt, newPage.Width.Point - 2 * PageMarginPt, newPage.Height.Point - 2 * PageMarginPt);
-            var scale = Math.Min(box.Width / image.PointWidth, box.Height / image.PointHeight);
-            var width = image.PointWidth * scale;
-            var height = image.PointHeight * scale;
-            gfx.DrawImage(image, box.X + (box.Width - width) / 2, box.Y + (box.Height - height) / 2, width, height);
+            if (options.Format == NewPageFormat.FromImage)
+            {
+                gfx.DrawImage(image, 0, 0, width, height);
+            }
+            else
+            {
+                var box = new XRect(PageMarginPt, PageMarginPt, width - 2 * PageMarginPt, height - 2 * PageMarginPt);
+                var (imageWidth, imageHeight) = ImageSizePt(image, options.Dpi);
+                var scale = Math.Min(box.Width / imageWidth, box.Height / imageHeight);
+                if (!options.FitImage) { scale = Math.Min(scale, 1); } // Originalgröße: nur verkleinern, wenn es nicht passt
+                gfx.DrawImage(image, box.X + (box.Width - imageWidth * scale) / 2, box.Y + (box.Height - imageHeight * scale) / 2, imageWidth * scale, imageHeight * scale);
+            }
         }
         document.Save(path);
-        return after ? page + 1 : page;
+        return index + 1;
+    }
+
+    /// <summary>Druckgröße eines Bildes in Punkt bei der gewählten Auflösung – nicht die DPI-Angabe der Datei (Handyfotos tragen oft 72 DPI).</summary>
+    private static (double Width, double Height) ImageSizePt(XImage image, double dpi) => (image.PixelWidth * 72 / dpi, image.PixelHeight * 72 / dpi);
+
+    /// <summary>PDF-Seiten dürfen höchstens 14 400 pt (200 Zoll) messen (ohne /UserUnit) – größere proportional verkleinern.</summary>
+    private static (double Width, double Height) LimitPageSize((double Width, double Height) size)
+    {
+        var factor = Math.Min(1, MaxPageSizePt / Math.Max(size.Width, size.Height));
+        return (size.Width * factor, size.Height * factor);
+    }
+
+    private const double MaxPageSizePt = 14400;
+
+    /// <summary>Sichtbare Maße einer Seite (1-basiert) in Punkt – bei gedrehter Seite vertauscht; (0, 0), wenn sie sich nicht lesen lässt.</summary>
+    public static (double Width, double Height) PageSizePt(string path, int page)
+    {
+        try
+        {
+            using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
+            var p = document.Pages[Math.Clamp(page, 1, document.PageCount) - 1];
+            return p.Rotate % 180 != 0 ? (p.Height.Point, p.Width.Point) : (p.Width.Point, p.Height.Point);
+        }
+        catch (Exception ex) when (IsPdfReadError(ex)) { return (0, 0); }
     }
 
     /// <summary>Bild für eine neue Seite laden. GDI+ meldet unlesbare oder unbekannte Bilddaten als OutOfMemoryException – die

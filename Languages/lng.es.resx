@@ -331,7 +331,6 @@ para instalar la última versión.</value></data>
   <data name="Dokument drucken" xml:space="preserve"><value>imprimir el documento</value></data>
   <data name="Vollbild ein/aus" xml:space="preserve"><value>pantalla completa sí/no</value></data>
   <data name="Zum Beenden des Vollbildmodus Esc gedrückt halten" xml:space="preserve"><value>Mantén pulsada Esc para salir de la pantalla completa</value></data>
-  <data name="Beenden auch durch Gedrückthalten von Esc – ein kurzes Esc schließt im Vollbild nur offene Viewer-Dialoge." xml:space="preserve"><value>También se sale manteniendo pulsada Esc; en pantalla completa, una pulsación breve de Esc solo cierra los diálogos abiertos del visor.</value></data>
   <data name="Programm beenden (Option)" xml:space="preserve"><value>cerrar el programa (opción)</value></data>
 
   <!-- Umbenennen-Dialog -->
@@ -575,12 +574,27 @@ Un clic en la vista previa fija la posición.</value></data>
   <!-- Leere Seite einfügen -->
   <data name="Leere Seite einfügen …" xml:space="preserve"><value>Insertar página vacía…</value></data>
   <data name="Leere Seite einfügen" xml:space="preserve"><value>Insertar página vacía</value></data>
-  <data name="Die neue Seite übernimmt das Format von Seite {0}." xml:space="preserve"><value>La página nueva toma el formato de la página {0}.</value></data>
-  <data name="&amp;Vor der aktuellen Seite" xml:space="preserve"><value>&amp;Antes de la página actual</value></data>
-  <data name="&amp;Nach der aktuellen Seite" xml:space="preserve"><value>&amp;Después de la página actual</value></data>
-  <data name="&amp;Bild (optional):" xml:space="preserve"><value>&amp;Imagen (opcional):</value></data>
+  <data name="Format" xml:space="preserve"><value>Formato</value></data>
+  <data name="&amp;Wie Seite {0}: {1}" xml:space="preserve"><value>&amp;Como la página {0}: {1}</value></data>
+  <data name="DIN A&amp;4" xml:space="preserve"><value>A&amp;4</value></data>
+  <data name="Wie das &amp;Bild (ohne Rand)" xml:space="preserve"><value>Como la &amp;imagen (sin margen)</value></data>
+  <data name="Hochformat" xml:space="preserve"><value>Vertical</value></data>
+  <data name="Querformat" xml:space="preserve"><value>Horizontal</value></data>
+  <data name="&amp;Nach Seite {0}" xml:space="preserve"><value>&amp;Después de la página {0}</value></data>
+  <data name="&amp;Vor Seite {0}" xml:space="preserve"><value>An&amp;tes de la página {0}</value></data>
+  <data name="Am &amp;Anfang" xml:space="preserve"><value>Al p&amp;rincipio</value></data>
+  <data name="Am &amp;Ende" xml:space="preserve"><value>Al &amp;final</value></data>
+  <data name="Bild (optional)" xml:space="preserve"><value>Imagen (opcional)</value></data>
+  <data name="Mehr dpi = kleineres Bild. Scans meist 300 dpi, Screenshots 96 dpi." xml:space="preserve"><value>Más dpi = imagen más pequeña. Escaneos: 300 dpi, capturas: 96 dpi.</value></data>
+  <data name="&amp;Originalgröße bei" xml:space="preserve"><value>Tamaño &amp;original a</value></data>
+  <data name="An die Seite an&amp;passen (10 mm Rand)" xml:space="preserve"><value>Ajustar a la &amp;página (margen de 10 mm)</value></data>
+  <data name="{0} × {1} Pixel, bei {2} dpi {3:0.#} × {4:0.#} cm" xml:space="preserve"><value>{0} × {1} píxeles, a {2} dpi {3:0.#} × {4:0.#} cm</value></data>
+  <data name="Bitte gib eine Auflösung zwischen 10 und 2400 dpi an." xml:space="preserve"><value>Indica una resolución entre 10 y 2400 dpi.</value></data>
+  <data name="DIN A3" xml:space="preserve"><value>A3</value></data>
+  <data name="DIN A4" xml:space="preserve"><value>A4</value></data>
+  <data name="DIN A5" xml:space="preserve"><value>A5</value></data>
+  <data name="DIN A6" xml:space="preserve"><value>A6</value></data>
   <data name="&amp;Durchsuchen …" xml:space="preserve"><value>&amp;Examinar…</value></data>
-  <data name="Das Bild wird mit 10 mm Rand eingepasst; ohne Bild bleibt die Seite leer." xml:space="preserve"><value>La imagen se ajusta con un margen de 10 mm; sin imagen, la página queda vacía.</value></data>
   <data name="Bilddateien" xml:space="preserve"><value>Archivos de imagen</value></data>
   <data name="Bild für die neue Seite wählen" xml:space="preserve"><value>Elegir una imagen para la página nueva</value></data>
   <data name="Die Bilddatei wurde nicht gefunden." xml:space="preserve"><value>No se encontró el archivo de imagen.</value></data>

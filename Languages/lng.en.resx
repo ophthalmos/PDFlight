@@ -331,7 +331,6 @@ the latest version.</value></data>
   <data name="Dokument drucken" xml:space="preserve"><value>print document</value></data>
   <data name="Vollbild ein/aus" xml:space="preserve"><value>full screen on/off</value></data>
   <data name="Zum Beenden des Vollbildmodus Esc gedrückt halten" xml:space="preserve"><value>Press and hold Esc to exit full screen</value></data>
-  <data name="Beenden auch durch Gedrückthalten von Esc – ein kurzes Esc schließt im Vollbild nur offene Viewer-Dialoge." xml:space="preserve"><value>Holding Esc also exits – in full screen a short press of Esc only closes open viewer dialogs.</value></data>
   <data name="Programm beenden (Option)" xml:space="preserve"><value>close program (option)</value></data>
 
   <!-- Umbenennen-Dialog -->
@@ -575,12 +574,27 @@ Clicking into the preview sets the position.</value></data>
   <!-- Leere Seite einfügen -->
   <data name="Leere Seite einfügen …" xml:space="preserve"><value>Insert blank page…</value></data>
   <data name="Leere Seite einfügen" xml:space="preserve"><value>Insert blank page</value></data>
-  <data name="Die neue Seite übernimmt das Format von Seite {0}." xml:space="preserve"><value>The new page takes the format of page {0}.</value></data>
-  <data name="&amp;Vor der aktuellen Seite" xml:space="preserve"><value>&amp;Before the current page</value></data>
-  <data name="&amp;Nach der aktuellen Seite" xml:space="preserve"><value>&amp;After the current page</value></data>
-  <data name="&amp;Bild (optional):" xml:space="preserve"><value>&amp;Image (optional):</value></data>
+  <data name="Format" xml:space="preserve"><value>Format</value></data>
+  <data name="&amp;Wie Seite {0}: {1}" xml:space="preserve"><value>&amp;Same as page {0}: {1}</value></data>
+  <data name="DIN A&amp;4" xml:space="preserve"><value>A&amp;4</value></data>
+  <data name="Wie das &amp;Bild (ohne Rand)" xml:space="preserve"><value>Like the &amp;image (no margin)</value></data>
+  <data name="Hochformat" xml:space="preserve"><value>Portrait</value></data>
+  <data name="Querformat" xml:space="preserve"><value>Landscape</value></data>
+  <data name="&amp;Nach Seite {0}" xml:space="preserve"><value>&amp;After page {0}</value></data>
+  <data name="&amp;Vor Seite {0}" xml:space="preserve"><value>Befo&amp;re page {0}</value></data>
+  <data name="Am &amp;Anfang" xml:space="preserve"><value>At the s&amp;tart</value></data>
+  <data name="Am &amp;Ende" xml:space="preserve"><value>At the &amp;end</value></data>
+  <data name="Bild (optional)" xml:space="preserve"><value>Image (optional)</value></data>
+  <data name="Mehr dpi = kleineres Bild. Scans meist 300 dpi, Screenshots 96 dpi." xml:space="preserve"><value>More dpi = smaller image. Scans usually 300 dpi, screenshots 96 dpi.</value></data>
+  <data name="&amp;Originalgröße bei" xml:space="preserve"><value>&amp;Original size at</value></data>
+  <data name="An die Seite an&amp;passen (10 mm Rand)" xml:space="preserve"><value>&amp;Fit to page (10 mm margin)</value></data>
+  <data name="{0} × {1} Pixel, bei {2} dpi {3:0.#} × {4:0.#} cm" xml:space="preserve"><value>{0} × {1} pixels, at {2} dpi {3:0.#} × {4:0.#} cm</value></data>
+  <data name="Bitte gib eine Auflösung zwischen 10 und 2400 dpi an." xml:space="preserve"><value>Please enter a resolution between 10 and 2400 dpi.</value></data>
+  <data name="DIN A3" xml:space="preserve"><value>A3</value></data>
+  <data name="DIN A4" xml:space="preserve"><value>A4</value></data>
+  <data name="DIN A5" xml:space="preserve"><value>A5</value></data>
+  <data name="DIN A6" xml:space="preserve"><value>A6</value></data>
   <data name="&amp;Durchsuchen …" xml:space="preserve"><value>&amp;Browse…</value></data>
-  <data name="Das Bild wird mit 10 mm Rand eingepasst; ohne Bild bleibt die Seite leer." xml:space="preserve"><value>The image is fitted with a 10 mm margin; without an image the page stays blank.</value></data>
   <data name="Bilddateien" xml:space="preserve"><value>Image files</value></data>
   <data name="Bild für die neue Seite wählen" xml:space="preserve"><value>Choose an image for the new page</value></data>
   <data name="Die Bilddatei wurde nicht gefunden." xml:space="preserve"><value>The image file was not found.</value></data>
