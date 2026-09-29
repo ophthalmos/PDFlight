@@ -95,7 +95,7 @@ internal static partial class ShortcutsPdf
             }
         }
         y += NoteGap;
-        if (y + noteHeight > footerTop) // zur Sicherheit — planmäßig eine Seite
+        if (y + noteHeight + CommandLineHeight > footerTop) // zur Sicherheit — planmäßig eine Seite; die Kommandozeilen-Zeile darf nicht in die Fußzeile rutschen
         {
             DrawFooter(gfx, page);
             gfx.Dispose();

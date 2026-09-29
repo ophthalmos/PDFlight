@@ -257,8 +257,7 @@ internal static class TaskDlg
         ("F7", "Textcursor-Navigation ein/aus (Markieren per Tastatur)",
             "Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert – Markieren ganz ohne Maus."),
         ("F8", "Adobe-Ansicht ein/aus (Option: Hervorheben und Kommentieren)", null),
-        ("F11", "Vollbild ein/aus",
-            "Beenden auch durch Gedrückthalten von Esc – ein kurzes Esc schließt im Vollbild nur offene Viewer-Dialoge."),
+        ("F11", "Vollbild ein/aus", null),
         // Strg + Zahl
         ("Strg+1 … 9", "in externem Programm öffnen", null),
         // Strg + Buchstabe
