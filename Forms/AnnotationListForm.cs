@@ -4,11 +4,12 @@ namespace PDFLight.Forms;
 
 /// <summary>Verwaltet die Anmerkungen des Dokuments: listet sie mit Seite, Art, Position und Textanfang, lässt
 /// Textanmerkungen bearbeiten (über den Einfügen-Dialog mit vorbelegten Werten) und beliebige Anmerkungen löschen.
-/// Jede Änderung läuft über den Bearbeitungslauf des Hauptfensters (Sicherung für Rückgängig, Fehlerdialog) und
-/// wird sofort gespeichert; die Liste wird danach neu gelesen.</summary>
+/// Gearbeitet wird auf der Datei, die das Hauptfenster übergibt – seit 04.10.2026 eine Kopie des angezeigten Stands (Anmerkungen
+/// ändern nur die Anzeige, gespeichert wird mit „Speichern“); jede Änderung läuft über <c>runEdit</c> (Fehlerdialog), die Liste wird
+/// danach neu gelesen.</summary>
 public partial class AnnotationListForm : Form
 {
-    /// <summary>True, sobald mindestens eine Änderung gespeichert wurde – das Hauptfenster lädt dann neu.</summary>
+    /// <summary>True, sobald mindestens eine Änderung gemacht wurde – das Hauptfenster zeigt dann den neuen Stand.</summary>
     public bool Changed { get; private set; }
 
     /// <summary>Seite der zuletzt geänderten Anmerkung (fürs Neuladen).</summary>
@@ -21,13 +22,16 @@ public partial class AnnotationListForm : Form
     private readonly string filePath;
     private readonly Func<Action, string, bool> runEdit;
 
-    public AnnotationListForm(string filePath, Func<Action, string, bool> runEdit)
+    /// <param name="filePath">Die Datei, auf der gelesen und geändert wird (eine Arbeitskopie des angezeigten Stands).</param>
+    /// <param name="runEdit">Führt eine Änderung aus; false bei Fehler (den meldet der Aufrufer).</param>
+    /// <param name="displayName">Angezeigter Dateiname – der der Arbeitskopie sagt dem Benutzer nichts.</param>
+    public AnnotationListForm(string filePath, Func<Action, string, bool> runEdit, string? displayName = null)
     {
         InitializeComponent();
         Lng.Apply(this);
         this.filePath = filePath;
         this.runEdit = runEdit;
-        labelFileValue.Text = Path.GetFileName(filePath);
+        labelFileValue.Text = displayName ?? Path.GetFileName(filePath);
         btnEdit.Image = ToolbarIcons.ButtonIcon(ToolbarIcons.Edit, this);
         btnDelete.Image = ToolbarIcons.ButtonIcon(ToolbarIcons.Delete, this);
         btnDeleteAll.Image = ToolbarIcons.ButtonIcon(ToolbarIcons.Clear, this);

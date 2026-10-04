@@ -254,6 +254,7 @@ internal static class TaskDlg
         ("F1", "diese Hilfedatei (PDF)", null),
         ("F2", "Datei umbenennen", null),
         ("F3 / Umschalt+F3", "nächster / vorheriger Suchtreffer", null),
+        ("F10 / Strg+F10 / Umschalt+F10", "Seitenleiste ein/aus / mit Miniaturen / mit Lesezeichen", null), // auch Strg+Umschalt+I (wie Edge) – eine Zeile, die Hilfe-PDF ist voll
         ("F11", "Vollbild ein/aus", null),
         // Strg + Zahl
         ("Strg+1 … 9", "in externem Programm öffnen", null),
@@ -284,7 +285,6 @@ internal static class TaskDlg
         ("Strg+Umschalt+B", "an Breite / an Seite anpassen (wechselt)", null),
         ("Strg+Umschalt+C", "Dateipfad in die Zwischenablage kopieren", null),
         ("Strg+Umschalt+H", "Stempel verwalten", null),
-        ("Strg+Umschalt+I", "Seitenleiste (Miniaturen, Lesezeichen) ein/aus", null),
         ("Strg+Umschalt+K", "sofort in den 1-Klick-Ordner kopieren", null),
         ("Strg+Umschalt+M / Strg+F4", "sofort in den 1-Klick-Ordner verschieben", null),
         ("Strg+Umschalt+P", "mit dem Druckdialog von Windows drucken", null),

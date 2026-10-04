@@ -135,11 +135,12 @@ internal sealed class PageView : ScrollableControl
         ClearSelection();
         ResetSearch();
         hoverLink = linkOnMouseDown = null;
-        markupUnderMouse = inkUnderMouse = null;
+        markupUnderMouse = inkUnderMouse = stampUnderMouse = freeTextUnderMouse = null;
         hoverAnnotation = null;
         ClearAnnotationGhost();
         inkStroke = null;
         pendingInk.Clear();
+        eraseGesture = null;
         SearchChanged?.Invoke(this, EventArgs.Empty);
         fit = DefaultFit == PageFit.None ? PageFit.Height : DefaultFit;
         currentPage = -1; // die Seitenbreite richtet sich dann nach Seite 1 – nicht nach der Seite des vorigen Dokuments
@@ -309,11 +310,13 @@ internal sealed class PageView : ScrollableControl
         UpdateCurrentPage();
     }
 
+    /// <summary>Springt zu einer Seite und macht sie zur aktiven – auch wenn danach eine andere in der Fenstermitte steht (die letzten
+    /// Seiten lassen sich nicht bis oben scrollen; zweiseitig die rechte des Paars; nach dem Umschalten der zweiseitigen Ansicht).</summary>
     public void GoToPage(int index)
     {
         if (index < 0 || index >= pageRects.Length) { return; }
         AutoScrollPosition = new Point(-AutoScrollPosition.X, pageRects[index].Y - LogicalToDeviceUnits(PageMargin));
-        UpdateCurrentPage();
+        SetCurrentPage(index);
         Invalidate();
     }
 
@@ -353,9 +356,18 @@ internal sealed class PageView : ScrollableControl
         }
     }
 
+    /// <summary>Die aktive Seite folgt der Fenstermitte. Zweiseitig bleibt sie, solange ihr Paar in der Mitte steht – sonst wiche eine
+    /// angeklickte rechte Seite beim nächsten Bildlauf gleich wieder der linken (Wunsch vom 04.10.2026).</summary>
     private void UpdateCurrentPage()
     {
         var page = pageRects.Length == 0 ? -1 : PageAt(new Point(ClientSize.Width / 2, ClientSize.Height / 2), clamp: true).Page;
+        if (twoPage && page >= 0 && currentPage >= 0 && currentPage < pageRects.Length && RowPages(page).Contains(currentPage)) { return; }
+        SetCurrentPage(page);
+    }
+
+    /// <summary>Aktive Seite setzen (Rahmen, Seitenfeld, Miniaturen über <see cref="CurrentPageChanged"/>).</summary>
+    private void SetCurrentPage(int page)
+    {
         if (page == currentPage) { return; }
         currentPage = page;
         if (ShowCurrentPageHighlight) { Invalidate(); } // der Rahmen wandert mit
@@ -618,6 +630,8 @@ internal sealed class PageView : ScrollableControl
     // Für das Entfernen merkt sich ein Rechtsklick, ob unter der Maus eine Textmarkierung liegt – das Kontextmenü fragt danach.
     private (int Page, int Number)? markupUnderMouse;
     private (int Page, int Number)? inkUnderMouse;   // ebenso eine Zeichnung (Freihand-Strich)
+    private (int Page, int Number)? stampUnderMouse; // ebenso ein Stempel
+    private (int Page, int Number)? freeTextUnderMouse; // ebenso ein Freitext-Kasten
     private Task? markupQuery;
 
     /// <summary>Hebt den markierten Text hervor (Farbe 0xRRGGBB); liefert die Zahl der Seiten, auf denen eine Hervorhebung entstand.</summary>
@@ -633,6 +647,22 @@ internal sealed class PageView : ScrollableControl
         }
         if (doc == document) { ClearSelection(); } // die Hervorhebung soll man sehen, nicht die Markierung darüber
         return pages;
+    }
+
+    /// <summary>Die Vierecke, die eine Hervorhebung des markierten Texts bekäme, je Seite (0-basiert, PDF-Koordinaten) – für Hervorhebungen
+    /// mit eigener Darstellung, die der Aufrufer selbst anlegt (weißer Marker). Die Markierung bleibt; leer ohne Markierung.</summary>
+    public async Task<List<(int Page, List<(double Left, double Top, double Right, double Bottom)> Boxes)>> SelectionBoxesAsync()
+    {
+        var result = new List<(int, List<(double, double, double, double)>)>();
+        if (document == null || OrderedSelection is not { } selection) { return result; }
+        var doc = document;
+        for (var page = selection.Start.Page; page <= selection.End.Page; page++)
+        {
+            if (!charCounts.ContainsKey(page)) { charCounts[page] = await doc.CharCountAsync(page); }
+            if (doc != document) { return []; }
+            if (SelectedRange(page) is { } range && await doc.HighlightBoxesAsync(page, range.Start, range.Count) is { Count: > 0 } boxes) { result.Add((page, boxes)); }
+        }
+        return result;
     }
 
     /// <summary>Liegt unter dem letzten Rechtsklick eine Textmarkierung (Hervorhebung u. ä.)? Die Abfrage läuft beim Drücken; ist sie
@@ -660,9 +690,65 @@ internal sealed class PageView : ScrollableControl
         return await document.RemoveMarkupAsync(ink.Page, ink.Number);
     }
 
+    /// <summary>Liegt unter dem letzten Rechtsklick ein Stempel (sein Rechteck)?</summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
+    public bool HasStampUnderMouse => markupQuery?.IsCompleted == true && stampUnderMouse != null;
+
+    /// <summary>Entfernt den Stempel unter dem letzten Rechtsklick (samt Popup).</summary>
+    public async Task<bool> RemoveStampUnderMouseAsync()
+    {
+        if (document == null || stampUnderMouse is not { } stamp) { return false; }
+        stampUnderMouse = null;
+        return await document.RemoveMarkupAsync(stamp.Page, stamp.Number);
+    }
+
+    /// <summary>Die oberste entfernbare Anmerkung unter dem letzten Rechtsklick (für den einen Kontextmenü-Eintrag „… entfernen“, Wunsch
+    /// vom 04.10.2026): Liegen mehrere übereinander, gewinnt die zuletzt angelegte – die höchste Nummer auf der Seite, wie beim Zeichnen.</summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
+    public RemovableAnnotation RemovableUnderMouse
+    {
+        get
+        {
+            if (markupQuery?.IsCompleted != true) { return RemovableAnnotation.None; }
+            (RemovableAnnotation Kind, int Number) top = (RemovableAnnotation.None, -1);
+            foreach (var (kind, hit) in new[] { (RemovableAnnotation.Markup, markupUnderMouse), (RemovableAnnotation.Ink, inkUnderMouse), (RemovableAnnotation.Stamp, stampUnderMouse), (RemovableAnnotation.FreeText, freeTextUnderMouse) })
+            {
+                if (hit is { } found && found.Number > top.Number) { top = (kind, found.Number); }
+            }
+            return top.Kind;
+        }
+    }
+
+    /// <summary>Entfernt die Anmerkung, die <see cref="RemovableUnderMouse"/> nennt.</summary>
+    public async Task<bool> RemoveUnderMouseAsync()
+    {
+        var kind = RemovableUnderMouse;
+        if (kind == RemovableAnnotation.FreeText && document != null && freeTextUnderMouse is { } freeText)
+        {
+            freeTextUnderMouse = null;
+            return await document.RemoveMarkupAsync(freeText.Page, freeText.Number);
+        }
+        return kind switch
+        {
+            RemovableAnnotation.Markup => await RemoveMarkupUnderMouseAsync(),
+            RemovableAnnotation.Ink => await RemoveInkUnderMouseAsync(),
+            RemovableAnnotation.Stamp => await RemoveStampUnderMouseAsync(),
+            _ => false,
+        };
+    }
+
+    /// <summary>Freitext oder Stempel unter dem letzten Rechtsklick, der oberste der beiden – für „Freitext/Stempel bearbeiten…“ im
+    /// Kontextmenü (Wunsch vom 04.10.2026; dasselbe wie ein Doppelklick); null, wenn dort keiner liegt.</summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
+    public AnnotationEventArgs? EditableUnderMouse =>
+        markupQuery?.IsCompleted != true ? null
+        : freeTextUnderMouse is { } freeText && (stampUnderMouse is not { } stamp || freeText.Number > stamp.Number) ? new AnnotationEventArgs(freeText.Page, freeText.Number, Protocol.AnnotFreeText)
+        : stampUnderMouse is { } onlyStamp ? new AnnotationEventArgs(onlyStamp.Page, onlyStamp.Number, Protocol.AnnotStamp)
+        : null;
+
     private async Task QueryMarkupAsync(Point client)
     {
-        markupUnderMouse = inkUnderMouse = null;
+        markupUnderMouse = inkUnderMouse = stampUnderMouse = freeTextUnderMouse = null;
         var (page, point) = PageAt(client, clamp: false);
         if (document == null || page < 0) { return; }
         var (width, height) = (pageRects[page].Width, pageRects[page].Height);
@@ -671,6 +757,11 @@ internal sealed class PageView : ScrollableControl
         if (document == null) { return; }
         var ink = await document.InkAtAsync(page, width, height, point);
         inkUnderMouse = ink >= 0 ? (page, ink) : null;
+        if (document == null) { return; }
+        // Stempel und Freitext je für sich – so findet sich auch ein Freitext unter einem Stempel und umgekehrt
+        stampUnderMouse = await document.AnnotationAtAsync(page, width, height, point, 1 << Protocol.AnnotStamp) is { } stamp ? (page, stamp.Number) : null;
+        if (document == null) { return; }
+        freeTextUnderMouse = await document.AnnotationAtAsync(page, width, height, point, 1 << Protocol.AnnotFreeText) is { } freeText ? (page, freeText.Number) : null;
     }
 
     // ================================================================== Suche
@@ -850,7 +941,7 @@ internal sealed class PageView : ScrollableControl
                     if (document == null) { break; }
                 }
                 var link = page < 0 || field >= 0 || annotation != null ? null : await document.LinkAtAsync(page, pageRects[page].Width, pageRects[page].Height, pagePoint);
-                if (dragging || formDragPage >= 0 || pick != null || ghost != null || InkMode || IsDisposed) { continue; } // beim Wählen einer Stelle und beim Zeichnen bleibt das Fadenkreuz
+                if (dragging || formDragPage >= 0 || pick != null || ghost != null || InkMode || EraseMode || IsDisposed) { continue; } // beim Wählen einer Stelle und beim Zeichnen bleibt das Fadenkreuz
                 hoverAnnotation = annotation is { } a && page < pageRects.Length ? (page, a.Number, a.Subtype, a.Rect, pageRects[page].Size) : null;
                 Cursor = annotation != null ? Cursors.SizeAll
                     : field is PdfiumForms.FieldTextField or PdfiumForms.FieldComboBox ? Cursors.IBeam
@@ -1399,6 +1490,112 @@ internal sealed class PageView : ScrollableControl
         }
     }
 
+    // ================================================================== Radieren
+
+    // Mit EraseMode entfernt ein Klick oder Wisch mit der linken Maustaste jede berührte Zeichnung und Hervorhebung ganz (wie Chromes
+    // Radierer; Wunsch vom 04.10.2026). Freitext und Stempel bleiben verschont – sie sind Kästen zum Verschieben, ein Wisch darüber
+    // soll sie nicht versehentlich löschen. Der Wisch wird in Abständen von EraseStep abgetastet; jede Stelle fragt das Hilfsprogramm
+    // nach Strich (InkAt: Abstand zur Linie) und Textmarkierung (MarkupAt) und entfernt, was es findet – die Kacheln zeigen das sofort.
+    // Ein Wisch ist ein Schritt: Erased meldet am Ende die Zahl und den Stand davor (für Rückgängig des Aufrufers).
+    private sealed class EraseGesture(Task<byte[]> before)
+    {
+        public Task<byte[]> Before { get; } = before; // vor der ersten Abfrage eingereiht – das Hilfsprogramm arbeitet der Reihe nach
+        public Queue<(int Page, Size PageSize, Point Point)> Pending { get; } = [];
+        public Point? Last { get; set; }              // zuletzt abgetastete Stelle im Fenster
+        public Task? Running { get; set; }
+        public int Removed { get; set; }
+    }
+
+    private const int EraseStep = 4;  // logische px zwischen zwei abgetasteten Stellen eines Wischs (InkAt trifft mit halber Strichstärke + 4 px)
+    private EraseGesture? eraseGesture;
+
+    /// <summary>Radiermodus: Klicken oder Wischen entfernt Zeichnungen und Hervorhebungen.</summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
+    public bool EraseMode
+    {
+        get;
+        set
+        {
+            field = value;
+            if (value) { CancelPick(); ClearSelection(); Cursor = EraseCursor ?? Cursors.Cross; } else { Cursor = Cursors.Default; }
+        }
+    }
+
+    /// <summary>Mauszeiger im Radiermodus (der Aufrufer baut ihn aus der Symbolschrift; ohne ihn das Fadenkreuz).</summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
+    public Cursor? EraseCursor { get; set; }
+
+    /// <summary>Ein Wisch beginnt (Maustaste auf der Seite gedrückt) – etwa um den Änderungsstand davor zu merken.</summary>
+    public event EventHandler? EraseStarted;
+
+    /// <summary>Ein Wisch hat etwas entfernt: Anzahl und der vollständige Stand davor (für Rückgängig des Aufrufers).</summary>
+    public event EventHandler<ErasedEventArgs>? Erased;
+
+    private bool TryStartErase(Point client)
+    {
+        if (!EraseMode || document == null) { return false; }
+        EraseStarted?.Invoke(this, EventArgs.Empty);
+        eraseGesture = new EraseGesture(document.SaveAsync());
+        ContinueErase(client);
+        return true;
+    }
+
+    private void ContinueErase(Point client)
+    {
+        if (eraseGesture is not { } gesture) { return; }
+        // die Strecke seit der letzten Stelle im Fenster abtasten – schnelle Wische (auch über den Seitenrand hinaus) überspringen sonst
+        // schmale Striche; jede Stelle zählt nur, wenn sie auf einer Seite liegt
+        var step = Math.Max(1, LogicalToDeviceUnits(EraseStep));
+        List<Point> samples = [];
+        if (gesture.Last is { } last)
+        {
+            var (dx, dy) = (client.X - last.X, client.Y - last.Y);
+            var steps = (int)(Math.Sqrt(dx * dx + dy * dy) / step);
+            if (steps == 0) { return; }
+            for (var i = 1; i <= steps; i++) { samples.Add(new Point(last.X + dx * i / steps, last.Y + dy * i / steps)); }
+        }
+        else { samples.Add(client); }
+        gesture.Last = client;
+        foreach (var sample in samples)
+        {
+            var (page, point) = PageAt(sample, clamp: false);
+            if (page >= 0) { gesture.Pending.Enqueue((page, pageRects[page].Size, point)); }
+        }
+        if (gesture.Running is not { IsCompleted: false }) { gesture.Running = ProcessEraseAsync(gesture); }
+    }
+
+    private async Task ProcessEraseAsync(EraseGesture gesture)
+    {
+        try
+        {
+            while (gesture == eraseGesture && document is { } doc && gesture.Pending.TryDequeue(out var spot))
+            {
+                if (spot.Page >= pageRects.Length || spot.PageSize != pageRects[spot.Page].Size) { continue; } // Zoom geändert
+                // an derselben Stelle so lange, bis nichts mehr getroffen wird – Striche können übereinanderliegen
+                for (var guard = 0; guard < 16; guard++)
+                {
+                    var number = await doc.InkAtAsync(spot.Page, spot.PageSize.Width, spot.PageSize.Height, spot.Point);
+                    if (number < 0 && doc == document) { number = await doc.MarkupAtAsync(spot.Page, spot.PageSize.Width, spot.PageSize.Height, spot.Point); }
+                    if (number < 0 || doc != document || !await doc.RemoveMarkupAsync(spot.Page, number)) { break; }
+                    gesture.Removed++;
+                }
+            }
+        }
+        catch (InvalidOperationException) { gesture.Pending.Clear(); } // Hilfsprogramm abgestürzt – das meldet SandboxClient selbst
+    }
+
+    private async Task FinishEraseAsync()
+    {
+        if (eraseGesture is not { } gesture) { return; }
+        while (gesture.Running is { IsCompleted: false } running) { await running; } // die letzten Stellen noch abarbeiten
+        if (gesture != eraseGesture) { return; }
+        eraseGesture = null;
+        byte[] before;
+        try { before = await gesture.Before; }
+        catch (InvalidOperationException) { return; }
+        if (gesture.Removed > 0) { Erased?.Invoke(this, new ErasedEventArgs(gesture.Removed, before)); }
+    }
+
     // ================================================================== Maus und Tastatur
 
     private (int Page, Point Point) dragStart;
@@ -1409,6 +1606,8 @@ internal sealed class PageView : ScrollableControl
     {
         base.OnMouseDown(e);
         Focus();
+        // die angeklickte Seite wird die aktive (Rahmen, Seitenfeld) – zweiseitig etwa die rechte des Paars (Wunsch vom 04.10.2026)
+        if (e.Button is MouseButtons.Left or MouseButtons.Right && PageAt(e.Location, clamp: false).Page is >= 0 and var clicked) { SetCurrentPage(clicked); }
         if (pick != null) // Stelle wählen: der Klick gehört nur dem Fadenkreuz
         {
             if (e.Button == MouseButtons.Left) { EndPick(PageAt(e.Location, clamp: false).Page >= 0 ? e.Location : null); }
@@ -1418,6 +1617,7 @@ internal sealed class PageView : ScrollableControl
         if (e.Button == MouseButtons.Right && document != null) { markupQuery = QueryMarkupAsync(e.Location); } // fürs Kontextmenü
         if (e.Button != MouseButtons.Left || document == null || pageRects.Length == 0) { return; }
         if (TryStartInk(e.Location)) { return; } // Zeichenmodus
+        if (TryStartErase(e.Location)) { return; } // Radiermodus
         if (e.Clicks == 1 && TryStartAnnotationDrag(e.Location)) { ClearSelection(); return; } // Textanmerkung oder Stempel verschieben
         if (e.Clicks == 2 && TryAnnotationDoubleClick(e.Location)) { ClearSelection(); return; } // … bearbeiten
         var (page, point) = PageAt(e.Location, clamp: true);
@@ -1481,6 +1681,7 @@ internal sealed class PageView : ScrollableControl
             return;
         }
         if (InkMode) { ContinueInk(e.Location); return; }
+        if (EraseMode) { if (eraseGesture != null) { ContinueErase(e.Location); } return; }
         if (ghostDragging) { DragAnnotation(e.Location); return; }
         if (ghost != null) { return; } // verschoben, wartet aufs Neuladen: das Verschiebekreuz bleibt
         if (!dragging)
@@ -1572,6 +1773,11 @@ internal sealed class PageView : ScrollableControl
         if (InkMode)
         {
             if (e.Button == MouseButtons.Left) { await FinishInkAsync(); }
+            return;
+        }
+        if (EraseMode)
+        {
+            if (e.Button == MouseButtons.Left) { await FinishEraseAsync(); }
             return;
         }
         if (ghostDragging)
@@ -1716,3 +1922,13 @@ internal sealed class InkAddedEventArgs(int page, byte[] before) : EventArgs
     public int Page { get; } = page;
     public byte[] Before { get; } = before;
 }
+
+/// <summary>Ein Wisch des Radierers hat Anmerkungen entfernt: Anzahl und der vollständige Stand davor (PDF-Bytes, für Rückgängig).</summary>
+internal sealed class ErasedEventArgs(int count, byte[] before) : EventArgs
+{
+    public int Count { get; } = count;
+    public byte[] Before { get; } = before;
+}
+
+/// <summary>Art der entfernbaren Anmerkung unter dem Rechtsklick (Kontextmenü „… entfernen“).</summary>
+internal enum RemovableAnnotation { None, Markup, Ink, Stamp, FreeText }

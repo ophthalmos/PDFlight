@@ -196,6 +196,28 @@ internal static class Program
         }
         played.Save(Path.Combine(outputFolder, "sandbox-seite1-emf.png"), ImageFormat.Png);
         Console.WriteLine($"Bilder: sandbox-seite1.png, sandbox-seite1-emf.png in {outputFolder}");
+
+        // Eigenschaften-Dialog: Sicherheit und eingebettete Dateien; eine ungültige Nummer muss einen Fehler melden, keinen Absturz
+        var (permissions, revision) = sandbox.Call(Protocol.Security, w => w.Write(document), r => (r.ReadUInt32(), r.ReadInt32()));
+        var names = sandbox.Call(Protocol.Attachments, w => w.Write(document), r =>
+        {
+            var list = new List<string>();
+            for (var i = r.ReadInt32(); i > 0; i--) { list.Add($"{r.ReadString()} ({r.ReadInt64()} Byte)"); }
+            return list;
+        });
+        var attachments = names.Count;
+        Console.WriteLine($"Sicherheit: Revision {revision}, Berechtigungen 0x{permissions:X8}; eingebettete Dateien: {string.Join(", ", names)}");
+        if (attachments > 0)
+        {
+            var first = sandbox.Call(Protocol.AttachmentData, w => { w.Write(document); w.Write(0); }, r => r.ReadBytes(r.ReadInt32()));
+            Console.WriteLine($"Erste eingebettete Datei gelesen: {first.Length} Byte");
+        }
+        try
+        {
+            sandbox.Call(Protocol.AttachmentData, w => { w.Write(document); w.Write(attachments); }, r => r.ReadBytes(r.ReadInt32()));
+            Console.WriteLine("FEHLER: Anhang mit ungültiger Nummer wurde geliefert");
+        }
+        catch (SandboxErrorException) { Console.WriteLine("Anhang mit ungültiger Nummer: abgewiesen (ok)"); }
     }
 
     private static Bitmap RenderBitmap(SandboxProcess sandbox, int document, int page, int width, int height) =>
@@ -203,6 +225,8 @@ internal static class Program
         {
             var stride = width * 4;
             var pixels = r.ReadBytes(stride * height);
+            // wie PdfiumDocument.ToBitmap: ReadBytes liefert am Ende des Datenstroms weniger, Marshal.Copy würfe sonst unverständlich (Ultra-Review 04.10.2026)
+            if (pixels.Length != stride * height) { throw new InvalidDataException("Unvollständiges Bild vom Hilfsprogramm."); }
             var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
             var data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
             try

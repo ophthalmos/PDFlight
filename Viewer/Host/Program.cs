@@ -84,6 +84,28 @@ internal static class Program
                     var bytes = Document(id).Save(removeSecurity);
                     return w => { w.Write(bytes.Length); w.Write(bytes); };
                 }
+            case Protocol.Security:
+                {
+                    var (permissions, revision) = Document(input.ReadInt32()).Security();
+                    return w => { w.Write(permissions); w.Write(revision); };
+                }
+            case Protocol.Attachments:
+                {
+                    var attachments = Document(input.ReadInt32()).Attachments();
+                    return w => { w.Write(attachments.Count); foreach (var (name, size) in attachments) { w.Write(name); w.Write(size); } };
+                }
+            case Protocol.AttachmentData:
+                {
+                    var (id, index) = (input.ReadInt32(), input.ReadInt32());
+                    var data = Document(id).AttachmentData(index);
+                    return w => { w.Write(data.Length); w.Write(data); };
+                }
+            case Protocol.HighlightBoxes:
+                {
+                    var (id, page, start, count) = (input.ReadInt32(), input.ReadInt32(), input.ReadInt32(), input.ReadInt32());
+                    var boxes = Document(id).HighlightBoxes(page, start, count);
+                    return w => { w.Write(boxes.Count); foreach (var (left, top, right, bottom) in boxes) { w.Write(left); w.Write(top); w.Write(right); w.Write(bottom); } };
+                }
             case Protocol.Info:
                 {
                     var (version, securityRevision) = Document(input.ReadInt32()).Info();

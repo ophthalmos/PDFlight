@@ -128,8 +128,8 @@ internal static partial class ShortcutsPdf
         string[] paragraphs =
         [
             Lng.T("PDFlight lädt die Datei zum Anzeigen in den Arbeitsspeicher. Die Datei selbst bleibt dabei frei: andere Programme können sie jederzeit ändern oder verschieben. Wird sie geändert, zeigt PDFlight den neuen Stand, sobald du zum Fenster zurückkehrst."),
-            Lng.T("Die Werkzeuge in der Anzeige (Zoom, Ansicht drehen, Suchen) verändern nur die Darstellung, nie die Datei. Alles, was du dort drehst, ist beim nächsten Öffnen wieder wie vorher."),
-            Lng.T("Die Befehle im Menü „Bearbeiten“ und in der Symbolleiste (Seiten löschen oder drehen, anhängen, Kennwort, Eigenschaften) ändern die Datei dagegen wirklich – und zwar sofort, ohne gesonderten Speichern-Schritt. Einen Fehlgriff machst du mit Strg+Z rückgängig."),
+            Lng.T("Änderungen über die Viewer-Leiste (Hervorheben, Zeichnen, Freitext, Stempel, Seiten drehen) bleiben ungespeichert, bis du auf „Speichern“ klickst."),
+            Lng.T("Die Befehle im Menü „Bearbeiten“ und in der Symbolleiste ändern die Datei sofort. Strg+Z macht einen Fehlgriff rückgängig."),
         ];
         return [.. paragraphs.Select(p => Wrap(gfx, p, NoteFont, width))]; // der Text steht bündig mit der Tabelle, der Kasten ragt um NotePad darüber hinaus
     }

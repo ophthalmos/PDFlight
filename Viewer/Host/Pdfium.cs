@@ -140,6 +140,10 @@ internal static unsafe partial class Pdfium
     [LibraryImport(Lib, EntryPoint = "FPDF_GetPageWidthF")] public static partial float GetPageWidthF(nint page);
     [LibraryImport(Lib, EntryPoint = "FPDF_GetPageHeightF")] public static partial float GetPageHeightF(nint page);
     public const int AnnotInk = 15;        // FPDF_ANNOT_INK
+    public const int AnnotFreeText = 3;    // FPDF_ANNOT_FREETEXT
+    public const int AnnotStamp = 13;      // FPDF_ANNOT_STAMP
+    [LibraryImport(Lib, EntryPoint = "FPDFAnnot_GetLinkedAnnot", StringMarshalling = StringMarshalling.Utf8)] public static partial nint AnnotGetLinkedAnnot(nint annot, string key);
+    [LibraryImport(Lib, EntryPoint = "FPDFPage_GetAnnotIndex")] public static partial int PageGetAnnotIndex(nint page, nint annot);
 
     [StructLayout(LayoutKind.Sequential)]
     public struct PointF { public float X, Y; } // FS_POINTF
@@ -162,6 +166,11 @@ internal static unsafe partial class Pdfium
     public const uint SaveRemoveSecurity = 3;     // FPDF_REMOVE_SECURITY (ein Wert, keine Bitmaske): vollständig und unverschlüsselt
     [LibraryImport(Lib, EntryPoint = "FPDF_GetFileVersion")] public static partial int GetFileVersion(nint document, out int version);
     [LibraryImport(Lib, EntryPoint = "FPDF_GetSecurityHandlerRevision")] public static partial int GetSecurityHandlerRevision(nint document);
+    [LibraryImport(Lib, EntryPoint = "FPDF_GetDocUserPermissions")] public static partial uint GetDocUserPermissions(nint document);
+    [LibraryImport(Lib, EntryPoint = "FPDFDoc_GetAttachmentCount")] public static partial int DocGetAttachmentCount(nint document);
+    [LibraryImport(Lib, EntryPoint = "FPDFDoc_GetAttachment")] public static partial nint DocGetAttachment(nint document, int index);
+    [LibraryImport(Lib, EntryPoint = "FPDFAttachment_GetName")] public static partial uint AttachmentGetName(nint attachment, byte* buffer, uint length);
+    [LibraryImport(Lib, EntryPoint = "FPDFAttachment_GetFile")] public static partial int AttachmentGetFile(nint attachment, byte* buffer, uint length, out uint written);
     public const int FlattenForPrint = 1;         // FLAT_PRINT
     public const int FlattenFailed = 0;           // FLATTEN_FAIL (1 = erledigt, 2 = nichts einzubrennen)
 

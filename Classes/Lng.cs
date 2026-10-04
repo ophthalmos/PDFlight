@@ -67,6 +67,10 @@ internal static class Lng
             {
                 foreach (ToolStripItem item in strip.Items) { TranslateItem(item); }
             }
+            if (child is ListView listView) // Spaltenköpfe sind keine Controls
+            {
+                foreach (ColumnHeader column in listView.Columns) { column.Text = T(column.Text); }
+            }
             TranslateChildren(child);
         }
     }

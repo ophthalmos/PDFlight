@@ -144,6 +144,23 @@ internal sealed class PdfiumDocument : IDisposable
     /// removeSecurity: unverschlüsselt – entfernt die Einschränkungen eines Besitzerkennworts, ohne etwas vom Inhalt zu verlieren.</summary>
     public Task<byte[]> SaveAsync(bool removeSecurity = false) => Command(Protocol.Save, w => w.Write(removeSecurity), r => r.ReadBytes(r.ReadInt32()));
 
+    /// <summary>Berechtigungsbits (/P, unverschlüsselt alle gesetzt) und Revision des Sicherheits-Handlers (-1 = nicht verschlüsselt).</summary>
+    public Task<(uint Permissions, int Revision)> SecurityAsync() =>
+        Command(Protocol.Security, _ => { }, r => (r.ReadUInt32(), r.ReadInt32()));
+
+    /// <summary>Eingebettete Dateien: Name und Größe in Byte (-1 = unbekannt); Nummer = Position in der Liste.</summary>
+    public Task<List<(string Name, long Size)>> AttachmentsAsync() =>
+        Command(Protocol.Attachments, _ => { }, r =>
+        {
+            var count = r.ReadInt32();
+            var list = new List<(string, long)>(count);
+            for (var i = 0; i < count; i++) { list.Add((r.ReadString(), r.ReadInt64())); }
+            return list;
+        });
+
+    /// <summary>Inhalt einer eingebetteten Datei – zum Speichern, nie zum Ausführen.</summary>
+    public Task<byte[]> AttachmentDataAsync(int index) => Command(Protocol.AttachmentData, w => w.Write(index), r => r.ReadBytes(r.ReadInt32()));
+
     /// <summary>PDF-Version (z. B. „1.7“, null = unbekannt) und ob das Dokument verschlüsselt ist.</summary>
     public Task<(string? Version, bool Encrypted)> InfoAsync() =>
         Query<(string?, bool)>((null, false), Protocol.Info, _ => { },
@@ -275,6 +292,15 @@ internal sealed class PdfiumDocument : IDisposable
     public const int AcrobatYellow = 0xFFC100;
 
     /// <summary>Hervorhebung (Farbe 0xRRGGBB, Vorgabe Acrobats Gelb) über einen Zeichenbereich einer Seite; true, wenn angelegt.</summary>
+    /// <summary>Die Vierecke je Textzeile (links, oben, rechts, unten in PDF-Koordinaten), die eine Hervorhebung des Zeichenbereichs bekäme.</summary>
+    public Task<List<(double Left, double Top, double Right, double Bottom)>> HighlightBoxesAsync(int index, int start, int count) =>
+        Command(Protocol.HighlightBoxes, w => { w.Write(index); w.Write(start); w.Write(count); }, r =>
+        {
+            var boxes = new List<(double, double, double, double)>();
+            for (var i = r.ReadInt32(); i > 0; i--) { boxes.Add((r.ReadDouble(), r.ReadDouble(), r.ReadDouble(), r.ReadDouble())); }
+            return boxes;
+        });
+
     public Task<bool> AddHighlightAsync(int index, int start, int count, int color = AcrobatYellow) =>
         Query(false, Protocol.AddHighlight, w => { w.Write(index); w.Write(start); w.Write(count); w.Write(color); }, r => r.ReadBoolean());
 

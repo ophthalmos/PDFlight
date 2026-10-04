@@ -61,6 +61,10 @@ internal static class ToolbarIcons
     public const char ChevronUp = '\uE70E';    // Suche: vorheriger Treffer (nächster: ChevronDown)
     public const char Cancel = '\uE711';       // Suchleiste schließen
     public const char Draw = '\uE76D';         // InkingTool: Zeichnen in der Viewer-Leiste (wie Edge)
+    public const char Erase = '\uE75C';        // EraseTool: Radierer in der Viewer-Leiste (wie Chrome)
+    public const char ManageAnnotations = '\uF0E3'; // ClipboardList: \u201EAnmerkungen verwalten\u201C in der Viewer-Leiste (E8FD ist die Dokumentstruktur)
+    public const char HighlightFill = '\uE891'; // F\u00FCllung zu Highlight: Kappe und Spitze des Markers in der gew\u00E4hlten Farbe
+    public const char DrawFill = '\uE88F';     // InkingColorOutline: Kappe und Stiftspitze zu Draw in der Stiftfarbe
     public const char Thumbnails = '\uEB9F';   // Photo2 (Bild mit Bergen): Seitenleiste mit Miniaturen (wie Chrome)
     public const char Outline = '\uE8FD';      // BulletedList: Seitenleiste mit der Dokumentstruktur
     public const char SelectAll = '\uE8B3';    // Kontextmenü der Anzeige: alles markieren
@@ -156,14 +160,21 @@ internal static class ToolbarIcons
         return bitmap;
     }
 
-    /// <summary>Symbol mit einem Farbbalken am unteren Rand – „Zeichnen“ zeigt so die gewählte Stiftfarbe (wie Edge).</summary>
-    public static Image WithColorBar(Image icon, Color bar)
+    /// <summary>Symbol mit farbig gefüllten Teilen wie bei Edge – „Hervorheben“ und „Zeichnen“ zeigen so die gewählte Farbe in Kappe und
+    /// Spitze des Markers bzw. in der Stiftspitze: erst die Füllglyphe in <paramref name="fillColor"/> (erst ab <paramref name="fillTop"/>
+    /// als Anteil der Höhe, um Teile oben abzuschneiden), darüber der Umriss. Neues Bild, nicht im Zwischenspeicher – der Aufrufer gibt es frei.</summary>
+    public static Image WithFill(char outline, char fill, Size size, Color color, Color fillColor, float fillTop = 0)
     {
-        Bitmap bitmap = new(icon);
+        Bitmap bitmap = new(size.Width, size.Height);
         using var g = Graphics.FromImage(bitmap);
-        var height = Math.Max(2, icon.Height / 8);
-        using SolidBrush brush = new(bar);
-        g.FillRectangle(brush, icon.Width / 8, icon.Height - height, icon.Width - icon.Width / 4, height);
+        g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+        using Font font = new(FontName, size.Height * 0.75f, GraphicsUnit.Pixel);
+        using StringFormat format = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+        var bounds = new RectangleF(0, 0, size.Width, size.Height);
+        g.SetClip(new RectangleF(0, size.Height * fillTop, size.Width, size.Height));
+        using (SolidBrush brush = new(fillColor)) { g.DrawString(fill.ToString(), font, brush, bounds, format); }
+        g.ResetClip();
+        using (SolidBrush brush = new(color)) { g.DrawString(outline.ToString(), font, brush, bounds, format); }
         return bitmap;
     }
 

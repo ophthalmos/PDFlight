@@ -71,6 +71,7 @@ public class AppSettings
     public string AnnotationBackground { get; set; } = "FFFFCC"; // Textanmerkung: zuletzt gewählter Hintergrund als RRGGBB, leer = transparent
     public string AnnotationTextColor { get; set; } = "000000";  // Textanmerkung: zuletzt gewählte Schriftfarbe als RRGGBB
     public string InkColor { get; set; } = "0050E6";             // Zeichnen: Stiftfarbe als RRGGBB
+    public string HighlightColor { get; set; } = "FFC100";       // Hervorheben: Farbe als RRGGBB (Vorgabe Acrobats Gelb)
     public float InkWidth { get; set; } = 2f;                       // Zeichnen: Strichstärke in Punkt (0,5–12)
     public string Language { get; set; } = "de";          // Kultur-Code; Sprachen liegen als Languages\lng.<code>.resx bereit
     public string InstallerLanguage { get; set; } = string.Empty; // zuletzt übernommene Setup-Sprachwahl (s. ApplyInstallerDefaults)

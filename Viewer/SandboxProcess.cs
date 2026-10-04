@@ -107,9 +107,15 @@ internal sealed class SandboxProcess : IDisposable
     /// immer nur ein Befehl zugleich.</summary>
     public T Call<T>(byte command, Action<BinaryWriter>? arguments, Func<BinaryReader, T> result)
     {
-        var timedOut = false;
+        // 0 = läuft, 1 = Antwort da, 2 = Frist abgelaufen – Timer und Aufruf setzen den Zustand atomar, wer zuerst kommt, gilt. Sonst
+        // konnte ein Timer, der genau beim Eintreffen der Antwort feuerte, das Hilfsprogramm nach einem geglückten Befehl noch beenden:
+        // Timer.Dispose wartet nicht auf einen schon laufenden Callback (Ultra-Review 04.10.2026)
+        var state = 0;
         // beendet den ganzen Job: das schließt seine Pipe-Enden, und das blockierte Lesen hier endet mit einer Ausnahme
-        using var watchdog = new System.Threading.Timer(_ => { timedOut = true; _ = SandboxNative.TerminateJobObject(job, SandboxNative.ExitCodeTimeout); }, null, Timeout, System.Threading.Timeout.InfiniteTimeSpan);
+        using var watchdog = new System.Threading.Timer(_ =>
+        {
+            if (Interlocked.CompareExchange(ref state, 2, 0) == 0) { _ = SandboxNative.TerminateJobObject(job, SandboxNative.ExitCodeTimeout); }
+        }, null, Timeout, System.Threading.Timeout.InfiniteTimeSpan);
         try
         {
             writer.Write(command);
@@ -122,12 +128,15 @@ internal sealed class SandboxProcess : IDisposable
                 handler(status, reader);
                 status = reader.ReadByte();
             }
+            // Die Antwort ist da: Das Hilfsprogramm schreibt sie erst, wenn alles berechnet ist (Host/Program.cs), der Rest kommt also
+            // ohne Warten – ab hier beendet der Timer nichts mehr. Hat er schon zugeschlagen, endet das Lesen gleich mit einer Ausnahme.
+            _ = Interlocked.CompareExchange(ref state, 1, 0);
             if (status == Protocol.Error) { throw new SandboxErrorException(reader.ReadString()); }
             return result(reader);
         }
         catch (Exception ex) when (ex is IOException or EndOfStreamException or ObjectDisposedException)
         {
-            throw new SandboxCrashedException(ExitCode(), timedOut, ErrorOutput.Trim(), ex);
+            throw new SandboxCrashedException(ExitCode(), Volatile.Read(ref state) == 2, ErrorOutput.Trim(), ex);
         }
     }
 

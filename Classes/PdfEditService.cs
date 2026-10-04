@@ -11,7 +11,14 @@ using PdfSharp.Pdf.IO;
 
 namespace PDFLight.Classes;
 
-internal record PdfInfo(string Title, string Author, string Subject, string Keywords, int PageCount, string Version, string Creator, string Producer);
+/// <summary>Angaben für den Eigenschaften-Dialog. Created/Modified aus dem Info-Wörterbuch (null = nicht angegeben), Tagged = Strukturbaum
+/// bzw. /MarkInfo /Marked, PageWidthPt/PageHeightPt = erste Seite wie angezeigt (/Rotate berücksichtigt).</summary>
+internal record PdfInfo(string Title, string Author, string Subject, string Keywords, int PageCount, string Version, string Creator, string Producer,
+    DateTime? Created = null, DateTime? Modified = null, bool Tagged = false, double PageWidthPt = 0, double PageHeightPt = 0, IReadOnlyList<FontInfo>? Fonts = null);
+
+/// <summary>Eine im Dokument verwendete Schrift (Reiter „Schriften“): Name ohne Untergruppen-Präfix, eingebettet bzw. als Untergruppe,
+/// Typ (TrueType, Type 1, CID …) und Kodierung.</summary>
+internal sealed record FontInfo(string Name, bool Embedded, bool Subset, string Type, string Encoding);
 
 /// <summary>Kenndaten einer Datei; PageWidthPt/PageHeightPt = Größe der ersten Seite in Punkt (Referenz für die Zoomanzeige; 0 = unbekannt),
 /// AnnotationCount = verwaltbare Anmerkungen (s. ListAnnotations) – schaltet den Verwaltungsdialog frei.</summary>
@@ -75,7 +82,7 @@ internal static partial class PdfEditService
         var removedPages = pages.Select(p => document.Pages[p - 1].Reference?.ObjectID).OfType<PdfObjectID>().ToHashSet();
         foreach (var page in pages.OrderByDescending(p => p)) { document.Pages.RemoveAt(page - 1); }
         PruneOutlines(document, removedPages);
-        document.Save(path);
+        SaveCompact(document, path);
     }
 
     /// <summary>Nach dem Löschen von Seiten: Lesezeichen, die auf eine gelöschte Seite zeigen, werden entfernt – ihre Unterpunkte
@@ -156,7 +163,7 @@ internal static partial class PdfEditService
             var p = document.Pages[page - 1];
             p.Rotate = ((p.Rotate + delta) % 360 + 360) % 360;
         }
-        document.Save(path);
+        SaveCompact(document, path);
     }
 
     /// <summary>Fügt eine FreeText-Anmerkung ein: ein gelber Textkasten an der Position (Millimeter von links/oben,
@@ -167,7 +174,7 @@ internal static partial class PdfEditService
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         AppendFreeText(document, document.Pages[page - 1], text, leftMm, topMm, fontSize, style);
-        document.Save(path);
+        SaveCompact(document, path);
     }
 
     /// <summary>Ersetzt eine FreeText-Anmerkung (Index im Annots-Array der Seite) durch eine neue mit geänderten Werten –
@@ -178,7 +185,7 @@ internal static partial class PdfEditService
         var pdfPage = document.Pages[page - 1];
         pdfPage.Annotations.Elements.RemoveAt(ResolveIndex(pdfPage.Annotations, objectNumber, index));
         AppendFreeText(document, pdfPage, text, leftMm, topMm, fontSize, style);
-        document.Save(path);
+        SaveCompact(document, path);
     }
 
     /// <summary>Verschiebt eine Freitext-Anmerkung oder einen Stempel (Index im Annots-Array der Seite) um dx/dy Punkt: nur ihr /Rect –
@@ -195,7 +202,7 @@ internal static partial class PdfEditService
         var x = Math.Clamp(Math.Min(rect.X1, rect.X2) + dx, box.X1, Math.Max(box.X1, box.X2 - width));
         var y = Math.Clamp(Math.Min(rect.Y1, rect.Y2) + dy, box.Y1, Math.Max(box.Y1, box.Y2 - height));
         annotation.Elements.SetRectangle("/Rect", new PdfRectangle(new XRect(x, y, width, height)));
-        document.Save(path);
+        SaveCompact(document, path);
     }
 
     /// <summary>Entfernt eine Anmerkung (Index im Annots-Array der Seite) samt zugehörigem Popup.</summary>
@@ -213,7 +220,7 @@ internal static partial class PdfEditService
                 if (annotations.Elements[i] is PdfReference reference && reference.ObjectID == popup.ObjectID) { annotations.Elements.RemoveAt(i); }
             }
         }
-        document.Save(path);
+        SaveCompact(document, path);
     }
 
     /// <summary>Löscht alle verwaltbaren Anmerkungen (s. ListAnnotations) auf allen Seiten – Links, Popups und Formularfelder bleiben,
@@ -238,7 +245,7 @@ internal static partial class PdfEditService
                 if (annotations.Elements[i] is PdfReference reference && popups.Contains(reference.ObjectID)) { annotations.Elements.RemoveAt(i); }
             }
         }
-        if (count > 0) { document.Save(path); }
+        if (count > 0) { SaveCompact(document, path); }
         return count;
     }
 
@@ -270,7 +277,7 @@ internal static partial class PdfEditService
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         RemoveOutlines(document);
-        document.Save(path);
+        SaveCompact(document, path);
     }
 
     private static void RemoveOutlines(PdfDocument document)
@@ -348,7 +355,7 @@ internal static partial class PdfEditService
         if (bookmarks.Count == 0)
         {
             RemoveOutlines(document);
-            document.Save(path);
+            SaveCompact(document, path);
             return;
         }
         var catalog = document.Internals.Catalog;
@@ -361,7 +368,7 @@ internal static partial class PdfEditService
         catalog.Elements.SetReference("/Outlines", root);
         oldRoot?.Elements.Clear();
         foreach (var item in oldItems) { item.Elements.Clear(); } // die übernommenen Teile hängen jetzt an den neuen Einträgen
-        document.Save(path);
+        SaveCompact(document, path);
 
         void Write(PdfDictionary parent, IReadOnlyList<Bookmark> items, bool open)
         {
@@ -482,7 +489,7 @@ internal static partial class PdfEditService
         var pdfPage = document.Pages[page - 1];
         if (replaceIndex >= 0) { pdfPage.Annotations.Elements.RemoveAt(ResolveIndex(pdfPage.Annotations, replaceObjectNumber, replaceIndex)); }
         AppendStamp(document, pdfPage, stamp, stamp.SecondLine(DateTime.Now), top); // Datum, Uhrzeit und Kürzel klein unter dem Text
-        document.Save(path);
+        SaveCompact(document, path);
     }
 
     /// <summary>Sucht auf der Seite einen PDFlight-Stempel, der den Platz des neuen Stempels überlappt (gleiche feste Position);
@@ -591,7 +598,7 @@ internal static partial class PdfEditService
         var sameStack = sameColumn && Math.Abs(oldTop - (planned.Y + planned.Height)) <= StackLimit * (planned.Height + StackGap);
         pdfPage.Annotations.Elements.RemoveAt(index);
         AppendStamp(document, pdfPage, stamp, dateLine, sameStack ? oldTop : null);
-        document.Save(path);
+        SaveCompact(document, path);
     }
 
     private static void AppendStamp(PdfDocument document, PdfPage pdfPage, Stamp stamp, string dateLine, double? top = null)
@@ -666,6 +673,67 @@ internal static partial class PdfEditService
         pdfPage.Annotations.Elements.Add(annotation.Reference!); // nach AddObject hat das Objekt eine Referenz
     }
 
+    /// <summary>Weißer Marker (Wunsch vom 04.10.2026): Hervorhebungen, deren Darstellung die Farben unter dem Marker umkehrt – Mischmodus
+    /// Differenz mit Weiß bei voller Deckkraft, heller Text auf dunklem Grund wird dunkel auf hellem. Im Modus Multiplizieren, in dem PDFium
+    /// Hervorhebungen zeichnet, bliebe Weiß auf jedem Grund unsichtbar. Es bleibt eine gewöhnliche Highlight-Anmerkung (/QuadPoints, /C
+    /// Weiß), die Radierer, „Hervorhebung entfernen“ und andere Programme erkennen; nur die Darstellung schreibt PDFlight selbst, weil
+    /// PDFium keinen anderen Mischmodus einträgt. Vierecke je Seite (0-basiert) in PDF-Koordinaten aus <c>PageView.SelectionBoxesAsync</c>.</summary>
+    public static void AddInvertHighlights(string path, IEnumerable<(int Page, List<(double Left, double Top, double Right, double Bottom)> Boxes)> pages)
+    {
+        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        foreach (var (page, boxes) in pages)
+        {
+            if (page < 0 || page >= document.PageCount || boxes.Count == 0) { continue; }
+            var pdfPage = document.Pages[page];
+            var (left, bottom, right, top) = (boxes.Min(b => b.Left), boxes.Min(b => b.Bottom), boxes.Max(b => b.Right), boxes.Max(b => b.Top));
+            var bounds = new PdfRectangle(new XRect(left, bottom, right - left, top - bottom));
+
+            var graphicsState = new PdfDictionary(document);
+            graphicsState.Elements.SetName("/Type", "/ExtGState");
+            graphicsState.Elements.SetName("/BM", "/Difference");
+            graphicsState.Elements.SetReal("/CA", 1);
+            graphicsState.Elements.SetReal("/ca", 1);
+            var graphicsStates = new PdfDictionary(document);
+            graphicsStates.Elements.SetObject("/GS0", graphicsState);
+            var resources = new PdfDictionary(document);
+            resources.Elements.SetObject("/ExtGState", graphicsStates);
+            // /BBox = /Rect: die Darstellung liegt ohne Umrechnung in Seitenkoordinaten
+            var content = new StringBuilder("/GS0 gs 1 1 1 rg ");
+            foreach (var box in boxes) { content.Append(CultureInfo.InvariantCulture, $"{box.Left:0.###} {box.Bottom:0.###} {box.Right - box.Left:0.###} {box.Top - box.Bottom:0.###} re "); }
+            content.Append('f');
+            var appearance = new PdfDictionary(document);
+            appearance.Elements.SetName("/Type", "/XObject");
+            appearance.Elements.SetName("/Subtype", "/Form");
+            appearance.Elements.SetRectangle("/BBox", bounds);
+            appearance.Elements.SetObject("/Resources", resources);
+            appearance.CreateStream(ToWinAnsi(content.ToString()));
+            document.Internals.AddObject(appearance);
+            var appearances = new PdfDictionary(document);
+            appearances.Elements.SetReference("/N", appearance);
+
+            var quads = new PdfArray(document); // je Zeile links oben, rechts oben, links unten, rechts unten – wie PDFiums Hervorhebungen
+            foreach (var box in boxes)
+            {
+                foreach (var value in new[] { box.Left, box.Top, box.Right, box.Top, box.Left, box.Bottom, box.Right, box.Bottom }) { quads.Elements.Add(new PdfReal(value)); }
+            }
+            var white = new PdfArray(document);
+            for (var i = 0; i < 3; i++) { white.Elements.Add(new PdfReal(1)); }
+            var annotation = new PdfDictionary(document);
+            annotation.Elements.SetName("/Type", "/Annot");
+            annotation.Elements.SetName("/Subtype", "/Highlight");
+            annotation.Elements.SetRectangle("/Rect", bounds);
+            annotation.Elements.SetObject("/QuadPoints", quads);
+            annotation.Elements.SetObject("/C", white);
+            annotation.Elements.SetReal("/CA", 1);
+            annotation.Elements.SetInteger("/F", 4); // drucken
+            annotation.Elements.SetObject("/AP", appearances);
+            annotation.Elements.SetDateTime("/M", DateTime.Now);
+            document.Internals.AddObject(annotation);
+            pdfPage.Annotations.Elements.Add(annotation.Reference!); // nach AddObject hat das Objekt eine Referenz
+        }
+        SaveCompact(document, path);
+    }
+
     /// <summary>Kastenmaß eines Stempels in Punkt (Arial steht für Helvetica): fetter Text, darunter die Datumszeile in kleinerer
     /// Schrift, plus Innenabstand relativ zur Schriftgröße.</summary>
     public static (double Width, double Height, double TextWidth, double DateWidth) MeasureStamp(string text, double fontSize, string dateLine)
@@ -730,7 +798,13 @@ internal static partial class PdfEditService
         }
         content.Append("Q ");
         var textColor = style.TextColor;
-        content.Append(CultureInfo.InvariantCulture, $"BT /Helv {fontSize:0.##} Tf {textColor.R / 255.0:0.###} {textColor.G / 255.0:0.###} {textColor.B / 255.0:0.###} rg {leading:0.##} TL {Padding:0.##} {height - Padding - fontSize * 0.8:0.##} Td ");
+        // Grundlinien so, dass der Text optisch mittig im Kasten steht: von der Oberkante der ersten Zeile (Versalien/Oberlängen oder nur
+        // x-Höhe) bis zur Unterkante der letzten (mit oder ohne Unterlängen). Vorher pauschal 0,8 em unter dem Innenrand – unten blieb
+        // sichtbar mehr Platz (Hinweis Wilhelms vom 04.10.2026); der Kasten selbst bleibt so groß wie bisher.
+        var block = fontSize * (TopExtent(lines[0]) + (lines.Length - 1) * LeadingFactor + BottomExtent(lines[^1]));
+        var lastBaseline = (height - block) / 2 + fontSize * BottomExtent(lines[^1]);
+        var firstBaseline = lastBaseline + (lines.Length - 1) * leading;
+        content.Append(CultureInfo.InvariantCulture, $"BT /Helv {fontSize:0.##} Tf {textColor.R / 255.0:0.###} {textColor.G / 255.0:0.###} {textColor.B / 255.0:0.###} rg {leading:0.##} TL {Padding:0.##} {firstBaseline:0.##} Td ");
         foreach (var line in lines)
         {
             content.Append('(').Append(Escape(line)).Append(") Tj T* ");
@@ -773,6 +847,17 @@ internal static partial class PdfEditService
 
     public const double Padding = 4;           // Innenabstand des Anmerkungskastens (Punkt) – die Vorschau zeichnet damit
     public const double LeadingFactor = 1.25;  // Zeilenabstand relativ zur Schriftgröße
+    private const double CapHeight = 0.718;    // Helvetica (AFM): Versalhöhe, …
+    private const double XHeight = 0.523;      // … x-Höhe …
+    private const double Descender = 0.207;    // … und Unterlänge relativ zur Schriftgröße
+
+    /// <summary>Wie hoch eine Zeile über die Grundlinie reicht: nur x-Höhe, wenn sie ausschließlich aus Kleinbuchstaben ohne Oberlänge,
+    /// Punkt oder Akzent besteht (a, c, e, m …), sonst Versalhöhe – Oberlängen, i-Punkte und Umlaute liegen etwa dort.</summary>
+    private static double TopExtent(string line) =>
+        line.Trim().Length > 0 && line.All(c => char.IsWhiteSpace(c) || "acegmnopqrsuvwxyz.,:;-_~".Contains(c)) ? XHeight : CapHeight;
+
+    /// <summary>Wie tief eine Zeile unter die Grundlinie reicht: Unterlänge bei g, j, p, q, y, Q, Klammern und Satzzeichen mit Unterlänge.</summary>
+    private static double BottomExtent(string line) => line.Any(c => "gjpqyQç(),;[]{}|_@µ".Contains(c)) ? Descender : 0;
 
     /// <summary>Zeilen eines Anmerkungstexts – Zeilenumbrüche als CRLF, LF oder auch nur CR (so schreibt sie Acrobat).</summary>
     public static string[] SplitLines(string text) => text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
@@ -826,7 +911,7 @@ internal static partial class PdfEditService
             foreach (var page in other.Pages) { document.AddPage(page); }
         }
         var pageCount = document.PageCount; // muss vor Save() gelesen werden — danach ist das Dokument gesperrt
-        document.Save(path);
+        SaveCompact(document, path);
         return pageCount;
     }
 
@@ -836,7 +921,7 @@ internal static partial class PdfEditService
         using var source = PdfReader.Open(sourcePath, PdfDocumentOpenMode.Import);
         using PdfDocument destination = new();
         foreach (var page in pages) { destination.AddPage(source.Pages[page - 1]); }
-        destination.Save(destinationPath);
+        SaveCompact(destination, destinationPath);
     }
 
     /// <summary>True, wenn sich die Datei mit dem Kennwort öffnen lässt (null/leer = ohne Kennwort).</summary>
@@ -864,7 +949,7 @@ internal static partial class PdfEditService
         CopyInfo(source, target);
         target.SecuritySettings.UserPassword = password;
         target.SecurityHandler.SetEncryptionToV5(); // AES-256, PDF 2.0
-        target.Save(path);
+        SaveCompact(target, path);
     }
 
     /// <summary>Duplex-Zusammenführung: verzahnt hinter jede Seite der Datei die passende Rückseite aus
@@ -883,7 +968,7 @@ internal static partial class PdfEditService
             target.AddPage(backs.Pages[backsReversed ? backs.PageCount - 1 - i : i]);
         }
         CopyInfo(fronts, target);
-        target.Save(path);
+        SaveCompact(target, path);
     }
 
     private static void CopyInfo(PdfDocument source, PdfDocument target)
@@ -894,12 +979,113 @@ internal static partial class PdfEditService
         target.Info.Keywords = source.Info.Keywords;
     }
 
-    public static PdfInfo ReadInfo(string path)
+    public static PdfInfo ReadInfo(string path, string? password = null)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import); // Import = lesender Zugriff (ReadOnly ist in PDFsharp 6 nicht implementiert)
+        // Import = lesender Zugriff (ReadOnly ist in PDFsharp 6 nicht implementiert); das Kennwort für Dateien mit Kennwort zum Öffnen
+        using var document = string.IsNullOrEmpty(password)
+            ? PdfReader.Open(path, PdfDocumentOpenMode.Import)
+            : PdfReader.Open(path, password, PdfDocumentOpenMode.Import);
         var v = document.Version; // z.B. 14 → "1.4"
+        static DateTime? Date(DateTime value) => value == DateTime.MinValue ? null : value; // PDFsharp: MinValue = nicht angegeben
+        var catalog = document.Internals.Catalog;
+        var tagged = catalog.Elements.ContainsKey("/StructTreeRoot") || catalog.Elements.GetDictionary("/MarkInfo")?.Elements.GetBoolean("/Marked") == true;
+        var (width, height) = (0.0, 0.0);
+        if (document.PageCount > 0)
+        {
+            var first = document.Pages[0];
+            var box = first.MediaBox;
+            (width, height) = first.Rotate % 180 == 0 ? (box.Width, box.Height) : (box.Height, box.Width);
+        }
+        IReadOnlyList<FontInfo> fonts;
+        try { fonts = CollectFonts(document); }
+        catch (Exception ex) when (IsPdfReadError(ex)) { fonts = []; } // ein kaputter Schrifteintrag soll den Dialog nicht verhindern
         return new PdfInfo(document.Info.Title, document.Info.Author, document.Info.Subject, document.Info.Keywords,
-            document.PageCount, $"{v / 10}.{v % 10}", document.Info.Creator, document.Info.Producer);
+            document.PageCount, $"{v / 10}.{v % 10}", document.Info.Creator, document.Info.Producer,
+            Date(document.Info.CreationDate), Date(document.Info.ModificationDate), tagged, width, height, fonts);
+    }
+
+    /// <summary>Die Schriften aus den Ressourcen der Seiten (auch geerbte und die von Formular-XObjects) – nur die Schrift-Wörterbücher, die
+    /// Seiteninhalte werden nicht zerlegt; so bleibt es auch bei großen Dateien schnell. Je Name, Typ, Kodierung und Einbettung ein Eintrag.</summary>
+    private static List<FontInfo> CollectFonts(PdfDocument document)
+    {
+        var fonts = new Dictionary<string, FontInfo>(StringComparer.Ordinal);
+        var visited = new HashSet<PdfDictionary>(ReferenceEqualityComparer.Instance);
+        void Resources(PdfDictionary? resources, int depth)
+        {
+            if (resources == null || depth > 8 || !visited.Add(resources)) { return; }
+            if (resources.Elements.GetDictionary("/Font") is { } fontDictionary)
+            {
+                foreach (var key in fontDictionary.Elements.Keys)
+                {
+                    if (fontDictionary.Elements.GetDictionary(key) is { } font && visited.Add(font) && Describe(font) is { } info)
+                    {
+                        fonts.TryAdd($"{info.Name}|{info.Type}|{info.Encoding}|{info.Embedded}|{info.Subset}", info);
+                    }
+                }
+            }
+            if (resources.Elements.GetDictionary("/XObject") is { } xObjects)
+            {
+                foreach (var key in xObjects.Elements.Keys)
+                {
+                    if (xObjects.Elements.GetDictionary(key) is { } xObject && xObject.Elements.GetName("/Subtype") == "/Form") { Resources(xObject.Elements.GetDictionary("/Resources"), depth + 1); }
+                }
+            }
+        }
+        foreach (var page in document.Pages)
+        {
+            // /Resources darf von einem /Pages-Knoten geerbt sein
+            PdfDictionary? node = page;
+            for (var level = 0; node != null && level < 32; level++)
+            {
+                if (node.Elements.GetDictionary("/Resources") is { } resources) { Resources(resources, 0); break; }
+                node = node.Elements.GetDictionary("/Parent");
+            }
+        }
+        return [.. fonts.Values.OrderBy(f => f.Name, StringComparer.OrdinalIgnoreCase)];
+    }
+
+    private static FontInfo? Describe(PdfDictionary font)
+    {
+        var subtype = font.Elements.GetName("/Subtype");
+        var baseFont = font.Elements.GetName("/BaseFont").TrimStart('/');
+        var descriptor = font.Elements.GetDictionary("/FontDescriptor");
+        string type;
+        if (subtype == "/Type0")
+        {
+            var descendant = font.Elements.GetArray("/DescendantFonts")?.Elements is { Count: > 0 } descendants ? Resolve(descendants[0]) as PdfDictionary : null;
+            type = descendant?.Elements.GetName("/Subtype") == "/CIDFontType2" ? "TrueType (CID)" : "Type 1 (CID)";
+            descriptor = descendant?.Elements.GetDictionary("/FontDescriptor");
+        }
+        else
+        {
+            type = subtype switch { "/TrueType" => "TrueType", "/Type1" => "Type 1", "/MMType1" => "Type 1 (Multiple Master)", "/Type3" => "Type 3", _ => subtype.TrimStart('/') };
+        }
+        if (descriptor?.Elements.GetDictionary("/FontFile3")?.Elements.GetName("/Subtype") == "/OpenType") { type = "OpenType"; }
+        var embedded = subtype == "/Type3" || descriptor != null && (descriptor.Elements.ContainsKey("/FontFile") || descriptor.Elements.ContainsKey("/FontFile2") || descriptor.Elements.ContainsKey("/FontFile3"));
+        var subset = baseFont.Length > 7 && baseFont[6] == '+' && baseFont[..6].All(char.IsAsciiLetterUpper); // „ABCDEF+Arial“
+        var name = subset ? baseFont[7..] : baseFont;
+        if (name.Length == 0) { name = subtype == "/Type3" ? "Type 3" : "?"; }
+        var encoding = Resolve(font.Elements["/Encoding"]) switch
+        {
+            PdfName { Value: "/WinAnsiEncoding" } => "Ansi",
+            PdfName { Value: "/MacRomanEncoding" } => "Roman",
+            PdfName { Value: "/StandardEncoding" } => "Standard",
+            PdfName other => other.Value.TrimStart('/'),
+            PdfDictionary => "*", // eigene Kodierung (Differences) – der Dialog übersetzt
+            _ => string.Empty,    // eingebaute Kodierung der Schrift – der Dialog übersetzt
+        };
+        return new FontInfo(name, embedded, subset, type, encoding);
+    }
+
+    private static PdfItem? Resolve(PdfItem? item) => item is PdfReference reference ? reference.Value : item;
+
+    /// <summary>Speichert und lässt dabei nichts Unerreichbares zurück. PDFsharp verwirft beim Speichern alle Objekte, auf die nichts mehr
+    /// verweist, ersetzt die XMP-Metadaten des Katalogs aber erst danach durch eigene – der alte XMP-Strom blieb so bei jeder Bearbeitung als
+    /// Waise in der Datei (geprüft 04.10.2026). Ohne Verweis darauf fällt er gleich mit weg; die neuen XMP-Daten schreibt PDFsharp trotzdem.</summary>
+    private static void SaveCompact(PdfDocument document, string path)
+    {
+        document.Internals.Catalog.Elements.Remove("/Metadata");
+        document.Save(path);
     }
 
     public static void WriteInfo(string path, string title, string author, string subject, string keywords)
@@ -909,7 +1095,7 @@ internal static partial class PdfEditService
         document.Info.Author = author ?? string.Empty;
         document.Info.Subject = subject ?? string.Empty;
         document.Info.Keywords = keywords ?? string.Empty;
-        document.Save(path);
+        SaveCompact(document, path);
     }
 
     /// <summary>Entfernt alle Metadaten: das gesamte Info-Wörterbuch (Titel, Autor, Betreff, Stichwörter, Anwendung, Produzent,
@@ -926,7 +1112,7 @@ internal static partial class PdfEditService
         if (author.Length > 0) { document.Info.Author = author; }
         if (subject.Length > 0) { document.Info.Subject = subject; }
         if (keywords.Length > 0) { document.Info.Keywords = keywords; }
-        document.Save(path);
+        SaveCompact(document, path);
     }
 
     /// <summary>XMP-Strom eines Wörterbuchs entfernen. PDFsharp schreibt auch nicht mehr referenzierte Objekte in die Datei,
@@ -967,7 +1153,7 @@ internal static partial class PdfEditService
             using var gfx = XGraphics.FromPdfPage(newPage);
             gfx.DrawImage(image, rect);
         }
-        document.Save(path);
+        SaveCompact(document, path);
         return index + 1;
     }
 
@@ -1037,7 +1223,7 @@ internal static partial class PdfEditService
     {
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         document.Pages.MovePage(page - 1, targetPage - 1);
-        document.Save(path);
+        SaveCompact(document, path);
     }
 
     /// <summary>Parst Seitenangaben wie "3", "2-5" oder "1, 4, 7-9"; null bei ungültiger Eingabe.</summary>

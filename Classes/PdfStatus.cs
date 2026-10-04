@@ -27,9 +27,11 @@ internal sealed partial record PdfStatus(int PageCount, string? Version, string?
         // im ganzen Fenster suchen: in der Element-Schreibweise ist das letzte Vorkommen das schließende </pdfaid:part>
         var matches = PartRegex().Matches(window);
         if (matches.Count == 0) { return null; }
-        var part = matches[^1].Groups[1].Value;
-        var conformance = ConformanceRegex().Match(window).Groups[1].Value;
-        return part + conformance.ToLowerInvariant();
+        var partMatch = matches[^1];
+        // die Konformitätsangabe, die der gewählten Teilangabe am nächsten steht – beide gehören zum selben Metadatenblock; die erste im
+        // Fenster könnte aus einem älteren Block einer früheren Speicherung stammen (Ultra-Review 04.10.2026)
+        var conformance = ConformanceRegex().Matches(window).OrderBy(m => Math.Abs(m.Index - partMatch.Index)).FirstOrDefault()?.Groups[1].Value ?? string.Empty;
+        return partMatch.Groups[1].Value + conformance.ToLowerInvariant();
     }
 
     [GeneratedRegex(@"pdfaid:part(?:\s*=\s*[""']|\s*>\s*)(\d+)")]

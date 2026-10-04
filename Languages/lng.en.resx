@@ -72,7 +72,6 @@
   <data name="Seiten drehen…" xml:space="preserve"><value>Rotate pages…</value></data>
   <data name="PDF-Datei anhängen…" xml:space="preserve"><value>Append PDF file…</value></data>
   <data name="Seiten extrahieren…" xml:space="preserve"><value>Extract pages…</value></data>
-  <data name="Änderung rückgängig" xml:space="preserve"><value>Undo change</value></data>
   <data name="Rückgängig:" xml:space="preserve"><value>Undo:</value></data>
   <data name="Verschieben nach „{0}“" xml:space="preserve"><value>Move to "{0}"</value></data>
   <data name="In den Papierkorb verschieben" xml:space="preserve"><value>Move to the Recycle Bin</value></data>
@@ -156,7 +155,6 @@ extract pages, properties (shortcuts in the menu)</value></data>
   <data name="Strg+Umschalt+← / →" xml:space="preserve"><value>Ctrl+Shift+← / →</value></data>
   <data name="Strg+Umschalt+R / L" xml:space="preserve"><value>Ctrl+Shift+R / L</value></data>
   <data name="Strg+F2" xml:space="preserve"><value>Ctrl+F2</value></data>
-  <data name="Strg+Umschalt+I" xml:space="preserve"><value>Ctrl+Shift+I</value></data>
   <data name="Datei" xml:space="preserve"><value>File</value></data>
   <data name="Strg+Umschalt+B" xml:space="preserve"><value>Ctrl+Shift+B</value></data>
   <data name="Gehe zu Seite (Zahl tippen + Enter)" xml:space="preserve"><value>Go to page (type number + Enter)</value></data>
@@ -396,15 +394,11 @@ the latest version.</value></data>
   <data name="&amp;Betreff:" xml:space="preserve"><value>Su&amp;bject:</value></data>
   <data name="&amp;Stichwörter:" xml:space="preserve"><value>&amp;Keywords:</value></data>
   <data name="Speichern" xml:space="preserve"><value>Save</value></data>
-  <data name="geändert" xml:space="preserve"><value>modified</value></data>
   <data name="Anwendung:" xml:space="preserve"><value>Application:</value></data>
-  <data name="PDF-Produzent:" xml:space="preserve"><value>PDF producer:</value></data>
   <data name="PDFlight-Hilfe" xml:space="preserve"><value>PDFlight-Help</value></data>
   <data name="diese Hilfedatei (PDF)" xml:space="preserve"><value>this help file (PDF)</value></data>
   <data name="Hilfedatei (PDF)…" xml:space="preserve"><value>Help file (PDF)…</value></data>
   <data name="PDFlight lädt die Datei zum Anzeigen in den Arbeitsspeicher. Die Datei selbst bleibt dabei frei: andere Programme können sie jederzeit ändern oder verschieben. Wird sie geändert, zeigt PDFlight den neuen Stand, sobald du zum Fenster zurückkehrst." xml:space="preserve"><value>PDFlight loads the file into memory for viewing. The file itself stays free: other programs can change or move it at any time. If it is changed, PDFlight shows the new version as soon as you return to the window.</value></data>
-  <data name="Die Werkzeuge in der Anzeige (Zoom, Ansicht drehen, Suchen) verändern nur die Darstellung, nie die Datei. Alles, was du dort drehst, ist beim nächsten Öffnen wieder wie vorher." xml:space="preserve"><value>The tools in the viewer (zoom, rotate view, search) only change the display, never the file. Anything you rotate there is back to normal the next time you open the file.</value></data>
-  <data name="Die Befehle im Menü „Bearbeiten“ und in der Symbolleiste (Seiten löschen oder drehen, anhängen, Kennwort, Eigenschaften) ändern die Datei dagegen wirklich – und zwar sofort, ohne gesonderten Speichern-Schritt. Einen Fehlgriff machst du mit Strg+Z rückgängig." xml:space="preserve"><value>The commands in the “Edit” menu and in the toolbar (delete or rotate pages, append, password, properties), however, really do change the file – immediately, with no separate save step. Undo a slip with Ctrl+Z.</value></data>
   <data name="Der Ordner konnte nicht gelöscht werden." xml:space="preserve"><value>The folder could not be deleted.</value></data>
   <data name="Ausgewählten Ordner umbenennen." xml:space="preserve"><value>Rename the selected folder.</value></data>
   <data name="Ausgewählten Ordner in den Papierkorb verschieben." xml:space="preserve"><value>Move the selected folder to the recycle bin.</value></data>
@@ -459,7 +453,6 @@ the latest version.</value></data>
   <data name="&amp;Name (optional, bis 30 Zeichen):" xml:space="preserve"><value>&amp;Name (optional, up to 30 characters):</value></data>
   <data name="&amp;Favoriten-Menü anzeigen (Dateien merken, max. 200 Einträge)" xml:space="preserve"><value>Sho&amp;w the favorites menu (remember files, max. 200 entries)</value></data>
   <!-- Textanmerkung-Dialog -->
-  <data name="Freitext hinzufügen…" xml:space="preserve"><value>Add free text…</value></data>
   <data name="Strg+T" xml:space="preserve"><value>Ctrl+T</value></data>
   <data name="Freitext einfügen" xml:space="preserve"><value>insert free text</value></data>
   <data name="Textanmerkung hinzufügen" xml:space="preserve"><value>Add text annotation</value></data>
@@ -490,7 +483,6 @@ the latest version.</value></data>
   <data name="Grün" xml:space="preserve"><value>Green</value></data>
   <data name="Blau" xml:space="preserve"><value>Blue</value></data>
   <!-- Anmerkungen verwalten -->
-  <data name="Anmerkungen verwalten…" xml:space="preserve"><value>Manage annotations…</value></data>
   <data name="Strg+Umschalt+T" xml:space="preserve"><value>Ctrl+Shift+T</value></data>
   <data name="Enter" xml:space="preserve"><value>Enter</value></data>
   <data name="Anmerkungen verwalten (bearbeiten, löschen)" xml:space="preserve"><value>manage annotations (edit, delete)</value></data>
@@ -513,7 +505,6 @@ the latest version.</value></data>
   <data name="Metadaten &amp;entfernen" xml:space="preserve"><value>R&amp;emove metadata</value></data>
   <data name="Entfernen der Metadaten" xml:space="preserve"><value>Removing the metadata</value></data>
   <data name="Die Metadaten wurden entfernt." xml:space="preserve"><value>The metadata was removed.</value></data>
-  <data name="Anwendung, Produzent, Daten und XMP werden mit entfernt." xml:space="preserve"><value>Application, producer, dates and XMP are removed as well.</value></data>
 
   <!-- Stempel -->
   <data name="&amp;Löschen" xml:space="preserve"><value>&amp;Delete</value></data>
@@ -529,7 +520,6 @@ the latest version.</value></data>
   <data name="Neu" xml:space="preserve"><value>New</value></data>
   <data name="Stempel" xml:space="preserve"><value>Stamp</value></data>
   <data name="Stempel einfügen" xml:space="preserve"><value>Insert stamp</value></data>
-  <data name="Stempel einfügen…" xml:space="preserve"><value>Insert stamp…</value></data>
   <data name="Stempel verwalten" xml:space="preserve"><value>Manage stamps</value></data>
   <data name="Stempel verwalten…" xml:space="preserve"><value>Manage stamps…</value></data>
   <data name="oben links" xml:space="preserve"><value>top left</value></data>
@@ -677,8 +667,6 @@ or press Ctrl+Shift+I.</value></data>
   <data name="Nächster Treffer (F3, Enter)" xml:space="preserve"><value>Next match (F3, Enter)</value></data>
   <data name="Ohne Kennwort lässt sich die Datei nicht anzeigen." xml:space="preserve"><value>The file cannot be displayed without a password.</value></data>
   <data name="Seite (Strg+G: Zahl tippen, Enter)" xml:space="preserve"><value>Page (Ctrl+G: type number, Enter)</value></data>
-  <data name="Seitenleiste (Miniaturen, Lesezeichen) ein/aus" xml:space="preserve"><value>Sidebar (thumbnails, bookmarks) on/off</value></data>
-  <data name="Seitenleiste mit Miniaturen und Lesezeichen (Strg+Umschalt+I)" xml:space="preserve"><value>Sidebar with thumbnails and bookmarks (Ctrl+Shift+I)</value></data>
   <data name="Strg+A" xml:space="preserve"><value>Ctrl+A</value></data>
   <data name="Strg+C" xml:space="preserve"><value>Ctrl+C</value></data>
   <data name="Suche schließen (Esc)" xml:space="preserve"><value>Close search (Esc)</value></data>
@@ -775,4 +763,82 @@ or press Ctrl+Shift+I.</value></data>
   <data name="Die Datei ist nur mit einem Besitzerkennwort geschützt, das Berechtigungen wie Drucken oder Ändern einschränkt. Die Einschränkungen werden entfernt, der Inhalt bleibt vollständig erhalten." xml:space="preserve"><value>The file is protected only by an owner password that restricts permissions such as printing or editing. The restrictions are removed; the content is kept in full.</value></data>
   <data name="Kennwortschutz von „{0}“ entfernen?" xml:space="preserve"><value>Remove password protection from “{0}”?</value></data>
   <data name="Die Datei wird unverschlüsselt gespeichert und lässt sich danach ohne Kennwort öffnen. Der Inhalt bleibt vollständig erhalten." xml:space="preserve"><value>The file is saved unencrypted and can then be opened without a password. The content is kept in full.</value></data>
+  <data name="Stempel entfernen" xml:space="preserve"><value>Remove stamp</value></data>
+  <data name="Der Stempel wurde entfernt." xml:space="preserve"><value>The stamp was removed.</value></data>
+  <data name="Alle Dateien (*.*)|*.*" xml:space="preserve"><value>All files (*.*)|*.*</value></data>
+  <data name="Anhänge" xml:space="preserve"><value>Attachments</value></data>
+  <data name="Ausfüllen von Formularfeldern" xml:space="preserve"><value>Filling of form fields</value></data>
+  <data name="Benutzerdefiniert" xml:space="preserve"><value>Custom</value></data>
+  <data name="Beschreibung" xml:space="preserve"><value>Description</value></data>
+  <data name="Dateigröße:" xml:space="preserve"><value>File size:</value></data>
+  <data name="Die eingebettete Datei konnte nicht gespeichert werden." xml:space="preserve"><value>The embedded file could not be saved.</value></data>
+  <data name="Dokumenteinschränkungen – Zusammenfassung" xml:space="preserve"><value>Document restrictions summary</value></data>
+  <data name="Dokumentsicherheit" xml:space="preserve"><value>Document security</value></data>
+  <data name="Dokumentzusammenstellung" xml:space="preserve"><value>Document assembly</value></data>
+  <data name="Eingebettete Datei speichern" xml:space="preserve"><value>Save embedded file</value></data>
+  <data name="Eingebettete Dateien werden nur gespeichert, nicht geöffnet." xml:space="preserve"><value>Embedded files are only saved, never opened.</value></data>
+  <data name="Erstellt am:" xml:space="preserve"><value>Created:</value></data>
+  <data name="Erweitert" xml:space="preserve"><value>Advanced</value></data>
+  <data name="Geändert am:" xml:space="preserve"><value>Modified:</value></data>
+  <data name="Größe" xml:space="preserve"><value>Size</value></data>
+  <data name="In diesem Dokument verwendete Schriften" xml:space="preserve"><value>Fonts used in this document</value></data>
+  <data name="Integriert" xml:space="preserve"><value>Built-in</value></data>
+  <data name="Ja" xml:space="preserve"><value>Yes</value></data>
+  <data name="Keine Schriften gefunden" xml:space="preserve"><value>No fonts found</value></data>
+  <data name="Keine Sicherheit" xml:space="preserve"><value>No security</value></data>
+  <data name="Keine" xml:space="preserve"><value>None</value></data>
+  <data name="Kennwort zum Öffnen:" xml:space="preserve"><value>Password to open:</value></data>
+  <data name="Kennwortsicherheit" xml:space="preserve"><value>Password security</value></data>
+  <data name="Kodierung:" xml:space="preserve"><value>Encoding:</value></data>
+  <data name="Kommentieren" xml:space="preserve"><value>Commenting</value></data>
+  <data name="Kopieren von Inhalt für Barrierefreiheit" xml:space="preserve"><value>Content copying for accessibility</value></data>
+  <data name="Kopieren von Inhalt" xml:space="preserve"><value>Content copying</value></data>
+  <data name="Nein" xml:space="preserve"><value>No</value></data>
+  <data name="Nicht zulässig" xml:space="preserve"><value>Not allowed</value></data>
+  <data name="Nur niedrige Auflösung" xml:space="preserve"><value>Low resolution only</value></data>
+  <data name="PDF erstellt mit:" xml:space="preserve"><value>PDF producer:</value></data>
+  <data name="PDF mit Tags:" xml:space="preserve"><value>Tagged PDF:</value></data>
+  <data name="PDF-Version:" xml:space="preserve"><value>PDF version:</value></data>
+  <data name="Schnelle Webanzeige:" xml:space="preserve"><value>Fast web view:</value></data>
+  <data name="Schriften" xml:space="preserve"><value>Fonts</value></data>
+  <data name="Seitenanzahl:" xml:space="preserve"><value>Number of pages:</value></data>
+  <data name="Seitenformat:" xml:space="preserve"><value>Page size:</value></data>
+  <data name="Sicherheit" xml:space="preserve"><value>Security</value></data>
+  <data name="Sicherheitssystem:" xml:space="preserve"><value>Security method:</value></data>
+  <data name="Speichern &amp;unter…" xml:space="preserve"><value>Save &amp;as…</value></data>
+  <data name="Speicherort:" xml:space="preserve"><value>Location:</value></data>
+  <data name="Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Typ:" xml:space="preserve"><value>Type:</value></data>
+  <data name="Verschlüsselung:" xml:space="preserve"><value>Encryption:</value></data>
+  <data name="Vorgang" xml:space="preserve"><value>Action</value></data>
+  <data name="Zulässig" xml:space="preserve"><value>Allowed</value></data>
+  <data name="wird entfernt" xml:space="preserve"><value>will be removed</value></data>
+  <data name="Ändern des Dokuments" xml:space="preserve"><value>Changing the document</value></data>
+  <data name="128 Bit (RC4 oder AES)" xml:space="preserve"><value>128-bit (RC4 or AES)</value></data>
+  <data name="Radieren" xml:space="preserve"><value>Erase</value></data>
+  <data name="Radierer" xml:space="preserve"><value>Eraser</value></data>
+  <data name="Radierer: Klicke auf Zeichnungen und Hervorhebungen oder wische darüber – sie werden entfernt. Esc beendet." xml:space="preserve"><value>Eraser: click drawings and highlights or swipe over them – they are removed. Esc ends.</value></data>
+  <data name="Radierer: Zeichnungen und Hervorhebungen durch Klicken oder Wischen entfernen (Esc beendet)" xml:space="preserve"><value>Eraser: remove drawings and highlights by clicking or swiping (Esc ends)</value></data>
+  <data name="Rückgängig" xml:space="preserve"><value>Undo</value></data>
+  <data name="Rückgängig (Strg+Z)" xml:space="preserve"><value>Undo (Ctrl+Z)</value></data>
+  <data name="Rückgängig: {0} (Strg+Z)" xml:space="preserve"><value>Undo: {0} (Ctrl+Z)</value></data>
+  <data name="Farbe zum Hervorheben" xml:space="preserve"><value>Highlight color</value></data>
+  <data name="Hervorhebungsfarbe" xml:space="preserve"><value>Highlight color</value></data>
+  <data name="Umkehren (für hellen Text auf dunklem Grund)" xml:space="preserve"><value>Invert (for light text on a dark background)</value></data>
+  <data name="Anmerkung entfernen" xml:space="preserve"><value>Remove annotation</value></data>
+  <data name="Anmerkungen verwalten" xml:space="preserve"><value>Manage annotations</value></data>
+  <data name="Anmerkung bearbeiten…" xml:space="preserve"><value>Edit annotation…</value></data>
+  <data name="Freitext bearbeiten…" xml:space="preserve"><value>Edit free text…</value></data>
+  <data name="Stempel bearbeiten…" xml:space="preserve"><value>Edit stamp…</value></data>
+  <data name="Freitext entfernen" xml:space="preserve"><value>Remove free text</value></data>
+  <data name="Der Freitext wurde entfernt." xml:space="preserve"><value>The free text was removed.</value></data>
+  <data name="F10 / Strg+F10 / Umschalt+F10" xml:space="preserve"><value>F10 / Ctrl+F10 / Shift+F10</value></data>
+  <data name="Seitenleiste ein/aus / mit Miniaturen / mit Lesezeichen" xml:space="preserve"><value>Sidebar on/off / with thumbnails / with bookmarks</value></data>
+  <data name="Seitenleiste mit Miniaturen und Lesezeichen (F10)" xml:space="preserve"><value>Sidebar with thumbnails and bookmarks (F10)</value></data>
+  <data name="Änderungen über die Viewer-Leiste (Hervorheben, Zeichnen, Freitext, Stempel, Seiten drehen) bleiben ungespeichert, bis du auf „Speichern“ klickst." xml:space="preserve"><value>Changes made with the viewer bar (highlight, draw, free text, stamp, rotate pages) stay unsaved until you click “Save”.</value></data>
+  <data name="Die Befehle im Menü „Bearbeiten“ und in der Symbolleiste ändern die Datei sofort. Strg+Z macht einen Fehlgriff rückgängig." xml:space="preserve"><value>The commands in the “Edit” menu and in the toolbar change the file immediately. Ctrl+Z undoes a slip.</value></data>
+  <data name="Verwalten" xml:space="preserve"><value>Manage</value></data>
+  <data name="Anmerkungen verwalten (Strg+Umschalt+T)" xml:space="preserve"><value>Manage annotations (Ctrl+Shift+T)</value></data>
+  <data name="Angezeigte S&amp;eite" xml:space="preserve"><value>Dis&amp;played page</value></data>
+  <data name="Ungespeicherte Änderungen an den Lesezeichen verwerfen?" xml:space="preserve"><value>Discard unsaved changes to the bookmarks?</value></data>
 </root>

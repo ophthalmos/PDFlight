@@ -47,6 +47,8 @@ public partial class MainForm : Form
         Lng.Apply(contextMenuPage); // Kontextmenüs hängen nicht im Control-Baum
         Lng.Apply(inkPalette);      // ebenso die Farbauswahl fürs Zeichnen (Dropdown der Viewer-Leiste)
         inkPalette.InkChanged += InkPalette_InkChanged; // kein Designer-Element des Formulars
+        Lng.Apply(highlightPalette); // ebenso die Farbauswahl fürs Hervorheben
+        highlightPalette.ColorChanged += HighlightPalette_ColorChanged;
         ApplyViewerColors();
         RestoreSidebar();
         RestoreViewSettings();
@@ -147,6 +149,7 @@ public partial class MainForm : Form
         settings.SearchWholeWord = btnWholeWord.Checked;
         settings.InkColor = AnnotationStyle.ToHex(pageView.InkColor);
         settings.InkWidth = pageView.InkWidth;
+        settings.HighlightColor = AnnotationStyle.ToHex(highlightPalette.SelectedColor);
         settings.ReloadSharedLists(); // Listenänderungen anderer Instanzen nicht überschreiben
         RememberCurrentPage();
         settings.LastFile = currentFile?.FullName ?? string.Empty;
@@ -465,7 +468,7 @@ public partial class MainForm : Form
         document = value;
         document?.Changed += Document_Changed;
         documentDirty = false;
-        UpdateTitle(); // ohne Stern, ohne „Speichern“ in der Viewer-Leiste
+        UpdateTitle(); // ohne „Speichern“ in der Viewer-Leiste
         pageView.SetDocument(value);
         thumbnailGrid.SetDocument(value);
         thumbnailGrid.CurrentPage = pageView.CurrentPage; // SetDocument der Miniaturen setzt sie zurück
@@ -491,22 +494,21 @@ public partial class MainForm : Form
         var hasFile = currentFile != null;
         InstanceRegistry.Publish(currentFile?.FullName); // den anderen Instanzen melden, welche Datei hier offen ist
         UpdateTitle();
+        LockForBookmarkEditor(); // solange der Lesezeichen-Editor offen ist: keine andere Datei, keine Bearbeitung
         splitButtonMove.Enabled = btnCopy.Enabled = btnRename.Enabled = btnDelete.Enabled = btnShowInFolder.Enabled = ddbEdit.Enabled = btnPrint.Enabled = btnEmail.Enabled = hasFile;
         // PDF/A-Schutz: verändernde Operationen bleiben gesperrt, bis „Bearbeitung aktivieren“ gedrückt wurde;
         // Extrahieren (neue Datei), Rückgängig (stellt alte Bytes wieder her) und Eigenschaften (dann nur lesend) bleiben frei
         pnlPdfA.Visible = hasFile && PdfALocked; // bei Kennwortschutz keine eigene Leiste – der Viewer zeigt selbst „eingeschränkte Berechtigungen“ (Wunsch vom 20.09.2026)
-        mnuDeletePages.Enabled = mnuRotatePages.Enabled = mnuAppendPdf.Enabled = mnuDuplex.Enabled = mnuAddAnnotation.Enabled = !EditLocked;
+        mnuDeletePages.Enabled = mnuRotatePages.Enabled = mnuAppendPdf.Enabled = mnuDuplex.Enabled = !EditLocked;
         mnuMovePage.Enabled = !EditLocked && currentPageCount > 1; // mit einer Seite gibt es nichts zu verschieben
         mnuInsertPage.Enabled = !EditLocked;
-        mnuAddStamp.Enabled = !EditLocked;
-        mnuManageAnnotations.Enabled = !EditLocked && currentPageCount > 0; // ohne Anmerkungen zeigt die Liste „(keine Anmerkungen)“ – gezählt wird nicht mehr (PDFium müsste dafür jede Seite laden)
         mnuRemoveBookmarks.Enabled = !EditLocked && (currentPdfStatus?.OutlineCount ?? 0) > 0;
         mnuEditBookmarks.Enabled = !EditLocked; // auch ohne Lesezeichen: dann legt der Editor welche an
         mnuSetPassword.Enabled = currentPageCount > 0 && !EditLocked;  // nur ohne bestehenden Kennwortschutz
         mnuRemovePassword.Enabled = hasFile && (currentPageCount <= 0 || Encrypted);  // bei geschützter (oder unlesbarer) Datei
         mnuRemoveRestrictions.Available = hasFile && OwnerPasswordOnly; // nur bei lesbaren, aber besitzergeschützten Dateien überhaupt im Menü (Wunsch vom 21.09.2026)
         foreach (var button in programIconButtons) { button.Enabled = hasFile; }
-        mnuHighlight.Visible = mnuRemoveMarkup.Visible = mnuRemoveInk.Visible = mnuAddFreeTextHere.Visible = toolStripSeparatorC1.Visible = hasFile && !EditLocked; // ändern das Dokument
+        mnuHighlight.Visible = mnuRemoveAnnotation.Visible = mnuAddFreeTextHere.Visible = toolStripSeparatorC1.Visible = hasFile && !EditLocked; // ändern das Dokument
         pageView.AllowAnnotationMove = hasFile && !EditLocked && currentPageCount > 0; // Textanmerkungen und Stempel verschieben (Ziehen) und bearbeiten (Doppelklick)
         UpdateAnnotationButtons();
         if (hasFile)
@@ -515,7 +517,7 @@ public partial class MainForm : Form
             var index = files.FindIndex(f => string.Equals(f, currentFile.FullName, StringComparison.OrdinalIgnoreCase));
             statusIndex.Text = Lng.T("Datei") + " " + (index >= 0 ? (index + 1).ToString() : "–") + "/" + files.Count;
             statusPath.Text = currentFile.FullName;
-            if (highlightMode || pageView.InkMode) { statusBeforeMode = statusPath.Text; ShowModeHint(); } // nach dem Speichern bleibt der Hinweis stehen
+            if (AnnotationModeActive) { statusBeforeMode = statusPath.Text; ShowModeHint(); } // nach dem Speichern bleibt der Hinweis stehen
             UpdateStatusInfo();
             UpdateFormatLabel();
             btnPrev.Enabled = btnNext.Enabled = files.Count > 1;
@@ -531,12 +533,13 @@ public partial class MainForm : Form
         }
         UpdateOneClickLabel();
         UpdateViewerState();
+        if (bookmarkEditor != null) { LockForBookmarkEditor(); } // die Freigaben oben gelten nicht, solange der Editor offen ist
     }
 
     /// <summary>Titelleiste: Dateiname (Option: voller Pfad), davor „*“ bei ungespeicherten Formulareingaben.</summary>
     private void UpdateTitle()
     {
-        Text = currentFile != null ? (documentDirty ? "* " : string.Empty) + (settings.ShowFullPathInTitle ? currentFile.FullName : currentFile.Name) + " – PDFlight" : "PDFlight";
+        Text = currentFile != null ? (settings.ShowFullPathInTitle ? currentFile.FullName : currentFile.Name) + " – PDFlight" : "PDFlight";
         var showSave = documentDirty && ShownDocument != null; // „Speichern“ in der Viewer-Leiste bei offenen Formulareingaben oder Anmerkungen
         if (btnSaveDocument.Visible != showSave)
         {
@@ -570,7 +573,7 @@ public partial class MainForm : Form
     private bool OwnerPasswordOnly => Encrypted && currentFile != null && !passwords.ContainsKey(currentFile.FullName);
 
     /// <summary>Bearbeiten gesperrt – wegen PDF/A (bis „Bearbeitung aktivieren“) oder wegen Kennwortschutz (bis „Kennwort entfernen“).</summary>
-    private bool EditLocked => PdfALocked || Encrypted || currentPageCount < 0; // < 0: noch nicht geladen – Verschlüsselung erst danach bekannt (Review 04.10.2026)
+    private bool EditLocked => PdfALocked || Encrypted || currentPageCount < 0 || bookmarkEditor != null; // < 0: noch nicht geladen – Verschlüsselung erst danach bekannt (Review 04.10.2026); Lesezeichen-Editor offen: nur ansehen
 
     /// <summary>„Bearbeitung aktivieren“ im PDF/A-Banner: hebt nach einer Warnung den Schreibschutz
     /// für diese Datei auf. Die Datei selbst bleibt dabei unverändert — die PDF/A-Kennzeichnung geht
@@ -1117,13 +1120,9 @@ public partial class MainForm : Form
         mnuAppendPdf.Image = MenuIcon(ToolbarIcons.Attach);
         mnuDuplex.Image = MenuIcon(ToolbarIcons.Interleave);
         mnuExtractPages.Image = MenuIcon(ToolbarIcons.Page);
-        mnuAddAnnotation.Image = MenuIcon(ToolbarIcons.Comment);
-        mnuManageAnnotations.Image = MenuIcon(ToolbarIcons.Edit);
         mnuRemoveBookmarks.Image = MenuIcon(ToolbarIcons.Bookmarks);
         mnuEditBookmarks.Image = MenuIcon(ToolbarIcons.Bookmarks);
-        mnuAddStamp.Image = MenuIcon(ToolbarIcons.Stamp);
         mnuManageStamps.Image = MenuIcon(ToolbarIcons.List);
-        mnuUndo.Image = MenuIcon(ToolbarIcons.Undo);
         mnuSetPassword.Image = MenuIcon(ToolbarIcons.Lock);
         mnuRemovePassword.Image = MenuIcon(ToolbarIcons.Unlock);
         mnuRemoveRestrictions.Image = MenuIcon(ToolbarIcons.Unlock);
@@ -1137,7 +1136,8 @@ public partial class MainForm : Form
         mnuViewCopy.Image = MenuIcon(ToolbarIcons.Copy); // Kontextmenü der Seitenansicht
         mnuViewSelectAll.Image = MenuIcon(ToolbarIcons.SelectAll);
         mnuHighlight.Image = MenuIcon(ToolbarIcons.Highlight);
-        mnuRemoveMarkup.Image = MenuIcon(ToolbarIcons.Clear);
+        mnuEditAnnotation.Image = MenuIcon(ToolbarIcons.Edit);
+        mnuRemoveAnnotation.Image = MenuIcon(ToolbarIcons.Clear);
         mnuAddFreeTextHere.Image = MenuIcon(ToolbarIcons.Comment);
         ApplyViewerIcons(); // die Viewer-Leiste folgt der Symbolgröße der Symbolleiste
         UpdateProgramIconVisibility(); // die Buttonbreiten haben sich geändert
@@ -1503,7 +1503,10 @@ public partial class MainForm : Form
         EndAnnotationModes(); // das Fadenkreuz verträgt sich nicht mit Zeichnen oder Hervorheben
         var status = statusPath.Text;
         statusPath.Text = Lng.T("Klicke auf die Stelle für den Freitext – Esc bricht ab.");
-        var point = await pageView.PickPointAsync();
+        var picking = pageView.PickPointAsync();
+        viewerStrip.Invalidate(); // „Freitext“ zeigt die Modus-Linie, solange das Fadenkreuz aktiv ist (IsActiveModeItem)
+        var point = await picking;
+        viewerStrip.Invalidate();
         if (statusPath.Text == Lng.T("Klicke auf die Stelle für den Freitext – Esc bricht ab.")) { statusPath.Text = status; }
         if (point is { } client) { await AddAnnotationAtAsync(client); }
     }
@@ -1570,15 +1573,52 @@ public partial class MainForm : Form
         if (annotation != null) { EditAnnotation(annotation); }
     }
 
-    /// <summary>Verwaltungsdialog: Anmerkungen auflisten, Textanmerkungen bearbeiten, beliebige löschen; danach neu laden.</summary>
-    private void ManageAnnotationsDialog()
+    /// <summary>„Anmerkungen verwalten“ auf dem angezeigten Stand (Wunsch vom 04.10.2026 – vorher speicherte der Aufruf offene Änderungen
+    /// still in die Datei): Die Liste arbeitet auf einer Arbeitskopie, ihr Ergebnis wird wie jede Anmerkungsänderung ungespeichert
+    /// angezeigt; alle Löschungen eines Aufrufs sind ein Rückgängig-Schritt.</summary>
+    private async void ManageAnnotationsDialog()
     {
-        if (currentFile == null) { return; }
+        if (currentFile == null || ShownDocument is not { } doc) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
-        using AnnotationListForm dialog = new(currentFile.FullName, (edit, name) => RunPdfEdit(edit, name)); // Methodengruppe passt wegen des optionalen Parameters nicht mehr
-        dialog.ShowDialog(this);
-        if (dialog.Changed) { LoadPdf(currentFile.FullName, dialog.LastPage); }
-        if (dialog.EditRequested is { } annotation) { EditAnnotation(annotation); } // die Liste hat sich dafür geschlossen
+        var actionName = Lng.T("Anmerkung löschen");
+        byte[] before;
+        string temp;
+        try
+        {
+            await pageView.EndFormInputAsync(); // ein gerade bearbeitetes Formularfeld gehört zum Stand
+            before = await doc.SaveAsync();
+            if (doc != document || currentFile == null) { return; }
+            temp = NewViewCopyPath();
+            await File.WriteAllBytesAsync(temp, before);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
+        {
+            TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), Lng.T("Anmerkungen verwalten")), ex);
+            return;
+        }
+        try
+        {
+            bool RunEdit(Action edit, string name)
+            {
+                try { edit(); return true; }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException || PdfEditService.IsPdfReadError(ex))
+                {
+                    TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), name), ex);
+                    return false;
+                }
+            }
+            using AnnotationListForm dialog = new(temp, RunEdit, currentFile.Name);
+            dialog.ShowDialog(this);
+            if (dialog.Changed)
+            {
+                var wasDirty = documentDirty;
+                if (!await ShowBytesAsync(await File.ReadAllBytesAsync(temp), dirty: true)) { return; }
+                AddViewUndo(new ViewUndo(before, wasDirty, actionName));
+                if (dialog.LastPage - 1 != pageView.CurrentPage) { pageView.GoToPage(dialog.LastPage - 1); } // zur Seite der zuletzt gelöschten
+            }
+            if (dialog.EditRequested is { } annotation) { EditAnnotation(annotation); } // die Liste hat sich dafür geschlossen
+        }
+        finally { DeleteViewCopy(temp); }
     }
 
     /// <summary>Textanmerkung bearbeiten: derselbe Dialog wie beim Einfügen, mit den Werten der Anmerkung vorbelegt;
@@ -1704,14 +1744,30 @@ public partial class MainForm : Form
         }
     }
 
-    private void ShowProperties()
+    private async void ShowProperties()
     {
         if (currentFile == null) { return; }
         PdfInfo info;
-        try { info = PdfEditService.ReadInfo(currentFile.FullName); }
+        passwords.TryGetValue(currentFile.FullName, out var password);
+        try { info = PdfEditService.ReadInfo(currentFile.FullName, password); }
         catch (Exception ex) when (PdfEditService.IsPdfReadError(ex)) { ShowNotEditableMessage(); return; }
         currentFile.Refresh();
-        using PropertiesForm dialog = new(info, currentFile, PdfALocked);
+        // Sicherheit und Anhänge aus PDFium – das Hilfsprogramm hat die Datei ohnehin offen
+        (uint Permissions, int Revision) security = (uint.MaxValue, -1);
+        IReadOnlyList<(string Name, long Size)> attachments = [];
+        var document = ShownDocument;
+        if (document != null)
+        {
+            try
+            {
+                security = await document.SecurityAsync();
+                attachments = await document.AttachmentsAsync();
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or IOException) { Debug.WriteLine(ex); } // Dialog trotzdem zeigen, ohne diese Angaben
+            if (currentFile == null || ShownDocument != document) { return; } // inzwischen eine andere Datei
+        }
+        Func<int, Task<byte[]>>? loadAttachment = document == null ? null : document.AttachmentDataAsync;
+        using PropertiesForm dialog = new(info, currentFile, currentPdfStatus, PdfALocked || Encrypted, security, password != null, attachments, loadAttachment);
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         if (dialog.RemoveRequested) // alles weg, auch Anwendung, Produzent, Daten und XMP; danach eingetippte Felder bleiben
         {
@@ -1837,6 +1893,7 @@ public partial class MainForm : Form
     /// Rückgängig wie bei jeder Bearbeitung.</summary>
     private void EditBookmarks()
     {
+        if (bookmarkEditor != null) { bookmarkEditor.Activate(); return; } // schon offen (nicht-modal)
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
         var file = currentFile.FullName;
@@ -1848,25 +1905,88 @@ public partial class MainForm : Form
             TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), Lng.T("Lesezeichen lesen")), ex);
             return;
         }
-        var page = Math.Max(1, ClampedCurrentPage());
-        using BookmarkForm dialog = new(file, stamp, bookmarks, currentPageCount, page);
+        BookmarkForm dialog = new(file, stamp, bookmarks, currentPageCount, () => Math.Max(1, ClampedCurrentPage()));
         Rectangle remembered = new(settings.BookmarkWindowX, settings.BookmarkWindowY, settings.BookmarkWindowWidth, settings.BookmarkWindowHeight);
+        dialog.StartPosition = FormStartPosition.Manual; // nicht-modal: CenterParent wirkt nur bei ShowDialog
         if (remembered.Width >= dialog.MinimumSize.Width && remembered.Height >= dialog.MinimumSize.Height && Screen.AllScreens.Any(s => s.WorkingArea.IntersectsWith(remembered)))
         {
-            dialog.StartPosition = FormStartPosition.Manual; // wie beim Hauptfenster: nicht auf einem abgesteckten Monitor wiederherstellen
-            dialog.Bounds = remembered;
+            dialog.Bounds = remembered; // wie beim Hauptfenster: nicht auf einem abgesteckten Monitor wiederherstellen
         }
-        var result = dialog.ShowDialog(this);
-        var bounds = dialog.WindowState == FormWindowState.Normal ? dialog.Bounds : dialog.RestoreBounds; // auch nach Abbrechen merken
-        (settings.BookmarkWindowX, settings.BookmarkWindowY, settings.BookmarkWindowWidth, settings.BookmarkWindowHeight) = (bounds.X, bounds.Y, bounds.Width, bounds.Height);
-        settings.ReloadSharedLists();
-        settings.Save();
-        if (result != DialogResult.OK) { return; }
-        if (RunPdfEdit(() => PdfEditService.WriteOutlines(file, dialog.Bookmarks), Lng.T("Lesezeichen speichern")))
+        else { dialog.Location = new Point(Left + (Width - dialog.Width) / 2, Top + (Height - dialog.Height) / 2); }
+        dialog.PageRequested += BookmarkEditor_PageRequested;
+        dialog.SaveRequested += BookmarkEditor_SaveRequested;
+        dialog.FormClosed += BookmarkEditor_FormClosed;
+        bookmarkEditor = dialog;
+        UpdateUiState(); // solange der Editor offen ist: nur ansehen, nichts bearbeiten, keine andere Datei (EditLocked, LockForBookmarkEditor)
+        dialog.Show(this);
+    }
+
+    // ------------------------------------------------------------------ Lesezeichen-Editor (nicht-modal, an die Anzeige gekoppelt)
+
+    // Der Editor bleibt offen, während man in der Anzeige blättert (Wunsch vom 04.10.2026): Markieren eines Eintrags blättert dorthin,
+    // „Angezeigte Seite“ übernimmt die gerade gezeigte als Ziel. Solange er offen ist, sperrt das Hauptfenster alles, was die Datei
+    // ändert oder eine andere anzeigt (EditLocked, Symbolleiste, Kürzel, Ablegen) – sonst passten Editor und Datei nicht mehr zusammen.
+    private BookmarkForm? bookmarkEditor;
+
+    private Dictionary<ToolStripItem, bool>? lockedToolbarStates; // Zustand der Symbolleiste vor dem Sperren
+
+    /// <summary>Hauptfenster gegen Dateiwechsel und Bearbeitungen sperren bzw. wieder freigeben (Symbolleiste, „Dokument schließen“).
+    /// Gesperrt werden die einzelnen Knöpfe – eine gesperrte ToolStrip zeichnet ihre Knöpfe weiter wie bedienbar; ihr Zustand davor
+    /// wird gemerkt und beim Freigeben wiederhergestellt. UpdateUiState ruft dies am Anfang (Freigeben vor dem Neuberechnen) und am Ende.</summary>
+    private void LockForBookmarkEditor()
+    {
+        var locked = bookmarkEditor != null;
+        if (locked)
         {
-            LoadPdf(file, page);
-            statusPath.Text = Lng.T("Die Lesezeichen wurden gespeichert.");
+            lockedToolbarStates ??= toolStrip.Items.Cast<ToolStripItem>().ToDictionary(item => item, item => item.Enabled);
+            foreach (ToolStripItem item in toolStrip.Items) { item.Enabled = false; }
         }
+        else if (lockedToolbarStates != null)
+        {
+            foreach (var (item, enabled) in lockedToolbarStates) { item.Enabled = enabled; }
+            lockedToolbarStates = null;
+        }
+        btnCloseDocument.Enabled = !locked && (document != null || currentFile != null);
+        UpdateAnnotationButtons(); // EditLocked schließt den offenen Editor ein
+    }
+
+    private void BookmarkEditor_PageRequested(object? sender, int page)
+    {
+        if (document != null && page >= 1 && page <= document.PageCount) { pageView.GoToPage(page - 1); }
+    }
+
+    /// <summary>„Speichern“ im Editor: Datei unverändert? Offene Anzeigeänderungen zuerst wegschreiben (sie lassen die Gliederung
+    /// unberührt), dann die Gliederung schreiben, Editor schließen, neu laden.</summary>
+    private async void BookmarkEditor_SaveRequested(object? sender, EventArgs e)
+    {
+        if (bookmarkEditor is not { } editor) { return; }
+        var file = editor.FilePath;
+        if (!editor.Stamp.Matches(file)) // Änderungserkennung statt Dateisperre (Entscheidung vom 20.09.2026)
+        {
+            TaskDlg.MsgTaskDlg(editor.Handle, Lng.T("Die Datei wurde inzwischen verändert."),
+                Lng.T("Die Lesezeichen wurden nicht gespeichert – schließe den Editor mit „Abbrechen“ und öffne ihn erneut."), TaskDialogIcon.Warning);
+            return;
+        }
+        if (documentDirty && !await CommitFormAsync()) { return; } // z. B. Formulareingaben, die während des Bearbeitens entstanden
+        var page = Math.Max(1, ClampedCurrentPage());
+        if (!RunPdfEdit(() => PdfEditService.WriteOutlines(file, editor.Bookmarks), Lng.T("Lesezeichen speichern"))) { return; }
+        editor.CompleteSave(); // schließt den Editor und gibt das Hauptfenster frei (FormClosed)
+        LoadPdf(file, page);
+        statusPath.Text = Lng.T("Die Lesezeichen wurden gespeichert.");
+    }
+
+    private void BookmarkEditor_FormClosed(object? sender, FormClosedEventArgs e)
+    {
+        if (sender is not BookmarkForm editor) { return; }
+        var bounds = editor.WindowState == FormWindowState.Normal ? editor.Bounds : editor.RestoreBounds; // auch nach Abbrechen merken
+        (settings.BookmarkWindowX, settings.BookmarkWindowY, settings.BookmarkWindowWidth, settings.BookmarkWindowHeight) = (bounds.X, bounds.Y, bounds.Width, bounds.Height);
+        if (!IsDisposed && !Disposing)
+        {
+            settings.ReloadSharedLists();
+            settings.Save();
+        }
+        bookmarkEditor = null;
+        if (!IsDisposed && !Disposing) { UpdateUiState(); }
     }
 
     /// <summary>Alle Lesezeichen (Gliederung) der Datei entfernen – für automatisch erzeugte, unsinnige Gliederungen (Bearbeiten-Menü).</summary>
@@ -1973,12 +2093,13 @@ public partial class MainForm : Form
         UpdateUndoMenu();
     }
 
-    /// <summary>„Rückgängig“ im Menü: zuerst die ungespeicherten Schritte in der Anzeige, sonst die letzte Dateiänderung.</summary>
+    /// <summary>„Rückgängig“ in der Viewer-Leiste (wie Edge, Wunsch vom 04.10.2026; vorher im Bearbeiten-Menü): zuerst die ungespeicherten
+    /// Schritte in der Anzeige, sonst die letzte Dateiänderung – auch Löschen, Verschieben und Umbenennen. Der Tooltip nennt den Schritt.</summary>
     private void UpdateUndoMenu()
     {
         var description = viewUndo.Count > 0 ? viewUndo[^1].Description : undoAction?.Description;
-        mnuUndo.Enabled = description != null;
-        mnuUndo.Text = description == null ? Lng.T("Änderung rückgängig") : Lng.T("Rückgängig:") + " " + description;
+        btnUndo.Enabled = description != null;
+        btnUndo.ToolTipText = description == null ? Lng.T("Rückgängig (Strg+Z)") : string.Format(Lng.T("Rückgängig: {0} (Strg+Z)"), description);
     }
 
     private void UndoLastChange()
@@ -2434,6 +2555,7 @@ public partial class MainForm : Form
     /// vorher still in die Datei geschrieben; scheitert das, unterbleibt die Funktion.</summary>
     private async void RunAfterCommit(Action action)
     {
+        if (bookmarkEditor != null) { bookmarkEditor.Activate(); return; } // Lesezeichen-Editor offen: keine Dateifunktionen (auch kein Ablegen)
         if (!await CommitFormAsync()) { return; }
         action();
     }
@@ -2529,19 +2651,49 @@ public partial class MainForm : Form
     private async void HighlightSelection()
     {
         if (EditLocked || ShownDocument == null || !pageView.HasSelection) { return; }
+        if (highlightPalette.SelectedColor.ToArgb() == Color.White.ToArgb())
+        {
+            // weißer Marker: Umkehren statt Multiplizieren – die Darstellung schreibt PDFsharp (s. PdfEditService.AddInvertHighlights)
+            var boxes = await pageView.SelectionBoxesAsync();
+            if (boxes.Count == 0 || !await EditInViewAsync(path => PdfEditService.AddInvertHighlights(path, boxes), Lng.T("Hervorheben"))) { return; }
+            if (!highlightMode) { statusPath.Text = Lng.T("Der markierte Text wurde hervorgehoben."); }
+            return;
+        }
         if (!await PushViewUndoAsync(Lng.T("Hervorheben"))) { return; }
-        if (await pageView.HighlightSelectionAsync() == 0) { viewUndo.RemoveAt(viewUndo.Count - 1); UpdateUndoMenu(); return; }
+        if (await pageView.HighlightSelectionAsync(highlightPalette.SelectedColor.ToArgb() & 0xFFFFFF) == 0) { viewUndo.RemoveAt(viewUndo.Count - 1); UpdateUndoMenu(); return; }
         if (highlightMode) { pageView.ClearSelection(); } // im Modus gleich frei für die nächste Markierung; der Hinweis bleibt stehen
         else { statusPath.Text = Lng.T("Der markierte Text wurde hervorgehoben."); }
     }
 
-    /// <summary>Kontextmenü „Hervorhebung entfernen“: die Hervorhebung unter dem Rechtsklick entfernen und die Datei speichern.</summary>
-    private async void MnuRemoveMarkup_Click(object? sender, EventArgs e)
+    /// <summary>Kontextmenü „… entfernen“: die oberste Hervorhebung, Zeichnung oder der Stempel unter dem Rechtsklick (ein Eintrag statt
+    /// drei, Wunsch vom 04.10.2026 – den Text setzt <see cref="ContextMenuPage_Opening"/>). Ungespeichert wie alle Anmerkungen; ein Stempel
+    /// geht samt angehängtem Popup.</summary>
+    private async void MnuRemoveAnnotation_Click(object? sender, EventArgs e)
     {
-        if (EditLocked || ShownDocument == null || !pageView.HasMarkupUnderMouse) { return; }
-        if (!await PushViewUndoAsync(Lng.T("Hervorhebung entfernen"))) { return; }
-        if (!await pageView.RemoveMarkupUnderMouseAsync()) { viewUndo.RemoveAt(viewUndo.Count - 1); UpdateUndoMenu(); return; }
-        statusPath.Text = Lng.T("Die Hervorhebung wurde entfernt.");
+        var kind = pageView.RemovableUnderMouse;
+        if (EditLocked || ShownDocument == null || kind == RemovableAnnotation.None) { return; }
+        var action = kind switch
+        {
+            RemovableAnnotation.Markup => Lng.T("Hervorhebung entfernen"),
+            RemovableAnnotation.Ink => Lng.T("Zeichnung entfernen"),
+            RemovableAnnotation.FreeText => Lng.T("Freitext entfernen"),
+            _ => Lng.T("Stempel entfernen"),
+        };
+        if (!await PushViewUndoAsync(action)) { return; }
+        if (!await pageView.RemoveUnderMouseAsync()) { viewUndo.RemoveAt(viewUndo.Count - 1); UpdateUndoMenu(); return; }
+        statusPath.Text = kind switch
+        {
+            RemovableAnnotation.Markup => Lng.T("Die Hervorhebung wurde entfernt."),
+            RemovableAnnotation.Ink => Lng.T("Die Zeichnung wurde entfernt."),
+            RemovableAnnotation.FreeText => Lng.T("Der Freitext wurde entfernt."),
+            _ => Lng.T("Der Stempel wurde entfernt."),
+        };
+    }
+
+    /// <summary>Kontextmenü „Freitext bearbeiten…“ bzw. „Stempel bearbeiten…“: derselbe Dialog wie beim Doppelklick.</summary>
+    private void MnuEditAnnotation_Click(object? sender, EventArgs e)
+    {
+        if (pageView.EditableUnderMouse is { } annotation) { PageView_AnnotationDoubleClicked(sender, annotation); }
     }
 
     // ------------------------------------------------------------------ Anmerkungen in der Viewer-Leiste (wie Edge, Wunsch vom 03.10.2026)
@@ -2558,34 +2710,64 @@ public partial class MainForm : Form
     private void UpdateAnnotationButtons()
     {
         var enabled = document != null && currentFile != null && !EditLocked && currentPageCount > 0;
-        btnHighlight.Enabled = btnFreeText.Enabled = btnStamp.Enabled = btnDraw.Enabled = ddbInk.Enabled = btnRotateLeft.Enabled = btnRotateRight.Enabled = enabled;
-        if (!enabled && (highlightMode || pageView.InkMode)) { EndAnnotationModes(); }
+        btnHighlight.Enabled = ddbHighlight.Enabled = btnFreeText.Enabled = btnStamp.Enabled = btnDraw.Enabled = ddbInk.Enabled = btnErase.Enabled = btnManageAnnotations.Enabled = btnRotateLeft.Enabled = btnRotateRight.Enabled = enabled;
+        if (!enabled && AnnotationModeActive) { EndAnnotationModes(); }
     }
 
-    /// <summary>Symbole für Freitext (T im Kasten) und Zeichnen (Stift mit Farbbalken in der gewählten Farbe).</summary>
+    /// <summary>Symbole für Freitext (T im Kasten), Hervorheben und Zeichnen (Marker bzw. Stift mit Farbbalken in der gewählten Farbe).</summary>
     private void UpdateAnnotationIcons()
     {
         if (!ToolbarIcons.FontAvailable) { return; } // dann bleiben die Zeichen aus dem Designer
         var color = ViewerIconColor;
-        // beide Bilder entstehen jedes Mal neu (nicht im Zwischenspeicher von ToolbarIcons) – die alten freigeben, sonst sammelten sich
+        // die Bilder entstehen jedes Mal neu (nicht im Zwischenspeicher von ToolbarIcons) – die alten freigeben, sonst sammelten sich
         // beim Ziehen am Stärke-Regler Dutzende bis zur nächsten Speicherbereinigung (Review 04.10.2026)
-        var (oldFreeText, oldDraw) = (btnFreeText.Image, btnDraw.Image);
+        var (oldFreeText, oldHighlight, oldDraw) = (btnFreeText.Image, btnHighlight.Image, btnDraw.Image);
         btnFreeText.Image = ToolbarIcons.TextBox(toolStrip.ImageScalingSize, color);
-        btnDraw.Image = ToolbarIcons.WithColorBar(ToolbarIcons.Get(ToolbarIcons.Draw, toolStrip.ImageScalingSize, color), pageView.InkColor);
+        // die gewählte Farbe füllt Kappe und Spitze des Markers bzw. die Stiftspitze (wie Edge, Wunsch vom 04.10.2026)
+        btnHighlight.Image = ToolbarIcons.WithFill(ToolbarIcons.Highlight, ToolbarIcons.HighlightFill, toolStrip.ImageScalingSize, color, highlightPalette.SelectedColor);
+        btnDraw.Image = ToolbarIcons.WithFill(ToolbarIcons.Draw, ToolbarIcons.DrawFill, toolStrip.ImageScalingSize, color, pageView.InkColor);
         oldFreeText?.Dispose();
+        oldHighlight?.Dispose();
         oldDraw?.Dispose();
         inkPalette.ApplyTheme(settings.DarkViewer);
         if (ddbInk.DropDown is { } dropDown) { dropDown.BackColor = inkPalette.BackColor; }
+        highlightPalette.ApplyTheme(settings.DarkViewer);
+        if (ddbHighlight.DropDown is { } highlightDropDown) { highlightDropDown.BackColor = highlightPalette.BackColor; }
     }
 
-    private void SetAnnotationMode(bool highlight, bool ink)
+    private readonly HighlightPalette highlightPalette = new();
+
+    /// <summary>Farbe fürs Hervorheben gewählt (Adobe-Palette): Symbol nachziehen, Dropdown schließen; markierter Text wird gleich in der
+    /// neuen Farbe hervorgehoben, sonst schaltet die Wahl den Hervorheben-Modus ein (wie beim Zeichnen).</summary>
+    private void HighlightPalette_ColorChanged(object? sender, EventArgs e)
     {
-        if (!highlightMode && !pageView.InkMode && (highlight || ink)) { statusBeforeMode = statusPath.Text; }
+        UpdateAnnotationIcons();
+        ddbHighlight.DropDown.Close();
+        if (EditLocked || ShownDocument == null) { return; }
+        if (pageView.HasSelection) { HighlightSelection(); }
+        else if (!highlightMode) { SetAnnotationMode(highlight: true, ink: false); }
+    }
+
+    private bool AnnotationModeActive => highlightMode || pageView.InkMode || pageView.EraseMode;
+
+    /// <summary>Für <see cref="ViewerStripRenderer.IsActiveMode"/>: Knopf und Farb-Dropdown des eingeschalteten Modus.</summary>
+    private bool IsActiveModeItem(ToolStripItem item) =>
+        (highlightMode && (item == btnHighlight || item == ddbHighlight)) ||
+        (pageView.InkMode && (item == btnDraw || item == ddbInk)) ||
+        (pageView.EraseMode && item == btnErase) ||
+        (pageView.IsPicking && item == btnFreeText); // Stelle für den Freitext wählen (Wunsch vom 04.10.2026)
+
+    private void SetAnnotationMode(bool highlight, bool ink, bool erase = false)
+    {
+        if (!AnnotationModeActive && (highlight || ink || erase)) { statusBeforeMode = statusPath.Text; }
         highlightMode = highlight;
         btnHighlight.Checked = highlight;
         if (pageView.InkMode != ink) { pageView.InkMode = ink; }
         btnDraw.Checked = ink;
-        if (highlight || ink) { ShowModeHint(); }
+        if (pageView.EraseMode != erase) { pageView.EraseMode = erase; }
+        btnErase.Checked = erase;
+        viewerStrip.Invalidate(); // Fläche und Akzentlinie des aktiven Modus (IsActiveModeItem)
+        if (highlight || ink || erase) { ShowModeHint(); }
         else if (statusBeforeMode != null) { statusPath.Text = statusBeforeMode; statusBeforeMode = null; }
     }
 
@@ -2593,6 +2775,7 @@ public partial class MainForm : Form
     {
         if (highlightMode) { statusPath.Text = Lng.T("Hervorheben: Markiere Text – er wird sofort hervorgehoben. Esc beendet."); }
         else if (pageView.InkMode) { statusPath.Text = Lng.T("Zeichnen: Ziehe mit gedrückter Maustaste über die Seite – mit Strg eine gerade Linie. Esc beendet."); }
+        else if (pageView.EraseMode) { statusPath.Text = Lng.T("Radierer: Klicke auf Zeichnungen und Hervorhebungen oder wische darüber – sie werden entfernt. Esc beendet."); }
     }
 
     private void EndAnnotationModes() => SetAnnotationMode(false, false);
@@ -2611,6 +2794,7 @@ public partial class MainForm : Form
 
     private void BtnFreeText_Click(object? sender, EventArgs e)
     {
+        if (pageView.IsPicking) { pageView.CancelPick(); return; } // zweiter Klick beendet das Wählen der Stelle wie bei den Modi
         AddAnnotationDialog(); // bearbeitet nur die Anzeige – vorher nichts speichern
     }
 
@@ -2646,23 +2830,49 @@ public partial class MainForm : Form
         AddViewUndo(new ViewUndo(e.Before, inkWasDirty, Lng.T("Zeichnen")));
     }
 
-    /// <summary>Kontextmenü „Zeichnung entfernen“: der Freihand-Strich unter dem Rechtsklick (statt eines Radierers, Entscheidung vom
-    /// 03.10.2026 – was ein Radierer kann und was nicht, wäre für Anwender unklar). Ungespeichert wie alle Anmerkungen.</summary>
-    private async void MnuRemoveInk_Click(object? sender, EventArgs e)
+    /// <summary>Radierer (Wunsch vom 04.10.2026, nach Chromes Vorbild): Klicken oder Wischen entfernt Zeichnungen und Hervorhebungen;
+    /// Freitext und Stempel bleiben verschont (Kontextmenü bzw. „Anmerkungen verwalten“). Ungespeichert wie alle Anmerkungen.</summary>
+    private void BtnErase_Click(object? sender, EventArgs e)
     {
-        if (EditLocked || ShownDocument == null || !pageView.HasInkUnderMouse) { return; }
-        if (!await PushViewUndoAsync(Lng.T("Zeichnung entfernen"))) { return; }
-        if (!await pageView.RemoveInkUnderMouseAsync()) { viewUndo.RemoveAt(viewUndo.Count - 1); UpdateUndoMenu(); return; }
-        statusPath.Text = Lng.T("Die Zeichnung wurde entfernt.");
+        if (EditLocked || ShownDocument == null) { return; }
+        SetAnnotationMode(highlight: false, ink: false, erase: !pageView.EraseMode);
+    }
+
+    private bool eraseWasDirty; // Änderungsstand beim Beginn des Wischs – so steht er nach Rückgängig wieder da
+
+    private void PageView_EraseStarted(object? sender, EventArgs e)
+    {
+        eraseWasDirty = documentDirty;
+    }
+
+    /// <summary>Ein Wisch hat etwas entfernt (das Dokument meldet sich selbst als geändert): ein Rückgängig-Schritt für den ganzen Wisch.</summary>
+    private void PageView_Erased(object? sender, ErasedEventArgs e)
+    {
+        AddViewUndo(new ViewUndo(e.Before, eraseWasDirty, Lng.T("Radieren")));
     }
 
     private void ContextMenuPage_Opening(object? sender, System.ComponentModel.CancelEventArgs e)
     {
         var shown = ShownDocument != null;
-        mnuViewCopy.Enabled = mnuHighlight.Enabled = shown && pageView.HasSelection;
+        mnuViewCopy.Enabled = shown && pageView.HasSelection;
+        // „Hervorheben“ nur mit markiertem Text, sonst ausgeblendet statt ausgegraut (Wunsch vom 04.10.2026, wie Edge); die Bearbeitungs-
+        // sperre steckt in Available von „… entfernen“ (UpdateUiState) – Visible läse vor dem Anzeigen false
+        mnuHighlight.Available = mnuRemoveAnnotation.Available && shown && pageView.HasSelection;
         mnuViewSelectAll.Enabled = shown;
-        mnuRemoveMarkup.Enabled = shown && pageView.HasMarkupUnderMouse;
-        mnuRemoveInk.Enabled = shown && pageView.HasInkUnderMouse;
+        var removable = shown ? pageView.RemovableUnderMouse : RemovableAnnotation.None;
+        mnuRemoveAnnotation.Enabled = removable != RemovableAnnotation.None;
+        mnuRemoveAnnotation.Text = removable switch // nennt, was entfernt wird; ohne Treffer gesperrt und allgemein
+        {
+            RemovableAnnotation.Markup => Lng.T("Hervorhebung entfernen"),
+            RemovableAnnotation.Ink => Lng.T("Zeichnung entfernen"),
+            RemovableAnnotation.Stamp => Lng.T("Stempel entfernen"),
+            RemovableAnnotation.FreeText => Lng.T("Freitext entfernen"),
+            _ => Lng.T("Anmerkung entfernen"),
+        };
+        // „Freitext/Stempel bearbeiten…“ wie ein Doppelklick (Wunsch vom 04.10.2026) – nur, wenn einer unter dem Rechtsklick liegt
+        var editable = shown ? pageView.EditableUnderMouse : null;
+        mnuEditAnnotation.Available = mnuRemoveAnnotation.Available && editable != null; // ohne Bearbeitungssperre (UpdateUiState) und mit Treffer; Visible läse vor dem Anzeigen false
+        mnuEditAnnotation.Text = editable?.IsStamp == true ? Lng.T("Stempel bearbeiten…") : Lng.T("Freitext bearbeiten…");
         mnuAddFreeTextHere.Enabled = shown && currentPageCount > 0 && pageView.IsOnPage(pageView.ContextMenuPoint);
     }
 
@@ -2688,7 +2898,7 @@ public partial class MainForm : Form
         thumbnailGrid.BackColor = treeOutline.BackColor = dark ? Color.FromArgb(40, 40, 40) : SystemColors.Window;
         thumbnailGrid.ForeColor = treeOutline.ForeColor = dark ? Color.FromArgb(230, 230, 230) : SystemColors.WindowText;
         splitViewer.BackColor = dark ? Color.FromArgb(40, 40, 40) : SystemColors.Control; // die Trennlinie zur Seitenleiste
-        if (dark) { viewerStrip.Renderer = new ViewerStripRenderer(); } else { viewerStrip.RenderMode = ToolStripRenderMode.ManagerRenderMode; }
+        viewerStrip.Renderer = new ViewerStripRenderer(dark) { IsActiveMode = IsActiveModeItem }; // hell wie der Standard, aktive Modi wie Edge
         sidebarStrip.Renderer = new SidebarRailRenderer(dark); // senkrechte Umschaltleiste wie in Chrome, in beiden Modi
         sidebarHeader.Renderer = new SidebarRailRenderer(dark); // Kopfzeile „Inhaltsverzeichnis“ wie in Edge
         foreach (var field in new Control[] { textPage.TextBox, comboZoom.ComboBox, textSearch.TextBox })
@@ -2734,6 +2944,24 @@ public partial class MainForm : Form
     /// damit eine spätere Änderung alle Symbole erreicht (Ultra-Review 04.10.2026).</summary>
     private Color ViewerIconColor => settings.DarkViewer ? ViewerStripRenderer.Foreground : Color.FromArgb(64, 64, 64);
 
+    /// <summary>Mauszeiger des Radierers: das Radierer-Symbol, schwarz mit weißem Saum (auf dunklen Zeichnungen und Seiten sichtbar). Der
+    /// Mittelpunkt ist die Radierstelle (Zeiger aus einem Icon haben ihren Hotspot in der Mitte). Einmal je Programmlauf angelegt.</summary>
+    private Cursor CreateEraseCursor()
+    {
+        var size = new Size(LogicalToDeviceUnits(24), LogicalToDeviceUnits(24));
+        using Bitmap bitmap = new(size.Width + 2, size.Height + 2);
+        using (var g = Graphics.FromImage(bitmap))
+        {
+            var halo = ToolbarIcons.Get(ToolbarIcons.Erase, size, Color.White); // aus dem Zwischenspeicher – nicht freigeben
+            for (var dx = 0; dx <= 2; dx++)
+            {
+                for (var dy = 0; dy <= 2; dy++) { g.DrawImage(halo, dx, dy); }
+            }
+            g.DrawImage(ToolbarIcons.Get(ToolbarIcons.Erase, size, Color.Black), 1, 1);
+        }
+        return new Cursor(bitmap.GetHicon());
+    }
+
     /// <summary>Symbol für die Viewer-Leiste in der Größe der Symbolleiste, im dunklen Anzeigehintergrund hell; null ohne Symbolschrift.</summary>
     private Image? ViewerIcon(char glyph, bool mirrored = false)
     {
@@ -2757,10 +2985,14 @@ public partial class MainForm : Form
             item.DisplayStyle = image != null ? ToolStripItemDisplayStyle.Image : ToolStripItemDisplayStyle.Text;
         }
         btnSidebar.Image = ViewerIcon(ToolbarIcons.Sidebar); // Beschriftung „Inhaltsverzeichnis“ nur bei geschlossener Seitenleiste (UpdateViewerLayout)
-        btnHighlight.Image = ViewerIcon(ToolbarIcons.Highlight); // Anzeige mit oder ohne Beschriftung entscheidet UpdateViewerLayout
+        // Hervorheben: Symbol mit Farbbalken aus UpdateAnnotationIcons; Anzeige mit oder ohne Beschriftung entscheidet UpdateViewerLayout
         btnStamp.Image = ViewerIcon(ToolbarIcons.Stamp);
+        Set(btnErase, ToolbarIcons.Erase); // nur das Symbol wie der Rückgängig-Knopf (Wunsch vom 04.10.2026)
+        Set(btnManageAnnotations, ToolbarIcons.ManageAnnotations); // nur Symbol – „Anmerkungen verwalten“ (Wunsch vom 04.10.2026, vorher im Bearbeiten-Menü)
+        if (ToolbarIcons.FontAvailable) { pageView.EraseCursor ??= CreateEraseCursor(); }
         foreach (var item in ViewerTextItems) { item.Font = toolStrip.Font; } // Beschriftung so groß wie in der Symbolleiste
         UpdateAnnotationIcons();
+        Set(btnUndo, ToolbarIcons.Undo); // nur das Symbol wie bei Edge; der Tooltip nennt den Schritt
         Set(btnZoomOut, ToolbarIcons.ZoomOut);
         Set(btnZoomIn, ToolbarIcons.ZoomIn);
         Set(btnTwoPage, ToolbarIcons.TwoPage);
@@ -2851,7 +3083,7 @@ public partial class MainForm : Form
         textPage.Enabled = btnZoomOut.Enabled = btnZoomIn.Enabled = comboZoom.Enabled = btnFitWidth.Enabled = btnTwoPage.Enabled = btnSearch.Enabled = has;
         btnTwoPage.Checked = pageView.TwoPageLayout;
         UpdateAnnotationButtons();
-        btnCloseDocument.Enabled = has || currentFile != null;
+        btnCloseDocument.Enabled = (has || currentFile != null) && bookmarkEditor == null; // nicht, solange der Lesezeichen-Editor offen ist
         labelPageCount.Text = has ? string.Format(Lng.T("von {0}"), document!.PageCount) : string.Empty; // has prüft document
         if (!textPage.Focused) { ShowCurrentPage(); }
         UpdateZoomDisplay();
@@ -3087,6 +3319,8 @@ public partial class MainForm : Form
         inkPalette.SelectedColor = pageView.InkColor;
         inkPalette.InkWidth = pageView.InkWidth;
         ddbInk.DropDown = new ToolStripDropDown { Padding = Padding.Empty, Items = { new ToolStripControlHost(inkPalette) { Margin = Padding.Empty, Padding = Padding.Empty } } };
+        highlightPalette.SelectedColor = AnnotationStyle.ParseHex(settings.HighlightColor) ?? HighlightPalette.DefaultColor;
+        ddbHighlight.DropDown = new ToolStripDropDown { Padding = Padding.Empty, Items = { new ToolStripControlHost(highlightPalette) { Margin = Padding.Empty, Padding = Padding.Empty } } };
         UpdateAnnotationIcons();
     }
 
@@ -3097,11 +3331,23 @@ public partial class MainForm : Form
         UpdateViewerLayout(); // die Beschriftung „Inhaltsverzeichnis“ kommt bzw. geht
     }
 
-    /// <summary>Strg+Umschalt+I und die Schaltfläche links in der Viewer-Leiste.</summary>
+    /// <summary>F10, Strg+Umschalt+I (wie Edge) und die Schaltfläche links in der Viewer-Leiste.</summary>
     private void ToggleSidebar()
     {
         SetSidebarVisible(splitViewer.Panel1Collapsed);
         sidebarUserVisible = !splitViewer.Panel1Collapsed;
+    }
+
+    /// <summary>Strg+F10 bzw. Umschalt+F10 (wie in PDFMover, Wunsch vom 04.10.2026): Seitenleiste ein/aus, beim Einblenden mit den
+    /// Miniaturen bzw. der Dokumentstruktur (Lesezeichen).</summary>
+    private void ToggleSidebar(bool bookmarks)
+    {
+        if (splitViewer.Panel1Collapsed)
+        {
+            ShowSidebarPanel(bookmarks);
+            sidebarUserBookmarks = bookmarks;
+        }
+        ToggleSidebar();
     }
 
     private void ShowSidebarPanel(bool bookmarks)
@@ -3489,12 +3735,12 @@ public partial class MainForm : Form
     private static bool IsViewNeutral(Keys keyData) => keyData is Keys.F1 or Keys.F3 or (Keys.F3 | Keys.Shift) or Keys.F11 or Keys.Escape or (Keys.Escape | Keys.Shift)
         or (Keys.Oemcomma | Keys.Control) or (Keys.F2 | Keys.Control | Keys.Shift) or (Keys.C | Keys.Control | Keys.Shift)
         or (Keys.D | Keys.Control) or (Keys.Enter | Keys.Alt) or (Keys.F | Keys.Control) or (Keys.G | Keys.Control)
-        or (Keys.I | Keys.Control | Keys.Shift) or (Keys.B | Keys.Control | Keys.Shift) or (Keys.R | Keys.Control | Keys.Shift) or (Keys.L | Keys.Control | Keys.Shift)
+        or (Keys.I | Keys.Control | Keys.Shift) or Keys.F10 or (Keys.F10 | Keys.Control) or (Keys.F10 | Keys.Shift) or (Keys.B | Keys.Control | Keys.Shift) or (Keys.R | Keys.Control | Keys.Shift) or (Keys.L | Keys.Control | Keys.Shift)
         or (Keys.Add | Keys.Control) or (Keys.Oemplus | Keys.Control) or (Keys.Subtract | Keys.Control) or (Keys.OemMinus | Keys.Control)
         or (Keys.D0 | Keys.Control) or (Keys.NumPad0 | Keys.Control) or (Keys.Space | Keys.Control) or (Keys.S | Keys.Control);
 
     /// <summary>Kürzel, die selbst in der Anzeige bearbeiten (Anmerkungen) oder deren Schritte zurücknehmen – davor wird nicht gespeichert.</summary>
-    private bool IsViewEdit(Keys keyData) => keyData is (Keys.T | Keys.Control) or (Keys.H | Keys.Control)
+    private bool IsViewEdit(Keys keyData) => keyData is (Keys.T | Keys.Control) or (Keys.H | Keys.Control) or (Keys.T | Keys.Control | Keys.Shift)
         || (keyData == (Keys.Z | Keys.Control) && viewUndo.Count > 0);
 
     /// <summary>Die Aktion zu einem Tastenkürzel – null, wenn die Taste keins ist (dann läuft sie an das Steuerelement mit dem Fokus weiter).</summary>
@@ -3519,7 +3765,7 @@ public partial class MainForm : Form
             case Keys.T | Keys.Control when !EditLocked: return AddAnnotationDialog;       // Textanmerkung
             case Keys.H | Keys.Control when !EditLocked: return AddStampDialog;            // Stempel
             case Keys.H | Keys.Control | Keys.Shift: return ManageStampsDialog;            // Stempelpalette pflegen
-            case Keys.T | Keys.Control | Keys.Shift when mnuManageAnnotations.Enabled: return ManageAnnotationsDialog;
+            case Keys.T | Keys.Control | Keys.Shift when btnManageAnnotations.Enabled: return ManageAnnotationsDialog;
             case Keys.Delete | Keys.Control | Keys.Shift when currentFile != null: return DeleteCurrent;
             case Keys.R | Keys.Control when !EditLocked: return RotatePagesDialog;
             case Keys.P | Keys.Control when currentFile != null: return PrintWithDialog;
@@ -3530,7 +3776,10 @@ public partial class MainForm : Form
             case Keys.R | Keys.Control | Keys.Shift when !EditLocked: return () => RotateAllPages(clockwise: true); // alle Seiten, ungespeichert
             case Keys.L | Keys.Control | Keys.Shift when !EditLocked: return () => RotateAllPages(clockwise: false);
             case Keys.G | Keys.Control: return FocusPageBox;                               // Gehe zu Seite (Zahl + Enter)
-            case Keys.I | Keys.Control | Keys.Shift: return ToggleSidebar;                 // Seitenleiste
+            case Keys.F10:
+            case Keys.I | Keys.Control | Keys.Shift: return ToggleSidebar;                 // Seitenleiste (F10 wie PDFMover, Strg+Umschalt+I wie Edge)
+            case Keys.F10 | Keys.Control: return () => ToggleSidebar(bookmarks: false);   // … beim Einblenden mit Miniaturen
+            case Keys.F10 | Keys.Shift: return () => ToggleSidebar(bookmarks: true);      // … beim Einblenden mit der Dokumentstruktur
             case Keys.B | Keys.Control | Keys.Shift: return ToggleFit;                     // an Breite / an Seite anpassen
             case Keys.Space | Keys.Control: return ToggleTwoPage;                         // ein-/zweiseitig
             case Keys.F | Keys.Control: return ShowSearch;
@@ -3559,7 +3808,7 @@ public partial class MainForm : Form
             case Keys.F11: return () => SetFullScreen(!isFullScreen);
             case Keys.Escape when pageView.IsPicking: return pageView.CancelPick;           // Stelle wählen abbrechen
             case Keys.Escape when pageView.IsMovingAnnotation: return pageView.ClearAnnotationGhost; // Verschieben abbrechen
-            case Keys.Escape when highlightMode || pageView.InkMode: return EndAnnotationModes;     // Hervorheben-/Zeichenmodus beenden
+            case Keys.Escape when AnnotationModeActive: return EndAnnotationModes;     // Hervorheben-, Zeichen- oder Radiermodus beenden
             case Keys.Escape | Keys.Shift when settings.CloseOnEscape: return Close;      // Shift+Esc beendet sofort (wie in NetRadio)
             case Keys.Escape when escHoldTimer.Enabled: return () => { };              // Tastenwiederholung nach dem Beenden des Vollbilds
             case Keys.Escape when SearchOpen: return CloseSearch;                        // zuerst die Suche
@@ -3608,6 +3857,7 @@ public partial class MainForm : Form
         if (TextInputFocused && IsTextEditingKey(keyData)) { return base.ProcessCmdKey(ref msg, keyData); } // das Textfeld braucht die Taste selbst
         if (ResolveShortcut(keyData) is { } action)
         {
+            if (bookmarkEditor != null && !IsViewNeutral(keyData)) { bookmarkEditor.Activate(); return true; } // Editor offen: nur Ansicht
             if (documentDirty && !IsViewNeutral(keyData) && !IsViewEdit(keyData)) { RunAfterCommit(action); } // offene Änderungen zuerst in die Datei
             else { action(); }
             return true;
@@ -3623,6 +3873,7 @@ public partial class MainForm : Form
     private static bool IsTextEditingKey(Keys keyData)
     {
         var key = keyData & Keys.KeyCode;
+        if (keyData == (Keys.F10 | Keys.Shift)) { return true; } // im Textfeld das Kontextmenü (Windows-Standard), nicht die Seitenleiste
         if (key is Keys.Escape or Keys.Delete or Keys.Back or Keys.Home or Keys.End or Keys.Left or Keys.Right or Keys.Up or Keys.Down or Keys.Insert)
         {
             return keyData != (Keys.Delete | Keys.Control | Keys.Shift);
@@ -3719,10 +3970,6 @@ public partial class MainForm : Form
     {
         RunAfterCommit(ExtractPagesDialog);
     }
-    private void MnuAddAnnotation_Click(object? sender, EventArgs e)
-    {
-        AddAnnotationDialog(); // Anmerkungen bearbeiten nur die Anzeige
-    }
     private void MnuRemoveBookmarks_Click(object? sender, EventArgs e)
     {
         RunAfterCommit(RemoveBookmarks);
@@ -3731,13 +3978,9 @@ public partial class MainForm : Form
     {
         RunAfterCommit(EditBookmarks);
     }
-    private void MnuManageAnnotations_Click(object? sender, EventArgs e)
+    private void BtnManageAnnotations_Click(object? sender, EventArgs e)
     {
-        RunAfterCommit(ManageAnnotationsDialog);
-    }
-    private void MnuAddStamp_Click(object? sender, EventArgs e)
-    {
-        AddStampDialog(); // Anmerkungen bearbeiten nur die Anzeige
+        ManageAnnotationsDialog(); // arbeitet auf dem angezeigten Stand – vorher nichts speichern
     }
     private void MnuManageStamps_Click(object? sender, EventArgs e)
     {
@@ -3760,7 +4003,7 @@ public partial class MainForm : Form
     {
         RunAfterCommit(RemoveRestrictionsDialog);
     }
-    private void MnuUndo_Click(object? sender, EventArgs e)
+    private void BtnUndo_Click(object? sender, EventArgs e)
     {
         if (viewUndo.Count > 0) { UndoViewChange(); return; } // ungespeicherte Schritte in der Anzeige zuerst
         RunAfterCommit(UndoLastChange);

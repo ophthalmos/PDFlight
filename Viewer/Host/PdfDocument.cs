@@ -625,6 +625,10 @@ internal sealed unsafe class PdfDocument : IDisposable
         return true;
     }
 
+    /// <summary>Die Vierecke je Textzeile, die <see cref="AddHighlight"/> für den Zeichenbereich anlegen würde (PDF-Koordinaten) – für
+    /// Hervorhebungen, deren Darstellung PDFlight selbst schreibt (weißer Marker: Umkehren statt Multiplizieren).</summary>
+    public List<(double Left, double Top, double Right, double Bottom)> HighlightBoxes(int index, int start, int count) => LineBoxes(index, start, count);
+
     /// <summary>Nummer der obersten Textmarkierung (Hervorhebung, Unterstreichung, Wellenlinie, Durchstreichung) an einer Stelle
     /// (Seitenpixel); -1, wenn dort keine ist. Getroffen wird ein Viereck der Markierung, nicht ihr umschließendes Rechteck.</summary>
     /// <summary>Seitenpixel → PDF-Koordinaten der Seite (für das Einfügen von Anmerkungen an einer angeklickten Stelle).</summary>
@@ -793,18 +797,30 @@ internal sealed unsafe class PdfDocument : IDisposable
         return Math.Sqrt(cx * cx + cy * cy);
     }
 
-    /// <summary>Entfernt eine Textmarkierung oder Zeichnung (Nummer aus <see cref="MarkupAt"/> bzw. <see cref="InkAt"/>); andere
-    /// Anmerkungsarten bleiben unberührt.</summary>
+    /// <summary>Entfernt eine Textmarkierung, Zeichnung, einen Stempel oder Freitext (Nummer aus <see cref="MarkupAt"/>, <see cref="InkAt"/> bzw.
+    /// <see cref="AnnotAt"/>) samt angehängtem Popup – das bliebe sonst verwaist auf der Seite; andere Anmerkungsarten bleiben unberührt.</summary>
     public bool RemoveMarkup(int index, int number)
     {
         var page = GetPage(index).Page;
         if (number < 0 || number >= Pdfium.PageGetAnnotCount(page)) { return false; }
         var annot = Pdfium.PageGetAnnot(page, number);
         if (annot == 0) { return false; }
-        int subtype;
-        try { subtype = Pdfium.AnnotGetSubtype(annot); }
+        int subtype, popup = -1;
+        try
+        {
+            subtype = Pdfium.AnnotGetSubtype(annot);
+            var linked = Pdfium.AnnotGetLinkedAnnot(annot, "Popup");
+            if (linked != 0)
+            {
+                try { popup = Pdfium.PageGetAnnotIndex(page, linked); }
+                finally { Pdfium.PageCloseAnnot(linked); }
+            }
+        }
         finally { Pdfium.PageCloseAnnot(annot); }
-        if (subtype is not ((>= Pdfium.AnnotHighlight and <= Pdfium.AnnotStrikeOut) or Pdfium.AnnotInk) || Pdfium.PageRemoveAnnot(page, number) == 0) { return false; }
+        if (subtype is not ((>= Pdfium.AnnotHighlight and <= Pdfium.AnnotStrikeOut) or Pdfium.AnnotInk or Pdfium.AnnotStamp or Pdfium.AnnotFreeText)) { return false; }
+        if (popup > number && Pdfium.PageRemoveAnnot(page, popup) == 0) { popup = -1; } // die höhere Nummer zuerst – sonst rückte die andere nach vorn
+        if (Pdfium.PageRemoveAnnot(page, number) == 0) { return false; }
+        if (popup >= 0 && popup < number) { _ = Pdfium.PageRemoveAnnot(page, popup); }
         Events.Invalidate(Id, index, 0, 0, 1, 1);
         Events.Changed(Id);
         return true;
@@ -817,6 +833,47 @@ internal sealed unsafe class PdfDocument : IDisposable
     {
         if (form != 0) { _ = Pdfium.FormForceToKillFocus(form); }
         return FormFillInfo.SaveToBytes(document, removeSecurity ? Pdfium.SaveRemoveSecurity : Pdfium.SaveNoIncremental);
+    }
+
+    /// <summary>Berechtigungsbits (/P) und Revision des Sicherheits-Handlers – für den Eigenschaften-Dialog. Die Benutzer-Berechtigungen, also /P der
+    /// Datei, auch wenn sie mit dem Besitzerkennwort geöffnet wurde (FPDF_GetDocPermissions meldete dann alles erlaubt).</summary>
+    public (uint Permissions, int Revision) Security() => (Pdfium.GetDocUserPermissions(document), Pdfium.GetSecurityHandlerRevision(document));
+
+    /// <summary>Eingebettete Dateien (Namensbaum /EmbeddedFiles): Name und Größe (-1, wenn PDFium sie nicht liefern kann).</summary>
+    public List<(string Name, long Size)> Attachments()
+    {
+        var result = new List<(string, long)>();
+        var count = Pdfium.DocGetAttachmentCount(document);
+        for (var i = 0; i < count; i++)
+        {
+            var attachment = Pdfium.DocGetAttachment(document, i);
+            if (attachment == 0) { result.Add(("?", -1)); continue; }
+            result.Add((AttachmentName(attachment), Pdfium.AttachmentGetFile(attachment, null, 0, out var size) != 0 ? size : -1));
+        }
+        return result;
+    }
+
+    /// <summary>Inhalt einer eingebetteten Datei.</summary>
+    public byte[] AttachmentData(int index)
+    {
+        if (index < 0 || index >= Pdfium.DocGetAttachmentCount(document)) { throw new InvalidOperationException("Diese eingebettete Datei gibt es nicht."); }
+        var attachment = Pdfium.DocGetAttachment(document, index);
+        if (attachment == 0 || Pdfium.AttachmentGetFile(attachment, null, 0, out var size) == 0) { throw new InvalidOperationException("PDFium konnte die eingebettete Datei nicht lesen."); }
+        var data = new byte[size];
+        fixed (byte* buffer = data)
+        {
+            if (size > 0 && Pdfium.AttachmentGetFile(attachment, buffer, size, out _) == 0) { throw new InvalidOperationException("PDFium konnte die eingebettete Datei nicht lesen."); }
+        }
+        return data;
+    }
+
+    private static string AttachmentName(nint attachment)
+    {
+        var length = Pdfium.AttachmentGetName(attachment, null, 0); // Bytes in UTF-16LE samt abschließender Null
+        if (length <= 2) { return string.Empty; }
+        var buffer = new byte[length];
+        fixed (byte* first = buffer) { _ = Pdfium.AttachmentGetName(attachment, first, length); }
+        return System.Text.Encoding.Unicode.GetString(buffer, 0, (int)length - 2);
     }
 
     /// <summary>PDF-Version aus der Kopfzeile (z. B. 17; 0 = unbekannt) und Revision des Sicherheits-Handlers (-1 = nicht verschlüsselt).</summary>

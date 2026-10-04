@@ -6,27 +6,44 @@ namespace PDFLight.Forms;
 /// und Zielseite des markierten Eintrags, dazu Neu (Nachbar oder Unterpunkt), Löschen, Verschieben, Ebenenwechsel und das
 /// Aufklappen bis zu einer Ebene. Der Baum zeichnet sich komplett selbst (OwnerDrawAll): Pfeil (Chevron) statt Plus/Minus, Titel links, Zielseite rechts in Grau,
 /// die Vorfahren des markierten Eintrags über die ganze Breite hellgrau hinterlegt. Gearbeitet wird am Modell in den Knoten-Tags;
-/// erst „Speichern“ liefert die neue Liste (<see cref="Bookmarks"/>), geschrieben wird sie vom Hauptfenster.</summary>
+/// erst „Speichern“ liefert die neue Liste (<see cref="Bookmarks"/>), geschrieben wird sie vom Hauptfenster.
+/// Seit 04.10.2026 nicht-modal und an die Anzeige gekoppelt (Wunsch Wilhelms): Markieren eines Eintrags oder Ändern der Zielseite
+/// blättert die Anzeige dorthin (<see cref="PageRequested"/>), „Angezeigte Seite“ und neue Einträge nehmen die gerade angezeigte Seite;
+/// „Speichern“ meldet <see cref="SaveRequested"/> – prüfen, schreiben und schließen (<see cref="CompleteSave"/>) übernimmt das Hauptfenster.</summary>
 public partial class BookmarkForm : Form
 {
-    private readonly int currentPage;
-    private readonly string filePath;
-    private readonly FileStamp stamp; // Zustand der Datei beim Lesen der Gliederung – Speichern nur, wenn sie unverändert ist
+    private readonly Func<int> currentPage; // die gerade angezeigte Seite (1-basiert) – sie ändert sich, während der Editor offen ist
     private bool loading; // beim Befüllen der Felder keine Änderungen zurückschreiben
+    private bool saved;   // vom Hauptfenster gespeichert – Schließen ohne Rückfrage
     private readonly Font? glyphFont; // Symbolschrift für die Aufklapp-Pfeile (null: Ersatzzeichnung)
 
-    /// <summary>Die bearbeitete Gliederung (nach „Speichern“).</summary>
+    /// <summary>Die bearbeitete Datei.</summary>
+    public string FilePath { get; }
+
+    /// <summary>Zustand der Datei beim Lesen der Gliederung – gespeichert wird nur, wenn sie seitdem unverändert ist.</summary>
+    public FileStamp Stamp { get; }
+
+    /// <summary>Etwas wurde geändert und noch nicht gespeichert.</summary>
+    public bool Dirty { get; private set; }
+
+    /// <summary>Die bearbeitete Gliederung (bei <see cref="SaveRequested"/> frisch aus dem Baum gelesen).</summary>
     public List<Bookmark> Bookmarks { get; private set; } = [];
 
-    public BookmarkForm(string filePath, FileStamp stamp, IReadOnlyList<Bookmark> bookmarks, int pageCount, int currentPage)
+    /// <summary>Die Anzeige soll zu dieser Seite (1-basiert) blättern.</summary>
+    public event EventHandler<int>? PageRequested;
+
+    /// <summary>„Speichern“: alle Titel sind gesetzt, <see cref="Bookmarks"/> ist aktuell.</summary>
+    public event EventHandler? SaveRequested;
+
+    public BookmarkForm(string filePath, FileStamp stamp, IReadOnlyList<Bookmark> bookmarks, int pageCount, Func<int> currentPage)
     {
         InitializeComponent();
-        this.filePath = filePath;
-        this.stamp = stamp;
+        FilePath = filePath;
+        Stamp = stamp;
         Lng.Apply(this);
         TextBoxMargins.Apply(this);
         pageCount = Math.Max(1, pageCount);
-        this.currentPage = Math.Clamp(currentPage, 1, pageCount);
+        this.currentPage = () => Math.Clamp(currentPage(), 1, pageCount);
         numPage.Maximum = pageCount;
         buttonNew.Image = ToolbarIcons.ButtonIcon(ToolbarIcons.Add, this);
         buttonDelete.Image = ToolbarIcons.ButtonIcon(ToolbarIcons.Delete, this);
@@ -109,7 +126,8 @@ public partial class BookmarkForm : Form
     /// der Titel steht danach markiert im Textfeld.</summary>
     private void AddNode(bool asChild)
     {
-        Bookmark bookmark = new() { Title = Lng.T("Neues Lesezeichen"), Page = currentPage };
+        Bookmark bookmark = new() { Title = Lng.T("Neues Lesezeichen"), Page = currentPage() };
+        Dirty = true;
         TreeNode node = new(bookmark.Title) { Tag = bookmark, ToolTipText = PageText(bookmark) };
         var selected = treeView.SelectedNode;
         if (selected == null) { treeView.Nodes.Add(node); }
@@ -125,6 +143,7 @@ public partial class BookmarkForm : Form
     private void MoveNode(TreeNodeCollection target, int index)
     {
         if (treeView.SelectedNode is not { } node) { return; }
+        Dirty = true;
         var expanded = node.IsExpanded;
         treeView.BeginUpdate();
         node.Remove();
@@ -141,6 +160,7 @@ public partial class BookmarkForm : Form
     {
         if (treeView.SelectedNode is not { } node) { return; }
         var siblings = node.Parent?.Nodes ?? treeView.Nodes;
+        Dirty = true;
         var next = node.NextNode ?? node.PrevNode ?? node.Parent;
         siblings.Remove(node);
         treeView.SelectedNode = next;
@@ -181,6 +201,7 @@ public partial class BookmarkForm : Form
     {
         ShowSelected();
         treeView.Invalidate(); // die grau hinterlegten Vorfahren wechseln mit der Auswahl
+        if (e.Node?.Tag is Bookmark { Page: > 0 } bookmark) { PageRequested?.Invoke(this, bookmark.Page); } // die Anzeige blättert mit
     }
 
     /// <summary>Zeile komplett selbst zeichnen: Hintergrund über die ganze Breite (Auswahl, Vorfahren der Auswahl in Hellgrau),
@@ -238,6 +259,7 @@ public partial class BookmarkForm : Form
     {
         if (loading || treeView.SelectedNode is not { } node) { return; }
         BookmarkOf(node).Title = textBoxTitle.Text.Trim();
+        Dirty = true;
         node.Text = textBoxTitle.Text;
     }
 
@@ -246,8 +268,17 @@ public partial class BookmarkForm : Form
         if (loading || treeView.SelectedNode is not { } node) { return; }
         var bookmark = BookmarkOf(node);
         bookmark.Page = (int)numPage.Value;
+        Dirty = true;
         node.ToolTipText = PageText(bookmark);
         treeView.Invalidate(); // die Seitenspalte neu zeichnen
+        PageRequested?.Invoke(this, bookmark.Page); // die neue Zielseite gleich zeigen
+    }
+
+    /// <summary>„Angezeigte Seite“: die Seite, die das Hauptfenster gerade zeigt, wird Ziel des markierten Eintrags.</summary>
+    private void ButtonCurrentPage_Click(object? sender, EventArgs e)
+    {
+        if (treeView.SelectedNode == null) { return; }
+        numPage.Value = Math.Clamp(currentPage(), (int)numPage.Minimum, (int)numPage.Maximum);
     }
 
     private void ButtonNew_Click(object? sender, EventArgs e) => AddNode(asChild: false);
@@ -302,13 +333,24 @@ public partial class BookmarkForm : Form
             textBoxTitle.Focus();
             return;
         }
-        if (!stamp.Matches(filePath)) // Änderungserkennung statt Dateisperre (Entscheidung vom 20.09.2026)
-        {
-            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei wurde inzwischen verändert."),
-                Lng.T("Die Lesezeichen wurden nicht gespeichert – schließe den Editor mit „Abbrechen“ und öffne ihn erneut."), TaskDialogIcon.Warning);
-            return;
-        }
         Bookmarks = Collect(treeView.Nodes);
+        SaveRequested?.Invoke(this, EventArgs.Empty); // Dateiprüfung, Schreiben und Schließen übernimmt das Hauptfenster
+    }
+
+    /// <summary>Vom Hauptfenster nach erfolgreichem Speichern: ohne Rückfrage schließen.</summary>
+    public void CompleteSave()
+    {
+        saved = true;
         DialogResult = DialogResult.OK;
+        Close(); // nicht-modal: DialogResult allein schließt nicht
+    }
+
+    private void ButtonCancel_Click(object? sender, EventArgs e) => Close(); // nicht-modal: der DialogResult-Knopf allein schließt nicht
+
+    /// <summary>Ungespeicherte Änderungen nicht stillschweigend verwerfen – auch nicht, wenn das Hauptfenster geschlossen wird.</summary>
+    private void BookmarkForm_FormClosing(object? sender, FormClosingEventArgs e)
+    {
+        if (!Dirty || saved || e.CloseReason is not (CloseReason.UserClosing or CloseReason.FormOwnerClosing)) { return; }
+        if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Ungespeicherte Änderungen an den Lesezeichen verwerfen?"), null, TaskDialogIcon.Warning, defaultNo: true)) { e.Cancel = true; }
     }
 }

@@ -18,6 +18,7 @@
     <SatelliteResourceLanguages>de;en;fr;es</SatelliteResourceLanguages>
     <ApplicationIcon>PDFlight.ico</ApplicationIcon>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks><!-- für die Quellgeneratoren LibraryImport/GeneratedComInterface -->
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -62,10 +63,8 @@
   <!-- Release: das Hilfsprogramm mit Native AOT (ohne JIT – erst damit läuft es mit Arbitrary Code Guard). Der AOT-Linker sucht
        vswhere.exe im PATH; neu erzeugt wird nur, wenn sich seine Quellen geändert haben. OutputPath: Der AOT-Publish baut zuerst ein
        eigenständiges .NET-Programm samt kompletter Laufzeit (~190 DLLs); dieser Zwischenstand gehört in den obj-Ordner. -->
-  <Target Name="PublishPdfHost" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'"
-          Inputs="@(PdfHostSources)" Outputs="$(OutDir)pdfhost.exe" DependsOnTargets="CollectPdfHostSources">
-    <Exec Command="dotnet publish &quot;$(MSBuildProjectDirectory)\Viewer\Host\pdfhost.csproj&quot; -c Release -o &quot;$(OutDir.TrimEnd('\'))&quot; -p:SelfContained=true -p:OutputPath=obj/aot/ -p:Version=$(Version) -nologo -v q"
-          EnvironmentVariables="PATH=$(MSBuildProgramFiles32)\Microsoft Visual Studio\Installer%3B$(PATH.Replace(';', '%3B'))" />
+  <Target Name="PublishPdfHost" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'" Inputs="@(PdfHostSources)" Outputs="$(OutDir)pdfhost.exe" DependsOnTargets="CollectPdfHostSources">
+    <Exec Command="dotnet publish &quot;$(MSBuildProjectDirectory)\Viewer\Host\pdfhost.csproj&quot; -c Release -o &quot;$(OutDir.TrimEnd('\'))&quot; -p:SelfContained=true -p:OutputPath=obj/aot/ -p:Version=$(Version) -nologo -v q" EnvironmentVariables="PATH=$(MSBuildProgramFiles32)\Microsoft Visual Studio\Installer%3B$(PATH.Replace(';', '%3B'))" />
   </Target>
 
   <Target Name="CollectPdfHostSources">

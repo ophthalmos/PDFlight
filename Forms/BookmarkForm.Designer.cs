@@ -34,6 +34,7 @@ namespace PDFLight.Forms
             textBoxTitle = new TextBox();
             labelPage = new Label();
             numPage = new NumericUpDown();
+            buttonCurrentPage = new Button();
             buttonNew = new Button();
             buttonNewChild = new Button();
             buttonDelete = new Button();
@@ -102,10 +103,21 @@ namespace PDFLight.Forms
             numPage.Location = new Point(464, 80);
             numPage.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             numPage.Name = "numPage";
-            numPage.Size = new Size(80, 23);
+            numPage.Size = new Size(60, 23);
             numPage.TabIndex = 4;
             numPage.Value = new decimal(new int[] { 1, 0, 0, 0 });
             numPage.ValueChanged += NumPage_ValueChanged;
+            //
+            // buttonCurrentPage
+            //
+            buttonCurrentPage.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonCurrentPage.Location = new Point(530, 79);
+            buttonCurrentPage.Name = "buttonCurrentPage";
+            buttonCurrentPage.Size = new Size(122, 25);
+            buttonCurrentPage.TabIndex = 5;
+            buttonCurrentPage.Text = "Angezeigte S&eite";
+            buttonCurrentPage.UseVisualStyleBackColor = true;
+            buttonCurrentPage.Click += ButtonCurrentPage_Click;
             // 
             // buttonNew
             // 
@@ -261,6 +273,7 @@ namespace PDFLight.Forms
             buttonCancel.TabIndex = 19;
             buttonCancel.Text = "Abbrechen";
             buttonCancel.UseVisualStyleBackColor = true;
+            buttonCancel.Click += ButtonCancel_Click;
             // 
             // BookmarkForm
             // 
@@ -283,6 +296,7 @@ namespace PDFLight.Forms
             Controls.Add(buttonNewChild);
             Controls.Add(buttonNew);
             Controls.Add(numPage);
+            Controls.Add(buttonCurrentPage);
             Controls.Add(labelPage);
             Controls.Add(textBoxTitle);
             Controls.Add(labelTitle);
@@ -294,6 +308,7 @@ namespace PDFLight.Forms
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;
             Text = "Lesezeichen bearbeiten (Entf löscht, Einfg legt einen Eintrag an, F2 springt zum Titel)";
+            FormClosing += BookmarkForm_FormClosing;
             ((System.ComponentModel.ISupportInitialize)numPage).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -306,6 +321,7 @@ namespace PDFLight.Forms
         private System.Windows.Forms.TextBox textBoxTitle;
         private System.Windows.Forms.Label labelPage;
         private System.Windows.Forms.NumericUpDown numPage;
+        private System.Windows.Forms.Button buttonCurrentPage;
         private System.Windows.Forms.Button buttonNew;
         private System.Windows.Forms.Button buttonNewChild;
         private System.Windows.Forms.Button buttonDelete;

@@ -10,7 +10,7 @@
 
 #define appName "PDFlight"
 #define appVersion "1.1.0"
-#define releaseDir "bin\Release\net10.0-windows"
+#define releaseDir "bin\x64\Release\net10.0-windows"
 
 [Setup]
 AppId={{7E1B0A4C-5A34-4B7A-9C57-3D8A41C6F2B9}

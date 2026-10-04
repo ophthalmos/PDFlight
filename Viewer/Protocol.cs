@@ -131,8 +131,8 @@ internal static class Protocol
     /// Durchstreichung …) an der Stelle, -1 = keine.</summary>
     public const byte MarkupAt = 26;
 
-    /// <summary>→ int Dok, int Seite, int Nummer (aus <see cref="MarkupAt"/> oder <see cref="InkAt"/>) ← bool entfernt. Entfernt nur
-    /// Textmarkierungen und Zeichnungen (Ink).</summary>
+    /// <summary>→ int Dok, int Seite, int Nummer (aus <see cref="MarkupAt"/>, <see cref="InkAt"/> oder <see cref="AnnotAt"/>) ← bool
+    /// entfernt. Entfernt nur Textmarkierungen, Zeichnungen (Ink) und Stempel, jeweils samt angehängtem Popup.</summary>
     public const byte RemoveMarkup = 27;
 
     /// <summary>→ int Dok, int Seite, int Seitenbreite, int Seitenhöhe, int x, int y ← int Nummer der obersten Zeichnung (Ink), deren
@@ -142,6 +142,20 @@ internal static class Protocol
     /// <summary>→ int Dok ← int PDF-Version (z. B. 17, 0 = unbekannt), int Revision des Sicherheits-Handlers (-1 = nicht verschlüsselt).
     /// Ersetzt seit 04.10.2026 das Lesen der Datei mit PDFsharp beim Öffnen – PDFsharp lief ungeschützt im Hauptprozess.</summary>
     public const byte Info = 34;
+
+    /// <summary>→ int Dok ← uint Berechtigungsbits (/P; unverschlüsselt alle gesetzt), int Revision des Sicherheits-Handlers (-1 = keine).
+    /// Für den Eigenschaften-Dialog.</summary>
+    public const byte Security = 35;
+
+    /// <summary>→ int Dok ← int Anzahl, dann je eingebetteter Datei Zeichenfolge Name, long Größe (-1 = unbekannt).</summary>
+    public const byte Attachments = 36;
+
+    /// <summary>→ int Dok, int Nummer ← int Länge, Bytes: der Inhalt einer eingebetteten Datei (nur zum Speichern, nie zum Ausführen).</summary>
+    public const byte AttachmentData = 37;
+
+    /// <summary>→ int Dok, int Seite, int erstes Zeichen, int Anzahl ← int Anzahl, je Textzeile 4 × double links, oben, rechts, unten in
+    /// PDF-Koordinaten: die Vierecke, die eine Hervorhebung des Zeichenbereichs bekäme – für Hervorhebungen mit eigener Darstellung.</summary>
+    public const byte HighlightBoxes = 38;
 
     // ================================================================== Umrechnung
 

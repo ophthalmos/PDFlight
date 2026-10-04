@@ -3,9 +3,15 @@
     <Platform Name="Any CPU" />
     <Platform Name="x64" />
   </Configurations>
-  <Project Path="PDFlight.csproj" />
+  <Project Path="PDFlight.csproj">
+    <Platform Solution="Release|x64" Project="x64" />
+  </Project>
   <Folder Name="/Viewer/">
-    <Project Path="Viewer/Host/pdfhost.csproj" />
-    <Project Path="Viewer/HostCheck/HostCheck.csproj" />
+    <Project Path="Viewer/Host/pdfhost.csproj">
+      <Platform Solution="Release|x64" Project="x64" />
+    </Project>
+    <Project Path="Viewer/HostCheck/HostCheck.csproj">
+      <Platform Solution="Release|x64" Project="x64" />
+    </Project>
   </Folder>
 </Solution>
