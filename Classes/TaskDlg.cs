@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Net;
 using System.Reflection;
-using Microsoft.Web.WebView2.Core;
 
 namespace PDFLight.Classes;
 
@@ -124,9 +123,9 @@ internal static class TaskDlg
         var curVersion = Assembly.GetExecutingAssembly().GetName().Version;
         var threeVersion = curVersion?.ToString(3) ?? Lng.T("unbekannt");
         var buildDate = GetBuildDate();
-        string webView2Runtime;
-        try { webView2Runtime = CoreWebView2Environment.GetAvailableBrowserVersionString(); }
-        catch (WebView2RuntimeNotFoundException) { webView2Runtime = Lng.T("nicht gefunden"); }
+        var pdfiumPath = Path.Combine(AppContext.BaseDirectory, "pdfium.dll"); // liegt neben PDFlight.exe, geladen wird sie nur im Hilfsprogramm
+        var pdfium = File.Exists(pdfiumPath) && FileVersionInfo.GetVersionInfo(pdfiumPath) is { FileMajorPart: > 0 } info
+            ? $"{info.FileMajorPart}.{info.FileMinorPart}.{info.FileBuildPart}" : Lng.T("nicht gefunden");
         var msg = Lng.T("About.Text",
             "PDFlight ist ein PDF-Viewer für typische Dateioperationen" + Environment.NewLine +
             "(Verschieben, Kopieren, Löschen, Umbenennen, Mailen)." + Environment.NewLine +
@@ -139,7 +138,7 @@ internal static class TaskDlg
         using var icon32 = icon == null ? null : new Icon(icon, 32, 32); // sonst nimmt der TaskDialog die 16-px-Variante des Fenster-Icons
         var indent = new string(' ', 14);
         var foot = $"{indent}© {buildDate:yyyy} Wilhelm Happe · Version {threeVersion} ({buildDate:d.M.yyyy})" +
-            $"\n{indent}WebView2-Runtime {webView2Runtime}" +
+            $"\n{indent}PDFium {pdfium}" +
             $"\n{indent}PDFsharp {typeof(PdfSharp.Pdf.PdfDocument).Assembly.GetName().Version?.ToString(3)}" +
             $"\n{indent}<a href=\"https://www.netradio.info/pdf/\">www.netradio.info</a>";
         var initialPage = new TaskDialogPage()
@@ -254,9 +253,7 @@ internal static class TaskDlg
         // F-Tasten
         ("F1", "diese Hilfedatei (PDF)", null),
         ("F2", "Datei umbenennen", null),
-        ("F7", "Textcursor-Navigation ein/aus (Markieren per Tastatur)",
-            "Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert – Markieren ganz ohne Maus."),
-        ("F8", "Adobe-Ansicht ein/aus (Option: Hervorheben und Kommentieren)", null),
+        ("F3 / Umschalt+F3", "nächster / vorheriger Suchtreffer", null),
         ("F11", "Vollbild ein/aus", null),
         // Strg + Zahl
         ("Strg+1 … 9", "in externem Programm öffnen", null),
@@ -273,22 +270,25 @@ internal static class TaskDlg
         ("Strg+O", "PDF-Datei öffnen", null),
         ("Strg+P", "Dokument drucken", null),
         ("Strg+R", "Seiten drehen", null),
+        ("Strg+S", "Formulareingaben speichern", null),
         ("Strg+T", "Freitext einfügen", null),
+        ("Strg+W", "Dokument schließen", null),
         ("Strg+X", "Seiten als neue Datei extrahieren", null),
         ("Strg+Y", "aktuelle Seite an eine andere Position verschieben", null),
         ("Strg+Z", "Dokumentänderung rückgängig machen", null),
         // Strg + Sondertaste
-        ("Strg+Entf", "Seiten löschen", null),
+        ("Strg+Einfg / Strg+Entf", "leere Seite einfügen / Seiten löschen", null), // eine Zeile für beide – die Hilfe-PDF ist voll (30.09.2026)
         ("Strg+Leertaste", "ein-/zweiseitiges Layout umschalten", null),
         ("Strg+,", "Einstellungen öffnen", null),
         // Strg + Umschalt + Buchstabe
-        ("Strg+Umschalt+B", "Seite an Fensterbreite anpassen", null),
+        ("Strg+Umschalt+B", "an Breite / an Seite anpassen (wechselt)", null),
         ("Strg+Umschalt+C", "Dateipfad in die Zwischenablage kopieren", null),
         ("Strg+Umschalt+H", "Stempel verwalten", null),
-        ("Strg+Umschalt+I", "Inhalte-Leiste ein-/ausblenden", null),
+        ("Strg+Umschalt+I", "Seitenleiste (Miniaturen, Lesezeichen) ein/aus", null),
         ("Strg+Umschalt+K", "sofort in den 1-Klick-Ordner kopieren", null),
         ("Strg+Umschalt+M / Strg+F4", "sofort in den 1-Klick-Ordner verschieben", null),
-        ("Strg+Umschalt+R / L", "Ansicht drehen (ändert die Datei nicht)", null),
+        ("Strg+Umschalt+P", "mit dem Druckdialog von Windows drucken", null),
+        ("Strg+Umschalt+R / L", "Alle Seiten drehen", null),
         ("Strg+Umschalt+T", "Anmerkungen verwalten (bearbeiten, löschen)", null),
         // Strg + Umschalt + Sondertaste
         ("Strg+Umschalt+Entf", "Datei in den Papierkorb verschieben", null),

@@ -57,7 +57,7 @@ namespace PDFLight.Forms
             editMenuItem.Name = "editMenuItem";
             editMenuItem.ShortcutKeyDisplayString = "Enter";
             editMenuItem.Size = new Size(176, 22);
-            editMenuItem.Text = "&Bearbeiten …";
+            editMenuItem.Text = "&Bearbeiten…";
             editMenuItem.Click += BtnEdit_Click;
             // 
             // deleteMenuItem
@@ -118,7 +118,7 @@ namespace PDFLight.Forms
             btnEdit.Name = "btnEdit";
             btnEdit.Size = new Size(130, 27);
             btnEdit.TabIndex = 2;
-            btnEdit.Text = "&Bearbeiten …";
+            btnEdit.Text = "&Bearbeiten…";
             btnEdit.TextImageRelation = TextImageRelation.ImageBeforeText;
             btnEdit.UseVisualStyleBackColor = true;
             btnEdit.Click += BtnEdit_Click;

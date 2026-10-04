@@ -126,10 +126,6 @@ public partial class InsertPageForm : Form
             : dpi == fileDpi ? Lng.T("(aus der Bilddatei)")
             : string.Format(Lng.T("(Bilddatei: {0} dpi)"), fileDpi);
         labelDpiSource.Enabled = NeedsDpi;
-        labelImageSize.Text = !imagePixels.IsEmpty && dpi >= MinDpi && dpi <= MaxDpi
-            ? string.Format(Lng.T("{0} × {1} Pixel, bei {2} dpi {3:0.#} × {4:0.#} cm"), imagePixels.Width, imagePixels.Height, dpi,
-                imagePixels.Width / dpi * 2.54, imagePixels.Height / dpi * 2.54)
-            : string.Empty;
         UpdatePreview();
     }
 
@@ -143,14 +139,23 @@ public partial class InsertPageForm : Form
         return PdfEditService.LayoutNewPage(Options, referenceWidth, referenceHeight, usable ? imagePixels.Width : 0, usable ? imagePixels.Height : 0);
     }
 
-    /// <summary>Beschriftung unter der Vorschau (Seitenmaße, bei Originalgröße der Verkleinerungsgrad) und neu zeichnen.</summary>
+    /// <summary>Seitenmaße unter der Vorschau, die Druckgröße des Bildes (bei Originalgröße und „wie das Bild“ samt Verkleinerungsgrad,
+    /// wenn es nicht passt) und neu zeichnen.</summary>
     private void UpdatePreview()
     {
         var layout = PreviewLayout();
         const double MmPerPt = 25.4 / 72;
         labelPreviewPage.Text = layout.Width > 0 ? $"{layout.Width * MmPerPt:0} × {layout.Height * MmPerPt:0} mm" : string.Empty;
-        labelPreviewScale.Text = layout.Image != null && !radioFit.Checked && layout.Scale < 0.995
-            ? string.Format(Lng.T("auf {0:0} % verkleinert"), layout.Scale * 100) : string.Empty;
+        var dpi = Dpi;
+        var sizeText = !imagePixels.IsEmpty && dpi >= MinDpi && dpi <= MaxDpi
+            ? string.Format(Lng.T("{0} × {1} Pixel, bei {2} dpi {3:0.#} × {4:0.#} cm"), imagePixels.Width, imagePixels.Height, dpi,
+                imagePixels.Width / dpi * 2.54, imagePixels.Height / dpi * 2.54)
+            : string.Empty;
+        if (sizeText.Length > 0 && layout.Image != null && (radioFromImage.Checked || !radioFit.Checked) && layout.Scale < 0.995)
+        {
+            sizeText += ", " + string.Format(Lng.T("auf {0:0} % verkleinert"), layout.Scale * 100); // beim Einpassen ist Größenänderung gewollt
+        }
+        labelImageSize.Text = sizeText;
         pictureBoxPreview.Invalidate();
     }
 

@@ -4,6 +4,24 @@ namespace PDFLight.Classes;
 
 internal static partial class NativeMethods
 {
+    // Dunkles Windows-Design für das Zoomfeld der Viewer-Leiste (MainForm.ApplyZoomFieldTheme); null/null hebt die Zuordnung wieder auf
+    [LibraryImport("uxtheme.dll", StringMarshalling = StringMarshalling.Utf16)]
+    public static partial int SetWindowTheme(nint hWnd, string? subAppName, string? subIdList);
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct COMBOBOXINFO
+    {
+        public int cbSize;
+        public int ItemLeft, ItemTop, ItemRight, ItemBottom;
+        public int ButtonLeft, ButtonTop, ButtonRight, ButtonBottom;
+        public int stateButton;
+        public nint hwndCombo, hwndItem, hwndList;
+    }
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool GetComboBoxInfo(nint hwndCombo, ref COMBOBOXINFO info);
+
     // Für EM_SETMARGINS (Innenabstand der TextBoxen, s. TextBoxMargins.Apply)
     [LibraryImport("user32.dll", EntryPoint = "SendMessageW")]
     public static partial nint SendMessage(nint hWnd, uint msg, nint wParam, nint lParam);
@@ -43,7 +61,7 @@ internal static partial class NativeMethods
     [LibraryImport("user32.dll")]
     public static partial uint GetWindowThreadProcessId(nint hWnd, out uint processId);
 
-    // Esc gedrückt halten beendet den Vollbildmodus (MainForm.WatchEscapeHold)
+    // Esc im Vollbild: Tastenwiederholung nach dem Beenden schlucken, bis die Taste los ist (MainForm.EscHoldTimer_Tick)
     public const int VK_ESCAPE = 0x1B;
 
     [LibraryImport("user32.dll")]

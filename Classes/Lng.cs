@@ -13,7 +13,7 @@ internal static class Lng
     private static readonly ResourceManager resources = new("PDFLight.Languages.lng", typeof(Lng).Assembly);
     private static CultureInfo? culture; // null = Deutsch (keine Übersetzung nötig)
 
-    /// <summary>Der gewählte Kultur-Code ("de", "en", …), z.B. für die Sprache des WebView2-Viewers.</summary>
+    /// <summary>Der gewählte Kultur-Code ("de", "en", …), z.B. für das Datum in der Hilfedatei.</summary>
     public static string CultureCode { get; private set; } = "de";
 
     public static void Initialize(string cultureCode)

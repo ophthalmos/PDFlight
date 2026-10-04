@@ -358,7 +358,7 @@ public partial class RenameForm : Form
         var fileName = renameTextBox.Text.Trim();
         if (fileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
         {
-            TaskDlg.MsgTaskDlg(Handle, Lng.T("Der Name enthält ungültige Zeichen."), Lng.T("Diese werden entfernt …"), TaskDialogIcon.Information);
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Der Name enthält ungültige Zeichen."), Lng.T("Diese werden entfernt…"), TaskDialogIcon.Information);
             renameTextBox.Text = Path.GetInvalidFileNameChars().Aggregate(fileName, (current, c) => current.Replace(c.ToString(), string.Empty));
             e.Cancel = true;
             return;

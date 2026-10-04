@@ -11,11 +11,13 @@ public partial class PasswordForm : Form
     private readonly bool confirm;
     private readonly ToolTip revealTip = new();
 
-    public PasswordForm(string fileName, bool confirm = false)
+    /// <param name="title">Fenstertitel statt „Kennwort entfernen“ (etwa beim Öffnen einer geschützten Datei).</param>
+    public PasswordForm(string fileName, bool confirm = false, string? title = null)
     {
         InitializeComponent();
         TextBoxMargins.Apply(this);
         this.confirm = confirm;
+        if (title != null) { Text = title; }
         if (confirm)
         {
             Text = Lng.T("Benutzer-Kennwort vergeben");

@@ -4,11 +4,12 @@
 ; Voraussetzungen auf dem Zielrechner:
 ;   - .NET Desktop Runtime 10 (x64) — fehlt sie, zeigt Windows beim ersten
 ;     Start selbst einen Dialog mit Download-Link, daher keine Prüfung hier.
-;   - WebView2-Runtime (auf Windows 10/11 in der Regel vorhanden; das Setup warnt, falls sie fehlt).
+; Die PDF-Anzeige (PDFium) bringt PDFlight selbst mit: pdfhost.exe (Native AOT)
+; und pdfium.dll liegen neben PDFlight.exe.
 ; ============================================================================
 
 #define appName "PDFlight"
-#define appVersion "1.0.3"
+#define appVersion "1.1.0"
 #define releaseDir "bin\Release\net10.0-windows"
 
 [Setup]
@@ -57,26 +58,23 @@ es.ConfirmUninstall=¿Seguro que desea quitar %1 y todos sus componentes? No es 
 [CustomMessages]
 en.Run=Launch {#appName}
 en.DesktopIcon=Create a desktop shortcut
-en.WebView2Missing=The Microsoft WebView2 runtime was not found.%n%n{#appName} needs it to display PDFs. Please download it from:%nhttps://developer.microsoft.com/microsoft-edge/webview2/%n%nSetup will continue anyway.
 en.PdfDocument=PDF file
 de.Run={#appName} starten
 de.DesktopIcon=Verknüpfung auf dem Desktop anlegen
-de.WebView2Missing=Die Microsoft-WebView2-Runtime wurde nicht gefunden.%n%n{#appName} benötigt sie für die PDF-Anzeige. Bitte lade sie herunter von:%nhttps://developer.microsoft.com/microsoft-edge/webview2/%n%nDie Installation wird trotzdem fortgesetzt.
 de.PdfDocument=PDF-Datei
 fr.Run=Lancer {#appName}
 fr.DesktopIcon=Créer un raccourci sur le Bureau
-fr.WebView2Missing=Le runtime Microsoft WebView2 est introuvable.%n%n{#appName} en a besoin pour afficher les PDF. Veuillez le télécharger depuis :%nhttps://developer.microsoft.com/microsoft-edge/webview2/%n%nL'installation continue malgré tout.
 fr.PdfDocument=Fichier PDF
 es.Run=Iniciar {#appName}
 es.DesktopIcon=Crear un acceso directo en el escritorio
-es.WebView2Missing=No se encontró el runtime de Microsoft WebView2.%n%n{#appName} lo necesita para mostrar PDF. Descárguelo desde:%nhttps://developer.microsoft.com/microsoft-edge/webview2/%n%nLa instalación continuará de todos modos.
 es.PdfDocument=Archivo PDF
 
 [Tasks]
 Name: desktopicon; Description: "{cm:DesktopIcon}"; Flags: unchecked
 
 [Files]
-Source: "{#releaseDir}\*"; Excludes: "*.pdb"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; Excludes: Altlasten aus Builds bis 1.0.3, falls der Release-Ordner nicht geleert wurde (WebView2, Adobe-Ansicht)
+Source: "{#releaseDir}\*"; Excludes: "*.pdb,Microsoft.Web.WebView2.*.dll,\runtimes\*,\adobe\*,adobe-clientid*.txt"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
@@ -101,14 +99,20 @@ Root: HKLM; Subkey: "Software\Classes\Applications\{#appName}.exe\shell\open\com
 ; --help: PDFlight erzeugt die Hilfedatei (Downloads-Ordner, Programmsprache) und zeigt sie als erstes Dokument an
 Filename: "{app}\{#appName}.exe"; Parameters: "--help"; Description: "{cm:Run}"; Flags: nowait postinstall skipifsilent
 
-; Hinweis: Die Benutzereinstellungen (%APPDATA%\PDFlight\settings.json) und der
-; WebView2-Datenordner (%LOCALAPPDATA%\PDFlight) bleiben bei der Deinstallation erhalten.
+; Hinweis: Die Benutzereinstellungen (%APPDATA%\PDFlight\settings.json) und der Ordner
+; %LOCALAPPDATA%\PDFlight (Rückgängig-Sicherungen) bleiben bei der Deinstallation erhalten.
 
 [InstallDelete]
 ; Vorgänger von setup.default aus früheren Versionen
 Type: files; Name: "{app}\language.default"
 ; früher separat ausgeliefertes Dokumentsymbol – steckt jetzt in der EXE
 Type: files; Name: "{app}\pdffile.ico"
+; bis 1.0.3: Anzeige über WebView2 und die optionale Adobe-Ansicht (seit 1.1.0 PDFium)
+Type: files; Name: "{app}\Microsoft.Web.WebView2.*.dll"
+Type: filesandordirs; Name: "{app}\runtimes"
+Type: filesandordirs; Name: "{app}\adobe"
+Type: files; Name: "{app}\adobe-clientid.txt"
+Type: filesandordirs; Name: "{localappdata}\PDFlight\WebView2.*"
 
 [UninstallDelete]
 Type: files; Name: "{app}\setup.default"
@@ -144,15 +148,4 @@ begin
   if CurStep = ssPostInstall then
     SaveStringToFile(ExpandConstant('{app}\setup.default'),
       'language=' + ActiveLanguage + #13#10 + 'toolbar=' + IntToStr(ToolbarLevel()) + #13#10, False);
-end;
-
-function InitializeSetup(): Boolean;
-var
-  WebView2Version: String;
-begin
-  Result := True;
-  { WebView2-Runtime vorhanden? (.NET-Runtime prüft Windows beim ersten Start selbst) }
-  if not RegQueryStringValue(HKLM, 'SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}', 'pv', WebView2Version) then
-    if not RegQueryStringValue(HKCU, 'Software\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}', 'pv', WebView2Version) then
-      MsgBox(CustomMessage('WebView2Missing'), mbInformation, MB_OK);
 end;

@@ -25,8 +25,8 @@ internal static class PaperFormat
         var heightMm = heightPt / PtPerMm;
         var shortMm = Math.Min(widthMm, heightMm);
         var longMm = Math.Max(widthMm, heightMm);
-        var match = Known.FirstOrDefault(k => Math.Abs(k.ShortMm - shortMm) <= ToleranceMm && Math.Abs(k.LongMm - longMm) <= ToleranceMm);
-        var name = match.Name == null ? $"{widthMm:0} × {heightMm:0} mm" : match.Translate ? Lng.T(match.Name) : match.Name;
+        var (Name, Translate, ShortMm, LongMm) = Known.FirstOrDefault(k => Math.Abs(k.ShortMm - shortMm) <= ToleranceMm && Math.Abs(k.LongMm - longMm) <= ToleranceMm);
+        var name = Name == null ? $"{widthMm:0} × {heightMm:0} mm" : Translate ? Lng.T(Name) : Name;
         return name + ", " + (widthMm > heightMm ? Lng.T("Querformat") : Lng.T("Hochformat"));
     }
 }

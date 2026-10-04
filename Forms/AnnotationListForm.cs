@@ -69,6 +69,7 @@ public partial class AnnotationListForm : Form
         "FreeText" => Lng.T("Textanmerkung"),
         "Text" => Lng.T("Haftnotiz"),
         "Stamp" => Lng.T("Stempel"),
+        "Ink" => Lng.T("Zeichnung"), // Freihand-Striche aus „Zeichnen“ in der Viewer-Leiste
         _ => subtype, // andere Arten sprachneutral mit ihrem PDF-Namen (Highlight, Square, …)
     };
 

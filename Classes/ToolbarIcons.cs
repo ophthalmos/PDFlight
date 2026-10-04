@@ -47,11 +47,28 @@ internal static class ToolbarIcons
     public const char Comment = '\uE90A';      // Textanmerkung einfügen (Bearbeiten-Menü)
     public const char Favorite = '\uE734';     // FavoriteStar: Favoriten-Menü und Hinzufügen-Eintrag
     public const char Bookmarks = '\uE8A4';    // Lesezeichen entfernen (Bearbeiten-Menü)
+    public const char Sidebar = '\uE700';      // GlobalNavigationButton (☰): Seitenleiste der Anzeige ein/aus
+    public const char ZoomIn = '\uE8A3';
+    public const char ZoomOut = '\uE71F';
+    public const char FitWidth = '\uE799';     // Seite zwischen senkrechten Strichen: an Breite anpassen
+    public const char FitPage = '\uE9A6';      // FitPage (Ecken): an Seite anpassen
+    public const char FullScreen = '\uE740';   // Vollbild ein
+    public const char BackToWindow = '\uE73F'; // Vollbild aus
+    public const char CloseDocument = '\uE8BB'; // ChromeClose: Dokument schließen
+    public const char Save = '\uE74E';         // Formulareingaben speichern (Viewer-Leiste)
+    public const char TwoPage = '\uE89A';    // TwoPage: zweiseitige Ansicht
+    public const char Search = '\uE721';
+    public const char ChevronUp = '\uE70E';    // Suche: vorheriger Treffer (nächster: ChevronDown)
+    public const char Cancel = '\uE711';       // Suchleiste schließen
+    public const char Draw = '\uE76D';         // InkingTool: Zeichnen in der Viewer-Leiste (wie Edge)
+    public const char Thumbnails = '\uEB9F';   // Photo2 (Bild mit Bergen): Seitenleiste mit Miniaturen (wie Chrome)
+    public const char Outline = '\uE8FD';      // BulletedList: Seitenleiste mit der Dokumentstruktur
+    public const char SelectAll = '\uE8B3';    // Kontextmenü der Anzeige: alles markieren
 
-    public const char Highlight = '';    // Textmarker: Schaltfläche „Adobe“ (optionale Ansicht zum Hervorheben)
+    public const char Highlight = '';    // Textmarker: Kontextmenü „Hervorheben“ der Anzeige
 
     private const string FontName = "Segoe MDL2 Assets";
-    private static readonly Dictionary<(char Glyph, int Size), Image> cache = [];
+    private static readonly Dictionary<(char Glyph, int Size, int Color), Image> cache = [];
 
     /// <summary>False, falls die Symbolschrift fehlt — dann bleiben die Buttons reine Textbuttons.</summary>
     public static bool FontAvailable { get; } = CheckFontAvailable();
@@ -121,9 +138,41 @@ internal static class ToolbarIcons
         return result;
     }
 
-    public static Image Get(char glyph, Size size)
+    /// <summary>„T im Kasten“ wie Edges Schaltfläche „Text hinzufügen“ – die Symbolschrift hat dafür keine Glyphe.</summary>
+    public static Image TextBox(Size size, Color color)
     {
-        if (!cache.TryGetValue((glyph, size.Width), out var image))
+        Bitmap bitmap = new(size.Width, size.Height);
+        using var g = Graphics.FromImage(bitmap);
+        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+        var line = Math.Max(1f, size.Height / 16f);
+        var inset = size.Height * 0.16f;
+        var box = new RectangleF(inset, inset, size.Width - 2 * inset, size.Height - 2 * inset);
+        using (var pen = new Pen(color, line)) { g.DrawRectangle(pen, box.X, box.Y, box.Width, box.Height); }
+        using Font font = new("Segoe UI", box.Height * 0.62f, FontStyle.Regular, GraphicsUnit.Pixel);
+        using StringFormat format = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+        using SolidBrush brush = new(color);
+        g.DrawString("T", font, brush, new RectangleF(box.X, box.Y + line / 2, box.Width, box.Height), format);
+        return bitmap;
+    }
+
+    /// <summary>Symbol mit einem Farbbalken am unteren Rand – „Zeichnen“ zeigt so die gewählte Stiftfarbe (wie Edge).</summary>
+    public static Image WithColorBar(Image icon, Color bar)
+    {
+        Bitmap bitmap = new(icon);
+        using var g = Graphics.FromImage(bitmap);
+        var height = Math.Max(2, icon.Height / 8);
+        using SolidBrush brush = new(bar);
+        g.FillRectangle(brush, icon.Width / 8, icon.Height - height, icon.Width - icon.Width / 4, height);
+        return bitmap;
+    }
+
+    public static Image Get(char glyph, Size size) => Get(glyph, size, Color.FromArgb(64, 64, 64));
+
+    /// <summary>Wie <see cref="Get(char, Size)"/> in einer anderen Farbe – etwa hell für die dunkle Viewer-Leiste.</summary>
+    public static Image Get(char glyph, Size size, Color color)
+    {
+        if (!cache.TryGetValue((glyph, size.Width, color.ToArgb()), out var image))
         {
             Bitmap bitmap = new(size.Width, size.Height);
             using (var g = Graphics.FromImage(bitmap))
@@ -131,11 +180,11 @@ internal static class ToolbarIcons
                 g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
                 using Font font = new(FontName, size.Height * 0.75f, GraphicsUnit.Pixel);
                 using StringFormat format = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-                using SolidBrush brush = new(Color.FromArgb(64, 64, 64));
+                using SolidBrush brush = new(color);
                 g.DrawString(glyph.ToString(), font, brush, new RectangleF(0, 0, size.Width, size.Height), format);
             }
             image = bitmap;
-            cache[(glyph, size.Width)] = image;
+            cache[(glyph, size.Width, color.ToArgb())] = image;
         }
         return image;
     }

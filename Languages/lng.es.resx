@@ -36,7 +36,7 @@
   <data name="Die Sprachänderung wird nach einem Neustart des Programms wirksam." xml:space="preserve"><value>El cambio de idioma tendrá efecto tras reiniciar el programa.</value></data>
   <data name="Jetzt neu starten?" xml:space="preserve"><value>¿Reiniciar ahora?</value></data>
   <data name="Zielordner" xml:space="preserve"><value>Carpetas de destino</value></data>
-  <data name="&amp;Hinzufügen …" xml:space="preserve"><value>&amp;Agregar…</value></data>
+  <data name="&amp;Hinzufügen…" xml:space="preserve"><value>&amp;Agregar…</value></data>
   <data name="&amp;Entfernen" xml:space="preserve"><value>&amp;Quitar</value></data>
   <data name="Nach &amp;oben" xml:space="preserve"><value>S&amp;ubir</value></data>
   <data name="Nach &amp;unten" xml:space="preserve"><value>&amp;Bajar</value></data>
@@ -68,24 +68,24 @@
   <data name="Löschen" xml:space="preserve"><value>Eliminar</value></data>
   <data name="Ordner öffnen" xml:space="preserve"><value>Abrir carpeta</value></data>
   <data name="Bearbeiten" xml:space="preserve"><value>Editar</value></data>
-  <data name="Seiten löschen …" xml:space="preserve"><value>Eliminar páginas…</value></data>
-  <data name="Seiten drehen …" xml:space="preserve"><value>Girar páginas…</value></data>
-  <data name="PDF-Datei anhängen …" xml:space="preserve"><value>Anexar archivo PDF…</value></data>
-  <data name="Seiten extrahieren …" xml:space="preserve"><value>Extraer páginas…</value></data>
+  <data name="Seiten löschen…" xml:space="preserve"><value>Eliminar páginas…</value></data>
+  <data name="Seiten drehen…" xml:space="preserve"><value>Girar páginas…</value></data>
+  <data name="PDF-Datei anhängen…" xml:space="preserve"><value>Anexar archivo PDF…</value></data>
+  <data name="Seiten extrahieren…" xml:space="preserve"><value>Extraer páginas…</value></data>
   <data name="Änderung rückgängig" xml:space="preserve"><value>Deshacer cambio</value></data>
   <data name="Rückgängig:" xml:space="preserve"><value>Deshacer:</value></data>
   <data name="Verschieben nach „{0}“" xml:space="preserve"><value>Mover a "{0}"</value></data>
   <data name="In den Papierkorb verschieben" xml:space="preserve"><value>Mover a la papelera</value></data>
   <data name="Die Datei konnte nicht aus dem Papierkorb wiederhergestellt werden." xml:space="preserve"><value>El archivo no se pudo restaurar desde la papelera.</value></data>
-  <data name="Eigenschaften …" xml:space="preserve"><value>Propiedades…</value></data>
+  <data name="Eigenschaften…" xml:space="preserve"><value>Propiedades…</value></data>
   <data name="Eigenschaften" xml:space="preserve"><value>Propiedades</value></data>
-  <data name="Öffnen mit …" xml:space="preserve"><value>Abrir con…</value></data>
-  <data name="Programme verwalten …" xml:space="preserve"><value>Administrar programas…</value></data>
+  <data name="Öffnen mit…" xml:space="preserve"><value>Abrir con…</value></data>
+  <data name="Programme verwalten…" xml:space="preserve"><value>Administrar programas…</value></data>
   <data name="(keine Programme gefunden)" xml:space="preserve"><value>(no se encontraron programas)</value></data>
   <data name="(keine zuletzt geöffneten Dateien)" xml:space="preserve"><value>(no hay archivos recientes)</value></data>
   <data name="Liste leeren" xml:space="preserve"><value>Vaciar lista</value></data>
   <data name="(Zielliste ist leer)" xml:space="preserve"><value>(la lista de destinos está vacía)</value></data>
-  <data name="Zielliste bearbeiten …" xml:space="preserve"><value>Editar lista de destinos…</value></data>
+  <data name="Zielliste bearbeiten…" xml:space="preserve"><value>Editar lista de destinos…</value></data>
   <data name="Keine Datei geöffnet" xml:space="preserve"><value>Ningún archivo abierto</value></data>
   <data name="Seite" xml:space="preserve"><value>página</value></data>
   <data name="Seiten" xml:space="preserve"><value>páginas</value></data>
@@ -104,7 +104,6 @@ Ctrl+clic: directamente a la carpeta de 1 clic (ver la barra de estado)</value><
   <data name="Strg+," xml:space="preserve"><value>Ctrl+,</value></data>
   <data name="Einstellungen öffnen" xml:space="preserve"><value>abrir la configuración</value></data>
   <data name="Seitenzahl, Dateigröße und Änderungsdatum der angezeigten Datei" xml:space="preserve"><value>Número de páginas, tamaño y fecha de modificación del archivo mostrado</value></data>
-  <data name="Zoomstufe des Viewers" xml:space="preserve"><value>Nivel de zoom del visor</value></data>
   <data name="PDF-Version der angezeigten Datei" xml:space="preserve"><value>Versión PDF del archivo mostrado</value></data>
   <data name="PDF/A: Format für die Langzeitarchivierung" xml:space="preserve"><value>PDF/A: formato para el archivado a largo plazo</value></data>
   <data name="Diese Datei entspricht dem PDF/A-Standard für die Langzeitarchivierung und wurde schreibgeschützt geöffnet." xml:space="preserve"><value>Este archivo cumple el estándar PDF/A para el archivado a largo plazo y se ha abierto como solo lectura.</value></data>
@@ -146,6 +145,9 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
   <data name="Strg+I" xml:space="preserve"><value>Ctrl+I</value></data>
   <data name="Strg+X" xml:space="preserve"><value>Ctrl+X</value></data>
   <data name="Strg+Entf" xml:space="preserve"><value>Ctrl+Supr</value></data>
+  <data name="Strg+Einfg" xml:space="preserve"><value>Ctrl+Insert</value></data>
+  <data name="Strg+Einfg / Strg+Entf" xml:space="preserve"><value>Ctrl+Insert / Ctrl+Supr</value></data>
+  <data name="leere Seite einfügen / Seiten löschen" xml:space="preserve"><value>insertar página vacía / eliminar páginas</value></data>
   <data name="Strg+Umschalt+C" xml:space="preserve"><value>Ctrl+Mayús+C</value></data>
   <data name="Dateipfad in die Zwischenablage kopieren" xml:space="preserve"><value>copiar la ruta del archivo al portapapeles</value></data>
   <data name="Der Dateipfad wurde in die Zwischenablage kopiert." xml:space="preserve"><value>La ruta del archivo se copió al portapapeles.</value></data>
@@ -153,16 +155,10 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
   <data name="Strg+Umschalt+Entf" xml:space="preserve"><value>Ctrl+Mayús+Supr</value></data>
   <data name="Strg+Umschalt+← / →" xml:space="preserve"><value>Ctrl+Mayús+← / →</value></data>
   <data name="Strg+Umschalt+R / L" xml:space="preserve"><value>Ctrl+Mayús+R / L</value></data>
-  <data name="Ansicht drehen (ändert die Datei nicht)" xml:space="preserve"><value>Girar la vista (no cambia el archivo)</value></data>
   <data name="Strg+F2" xml:space="preserve"><value>Ctrl+F2</value></data>
   <data name="Strg+Umschalt+I" xml:space="preserve"><value>Ctrl+Mayús+I</value></data>
-  <data name="Strg+Leertaste" xml:space="preserve"><value>Ctrl+Espacio</value></data>
   <data name="Datei" xml:space="preserve"><value>Archivo</value></data>
-  <data name="ein-/zweiseitiges Layout umschalten" xml:space="preserve"><value>alternar diseño de una/dos páginas</value></data>
   <data name="Strg+Umschalt+B" xml:space="preserve"><value>Ctrl+Mayús+B</value></data>
-  <data name="Inhalte-Leiste ein-/ausblenden" xml:space="preserve"><value>Mostrar/ocultar el panel de contenido</value></data>
-  <data name="Seite an Fensterbreite anpassen" xml:space="preserve"><value>Ajustar la página al ancho de la ventana</value></data>
-  <data name="Textcursor-Navigation ein/aus (Markieren per Tastatur)" xml:space="preserve"><value>Navegación con cursor de texto (seleccionar con el teclado)</value></data>
   <data name="Gehe zu Seite (Zahl tippen + Enter)" xml:space="preserve"><value>Ir a la página (escribir el número + Entrar)</value></data>
   <data name="Strg+1 … 9" xml:space="preserve"><value>Ctrl+1 … 9</value></data>
   <data name="Bild ↑ / Bild ↓" xml:space="preserve"><value>RePág / AvPág</value></data>
@@ -172,9 +168,6 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
   <data name="Entf" xml:space="preserve"><value>Supr</value></data>
 
   <!-- MainForm: Meldungen und Dialoge -->
-  <data name="Die WebView2-Runtime ist nicht installiert." xml:space="preserve"><value>El runtime de WebView2 no está instalado.</value></data>
-  <data name="Bitte installiere sie über:" xml:space="preserve"><value>Instálelo desde:</value></data>
-  <data name="Die PDF-Anzeige (WebView2) konnte nicht gestartet werden." xml:space="preserve"><value>No se pudo iniciar el visor PDF (WebView2).</value></data>
   <data name="Die Datei konnte nicht geladen werden." xml:space="preserve"><value>No se pudo cargar el archivo.</value></data>
   <data name="PDF-Dateien (*.pdf)|*.pdf" xml:space="preserve"><value>Archivos PDF (*.pdf)|*.pdf</value></data>
   <data name="PDF-Datei öffnen" xml:space="preserve"><value>Abrir archivo PDF</value></data>
@@ -206,7 +199,7 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
   <data name="Umbenennen fehlgeschlagen." xml:space="preserve"><value>Error al renombrar.</value></data>
   <data name="In den Papierkorb verschieben?" xml:space="preserve"><value>¿Mover a la papelera?</value></data>
   <data name="Immer fragen" xml:space="preserve"><value>Preguntar siempre</value></data>
-  <data name="E-Mail wird erstellt (MAPI) …" xml:space="preserve"><value>Creando correo (MAPI)…</value></data>
+  <data name="E-Mail wird erstellt (MAPI)…" xml:space="preserve"><value>Creando correo (MAPI)…</value></data>
   <data name="Die E-Mail konnte nicht erstellt werden." xml:space="preserve"><value>No se pudo crear el correo.</value></data>
   <data name="{0} fehlgeschlagen." xml:space="preserve"><value>Error: {0}.</value></data>
   <data name="Die Datei kann nicht bearbeitet werden." xml:space="preserve"><value>El archivo no se puede editar.</value></data>
@@ -236,15 +229,15 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
   <data name="Rückgängig fehlgeschlagen." xml:space="preserve"><value>Error al deshacer.</value></data>
   <data name="Die letzte Änderung wurde rückgängig gemacht." xml:space="preserve"><value>Se deshizo el último cambio.</value></data>
   <data name="Das Programm konnte nicht gestartet werden." xml:space="preserve"><value>No se pudo iniciar el programa.</value></data>
-  <data name="Rückseiten-Scan einfügen …" xml:space="preserve"><value>Insertar escaneo de caras traseras…</value></data>
+  <data name="Rückseiten-Scan einfügen…" xml:space="preserve"><value>Insertar escaneo de caras traseras…</value></data>
   <data name="Rückseiten-Scan einfügen" xml:space="preserve"><value>Insertar escaneo de caras traseras</value></data>
   <data name="Duplex.Intro" xml:space="preserve"><value>Para escáneres sin unidad dúplex: el archivo mostrado contiene las caras delanteras (1, 3, 5 …).
 En el siguiente paso, elige el archivo con las caras traseras: se intercalará con las delanteras
 en un documento completo (1, 2, 3 …).
 
 Ambos archivos deben tener el mismo número de páginas.</value></data>
-  <data name="Kennwort entfernen …" xml:space="preserve"><value>Quitar la contraseña…</value></data>
-  <data name="Kennwort vergeben …" xml:space="preserve"><value>Establecer contraseña…</value></data>
+  <data name="Kennwort entfernen…" xml:space="preserve"><value>Quitar la contraseña…</value></data>
+  <data name="Kennwort vergeben…" xml:space="preserve"><value>Establecer contraseña…</value></data>
   <data name="Drucken" xml:space="preserve"><value>Imprimir</value></data>
   <data name="Datei drucken (Strg+P)" xml:space="preserve"><value>Imprimir el archivo (Ctrl+P)</value></data>
   <data name="Benutzer-Kennwort vergeben" xml:space="preserve"><value>Establecer contraseña de usuario</value></data>
@@ -293,9 +286,8 @@ del PDF o extraerlas a un archivo nuevo, y se puede
 anexar otro archivo PDF.</value></data>
   <data name="Anerkennung spenden via PayPal" xml:space="preserve"><value>Donar mediante PayPal</value></data>
   <data name="Hilfe" xml:space="preserve"><value>Ayuda</value></data>
-  <data name="Nach Updates suchen …" xml:space="preserve"><value>Buscar actualizaciones…</value></data>
-  <data name="Über PDFlight …" xml:space="preserve"><value>Acerca de PDFlight…</value></data>
-  <data name="Setzt einen Textcursor ins Dokument: Pfeiltasten bewegen ihn, Umschalt+Pfeile markieren Text, Strg+C kopiert – Markieren ganz ohne Maus." xml:space="preserve"><value>Coloca un cursor de texto en el documento: las flechas lo mueven, Mayús+flechas seleccionan, Ctrl+C copia; seleccionar sin ratón.</value></data>
+  <data name="Nach Updates suchen…" xml:space="preserve"><value>Buscar actualizaciones…</value></data>
+  <data name="Über PDFlight…" xml:space="preserve"><value>Acerca de PDFlight…</value></data>
   <data name="Tastenkürzel" xml:space="preserve"><value>Atajos de teclado</value></data>
   <data name="PDFlightSetup.exe herunterladen" xml:space="preserve"><value>Descargar PDFlightSetup.exe</value></data>
   <data name="Download.Detail" xml:space="preserve"><value>PDFlightSetup.exe se guardará en la carpeta de
@@ -330,7 +322,6 @@ para instalar la última versión.</value></data>
   <data name="im Dokument suchen" xml:space="preserve"><value>buscar en el documento</value></data>
   <data name="Dokument drucken" xml:space="preserve"><value>imprimir el documento</value></data>
   <data name="Vollbild ein/aus" xml:space="preserve"><value>pantalla completa sí/no</value></data>
-  <data name="Zum Beenden des Vollbildmodus Esc gedrückt halten" xml:space="preserve"><value>Mantén pulsada Esc para salir de la pantalla completa</value></data>
   <data name="Programm beenden (Option)" xml:space="preserve"><value>cerrar el programa (opción)</value></data>
 
   <!-- Umbenennen-Dialog -->
@@ -353,7 +344,7 @@ para instalar la última versión.</value></data>
   <data name="In den Papierkorb" xml:space="preserve"><value>A la papelera</value></data>
   <data name="Doppelklick oder Eingabe übernimmt einen Namen aus der Liste." xml:space="preserve"><value>Doble clic o Entrar aplica un nombre de la lista.</value></data>
   <data name="Der Name enthält ungültige Zeichen." xml:space="preserve"><value>El nombre contiene caracteres no válidos.</value></data>
-  <data name="Diese werden entfernt …" xml:space="preserve"><value>Se eliminarán…</value></data>
+  <data name="Diese werden entfernt…" xml:space="preserve"><value>Se eliminarán…</value></data>
   <data name="Vorhandene Datei ersetzen?" xml:space="preserve"><value>¿Reemplazar el archivo existente?</value></data>
   <data name="Eine Datei gleichen Namens ist bereits vorhanden. Sie wird in den Papierkorb verschoben." xml:space="preserve"><value>Ya existe un archivo con el mismo nombre. Se moverá a la papelera.</value></data>
   <data name="Die vorhandene Datei konnte nicht ersetzt werden." xml:space="preserve"><value>No se pudo reemplazar el archivo existente.</value></data>
@@ -410,7 +401,7 @@ para instalar la última versión.</value></data>
   <data name="PDF-Produzent:" xml:space="preserve"><value>Productor de PDF:</value></data>
   <data name="PDFlight-Hilfe" xml:space="preserve"><value>PDFlight-Ayuda</value></data>
   <data name="diese Hilfedatei (PDF)" xml:space="preserve"><value>este archivo de ayuda (PDF)</value></data>
-  <data name="Hilfedatei (PDF) …" xml:space="preserve"><value>Archivo de ayuda (PDF)…</value></data>
+  <data name="Hilfedatei (PDF)…" xml:space="preserve"><value>Archivo de ayuda (PDF)…</value></data>
   <data name="PDFlight lädt die Datei zum Anzeigen in den Arbeitsspeicher. Die Datei selbst bleibt dabei frei: andere Programme können sie jederzeit ändern oder verschieben. Wird sie geändert, zeigt PDFlight den neuen Stand, sobald du zum Fenster zurückkehrst." xml:space="preserve"><value>PDFlight carga el archivo en la memoria para mostrarlo. El archivo en sí queda libre: otros programas pueden modificarlo o moverlo en cualquier momento. Si se modifica, PDFlight muestra la nueva versión en cuanto vuelves a la ventana.</value></data>
   <data name="Die Werkzeuge in der Anzeige (Zoom, Ansicht drehen, Suchen) verändern nur die Darstellung, nie die Datei. Alles, was du dort drehst, ist beim nächsten Öffnen wieder wie vorher." xml:space="preserve"><value>Las herramientas del visor (zoom, girar la vista, buscar) solo cambian la presentación, nunca el archivo. Todo lo que gires ahí vuelve a estar como antes la próxima vez que lo abras.</value></data>
   <data name="Die Befehle im Menü „Bearbeiten“ und in der Symbolleiste (Seiten löschen oder drehen, anhängen, Kennwort, Eigenschaften) ändern die Datei dagegen wirklich – und zwar sofort, ohne gesonderten Speichern-Schritt. Einen Fehlgriff machst du mit Strg+Z rückgängig." xml:space="preserve"><value>Los comandos del menú «Editar» y de la barra de herramientas (eliminar o girar páginas, anexar, contraseña, propiedades), en cambio, sí cambian el archivo – de inmediato, sin un paso de guardar aparte. Un desliz lo deshaces con Ctrl+Z.</value></data>
@@ -428,7 +419,7 @@ para instalar la última versión.</value></data>
   <data name="Sie wird mit in den Papierkorb verschoben." xml:space="preserve"><value>También se moverá a la papelera.</value></data>
   <data name="Sie werden mit in den Papierkorb verschoben." xml:space="preserve"><value>También se moverán a la papelera.</value></data>
   <data name="Die Hilfedatei konnte nicht erstellt werden." xml:space="preserve"><value>No se pudo crear el archivo de ayuda.</value></data>
-  <data name="Drucke …" xml:space="preserve"><value>Imprimiendo…</value></data>
+  <data name="Drucke…" xml:space="preserve"><value>Imprimiendo…</value></data>
   <data name="Drucken fehlgeschlagen." xml:space="preserve"><value>Error al imprimir.</value></data>
   <data name="Der Drucker ist nicht verfügbar." xml:space="preserve"><value>La impresora no está disponible.</value></data>
   <data name="Das Dokument konnte nicht gedruckt werden." xml:space="preserve"><value>No se pudo imprimir el documento.</value></data>
@@ -450,7 +441,7 @@ para instalar la última versión.</value></data>
   <!-- Favoriten (Menü, Dialog, Einstellung) -->
   <data name="Favoriten" xml:space="preserve"><value>Favoritos</value></data>
   <data name="Dateien als Favoriten merken und wiederfinden (Strg+D)" xml:space="preserve"><value>Recordar archivos como favoritos y volver a encontrarlos (Ctrl+D)</value></data>
-  <data name="Angezeigte Datei zu den Favoriten hinzufügen …" xml:space="preserve"><value>Añadir el archivo mostrado a favoritos…</value></data>
+  <data name="Angezeigte Datei zu den Favoriten hinzufügen…" xml:space="preserve"><value>Añadir el archivo mostrado a favoritos…</value></data>
   <data name="Datei aus den Favoriten entfernen" xml:space="preserve"><value>Quitar el archivo de favoritos</value></data>
   <data name="»{0}« aus den Favoriten entfernen" xml:space="preserve"><value>Quitar «{0}» de favoritos</value></data>
   <data name="Nicht mehr vorhandene Favoriten entfernen" xml:space="preserve"><value>Quitar los favoritos que ya no existen</value></data>
@@ -468,7 +459,7 @@ para instalar la última versión.</value></data>
   <data name="&amp;Name (optional, bis 30 Zeichen):" xml:space="preserve"><value>&amp;Nombre (opcional, hasta 30 caracteres):</value></data>
   <data name="&amp;Favoriten-Menü anzeigen (Dateien merken, max. 200 Einträge)" xml:space="preserve"><value>Mostrar el menú de fa&amp;voritos (recordar archivos, máx. 200 entradas)</value></data>
   <!-- Textanmerkung-Dialog -->
-  <data name="Freitext hinzufügen …" xml:space="preserve"><value>Añadir texto libre…</value></data>
+  <data name="Freitext hinzufügen…" xml:space="preserve"><value>Añadir texto libre…</value></data>
   <data name="Strg+T" xml:space="preserve"><value>Ctrl+T</value></data>
   <data name="Freitext einfügen" xml:space="preserve"><value>insertar texto libre</value></data>
   <data name="Textanmerkung hinzufügen" xml:space="preserve"><value>Añadir anotación de texto</value></data>
@@ -477,13 +468,10 @@ para instalar la última versión.</value></data>
   <data name="Abstand von &amp;links (mm):" xml:space="preserve"><value>Distancia desde la &amp;izquierda (mm):</value></data>
   <data name="Abstand von &amp;oben (mm):" xml:space="preserve"><value>Distancia desde &amp;arriba (mm):</value></data>
   <data name="Schrift&amp;größe (pt):" xml:space="preserve"><value>Tamaño de &amp;fuente (pt):</value></data>
-  <data name="Anmerkung.Info" xml:space="preserve"><value>Distancias desde la esquina superior izquierda de la página.
-Un clic en la vista previa fija la posición.</value></data>
   <data name="Bitte gib einen Text ein." xml:space="preserve"><value>Escribe un texto.</value></data>
   <data name="Die Textanmerkung wurde auf Seite {0} eingefügt." xml:space="preserve"><value>La anotación de texto se insertó en la página {0}.</value></data>
   <data name="Die Textanmerkung wurde auf Seite {0} geändert." xml:space="preserve"><value>La anotación de texto de la página {0} se modificó.</value></data>
   <data name="Seite {0} von {1}" xml:space="preserve"><value>Página {0} de {1}</value></data>
-  <data name="Vorschau nicht verfügbar" xml:space="preserve"><value>Vista previa no disponible</value></data>
   <data name="&amp;Hintergrund:" xml:space="preserve"><value>&amp;Fondo:</value></data>
   <data name="&amp;Rahmen:" xml:space="preserve"><value>&amp;Borde:</value></data>
   <data name="Grau" xml:space="preserve"><value>Gris</value></data>
@@ -502,7 +490,7 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="Grün" xml:space="preserve"><value>Verde</value></data>
   <data name="Blau" xml:space="preserve"><value>Azul</value></data>
   <!-- Anmerkungen verwalten -->
-  <data name="Anmerkungen verwalten …" xml:space="preserve"><value>Administrar anotaciones…</value></data>
+  <data name="Anmerkungen verwalten…" xml:space="preserve"><value>Administrar anotaciones…</value></data>
   <data name="Strg+Umschalt+T" xml:space="preserve"><value>Ctrl+Mayús+T</value></data>
   <data name="Enter" xml:space="preserve"><value>Intro</value></data>
   <data name="Anmerkungen verwalten (bearbeiten, löschen)" xml:space="preserve"><value>administrar anotaciones (editar, eliminar)</value></data>
@@ -510,14 +498,14 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="Seitennr." xml:space="preserve"><value>Página n.º</value></data>
   <data name="Position" xml:space="preserve"><value>Posición</value></data>
   <data name="Text" xml:space="preserve"><value>Texto</value></data>
-  <data name="&amp;Bearbeiten …" xml:space="preserve"><value>&amp;Editar…</value></data>
+  <data name="&amp;Bearbeiten…" xml:space="preserve"><value>&amp;Editar…</value></data>
   <data name="Schließen" xml:space="preserve"><value>Cerrar</value></data>
   <data name="Haftnotiz" xml:space="preserve"><value>Nota adhesiva</value></data>
   <data name="Textanmerkung bearbeiten" xml:space="preserve"><value>Editar anotación de texto</value></data>
   <data name="(keine Anmerkungen)" xml:space="preserve"><value>(sin anotaciones)</value></data>
   <data name="Anmerkung löschen" xml:space="preserve"><value>Eliminar anotación</value></data>
   <data name="links {0:0.#} mm, oben {1:0.#} mm" xml:space="preserve"><value>izquierda {0:0.#} mm, arriba {1:0.#} mm</value></data>
-  <data name="Aktuelle Seite verschieben …" xml:space="preserve"><value>Mover la página actual…</value></data>
+  <data name="Aktuelle Seite verschieben…" xml:space="preserve"><value>Mover la página actual…</value></data>
   <data name="Seite verschieben" xml:space="preserve"><value>Mover página</value></data>
   <data name="Seite {0} an &amp;Position (1–{1}):" xml:space="preserve"><value>Página {0} a la &amp;posición (1–{1}):</value></data>
   <data name="Die übrigen Seiten rücken entsprechend auf." xml:space="preserve"><value>Las demás páginas se desplazan en consecuencia.</value></data>
@@ -541,9 +529,9 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="Neu" xml:space="preserve"><value>Nuevo</value></data>
   <data name="Stempel" xml:space="preserve"><value>Sello</value></data>
   <data name="Stempel einfügen" xml:space="preserve"><value>Insertar sello</value></data>
-  <data name="Stempel einfügen …" xml:space="preserve"><value>Insertar sello…</value></data>
+  <data name="Stempel einfügen…" xml:space="preserve"><value>Insertar sello…</value></data>
   <data name="Stempel verwalten" xml:space="preserve"><value>Administrar sellos</value></data>
-  <data name="Stempel verwalten …" xml:space="preserve"><value>Administrar sellos…</value></data>
+  <data name="Stempel verwalten…" xml:space="preserve"><value>Administrar sellos…</value></data>
   <data name="oben links" xml:space="preserve"><value>arriba a la izquierda</value></data>
   <data name="oben mittig" xml:space="preserve"><value>arriba al centro</value></data>
   <data name="oben rechts" xml:space="preserve"><value>arriba a la derecha</value></data>
@@ -572,7 +560,7 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="&amp;Deckkraft (%):" xml:space="preserve"><value>&amp;Opacidad (%):</value></data>
 
   <!-- Leere Seite einfügen -->
-  <data name="Leere Seite einfügen …" xml:space="preserve"><value>Insertar página vacía…</value></data>
+  <data name="Leere Seite einfügen…" xml:space="preserve"><value>Insertar página vacía…</value></data>
   <data name="Leere Seite einfügen" xml:space="preserve"><value>Insertar página vacía</value></data>
   <data name="Format" xml:space="preserve"><value>Formato</value></data>
   <data name="&amp;Wie Seite {0}: {1}" xml:space="preserve"><value>&amp;Como la página {0}: {1}</value></data>
@@ -585,7 +573,6 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="Am &amp;Anfang" xml:space="preserve"><value>Al p&amp;rincipio</value></data>
   <data name="Am &amp;Ende" xml:space="preserve"><value>Al &amp;final</value></data>
   <data name="Bild (optional)" xml:space="preserve"><value>Imagen (opcional)</value></data>
-  <data name="Vorschau" xml:space="preserve"><value>Vista previa</value></data>
   <data name="auf {0:0} % verkleinert" xml:space="preserve"><value>reducida al {0:0} %</value></data>
   <data name="(aus der Bilddatei)" xml:space="preserve"><value>(del archivo de imagen)</value></data>
   <data name="(Bilddatei: {0} dpi)" xml:space="preserve"><value>(archivo de imagen: {0} dpi)</value></data>
@@ -598,14 +585,14 @@ Un clic en la vista previa fija la posición.</value></data>
   <data name="DIN A4" xml:space="preserve"><value>A4</value></data>
   <data name="DIN A5" xml:space="preserve"><value>A5</value></data>
   <data name="DIN A6" xml:space="preserve"><value>A6</value></data>
-  <data name="&amp;Durchsuchen …" xml:space="preserve"><value>&amp;Examinar…</value></data>
+  <data name="&amp;Durchsuchen…" xml:space="preserve"><value>&amp;Examinar…</value></data>
   <data name="Bilddateien" xml:space="preserve"><value>Archivos de imagen</value></data>
   <data name="Bild für die neue Seite wählen" xml:space="preserve"><value>Elegir una imagen para la página nueva</value></data>
   <data name="Die Bilddatei wurde nicht gefunden." xml:space="preserve"><value>No se encontró el archivo de imagen.</value></data>
   <data name="Seite einfügen" xml:space="preserve"><value>Inserción de una página</value></data>
   <data name="Eine leere Seite wurde als Seite {0} eingefügt." xml:space="preserve"><value>Se insertó una página vacía como página {0}.</value></data>
   <data name="Eine Seite mit dem Bild wurde als Seite {0} eingefügt." xml:space="preserve"><value>Se insertó una página con la imagen como página {0}.</value></data>
-  <data name="Lesezeichen entfernen …" xml:space="preserve"><value>Eliminar marcadores…</value></data>
+  <data name="Lesezeichen entfernen…" xml:space="preserve"><value>Eliminar marcadores…</value></data>
   <data name="Alle {0} Lesezeichen entfernen?" xml:space="preserve"><value>¿Eliminar los {0} marcadores?</value></data>
   <data name="Lesezeichen.Info" xml:space="preserve"><value>Los marcadores forman un índice interactivo que permite saltar
 rápidamente a capítulos, títulos o secciones concretos.
@@ -620,7 +607,7 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="An dieser Stelle stehen schon {0} Stempel." xml:space="preserve"><value>Ya hay {0} sellos en este lugar.</value></data>
   <data name="Mehr als drei Stempel je Position gibt es nicht." xml:space="preserve"><value>No caben más de tres sellos por posición.</value></data>
   <data name="Die Bilddatei konnte nicht gelesen werden." xml:space="preserve"><value>No se pudo leer el archivo de imagen.</value></data>
-  <data name="Lesezeichen bearbeiten …" xml:space="preserve"><value>Editar marcadores…</value></data>
+  <data name="Lesezeichen bearbeiten…" xml:space="preserve"><value>Editar marcadores…</value></data>
   <data name="Lesezeichen bearbeiten (Entf löscht, Einfg legt einen Eintrag an, F2 springt zum Titel)" xml:space="preserve"><value>Editar marcadores (Supr elimina, Insert añade una entrada, F2 salta al título)</value></data>
   <data name="Lesezeichen lesen" xml:space="preserve"><value>Lectura de marcadores</value></data>
   <data name="Lesezeichen speichern" xml:space="preserve"><value>Guardado de marcadores</value></data>
@@ -660,43 +647,132 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="„{0}“ ist schreibgeschützt." xml:space="preserve"><value>«{0}» es de solo lectura.</value></data>
   <data name="Soll der Schreibschutz aufgehoben werden, damit „{0}“ gespeichert werden kann?" xml:space="preserve"><value>¿Quitar la protección contra escritura para poder guardar «{0}»?</value></data>
   <data name="„{0}“ ist mit einem Kennwort geschützt." xml:space="preserve"><value>«{0}» está protegido con contraseña.</value></data>
-  <data name="Einschränkungen entfernen …" xml:space="preserve"><value>Quitar las restricciones…</value></data>
+  <data name="Einschränkungen entfernen…" xml:space="preserve"><value>Quitar las restricciones…</value></data>
   <data name="Einschränkungen von „{0}“ entfernen?" xml:space="preserve"><value>¿Quitar las restricciones de «{0}»?</value></data>
-  <data name="Die Datei ist nur mit einem Besitzerkennwort geschützt, das Berechtigungen wie Drucken oder Ändern einschränkt. Ohne das Kennwort wird die Datei neu aufgebaut – Lesezeichen und Formularfelder gehen dabei verloren." xml:space="preserve"><value>El archivo solo está protegido con una contraseña de propietario que limita permisos como imprimir o editar. Sin la contraseña, el archivo se reconstruye – los marcadores y los campos de formulario se pierden.</value></data>
   <data name="Entfernen der Einschränkungen" xml:space="preserve"><value>Quitar las restricciones</value></data>
   <data name="Die Einschränkungen wurden entfernt." xml:space="preserve"><value>Se quitaron las restricciones.</value></data>
-  <data name="Zum Bearbeiten hebst du den Schutz zuerst über Bearbeiten → „Einschränkungen entfernen …“ auf." xml:space="preserve"><value>Para editarlo, quita primero la protección en Editar → «Quitar las restricciones…».</value></data>
-  <data name="Adobe.Consent" xml:space="preserve"><value>La API Adobe PDF Embed es un servicio web de Adobe para mostrar documentos PDF. Incluye herramientas de texto interactivas como resaltados y comentarios, que por motivos técnicos no son posibles en la vista normal de PDFlight. Si necesitas estas funciones, puedes activar aquí esta vista opcional. Al activarla aparece en la barra principal un botón adicional para encenderla y apagarla. La tecla F8 permite cambiar rápidamente entre las dos vistas.
-
-Adobe recibe entonces tu dirección IP y datos técnicos del navegador, guarda cookies y comprueba la licencia del programa. El archivo PDF solo se muestra en tu equipo y no se sube. PDFlight no envía el registro de uso de Adobe.</value></data>
-  <data name="Datenschutzerklärung von Adobe" xml:space="preserve"><value>Política de privacidad de Adobe</value></data>
-  <data name="Ich bin damit &amp;einverstanden und möchte PDF Embed API nutzen" xml:space="preserve"><value>Estoy de &amp;acuerdo y quiero usar la API PDF Embed</value></data>
-  <data name="Schaltfläche „Adobe“ mit Symbol und Text an&amp;zeigen (andernfalls nur Symbol)" xml:space="preserve"><value>Mostrar el &amp;botón «Adobe» con icono y texto (si no, solo icono)</value></data>
-  <data name="Adobe-Client-ID gefunden (adobe-clientid.txt)." xml:space="preserve"><value>ID de cliente de Adobe encontrado (adobe-clientid.txt).</value></data>
-  <data name="Adobe-Client-ID fehlt: Datei adobe-clientid.txt neben PDFlight.exe anlegen – bis dahin bleibt die Ansicht gesperrt." xml:space="preserve"><value>Falta el ID de cliente de Adobe: crea el archivo adobe-clientid.txt junto a PDFlight.exe; hasta entonces la vista permanece bloqueada.</value></data>
-  <data name="Der Browser konnte nicht geöffnet werden." xml:space="preserve"><value>No se pudo abrir el navegador.</value></data>
-  <data name="Tooltip.Adobe" xml:space="preserve"><value>Adobe PDF Embed API activada/desactivada (F8)
-➤ Resaltar y comentar
-🛈: Guardar mediante la barra de Adobe</value></data>
-  <data name="Ungespeicherte Änderungen in der Adobe-Ansicht" xml:space="preserve"><value>Cambios sin guardar en la vista de Adobe</value></data>
-  <data name="Speichere Hervorhebungen und Kommentare zuerst mit „Speichern“ in der Adobe-Leiste. Beim Verlassen der Ansicht gehen sie sonst verloren." xml:space="preserve"><value>Guarda primero los resaltados y comentarios con «Guardar» en la barra de Adobe. De lo contrario se perderán al salir de la vista.</value></data>
-  <data name="Zurück zur Adobe-Ansicht" xml:space="preserve"><value>Volver a la vista de Adobe</value></data>
-  <data name="Verwerfen" xml:space="preserve"><value>Descartar</value></data>
-  <data name="Speichern der Adobe-Anmerkungen" xml:space="preserve"><value>Guardar las anotaciones de Adobe</value></data>
-  <data name="Adobe-Ansicht wird geladen …" xml:space="preserve"><value>Cargando la vista de Adobe …</value></data>
-  <data name="Das Adobe-SDK ist nicht erreichbar (Internetverbindung?)" xml:space="preserve"><value>El SDK de Adobe no está accesible (¿conexión a Internet?)</value></data>
-  <data name="Die Anmerkungen aus der Adobe-Ansicht wurden gespeichert." xml:space="preserve"><value>Las anotaciones de la vista de Adobe se han guardado.</value></data>
-  <data name="Fehler in der Adobe-Ansicht: {0}" xml:space="preserve"><value>Error en la vista de Adobe: {0}</value></data>
-  <data name="Adobe-Client-ID fehlt" xml:space="preserve"><value>Falta el ID de cliente de Adobe</value></data>
-  <data name="Lege neben PDFlight.exe die Datei „adobe-clientid.txt“ mit der Client-ID der Adobe PDF Embed API an (Vorlage: adobe-clientid.example.txt)." xml:space="preserve"><value>Crea junto a PDFlight.exe el archivo «adobe-clientid.txt» con el ID de cliente de la API Adobe PDF Embed (plantilla: adobe-clientid.example.txt).</value></data>
-  <data name="Adobe-Ansicht ein/aus (Option: Hervorheben und Kommentieren)" xml:space="preserve"><value>Vista de Adobe activada/desactivada (opción: resaltar y comentar)</value></data>
-  <data name="Formular speichern" xml:space="preserve"><value>Guardar el formulario</value></data>
-  <data name="Die Formulareingaben wurden gespeichert." xml:space="preserve"><value>Las entradas del formulario se han guardado.</value></data>
-  <data name="Die Formulareingaben konnten nicht gespeichert werden." xml:space="preserve"><value>No se pudieron guardar las entradas del formulario.</value></data>
-  <data name="Der Viewer hat die Datei nicht geliefert. Versuche es über die Speichern-Schaltfläche in der Viewer-Leiste." xml:space="preserve"><value>El visor no entregó el archivo. Prueba con el botón Guardar de la barra del visor.</value></data>
+  <data name="Zum Bearbeiten hebst du den Schutz zuerst über Bearbeiten → „Einschränkungen entfernen…“ auf." xml:space="preserve"><value>Para editarlo, quita primero la protección en Editar → «Quitar las restricciones…».</value></data>
   <data name="Nicht speichern" xml:space="preserve"><value>No guardar</value></data>
-  <data name="Die ausgefüllten Formularfelder sind noch nicht in der Datei gespeichert." xml:space="preserve"><value>Los campos de formulario rellenados aún no están guardados en el archivo.</value></data>
   <data name="Die Datei ist als PDF/A gekennzeichnet – nach dem Speichern entspricht sie dem Standard nicht mehr." xml:space="preserve"><value>El archivo está marcado como PDF/A; tras guardarlo ya no cumplirá la norma.</value></data>
-  <data name="Formulareingaben in „{0}“ speichern?" xml:space="preserve"><value>¿Guardar las entradas del formulario en «{0}»?</value></data>
-  <data name="Der Speichern-Dialog des Viewers ist offen. Speichere die Datei dort unter ihrem bisherigen Namen – PDFlight übernimmt sie danach." xml:space="preserve"><value>El diálogo de guardado del visor está abierto. Guarda el archivo allí con su nombre actual; PDFlight lo recogerá después.</value></data>
+  <data name="(keine Lesezeichen)" xml:space="preserve"><value>(sin marcadores)</value></data>
+  <data name="{0} Seiten an „{1}“ gesendet." xml:space="preserve"><value>{0} páginas enviadas a «{1}».</value></data>
+  <data name="{0} Treffer – durchsucht {1} von {2} Seiten" xml:space="preserve"><value>{0} coincidencias – buscadas {1} de {2} páginas</value></data>
+  <data name="Alles markieren" xml:space="preserve"><value>Seleccionar todo</value></data>
+  <data name="Der markierte Text wurde hervorgehoben." xml:space="preserve"><value>El texto seleccionado se ha resaltado.</value></data>
+  <data name="Die Datei konnte nicht angezeigt werden." xml:space="preserve"><value>No se pudo mostrar el archivo.</value></data>
+  <data name="Die Datei neu laden?" xml:space="preserve"><value>¿Volver a cargar el archivo?</value></data>
+  <data name="Die Hervorhebung wurde entfernt." xml:space="preserve"><value>Se ha quitado el resaltado.</value></data>
+  <data name="Die PDF-Darstellung wurde unerwartet beendet." xml:space="preserve"><value>La visualización del PDF se detuvo inesperadamente.</value></data>
+  <data name="Dieser Link wird nicht geöffnet: {0}" xml:space="preserve"><value>Este enlace no se abre: {0}</value></data>
+  <data name="Drucke Seite {0} von {1}…" xml:space="preserve"><value>Imprimiendo página {0} de {1}…</value></data>
+  <data name="F3 / Umschalt+F3" xml:space="preserve"><value>F3 / Mayús+F3</value></data>
+  <data name="Gehe zu Seite {0}" xml:space="preserve"><value>Ir a la página {0}</value></data>
+  <data name="Groß-/Kleinschreibung beachten" xml:space="preserve"><value>Coincidir mayúsculas y minúsculas</value></data>
+  <data name="Hervorheben" xml:space="preserve"><value>Resaltar</value></data>
+  <data name="Hervorhebung entfernen" xml:space="preserve"><value>Quitar resaltado</value></data>
+  <data name="Im Dokument suchen (Strg+F)" xml:space="preserve"><value>Buscar en el documento (Ctrl+F)</value></data>
+  <data name="Keine Treffer" xml:space="preserve"><value>Sin coincidencias</value></data>
+  <data name="Miniaturen" xml:space="preserve"><value>Miniaturas</value></data>
+  <data name="nächster / vorheriger Suchtreffer" xml:space="preserve"><value>coincidencia siguiente / anterior</value></data>
+  <data name="Nächster Treffer (F3, Enter)" xml:space="preserve"><value>Coincidencia siguiente (F3, Intro)</value></data>
+  <data name="Ohne Kennwort lässt sich die Datei nicht anzeigen." xml:space="preserve"><value>El archivo no se puede mostrar sin contraseña.</value></data>
+  <data name="Seite (Strg+G: Zahl tippen, Enter)" xml:space="preserve"><value>Página (Ctrl+G: escribe el número, Intro)</value></data>
+  <data name="Seitenleiste (Miniaturen, Lesezeichen) ein/aus" xml:space="preserve"><value>Barra lateral (miniaturas, marcadores) sí/no</value></data>
+  <data name="Seitenleiste mit Miniaturen und Lesezeichen (Strg+Umschalt+I)" xml:space="preserve"><value>Barra lateral con miniaturas y marcadores (Ctrl+Mayús+I)</value></data>
+  <data name="Strg+A" xml:space="preserve"><value>Ctrl+A</value></data>
+  <data name="Strg+C" xml:space="preserve"><value>Ctrl+C</value></data>
+  <data name="Suche schließen (Esc)" xml:space="preserve"><value>Cerrar búsqueda (Esc)</value></data>
+  <data name="Suchen" xml:space="preserve"><value>Buscar</value></data>
+  <data name="Treffer {0} von {1}" xml:space="preserve"><value>Coincidencia {0} de {1}</value></data>
+  <data name="Vergrößern (Strg+Plus)" xml:space="preserve"><value>Ampliar (Ctrl+Más)</value></data>
+  <data name="Verkleinern (Strg+Minus)" xml:space="preserve"><value>Reducir (Ctrl+Menos)</value></data>
+  <data name="von {0}" xml:space="preserve"><value>de {0}</value></data>
+  <data name="Vorheriger Treffer (Umschalt+F3)" xml:space="preserve"><value>Coincidencia anterior (Mayús+F3)</value></data>
+  <data name="Zoomstufe (Strg+Mausrad)" xml:space="preserve"><value>Nivel de zoom (Ctrl+rueda del ratón)</value></data>
+  <data name="Zoomstufe der Anzeige" xml:space="preserve"><value>Nivel de zoom de la vista</value></data>
+  <data name="Geschützte Datei öffnen" xml:space="preserve"><value>Abrir archivo protegido</value></data>
+  <data name="Strg+Leertaste" xml:space="preserve"><value>Ctrl+Espacio</value></data>
+  <data name="ein-/zweiseitiges Layout umschalten" xml:space="preserve"><value>alternar entre una y dos páginas</value></data>
+  <data name="Zweiseitige Ansicht ein/aus (Strg+Leertaste)" xml:space="preserve"><value>Vista de dos páginas sí/no (Ctrl+Espacio)</value></data>
+  <data name="An Seite anpassen" xml:space="preserve"><value>Ajustar a la página</value></data>
+  <data name="An Höhe anpassen" xml:space="preserve"><value>Ajustar al alto</value></data>
+  <data name="An Breite anpassen" xml:space="preserve"><value>Ajustar al ancho</value></data>
+  <data name="Originalgröße" xml:space="preserve"><value>Tamaño real</value></data>
+  <data name="An Seite anpassen (Strg+Umschalt+B)" xml:space="preserve"><value>Ajustar a la página (Ctrl+Mayús+B)</value></data>
+  <data name="An Breite anpassen (Strg+Umschalt+B)" xml:space="preserve"><value>Ajustar al ancho (Ctrl+Mayús+B)</value></data>
+  <data name="PDF im Vollbildmodus anzeigen (F11)" xml:space="preserve"><value>Mostrar el PDF a pantalla completa (F11)</value></data>
+  <data name="Vollbildmodus beenden (F11)" xml:space="preserve"><value>Salir de pantalla completa (F11)</value></data>
+  <data name="an Breite / an Seite anpassen (wechselt)" xml:space="preserve"><value>ajustar al ancho / a la página (alterna)</value></data>
+  <data name="Aktuelle Seite" xml:space="preserve"><value>Página actual</value></data>
+  <data name="Aktuelle Seite ({0})" xml:space="preserve"><value>Página actual ({0})</value></data>
+  <data name="Alle" xml:space="preserve"><value>Todas</value></data>
+  <data name="An druckbaren Bereich anpassen" xml:space="preserve"><value>Ajustar al área imprimible</value></data>
+  <data name="Beidseitig, kurze Kante" xml:space="preserve"><value>A doble cara, borde corto</value></data>
+  <data name="Beidseitig, lange Kante" xml:space="preserve"><value>A doble cara, borde largo</value></data>
+  <data name="Beidseitiger Druck" xml:space="preserve"><value>Impresión a doble cara</value></data>
+  <data name="Benutzerdefiniert (%)" xml:space="preserve"><value>Personalizado (%)</value></data>
+  <data name="Benutzerdefiniert:" xml:space="preserve"><value>Personalizado:</value></data>
+  <data name="Drucken mithilfe des Systemdialogfelds… (Strg+Umschalt+P)" xml:space="preserve"><value>Imprimir con el cuadro de diálogo del sistema… (Ctrl+Mayús+P)</value></data>
+  <data name="Drucker" xml:space="preserve"><value>Impresora</value></data>
+  <data name="Einseitig" xml:space="preserve"><value>Una cara</value></data>
+  <data name="Farbe" xml:space="preserve"><value>Color</value></data>
+  <data name="Insgesamt: {0} Papierbögen" xml:space="preserve"><value>Total: {0} hojas de papel</value></data>
+  <data name="Insgesamt: 1 Papierbogen" xml:space="preserve"><value>Total: 1 hoja de papel</value></data>
+  <data name="Kopien" xml:space="preserve"><value>Copias</value></data>
+  <data name="Layout" xml:space="preserve"><value>Diseño</value></data>
+  <data name="Nur gerade Seiten" xml:space="preserve"><value>Solo páginas pares</value></data>
+  <data name="Nur ungerade Seiten" xml:space="preserve"><value>Solo páginas impares</value></data>
+  <data name="Papierformat" xml:space="preserve"><value>Tamaño del papel</value></data>
+  <data name="Schwarzweiß" xml:space="preserve"><value>Blanco y negro</value></data>
+  <data name="Skalierung" xml:space="preserve"><value>Escala</value></data>
+  <data name="Tatsächliche Größe" xml:space="preserve"><value>Tamaño real</value></data>
+  <data name="Weitere Einstellungen ▾" xml:space="preserve"><value>Más opciones ▾</value></data>
+  <data name="Wie die Seite (Hoch-/Querformat)" xml:space="preserve"><value>Como la página (vertical/horizontal)</value></data>
+  <data name="z. B. 1-5, 8, 11-13" xml:space="preserve"><value>p. ej. 1-5, 8, 11-13</value></data>
+  <data name="Strg+Umschalt+P" xml:space="preserve"><value>Ctrl+Mayús+P</value></data>
+  <data name="mit dem Druckdialog von Windows drucken" xml:space="preserve"><value>imprimir con el cuadro de diálogo de impresión de Windows</value></data>
+  <data name="Nur ganze Wörter suchen" xml:space="preserve"><value>Solo palabras completas</value></data>
+  <data name="Dokument schließen (Strg+W)" xml:space="preserve"><value>Cerrar documento (Ctrl+W)</value></data>
+  <data name="Das Dokument wurde geschlossen." xml:space="preserve"><value>Se ha cerrado el documento.</value></data>
+  <data name="Strg+W" xml:space="preserve"><value>Ctrl+W</value></data>
+  <data name="Dokument schließen" xml:space="preserve"><value>cerrar documento</value></data>
+  <data name="Formulareingaben in der Datei speichern (Strg+S)" xml:space="preserve"><value>Guardar las entradas del formulario en el archivo (Ctrl+S)</value></data>
+  <data name="Die Formulareingaben wurden gespeichert." xml:space="preserve"><value>Se han guardado las entradas del formulario.</value></data>
+  <data name="Strg+S" xml:space="preserve"><value>Ctrl+S</value></data>
+  <data name="Formulareingaben speichern" xml:space="preserve"><value>guardar las entradas del formulario</value></data>
+  <data name="Zum Beenden des Vollbildmodus Esc drücken" xml:space="preserve"><value>Pulsa Esc para salir de la pantalla completa</value></data>
+  <data name="Klicke auf die Stelle für den Freitext – Esc bricht ab." xml:space="preserve"><value>Haz clic donde debe ir el texto libre – Esc cancela.</value></data>
+  <data name="Freitext hier einfügen…" xml:space="preserve"><value>Insertar texto libre aquí…</value></data>
+  <data name="Maße ab der linken oberen Ecke der Seite." xml:space="preserve"><value>Medidas desde la esquina superior izquierda de la página.</value></data>
+  <data name="Textanmerkung verschieben" xml:space="preserve"><value>Mover anotación de texto</value></data>
+  <data name="Die Textanmerkung wurde auf Seite {0} verschoben." xml:space="preserve"><value>La anotación de texto de la página {0} se movió.</value></data>
+  <data name="Stempel verschieben" xml:space="preserve"><value>Mover sello</value></data>
+  <data name="Der Stempel wurde auf Seite {0} verschoben." xml:space="preserve"><value>El sello de la página {0} se movió.</value></data>
+  <data name="Dokumentstruktur" xml:space="preserve"><value>Esquema del documento</value></data>
+  <data name="Inhaltsverzeichnis" xml:space="preserve"><value>Índice</value></data>
+  <data name="Seitenleiste schließen" xml:space="preserve"><value>Cerrar panel lateral</value></data>
+  <data name="Breit" xml:space="preserve"><value>Ancho</value></data>
+  <data name="Farbe und Stärke" xml:space="preserve"><value>Color y grosor</value></data>
+  <data name="Farben" xml:space="preserve"><value>Colores</value></data>
+  <data name="Freitext hinzufügen (Strg+T)" xml:space="preserve"><value>Añadir texto libre (Ctrl+T)</value></data>
+  <data name="Hervorheben: Markiere Text – er wird sofort hervorgehoben. Esc beendet." xml:space="preserve"><value>Resaltar: selecciona texto – se resalta al instante. Esc termina.</value></data>
+  <data name="Hervorheben: markierten Text sofort, sonst jede folgende Markierung (Esc beendet)" xml:space="preserve"><value>Resaltar: el texto seleccionado al instante; si no, cada selección siguiente (Esc termina)</value></data>
+  <data name="Schmal" xml:space="preserve"><value>Fino</value></data>
+  <data name="Stärke" xml:space="preserve"><value>Grosor</value></data>
+  <data name="Stempel einfügen (Strg+H)" xml:space="preserve"><value>Insertar sello (Ctrl+H)</value></data>
+  <data name="Zeichnen" xml:space="preserve"><value>Dibujar</value></data>
+  <data name="Zeichnen (Esc beendet)" xml:space="preserve"><value>Dibujar (Esc termina)</value></data>
+  <data name="Zeichnung" xml:space="preserve"><value>Dibujo</value></data>
+  <data name="Änderungen in „{0}“ speichern?" xml:space="preserve"><value>¿Guardar los cambios en «{0}»?</value></data>
+  <data name="Formulareingaben oder Anmerkungen sind noch nicht in der Datei gespeichert." xml:space="preserve"><value>Hay entradas de formulario o anotaciones que aún no se han guardado en el archivo.</value></data>
+  <data name="Freitext" xml:space="preserve"><value>Texto libre</value></data>
+  <data name="Alle Seiten drehen" xml:space="preserve"><value>Girar todas las páginas</value></data>
+  <data name="Alle Seiten nach links drehen (Strg+Umschalt+L)" xml:space="preserve"><value>Girar todas las páginas a la izquierda (Ctrl+Mayús+L)</value></data>
+  <data name="Alle Seiten nach rechts drehen (Strg+Umschalt+R)" xml:space="preserve"><value>Girar todas las páginas a la derecha (Ctrl+Mayús+R)</value></data>
+  <data name="Zeichnung entfernen" xml:space="preserve"><value>Quitar dibujo</value></data>
+  <data name="Die Zeichnung wurde entfernt." xml:space="preserve"><value>Se quitó el dibujo.</value></data>
+  <data name="Zeichnen: Ziehe mit gedrückter Maustaste über die Seite – mit Strg eine gerade Linie. Esc beendet." xml:space="preserve"><value>Dibujar: arrastra el ratón sobre la página con el botón pulsado – con Ctrl, una línea recta. Esc termina.</value></data>
+  <data name="Die Datei ist nur mit einem Besitzerkennwort geschützt, das Berechtigungen wie Drucken oder Ändern einschränkt. Die Einschränkungen werden entfernt, der Inhalt bleibt vollständig erhalten." xml:space="preserve"><value>El archivo solo está protegido con una contraseña de propietario que restringe permisos como imprimir o modificar. Se quitan las restricciones; el contenido se conserva por completo.</value></data>
+  <data name="Kennwortschutz von „{0}“ entfernen?" xml:space="preserve"><value>¿Quitar la protección por contraseña de «{0}»?</value></data>
+  <data name="Die Datei wird unverschlüsselt gespeichert und lässt sich danach ohne Kennwort öffnen. Der Inhalt bleibt vollständig erhalten." xml:space="preserve"><value>El archivo se guarda sin cifrar y después se puede abrir sin contraseña. El contenido se conserva por completo.</value></data>
 </root>

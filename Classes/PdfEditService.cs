@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -39,10 +39,6 @@ internal sealed record AnnotationStyle(Color? BorderColor, Color? Background, Co
         hex.Length == 6 && int.TryParse(hex, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var rgb) ? Color.FromArgb(rgb >> 16 & 0xFF, rgb >> 8 & 0xFF, rgb & 0xFF) : null;
 }
 
-/// <param name="Encrypted">Die Datei ist verschlüsselt, lässt sich aber ohne Kennwort lesen (nur Besitzerkennwort): PDFsharp öffnet sie zum
-/// Bearbeiten nicht – jede Änderung braucht vorher „Kennwort entfernen“ (Fehlerbericht 20.09.2026).</param>
-internal record PdfStatus(int PageCount, string? Version, string? PdfALevel, double PageWidthPt = 0, double PageHeightPt = 0, int AnnotationCount = 0, int OutlineCount = 0, bool Encrypted = false, int FormFieldCount = -1, int OpenPage = 0);
-
 /// <summary>Wohin die neue Seite kommt (<see cref="PdfEditService.InsertBlankPage"/>): relativ zur angezeigten Seite oder ans Ende.</summary>
 internal enum InsertPosition { After, Before, First, Last }
 
@@ -71,116 +67,6 @@ internal static partial class PdfEditService
         }
         catch (Exception ex) when (IsPdfReadError(ex)) { return -1; }
     }
-
-    /// <summary>Seitenzahl, PDF-Version und PDF/A-Stufe der Datei für die Statusleiste;
-    /// PageCount -1 und alles Weitere null, wenn die Datei nicht lesbar ist (z.B. verschlüsselt).</summary>
-    public static PdfStatus TryReadStatus(string path)
-    {
-        try
-        {
-            using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
-            return ReadStatus(document);
-        }
-        catch (Exception ex) when (IsPdfReadError(ex)) { return new PdfStatus(-1, null, null); }
-    }
-
-    private static PdfStatus ReadStatus(PdfDocument document)
-    {
-        var v = document.Version;
-        var first = document.PageCount > 0 ? document.Pages[0] : null;
-        return new PdfStatus(document.PageCount, $"{v / 10}.{v % 10}", GetPdfALevel(document), first?.Width.Point ?? 0, first?.Height.Point ?? 0, Guarded(() => CountAnnotations(document)), Guarded(() => CountOutlines(document)),
-            Guarded(() => document.SecurityHandler.Elements.ContainsKey("/Filter") ? 1 : 0) == 1, // SecuritySettings.IsEncrypted liefert im Import-Lauf false (geprüft 20.09.2026) – der geladene Handler trägt dagegen das /Encrypt-Wörterbuch
-            Guarded(() => CountFormFields(document), fallback: -1), // -1 = unbekannt: die Save-Schaltfläche des Viewers bleibt dann sichtbar
-            Guarded(() => OpenActionPage(document)));
-    }
-
-    /// <summary>Zielseite (1-basiert) einer Öffnungsaktion mit Höhenangabe – /OpenAction [Seite /XYZ links oben zoom] mit „oben“ ≠ null,
-    /// direkt oder als GoTo-Aktion; sonst 0. Der Chromium-Viewer wendet die Höhe falsch an und landet eine Seite zu weit unten
-    /// (Fehlerbericht 26.09.2026: Jahressteuerbescheinigungen der Deutschen Bank mit [Seite 1 /XYZ 0 841,9 0] öffneten auf Seite 2;
-    /// ohne Höhe oder mit „#page=1“ stimmt es). LoadPdf öffnet solche Dateien deshalb mit dem Fragment „#page=N“.
-    /// Roh über den Katalog gelesen: PDFsharps GetValue("/OpenAction") wirft NotImplementedException (Array oder Wörterbuch).</summary>
-    private static int OpenActionPage(PdfDocument document)
-    {
-        var action = Resolve(document.Internals.Catalog.Elements["/OpenAction"]);
-        if (action is PdfDictionary dictionary && dictionary.Elements.GetName("/S") == "/GoTo") { action = Resolve(dictionary.Elements["/D"]); }
-        if (action is not PdfArray { Elements.Count: >= 4 } destination || destination.Elements[0] is not PdfReference target
-            || (destination.Elements[1] as PdfName)?.Value != "/XYZ" || Resolve(destination.Elements[3]) is null or PdfNull) { return 0; }
-        for (var i = 0; i < document.PageCount; i++)
-        {
-            if (document.Pages[i].Reference?.ObjectID == target.ObjectID) { return i + 1; }
-        }
-        return 0;
-    }
-
-    private static PdfItem? Resolve(PdfItem? item) => item is PdfReference reference ? reference.Value : item;
-
-    /// <summary>PDFsharp beim Programmstart im Hintergrund vorbereiten: eine kleine PDF im Speicher schreiben und wie <see cref="TryReadStatus"/>
-    /// lesen. Sonst kosteten Laden und JIT-Übersetzung beim ersten Dokument ≈ 150 ms – und seit TryReadStatus vor dem Laden läuft (die
-    /// Save-Schaltfläche des Viewers hängt an den Formularfeldern), verzögerte das die erste Anzeige (gemessen 26.09.2026).</summary>
-    public static void WarmUp()
-    {
-        try
-        {
-            using var stream = new MemoryStream();
-            using (var source = new PdfDocument())
-            {
-                source.AddPage();
-                source.Save(stream, false);
-            }
-            stream.Position = 0;
-            using var document = PdfReader.Open(stream, PdfDocumentOpenMode.Import);
-            ReadStatus(document);
-        }
-        catch (Exception ex) when (IsPdfReadError(ex)) { } // nur eine Vorbereitung – ein Fehler zeigt sich beim echten Dokument
-    }
-
-    /// <summary>Ein Zähler für die Statuszeile; bei einem Lesefehler in dem Teil 0 statt Abbruch – die Seitenzahl und damit die
-    /// Bearbeitung bleiben verfügbar (ein Canva-Export mit ungültigem /Annots-Eintrag ließ sonst die ganze Datei als unlesbar gelten, 19.09.2026).</summary>
-    private static int Guarded(Func<int> count, int fallback = 0)
-    {
-        try { return count(); }
-        catch (Exception ex) when (IsPdfReadError(ex)) { return fallback; }
-    }
-
-    /// <summary>Formularfelder der Datei: Einträge in /AcroForm /Fields; ist das Array leer oder fehlt es, die Widget-Anmerkungen der
-    /// Seiten (manche Erzeuger hängen Felder nur dort an). Entscheidet, ob der Viewer seine Save-Schaltfläche zeigt.</summary>
-    private static int CountFormFields(PdfDocument document)
-    {
-        var fields = document.Internals.Catalog.Elements.GetDictionary("/AcroForm")?.Elements.GetArray("/Fields");
-        if (fields is { Elements.Count: > 0 }) { return fields.Elements.Count; }
-        var widgets = 0;
-        for (var p = 0; p < document.PageCount; p++)
-        {
-            foreach (var (_, annotation) in AnnotationDictionaries(document.Pages[p].Annotations))
-            {
-                if (annotation.Elements.GetName("/Subtype") == "/Widget") { widgets++; }
-            }
-        }
-        return widgets;
-    }
-
-    /// <summary>Liest die deklarierte PDF/A-Stufe (z.B. "2b") aus den XMP-Metadaten des Dokuments;
-    /// null, wenn keine deklariert ist. Erkennt Attribut- und Element-Schreibweise der pdfaid-Einträge.</summary>
-    private static string? GetPdfALevel(PdfDocument document)
-    {
-        try
-        {
-            if (document.Internals.Catalog.Elements.GetDictionary("/Metadata")?.Stream is not { } stream) { return null; }
-            var xmp = Encoding.UTF8.GetString(stream.UnfilteredValue);
-            var part = PdfAPartRegex().Match(xmp).Groups[1].Value;
-            if (part.Length == 0) { return null; }
-            var conformance = PdfAConformanceRegex().Match(xmp).Groups[1].Value;
-            return part + conformance.ToLowerInvariant();
-        }
-        catch (Exception ex) when (IsPdfReadError(ex)) { return null; }
-    }
-
-    // pdfaid:part="2" bzw. <pdfaid:part>2</pdfaid:part> — beide Schreibweisen kommen vor
-    [GeneratedRegex(@"pdfaid:part(?:\s*=\s*[""']|\s*>\s*)(\d+)")]
-    private static partial Regex PdfAPartRegex();
-
-    [GeneratedRegex(@"pdfaid:conformance(?:\s*=\s*[""']|\s*>\s*)([A-Za-z])")]
-    private static partial Regex PdfAConformanceRegex();
 
     /// <summary>Löscht die angegebenen Seiten (1-basiert); mindestens eine Seite muss übrig bleiben.</summary>
     public static void DeletePages(string path, IReadOnlyList<int> pages)
@@ -274,7 +160,7 @@ internal static partial class PdfEditService
     }
 
     /// <summary>Fügt eine FreeText-Anmerkung ein: ein gelber Textkasten an der Position (Millimeter von links/oben,
-    /// unrotierte Seite) mit eigenem Erscheinungsbild – der Chromium-Viewer zeichnet Anmerkungen ohne
+    /// unrotierte Seite) mit eigenem Erscheinungsbild – manche Betrachter (etwa Chromium) zeichnen Anmerkungen ohne
     /// Darstellungsstrom nicht (PDFsharps PdfTextAnnotation bliebe dort ein stummes Symbol). Schrift Helvetica
     /// (Standardschrift, nichts einzubetten), Text in WinAnsi; die Anmerkung bleibt als solche entfernbar.</summary>
     public static void AddFreeTextAnnotation(string path, int page, string text, double leftMm, double topMm, double fontSize, AnnotationStyle style)
@@ -292,6 +178,23 @@ internal static partial class PdfEditService
         var pdfPage = document.Pages[page - 1];
         pdfPage.Annotations.Elements.RemoveAt(ResolveIndex(pdfPage.Annotations, objectNumber, index));
         AppendFreeText(document, pdfPage, text, leftMm, topMm, fontSize, style);
+        document.Save(path);
+    }
+
+    /// <summary>Verschiebt eine Freitext-Anmerkung oder einen Stempel (Index im Annots-Array der Seite) um dx/dy Punkt: nur ihr /Rect –
+    /// der Darstellungsstrom wird auf /Rect abgebildet und wandert damit mit. Der Kasten bleibt ganz auf der Seite (MediaBox).</summary>
+    public static void MoveAnnotation(string path, int page, int index, double dx, double dy)
+    {
+        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        var pdfPage = document.Pages[page - 1];
+        var annotation = AnnotationAt(pdfPage.Annotations, index);
+        if (annotation.Elements.GetName("/Subtype") is not ("/FreeText" or "/Stamp")) { throw new InvalidOperationException("An dieser Stelle steht keine Textanmerkung und kein Stempel mehr."); }
+        var rect = annotation.Elements.GetRectangle("/Rect");
+        var box = pdfPage.MediaBox;
+        var (width, height) = (rect.Width, rect.Height);
+        var x = Math.Clamp(Math.Min(rect.X1, rect.X2) + dx, box.X1, Math.Max(box.X1, box.X2 - width));
+        var y = Math.Clamp(Math.Min(rect.Y1, rect.Y2) + dy, box.Y1, Math.Max(box.Y1, box.Y2 - height));
+        annotation.Elements.SetRectangle("/Rect", new PdfRectangle(new XRect(x, y, width, height)));
         document.Save(path);
     }
 
@@ -360,15 +263,6 @@ internal static partial class PdfEditService
         return (item is PdfReference reference ? reference.Value as PdfDictionary : item as PdfDictionary)
             ?? throw new InvalidOperationException("Die Anmerkung wurde in der Datei nicht mehr gefunden.");
     }
-
-    /// <summary>Zahl der Lesezeichen (Gliederung) samt Unterebenen – schaltet „Lesezeichen entfernen“ frei.</summary>
-    private static int CountOutlines(PdfDocument document)
-    {
-        try { return CountOutlines(document.Outlines); }
-        catch (Exception ex) when (IsPdfReadError(ex)) { return 0; } // kaputte Gliederung: dann eben keine
-    }
-
-    private static int CountOutlines(PdfOutlineCollection outlines) => outlines.Count + outlines.Sum(o => CountOutlines(o.Outlines));
 
     /// <summary>Entfernt die komplette Gliederung (Lesezeichen) der Datei und schaltet den Seitenmodus auf „ohne Leiste“,
     /// sonst zeigt der Viewer weiter eine leere Lesezeichenleiste. Die Seiten bleiben unberührt.</summary>
@@ -498,19 +392,6 @@ internal static partial class PdfEditService
             if (previous != null) { parent.Elements.SetReference("/Last", previous); }
             parent.Elements.SetInteger("/Count", open ? visible : -visible);
         }
-    }
-
-    private static int CountAnnotations(PdfDocument document)
-    {
-        var count = 0;
-        for (var p = 0; p < document.PageCount; p++)
-        {
-            foreach (var (_, annotation) in AnnotationDictionaries(document.Pages[p].Annotations))
-            {
-                if (IsManageable(annotation.Elements.GetName("/Subtype").TrimStart('/'))) { count++; }
-            }
-        }
-        return count;
     }
 
     /// <summary>Die Position der Anmerkung mit dieser Objektnummer im Annots-Array; ohne Treffer (direkt eingebettetes
@@ -907,30 +788,6 @@ internal static partial class PdfEditService
         return (textWidth + 2 * Padding, lines.Length * fontSize * LeadingFactor + 2 * Padding);
     }
 
-    /// <summary>Speichert eine Seite als Einzelseiten-PDF für die Vorschau im Anmerkungsdialog – mit einem magentafarbenen
-    /// Rahmen am Seitenrand, an dem der Dialog die Seitenfläche im abfotografierten Viewerbild sicher wiederfindet
-    /// (Weiß gegen den hellgrauen Viewerhintergrund wäre zu unsicher). Liefert die Seitengröße in Punkt.
-    /// excludeAnnotationIndex blendet die gerade bearbeitete Anmerkung aus.</summary>
-    public static (double Width, double Height) ExtractPageForPreview(string sourcePath, string destinationPath, int page, int excludeAnnotationIndex = -1)
-    {
-        using var source = PdfReader.Open(sourcePath, PdfDocumentOpenMode.Import);
-        using PdfDocument destination = new();
-        var copy = destination.AddPage(source.Pages[page - 1]);
-        if (excludeAnnotationIndex >= 0 && excludeAnnotationIndex < copy.Annotations.Count)
-        {
-            copy.Annotations.Elements.RemoveAt(excludeAnnotationIndex); // beim Bearbeiten zeigt die Vorschau nur den neuen Kasten
-        }
-        var (width, height) = (copy.Width.Point, copy.Height.Point);
-        using (var gfx = XGraphics.FromPdfPage(copy, XGraphicsPdfPageOptions.Append))
-        {
-            gfx.DrawRectangle(new XPen(XColors.Magenta, PreviewFrameWidth), PreviewFrameWidth / 2, PreviewFrameWidth / 2, width - PreviewFrameWidth, height - PreviewFrameWidth);
-        }
-        destination.Save(destinationPath);
-        return (width, height);
-    }
-
-    public const double PreviewFrameWidth = 3;  // Punkt – auch bei kleiner Vorschau noch ein erkennbarer Streifen
-
     /// <summary>Breite und Höhe einer Seite in Punkt (1-basiert).</summary>
     public static (double Width, double Height) GetPageSize(string path, int page)
     {
@@ -995,40 +852,8 @@ internal static partial class PdfEditService
         catch (Exception ex) when (IsPdfReadError(ex)) { return false; }
     }
 
-    /// <summary>Speichert die Datei ohne Kennwortschutz neu. Mit dem Besitzerkennwort öffnet PDFsharp zum Ändern, dann wird nur die
-    /// Verschlüsselung abgeschaltet und alles bleibt (Lesezeichen, Formulare, Metadaten). Ist das Kennwort bloß das Benutzerkennwort,
-    /// verweigert PDFsharp das Ändern – dann Rückfall auf den Neuaufbau (<see cref="Rebuild"/>). Geprüft 21.09.2026.</summary>
-    public static void RemovePassword(string path, string password)
-    {
-        var bytes = File.ReadAllBytes(path); // Quelle in den Speicher, damit dieselbe Datei überschrieben werden kann
-        try
-        {
-            using MemoryStream stream = new(bytes);
-            using var document = PdfReader.Open(stream, password, PdfDocumentOpenMode.Modify);
-            document.SecurityHandler.SetEncryptionToNoneAndResetPasswords();
-            document.Save(path);
-        }
-        catch (PdfReaderException) { Rebuild(bytes, path, password); } // „owner password required“: nur Benutzerrechte
-    }
-
-    /// <summary>Nur mit Besitzerkennwort geschützte, ohne Kennwort lesbare Datei (Berechtigungen eingeschränkt) ohne das Kennwort
-    /// entsperren: Neuaufbau aus den Seiten wie beim Drucken „Als PDF speichern“, nur ohne Rendering. Lesezeichen und Formularfelder
-    /// hängen am Katalog und gehen verloren, Anmerkungen und Metadaten bleiben (Wunsch vom 21.09.2026).</summary>
-    public static void RemoveRestrictions(string path) => Rebuild(File.ReadAllBytes(path), path, string.Empty);
-
-    /// <summary>Seiten und Metadaten in ein neues, unverschlüsseltes Dokument übernehmen – unabhängig vom Verfahren der Quelle.</summary>
-    private static void Rebuild(byte[] bytes, string path, string password)
-    {
-        using MemoryStream stream = new(bytes);
-        using var source = PdfReader.Open(stream, password, PdfDocumentOpenMode.Import);
-        using PdfDocument target = new();
-        foreach (var page in source.Pages) { target.AddPage(page); }
-        CopyInfo(source, target);
-        target.Save(path);
-    }
-
-    /// <summary>Verschlüsselt die Datei mit AES-256 (PDF 2.0) und dem angegebenen Benutzer-Kennwort.
-    /// Wie beim Entfernen wird die Datei aus einer Speicherkopie neu aufgebaut.</summary>
+    /// <summary>Verschlüsselt die Datei mit AES-256 (PDF 2.0) und dem angegebenen Benutzer-Kennwort; die Datei wird aus einer
+    /// Speicherkopie neu aufgebaut. Bleibt bei PDFsharp – PDFium kann nicht verschlüsseln (Entfernen läuft dagegen über PDFium).</summary>
     public static void SetPassword(string path, string password)
     {
         var bytes = File.ReadAllBytes(path);

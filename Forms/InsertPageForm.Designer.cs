@@ -49,16 +49,13 @@ namespace PDFLight.Forms
             labelImageSize = new Label();
             labelDpiHint = new Label();
             labelDpiSource = new Label();
-            groupPreview = new GroupBox();
             pictureBoxPreview = new PictureBox();
             labelPreviewPage = new Label();
-            labelPreviewScale = new Label();
             buttonOK = new Button();
             buttonCancel = new Button();
             groupFormat.SuspendLayout();
             groupPosition.SuspendLayout();
             groupImage.SuspendLayout();
-            groupPreview.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBoxPreview).BeginInit();
             SuspendLayout();
             // 
@@ -225,7 +222,7 @@ namespace PDFLight.Forms
             buttonBrowse.Name = "buttonBrowse";
             buttonBrowse.Size = new Size(139, 27);
             buttonBrowse.TabIndex = 1;
-            buttonBrowse.Text = "&Durchsuchen …";
+            buttonBrowse.Text = "&Durchsuchen…";
             buttonBrowse.UseVisualStyleBackColor = true;
             buttonBrowse.Click += ButtonBrowse_Click;
             // 
@@ -305,45 +302,24 @@ namespace PDFLight.Forms
             labelDpiSource.Size = new Size(0, 15);
             labelDpiSource.TabIndex = 8;
             // 
-            // groupPreview
-            // 
-            groupPreview.Controls.Add(pictureBoxPreview);
-            groupPreview.Controls.Add(labelPreviewPage);
-            groupPreview.Controls.Add(labelPreviewScale);
-            groupPreview.Location = new Point(299, 12);
-            groupPreview.Name = "groupPreview";
-            groupPreview.Size = new Size(147, 190);
-            groupPreview.TabIndex = 3;
-            groupPreview.TabStop = false;
-            groupPreview.Text = "Vorschau";
-            // 
             // pictureBoxPreview
             // 
             pictureBoxPreview.BackColor = Color.FromArgb(210, 210, 210);
-            pictureBoxPreview.Location = new Point(8, 22);
+            pictureBoxPreview.Location = new Point(299, 19);
             pictureBoxPreview.Name = "pictureBoxPreview";
-            pictureBoxPreview.Size = new Size(132, 128);
-            pictureBoxPreview.TabIndex = 0;
+            pictureBoxPreview.Size = new Size(147, 183);
+            pictureBoxPreview.TabIndex = 3;
             pictureBoxPreview.TabStop = false;
             pictureBoxPreview.Paint += PictureBoxPreview_Paint;
             // 
             // labelPreviewPage
             // 
-            labelPreviewPage.AutoSize = true;
             labelPreviewPage.ForeColor = SystemColors.GrayText;
-            labelPreviewPage.Location = new Point(8, 153);
+            labelPreviewPage.Location = new Point(299, 200);
             labelPreviewPage.Name = "labelPreviewPage";
-            labelPreviewPage.Size = new Size(0, 15);
-            labelPreviewPage.TabIndex = 1;
-            // 
-            // labelPreviewScale
-            // 
-            labelPreviewScale.AutoSize = true;
-            labelPreviewScale.ForeColor = SystemColors.GrayText;
-            labelPreviewScale.Location = new Point(8, 169);
-            labelPreviewScale.Name = "labelPreviewScale";
-            labelPreviewScale.Size = new Size(0, 15);
-            labelPreviewScale.TabIndex = 2;
+            labelPreviewPage.Size = new Size(147, 15);
+            labelPreviewPage.TabIndex = 6;
+            labelPreviewPage.TextAlign = ContentAlignment.TopCenter;
             // 
             // buttonOK
             // 
@@ -376,7 +352,8 @@ namespace PDFLight.Forms
             ClientSize = new Size(458, 411);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
-            Controls.Add(groupPreview);
+            Controls.Add(pictureBoxPreview);
+            Controls.Add(labelPreviewPage);
             Controls.Add(groupImage);
             Controls.Add(groupPosition);
             Controls.Add(groupFormat);
@@ -394,8 +371,6 @@ namespace PDFLight.Forms
             groupPosition.PerformLayout();
             groupImage.ResumeLayout(false);
             groupImage.PerformLayout();
-            groupPreview.ResumeLayout(false);
-            groupPreview.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBoxPreview).EndInit();
             ResumeLayout(false);
         }
@@ -423,10 +398,8 @@ namespace PDFLight.Forms
         private System.Windows.Forms.Label labelImageSize;
         private System.Windows.Forms.Label labelDpiHint;
         private System.Windows.Forms.Label labelDpiSource;
-        private System.Windows.Forms.GroupBox groupPreview;
         private System.Windows.Forms.PictureBox pictureBoxPreview;
         private System.Windows.Forms.Label labelPreviewPage;
-        private System.Windows.Forms.Label labelPreviewScale;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
     }

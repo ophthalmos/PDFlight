@@ -4,4 +4,8 @@
     <Platform Name="x64" />
   </Configurations>
   <Project Path="PDFlight.csproj" />
+  <Folder Name="/Viewer/">
+    <Project Path="Viewer/Host/pdfhost.csproj" />
+    <Project Path="Viewer/HostCheck/HostCheck.csproj" />
+  </Folder>
 </Solution>

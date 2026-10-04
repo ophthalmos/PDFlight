@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace PDFLight.Classes;
 
@@ -56,13 +56,22 @@ public class AppSettings
     public bool ReopenLastFile { get; set; }              // zuletzt geöffnete Datei beim Start laden
     public bool ShowFullPathInTitle { get; set; }         // vollständigen Dateipfad statt nur des Dateinamens in der Titelleiste
     public bool ShowFavorites { get; set; }               // Favoriten-Menü in der Symbolleiste (Strg+D merkt die Datei); Standard aus
-    public bool DarkViewer { get; set; }                  // Anzeigehintergrund dunkel (WebView2 PreferredColorScheme = Dark); Standard hell
-    public bool AdobeEmbedEnabled { get; set; }           // Zustimmung zur optionalen Adobe-Ansicht (Einstellungen → Adobe PDF Embed API); Standard aus – erst dann geht etwas zu Adobe
-    public bool AdobeEmbedButton { get; set; } = true;    // Schaltfläche „Adobe“ mit Symbol und Text, sonst nur Symbol (sichtbar ist sie mit AdobeEmbedEnabled immer; bis 26.09.2026: ein/aus)
+    public bool DarkViewer { get; set; }                  // Anzeigehintergrund dunkel (Fläche neben den Seiten und Seitenleiste); Standard hell
+    public bool ShowSidebar { get; set; }                 // Seitenleiste (Miniaturen/Lesezeichen) der Anzeige eingeblendet; gemerkt beim Beenden
+    public int SidebarWidth { get; set; }                 // ihre Breite in logischen Pixeln (0 = Vorgabe)
+    public bool SidebarBookmarks { get; set; }            // sie zeigt die Lesezeichen statt der Miniaturen
+    public string ViewFit { get; set; } = "Height";       // Anzeige beim Beenden: Anpassung (Page, Height, Width; None = feste Zoomstufe)
+    public int ViewZoomPercent { get; set; } = 100;       // ihre Zoomstufe in Prozent (gilt bei ViewFit None)
+    public bool TwoPageLayout { get; set; }               // zweiseitige Ansicht
+    public bool SearchMatchCase { get; set; }             // Suche: Groß-/Kleinschreibung beachten
+    public bool SearchWholeWord { get; set; }             // Suche: nur ganze Wörter
+    public string LastPrinter { get; set; } = string.Empty; // zuletzt im Druckdialog gewählter Drucker (leer = Standarddrucker)
     public bool ExperimentalFeatures { get; set; }        // ohne Wirkung seit 20.09.2026 (der Lesezeichen-Editor ist regulär); bleibt, damit vorhandene settings.json unverändert lesbar sind
     public string AnnotationBorderColor { get; set; } = "808080"; // Textanmerkung: zuletzt gewählte Rahmenfarbe als RRGGBB, leer = kein Rahmen
     public string AnnotationBackground { get; set; } = "FFFFCC"; // Textanmerkung: zuletzt gewählter Hintergrund als RRGGBB, leer = transparent
     public string AnnotationTextColor { get; set; } = "000000";  // Textanmerkung: zuletzt gewählte Schriftfarbe als RRGGBB
+    public string InkColor { get; set; } = "0050E6";             // Zeichnen: Stiftfarbe als RRGGBB
+    public float InkWidth { get; set; } = 2f;                       // Zeichnen: Strichstärke in Punkt (0,5–12)
     public string Language { get; set; } = "de";          // Kultur-Code; Sprachen liegen als Languages\lng.<code>.resx bereit
     public string InstallerLanguage { get; set; } = string.Empty; // zuletzt übernommene Setup-Sprachwahl (s. ApplyInstallerDefaults)
     public int InstallerToolbarLevel { get; set; } = -1;          // zuletzt übernommene Symbolleisten-Abstufung des Setups (-1 = noch keine)

@@ -19,22 +19,28 @@ with Ctrl+Z. PDFlight recognises PDF/A files and protects them from accidental e
 Form fields filled in the viewer are marked with an asterisk in the title bar; PDFlight asks
 before closing and writes them into the file silently before any other action.
 
-For highlighting and commenting, PDFlight offers an optional second view based on the
-Adobe PDF Embed API (Settings → "Adobe PDF Embed API", button "Adobe" or F8). It is off by
-default because it loads Adobe's viewer from the web; the PDF itself stays on your device.
-Any other command switches back to the built-in viewer.
+Selected text can be highlighted (right-click → Highlight) and the highlight removed again;
+both are saved immediately. A sidebar shows page thumbnails or the document's bookmarks.
+
+PDFs are rendered with [PDFium](https://pdfium.googlesource.com/pdfium/) – not inside PDFlight
+itself, but in a separate helper process (`pdfhost.exe`) that runs in a Windows AppContainer
+sandbox: it can't read your files, reach the network or start programs, and it is compiled
+ahead of time so it may not generate executable code at run time. PDFlight hands it the
+document as bytes; if a malformed PDF crashes it, PDFlight simply offers to reload. PDF
+JavaScript is never executed.
 
 PDFlight is open source (MIT), runs on Windows 10 and 11 and speaks German, English,
 French and Spanish.
 
 ## Requirements
 
-Windows 10/11 (64-bit), [.NET Desktop Runtime 10](https://dotnet.microsoft.com/download/dotnet/10.0)
-and the [WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/).
+Windows 10/11 (64-bit) and the [.NET Desktop Runtime 10](https://dotnet.microsoft.com/download/dotnet/10.0).
 
 ## Building
 
-`dotnet build PDFlight.csproj -c Release` with the .NET 10 SDK; the setup is produced with
+`dotnet build PDFlight.csproj -c Release` with the .NET 10 SDK; the Release build publishes
+the helper `pdfhost.exe` with Native AOT, which needs the C++ build tools of Visual Studio
+("Desktop development with C++"). The setup is produced with
 [Inno Setup](https://jrsoftware.org/isinfo.php) from `Installer.iss`.
 
 ## License

@@ -1,18 +1,14 @@
-<Project>
-  <!-- SDK-Importe explizit statt über das Sdk-Attribut, damit die Reference-Bereinigung
-       unten NACH den SDK-/NuGet-Targets ausgewertet werden kann (ersetzt Directory.Build.targets) -->
-  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
-    <UseWPF>true</UseWPF><!-- nur für UIAutomationClient (Seitenzahl aus der Viewer-Toolbar lesen) -->
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>1.0.3</AssemblyVersion>
-    <FileVersion>1.0.3</FileVersion>
-    <Version>1.0.3</Version>
+    <AssemblyVersion>1.1.0</AssemblyVersion>
+    <FileVersion>1.1.0</FileVersion>
+    <Version>1.1.0</Version>
     <SourceRevisionId>build$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</SourceRevisionId><!-- Builddatum für den Über-Dialog (TaskDlg.GetBuildDate) -->
     <Product>PDFlight</Product>
     <RootNamespace>PDFLight</RootNamespace><!-- Namespaces im Code bleiben PDFLight; nur der sichtbare Name ist PDFlight -->
@@ -25,21 +21,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4258.31" />
     <PackageReference Include="PDFsharp-GDI" Version="6.2.4" />
   </ItemGroup>
 
-  <!-- UseWPF entfernt System.IO und System.Net.Http aus den impliziten Usings — hier wiederherstellen -->
+  <!-- Das Hilfsprogramm (Viewer\Host) und sein Prüfprogramm (Viewer\HostCheck) haben eigene Projektdateien; ihre Quellen und
+       Ausgaben (Viewer\bin) gehören nicht in dieses Projekt. Protocol.cs, SandboxProcess.cs und SandboxNative.cs in Viewer\ teilen
+       sie sich mit ihm. -->
   <ItemGroup>
-    <Using Include="System.IO" />
-    <Using Include="System.Net.Http" />
-    <!-- Optionale Adobe-Ansicht (Classes\AdobeEmbed.cs): die Seite, die das Adobe-SDK einbettet, und die Client-ID (git-ignoriert;
-         fehlt sie, bleibt die Ansicht gesperrt). Der Installer nimmt beides aus dem Release-Ordner mit. -->
-    <None Include="adobe\**" CopyToOutputDirectory="PreserveNewest" LinkBase="adobe" />
-    <None Include="adobe-clientid.txt" CopyToOutputDirectory="PreserveNewest" Condition="Exists('adobe-clientid.txt')" />
+    <Compile Remove="Viewer\Host\**;Viewer\HostCheck\**;Viewer\bin\**" />
+    <EmbeddedResource Remove="Viewer\Host\**;Viewer\HostCheck\**;Viewer\bin\**" />
+    <None Remove="Viewer\Host\**;Viewer\HostCheck\**;Viewer\bin\**" />
   </ItemGroup>
-
-  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
   <!-- Übersetzungs-Konsistenz (deutscher Text = resx-Schlüssel): meldet nach jedem Build fehlende und verwaiste
        Schlüssel (LNG001/LNG002) – im Debug als Warnungen, im Release als Fehler mit Build-Abbruch (-Strict),
@@ -49,13 +41,39 @@
     <Exec Condition="'$(Configuration)' == 'Release'" Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\check-lng.ps1&quot; -Strict" WorkingDirectory="$(MSBuildProjectDirectory)" />
   </Target>
 
-  <!-- WebView2 referenziert ungefragt auch seine WPF-Assembly; sie wird nicht benötigt und
-       verursachte die MSB3277-Warnung (WindowsBase-Versionskonflikt). Das Entfernen muss nach
-       den NuGet-Targets des Pakets stehen — ein Entfernen erst im Build ließe Visual Studio
-       über einen nicht auflösbaren Referenzpfad klagen. -->
-  <ItemGroup>
-    <Reference Remove="@(Reference-&gt;WithMetadataValue('Filename', 'Microsoft.Web.WebView2.Wpf'))" />
-  </ItemGroup>
+  <!-- PDF-Darstellung: PDFium läuft im Hilfsprogramm pdfhost.exe (Viewer\Host), abgeschottet im AppContainer; es liegt samt pdfium.dll
+       neben PDFlight.exe. Kein ProjectReference: das SDK kopierte sonst auch die Laufzeitdateien des Hilfsprogramms dazu. Zielordner
+       erst in den Targets bilden – in einer PropertyGroup ist $(OutDir) noch leer, der Pfad läge dann im Projektordner. -->
+
+  <!-- Debug: das Hilfsprogramm mit JIT (schnell gebaut) bauen und kopieren -->
+  <Target Name="BuildPdfHost" BeforeTargets="Build" Condition="'$(Configuration)' != 'Release'">
+    <!-- erst wiederherstellen (eigene Auswertung, sonst sähe der Build die frischen NuGet-Angaben nicht), dann bauen -->
+    <MSBuild Projects="Viewer\Host\pdfhost.csproj" Targets="Restore" Properties="Configuration=$(Configuration);MSBuildRestoreSessionId=$([System.Guid]::NewGuid())" />
+    <MSBuild Projects="Viewer\Host\pdfhost.csproj" Targets="Build" Properties="Configuration=$(Configuration);Version=$(Version)" />
+  </Target>
+
+  <Target Name="CopyPdfHost" AfterTargets="Build" Condition="'$(Configuration)' != 'Release'">
+    <ItemGroup>
+      <PdfHostFiles Include="Viewer\bin\$(Configuration)\pdfhost.*;Viewer\bin\$(Configuration)\pdfium.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(PdfHostFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+  <!-- Release: das Hilfsprogramm mit Native AOT (ohne JIT – erst damit läuft es mit Arbitrary Code Guard). Der AOT-Linker sucht
+       vswhere.exe im PATH; neu erzeugt wird nur, wenn sich seine Quellen geändert haben. OutputPath: Der AOT-Publish baut zuerst ein
+       eigenständiges .NET-Programm samt kompletter Laufzeit (~190 DLLs); dieser Zwischenstand gehört in den obj-Ordner. -->
+  <Target Name="PublishPdfHost" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'"
+          Inputs="@(PdfHostSources)" Outputs="$(OutDir)pdfhost.exe" DependsOnTargets="CollectPdfHostSources">
+    <Exec Command="dotnet publish &quot;$(MSBuildProjectDirectory)\Viewer\Host\pdfhost.csproj&quot; -c Release -o &quot;$(OutDir.TrimEnd('\'))&quot; -p:SelfContained=true -p:OutputPath=obj/aot/ -p:Version=$(Version) -nologo -v q"
+          EnvironmentVariables="PATH=$(MSBuildProgramFiles32)\Microsoft Visual Studio\Installer%3B$(PATH.Replace(';', '%3B'))" />
+  </Target>
+
+  <Target Name="CollectPdfHostSources">
+    <ItemGroup>
+      <PdfHostSources Include="Viewer\Host\*.cs;Viewer\Host\pdfhost.csproj;Viewer\Protocol.cs;$(MSBuildProjectFullPath)" />
+    </ItemGroup>
+  </Target>
+
   <!-- Release: pdffile.ico (Explorer-Symbol für PDF-Dateien) als zweites Icon in die EXE einfügen – Installer und
        ShellUtil.RegisterFileType verweisen auf PDFlight.exe,1; die ico-Datei selbst wird nicht mehr ausgeliefert -->
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
