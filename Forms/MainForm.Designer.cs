@@ -135,7 +135,7 @@
             splitViewer = new SplitContainer();
             panelSidebarContent = new Panel();
             thumbnailGrid = new PDFLight.Viewer.ThumbnailGrid();
-            treeOutline = new TreeView();
+            outlineView = new PDFLight.Viewer.OutlineView();
             sidebarStrip = new ToolStrip();
             btnSideThumbnails = new ToolStripButton();
             btnSideBookmarks = new ToolStripButton();
@@ -1051,7 +1051,7 @@
             // panelSidebarContent
             // 
             panelSidebarContent.Controls.Add(thumbnailGrid);
-            panelSidebarContent.Controls.Add(treeOutline);
+            panelSidebarContent.Controls.Add(outlineView);
             panelSidebarContent.Dock = DockStyle.Fill;
             panelSidebarContent.Location = new Point(44, 40);
             panelSidebarContent.Name = "panelSidebarContent";
@@ -1069,19 +1069,18 @@
             thumbnailGrid.TabIndex = 1;
             thumbnailGrid.PageActivated += ThumbnailGrid_PageActivated;
             // 
-            // treeOutline
+            // outlineView
             // 
-            treeOutline.BorderStyle = BorderStyle.None;
-            treeOutline.Dock = DockStyle.Fill;
-            treeOutline.HideSelection = false;
-            treeOutline.Location = new Point(0, 0);
-            treeOutline.Name = "treeOutline";
-            treeOutline.ShowNodeToolTips = true;
-            treeOutline.Size = new Size(156, 60);
-            treeOutline.TabIndex = 2;
-            treeOutline.Visible = false;
-            treeOutline.AfterSelect += TreeOutline_AfterSelect;
-            treeOutline.NodeMouseClick += TreeOutline_NodeMouseClick;
+            outlineView.AccessibleName = "Dokumentstruktur";
+            outlineView.AccessibleRole = AccessibleRole.Outline;
+            outlineView.Dock = DockStyle.Fill;
+            outlineView.Font = new Font("Segoe UI", 9.75F);
+            outlineView.Location = new Point(0, 0);
+            outlineView.Name = "outlineView";
+            outlineView.Size = new Size(156, 60);
+            outlineView.TabIndex = 2;
+            outlineView.Visible = false;
+            outlineView.ItemActivated += OutlineView_ItemActivated;
             // 
             // sidebarStrip
             // 
@@ -1398,7 +1397,7 @@
         private ToolStripButton btnSearchClose;
         private SplitContainer splitViewer;
         private PDFLight.Viewer.ThumbnailGrid thumbnailGrid;
-        private TreeView treeOutline;
+        private PDFLight.Viewer.OutlineView outlineView;
         private ToolStrip sidebarStrip;
         private ToolStripButton btnSideThumbnails;
         private ToolStripButton btnSideBookmarks;

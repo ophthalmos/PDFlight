@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 
@@ -98,7 +99,7 @@ internal static class ToolbarIcons
         return padded;
     }
 
-    public const char ChevronDown = '';  // aufgeklappter Zweig im Lesezeichen-Editor (ChevronRight = Next)
+    public const char ChevronDown = '';  // Suche: nächster Treffer
 
     private static readonly Dictionary<int, Font> glyphFonts = []; // je Pixelgröße eine Schrift, lebt bis zum Programmende
 
@@ -176,6 +177,30 @@ internal static class ToolbarIcons
         g.ResetClip();
         using (SolidBrush brush = new(color)) { g.DrawString(outline.ToString(), font, brush, bounds, format); }
         return bitmap;
+    }
+
+    /// <summary>Aufklappzeichen wie bei Edge, mittig in <paramref name="area"/>: gefülltes „▶“ für zu, „◢“ für auf (Wunsch vom
+    /// 05.10.2026 – auffälliger als feine Pfeile, man muss ja darauf klicken). Dokumentstruktur und Lesezeichen-Editor teilen es sich;
+    /// mit GDI+ geglättet gezeichnet, unabhängig von der Symbolschrift. <paramref name="scale"/> = Gerätepixel je logischem Pixel.</summary>
+    public static void DrawExpander(Graphics g, Rectangle area, bool expanded, Color color, float scale)
+    {
+        var (cx, cy) = (area.X + area.Width / 2f, area.Y + area.Height / 2f);
+        PointF[] points;
+        if (expanded)
+        {
+            var half = 3 * scale; // Schenkel 6 px
+            points = [new(cx + half, cy - half), new(cx + half, cy + half), new(cx - half, cy + half)];
+        }
+        else
+        {
+            var (half, depth) = (4 * scale, 5 * scale); // 8 px hoch, 5 px breit
+            points = [new(cx - depth / 2, cy - half), new(cx + depth / 2, cy), new(cx - depth / 2, cy + half)];
+        }
+        var smoothing = g.SmoothingMode;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        using SolidBrush brush = new(color);
+        g.FillPolygon(brush, points);
+        g.SmoothingMode = smoothing;
     }
 
     public static Image Get(char glyph, Size size) => Get(glyph, size, Color.FromArgb(64, 64, 64));

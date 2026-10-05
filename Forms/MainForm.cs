@@ -2895,8 +2895,10 @@ public partial class MainForm : Form
     {
         var dark = settings.DarkViewer;
         pageView.BackColor = dark ? Color.FromArgb(51, 51, 51) : Color.FromArgb(232, 232, 232);
-        thumbnailGrid.BackColor = treeOutline.BackColor = dark ? Color.FromArgb(40, 40, 40) : SystemColors.Window;
-        thumbnailGrid.ForeColor = treeOutline.ForeColor = dark ? Color.FromArgb(230, 230, 230) : SystemColors.WindowText;
+        thumbnailGrid.BackColor = outlineView.BackColor = dark ? Color.FromArgb(40, 40, 40) : SystemColors.Window;
+        thumbnailGrid.ForeColor = outlineView.ForeColor = dark ? Color.FromArgb(230, 230, 230) : SystemColors.WindowText;
+        outlineView.SelectionBackColor = dark ? Color.FromArgb(77, 77, 77) : Color.FromArgb(204, 228, 247); // wie die Auswahl im Explorer
+        outlineView.HoverBackColor = dark ? Color.FromArgb(56, 56, 56) : Color.FromArgb(229, 243, 255);
         splitViewer.BackColor = dark ? Color.FromArgb(40, 40, 40) : SystemColors.Control; // die Trennlinie zur Seitenleiste
         viewerStrip.Renderer = new ViewerStripRenderer(dark) { IsActiveMode = IsActiveModeItem }; // hell wie der Standard, aktive Modi wie Edge
         sidebarStrip.Renderer = new SidebarRailRenderer(dark); // senkrechte Umschaltleiste wie in Chrome, in beiden Modi
@@ -3352,7 +3354,7 @@ public partial class MainForm : Form
 
     private void ShowSidebarPanel(bool bookmarks)
     {
-        treeOutline.Visible = bookmarks;
+        outlineView.Visible = bookmarks;
         thumbnailGrid.Visible = !bookmarks;
         btnSideBookmarks.Checked = bookmarks;
         btnSideThumbnails.Checked = !bookmarks;
@@ -3404,31 +3406,17 @@ public partial class MainForm : Form
         pageView.GoToPage(page);
     }
 
+    /// <summary>Dokumentstruktur der Seitenleiste füllen (selbst gezeichnet wie bei Chrome: Pfeile, Zeilenumbruch – <see cref="OutlineView"/>);
+    /// ein einziger Oberpunkt klappt gleich auf.</summary>
     private void FillOutline(List<OutlineItem> outline)
     {
-        static TreeNode Node(OutlineItem item)
-        {
-            var node = new TreeNode(item.Title.Length > 0 ? item.Title : "–") { Tag = item, ToolTipText = item.Title };
-            node.Nodes.AddRange([.. item.Children.Select(Node)]);
-            return node;
-        }
-        treeOutline.BeginUpdate();
-        treeOutline.Nodes.Clear();
-        treeOutline.Nodes.AddRange([.. outline.Select(Node)]);
-        if (treeOutline.Nodes.Count == 1) { treeOutline.Nodes[0].Expand(); } // ein einziger Oberpunkt (oft der Titel): gleich aufklappen
-        if (outline.Count == 0 && document != null) { treeOutline.Nodes.Add(new TreeNode(Lng.T("(keine Lesezeichen)")) { ForeColor = SystemColors.GrayText }); }
-        treeOutline.EndUpdate();
+        outlineView.EmptyText = document != null ? Lng.T("(keine Lesezeichen)") : string.Empty;
+        outlineView.SetItems(outline);
     }
 
-    private void TreeOutline_NodeMouseClick(object? sender, TreeNodeMouseClickEventArgs e)
+    private void OutlineView_ItemActivated(object? sender, OutlineItem item)
     {
-        if (e.Button != MouseButtons.Left || treeOutline.HitTest(e.Location).Location == TreeViewHitTestLocations.PlusMinus) { return; } // Auf-/Zuklappen
-        if (e.Node?.Tag is OutlineItem { Target: { } target }) { Navigate(target); }
-    }
-
-    private void TreeOutline_AfterSelect(object? sender, TreeViewEventArgs e)
-    {
-        if (e.Action == TreeViewAction.ByKeyboard && e.Node?.Tag is OutlineItem { Target: { } target }) { Navigate(target); }
+        if (item.Target is { } target) { Navigate(target); }
     }
 
     // ------------------------------------------------------------------ Links

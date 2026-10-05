@@ -15,7 +15,6 @@ public partial class BookmarkForm : Form
     private readonly Func<int> currentPage; // die gerade angezeigte Seite (1-basiert) – sie ändert sich, während der Editor offen ist
     private bool loading; // beim Befüllen der Felder keine Änderungen zurückschreiben
     private bool saved;   // vom Hauptfenster gespeichert – Schließen ohne Rückfrage
-    private readonly Font? glyphFont; // Symbolschrift für die Aufklapp-Pfeile (null: Ersatzzeichnung)
 
     /// <summary>Die bearbeitete Datei.</summary>
     public string FilePath { get; }
@@ -47,7 +46,6 @@ public partial class BookmarkForm : Form
         numPage.Maximum = pageCount;
         buttonNew.Image = ToolbarIcons.ButtonIcon(ToolbarIcons.Add, this);
         buttonDelete.Image = ToolbarIcons.ButtonIcon(ToolbarIcons.Delete, this);
-        glyphFont = ToolbarIcons.GlyphFont(LogicalToDeviceUnits(9));
         treeView.BeginUpdate();
         Fill(treeView.Nodes, bookmarks);
         treeView.EndUpdate();
@@ -205,7 +203,7 @@ public partial class BookmarkForm : Form
     }
 
     /// <summary>Zeile komplett selbst zeichnen: Hintergrund über die ganze Breite (Auswahl, Vorfahren der Auswahl in Hellgrau),
-    /// Aufklappsymbol im Stil des Systems, Titel und rechts die Zielseite.</summary>
+    /// Aufklappdreieck wie bei Edge, Titel und rechts die Zielseite.</summary>
     private void TreeView_DrawNode(object? sender, DrawTreeNodeEventArgs e)
     {
         if (e.Node?.Tag is not Bookmark bookmark || e.Bounds.Height <= 0) { e.DrawDefault = true; return; }
@@ -215,7 +213,11 @@ public partial class BookmarkForm : Form
         Rectangle row = new(0, e.Bounds.Y, treeView.ClientSize.Width, e.Bounds.Height);
         var back = selected ? (active ? SystemColors.Highlight : SystemColors.ControlLight) : IsAncestorOfSelection(e.Node) ? Color.FromArgb(232, 232, 232) : treeView.BackColor;
         using (SolidBrush brush = new(back)) { g.FillRectangle(brush, row); }
-        if (e.Node.Nodes.Count > 0) { DrawGlyph(g, new Rectangle(e.Node.Bounds.X - treeView.Indent, e.Bounds.Y, treeView.Indent, e.Bounds.Height), e.Node.IsExpanded, active ? SystemColors.HighlightText : Color.FromArgb(96, 96, 96)); } // kräftiger als GrayText (Wunsch vom 20.09.2026)
+        if (e.Node.Nodes.Count > 0) // Dreieck wie in der Dokumentstruktur, in der Textfarbe (Wunsch vom 05.10.2026)
+        {
+            ToolbarIcons.DrawExpander(g, new Rectangle(e.Node.Bounds.X - treeView.Indent, e.Bounds.Y, treeView.Indent, e.Bounds.Height), e.Node.IsExpanded,
+                active ? SystemColors.HighlightText : treeView.ForeColor, DeviceDpi / 96f);
+        }
         var pageWidth = LogicalToDeviceUnits(44);
         Rectangle pageBounds = new(row.Right - pageWidth - LogicalToDeviceUnits(4), e.Bounds.Y, pageWidth, e.Bounds.Height);
         Rectangle textBounds = new(e.Node.Bounds.X, e.Bounds.Y, Math.Max(0, pageBounds.Left - e.Node.Bounds.X), e.Bounds.Height);
@@ -223,23 +225,6 @@ public partial class BookmarkForm : Form
             TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
         TextRenderer.DrawText(g, bookmark.Page > 0 ? bookmark.Page.ToString() : "–", treeView.Font, pageBounds, active ? SystemColors.HighlightText : SystemColors.GrayText,
             TextFormatFlags.VerticalCenter | TextFormatFlags.Right | TextFormatFlags.NoPrefix);
-    }
-
-    /// <summary>Aufklapp-Pfeil wie im Explorer: „>“ für zu, gekippt für auf – als Glyphe der Symbolschrift; ohne die Schrift ein
-    /// mit Linien gezeichnetes Winkelzeichen.</summary>
-    private void DrawGlyph(Graphics g, Rectangle area, bool expanded, Color color)
-    {
-        if (glyphFont != null)
-        {
-            TextRenderer.DrawText(g, (expanded ? ToolbarIcons.ChevronDown : ToolbarIcons.Next).ToString(), glyphFont, area, color,
-                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-            return;
-        }
-        var half = Math.Max(2, LogicalToDeviceUnits(3));
-        var (cx, cy) = (area.X + area.Width / 2, area.Y + area.Height / 2);
-        using Pen pen = new(color, LogicalToDeviceUnits(1));
-        if (expanded) { g.DrawLines(pen, [new Point(cx - half, cy - half / 2), new Point(cx, cy + half / 2), new Point(cx + half, cy - half / 2)]); }
-        else { g.DrawLines(pen, [new Point(cx - half / 2, cy - half), new Point(cx + half / 2, cy), new Point(cx - half / 2, cy + half)]); }
     }
 
     private void TreeView_KeyDown(object? sender, KeyEventArgs e)

@@ -74,7 +74,7 @@ Name: desktopicon; Description: "{cm:DesktopIcon}"; Flags: unchecked
 
 [Files]
 ; Excludes: Altlasten aus Builds bis 1.0.3, falls der Release-Ordner nicht geleert wurde (WebView2, Adobe-Ansicht)
-Source: "{#releaseDir}\*"; Excludes: "*.pdb,Microsoft.Web.WebView2.*.dll,\runtimes\*,\adobe\*,adobe-clientid*.txt"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#releaseDir}\*"; Excludes: "*.pdb,Microsoft.Web.WebView2.*,\runtimes\*,\adobe\*,adobe-clientid*.txt"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
@@ -108,7 +108,7 @@ Type: files; Name: "{app}\language.default"
 ; früher separat ausgeliefertes Dokumentsymbol – steckt jetzt in der EXE
 Type: files; Name: "{app}\pdffile.ico"
 ; bis 1.0.3: Anzeige über WebView2 und die optionale Adobe-Ansicht (seit 1.1.0 PDFium)
-Type: files; Name: "{app}\Microsoft.Web.WebView2.*.dll"
+Type: files; Name: "{app}\Microsoft.Web.WebView2.*"
 Type: filesandordirs; Name: "{app}\runtimes"
 Type: filesandordirs; Name: "{app}\adobe"
 Type: files; Name: "{app}\adobe-clientid.txt"
@@ -120,6 +120,7 @@ Type: files; Name: "{app}\setup.default"
 [Code]
 function GetSystemMetrics(nIndex: Integer): Integer; external 'GetSystemMetrics@user32.dll stdcall';
 function GetDpiForSystem(): Cardinal; external 'GetDpiForSystem@user32.dll stdcall delayload';
+function DeleteAppContainerProfile(Name: String): Integer; external 'DeleteAppContainerProfile@userenv.dll stdcall delayload';
 
 { Abstufung der Symbolleiste nach der logischen Breite des Hauptbildschirms (physische Pixel durch die DPI-Skalierung):
   gemessener Platzbedarf 1390 px mit großen Symbolen und Programm-Icons, 1245 px mit kleinen Symbolen, 1153 px ohne
@@ -148,4 +149,16 @@ begin
   if CurStep = ssPostInstall then
     SaveStringToFile(ExpandConstant('{app}\setup.default'),
       'language=' + ActiveLanguage + #13#10 + 'toolbar=' + IntToStr(ToolbarLevel()) + #13#10, False);
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  { AppContainer-Profil des PDF-Hilfsprogramms entfernen, das PDFlight beim ersten Start anlegt (SandboxProcess.ContainerName):
+    Registry-Eintrag und Ordner unter %LOCALAPPDATA%\Packages. Es gehört dem Benutzer, der deinstalliert – Profile anderer
+    Benutzer bleiben. Scheitert es (z. B. schon entfernt), ist das ohne Belang. }
+  if CurUninstallStep = usPostUninstall then
+  try
+    DeleteAppContainerProfile('PDFlight.pdfhost');
+  except
+  end;
 end;
