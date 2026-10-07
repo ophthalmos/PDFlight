@@ -92,7 +92,12 @@ internal static class Program
             case Protocol.Attachments:
                 {
                     var attachments = Document(input.ReadInt32()).Attachments();
-                    return w => { w.Write(attachments.Count); foreach (var (name, size) in attachments) { w.Write(name); w.Write(size); } };
+                    return w => { w.Write(attachments.Count); foreach (var (name, size, modified) in attachments) { w.Write(name); w.Write(size); w.Write(modified); } };
+                }
+            case Protocol.AttachmentCount:
+                {
+                    var count = Document(input.ReadInt32()).AttachmentCount();
+                    return w => w.Write(count);
                 }
             case Protocol.AttachmentData:
                 {

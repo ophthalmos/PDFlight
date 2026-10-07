@@ -34,7 +34,7 @@ namespace PDFLight.Forms
             editMenuItem = new ToolStripMenuItem();
             deleteMenuItem = new ToolStripMenuItem();
             labelFileValue = new Label();
-            listView = new ListView();
+            listView = new PDFLight.Controls.StaticHeaderListView();
             colPage = new ColumnHeader();
             colPosition = new ColumnHeader();
             colText = new ColumnHeader();
@@ -190,7 +190,7 @@ namespace PDFLight.Forms
         private System.Windows.Forms.ToolStripMenuItem editMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteMenuItem;
         private System.Windows.Forms.Label labelFileValue;
-        private System.Windows.Forms.ListView listView;
+        private PDFLight.Controls.StaticHeaderListView listView;
         private System.Windows.Forms.ColumnHeader colPage;
         private System.Windows.Forms.ColumnHeader colPosition;
         private System.Windows.Forms.ColumnHeader colText;

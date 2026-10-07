@@ -23,6 +23,8 @@
             trackWidth = new TrackBar();
             labelThin = new Label();
             labelWide = new Label();
+            panelLine = new Panel();
+            labelHint = new Label();
             ((System.ComponentModel.ISupportInitialize)trackWidth).BeginInit();
             SuspendLayout();
             // 
@@ -97,11 +99,30 @@
             labelWide.TabIndex = 6;
             labelWide.Text = "Breit";
             labelWide.TextAlign = ContentAlignment.TopRight;
-            // 
+            //
+            // panelLine
+            //
+            panelLine.Location = new Point(14, 360);
+            panelLine.Name = "panelLine";
+            panelLine.Size = new Size(218, 1);
+            panelLine.TabIndex = 7;
+            //
+            // labelHint
+            //
+            labelHint.AutoSize = true;
+            labelHint.Font = new Font("Segoe UI", 8F);
+            labelHint.Location = new Point(12, 368);
+            labelHint.Name = "labelHint";
+            labelHint.Size = new Size(192, 13);
+            labelHint.TabIndex = 8;
+            labelHint.Text = "Tipp: Strg drücken für gerade Linien";
+            //
             // InkPalette
-            // 
+            //
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(labelHint);
+            Controls.Add(panelLine);
             Controls.Add(labelWide);
             Controls.Add(labelThin);
             Controls.Add(trackWidth);
@@ -111,7 +132,7 @@
             Controls.Add(labelColors);
             Name = "InkPalette";
             Padding = new Padding(0, 0, 10, 12);
-            Size = new Size(246, 362);
+            Size = new Size(246, 393);
             ((System.ComponentModel.ISupportInitialize)trackWidth).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -126,5 +147,7 @@
         private TrackBar trackWidth;
         private Label labelThin;
         private Label labelWide;
+        private Panel panelLine;
+        private Label labelHint;
     }
 }

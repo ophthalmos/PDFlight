@@ -162,18 +162,19 @@ internal static class TaskDlg
 
     /// <summary>Manuelle Updatesuche (Info-Menü): lädt die XML-Datei von der Webseite des Autors
     /// und zeigt das Ergebnis; bei einem Update mit Download-Schaltfläche.</summary>
-    public static async Task UpdateTaskDlg(nint hwnd)
+    public static async Task UpdateTaskDlg(nint hwnd, Icon? icon)
     {
         var curVersion = Assembly.GetExecutingAssembly().GetName().Version;
         var threeVersion = curVersion?.ToString(3) ?? Lng.T("unbekannt");
         TaskDialogButton downloadButton = new TaskDialogCommandLinkButton(Lng.T("PDFlightSetup.exe herunterladen"),
             Lng.T("Download.Detail", "PDFlightSetup.exe wird im Download-Ordner\ngespeichert. Führe das Setupprogramm aus,\num die neueste Version zu installieren."));
+        using var icon32 = icon == null ? null : new Icon(icon, 32, 32); // sonst nimmt der TaskDialog die 16-px-Variante des Fenster-Icons
         var updatePage = new TaskDialogPage()
         {
             Caption = Application.ProductName,
             Heading = string.Format(Lng.T("{0} ist auf dem neuesten Stand."), Application.ProductName),
             Text = $"Version {threeVersion} (64-Bit)",
-            Icon = TaskDialogIcon.Information,
+            Icon = icon32 == null ? null : new TaskDialogIcon(icon32),
             AllowCancel = true,
             SizeToContent = true,
             Buttons = { TaskDialogButton.Close }

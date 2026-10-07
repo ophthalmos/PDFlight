@@ -148,15 +148,46 @@ internal sealed class PdfiumDocument : IDisposable
     public Task<(uint Permissions, int Revision)> SecurityAsync() =>
         Command(Protocol.Security, _ => { }, r => (r.ReadUInt32(), r.ReadInt32()));
 
-    /// <summary>Eingebettete Dateien: Name und Größe in Byte (-1 = unbekannt); Nummer = Position in der Liste.</summary>
-    public Task<List<(string Name, long Size)>> AttachmentsAsync() =>
+    /// <summary>Eingebettete Dateien: Name, Größe in Byte (-1 = unbekannt) und Änderungsdatum (null = keins in der Datei); Nummer =
+    /// Position in der Liste.</summary>
+    public Task<List<(string Name, long Size, DateTime? Modified)>> AttachmentsAsync() =>
         Command(Protocol.Attachments, _ => { }, r =>
         {
             var count = r.ReadInt32();
-            var list = new List<(string, long)>(count);
-            for (var i = 0; i < count; i++) { list.Add((r.ReadString(), r.ReadInt64())); }
+            var list = new List<(string, long, DateTime?)>(count);
+            for (var i = 0; i < count; i++) { list.Add((r.ReadString(), r.ReadInt64(), ParsePdfDate(r.ReadString()))); }
             return list;
         });
+
+    /// <summary>Anzahl der eingebetteten Dateien – billig, ohne sie zu entpacken (für die Statusleiste beim Öffnen).</summary>
+    public Task<int> AttachmentCountAsync() => Command(Protocol.AttachmentCount, _ => { }, r => r.ReadInt32());
+
+    /// <summary>PDF-Datum „D:JJJJMMTTHHmmSS+HH'mm'“ in Ortszeit; alles nach dem Jahr ist optional, ohne Zeitzone gilt die Angabe als
+    /// Ortszeit. null, wenn die Zeichenfolge leer oder kein Datum ist (sie stammt vom Ersteller der PDF).</summary>
+    internal static DateTime? ParsePdfDate(string text)
+    {
+        var s = text.Trim();
+        if (s.StartsWith("D:", StringComparison.Ordinal)) { s = s[2..]; }
+        int Part(int start, int length, int fallback) =>
+            s.Length >= start + length && int.TryParse(s.AsSpan(start, length), System.Globalization.NumberStyles.None, null, out var value) ? value : fallback;
+        var year = Part(0, 4, -1);
+        if (year < 1) { return null; }
+        var (month, day, hour, minute, second) = (Part(4, 2, 1), Part(6, 2, 1), Part(8, 2, 0), Part(10, 2, 0), Part(12, 2, 0));
+        if (month is < 1 or > 12 || day < 1 || day > DateTime.DaysInMonth(year, month) || hour > 23 || minute > 59 || second > 59) { return null; }
+        var local = new DateTime(year, month, day, hour, minute, second);
+        var zone = s.Length > 14 ? s[14] : '\0';
+        if (zone == 'Z') { return DateTime.SpecifyKind(local, DateTimeKind.Utc).ToLocalTime(); }
+        if (zone is '+' or '-')
+        {
+            var offset = new TimeSpan(Part(15, 2, 0), s.Length >= 20 ? Part(18, 2, 0) : 0, 0);
+            if (offset > TimeSpan.FromHours(14)) { return local; } // ungültige Zeitzone: DateTimeOffset würfe
+            // am Rand des Wertebereichs (Jahr 1 mit positiver, 9999 mit negativer Zone) wirft der Konstruktor – die Zeichenfolge kommt aus
+            // einer fremden PDF, und eine Ausnahme hier ließe den Rest der Antwort ungelesen in der Pipe (Review 06.10.2026)
+            try { return new DateTimeOffset(local, zone == '-' ? -offset : offset).LocalDateTime; }
+            catch (ArgumentOutOfRangeException) { return local; }
+        }
+        return local;
+    }
 
     /// <summary>Inhalt einer eingebetteten Datei – zum Speichern, nie zum Ausführen.</summary>
     public Task<byte[]> AttachmentDataAsync(int index) => Command(Protocol.AttachmentData, w => w.Write(index), r => r.ReadBytes(r.ReadInt32()));

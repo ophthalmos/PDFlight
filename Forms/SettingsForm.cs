@@ -195,7 +195,12 @@ public partial class SettingsForm : Form
 
     private void BtnProgramAdd_Click(object? sender, EventArgs e)
     {
-        using OpenFileDialog dialog = new() { Filter = Lng.T("Programme (*.exe)|*.exe"), Title = Lng.T("Programm hinzufügen") };
+        using OpenFileDialog dialog = new()
+        {
+            Filter = Lng.T("Programme (*.exe)|*.exe"),
+            Title = Lng.T("Programm hinzufügen"),
+            InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), // Wunsch vom 05.10.2026
+        };
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         var existing = listPrograms.Items.Cast<string>().ToList().FindIndex(f => string.Equals(f, dialog.FileName, StringComparison.OrdinalIgnoreCase));
         listPrograms.SelectedIndex = existing >= 0 ? existing : listPrograms.Items.Add(dialog.FileName);

@@ -147,7 +147,8 @@ internal static class Protocol
     /// Für den Eigenschaften-Dialog.</summary>
     public const byte Security = 35;
 
-    /// <summary>→ int Dok ← int Anzahl, dann je eingebetteter Datei Zeichenfolge Name, long Größe (-1 = unbekannt).</summary>
+    /// <summary>→ int Dok ← int Anzahl, dann je eingebetteter Datei Zeichenfolge Name, long Größe (-1 = unbekannt), Zeichenfolge Änderungsdatum
+    /// (PDF-Datum aus /Params /ModDate, leer = keins; seit 05.10.2026).</summary>
     public const byte Attachments = 36;
 
     /// <summary>→ int Dok, int Nummer ← int Länge, Bytes: der Inhalt einer eingebetteten Datei (nur zum Speichern, nie zum Ausführen).</summary>
@@ -156,6 +157,10 @@ internal static class Protocol
     /// <summary>→ int Dok, int Seite, int erstes Zeichen, int Anzahl ← int Anzahl, je Textzeile 4 × double links, oben, rechts, unten in
     /// PDF-Koordinaten: die Vierecke, die eine Hervorhebung des Zeichenbereichs bekäme – für Hervorhebungen mit eigener Darstellung.</summary>
     public const byte HighlightBoxes = 38;
+
+    /// <summary>→ int Dok ← int Anzahl der eingebetteten Dateien – für den Hinweis in der Statusleiste beim Öffnen. Bewusst ohne Namen und
+    /// Größen: die Größe verlangt von PDFium, jeden Anhang ganz zu entpacken (Review 06.10.2026).</summary>
+    public const byte AttachmentCount = 39;
 
     // ================================================================== Umrechnung
 

@@ -45,6 +45,8 @@ public partial class MainForm : Form
         ddbEdit.ToolTipText = Lng.T("Tooltip.Edit", ddbEdit.ToolTipText);
         statusIndex.ToolTipText = Lng.T("Tooltip.StatusIndex", statusIndex.ToolTipText);
         Lng.Apply(contextMenuPage); // Kontextmenüs hängen nicht im Control-Baum
+        Lng.Apply(contextMenuOutline);
+        Lng.Apply(contextMenuThumbnails);
         Lng.Apply(inkPalette);      // ebenso die Farbauswahl fürs Zeichnen (Dropdown der Viewer-Leiste)
         inkPalette.InkChanged += InkPalette_InkChanged; // kein Designer-Element des Formulars
         Lng.Apply(highlightPalette); // ebenso die Farbauswahl fürs Hervorheben
@@ -415,7 +417,7 @@ public partial class MainForm : Form
             {
                 if (version != loadVersion || IsDisposed) { return null; }
                 if (ex.WrongPassword) { TaskDlg.MsgTaskDlg(Handle, Lng.T("Das Kennwort ist falsch."), null, TaskDialogIcon.Warning); }
-                using PasswordForm dialog = new(Path.GetFileName(path), title: Lng.T("Geschützte Datei öffnen"));
+                using PasswordForm dialog = new(Path.GetFileName(path));
                 if (dialog.ShowDialog(this) != DialogResult.OK || version != loadVersion)
                 {
                     if (version == loadVersion) { ShowDocument(null); statusPath.Text = Lng.T("Ohne Kennwort lässt sich die Datei nicht anzeigen."); }
@@ -439,6 +441,9 @@ public partial class MainForm : Form
         else if (page > 1) { pageView.GoToPage(page - 1); }
         var (fileVersion, encrypted) = await opened.InfoAsync();
         var outline = await opened.OutlineAsync();
+        // für den Hinweis in der Statusleiste – nur die Anzahl (die Liste entpackt jeden Anhang) und nur beim ersten Laden, nicht bei
+        // jedem Stand aus dem Speicher (Anmerkungsschritte, Rückgängig), dort wird der Status nicht neu gesetzt (Review 06.10.2026)
+        var attachmentCount = currentPageCount < 0 ? await opened.AttachmentCountAsync() : 0;
         if (opened == document)
         {
             FillOutline(outline);
@@ -448,7 +453,7 @@ public partial class MainForm : Form
             if (currentPageCount < 0)
             {
                 static int Count(IEnumerable<OutlineItem> items) => items.Sum(i => 1 + Count(i.Children));
-                currentPdfStatus = (currentPdfStatus ?? new PdfStatus(-1, null, null)) with { PageCount = opened.PageCount, Version = fileVersion, Encrypted = encrypted, OutlineCount = Count(outline) };
+                currentPdfStatus = (currentPdfStatus ?? new PdfStatus(-1, null, null)) with { PageCount = opened.PageCount, Version = fileVersion, Encrypted = encrypted, OutlineCount = Count(outline), AttachmentCount = attachmentCount };
                 currentPageCount = opened.PageCount;
                 var message = statusPath.Text;
                 UpdateUiState();
@@ -504,9 +509,6 @@ public partial class MainForm : Form
         mnuInsertPage.Enabled = !EditLocked;
         mnuRemoveBookmarks.Enabled = !EditLocked && (currentPdfStatus?.OutlineCount ?? 0) > 0;
         mnuEditBookmarks.Enabled = !EditLocked; // auch ohne Lesezeichen: dann legt der Editor welche an
-        mnuSetPassword.Enabled = currentPageCount > 0 && !EditLocked;  // nur ohne bestehenden Kennwortschutz
-        mnuRemovePassword.Enabled = hasFile && (currentPageCount <= 0 || Encrypted);  // bei geschützter (oder unlesbarer) Datei
-        mnuRemoveRestrictions.Available = hasFile && OwnerPasswordOnly; // nur bei lesbaren, aber besitzergeschützten Dateien überhaupt im Menü (Wunsch vom 21.09.2026)
         foreach (var button in programIconButtons) { button.Enabled = hasFile; }
         mnuHighlight.Visible = mnuRemoveAnnotation.Visible = mnuAddFreeTextHere.Visible = toolStripSeparatorC1.Visible = hasFile && !EditLocked; // ändern das Dokument
         pageView.AllowAnnotationMove = hasFile && !EditLocked && currentPageCount > 0; // Textanmerkungen und Stempel verschieben (Ziehen) und bearbeiten (Doppelklick)
@@ -527,7 +529,7 @@ public partial class MainForm : Form
             statusIndex.Text = Lng.T("Datei") + " 0/0";
             statusPath.Text = Lng.T("Keine Datei geöffnet");
             statusInfo.Text = string.Empty;
-            statusFormat.Visible = false;
+            statusFormat.Visible = statusAttachments.Visible = false;
             statusZoom.Visible = false;
             btnPrev.Enabled = btnNext.Enabled = false;
         }
@@ -569,10 +571,8 @@ public partial class MainForm : Form
     /// (Einschränkungen): PDFsharp öffnet solche Dateien nicht zum Bearbeiten.</summary>
     private bool Encrypted => currentPdfStatus?.Encrypted ?? false;
 
-    /// <summary>Nur ein Besitzerkennwort (ohne Kennwort lesbar, aber mit Einschränkungen) – dafür gibt es „Einschränkungen entfernen“.</summary>
-    private bool OwnerPasswordOnly => Encrypted && currentFile != null && !passwords.ContainsKey(currentFile.FullName);
-
-    /// <summary>Bearbeiten gesperrt – wegen PDF/A (bis „Bearbeitung aktivieren“) oder wegen Kennwortschutz (bis „Kennwort entfernen“).</summary>
+    /// <summary>Bearbeiten gesperrt – wegen PDF/A (bis „Bearbeitung aktivieren“) oder wegen Kennwortschutz (bis er in den Eigenschaften, Reiter
+    /// „Sicherheit“, aufgehoben ist).</summary>
     private bool EditLocked => PdfALocked || Encrypted || currentPageCount < 0 || bookmarkEditor != null; // < 0: noch nicht geladen – Verschlüsselung erst danach bekannt (Review 04.10.2026); Lesezeichen-Editor offen: nur ansehen
 
     /// <summary>„Bearbeitung aktivieren“ im PDF/A-Banner: hebt nach einer Warnung den Schreibschutz
@@ -599,13 +599,24 @@ public partial class MainForm : Form
             ? Lng.T("PDF/A: Format für die Langzeitarchivierung") + $" (PDF {currentPdfStatus!.Version})"
             : Lng.T("PDF-Version der angezeigten Datei");
         statusFormat.Visible = currentPdfStatus?.Version != null;
+        // Anhänge (Wunsch vom 05.10.2026): sonst sah man sie nur, wenn man zufällig die Eigenschaften öffnete – E-Rechnungen tragen z. B.
+        // ihre XML so mit; ein Klick öffnet die Eigenschaften auf dem Reiter „Anhänge“
+        var attachments = currentPdfStatus?.AttachmentCount ?? 0;
+        statusAttachments.Text = statusAttachments.Image != null ? attachments.ToString() : Lng.T("Anhänge") + ": " + attachments; // ohne Symbolschrift ausgeschrieben
+        statusAttachments.ToolTipText = string.Format(Lng.T(attachments == 1 ? "Anhang anzeigen" : "{0} Anhänge anzeigen"), attachments); // kurz: ein langer Tooltip stieß maximiert an den Bildschirmrand und flackerte (05.10.2026)
+        statusAttachments.Visible = attachments > 0;
+    }
+
+    private void StatusAttachments_Click(object? sender, EventArgs e)
+    {
+        RunAfterCommit(() => ShowProperties(showAttachments: true));
     }
 
     private void OpenFile()
     {
         using OpenFileDialog dialog = new() { Filter = Lng.T("PDF-Dateien (*.pdf)|*.pdf"), Title = Lng.T("PDF-Datei öffnen") };
         if (currentFile != null) { dialog.InitialDirectory = currentFile.DirectoryName; }
-        if (dialog.ShowDialog(this) == DialogResult.OK) { LoadPdf(dialog.FileName, addToRecent: true); }
+        if (dialog.ShowDialog(this) == DialogResult.OK) { LoadOtherFile(dialog.FileName, addToRecent: true); }
     }
 
     /// <summary>Dropdown des Öffnen-Buttons: die zuletzt geöffneten Dateien.</summary>
@@ -621,7 +632,7 @@ public partial class MainForm : Form
                 Tag = file,
                 Image = ShellInfo.GetTypeIcon(".pdf", LogicalToDeviceUnits(16)),
             };
-            item.Click += (s, args) => RunAfterCommit(() => LoadPdf((string)((ToolStripMenuItem)s!).Tag!, addToRecent: true));
+            item.Click += (s, args) => RunUnlessEditing(() => LoadOtherFile((string)((ToolStripMenuItem)s!).Tag!, addToRecent: true));
             btnOpen.DropDownItems.Add(item);
         }
         if (btnOpen.DropDownItems.Count == 0)
@@ -741,7 +752,7 @@ public partial class MainForm : Form
         // Steht die Zieldatei schon in einem anderen Fenster, kommt dieses nach vorn und hier bleibt die aktuelle Datei – ohne Rückfrage
         // (Wunsch vom 26.09.2026; vorher ein Dialog mit „Anderes Fenster aktivieren“ als Vorgabe). Ist das Fenster inzwischen weg: hier anzeigen.
         var pid = InstanceRegistry.FindInstanceShowing(files[next]);
-        if (pid == null || !InstanceRegistry.Activate(pid.Value)) { LoadPdf(files[next]); }
+        if (pid == null || !InstanceRegistry.Activate(pid.Value)) { LoadOtherFile(files[next]); }
     }
 
     /// <summary>Nach dem Löschen: nächste Datei an gleicher Position laden oder Anzeige leeren. Zeigt eine andere Instanz die
@@ -1120,12 +1131,17 @@ public partial class MainForm : Form
         mnuAppendPdf.Image = MenuIcon(ToolbarIcons.Attach);
         mnuDuplex.Image = MenuIcon(ToolbarIcons.Interleave);
         mnuExtractPages.Image = MenuIcon(ToolbarIcons.Page);
+        // Büroklammer in der Statusleiste: in der Linkfarbe wie die Zahl daneben – das Feld ist ein Link (Wunsch vom 05.10.2026); immer mit
+        // Symbol, auch ohne Programm-Icons, sonst stünde nur eine Zahl da
+        statusAttachments.Image = ToolbarIcons.FontAvailable ? ToolbarIcons.Get(ToolbarIcons.Attach, LogicalToDeviceUnits(new Size(16, 16)), statusAttachments.LinkColor) : null;
+        mnuThumbInsertPage.Image = mnuInsertPage.Image; // Kontextmenü der Miniaturen: dieselben Befehle
+        mnuThumbRotatePages.Image = mnuRotatePages.Image;
+        mnuThumbMovePage.Image = mnuMovePage.Image;
+        mnuThumbExtractPages.Image = mnuExtractPages.Image;
+        mnuThumbDeletePages.Image = mnuDeletePages.Image;
         mnuRemoveBookmarks.Image = MenuIcon(ToolbarIcons.Bookmarks);
         mnuEditBookmarks.Image = MenuIcon(ToolbarIcons.Bookmarks);
         mnuManageStamps.Image = MenuIcon(ToolbarIcons.List);
-        mnuSetPassword.Image = MenuIcon(ToolbarIcons.Lock);
-        mnuRemovePassword.Image = MenuIcon(ToolbarIcons.Unlock);
-        mnuRemoveRestrictions.Image = MenuIcon(ToolbarIcons.Unlock);
         mnuProperties.Image = MenuIcon(ToolbarIcons.Info);
         mnuFavoriteAdd.Image = MenuIcon(ToolbarIcons.Favorite); // Favoriten-Menü
         mnuFavoriteRemove.Image = MenuIcon(ToolbarIcons.Delete); // schlicht – der Stern steht schon am Menü selbst
@@ -1252,95 +1268,6 @@ public partial class MainForm : Form
 
     // ------------------------------------------------------------------ Seitenoperationen (PDFsharp)
 
-    /// <summary>Verschlüsselt die aktuelle Datei mit AES-256 (PDF 2.0) und einem
-    /// Benutzer-Kennwort (Abfrage mit Wiederholungsfeld, mit Undo-Sicherung).</summary>
-    private void SetPasswordDialog()
-    {
-        if (currentFile == null) { return; }
-        if (!PdfEditService.CanOpen(currentFile.FullName, null))
-        {
-            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei ist bereits verschlüsselt."),
-                Lng.T("Ein Kennwortschutz lässt sich über Bearbeiten → \"Kennwort entfernen\" aufheben."), TaskDialogIcon.Information);
-            return;
-        }
-        using PasswordForm dialog = new(currentFile.Name, confirm: true);
-        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
-        var password = dialog.Password;
-        if (RunPdfEdit(() => PdfEditService.SetPassword(currentFile.FullName, password), Lng.T("Vergeben des Kennworts")))
-        {
-            passwords[currentFile.FullName] = password; // das Neuladen soll nicht gleich nach dem eben vergebenen Kennwort fragen
-            LoadPdf(currentFile.FullName, ClampedCurrentPage());
-            statusPath.Text = Lng.T("Die Datei ist jetzt mit AES-256 verschlüsselt.");
-        }
-    }
-
-    /// <summary>Entfernt den Kennwortschutz der aktuellen Datei (fragt das Kennwort ab, mit Undo-Sicherung).</summary>
-    /// <summary>Nur mit Besitzerkennwort geschützte Datei (Berechtigungen wie Drucken/Ändern eingeschränkt) ohne Kennwort neu aufbauen –
-    /// wie „Als PDF speichern“ im Druckdialog, nur ohne Rendering. Lesezeichen und Formularfelder gehen dabei verloren (Rückfrage).</summary>
-    /// <summary>„Einschränkungen entfernen“ (nur Besitzerkennwort): PDFium schreibt die angezeigte Datei unverschlüsselt
-    /// (FPDF_REMOVE_SECURITY) – verlustfrei, Lesezeichen und Formularfelder bleiben (seit 04.10.2026; PDFsharp musste sie ohne
-    /// Kennwort aus den Seiten neu aufbauen).</summary>
-    private async void RemoveRestrictionsDialog()
-    {
-        if (currentFile == null || !OwnerPasswordOnly || ShownDocument is not { } doc) { return; }
-        if (!TaskDlg.ConfirmTaskDlg(Handle, string.Format(Lng.T("Einschränkungen von „{0}“ entfernen?"), currentFile.Name),
-            Lng.T("Die Datei ist nur mit einem Besitzerkennwort geschützt, das Berechtigungen wie Drucken oder Ändern einschränkt. Die Einschränkungen werden entfernt, der Inhalt bleibt vollständig erhalten."),
-            TaskDialogIcon.Warning)) { return; }
-        byte[] bytes;
-        try { bytes = await doc.SaveAsync(removeSecurity: true); }
-        catch (InvalidOperationException ex)
-        {
-            TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), Lng.T("Entfernen der Einschränkungen")), ex);
-            return;
-        }
-        if (doc != document || currentFile == null) { return; }
-        var path = currentFile.FullName;
-        if (RunPdfEdit(() => File.WriteAllBytes(path, bytes), Lng.T("Entfernen der Einschränkungen"), allowEncrypted: true))
-        {
-            LoadPdf(path); // jetzt ist auch die Bearbeitung frei
-            statusPath.Text = Lng.T("Die Einschränkungen wurden entfernt.");
-        }
-    }
-
-    /// <summary>„Kennwort entfernen“ über PDFium (seit 04.10.2026): Die angezeigte Datei ist schon mit dem Kennwort geöffnet – nach einer
-    /// Rückfrage schreibt PDFium sie unverschlüsselt (FPDF_REMOVE_SECURITY), verlustfrei und ohne erneute Kennwortabfrage. Bis dahin
-    /// fragte PDFlight das Kennwort ab, und PDFsharp musste die Datei mit bloßem Benutzerkennwort aus den Seiten neu aufbauen (Lesezeichen
-    /// und Formularfelder gingen verloren). Nur ein Besitzerkennwort: dasselbe wie „Einschränkungen entfernen“.</summary>
-    private async void RemovePasswordDialog()
-    {
-        if (currentFile == null) { return; }
-        var path = currentFile.FullName;
-        if (ShownDocument == null) // Kennwortabfrage beim Öffnen abgebrochen: jetzt laden, dabei kommt sie erneut
-        {
-            LoadPdf(path);
-            if (await WaitForDocumentAsync() == null || currentFile?.FullName != path) { return; }
-        }
-        if (ShownDocument is not { } doc || currentFile == null) { return; }
-        if (!Encrypted)
-        {
-            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei ist nicht verschlüsselt."), null, TaskDialogIcon.Information);
-            return;
-        }
-        if (OwnerPasswordOnly) { RemoveRestrictionsDialog(); return; }
-        if (!TaskDlg.ConfirmTaskDlg(Handle, string.Format(Lng.T("Kennwortschutz von „{0}“ entfernen?"), currentFile.Name),
-            Lng.T("Die Datei wird unverschlüsselt gespeichert und lässt sich danach ohne Kennwort öffnen. Der Inhalt bleibt vollständig erhalten."),
-            TaskDialogIcon.Warning)) { return; }
-        byte[] bytes;
-        try { bytes = await doc.SaveAsync(removeSecurity: true); }
-        catch (InvalidOperationException ex)
-        {
-            TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), Lng.T("Entfernen des Kennworts")), ex);
-            return;
-        }
-        if (doc != document || currentFile?.FullName != path) { return; }
-        if (RunPdfEdit(() => File.WriteAllBytes(path, bytes), Lng.T("Entfernen des Kennworts"), allowEncrypted: true))
-        {
-            passwords.Remove(path);
-            LoadPdf(path, ClampedCurrentPage()); // jetzt ist auch die Bearbeitung frei
-            statusPath.Text = Lng.T("Das Kennwort wurde entfernt.");
-        }
-    }
-
     /// <summary>Rückseiten-Scan einfügen (Duplex-Zusammenführung): Rückseiten aus einer zweiten Datei
     /// hinter die Seiten der aktuellen verzahnen — für Scanner ohne Duplex-Einheit.</summary>
     private void MergeDuplexDialog()
@@ -1425,18 +1352,18 @@ public partial class MainForm : Form
         finally { Cursor.Current = Cursors.Default; }
     }
 
-    /// <summary>Verschlüsselte, aber ohne Kennwort lesbare Datei (nur Besitzerkennwort): Bearbeiten geht erst nach „Kennwort entfernen“.</summary>
+    /// <summary>Verschlüsselte Datei: Bearbeiten geht erst, wenn der Schutz in den Eigenschaften (Reiter „Sicherheit“) aufgehoben ist.</summary>
     private void ShowEncryptedMessage()
     {
         TaskDlg.MsgTaskDlg(Handle, string.Format(Lng.T("„{0}“ ist mit einem Kennwort geschützt."), currentFile?.Name),
-            Lng.T("Zum Bearbeiten hebst du den Schutz zuerst über Bearbeiten → „Einschränkungen entfernen…“ auf."), TaskDialogIcon.Warning);
+            Lng.T("Zum Bearbeiten hebst du den Schutz zuerst unter Eigenschaften (Strg+I), Reiter „Sicherheit“, auf."), TaskDialogIcon.Warning);
     }
 
     private void ShowNotEditableMessage()
     {
         TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei kann nicht bearbeitet werden."),
             Lng.T("Möglicherweise ist sie verschlüsselt oder beschädigt.") + Environment.NewLine
-            + Lng.T("Ein Kennwortschutz lässt sich über Bearbeiten → \"Kennwort entfernen\" aufheben."), TaskDialogIcon.Warning);
+            + Lng.T("Öffne sie mit ihrem Kennwort – den Schutz hebst du dann unter Eigenschaften (Strg+I), Reiter „Sicherheit“, auf."), TaskDialogIcon.Warning);
     }
 
     private void DeletePagesDialog()
@@ -1744,7 +1671,9 @@ public partial class MainForm : Form
         }
     }
 
-    private async void ShowProperties()
+    private void ShowProperties() => ShowProperties(showAttachments: false);
+
+    private async void ShowProperties(bool showAttachments)
     {
         if (currentFile == null) { return; }
         PdfInfo info;
@@ -1754,7 +1683,7 @@ public partial class MainForm : Form
         currentFile.Refresh();
         // Sicherheit und Anhänge aus PDFium – das Hilfsprogramm hat die Datei ohnehin offen
         (uint Permissions, int Revision) security = (uint.MaxValue, -1);
-        IReadOnlyList<(string Name, long Size)> attachments = [];
+        IReadOnlyList<(string Name, long Size, DateTime? Modified)> attachments = [];
         var document = ShownDocument;
         if (document != null)
         {
@@ -1767,24 +1696,70 @@ public partial class MainForm : Form
             if (currentFile == null || ShownDocument != document) { return; } // inzwischen eine andere Datei
         }
         Func<int, Task<byte[]>>? loadAttachment = document == null ? null : document.AttachmentDataAsync;
-        using PropertiesForm dialog = new(info, currentFile, currentPdfStatus, PdfALocked || Encrypted, security, password != null, attachments, loadAttachment);
-        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
-        if (dialog.RemoveRequested) // alles weg, auch Anwendung, Produzent, Daten und XMP; danach eingetippte Felder bleiben
+        using PropertiesForm dialog = new(info, currentFile, currentPdfStatus, PdfALocked, security, password != null, attachments, loadAttachment);
+        if (showAttachments) { dialog.SelectAttachments(); }
+        if (dialog.ShowDialog(this) != DialogResult.OK || !dialog.HasChanges) { return; } // „OK“ ohne Änderung schreibt nichts
+        await WritePropertiesAsync(dialog, document, password, security);
+    }
+
+    /// <summary>Schränkt die Datei etwas ein (Drucken, Ändern, Kopieren, Kommentieren, Formulare, Zusammenstellen)? Bits nach PDF-Norm
+    /// Tabelle 22 (1-basiert 3–6, ab Revision 3 auch 9–12); unverschlüsselt (Revision -1) nie.</summary>
+    private static bool HasRestrictions((uint Permissions, int Revision) security)
+    {
+        if (security.Revision < 0) { return false; }
+        var mask = security.Revision >= 3 ? 0xF3Cu : 0x3Cu;
+        return (security.Permissions & mask) != mask;
+    }
+
+    /// <summary>„OK“ im Eigenschaften-Dialog: Metadaten und Kennwortschutz in einem Schreibvorgang, ein Rückgängig-Schritt (seit 06.10.2026;
+    /// vorher getrennte Menüpunkte „Kennwort vergeben/entfernen“ und „Einschränkungen entfernen“). Eine verschlüsselte Datei entschlüsselt
+    /// erst PDFium (verlustfrei, die angezeigte Datei ist schon offen), PDFsharp schreibt dann Metadaten und verschlüsselt bei Bedarf neu –
+    /// mit dem neuen Kennwort oder, wenn es bleiben soll, mit dem bisherigen.</summary>
+    private async Task WritePropertiesAsync(PropertiesForm dialog, PdfiumDocument? shown, string? oldPassword, (uint Permissions, int Revision) security)
+    {
+        if (currentFile == null) { return; }
+        var path = currentFile.FullName;
+        var action = dialog.PasswordAction;
+        var newPassword = action switch
         {
-            if (RunPdfEdit(() => PdfEditService.RemoveMetadata(currentFile.FullName, dialog.DocTitle, dialog.DocAuthor, dialog.DocSubject, dialog.DocKeywords), Lng.T("Entfernen der Metadaten")))
-            {
-                LoadPdf(currentFile.FullName);
-                statusPath.Text = Lng.T("Die Metadaten wurden entfernt.");
-            }
-        }
-        else if (dialog.InfoChanged)
+            PasswordChange.Set => dialog.NewPassword,
+            PasswordChange.Remove => null,
+            _ => Encrypted && !dialog.RemoveRestrictions ? oldPassword : null, // beibehalten; bloße Einschränkungen aufheben = unverschlüsselt
+        };
+        // Neu verschlüsseln kann PDFsharp nur mit einem Kennwort zum Öffnen und ohne Einschränkungen – die ursprüngliche Verschlüsselung
+        // übernimmt es nicht (im Modify-Modus verlangt es das Besitzerkennwort und speichert dann unverschlüsselt). Hatte die Datei
+        // Einschränkungen, entfallen sie; und war das eingegebene Kennwort das Besitzerkennwort, gilt es künftig zum Öffnen. Vorher
+        // fragen statt still zu ändern (Review 06.10.2026); ohne Einschränkungen bleibt alles, wie es war.
+        if (Encrypted && newPassword != null && HasRestrictions(security) && !TaskDlg.ConfirmTaskDlg(Handle,
+            Lng.T("Die Einschränkungen der Datei entfallen."),
+            Lng.T(action == PasswordChange.Set ? "Mit dem neuen Kennwort wird die Datei neu verschlüsselt (AES 256 Bit); Einschränkungen wie beim Drucken oder Kopieren gelten danach nicht mehr. Trotzdem speichern?"
+                : "Die Datei wird mit dem Kennwort, mit dem du sie geöffnet hast, neu verschlüsselt (AES 256 Bit); Einschränkungen wie beim Drucken oder Kopieren gelten danach nicht mehr. Hast du sie mit dem Besitzerkennwort geöffnet, öffnet künftig dieses die Datei. Trotzdem speichern?"),
+            TaskDialogIcon.Warning)) { return; }
+        byte[]? decrypted = null;
+        if (Encrypted)
         {
-            if (RunPdfEdit(() => PdfEditService.WriteInfo(currentFile.FullName, dialog.DocTitle, dialog.DocAuthor, dialog.DocSubject, dialog.DocKeywords), Lng.T("Speichern der Eigenschaften")))
+            if (shown == null) { ShowNotEditableMessage(); return; }
+            try { decrypted = await shown.SaveAsync(removeSecurity: true); }
+            catch (InvalidOperationException ex)
             {
-                LoadPdf(currentFile.FullName);
-                statusPath.Text = Lng.T("Die Dokumenteigenschaften wurden gespeichert.");
+                TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), Lng.T("Speichern der Eigenschaften")), ex);
+                return;
             }
+            if (shown != document || currentFile?.FullName != path) { return; } // inzwischen eine andere Datei
         }
+        DocumentText? text = dialog.InfoChanged || dialog.RemoveRequested ? new(dialog.DocTitle, dialog.DocAuthor, dialog.DocSubject, dialog.DocKeywords) : null;
+        PropertyChanges changes = new(text, dialog.RemoveRequested, newPassword);
+        if (!RunPdfEdit(() => PdfEditService.WriteProperties(path, decrypted, changes), Lng.T("Speichern der Eigenschaften"), allowEncrypted: true)) { return; }
+        if (newPassword != null) { passwords[path] = newPassword; } else { passwords.Remove(path); } // das Neuladen fragt nicht nach
+        LoadPdf(path, ClampedCurrentPage()); // Status, Sperren und Statusleiste neu
+        statusPath.Text = action switch
+        {
+            PasswordChange.Set => Lng.T("Die Datei ist jetzt mit einem Kennwort geschützt (AES 256 Bit)."),
+            PasswordChange.Remove => Lng.T("Der Kennwortschutz wurde entfernt."),
+            _ when dialog.RemoveRestrictions => Lng.T("Die Einschränkungen wurden aufgehoben."),
+            _ when dialog.RemoveRequested => Lng.T("Die Metadaten wurden entfernt."),
+            _ => Lng.T("Die Dokumenteigenschaften wurden gespeichert."),
+        };
     }
 
     /// <summary>Stempelpalette zeigen und den gewählten Stempel auf die angezeigte Seite setzen (Strg+L).</summary>
@@ -2363,7 +2338,7 @@ public partial class MainForm : Form
             TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei existiert nicht mehr."), favorite.File, TaskDialogIcon.Warning);
             return;
         }
-        RunAfterCommit(() => LoadPdf(favorite.File, addToRecent: true));
+        RunUnlessEditing(() => LoadOtherFile(favorite.File, addToRecent: true));
     }
 
     private void MnuFavoriteAdd_Click(object? sender, EventArgs e) { AddFavorite(); }
@@ -2417,7 +2392,7 @@ public partial class MainForm : Form
     private void UpdateFilePaths(string oldPath, string newPath)
     {
         // sonst fragte das Neuladen erneut nach dem Kennwort, und eine Datei mit Benutzerkennwort galt als „nur Besitzerkennwort“
-        // (OwnerPasswordOnly) – „Einschränkungen entfernen“ hätte dann das Kennwort entfernt (Review 04.10.2026)
+        // – der Eigenschaften-Dialog hätte dann statt des Kennworts nur „Einschränkungen aufheben“ angeboten (Review 04.10.2026)
         if (passwords.Remove(oldPath, out var password)) { passwords[newPath] = password; }
         settings.ReloadSharedLists(); // parallel laufende Instanzen nicht überschreiben
         settings.MoveFavorites(oldPath, newPath);
@@ -2560,6 +2535,22 @@ public partial class MainForm : Form
         action();
     }
 
+    /// <summary>Einstieg für das Wechseln der Datei (Öffnen, Zuletzt-Liste, Favoriten, Blättern im Ordner): offene Änderungen nicht still
+    /// speichern – die Rückfrage stellt <see cref="LoadOtherFile"/>, sobald feststeht, dass eine andere Datei angezeigt wird.</summary>
+    private void RunUnlessEditing(Action action)
+    {
+        if (bookmarkEditor != null) { bookmarkEditor.Activate(); return; } // Lesezeichen-Editor offen: die Datei bleibt angezeigt
+        action();
+    }
+
+    /// <summary>Eine andere Datei anzeigen; bei offenen Änderungen der bisherigen vorher Speichern / Nicht speichern / Abbrechen fragen
+    /// wie beim Schließen (Wunsch vom 05.10.2026 – vorher wurde still gespeichert).</summary>
+    private async void LoadOtherFile(string path, bool addToRecent = false)
+    {
+        if (!await ConfirmSaveChangesAsync()) { return; }
+        LoadPdf(path, addToRecent: addToRecent);
+    }
+
     private bool closeApproved; // Rückfrage zu den Formulareingaben beim Schließen erledigt: das nächste Schließen läuft durch
 
     private void Document_Changed(object? sender, EventArgs e)
@@ -2609,6 +2600,16 @@ public partial class MainForm : Form
     /// <summary>Schließen mit offenen Formulareingaben: Speichern / Nicht speichern / Abbrechen (Wunsch vom 26.09.2026); danach erneut schließen.</summary>
     private async void AskSaveFormBeforeClose()
     {
+        if (!await ConfirmSaveChangesAsync()) { return; }
+        closeApproved = true;
+        Close();
+    }
+
+    /// <summary>Rückfrage bei offenen Änderungen der Anzeige vor dem Schließen von Programm oder Dokument: Speichern / Nicht speichern /
+    /// Abbrechen. false = abgebrochen oder Speichern gescheitert, das Schließen unterbleibt.</summary>
+    private async Task<bool> ConfirmSaveChangesAsync()
+    {
+        if (!documentDirty) { return true; }
         var save = new TaskDialogButton(Lng.T("Speichern"));
         var discard = new TaskDialogButton(Lng.T("Nicht speichern"));
         var text = Lng.T("Formulareingaben oder Anmerkungen sind noch nicht in der Datei gespeichert.");
@@ -2624,11 +2625,12 @@ public partial class MainForm : Form
             DefaultButton = save,
         };
         var result = TaskDialog.ShowDialog(Handle, page);
-        if (result == save) { if (!await CommitFormAsync()) { return; } }
-        else if (result == discard) { documentDirty = false; viewUndo.Clear(); }
-        else { return; }
-        closeApproved = true;
-        Close();
+        if (result == save) { return await CommitFormAsync(); }
+        if (result != discard) { return false; }
+        documentDirty = false;
+        viewUndo.Clear();
+        UpdateUndoMenu();
+        return true;
     }
 
     /// <summary>Dateidaten der angezeigten Datei neu einlesen (Größe, Änderungszeit, Seitenzahl, PDF-Status), ohne die Anzeige zu laden –
@@ -3189,14 +3191,17 @@ public partial class MainForm : Form
 
     private void BtnCloseDocument_Click(object? sender, EventArgs e)
     {
-        RunAfterCommit(CloseDocument); // offene Formulareingaben vorher in die Datei
+        CloseDocument();
     }
 
     /// <summary>Strg+W und die Schaltfläche ganz rechts in der Viewer-Leiste: das Dokument schließen – PDFlight zeigt danach keine Datei
-    /// mehr an (die Seite wird wie beim Wechsel gemerkt).</summary>
-    private void CloseDocument()
+    /// mehr an (die Seite wird wie beim Wechsel gemerkt). Offene Änderungen nicht still speichern, sondern wie beim Beenden nachfragen
+    /// (Wunsch vom 05.10.2026).</summary>
+    private async void CloseDocument()
     {
         if (currentFile == null && document == null) { return; }
+        if (bookmarkEditor != null) { bookmarkEditor.Activate(); return; } // Lesezeichen-Editor offen: die Datei bleibt angezeigt
+        if (!await ConfirmSaveChangesAsync()) { return; }
         if (RememberCurrentPage()) { settings.Save(); }
         ClearDisplay(Lng.T("Das Dokument wurde geschlossen."));
     }
@@ -3404,6 +3409,55 @@ public partial class MainForm : Form
     private void ThumbnailGrid_PageActivated(object? sender, int page)
     {
         pageView.GoToPage(page);
+    }
+
+    /// <summary>Kontextmenü der Miniaturen (Wunsch vom 05.10.2026, wie Acrobat): die Seitenbefehle des Bearbeiten-Menüs. Der Rechtsklick
+    /// hat die Seite schon angezeigt (<see cref="ThumbnailGrid"/>), die Befehle wirken wie im Menü auf die angezeigte Seite – gesperrt wie dort.</summary>
+    private void ContextMenuThumbnails_Opening(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        if (currentFile == null || document == null) { e.Cancel = true; return; }
+        var menu = ddbEdit.Enabled; // aus, solange der Lesezeichen-Editor offen ist
+        mnuThumbInsertPage.Enabled = menu && mnuInsertPage.Enabled;
+        mnuThumbRotatePages.Enabled = menu && mnuRotatePages.Enabled;
+        mnuThumbMovePage.Enabled = menu && mnuMovePage.Enabled;
+        mnuThumbExtractPages.Enabled = menu && mnuExtractPages.Enabled;
+        mnuThumbDeletePages.Enabled = menu && mnuDeletePages.Enabled;
+    }
+
+    /// <summary>Kontextmenü der Dokumentstruktur: alles auf- oder zuklappen, bis Ebene 2 oder 3 nur, wenn das nicht schon „alles“ ist;
+    /// wirkungslose Einträge (der Baum steht schon so) ausgegraut.</summary>
+    private void ContextMenuOutline_Opening(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        var depth = outlineView.Depth;
+        if (depth < 2) { e.Cancel = true; return; } // nichts zum Aufklappen
+        mnuOutlineLevel2.Available = depth > 2;
+        mnuOutlineLevel3.Available = depth > 3;
+        toolStripSeparatorO1.Available = depth > 2;
+        // was gerade nichts ändern würde, ausgegraut (Wunsch vom 05.10.2026)
+        mnuOutlineExpandAll.Enabled = !outlineView.IsAtLevel(int.MaxValue);
+        mnuOutlineCollapseAll.Enabled = !outlineView.IsAtLevel(1);
+        mnuOutlineLevel2.Enabled = !outlineView.IsAtLevel(2);
+        mnuOutlineLevel3.Enabled = !outlineView.IsAtLevel(3);
+    }
+
+    private void MnuOutlineExpandAll_Click(object? sender, EventArgs e)
+    {
+        outlineView.ExpandToLevel(int.MaxValue);
+    }
+
+    private void MnuOutlineCollapseAll_Click(object? sender, EventArgs e)
+    {
+        outlineView.ExpandToLevel(1);
+    }
+
+    private void MnuOutlineLevel2_Click(object? sender, EventArgs e)
+    {
+        outlineView.ExpandToLevel(2);
+    }
+
+    private void MnuOutlineLevel3_Click(object? sender, EventArgs e)
+    {
+        outlineView.ExpandToLevel(3);
     }
 
     /// <summary>Dokumentstruktur der Seitenleiste füllen (selbst gezeichnet wie bei Chrome: Pfeile, Zeilenumbruch – <see cref="OutlineView"/>);
@@ -3727,6 +3781,11 @@ public partial class MainForm : Form
         or (Keys.Add | Keys.Control) or (Keys.Oemplus | Keys.Control) or (Keys.Subtract | Keys.Control) or (Keys.OemMinus | Keys.Control)
         or (Keys.D0 | Keys.Control) or (Keys.NumPad0 | Keys.Control) or (Keys.Space | Keys.Control) or (Keys.S | Keys.Control);
 
+    /// <summary>Kürzel, die die angezeigte Datei schließen oder durch eine andere ersetzen – sie speichern nicht still, sondern fragen selbst
+    /// (<see cref="CloseDocument"/>, <see cref="LoadOtherFile"/>).</summary>
+    private static bool IsFileSwitch(Keys keyData) => keyData is (Keys.W | Keys.Control) or (Keys.O | Keys.Control)
+        or (Keys.Right | Keys.Control | Keys.Shift) or (Keys.Left | Keys.Control | Keys.Shift);
+
     /// <summary>Kürzel, die selbst in der Anzeige bearbeiten (Anmerkungen) oder deren Schritte zurücknehmen – davor wird nicht gespeichert.</summary>
     private bool IsViewEdit(Keys keyData) => keyData is (Keys.T | Keys.Control) or (Keys.H | Keys.Control) or (Keys.T | Keys.Control | Keys.Shift)
         || (keyData == (Keys.Z | Keys.Control) && viewUndo.Count > 0);
@@ -3846,7 +3905,7 @@ public partial class MainForm : Form
         if (ResolveShortcut(keyData) is { } action)
         {
             if (bookmarkEditor != null && !IsViewNeutral(keyData)) { bookmarkEditor.Activate(); return true; } // Editor offen: nur Ansicht
-            if (documentDirty && !IsViewNeutral(keyData) && !IsViewEdit(keyData)) { RunAfterCommit(action); } // offene Änderungen zuerst in die Datei
+            if (documentDirty && !IsViewNeutral(keyData) && !IsViewEdit(keyData) && !IsFileSwitch(keyData)) { RunAfterCommit(action); } // offene Änderungen zuerst in die Datei
             else { action(); }
             return true;
         }
@@ -3873,17 +3932,18 @@ public partial class MainForm : Form
 
     // Datei- und Dokumentfunktionen laufen über RunAfterCommit: offene Formulareingaben kommen vorher in die Datei
     // (Wunsch vom 26.09.2026); Einstellungen, Hilfe, Ordner öffnen und die Favoriten-Pflege berühren die Datei nicht.
+    // Öffnen und Blättern wechseln die Datei – sie fragen nach (RunUnlessEditing, LoadOtherFile; seit 05.10.2026).
     private void BtnOpen_Click(object? sender, EventArgs e)
     {
-        RunAfterCommit(OpenFile);
+        RunUnlessEditing(OpenFile);
     }
     private void BtnPrev_Click(object? sender, EventArgs e)
     {
-        RunAfterCommit(() => StepFile(-1));
+        RunUnlessEditing(() => StepFile(-1));
     }
     private void BtnNext_Click(object? sender, EventArgs e)
     {
-        RunAfterCommit(() => StepFile(1));
+        RunUnlessEditing(() => StepFile(1));
     }
     private void BtnCopy_Click(object? sender, EventArgs e)
     {
@@ -3920,7 +3980,7 @@ public partial class MainForm : Form
     }
     private async void MnuCheckUpdate_Click(object? sender, EventArgs e)
     {
-        await TaskDlg.UpdateTaskDlg(Handle);
+        await TaskDlg.UpdateTaskDlg(Handle, Icon);
     }
     private void MnuAbout_Click(object? sender, EventArgs e)
     {
@@ -3977,19 +4037,6 @@ public partial class MainForm : Form
     private void MnuDuplex_Click(object? sender, EventArgs e)
     {
         RunAfterCommit(MergeDuplexDialog);
-    }
-    private void MnuSetPassword_Click(object? sender, EventArgs e)
-    {
-        RunAfterCommit(SetPasswordDialog);
-    }
-    private void MnuRemovePassword_Click(object? sender, EventArgs e)
-    {
-        RunAfterCommit(RemovePasswordDialog);
-    }
-
-    private void MnuRemoveRestrictions_Click(object? sender, EventArgs e)
-    {
-        RunAfterCommit(RemoveRestrictionsDialog);
     }
     private void BtnUndo_Click(object? sender, EventArgs e)
     {

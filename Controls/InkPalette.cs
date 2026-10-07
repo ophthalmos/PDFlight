@@ -53,7 +53,8 @@ public partial class InkPalette : UserControl
         this.dark = dark;
         BackColor = trackWidth.BackColor = dark ? Color.FromArgb(44, 44, 44) : SystemColors.Window;
         ForeColor = dark ? Color.FromArgb(232, 232, 232) : SystemColors.ControlText;
-        labelThin.ForeColor = labelWide.ForeColor = dark ? Color.FromArgb(170, 170, 170) : SystemColors.GrayText;
+        labelThin.ForeColor = labelWide.ForeColor = labelHint.ForeColor = dark ? Color.FromArgb(170, 170, 170) : SystemColors.GrayText;
+        panelLine.BackColor = dark ? Color.FromArgb(80, 80, 80) : Color.FromArgb(218, 218, 218);
         Invalidate(true);
     }
 
@@ -102,7 +103,8 @@ public partial class InkPalette : UserControl
                 g.DrawEllipse(pen, outer);
             }
             using (var brush = new SolidBrush(Colors[i])) { g.FillEllipse(brush, bounds); }
-            using (var border = new Pen(Color.FromArgb(dark ? 90 : 60, 128, 128, 128))) { g.DrawEllipse(border, bounds); } // helle Farben auf hellem Grund
+            using var border = new Pen(Color.FromArgb(dark ? 90 : 60, 128, 128, 128));
+            g.DrawEllipse(border, bounds);  // helle Farben auf hellem Grund
         }
     }
 

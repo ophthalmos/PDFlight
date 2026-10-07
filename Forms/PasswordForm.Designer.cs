@@ -29,11 +29,8 @@ namespace PDFLight.Forms
         private void InitializeComponent()
         {
             labelFileValue = new System.Windows.Forms.Label();
-            labelInfo = new System.Windows.Forms.Label();
             labelPassword = new System.Windows.Forms.Label();
             textBoxPassword = new System.Windows.Forms.TextBox();
-            labelRepeat = new System.Windows.Forms.Label();
-            textBoxRepeat = new System.Windows.Forms.TextBox();
             buttonOK = new System.Windows.Forms.Button();
             buttonCancel = new System.Windows.Forms.Button();
             SuspendLayout();
@@ -47,15 +44,6 @@ namespace PDFLight.Forms
             labelFileValue.Size = new System.Drawing.Size(400, 15);
             labelFileValue.TabIndex = 0;
             labelFileValue.Text = "datei.pdf";
-            //
-            // labelInfo
-            //
-            labelInfo.AutoSize = true;
-            labelInfo.Location = new System.Drawing.Point(12, 38);
-            labelInfo.Name = "labelInfo";
-            labelInfo.Size = new System.Drawing.Size(400, 45);
-            labelInfo.TabIndex = 7;
-            labelInfo.Visible = false;
             //
             // labelPassword
             //
@@ -75,24 +63,6 @@ namespace PDFLight.Forms
             textBoxPassword.TabIndex = 2;
             textBoxPassword.UseSystemPasswordChar = true;
             //
-            // labelRepeat
-            //
-            labelRepeat.AutoSize = true;
-            labelRepeat.Location = new System.Drawing.Point(12, 83);
-            labelRepeat.Name = "labelRepeat";
-            labelRepeat.Size = new System.Drawing.Size(79, 15);
-            labelRepeat.TabIndex = 3;
-            labelRepeat.Text = "&Wiederholen:";
-            //
-            // textBoxRepeat
-            //
-            textBoxRepeat.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            textBoxRepeat.Location = new System.Drawing.Point(100, 80);
-            textBoxRepeat.Name = "textBoxRepeat";
-            textBoxRepeat.Size = new System.Drawing.Size(312, 23);
-            textBoxRepeat.TabIndex = 4;
-            textBoxRepeat.UseSystemPasswordChar = true;
-            //
             // buttonOK
             //
             buttonOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
@@ -103,7 +73,6 @@ namespace PDFLight.Forms
             buttonOK.TabIndex = 5;
             buttonOK.Text = "OK";
             buttonOK.UseVisualStyleBackColor = true;
-            buttonOK.Click += ButtonOK_Click;
             //
             // buttonCancel
             //
@@ -125,11 +94,8 @@ namespace PDFLight.Forms
             ClientSize = new System.Drawing.Size(424, 129);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
-            Controls.Add(textBoxRepeat);
-            Controls.Add(labelRepeat);
             Controls.Add(textBoxPassword);
             Controls.Add(labelPassword);
-            Controls.Add(labelInfo);
             Controls.Add(labelFileValue);
             FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             MaximizeBox = false;
@@ -137,7 +103,7 @@ namespace PDFLight.Forms
             Name = "PasswordForm";
             ShowInTaskbar = false;
             StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            Text = "Kennwort entfernen";
+            Text = "Geschützte Datei öffnen";
             ResumeLayout(false);
             PerformLayout();
         }
@@ -145,11 +111,8 @@ namespace PDFLight.Forms
         #endregion
 
         private System.Windows.Forms.Label labelFileValue;
-        private System.Windows.Forms.Label labelInfo;
         private System.Windows.Forms.Label labelPassword;
         private System.Windows.Forms.TextBox textBoxPassword;
-        private System.Windows.Forms.Label labelRepeat;
-        private System.Windows.Forms.TextBox textBoxRepeat;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
     }

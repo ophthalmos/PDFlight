@@ -283,7 +283,7 @@ internal sealed class ThumbnailGrid : ScrollableControl
     {
         base.OnMouseDown(e);
         Focus(); // für Mausrad und Pfeiltasten
-        if (e.Button != MouseButtons.Left || document == null) { return; }
+        if (e.Button is not (MouseButtons.Left or MouseButtons.Right) || document == null) { return; } // rechts: die Seite fürs Kontextmenü anzeigen
         var hit = VisiblePages().FirstOrDefault(i => CellBounds(i).Contains(e.Location), -1);
         if (hit >= 0) { Activate(hit); }
     }

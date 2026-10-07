@@ -171,6 +171,7 @@ internal static unsafe partial class Pdfium
     [LibraryImport(Lib, EntryPoint = "FPDFDoc_GetAttachment")] public static partial nint DocGetAttachment(nint document, int index);
     [LibraryImport(Lib, EntryPoint = "FPDFAttachment_GetName")] public static partial uint AttachmentGetName(nint attachment, byte* buffer, uint length);
     [LibraryImport(Lib, EntryPoint = "FPDFAttachment_GetFile")] public static partial int AttachmentGetFile(nint attachment, byte* buffer, uint length, out uint written);
+    [LibraryImport(Lib, EntryPoint = "FPDFAttachment_GetStringValue")] public static partial uint AttachmentGetStringValue(nint attachment, byte* key, byte* buffer, uint length);
     public const int FlattenForPrint = 1;         // FLAT_PRINT
     public const int FlattenFailed = 0;           // FLATTEN_FAIL (1 = erledigt, 2 = nichts einzubrennen)
 

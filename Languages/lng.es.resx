@@ -234,31 +234,15 @@ En el siguiente paso, elige el archivo con las caras traseras: se intercalará c
 en un documento completo (1, 2, 3 …).
 
 Ambos archivos deben tener el mismo número de páginas.</value></data>
-  <data name="Kennwort entfernen…" xml:space="preserve"><value>Quitar la contraseña…</value></data>
-  <data name="Kennwort vergeben…" xml:space="preserve"><value>Establecer contraseña…</value></data>
   <data name="Drucken" xml:space="preserve"><value>Imprimir</value></data>
   <data name="Datei drucken (Strg+P)" xml:space="preserve"><value>Imprimir el archivo (Ctrl+P)</value></data>
-  <data name="Benutzer-Kennwort vergeben" xml:space="preserve"><value>Establecer contraseña de usuario</value></data>
-  <data name="Kennwort.Info" xml:space="preserve"><value>El archivo se cifrará con AES-256 (PDF 2.0).
-La contraseña se pedirá cada vez que se abra el archivo.
-Sin ella, el archivo ya no podrá mostrarse.</value></data>
   <data name="Kennwort anzeigen" xml:space="preserve"><value>Mostrar la contraseña</value></data>
   <data name="Drehen.Info" xml:space="preserve"><value>La rotación se guarda de forma permanente en el archivo.
 El botón de girar del visor, en cambio, solo cambia la vista.</value></data>
   <data name="Kennwort verbergen" xml:space="preserve"><value>Ocultar la contraseña</value></data>
   <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Repetir:</value></data>
-  <data name="Bitte gib ein Kennwort ein." xml:space="preserve"><value>Escriba una contraseña.</value></data>
-  <data name="Die Kennwörter stimmen nicht überein." xml:space="preserve"><value>Las contraseñas no coinciden.</value></data>
-  <data name="Die Datei ist bereits verschlüsselt." xml:space="preserve"><value>El archivo ya está cifrado.</value></data>
-  <data name="Vergeben des Kennworts" xml:space="preserve"><value>Establecer la contraseña</value></data>
-  <data name="Die Datei ist jetzt mit AES-256 verschlüsselt." xml:space="preserve"><value>El archivo ahora está cifrado con AES-256.</value></data>
-  <data name="Kennwort entfernen" xml:space="preserve"><value>Quitar la contraseña</value></data>
   <data name="&amp;Kennwort:" xml:space="preserve"><value>&amp;Contraseña:</value></data>
-  <data name="Die Datei ist nicht verschlüsselt." xml:space="preserve"><value>El archivo no está cifrado.</value></data>
   <data name="Das Kennwort ist falsch." xml:space="preserve"><value>La contraseña es incorrecta.</value></data>
-  <data name="Entfernen des Kennworts" xml:space="preserve"><value>Quitar la contraseña</value></data>
-  <data name="Das Kennwort wurde entfernt." xml:space="preserve"><value>Se quitó la contraseña.</value></data>
-  <data name="Ein Kennwortschutz lässt sich über Bearbeiten → &quot;Kennwort entfernen&quot; aufheben." xml:space="preserve"><value>La protección con contraseña se puede quitar en Editar → "Quitar la contraseña".</value></data>
   <data name="Datei mit den Rückseiten wählen" xml:space="preserve"><value>Elegir el archivo con las caras traseras</value></data>
   <data name="Bitte wähle eine andere Datei als die angezeigte." xml:space="preserve"><value>Elige un archivo distinto del mostrado.</value></data>
   <data name="Die Seitenzahlen passen nicht zusammen." xml:space="preserve"><value>Los números de páginas no coinciden.</value></data>
@@ -503,7 +487,6 @@ para instalar la última versión.</value></data>
   <data name="Die übrigen Seiten rücken entsprechend auf." xml:space="preserve"><value>Las demás páginas se desplazan en consecuencia.</value></data>
   <data name="Seite {0} wurde an Position {1} verschoben." xml:space="preserve"><value>La página {0} se movió a la posición {1}.</value></data>
   <data name="Metadaten &amp;entfernen" xml:space="preserve"><value>&amp;Eliminar metadatos</value></data>
-  <data name="Entfernen der Metadaten" xml:space="preserve"><value>Eliminación de los metadatos</value></data>
   <data name="Die Metadaten wurden entfernt." xml:space="preserve"><value>Los metadatos se han eliminado.</value></data>
 
   <!-- Stempel -->
@@ -637,11 +620,6 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="„{0}“ ist schreibgeschützt." xml:space="preserve"><value>«{0}» es de solo lectura.</value></data>
   <data name="Soll der Schreibschutz aufgehoben werden, damit „{0}“ gespeichert werden kann?" xml:space="preserve"><value>¿Quitar la protección contra escritura para poder guardar «{0}»?</value></data>
   <data name="„{0}“ ist mit einem Kennwort geschützt." xml:space="preserve"><value>«{0}» está protegido con contraseña.</value></data>
-  <data name="Einschränkungen entfernen…" xml:space="preserve"><value>Quitar las restricciones…</value></data>
-  <data name="Einschränkungen von „{0}“ entfernen?" xml:space="preserve"><value>¿Quitar las restricciones de «{0}»?</value></data>
-  <data name="Entfernen der Einschränkungen" xml:space="preserve"><value>Quitar las restricciones</value></data>
-  <data name="Die Einschränkungen wurden entfernt." xml:space="preserve"><value>Se quitaron las restricciones.</value></data>
-  <data name="Zum Bearbeiten hebst du den Schutz zuerst über Bearbeiten → „Einschränkungen entfernen…“ auf." xml:space="preserve"><value>Para editarlo, quita primero la protección en Editar → «Quitar las restricciones…».</value></data>
   <data name="Nicht speichern" xml:space="preserve"><value>No guardar</value></data>
   <data name="Die Datei ist als PDF/A gekennzeichnet – nach dem Speichern entspricht sie dem Standard nicht mehr." xml:space="preserve"><value>El archivo está marcado como PDF/A; tras guardarlo ya no cumplirá la norma.</value></data>
   <data name="(keine Lesezeichen)" xml:space="preserve"><value>(sin marcadores)</value></data>
@@ -760,9 +738,6 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="Zeichnung entfernen" xml:space="preserve"><value>Quitar dibujo</value></data>
   <data name="Die Zeichnung wurde entfernt." xml:space="preserve"><value>Se quitó el dibujo.</value></data>
   <data name="Zeichnen: Ziehe mit gedrückter Maustaste über die Seite – mit Strg eine gerade Linie. Esc beendet." xml:space="preserve"><value>Dibujar: arrastra el ratón sobre la página con el botón pulsado – con Ctrl, una línea recta. Esc termina.</value></data>
-  <data name="Die Datei ist nur mit einem Besitzerkennwort geschützt, das Berechtigungen wie Drucken oder Ändern einschränkt. Die Einschränkungen werden entfernt, der Inhalt bleibt vollständig erhalten." xml:space="preserve"><value>El archivo solo está protegido con una contraseña de propietario que restringe permisos como imprimir o modificar. Se quitan las restricciones; el contenido se conserva por completo.</value></data>
-  <data name="Kennwortschutz von „{0}“ entfernen?" xml:space="preserve"><value>¿Quitar la protección por contraseña de «{0}»?</value></data>
-  <data name="Die Datei wird unverschlüsselt gespeichert und lässt sich danach ohne Kennwort öffnen. Der Inhalt bleibt vollständig erhalten." xml:space="preserve"><value>El archivo se guarda sin cifrar y después se puede abrir sin contraseña. El contenido se conserva por completo.</value></data>
   <data name="Stempel entfernen" xml:space="preserve"><value>Quitar sello</value></data>
   <data name="Der Stempel wurde entfernt." xml:space="preserve"><value>Se quitó el sello.</value></data>
   <data name="Alle Dateien (*.*)|*.*" xml:space="preserve"><value>Todos los archivos (*.*)|*.*</value></data>
@@ -773,10 +748,8 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="Dateigröße:" xml:space="preserve"><value>Tamaño del archivo:</value></data>
   <data name="Die eingebettete Datei konnte nicht gespeichert werden." xml:space="preserve"><value>No se pudo guardar el archivo incrustado.</value></data>
   <data name="Dokumenteinschränkungen – Zusammenfassung" xml:space="preserve"><value>Resumen de restricciones del documento</value></data>
-  <data name="Dokumentsicherheit" xml:space="preserve"><value>Seguridad del documento</value></data>
   <data name="Dokumentzusammenstellung" xml:space="preserve"><value>Ensamblaje del documento</value></data>
   <data name="Eingebettete Datei speichern" xml:space="preserve"><value>Guardar archivo incrustado</value></data>
-  <data name="Eingebettete Dateien werden nur gespeichert, nicht geöffnet." xml:space="preserve"><value>Los archivos incrustados solo se guardan, nunca se abren.</value></data>
   <data name="Erstellt am:" xml:space="preserve"><value>Creado:</value></data>
   <data name="Erweitert" xml:space="preserve"><value>Avanzado</value></data>
   <data name="Geändert am:" xml:space="preserve"><value>Modificado:</value></data>
@@ -785,10 +758,6 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="Integriert" xml:space="preserve"><value>Integrada</value></data>
   <data name="Ja" xml:space="preserve"><value>Sí</value></data>
   <data name="Keine Schriften gefunden" xml:space="preserve"><value>No se encontraron fuentes</value></data>
-  <data name="Keine Sicherheit" xml:space="preserve"><value>Sin seguridad</value></data>
-  <data name="Keine" xml:space="preserve"><value>Ninguno</value></data>
-  <data name="Kennwort zum Öffnen:" xml:space="preserve"><value>Contraseña de apertura:</value></data>
-  <data name="Kennwortsicherheit" xml:space="preserve"><value>Seguridad por contraseña</value></data>
   <data name="Kodierung:" xml:space="preserve"><value>Codificación:</value></data>
   <data name="Kommentieren" xml:space="preserve"><value>Comentarios</value></data>
   <data name="Kopieren von Inhalt für Barrierefreiheit" xml:space="preserve"><value>Copia de contenido para accesibilidad</value></data>
@@ -804,12 +773,10 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="Seitenanzahl:" xml:space="preserve"><value>Número de páginas:</value></data>
   <data name="Seitenformat:" xml:space="preserve"><value>Tamaño de página:</value></data>
   <data name="Sicherheit" xml:space="preserve"><value>Seguridad</value></data>
-  <data name="Sicherheitssystem:" xml:space="preserve"><value>Método de seguridad:</value></data>
   <data name="Speichern &amp;unter…" xml:space="preserve"><value>Guardar &amp;como…</value></data>
   <data name="Speicherort:" xml:space="preserve"><value>Ubicación:</value></data>
   <data name="Status" xml:space="preserve"><value>Estado</value></data>
   <data name="Typ:" xml:space="preserve"><value>Tipo:</value></data>
-  <data name="Verschlüsselung:" xml:space="preserve"><value>Cifrado:</value></data>
   <data name="Vorgang" xml:space="preserve"><value>Acción</value></data>
   <data name="Zulässig" xml:space="preserve"><value>Permitido</value></data>
   <data name="wird entfernt" xml:space="preserve"><value>se eliminará</value></data>
@@ -836,9 +803,49 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="Seitenleiste ein/aus / mit Miniaturen / mit Lesezeichen" xml:space="preserve"><value>Barra lateral sí/no / con miniaturas / con marcadores</value></data>
   <data name="Seitenleiste mit Miniaturen und Lesezeichen (F10)" xml:space="preserve"><value>Barra lateral con miniaturas y marcadores (F10)</value></data>
   <data name="Änderungen über die Viewer-Leiste (Hervorheben, Zeichnen, Freitext, Stempel, Seiten drehen) bleiben ungespeichert, bis du auf „Speichern“ klickst." xml:space="preserve"><value>Los cambios hechos con la barra del visor (resaltar, dibujar, texto libre, sello, girar páginas) quedan sin guardar hasta que haces clic en «Guardar».</value></data>
-  <data name="Die Befehle im Menü „Bearbeiten“ und in der Symbolleiste ändern die Datei sofort. Strg+Z macht einen Fehlgriff rückgängig." xml:space="preserve"><value>Los comandos del menú «Editar» y de la barra de herramientas cambian el archivo de inmediato. Ctrl+Z deshace un desliz.</value></data>
+  <data name="Die Befehle im Menü „Bearbeiten“ und in der oberen Symbolleiste ändern die Datei sofort. Strg+Z macht einen Fehlgriff rückgängig." xml:space="preserve"><value>Los comandos del menú «Editar» y de la barra de herramientas superior cambian el archivo de inmediato. Ctrl+Z deshace un desliz.</value></data>
   <data name="Verwalten" xml:space="preserve"><value>Administrar</value></data>
   <data name="Anmerkungen verwalten (Strg+Umschalt+T)" xml:space="preserve"><value>Administrar anotaciones (Ctrl+Mayús+T)</value></data>
   <data name="Angezeigte S&amp;eite" xml:space="preserve"><value>Página &amp;mostrada</value></data>
   <data name="Ungespeicherte Änderungen an den Lesezeichen verwerfen?" xml:space="preserve"><value>¿Descartar los cambios no guardados de los marcadores?</value></data>
+  <data name="Tipp: Strg drücken für gerade Linien" xml:space="preserve"><value>Consejo: mantén Ctrl para líneas rectas</value></data>
+  <data name="Alles aufklappen" xml:space="preserve"><value>Desplegar todo</value></data>
+  <data name="Alles zuklappen" xml:space="preserve"><value>Contraer todo</value></data>
+  <data name="Bis Ebene 2 aufklappen" xml:space="preserve"><value>Desplegar hasta el nivel 2</value></data>
+  <data name="Bis Ebene 3 aufklappen" xml:space="preserve"><value>Desplegar hasta el nivel 3</value></data>
+  <data name="Seite verschieben…" xml:space="preserve"><value>Mover la página…</value></data>
+  <data name="„{0}“ wird nicht geöffnet." xml:space="preserve"><value>«{0}» no se abrirá.</value></data>
+  <data name="„{0}“ öffnen?" xml:space="preserve"><value>¿Abrir «{0}»?</value></data>
+  <data name="Anhänge können Makros oder Schadcode enthalten. Öffne die Datei nur, wenn die PDF aus einer sicheren Quelle stammt." xml:space="preserve"><value>Los adjuntos pueden contener macros o software malicioso. Abre el archivo solo si el PDF procede de una fuente segura.</value></data>
+  <data name="Die eingebettete Datei konnte nicht geöffnet werden." xml:space="preserve"><value>No se pudo abrir el archivo incrustado.</value></data>
+  <data name="Programme und Skripte lassen sich nur speichern." xml:space="preserve"><value>Los programas y scripts solo se pueden guardar.</value></data>
+  <data name="Programme, Skripte und ähnliche Dateien öffnet PDFlight aus Sicherheitsgründen nicht. Möchtest du die Datei stattdessen speichern?" xml:space="preserve"><value>Por motivos de seguridad, PDFlight no abre programas, scripts ni archivos similares. ¿Quieres guardar el archivo en su lugar?</value></data>
+  <data name="Ö&amp;ffnen" xml:space="preserve"><value>&amp;Abrir</value></data>
+  <data name="Speichern unter…" xml:space="preserve"><value>Guardar como…</value></data>
+  <data name="Geändert am" xml:space="preserve"><value>Modificado</value></data>
+  <data name="Anhang anzeigen" xml:space="preserve"><value>Mostrar el adjunto</value></data>
+  <data name="{0} Anhänge anzeigen" xml:space="preserve"><value>Mostrar los {0} adjuntos</value></data>
+  <data name="Das Kennwort ist sehr kurz." xml:space="preserve"><value>La contraseña es muy corta.</value></data>
+  <data name="Der Kennwortschutz wurde entfernt." xml:space="preserve"><value>Se ha quitado la protección con contraseña.</value></data>
+  <data name="Die Datei ist jetzt mit einem Kennwort geschützt (AES 256 Bit)." xml:space="preserve"><value>El archivo ahora está protegido con contraseña (AES de 256 bits).</value></data>
+  <data name="Die Datei ist nicht geschützt." xml:space="preserve"><value>El archivo no está protegido.</value></data>
+  <data name="Die Datei lässt sich ohne Kennwort öffnen. Verschlüsselung: {0}." xml:space="preserve"><value>El archivo se abre sin contraseña. Cifrado: {0}.</value></data>
+  <data name="Die Einschränkungen wurden aufgehoben." xml:space="preserve"><value>Se han quitado las restricciones.</value></data>
+  <data name="Die beiden Kennwörter stimmen nicht überein." xml:space="preserve"><value>Las dos contraseñas no coinciden.</value></data>
+  <data name="Einschränkungen &amp;aufheben" xml:space="preserve"><value>&amp;Quitar restricciones</value></data>
+  <data name="Felder leer lassen, um das bisherige Kennwort zu behalten. Ein neues Kennwort wird mit AES 256 Bit verschlüsselt (lesbar ab Acrobat X)." xml:space="preserve"><value>Deja los campos vacíos para conservar la contraseña actual. Una nueva contraseña se cifra con AES de 256 bits (legible desde Acrobat X).</value></data>
+  <data name="Gib ein Kennwort ein." xml:space="preserve"><value>Introduce una contraseña.</value></data>
+  <data name="Kennwort zum &amp;Öffnen verlangen" xml:space="preserve"><value>Pedir contraseña para &amp;abrir</value></data>
+  <data name="Kennwortschutz" xml:space="preserve"><value>Protección con contraseña</value></data>
+  <data name="Kurze Kennwörter lassen sich leicht erraten. Trotzdem verwenden?" xml:space="preserve"><value>Las contraseñas cortas son fáciles de adivinar. ¿Usarla de todos modos?</value></data>
+  <data name="PDF/A-Dateien dürfen nicht verschlüsselt werden." xml:space="preserve"><value>Los archivos PDF/A no deben cifrarse.</value></data>
+  <data name="Zum Öffnen ist ein Kennwort nötig. Verschlüsselung: {0}." xml:space="preserve"><value>Se necesita una contraseña para abrir el archivo. Cifrado: {0}.</value></data>
+  <data name="Zum Bearbeiten hebst du den Schutz zuerst unter Eigenschaften (Strg+I), Reiter „Sicherheit“, auf." xml:space="preserve"><value>Para editarlo, quita primero la protección en Propiedades (Ctrl+I), pestaña «Seguridad».</value></data>
+  <data name="Öffne sie mit ihrem Kennwort – den Schutz hebst du dann unter Eigenschaften (Strg+I), Reiter „Sicherheit“, auf." xml:space="preserve"><value>Ábrelo con su contraseña; después puedes quitar la protección en Propiedades (Ctrl+I), pestaña «Seguridad».</value></data>
+  <data name="Kennwort.Info" xml:space="preserve"><value>El archivo se cifrará con AES-256 (PDF 2.0).
+La contraseña se pedirá cada vez que se abra el archivo.
+Sin ella, el archivo ya no podrá mostrarse.</value></data>
+  <data name="Die Einschränkungen der Datei entfallen." xml:space="preserve"><value>Se quitarán las restricciones del archivo.</value></data>
+  <data name="Mit dem neuen Kennwort wird die Datei neu verschlüsselt (AES 256 Bit); Einschränkungen wie beim Drucken oder Kopieren gelten danach nicht mehr. Trotzdem speichern?" xml:space="preserve"><value>El archivo se volverá a cifrar con la nueva contraseña (AES de 256 bits); las restricciones como las de impresión o copia dejarán de aplicarse. ¿Guardar de todos modos?</value></data>
+  <data name="Die Datei wird mit dem Kennwort, mit dem du sie geöffnet hast, neu verschlüsselt (AES 256 Bit); Einschränkungen wie beim Drucken oder Kopieren gelten danach nicht mehr. Hast du sie mit dem Besitzerkennwort geöffnet, öffnet künftig dieses die Datei. Trotzdem speichern?" xml:space="preserve"><value>El archivo se volverá a cifrar con la contraseña con la que lo abriste (AES de 256 bits); las restricciones como las de impresión o copia dejarán de aplicarse. Si lo abriste con la contraseña de propietario, a partir de ahora será esa la que abra el archivo. ¿Guardar de todos modos?</value></data>
 </root>

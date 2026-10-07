@@ -11,7 +11,8 @@ namespace PDFLight.Classes;
 /// <param name="PdfALevel">Deklarierte PDF/A-Stufe, z. B. „2b“; null ohne Deklaration.</param>
 /// <param name="OutlineCount">Lesezeichen, alle Ebenen.</param>
 /// <param name="Encrypted">Verschlüsselt (Benutzer- oder nur Besitzerkennwort).</param>
-internal sealed partial record PdfStatus(int PageCount, string? Version, string? PdfALevel, int OutlineCount = 0, bool Encrypted = false)
+/// <param name="AttachmentCount">Eingebettete Dateien (Anhänge des Dokuments, z. B. die XML einer E-Rechnung) – Hinweis in der Statusleiste.</param>
+internal sealed partial record PdfStatus(int PageCount, string? Version, string? PdfALevel, int OutlineCount = 0, bool Encrypted = false, int AttachmentCount = 0)
 {
     private static readonly byte[] PartKey = "pdfaid:part"u8.ToArray();
 

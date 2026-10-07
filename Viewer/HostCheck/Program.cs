@@ -202,11 +202,18 @@ internal static class Program
         var names = sandbox.Call(Protocol.Attachments, w => w.Write(document), r =>
         {
             var list = new List<string>();
-            for (var i = r.ReadInt32(); i > 0; i--) { list.Add($"{r.ReadString()} ({r.ReadInt64()} Byte)"); }
+            for (var i = r.ReadInt32(); i > 0; i--)
+            {
+                var (name, size, modified) = (r.ReadString(), r.ReadInt64(), r.ReadString());
+                list.Add($"{name} ({size} Byte, geändert {(modified.Length > 0 ? modified : "–")})");
+            }
             return list;
         });
         var attachments = names.Count;
         Console.WriteLine($"Sicherheit: Revision {revision}, Berechtigungen 0x{permissions:X8}; eingebettete Dateien: {string.Join(", ", names)}");
+        var counted = sandbox.Call(Protocol.AttachmentCount, w => w.Write(document), r => r.ReadInt32());
+        Console.WriteLine($"Anzahl der Anhänge (eigener Befehl): {counted}" + (counted == attachments ? " (stimmt)" : " – FEHLER: weicht von der Liste ab"));
+        if (counted != attachments) { failures++; }
         if (attachments > 0)
         {
             var first = sandbox.Call(Protocol.AttachmentData, w => { w.Write(document); w.Write(0); }, r => r.ReadBytes(r.ReadInt32()));

@@ -36,7 +36,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="bblanchon.PDFium.Win32" Version="156.0.8076" />
+    <PackageReference Include="bblanchon.PDFium.Win32" Version="157.0.8086" />
     <Compile Include="..\Protocol.cs" Link="Protocol.cs" />
     <Using Include="PDFLight.Viewer" /><!-- Protocol -->
   </ItemGroup>

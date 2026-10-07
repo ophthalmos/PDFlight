@@ -234,31 +234,15 @@ extraire des pages, propriétés (raccourcis dans le menu)</value></data>
 pour former un document complet (1, 2, 3 …).
 
 Les deux fichiers doivent avoir le même nombre de pages.</value></data>
-  <data name="Kennwort entfernen…" xml:space="preserve"><value>Supprimer le mot de passe…</value></data>
-  <data name="Kennwort vergeben…" xml:space="preserve"><value>Définir un mot de passe…</value></data>
   <data name="Drucken" xml:space="preserve"><value>Imprimer</value></data>
   <data name="Datei drucken (Strg+P)" xml:space="preserve"><value>Imprimer le fichier (Ctrl+P)</value></data>
-  <data name="Benutzer-Kennwort vergeben" xml:space="preserve"><value>Définir un mot de passe utilisateur</value></data>
-  <data name="Kennwort.Info" xml:space="preserve"><value>Le fichier sera chiffré en AES-256 (PDF 2.0).
-Le mot de passe sera demandé à chaque ouverture du fichier.
-Sans lui, le fichier ne pourra plus être affiché.</value></data>
   <data name="Kennwort anzeigen" xml:space="preserve"><value>Afficher le mot de passe</value></data>
   <data name="Drehen.Info" xml:space="preserve"><value>La rotation est enregistrée durablement dans le fichier.
 Le bouton de rotation de l'afficheur, lui, ne change que l'affichage.</value></data>
   <data name="Kennwort verbergen" xml:space="preserve"><value>Masquer le mot de passe</value></data>
   <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Répéter :</value></data>
-  <data name="Bitte gib ein Kennwort ein." xml:space="preserve"><value>Saisis un mot de passe.</value></data>
-  <data name="Die Kennwörter stimmen nicht überein." xml:space="preserve"><value>Les mots de passe ne correspondent pas.</value></data>
-  <data name="Die Datei ist bereits verschlüsselt." xml:space="preserve"><value>Le fichier est déjà chiffré.</value></data>
-  <data name="Vergeben des Kennworts" xml:space="preserve"><value>Définition du mot de passe</value></data>
-  <data name="Die Datei ist jetzt mit AES-256 verschlüsselt." xml:space="preserve"><value>Le fichier est maintenant chiffré en AES-256.</value></data>
-  <data name="Kennwort entfernen" xml:space="preserve"><value>Supprimer le mot de passe</value></data>
   <data name="&amp;Kennwort:" xml:space="preserve"><value>&amp;Mot de passe :</value></data>
-  <data name="Die Datei ist nicht verschlüsselt." xml:space="preserve"><value>Le fichier n'est pas chiffré.</value></data>
   <data name="Das Kennwort ist falsch." xml:space="preserve"><value>Le mot de passe est incorrect.</value></data>
-  <data name="Entfernen des Kennworts" xml:space="preserve"><value>Suppression du mot de passe</value></data>
-  <data name="Das Kennwort wurde entfernt." xml:space="preserve"><value>Le mot de passe a été supprimé.</value></data>
-  <data name="Ein Kennwortschutz lässt sich über Bearbeiten → &quot;Kennwort entfernen&quot; aufheben." xml:space="preserve"><value>Une protection par mot de passe peut être levée via Édition → « Supprimer le mot de passe ».</value></data>
   <data name="Datei mit den Rückseiten wählen" xml:space="preserve"><value>Choisir le fichier des versos</value></data>
   <data name="Bitte wähle eine andere Datei als die angezeigte." xml:space="preserve"><value>Choisis un fichier différent de celui affiché.</value></data>
   <data name="Die Seitenzahlen passen nicht zusammen." xml:space="preserve"><value>Les nombres de pages ne correspondent pas.</value></data>
@@ -503,7 +487,6 @@ d'installation pour installer la dernière version.</value></data>
   <data name="Die übrigen Seiten rücken entsprechend auf." xml:space="preserve"><value>Les autres pages se décalent en conséquence.</value></data>
   <data name="Seite {0} wurde an Position {1} verschoben." xml:space="preserve"><value>La page {0} a été déplacée à la position {1}.</value></data>
   <data name="Metadaten &amp;entfernen" xml:space="preserve"><value>Supprim&amp;er les métadonnées</value></data>
-  <data name="Entfernen der Metadaten" xml:space="preserve"><value>Suppression des métadonnées</value></data>
   <data name="Die Metadaten wurden entfernt." xml:space="preserve"><value>Les métadonnées ont été supprimées.</value></data>
 
   <!-- Stempel -->
@@ -637,11 +620,6 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="„{0}“ ist schreibgeschützt." xml:space="preserve"><value>« {0} » est en lecture seule.</value></data>
   <data name="Soll der Schreibschutz aufgehoben werden, damit „{0}“ gespeichert werden kann?" xml:space="preserve"><value>Supprimer la protection en écriture pour pouvoir enregistrer « {0} » ?</value></data>
   <data name="„{0}“ ist mit einem Kennwort geschützt." xml:space="preserve"><value>« {0} » est protégé par un mot de passe.</value></data>
-  <data name="Einschränkungen entfernen…" xml:space="preserve"><value>Supprimer les restrictions…</value></data>
-  <data name="Einschränkungen von „{0}“ entfernen?" xml:space="preserve"><value>Supprimer les restrictions de « {0} » ?</value></data>
-  <data name="Entfernen der Einschränkungen" xml:space="preserve"><value>Suppression des restrictions</value></data>
-  <data name="Die Einschränkungen wurden entfernt." xml:space="preserve"><value>Les restrictions ont été supprimées.</value></data>
-  <data name="Zum Bearbeiten hebst du den Schutz zuerst über Bearbeiten → „Einschränkungen entfernen…“ auf." xml:space="preserve"><value>Pour le modifier, supprime d’abord la protection via Modifier → « Supprimer les restrictions… ».</value></data>
   <data name="Nicht speichern" xml:space="preserve"><value>Ne pas enregistrer</value></data>
   <data name="Die Datei ist als PDF/A gekennzeichnet – nach dem Speichern entspricht sie dem Standard nicht mehr." xml:space="preserve"><value>Le fichier est marqué PDF/A – après l'enregistrement, il ne sera plus conforme à la norme.</value></data>
   <data name="(keine Lesezeichen)" xml:space="preserve"><value>(aucun signet)</value></data>
@@ -760,9 +738,6 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Zeichnung entfernen" xml:space="preserve"><value>Supprimer le dessin</value></data>
   <data name="Die Zeichnung wurde entfernt." xml:space="preserve"><value>Le dessin a été supprimé.</value></data>
   <data name="Zeichnen: Ziehe mit gedrückter Maustaste über die Seite – mit Strg eine gerade Linie. Esc beendet." xml:space="preserve"><value>Dessiner : fais glisser la souris sur la page en maintenant le bouton enfoncé – avec Ctrl pour une ligne droite. Échap termine.</value></data>
-  <data name="Die Datei ist nur mit einem Besitzerkennwort geschützt, das Berechtigungen wie Drucken oder Ändern einschränkt. Die Einschränkungen werden entfernt, der Inhalt bleibt vollständig erhalten." xml:space="preserve"><value>Le fichier est protégé uniquement par un mot de passe propriétaire qui restreint des autorisations comme l'impression ou la modification. Les restrictions sont supprimées, le contenu est entièrement conservé.</value></data>
-  <data name="Kennwortschutz von „{0}“ entfernen?" xml:space="preserve"><value>Supprimer la protection par mot de passe de « {0} » ?</value></data>
-  <data name="Die Datei wird unverschlüsselt gespeichert und lässt sich danach ohne Kennwort öffnen. Der Inhalt bleibt vollständig erhalten." xml:space="preserve"><value>Le fichier est enregistré sans chiffrement et s'ouvre ensuite sans mot de passe. Le contenu est entièrement conservé.</value></data>
   <data name="Stempel entfernen" xml:space="preserve"><value>Supprimer le tampon</value></data>
   <data name="Der Stempel wurde entfernt." xml:space="preserve"><value>Le tampon a été supprimé.</value></data>
   <data name="Alle Dateien (*.*)|*.*" xml:space="preserve"><value>Tous les fichiers (*.*)|*.*</value></data>
@@ -773,10 +748,8 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Dateigröße:" xml:space="preserve"><value>Taille du fichier :</value></data>
   <data name="Die eingebettete Datei konnte nicht gespeichert werden." xml:space="preserve"><value>Le fichier incorporé n’a pas pu être enregistré.</value></data>
   <data name="Dokumenteinschränkungen – Zusammenfassung" xml:space="preserve"><value>Résumé des restrictions du document</value></data>
-  <data name="Dokumentsicherheit" xml:space="preserve"><value>Sécurité du document</value></data>
   <data name="Dokumentzusammenstellung" xml:space="preserve"><value>Assemblage du document</value></data>
   <data name="Eingebettete Datei speichern" xml:space="preserve"><value>Enregistrer le fichier incorporé</value></data>
-  <data name="Eingebettete Dateien werden nur gespeichert, nicht geöffnet." xml:space="preserve"><value>Les fichiers incorporés sont seulement enregistrés, jamais ouverts.</value></data>
   <data name="Erstellt am:" xml:space="preserve"><value>Créé le :</value></data>
   <data name="Erweitert" xml:space="preserve"><value>Avancé</value></data>
   <data name="Geändert am:" xml:space="preserve"><value>Modifié le :</value></data>
@@ -785,10 +758,6 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Integriert" xml:space="preserve"><value>Intégré</value></data>
   <data name="Ja" xml:space="preserve"><value>Oui</value></data>
   <data name="Keine Schriften gefunden" xml:space="preserve"><value>Aucune police trouvée</value></data>
-  <data name="Keine Sicherheit" xml:space="preserve"><value>Aucune sécurité</value></data>
-  <data name="Keine" xml:space="preserve"><value>Aucun</value></data>
-  <data name="Kennwort zum Öffnen:" xml:space="preserve"><value>Mot de passe d’ouverture :</value></data>
-  <data name="Kennwortsicherheit" xml:space="preserve"><value>Sécurité par mot de passe</value></data>
   <data name="Kodierung:" xml:space="preserve"><value>Codage :</value></data>
   <data name="Kommentieren" xml:space="preserve"><value>Commentaires</value></data>
   <data name="Kopieren von Inhalt für Barrierefreiheit" xml:space="preserve"><value>Copie du contenu pour l’accessibilité</value></data>
@@ -804,12 +773,10 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Seitenanzahl:" xml:space="preserve"><value>Nombre de pages :</value></data>
   <data name="Seitenformat:" xml:space="preserve"><value>Format de page :</value></data>
   <data name="Sicherheit" xml:space="preserve"><value>Sécurité</value></data>
-  <data name="Sicherheitssystem:" xml:space="preserve"><value>Méthode de sécurité :</value></data>
   <data name="Speichern &amp;unter…" xml:space="preserve"><value>Enregistrer &amp;sous…</value></data>
   <data name="Speicherort:" xml:space="preserve"><value>Emplacement :</value></data>
   <data name="Status" xml:space="preserve"><value>État</value></data>
   <data name="Typ:" xml:space="preserve"><value>Type :</value></data>
-  <data name="Verschlüsselung:" xml:space="preserve"><value>Chiffrement :</value></data>
   <data name="Vorgang" xml:space="preserve"><value>Action</value></data>
   <data name="Zulässig" xml:space="preserve"><value>Autorisé</value></data>
   <data name="wird entfernt" xml:space="preserve"><value>sera supprimé</value></data>
@@ -836,9 +803,49 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Seitenleiste ein/aus / mit Miniaturen / mit Lesezeichen" xml:space="preserve"><value>Volet latéral activé/désactivé / avec miniatures / avec signets</value></data>
   <data name="Seitenleiste mit Miniaturen und Lesezeichen (F10)" xml:space="preserve"><value>Volet latéral avec miniatures et signets (F10)</value></data>
   <data name="Änderungen über die Viewer-Leiste (Hervorheben, Zeichnen, Freitext, Stempel, Seiten drehen) bleiben ungespeichert, bis du auf „Speichern“ klickst." xml:space="preserve"><value>Les modifications faites avec la barre de l’afficheur (surligner, dessiner, texte libre, tampon, rotation) restent non enregistrées jusqu’à ce que tu cliques sur « Enregistrer ».</value></data>
-  <data name="Die Befehle im Menü „Bearbeiten“ und in der Symbolleiste ändern die Datei sofort. Strg+Z macht einen Fehlgriff rückgängig." xml:space="preserve"><value>Les commandes du menu « Édition » et de la barre d’outils modifient le fichier immédiatement. Ctrl+Z annule une fausse manœuvre.</value></data>
+  <data name="Die Befehle im Menü „Bearbeiten“ und in der oberen Symbolleiste ändern die Datei sofort. Strg+Z macht einen Fehlgriff rückgängig." xml:space="preserve"><value>Les commandes du menu « Édition » et de la barre d’outils supérieure modifient le fichier immédiatement. Ctrl+Z annule une fausse manœuvre.</value></data>
   <data name="Verwalten" xml:space="preserve"><value>Gérer</value></data>
   <data name="Anmerkungen verwalten (Strg+Umschalt+T)" xml:space="preserve"><value>Gérer les annotations (Ctrl+Maj+T)</value></data>
   <data name="Angezeigte S&amp;eite" xml:space="preserve"><value>Pa&amp;ge affichée</value></data>
   <data name="Ungespeicherte Änderungen an den Lesezeichen verwerfen?" xml:space="preserve"><value>Abandonner les modifications non enregistrées des signets ?</value></data>
+  <data name="Tipp: Strg drücken für gerade Linien" xml:space="preserve"><value>Astuce : Ctrl pour des lignes droites</value></data>
+  <data name="Alles aufklappen" xml:space="preserve"><value>Tout déplier</value></data>
+  <data name="Alles zuklappen" xml:space="preserve"><value>Tout replier</value></data>
+  <data name="Bis Ebene 2 aufklappen" xml:space="preserve"><value>Déplier jusqu’au niveau 2</value></data>
+  <data name="Bis Ebene 3 aufklappen" xml:space="preserve"><value>Déplier jusqu’au niveau 3</value></data>
+  <data name="Seite verschieben…" xml:space="preserve"><value>Déplacer la page…</value></data>
+  <data name="„{0}“ wird nicht geöffnet." xml:space="preserve"><value>« {0} » ne sera pas ouvert.</value></data>
+  <data name="„{0}“ öffnen?" xml:space="preserve"><value>Ouvrir « {0} » ?</value></data>
+  <data name="Anhänge können Makros oder Schadcode enthalten. Öffne die Datei nur, wenn die PDF aus einer sicheren Quelle stammt." xml:space="preserve"><value>Les pièces jointes peuvent contenir des macros ou des logiciels malveillants. N’ouvre le fichier que si le PDF provient d’une source sûre.</value></data>
+  <data name="Die eingebettete Datei konnte nicht geöffnet werden." xml:space="preserve"><value>Le fichier incorporé n’a pas pu être ouvert.</value></data>
+  <data name="Programme und Skripte lassen sich nur speichern." xml:space="preserve"><value>Programmes et scripts : enregistrement seulement.</value></data>
+  <data name="Programme, Skripte und ähnliche Dateien öffnet PDFlight aus Sicherheitsgründen nicht. Möchtest du die Datei stattdessen speichern?" xml:space="preserve"><value>Pour des raisons de sécurité, PDFlight n’ouvre pas les programmes, scripts et fichiers similaires. Veux-tu plutôt enregistrer le fichier ?</value></data>
+  <data name="Ö&amp;ffnen" xml:space="preserve"><value>&amp;Ouvrir</value></data>
+  <data name="Speichern unter…" xml:space="preserve"><value>Enregistrer sous…</value></data>
+  <data name="Geändert am" xml:space="preserve"><value>Modifié le</value></data>
+  <data name="Anhang anzeigen" xml:space="preserve"><value>Afficher la pièce jointe</value></data>
+  <data name="{0} Anhänge anzeigen" xml:space="preserve"><value>Afficher les {0} pièces jointes</value></data>
+  <data name="Das Kennwort ist sehr kurz." xml:space="preserve"><value>Le mot de passe est très court.</value></data>
+  <data name="Der Kennwortschutz wurde entfernt." xml:space="preserve"><value>La protection par mot de passe a été supprimée.</value></data>
+  <data name="Die Datei ist jetzt mit einem Kennwort geschützt (AES 256 Bit)." xml:space="preserve"><value>Le fichier est maintenant protégé par mot de passe (AES 256 bits).</value></data>
+  <data name="Die Datei ist nicht geschützt." xml:space="preserve"><value>Le fichier n’est pas protégé.</value></data>
+  <data name="Die Datei lässt sich ohne Kennwort öffnen. Verschlüsselung: {0}." xml:space="preserve"><value>Le fichier s’ouvre sans mot de passe. Chiffrement : {0}.</value></data>
+  <data name="Die Einschränkungen wurden aufgehoben." xml:space="preserve"><value>Les restrictions ont été levées.</value></data>
+  <data name="Die beiden Kennwörter stimmen nicht überein." xml:space="preserve"><value>Les deux mots de passe ne correspondent pas.</value></data>
+  <data name="Einschränkungen &amp;aufheben" xml:space="preserve"><value>&amp;Lever les restrictions</value></data>
+  <data name="Felder leer lassen, um das bisherige Kennwort zu behalten. Ein neues Kennwort wird mit AES 256 Bit verschlüsselt (lesbar ab Acrobat X)." xml:space="preserve"><value>Laisse les champs vides pour conserver le mot de passe actuel. Un nouveau mot de passe est chiffré en AES 256 bits (lisible à partir d’Acrobat X).</value></data>
+  <data name="Gib ein Kennwort ein." xml:space="preserve"><value>Saisis un mot de passe.</value></data>
+  <data name="Kennwort zum &amp;Öffnen verlangen" xml:space="preserve"><value>Exiger un mot de passe à l’&amp;ouverture</value></data>
+  <data name="Kennwortschutz" xml:space="preserve"><value>Protection par mot de passe</value></data>
+  <data name="Kurze Kennwörter lassen sich leicht erraten. Trotzdem verwenden?" xml:space="preserve"><value>Les mots de passe courts sont faciles à deviner. L’utiliser quand même ?</value></data>
+  <data name="PDF/A-Dateien dürfen nicht verschlüsselt werden." xml:space="preserve"><value>Les fichiers PDF/A ne doivent pas être chiffrés.</value></data>
+  <data name="Zum Öffnen ist ein Kennwort nötig. Verschlüsselung: {0}." xml:space="preserve"><value>Un mot de passe est nécessaire pour ouvrir le fichier. Chiffrement : {0}.</value></data>
+  <data name="Zum Bearbeiten hebst du den Schutz zuerst unter Eigenschaften (Strg+I), Reiter „Sicherheit“, auf." xml:space="preserve"><value>Pour le modifier, lève d’abord la protection dans Propriétés (Ctrl+I), onglet « Sécurité ».</value></data>
+  <data name="Öffne sie mit ihrem Kennwort – den Schutz hebst du dann unter Eigenschaften (Strg+I), Reiter „Sicherheit“, auf." xml:space="preserve"><value>Ouvre-le avec son mot de passe – tu peux ensuite lever la protection dans Propriétés (Ctrl+I), onglet « Sécurité ».</value></data>
+  <data name="Kennwort.Info" xml:space="preserve"><value>Le fichier sera chiffré en AES-256 (PDF 2.0).
+Le mot de passe sera demandé à chaque ouverture du fichier.
+Sans lui, le fichier ne pourra plus être affiché.</value></data>
+  <data name="Die Einschränkungen der Datei entfallen." xml:space="preserve"><value>Les restrictions du fichier seront supprimées.</value></data>
+  <data name="Mit dem neuen Kennwort wird die Datei neu verschlüsselt (AES 256 Bit); Einschränkungen wie beim Drucken oder Kopieren gelten danach nicht mehr. Trotzdem speichern?" xml:space="preserve"><value>Le fichier sera chiffré à nouveau avec le nouveau mot de passe (AES 256 bits) ; les restrictions comme celles sur l’impression ou la copie ne s’appliqueront plus. Enregistrer quand même ?</value></data>
+  <data name="Die Datei wird mit dem Kennwort, mit dem du sie geöffnet hast, neu verschlüsselt (AES 256 Bit); Einschränkungen wie beim Drucken oder Kopieren gelten danach nicht mehr. Hast du sie mit dem Besitzerkennwort geöffnet, öffnet künftig dieses die Datei. Trotzdem speichern?" xml:space="preserve"><value>Le fichier sera chiffré à nouveau avec le mot de passe que tu as utilisé pour l’ouvrir (AES 256 bits) ; les restrictions comme celles sur l’impression ou la copie ne s’appliqueront plus. Si tu l’as ouvert avec le mot de passe propriétaire, c’est désormais lui qui ouvrira le fichier. Enregistrer quand même ?</value></data>
 </root>

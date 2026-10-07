@@ -60,15 +60,10 @@
             mnuExtractPages = new ToolStripMenuItem();
             toolStripSeparator14 = new ToolStripSeparator();
             mnuManageStamps = new ToolStripMenuItem();
-            btnManageAnnotations = new ToolStripButton();
             toolStripSeparator16 = new ToolStripSeparator();
             mnuRemoveBookmarks = new ToolStripMenuItem();
             mnuEditBookmarks = new ToolStripMenuItem();
             toolStripSeparator6 = new ToolStripSeparator();
-            mnuSetPassword = new ToolStripMenuItem();
-            mnuRemovePassword = new ToolStripMenuItem();
-            mnuRemoveRestrictions = new ToolStripMenuItem();
-            toolStripSeparator10 = new ToolStripSeparator();
             mnuProperties = new ToolStripMenuItem();
             toolStripSeparator9 = new ToolStripSeparator();
             ddbFavorites = new ToolStripDropDownButton();
@@ -85,11 +80,13 @@
             toolStripSeparator11 = new ToolStripSeparator();
             mnuAbout = new ToolStripMenuItem();
             btnSettings = new ToolStripButton();
+            btnManageAnnotations = new ToolStripButton();
             statusStrip = new StatusStrip();
             statusIndex = new ToolStripStatusLabel();
             statusPath = new ToolStripStatusLabel();
             statusOneClick = new ToolStripStatusLabel();
             statusFormat = new ToolStripStatusLabel();
+            statusAttachments = new ToolStripStatusLabel();
             statusZoom = new ToolStripStatusLabel();
             statusInfo = new ToolStripStatusLabel();
             pnlPdfA = new Panel();
@@ -104,6 +101,7 @@
             btnDraw = new ToolStripButton();
             ddbInk = new ToolStripDropDownButton();
             btnErase = new ToolStripButton();
+            toolStripSeparatorV5 = new ToolStripSeparator();
             btnFreeText = new ToolStripButton();
             btnStamp = new ToolStripButton();
             labelViewerSpacer = new ToolStripLabel();
@@ -119,10 +117,9 @@
             btnRotateLeft = new ToolStripButton();
             btnRotateRight = new ToolStripButton();
             btnCloseDocument = new ToolStripButton();
+            toolStripSeparatorV6 = new ToolStripSeparator();
             btnFullScreen = new ToolStripButton();
             toolStripSeparatorV4 = new ToolStripSeparator();
-            toolStripSeparatorV5 = new ToolStripSeparator();
-            toolStripSeparatorV6 = new ToolStripSeparator();
             btnSearch = new ToolStripButton();
             btnSearchClose = new ToolStripButton();
             btnSearchNext = new ToolStripButton();
@@ -151,6 +148,19 @@
             mnuHighlight = new ToolStripMenuItem();
             mnuEditAnnotation = new ToolStripMenuItem();
             mnuRemoveAnnotation = new ToolStripMenuItem();
+            contextMenuOutline = new ContextMenuStrip(components);
+            mnuOutlineExpandAll = new ToolStripMenuItem();
+            mnuOutlineCollapseAll = new ToolStripMenuItem();
+            toolStripSeparatorO1 = new ToolStripSeparator();
+            mnuOutlineLevel2 = new ToolStripMenuItem();
+            mnuOutlineLevel3 = new ToolStripMenuItem();
+            contextMenuThumbnails = new ContextMenuStrip(components);
+            mnuThumbInsertPage = new ToolStripMenuItem();
+            mnuThumbRotatePages = new ToolStripMenuItem();
+            mnuThumbMovePage = new ToolStripMenuItem();
+            mnuThumbExtractPages = new ToolStripMenuItem();
+            toolStripSeparatorT1 = new ToolStripSeparator();
+            mnuThumbDeletePages = new ToolStripMenuItem();
             printDocument = new System.Drawing.Printing.PrintDocument();
             printDialog = new PrintDialog();
             toolTipLink = new ToolTip(components);
@@ -166,6 +176,8 @@
             sidebarStrip.SuspendLayout();
             sidebarHeader.SuspendLayout();
             contextMenuPage.SuspendLayout();
+            contextMenuOutline.SuspendLayout();
+            contextMenuThumbnails.SuspendLayout();
             SuspendLayout();
             // 
             // splashTimer
@@ -323,7 +335,7 @@
             // ddbEdit
             // 
             ddbEdit.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuMovePage, mnuInsertPage, toolStripSeparator15, mnuAppendPdf, mnuDuplex, mnuExtractPages, toolStripSeparator14, mnuManageStamps, toolStripSeparator16, mnuRemoveBookmarks, mnuEditBookmarks, toolStripSeparator6, mnuSetPassword, mnuRemovePassword, mnuRemoveRestrictions, toolStripSeparator10, mnuProperties });
+            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuMovePage, mnuInsertPage, toolStripSeparator15, mnuAppendPdf, mnuDuplex, mnuExtractPages, toolStripSeparator14, mnuManageStamps, toolStripSeparator16, mnuRemoveBookmarks, mnuEditBookmarks, toolStripSeparator6, mnuProperties });
             ddbEdit.Enabled = false;
             ddbEdit.Name = "ddbEdit";
             ddbEdit.Size = new Size(76, 22);
@@ -334,7 +346,7 @@
             // 
             mnuDeletePages.Name = "mnuDeletePages";
             mnuDeletePages.ShortcutKeyDisplayString = "Strg+Entf";
-            mnuDeletePages.Size = new Size(314, 22);
+            mnuDeletePages.Size = new Size(283, 22);
             mnuDeletePages.Text = "Seiten löschen…";
             mnuDeletePages.Click += MnuDeletePages_Click;
             // 
@@ -342,7 +354,7 @@
             // 
             mnuRotatePages.Name = "mnuRotatePages";
             mnuRotatePages.ShortcutKeyDisplayString = "Strg+R";
-            mnuRotatePages.Size = new Size(314, 22);
+            mnuRotatePages.Size = new Size(283, 22);
             mnuRotatePages.Text = "Seiten drehen…";
             mnuRotatePages.Click += MnuRotatePages_Click;
             // 
@@ -350,7 +362,7 @@
             // 
             mnuMovePage.Name = "mnuMovePage";
             mnuMovePage.ShortcutKeyDisplayString = "Strg+Y";
-            mnuMovePage.Size = new Size(314, 22);
+            mnuMovePage.Size = new Size(283, 22);
             mnuMovePage.Text = "Aktuelle Seite verschieben…";
             mnuMovePage.Click += MnuMovePage_Click;
             // 
@@ -358,27 +370,27 @@
             // 
             mnuInsertPage.Name = "mnuInsertPage";
             mnuInsertPage.ShortcutKeyDisplayString = "Strg+Einfg";
-            mnuInsertPage.Size = new Size(314, 22);
+            mnuInsertPage.Size = new Size(283, 22);
             mnuInsertPage.Text = "Leere Seite einfügen…";
             mnuInsertPage.Click += MnuInsertPage_Click;
             // 
             // toolStripSeparator15
             // 
             toolStripSeparator15.Name = "toolStripSeparator15";
-            toolStripSeparator15.Size = new Size(311, 6);
+            toolStripSeparator15.Size = new Size(280, 6);
             // 
             // mnuAppendPdf
             // 
             mnuAppendPdf.Name = "mnuAppendPdf";
             mnuAppendPdf.ShortcutKeyDisplayString = "Strg+N";
-            mnuAppendPdf.Size = new Size(314, 22);
+            mnuAppendPdf.Size = new Size(283, 22);
             mnuAppendPdf.Text = "PDF-Datei anhängen…";
             mnuAppendPdf.Click += MnuAppendPdf_Click;
             // 
             // mnuDuplex
             // 
             mnuDuplex.Name = "mnuDuplex";
-            mnuDuplex.Size = new Size(314, 22);
+            mnuDuplex.Size = new Size(283, 22);
             mnuDuplex.Text = "Rückseiten-Scan einfügen…";
             mnuDuplex.Click += MnuDuplex_Click;
             // 
@@ -386,32 +398,32 @@
             // 
             mnuExtractPages.Name = "mnuExtractPages";
             mnuExtractPages.ShortcutKeyDisplayString = "Strg+X";
-            mnuExtractPages.Size = new Size(314, 22);
+            mnuExtractPages.Size = new Size(283, 22);
             mnuExtractPages.Text = "Seiten extrahieren…";
             mnuExtractPages.Click += MnuExtractPages_Click;
             // 
             // toolStripSeparator14
             // 
             toolStripSeparator14.Name = "toolStripSeparator14";
-            toolStripSeparator14.Size = new Size(311, 6);
+            toolStripSeparator14.Size = new Size(280, 6);
             // 
             // mnuManageStamps
             // 
             mnuManageStamps.Name = "mnuManageStamps";
             mnuManageStamps.ShortcutKeyDisplayString = "Strg+Umschalt+H";
-            mnuManageStamps.Size = new Size(314, 22);
+            mnuManageStamps.Size = new Size(283, 22);
             mnuManageStamps.Text = "Stempel verwalten…";
             mnuManageStamps.Click += MnuManageStamps_Click;
             // 
             // toolStripSeparator16
             // 
             toolStripSeparator16.Name = "toolStripSeparator16";
-            toolStripSeparator16.Size = new Size(311, 6);
+            toolStripSeparator16.Size = new Size(280, 6);
             // 
             // mnuRemoveBookmarks
             // 
             mnuRemoveBookmarks.Name = "mnuRemoveBookmarks";
-            mnuRemoveBookmarks.Size = new Size(314, 22);
+            mnuRemoveBookmarks.Size = new Size(283, 22);
             mnuRemoveBookmarks.Text = "Lesezeichen entfernen…";
             mnuRemoveBookmarks.Click += MnuRemoveBookmarks_Click;
             // 
@@ -419,46 +431,20 @@
             // 
             mnuEditBookmarks.Name = "mnuEditBookmarks";
             mnuEditBookmarks.ShortcutKeyDisplayString = "Strg+F2";
-            mnuEditBookmarks.Size = new Size(314, 22);
+            mnuEditBookmarks.Size = new Size(283, 22);
             mnuEditBookmarks.Text = "Lesezeichen bearbeiten…";
             mnuEditBookmarks.Click += MnuEditBookmarks_Click;
             // 
             // toolStripSeparator6
             // 
             toolStripSeparator6.Name = "toolStripSeparator6";
-            toolStripSeparator6.Size = new Size(311, 6);
-            // 
-            // mnuSetPassword
-            // 
-            mnuSetPassword.Name = "mnuSetPassword";
-            mnuSetPassword.Size = new Size(314, 22);
-            mnuSetPassword.Text = "Kennwort vergeben…";
-            mnuSetPassword.Click += MnuSetPassword_Click;
-            // 
-            // mnuRemovePassword
-            // 
-            mnuRemovePassword.Name = "mnuRemovePassword";
-            mnuRemovePassword.Size = new Size(314, 22);
-            mnuRemovePassword.Text = "Kennwort entfernen…";
-            mnuRemovePassword.Click += MnuRemovePassword_Click;
-            // 
-            // mnuRemoveRestrictions
-            // 
-            mnuRemoveRestrictions.Name = "mnuRemoveRestrictions";
-            mnuRemoveRestrictions.Size = new Size(314, 22);
-            mnuRemoveRestrictions.Text = "Einschränkungen entfernen…";
-            mnuRemoveRestrictions.Click += MnuRemoveRestrictions_Click;
-            // 
-            // toolStripSeparator10
-            // 
-            toolStripSeparator10.Name = "toolStripSeparator10";
-            toolStripSeparator10.Size = new Size(311, 6);
-            // 
+            toolStripSeparator6.Size = new Size(280, 6);
+            //
             // mnuProperties
             // 
             mnuProperties.Name = "mnuProperties";
             mnuProperties.ShortcutKeyDisplayString = "Strg+I";
-            mnuProperties.Size = new Size(314, 22);
+            mnuProperties.Size = new Size(283, 22);
             mnuProperties.Text = "Eigenschaften…";
             mnuProperties.Click += MnuProperties_Click;
             // 
@@ -574,11 +560,21 @@
             btnSettings.ToolTipText = "Zielordner, Programme und Optionen verwalten (Strg+,)";
             btnSettings.Click += BtnSettings_Click;
             // 
+            // btnManageAnnotations
+            // 
+            btnManageAnnotations.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            btnManageAnnotations.Enabled = false;
+            btnManageAnnotations.Name = "btnManageAnnotations";
+            btnManageAnnotations.Size = new Size(62, 33);
+            btnManageAnnotations.Text = "Verwalten";
+            btnManageAnnotations.ToolTipText = "Anmerkungen verwalten (Strg+Umschalt+T)";
+            btnManageAnnotations.Click += BtnManageAnnotations_Click;
+            // 
             // statusStrip
             // 
             statusStrip.AllowDrop = true;
             statusStrip.BackColor = SystemColors.Control;
-            statusStrip.Items.AddRange(new ToolStripItem[] { statusIndex, statusPath, statusOneClick, statusFormat, statusZoom, statusInfo });
+            statusStrip.Items.AddRange(new ToolStripItem[] { statusIndex, statusPath, statusOneClick, statusFormat, statusAttachments, statusZoom, statusInfo });
             statusStrip.Location = new Point(0, 725);
             statusStrip.Name = "statusStrip";
             statusStrip.ShowItemToolTips = true;
@@ -620,7 +616,19 @@
             statusFormat.Name = "statusFormat";
             statusFormat.Size = new Size(4, 19);
             statusFormat.Visible = false;
-            // 
+            //
+            // statusAttachments
+            //
+            statusAttachments.BorderSides = ToolStripStatusLabelBorderSides.Left;
+            statusAttachments.BorderStyle = Border3DStyle.Etched;
+            statusAttachments.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            statusAttachments.IsLink = true;
+            statusAttachments.LinkBehavior = LinkBehavior.HoverUnderline;
+            statusAttachments.Name = "statusAttachments";
+            statusAttachments.Size = new Size(4, 19);
+            statusAttachments.Visible = false;
+            statusAttachments.Click += StatusAttachments_Click;
+            //
             // statusZoom
             // 
             statusZoom.BorderSides = ToolStripStatusLabelBorderSides.Left;
@@ -720,11 +728,11 @@
             // 
             // ddbHighlight
             // 
+            ddbHighlight.AutoSize = false;
             ddbHighlight.DisplayStyle = ToolStripItemDisplayStyle.None;
             ddbHighlight.Enabled = false;
             ddbHighlight.Margin = new Padding(0, 1, 2, 2);
             ddbHighlight.Name = "ddbHighlight";
-            ddbHighlight.AutoSize = false;
             ddbHighlight.Size = new Size(22, 33);
             ddbHighlight.ToolTipText = "Farbe zum Hervorheben";
             // 
@@ -740,11 +748,11 @@
             // 
             // ddbInk
             // 
+            ddbInk.AutoSize = false;
             ddbInk.DisplayStyle = ToolStripItemDisplayStyle.None;
             ddbInk.Enabled = false;
             ddbInk.Margin = new Padding(0, 1, 2, 2);
             ddbInk.Name = "ddbInk";
-            ddbInk.AutoSize = false;
             ddbInk.Size = new Size(22, 33);
             ddbInk.ToolTipText = "Farbe und Stärke";
             // 
@@ -757,6 +765,11 @@
             btnErase.Text = "Radierer";
             btnErase.ToolTipText = "Radierer: Zeichnungen und Hervorhebungen durch Klicken oder Wischen entfernen (Esc beendet)";
             btnErase.Click += BtnErase_Click;
+            // 
+            // toolStripSeparatorV5
+            // 
+            toolStripSeparatorV5.Name = "toolStripSeparatorV5";
+            toolStripSeparatorV5.Size = new Size(6, 36);
             // 
             // btnFreeText
             // 
@@ -777,16 +790,6 @@
             btnStamp.Text = "Stempel";
             btnStamp.ToolTipText = "Stempel einfügen (Strg+H)";
             btnStamp.Click += BtnStamp_Click;
-            //
-            // btnManageAnnotations
-            //
-            btnManageAnnotations.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            btnManageAnnotations.Enabled = false;
-            btnManageAnnotations.Name = "btnManageAnnotations";
-            btnManageAnnotations.Size = new Size(64, 33);
-            btnManageAnnotations.Text = "Verwalten";
-            btnManageAnnotations.ToolTipText = "Anmerkungen verwalten (Strg+Umschalt+T)";
-            btnManageAnnotations.Click += BtnManageAnnotations_Click;
             // 
             // labelViewerSpacer
             // 
@@ -903,6 +906,12 @@
             btnCloseDocument.ToolTipText = "Dokument schließen (Strg+W)";
             btnCloseDocument.Click += BtnCloseDocument_Click;
             // 
+            // toolStripSeparatorV6
+            // 
+            toolStripSeparatorV6.Alignment = ToolStripItemAlignment.Right;
+            toolStripSeparatorV6.Name = "toolStripSeparatorV6";
+            toolStripSeparatorV6.Size = new Size(6, 36);
+            // 
             // btnFullScreen
             // 
             btnFullScreen.Alignment = ToolStripItemAlignment.Right;
@@ -918,17 +927,6 @@
             toolStripSeparatorV4.Alignment = ToolStripItemAlignment.Right;
             toolStripSeparatorV4.Name = "toolStripSeparatorV4";
             toolStripSeparatorV4.Size = new Size(6, 36);
-            //
-            // toolStripSeparatorV5
-            //
-            toolStripSeparatorV5.Name = "toolStripSeparatorV5";
-            toolStripSeparatorV5.Size = new Size(6, 36);
-            //
-            // toolStripSeparatorV6
-            //
-            toolStripSeparatorV6.Alignment = ToolStripItemAlignment.Right;
-            toolStripSeparatorV6.Name = "toolStripSeparatorV6";
-            toolStripSeparatorV6.Size = new Size(6, 36);
             // 
             // btnSearch
             // 
@@ -936,7 +934,7 @@
             btnSearch.DisplayStyle = ToolStripItemDisplayStyle.Text;
             btnSearch.Enabled = false;
             btnSearch.Name = "btnSearch";
-            btnSearch.Size = new Size(50, 33);
+            btnSearch.Size = new Size(50, 19);
             btnSearch.Text = "Suchen";
             btnSearch.ToolTipText = "Im Dokument suchen (Strg+F)";
             btnSearch.Click += BtnSearch_Click;
@@ -946,7 +944,7 @@
             btnSearchClose.Alignment = ToolStripItemAlignment.Right;
             btnSearchClose.DisplayStyle = ToolStripItemDisplayStyle.Text;
             btnSearchClose.Name = "btnSearchClose";
-            btnSearchClose.Size = new Size(23, 33);
+            btnSearchClose.Size = new Size(23, 19);
             btnSearchClose.Text = "✕";
             btnSearchClose.ToolTipText = "Suche schließen (Esc)";
             btnSearchClose.Visible = false;
@@ -957,7 +955,7 @@
             btnSearchNext.Alignment = ToolStripItemAlignment.Right;
             btnSearchNext.DisplayStyle = ToolStripItemDisplayStyle.Text;
             btnSearchNext.Name = "btnSearchNext";
-            btnSearchNext.Size = new Size(23, 33);
+            btnSearchNext.Size = new Size(23, 19);
             btnSearchNext.Text = "▼";
             btnSearchNext.ToolTipText = "Nächster Treffer (F3, Enter)";
             btnSearchNext.Visible = false;
@@ -1067,12 +1065,16 @@
             thumbnailGrid.Name = "thumbnailGrid";
             thumbnailGrid.Size = new Size(156, 60);
             thumbnailGrid.TabIndex = 1;
+            thumbnailGrid.ContextMenuStrip = contextMenuThumbnails;
             thumbnailGrid.PageActivated += ThumbnailGrid_PageActivated;
             // 
             // outlineView
             // 
             outlineView.AccessibleName = "Dokumentstruktur";
             outlineView.AccessibleRole = AccessibleRole.Outline;
+            outlineView.AutoScroll = true;
+            outlineView.AutoScrollMinSize = new Size(0, 10);
+            outlineView.ContextMenuStrip = contextMenuOutline;
             outlineView.Dock = DockStyle.Fill;
             outlineView.Font = new Font("Segoe UI", 9.75F);
             outlineView.Location = new Point(0, 0);
@@ -1181,7 +1183,7 @@
             // 
             contextMenuPage.Items.AddRange(new ToolStripItem[] { mnuViewCopy, mnuViewSelectAll, toolStripSeparatorC1, mnuAddFreeTextHere, mnuHighlight, mnuEditAnnotation, mnuRemoveAnnotation });
             contextMenuPage.Name = "contextMenuPage";
-            contextMenuPage.Size = new Size(206, 164);
+            contextMenuPage.Size = new Size(206, 142);
             contextMenuPage.Opening += ContextMenuPage_Opening;
             // 
             // mnuViewCopy
@@ -1218,21 +1220,113 @@
             mnuHighlight.Size = new Size(205, 22);
             mnuHighlight.Text = "Hervorheben";
             mnuHighlight.Click += MnuHighlight_Click;
-            //
+            // 
             // mnuEditAnnotation
-            //
+            // 
             mnuEditAnnotation.Name = "mnuEditAnnotation";
             mnuEditAnnotation.Size = new Size(205, 22);
             mnuEditAnnotation.Text = "Anmerkung bearbeiten…";
             mnuEditAnnotation.Click += MnuEditAnnotation_Click;
-            //
+            // 
             // mnuRemoveAnnotation
             // 
             mnuRemoveAnnotation.Name = "mnuRemoveAnnotation";
             mnuRemoveAnnotation.Size = new Size(205, 22);
             mnuRemoveAnnotation.Text = "Anmerkung entfernen";
             mnuRemoveAnnotation.Click += MnuRemoveAnnotation_Click;
-            // 
+            //
+            // contextMenuOutline
+            //
+            contextMenuOutline.Items.AddRange(new ToolStripItem[] { mnuOutlineExpandAll, mnuOutlineCollapseAll, toolStripSeparatorO1, mnuOutlineLevel2, mnuOutlineLevel3 });
+            contextMenuOutline.Name = "contextMenuOutline";
+            contextMenuOutline.Size = new Size(197, 98);
+            contextMenuOutline.Opening += ContextMenuOutline_Opening;
+            //
+            // mnuOutlineExpandAll
+            //
+            mnuOutlineExpandAll.Name = "mnuOutlineExpandAll";
+            mnuOutlineExpandAll.Size = new Size(196, 22);
+            mnuOutlineExpandAll.Text = "Alles aufklappen";
+            mnuOutlineExpandAll.Click += MnuOutlineExpandAll_Click;
+            //
+            // mnuOutlineCollapseAll
+            //
+            mnuOutlineCollapseAll.Name = "mnuOutlineCollapseAll";
+            mnuOutlineCollapseAll.Size = new Size(196, 22);
+            mnuOutlineCollapseAll.Text = "Alles zuklappen";
+            mnuOutlineCollapseAll.Click += MnuOutlineCollapseAll_Click;
+            //
+            // toolStripSeparatorO1
+            //
+            toolStripSeparatorO1.Name = "toolStripSeparatorO1";
+            toolStripSeparatorO1.Size = new Size(193, 6);
+            //
+            // mnuOutlineLevel2
+            //
+            mnuOutlineLevel2.Name = "mnuOutlineLevel2";
+            mnuOutlineLevel2.Size = new Size(196, 22);
+            mnuOutlineLevel2.Text = "Bis Ebene 2 aufklappen";
+            mnuOutlineLevel2.Click += MnuOutlineLevel2_Click;
+            //
+            // mnuOutlineLevel3
+            //
+            mnuOutlineLevel3.Name = "mnuOutlineLevel3";
+            mnuOutlineLevel3.Size = new Size(196, 22);
+            mnuOutlineLevel3.Text = "Bis Ebene 3 aufklappen";
+            mnuOutlineLevel3.Click += MnuOutlineLevel3_Click;
+            //
+            // contextMenuThumbnails
+            //
+            contextMenuThumbnails.Items.AddRange(new ToolStripItem[] { mnuThumbInsertPage, mnuThumbRotatePages, mnuThumbMovePage, mnuThumbExtractPages, toolStripSeparatorT1, mnuThumbDeletePages });
+            contextMenuThumbnails.Name = "contextMenuThumbnails";
+            contextMenuThumbnails.Size = new Size(260, 120);
+            contextMenuThumbnails.Opening += ContextMenuThumbnails_Opening;
+            //
+            // mnuThumbInsertPage
+            //
+            mnuThumbInsertPage.Name = "mnuThumbInsertPage";
+            mnuThumbInsertPage.ShortcutKeyDisplayString = "Strg+Einfg";
+            mnuThumbInsertPage.Size = new Size(259, 22);
+            mnuThumbInsertPage.Text = "Leere Seite einfügen…";
+            mnuThumbInsertPage.Click += MnuInsertPage_Click;
+            //
+            // mnuThumbRotatePages
+            //
+            mnuThumbRotatePages.Name = "mnuThumbRotatePages";
+            mnuThumbRotatePages.ShortcutKeyDisplayString = "Strg+R";
+            mnuThumbRotatePages.Size = new Size(259, 22);
+            mnuThumbRotatePages.Text = "Seiten drehen…";
+            mnuThumbRotatePages.Click += MnuRotatePages_Click;
+            //
+            // mnuThumbMovePage
+            //
+            mnuThumbMovePage.Name = "mnuThumbMovePage";
+            mnuThumbMovePage.ShortcutKeyDisplayString = "Strg+Y";
+            mnuThumbMovePage.Size = new Size(259, 22);
+            mnuThumbMovePage.Text = "Seite verschieben…";
+            mnuThumbMovePage.Click += MnuMovePage_Click;
+            //
+            // mnuThumbExtractPages
+            //
+            mnuThumbExtractPages.Name = "mnuThumbExtractPages";
+            mnuThumbExtractPages.ShortcutKeyDisplayString = "Strg+X";
+            mnuThumbExtractPages.Size = new Size(259, 22);
+            mnuThumbExtractPages.Text = "Seiten extrahieren…";
+            mnuThumbExtractPages.Click += MnuExtractPages_Click;
+            //
+            // toolStripSeparatorT1
+            //
+            toolStripSeparatorT1.Name = "toolStripSeparatorT1";
+            toolStripSeparatorT1.Size = new Size(256, 6);
+            //
+            // mnuThumbDeletePages
+            //
+            mnuThumbDeletePages.Name = "mnuThumbDeletePages";
+            mnuThumbDeletePages.ShortcutKeyDisplayString = "Strg+Entf";
+            mnuThumbDeletePages.Size = new Size(259, 22);
+            mnuThumbDeletePages.Text = "Seiten löschen…";
+            mnuThumbDeletePages.Click += MnuDeletePages_Click;
+            //
             // printDocument
             // 
             printDocument.BeginPrint += PrintDocument_BeginPrint;
@@ -1287,6 +1381,8 @@
             sidebarHeader.ResumeLayout(false);
             sidebarHeader.PerformLayout();
             contextMenuPage.ResumeLayout(false);
+            contextMenuOutline.ResumeLayout(false);
+            contextMenuThumbnails.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -1317,9 +1413,6 @@
         private System.Windows.Forms.ToolStripMenuItem mnuInsertPage;
         private System.Windows.Forms.ToolStripMenuItem mnuAppendPdf;
         private System.Windows.Forms.ToolStripMenuItem mnuDuplex;
-        private System.Windows.Forms.ToolStripMenuItem mnuSetPassword;
-        private System.Windows.Forms.ToolStripMenuItem mnuRemovePassword;
-        private System.Windows.Forms.ToolStripMenuItem mnuRemoveRestrictions;
         private System.Windows.Forms.ToolStripMenuItem mnuExtractPages;
         private ToolStripButton btnManageAnnotations;
         private System.Windows.Forms.ToolStripMenuItem mnuRemoveBookmarks;
@@ -1348,13 +1441,13 @@
         private System.Windows.Forms.ToolStripStatusLabel statusPath;
         private System.Windows.Forms.ToolStripStatusLabel statusOneClick;
         private System.Windows.Forms.ToolStripStatusLabel statusFormat;
+        private System.Windows.Forms.ToolStripStatusLabel statusAttachments;
         private System.Windows.Forms.ToolStripStatusLabel statusZoom;
         private System.Windows.Forms.ToolStripStatusLabel statusInfo;
         private System.Windows.Forms.Panel pnlPdfA;
         private System.Windows.Forms.Label lblPdfA;
         private System.Windows.Forms.Button btnPdfAEnable;
         private ToolStripSeparator toolStripSeparator9;
-        private ToolStripSeparator toolStripSeparator10;
         private ToolStripSeparator toolStripSeparator15;
         private ToolStripSeparator toolStripSeparator14;
         private ToolStripSeparator toolStripSeparator16;
@@ -1414,6 +1507,19 @@
         private ToolStripMenuItem mnuEditAnnotation;
         private ToolStripMenuItem mnuRemoveAnnotation;
         private ToolStripMenuItem mnuAddFreeTextHere;
+        private ContextMenuStrip contextMenuOutline;
+        private ToolStripMenuItem mnuOutlineExpandAll;
+        private ToolStripMenuItem mnuOutlineCollapseAll;
+        private ToolStripSeparator toolStripSeparatorO1;
+        private ToolStripMenuItem mnuOutlineLevel2;
+        private ToolStripMenuItem mnuOutlineLevel3;
+        private ContextMenuStrip contextMenuThumbnails;
+        private ToolStripMenuItem mnuThumbInsertPage;
+        private ToolStripMenuItem mnuThumbRotatePages;
+        private ToolStripMenuItem mnuThumbMovePage;
+        private ToolStripMenuItem mnuThumbExtractPages;
+        private ToolStripSeparator toolStripSeparatorT1;
+        private ToolStripMenuItem mnuThumbDeletePages;
         private System.Drawing.Printing.PrintDocument printDocument;
         private PrintDialog printDialog;
         private ToolTip toolTipLink;

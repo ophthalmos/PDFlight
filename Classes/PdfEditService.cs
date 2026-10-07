@@ -20,6 +20,13 @@ internal record PdfInfo(string Title, string Author, string Subject, string Keyw
 /// Typ (TrueType, Type 1, CID …) und Kodierung.</summary>
 internal sealed record FontInfo(string Name, bool Embedded, bool Subset, string Type, string Encoding);
 
+/// <summary>Die vier bearbeitbaren Metadaten des Eigenschaften-Dialogs.</summary>
+internal sealed record DocumentText(string Title, string Author, string Subject, string Keywords);
+
+/// <summary>Was „OK“ im Eigenschaften-Dialog schreibt (<see cref="PdfEditService.WriteProperties"/>): neue Metadaten (null = unverändert),
+/// vorher alle Metadaten entfernen, Kennwort zum Öffnen (null = unverschlüsselt speichern).</summary>
+internal sealed record PropertyChanges(DocumentText? Info, bool RemoveMetadata, string? Password);
+
 /// <summary>Kenndaten einer Datei; PageWidthPt/PageHeightPt = Größe der ersten Seite in Punkt (Referenz für die Zoomanzeige; 0 = unbekannt),
 /// AnnotationCount = verwaltbare Anmerkungen (s. ListAnnotations) – schaltet den Verwaltungsdialog frei.</summary>
 /// <summary>Eine Anmerkung fürs Verwalten (s. PdfEditService.ListAnnotations): Index = Position im Annots-Array der Seite,
@@ -699,7 +706,7 @@ internal static partial class PdfEditService
             resources.Elements.SetObject("/ExtGState", graphicsStates);
             // /BBox = /Rect: die Darstellung liegt ohne Umrechnung in Seitenkoordinaten
             var content = new StringBuilder("/GS0 gs 1 1 1 rg ");
-            foreach (var box in boxes) { content.Append(CultureInfo.InvariantCulture, $"{box.Left:0.###} {box.Bottom:0.###} {box.Right - box.Left:0.###} {box.Top - box.Bottom:0.###} re "); }
+            foreach (var (Left, Top, Right, Bottom) in boxes) { content.Append(CultureInfo.InvariantCulture, $"{Left:0.###} {Bottom:0.###} {Right - Left:0.###} {Top - Bottom:0.###} re "); }
             content.Append('f');
             var appearance = new PdfDictionary(document);
             appearance.Elements.SetName("/Type", "/XObject");
@@ -712,9 +719,9 @@ internal static partial class PdfEditService
             appearances.Elements.SetReference("/N", appearance);
 
             var quads = new PdfArray(document); // je Zeile links oben, rechts oben, links unten, rechts unten – wie PDFiums Hervorhebungen
-            foreach (var box in boxes)
+            foreach (var (Left, Top, Right, Bottom) in boxes)
             {
-                foreach (var value in new[] { box.Left, box.Top, box.Right, box.Top, box.Left, box.Bottom, box.Right, box.Bottom }) { quads.Elements.Add(new PdfReal(value)); }
+                foreach (var value in new[] { Left, Top, Right, Top, Left, Bottom, Right, Bottom }) { quads.Elements.Add(new PdfReal(value)); }
             }
             var white = new PdfArray(document);
             for (var i = 0; i < 3; i++) { white.Elements.Add(new PdfReal(1)); }
@@ -924,34 +931,6 @@ internal static partial class PdfEditService
         SaveCompact(destination, destinationPath);
     }
 
-    /// <summary>True, wenn sich die Datei mit dem Kennwort öffnen lässt (null/leer = ohne Kennwort).</summary>
-    public static bool CanOpen(string path, string? password)
-    {
-        try
-        {
-            using var document = string.IsNullOrEmpty(password)
-                ? PdfReader.Open(path, PdfDocumentOpenMode.Import)
-                : PdfReader.Open(path, password, PdfDocumentOpenMode.Import);
-            return true;
-        }
-        catch (Exception ex) when (IsPdfReadError(ex)) { return false; }
-    }
-
-    /// <summary>Verschlüsselt die Datei mit AES-256 (PDF 2.0) und dem angegebenen Benutzer-Kennwort; die Datei wird aus einer
-    /// Speicherkopie neu aufgebaut. Bleibt bei PDFsharp – PDFium kann nicht verschlüsseln (Entfernen läuft dagegen über PDFium).</summary>
-    public static void SetPassword(string path, string password)
-    {
-        var bytes = File.ReadAllBytes(path);
-        using MemoryStream stream = new(bytes);
-        using var source = PdfReader.Open(stream, PdfDocumentOpenMode.Import);
-        using PdfDocument target = new();
-        foreach (var page in source.Pages) { target.AddPage(page); }
-        CopyInfo(source, target);
-        target.SecuritySettings.UserPassword = password;
-        target.SecurityHandler.SetEncryptionToV5(); // AES-256, PDF 2.0
-        SaveCompact(target, path);
-    }
-
     /// <summary>Duplex-Zusammenführung: verzahnt hinter jede Seite der Datei die passende Rückseite aus
     /// backPath (bei backsReversed von hinten gezählt — der übliche Fall, wenn der Stapel zum Scannen
     /// gewendet wurde). Beide Dateien müssen gleich viele Seiten haben (prüft der Aufrufer).</summary>
@@ -1088,31 +1067,47 @@ internal static partial class PdfEditService
         document.Save(path);
     }
 
-    public static void WriteInfo(string path, string title, string author, string subject, string keywords)
+    /// <summary>„OK“ im Eigenschaften-Dialog: Metadaten und Kennwortschutz in einem Durchgang schreiben (ein Rückgängig-Schritt).
+    /// <paramref name="decrypted"/> ist bei verschlüsselten Dateien die von PDFium entschlüsselte Fassung (PDFsharp kann verschlüsselte
+    /// Dateien nicht ändern), sonst null = die Datei selbst. Ändert sich weder an den Metadaten noch am Kennwort etwas – Schutz oder
+    /// Einschränkungen nur aufheben –, kommt PDFiums Fassung unverändert und damit verlustfrei in die Datei. Verschlüsselt wird im
+    /// Modify-Modus: Lesezeichen und Formularfelder bleiben (bis 06.10.2026 baute „Kennwort vergeben“ die Datei aus ihren Seiten neu auf
+    /// und verlor beides).</summary>
+    public static void WriteProperties(string path, byte[]? decrypted, PropertyChanges changes)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
-        document.Info.Title = title ?? string.Empty;
-        document.Info.Author = author ?? string.Empty;
-        document.Info.Subject = subject ?? string.Empty;
-        document.Info.Keywords = keywords ?? string.Empty;
+        var bytes = decrypted ?? File.ReadAllBytes(path);
+        if (changes.Info == null && !changes.RemoveMetadata && changes.Password == null)
+        {
+            File.WriteAllBytes(path, bytes);
+            return;
+        }
+        using MemoryStream stream = new(bytes);
+        using var document = PdfReader.Open(stream, PdfDocumentOpenMode.Modify);
+        if (changes.RemoveMetadata) { ClearMetadata(document); }
+        if (changes.Info is { } info)
+        {
+            // nach dem Leeren nur, was eingetippt ist – sonst stünden leere Einträge in der Datei
+            if (!changes.RemoveMetadata || info.Title.Length > 0) { document.Info.Title = info.Title; }
+            if (!changes.RemoveMetadata || info.Author.Length > 0) { document.Info.Author = info.Author; }
+            if (!changes.RemoveMetadata || info.Subject.Length > 0) { document.Info.Subject = info.Subject; }
+            if (!changes.RemoveMetadata || info.Keywords.Length > 0) { document.Info.Keywords = info.Keywords; }
+        }
+        if (changes.Password != null)
+        {
+            document.SecuritySettings.UserPassword = changes.Password;
+            document.SecurityHandler.SetEncryptionToV5(); // AES-256, PDF 2.0; ohne eigenes Berechtigungskennwort – alles erlaubt
+        }
         SaveCompact(document, path);
     }
 
     /// <summary>Entfernt alle Metadaten: das gesamte Info-Wörterbuch (Titel, Autor, Betreff, Stichwörter, Anwendung, Produzent,
-    /// Datumsangaben und private Einträge) sowie die XMP-Metadaten von Katalog und Seiten; anschließend werden die vier
-    /// sichtbaren Felder neu gesetzt, sofern nicht leer. PDFsharp schreibt beim Speichern eigene XMP-Daten samt Produzent –
-    /// die nennen dann nur noch PDFsharp und das Speicherdatum, nichts aus der Herkunft der Datei.</summary>
-    public static void RemoveMetadata(string path, string title, string author, string subject, string keywords)
+    /// Datumsangaben und private Einträge) sowie die XMP-Metadaten von Katalog und Seiten. PDFsharp schreibt beim Speichern eigene
+    /// XMP-Daten samt Produzent – die nennen dann nur noch PDFsharp und das Speicherdatum, nichts aus der Herkunft der Datei.</summary>
+    private static void ClearMetadata(PdfDocument document)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         foreach (var key in document.Info.Elements.Keys.ToList()) { document.Info.Elements.Remove(key); }
         StripXmp(document.Internals.Catalog);
         foreach (var page in document.Pages) { StripXmp(page); }
-        if (title.Length > 0) { document.Info.Title = title; }
-        if (author.Length > 0) { document.Info.Author = author; }
-        if (subject.Length > 0) { document.Info.Subject = subject; }
-        if (keywords.Length > 0) { document.Info.Keywords = keywords; }
-        SaveCompact(document, path);
     }
 
     /// <summary>XMP-Strom eines Wörterbuchs entfernen. PDFsharp schreibt auch nicht mehr referenzierte Objekte in die Datei,

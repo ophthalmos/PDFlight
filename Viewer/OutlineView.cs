@@ -82,6 +82,41 @@ internal sealed class OutlineView : ScrollableControl
         }
     }
 
+    /// <summary>Anzahl der Ebenen (1 = nur Oberpunkte, 0 = keine Einträge).</summary>
+    [Browsable(false)]
+    public int Depth => roots.Count == 0 ? 0 : roots.Max(DepthOf);
+
+    private static int DepthOf(Node node) => 1 + (node.Children.Count == 0 ? 0 : node.Children.Max(DepthOf));
+
+    /// <summary>Entspricht der Aufklappzustand schon <see cref="ExpandToLevel"/> mit dieser Ebene? Dann wäre der Befehl wirkungslos.
+    /// Es zählt nur, was zu sehen ist: Einträge ohne Unterpunkte und das Innere zugeklappter Zweige bleiben außen vor.</summary>
+    public bool IsAtLevel(int level)
+    {
+        static bool Check(IEnumerable<Node> nodes, int level) =>
+            nodes.All(n => n.Children.Count == 0 || (n.Expanded == n.Depth < level - 1 && (!n.Expanded || Check(n.Children, level))));
+        return Check(roots, level);
+    }
+
+    /// <summary>Kontextmenü: alles zuklappen und bis zur Ebene <paramref name="level"/> wieder öffnen (1 = nur die Oberpunkte sichtbar,
+    /// <see cref="int.MaxValue"/> = alles auf). Eine Auswahl im zugeklappten Zweig wandert zum sichtbaren Vorfahren.</summary>
+    public void ExpandToLevel(int level)
+    {
+        void Set(IEnumerable<Node> nodes)
+        {
+            foreach (var node in nodes) { node.Expanded = node.Depth < level - 1; Set(node.Children); }
+        }
+        Set(roots);
+        if (selected != null)
+        {
+            for (var current = selected.Parent; current != null; current = current.Parent)
+            {
+                if (!current.Expanded) { selected = current; }
+            }
+        }
+        Relayout();
+        if (selected != null) { EnsureVisible(selected); }
+    }
+
     // ================================================================== Anordnung
 
     private int Scale(int logical) => LogicalToDeviceUnits(logical);

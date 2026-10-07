@@ -234,31 +234,15 @@ In the next step, select the file with the back pages – it will be interleaved
 into one complete document (1, 2, 3 …).
 
 Both files must have the same number of pages.</value></data>
-  <data name="Kennwort entfernen…" xml:space="preserve"><value>Remove password…</value></data>
-  <data name="Kennwort vergeben…" xml:space="preserve"><value>Set password…</value></data>
   <data name="Drucken" xml:space="preserve"><value>Print</value></data>
   <data name="Datei drucken (Strg+P)" xml:space="preserve"><value>Print file (Ctrl+P)</value></data>
-  <data name="Benutzer-Kennwort vergeben" xml:space="preserve"><value>Set user password</value></data>
-  <data name="Kennwort.Info" xml:space="preserve"><value>The file will be encrypted with AES-256 (PDF 2.0).
-The password will be required each time the file is opened.
-Without it, the file can no longer be displayed.</value></data>
   <data name="Kennwort anzeigen" xml:space="preserve"><value>Show password</value></data>
   <data name="Drehen.Info" xml:space="preserve"><value>The rotation is saved permanently in the file.
 The viewer's rotate button, by contrast, only changes the view.</value></data>
   <data name="Kennwort verbergen" xml:space="preserve"><value>Hide password</value></data>
   <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Repeat:</value></data>
-  <data name="Bitte gib ein Kennwort ein." xml:space="preserve"><value>Please enter a password.</value></data>
-  <data name="Die Kennwörter stimmen nicht überein." xml:space="preserve"><value>The passwords do not match.</value></data>
-  <data name="Die Datei ist bereits verschlüsselt." xml:space="preserve"><value>The file is already encrypted.</value></data>
-  <data name="Vergeben des Kennworts" xml:space="preserve"><value>Setting the password</value></data>
-  <data name="Die Datei ist jetzt mit AES-256 verschlüsselt." xml:space="preserve"><value>The file is now encrypted with AES-256.</value></data>
-  <data name="Kennwort entfernen" xml:space="preserve"><value>Remove password</value></data>
   <data name="&amp;Kennwort:" xml:space="preserve"><value>&amp;Password:</value></data>
-  <data name="Die Datei ist nicht verschlüsselt." xml:space="preserve"><value>The file is not encrypted.</value></data>
   <data name="Das Kennwort ist falsch." xml:space="preserve"><value>The password is incorrect.</value></data>
-  <data name="Entfernen des Kennworts" xml:space="preserve"><value>Removing the password</value></data>
-  <data name="Das Kennwort wurde entfernt." xml:space="preserve"><value>The password was removed.</value></data>
-  <data name="Ein Kennwortschutz lässt sich über Bearbeiten → &quot;Kennwort entfernen&quot; aufheben." xml:space="preserve"><value>Password protection can be removed via Edit → "Remove password".</value></data>
   <data name="Datei mit den Rückseiten wählen" xml:space="preserve"><value>Select the file with the back pages</value></data>
   <data name="Bitte wähle eine andere Datei als die angezeigte." xml:space="preserve"><value>Please select a different file than the one displayed.</value></data>
   <data name="Die Seitenzahlen passen nicht zusammen." xml:space="preserve"><value>The page counts do not match.</value></data>
@@ -503,7 +487,6 @@ the latest version.</value></data>
   <data name="Die übrigen Seiten rücken entsprechend auf." xml:space="preserve"><value>The remaining pages shift accordingly.</value></data>
   <data name="Seite {0} wurde an Position {1} verschoben." xml:space="preserve"><value>Page {0} was moved to position {1}.</value></data>
   <data name="Metadaten &amp;entfernen" xml:space="preserve"><value>R&amp;emove metadata</value></data>
-  <data name="Entfernen der Metadaten" xml:space="preserve"><value>Removing the metadata</value></data>
   <data name="Die Metadaten wurden entfernt." xml:space="preserve"><value>The metadata was removed.</value></data>
 
   <!-- Stempel -->
@@ -637,11 +620,6 @@ or press Ctrl+Shift+I.</value></data>
   <data name="„{0}“ ist schreibgeschützt." xml:space="preserve"><value>„{0}“ is read-only.</value></data>
   <data name="Soll der Schreibschutz aufgehoben werden, damit „{0}“ gespeichert werden kann?" xml:space="preserve"><value>Remove the write protection so that „{0}“ can be saved?</value></data>
   <data name="„{0}“ ist mit einem Kennwort geschützt." xml:space="preserve"><value>„{0}“ is protected by a password.</value></data>
-  <data name="Einschränkungen entfernen…" xml:space="preserve"><value>Remove restrictions…</value></data>
-  <data name="Einschränkungen von „{0}“ entfernen?" xml:space="preserve"><value>Remove restrictions from „{0}“?</value></data>
-  <data name="Entfernen der Einschränkungen" xml:space="preserve"><value>Removing the restrictions</value></data>
-  <data name="Die Einschränkungen wurden entfernt." xml:space="preserve"><value>The restrictions were removed.</value></data>
-  <data name="Zum Bearbeiten hebst du den Schutz zuerst über Bearbeiten → „Einschränkungen entfernen…“ auf." xml:space="preserve"><value>To edit it, first remove the protection via Edit → „Remove restrictions…“.</value></data>
   <data name="Nicht speichern" xml:space="preserve"><value>Don't save</value></data>
   <data name="Die Datei ist als PDF/A gekennzeichnet – nach dem Speichern entspricht sie dem Standard nicht mehr." xml:space="preserve"><value>The file is marked as PDF/A – after saving it no longer conforms to the standard.</value></data>
   <data name="(keine Lesezeichen)" xml:space="preserve"><value>(no bookmarks)</value></data>
@@ -760,9 +738,6 @@ or press Ctrl+Shift+I.</value></data>
   <data name="Zeichnung entfernen" xml:space="preserve"><value>Remove drawing</value></data>
   <data name="Die Zeichnung wurde entfernt." xml:space="preserve"><value>The drawing was removed.</value></data>
   <data name="Zeichnen: Ziehe mit gedrückter Maustaste über die Seite – mit Strg eine gerade Linie. Esc beendet." xml:space="preserve"><value>Draw: drag across the page with the mouse button held down – with Ctrl for a straight line. Esc ends.</value></data>
-  <data name="Die Datei ist nur mit einem Besitzerkennwort geschützt, das Berechtigungen wie Drucken oder Ändern einschränkt. Die Einschränkungen werden entfernt, der Inhalt bleibt vollständig erhalten." xml:space="preserve"><value>The file is protected only by an owner password that restricts permissions such as printing or editing. The restrictions are removed; the content is kept in full.</value></data>
-  <data name="Kennwortschutz von „{0}“ entfernen?" xml:space="preserve"><value>Remove password protection from “{0}”?</value></data>
-  <data name="Die Datei wird unverschlüsselt gespeichert und lässt sich danach ohne Kennwort öffnen. Der Inhalt bleibt vollständig erhalten." xml:space="preserve"><value>The file is saved unencrypted and can then be opened without a password. The content is kept in full.</value></data>
   <data name="Stempel entfernen" xml:space="preserve"><value>Remove stamp</value></data>
   <data name="Der Stempel wurde entfernt." xml:space="preserve"><value>The stamp was removed.</value></data>
   <data name="Alle Dateien (*.*)|*.*" xml:space="preserve"><value>All files (*.*)|*.*</value></data>
@@ -773,10 +748,8 @@ or press Ctrl+Shift+I.</value></data>
   <data name="Dateigröße:" xml:space="preserve"><value>File size:</value></data>
   <data name="Die eingebettete Datei konnte nicht gespeichert werden." xml:space="preserve"><value>The embedded file could not be saved.</value></data>
   <data name="Dokumenteinschränkungen – Zusammenfassung" xml:space="preserve"><value>Document restrictions summary</value></data>
-  <data name="Dokumentsicherheit" xml:space="preserve"><value>Document security</value></data>
   <data name="Dokumentzusammenstellung" xml:space="preserve"><value>Document assembly</value></data>
   <data name="Eingebettete Datei speichern" xml:space="preserve"><value>Save embedded file</value></data>
-  <data name="Eingebettete Dateien werden nur gespeichert, nicht geöffnet." xml:space="preserve"><value>Embedded files are only saved, never opened.</value></data>
   <data name="Erstellt am:" xml:space="preserve"><value>Created:</value></data>
   <data name="Erweitert" xml:space="preserve"><value>Advanced</value></data>
   <data name="Geändert am:" xml:space="preserve"><value>Modified:</value></data>
@@ -785,10 +758,6 @@ or press Ctrl+Shift+I.</value></data>
   <data name="Integriert" xml:space="preserve"><value>Built-in</value></data>
   <data name="Ja" xml:space="preserve"><value>Yes</value></data>
   <data name="Keine Schriften gefunden" xml:space="preserve"><value>No fonts found</value></data>
-  <data name="Keine Sicherheit" xml:space="preserve"><value>No security</value></data>
-  <data name="Keine" xml:space="preserve"><value>None</value></data>
-  <data name="Kennwort zum Öffnen:" xml:space="preserve"><value>Password to open:</value></data>
-  <data name="Kennwortsicherheit" xml:space="preserve"><value>Password security</value></data>
   <data name="Kodierung:" xml:space="preserve"><value>Encoding:</value></data>
   <data name="Kommentieren" xml:space="preserve"><value>Commenting</value></data>
   <data name="Kopieren von Inhalt für Barrierefreiheit" xml:space="preserve"><value>Content copying for accessibility</value></data>
@@ -804,12 +773,10 @@ or press Ctrl+Shift+I.</value></data>
   <data name="Seitenanzahl:" xml:space="preserve"><value>Number of pages:</value></data>
   <data name="Seitenformat:" xml:space="preserve"><value>Page size:</value></data>
   <data name="Sicherheit" xml:space="preserve"><value>Security</value></data>
-  <data name="Sicherheitssystem:" xml:space="preserve"><value>Security method:</value></data>
   <data name="Speichern &amp;unter…" xml:space="preserve"><value>Save &amp;as…</value></data>
   <data name="Speicherort:" xml:space="preserve"><value>Location:</value></data>
   <data name="Status" xml:space="preserve"><value>Status</value></data>
   <data name="Typ:" xml:space="preserve"><value>Type:</value></data>
-  <data name="Verschlüsselung:" xml:space="preserve"><value>Encryption:</value></data>
   <data name="Vorgang" xml:space="preserve"><value>Action</value></data>
   <data name="Zulässig" xml:space="preserve"><value>Allowed</value></data>
   <data name="wird entfernt" xml:space="preserve"><value>will be removed</value></data>
@@ -836,9 +803,49 @@ or press Ctrl+Shift+I.</value></data>
   <data name="Seitenleiste ein/aus / mit Miniaturen / mit Lesezeichen" xml:space="preserve"><value>Sidebar on/off / with thumbnails / with bookmarks</value></data>
   <data name="Seitenleiste mit Miniaturen und Lesezeichen (F10)" xml:space="preserve"><value>Sidebar with thumbnails and bookmarks (F10)</value></data>
   <data name="Änderungen über die Viewer-Leiste (Hervorheben, Zeichnen, Freitext, Stempel, Seiten drehen) bleiben ungespeichert, bis du auf „Speichern“ klickst." xml:space="preserve"><value>Changes made with the viewer bar (highlight, draw, free text, stamp, rotate pages) stay unsaved until you click “Save”.</value></data>
-  <data name="Die Befehle im Menü „Bearbeiten“ und in der Symbolleiste ändern die Datei sofort. Strg+Z macht einen Fehlgriff rückgängig." xml:space="preserve"><value>The commands in the “Edit” menu and in the toolbar change the file immediately. Ctrl+Z undoes a slip.</value></data>
+  <data name="Die Befehle im Menü „Bearbeiten“ und in der oberen Symbolleiste ändern die Datei sofort. Strg+Z macht einen Fehlgriff rückgängig." xml:space="preserve"><value>The commands in the “Edit” menu and in the top toolbar change the file immediately. Ctrl+Z undoes a slip.</value></data>
   <data name="Verwalten" xml:space="preserve"><value>Manage</value></data>
   <data name="Anmerkungen verwalten (Strg+Umschalt+T)" xml:space="preserve"><value>Manage annotations (Ctrl+Shift+T)</value></data>
   <data name="Angezeigte S&amp;eite" xml:space="preserve"><value>Dis&amp;played page</value></data>
   <data name="Ungespeicherte Änderungen an den Lesezeichen verwerfen?" xml:space="preserve"><value>Discard unsaved changes to the bookmarks?</value></data>
+  <data name="Tipp: Strg drücken für gerade Linien" xml:space="preserve"><value>Tip: hold Ctrl to draw straight lines</value></data>
+  <data name="Alles aufklappen" xml:space="preserve"><value>Expand all</value></data>
+  <data name="Alles zuklappen" xml:space="preserve"><value>Collapse all</value></data>
+  <data name="Bis Ebene 2 aufklappen" xml:space="preserve"><value>Expand to level 2</value></data>
+  <data name="Bis Ebene 3 aufklappen" xml:space="preserve"><value>Expand to level 3</value></data>
+  <data name="Seite verschieben…" xml:space="preserve"><value>Move page…</value></data>
+  <data name="„{0}“ wird nicht geöffnet." xml:space="preserve"><value>“{0}” will not be opened.</value></data>
+  <data name="„{0}“ öffnen?" xml:space="preserve"><value>Open “{0}”?</value></data>
+  <data name="Anhänge können Makros oder Schadcode enthalten. Öffne die Datei nur, wenn die PDF aus einer sicheren Quelle stammt." xml:space="preserve"><value>Attachments can contain macros or malware. Only open the file if the PDF comes from a trusted source.</value></data>
+  <data name="Die eingebettete Datei konnte nicht geöffnet werden." xml:space="preserve"><value>The embedded file could not be opened.</value></data>
+  <data name="Programme und Skripte lassen sich nur speichern." xml:space="preserve"><value>Programs and scripts can only be saved.</value></data>
+  <data name="Programme, Skripte und ähnliche Dateien öffnet PDFlight aus Sicherheitsgründen nicht. Möchtest du die Datei stattdessen speichern?" xml:space="preserve"><value>For security reasons, PDFlight does not open programs, scripts and similar files. Do you want to save the file instead?</value></data>
+  <data name="Ö&amp;ffnen" xml:space="preserve"><value>&amp;Open</value></data>
+  <data name="Speichern unter…" xml:space="preserve"><value>Save as…</value></data>
+  <data name="Geändert am" xml:space="preserve"><value>Modified</value></data>
+  <data name="Anhang anzeigen" xml:space="preserve"><value>Show attachment</value></data>
+  <data name="{0} Anhänge anzeigen" xml:space="preserve"><value>Show {0} attachments</value></data>
+  <data name="Das Kennwort ist sehr kurz." xml:space="preserve"><value>The password is very short.</value></data>
+  <data name="Der Kennwortschutz wurde entfernt." xml:space="preserve"><value>Password protection has been removed.</value></data>
+  <data name="Die Datei ist jetzt mit einem Kennwort geschützt (AES 256 Bit)." xml:space="preserve"><value>The file is now password-protected (AES 256-bit).</value></data>
+  <data name="Die Datei ist nicht geschützt." xml:space="preserve"><value>The file is not protected.</value></data>
+  <data name="Die Datei lässt sich ohne Kennwort öffnen. Verschlüsselung: {0}." xml:space="preserve"><value>The file opens without a password. Encryption: {0}.</value></data>
+  <data name="Die Einschränkungen wurden aufgehoben." xml:space="preserve"><value>The restrictions have been lifted.</value></data>
+  <data name="Die beiden Kennwörter stimmen nicht überein." xml:space="preserve"><value>The two passwords do not match.</value></data>
+  <data name="Einschränkungen &amp;aufheben" xml:space="preserve"><value>&amp;Lift restrictions</value></data>
+  <data name="Felder leer lassen, um das bisherige Kennwort zu behalten. Ein neues Kennwort wird mit AES 256 Bit verschlüsselt (lesbar ab Acrobat X)." xml:space="preserve"><value>Leave the fields empty to keep the current password. A new password is encrypted with AES 256-bit (readable from Acrobat X).</value></data>
+  <data name="Gib ein Kennwort ein." xml:space="preserve"><value>Enter a password.</value></data>
+  <data name="Kennwort zum &amp;Öffnen verlangen" xml:space="preserve"><value>Require a password to &amp;open</value></data>
+  <data name="Kennwortschutz" xml:space="preserve"><value>Password protection</value></data>
+  <data name="Kurze Kennwörter lassen sich leicht erraten. Trotzdem verwenden?" xml:space="preserve"><value>Short passwords are easy to guess. Use it anyway?</value></data>
+  <data name="PDF/A-Dateien dürfen nicht verschlüsselt werden." xml:space="preserve"><value>PDF/A files must not be encrypted.</value></data>
+  <data name="Zum Öffnen ist ein Kennwort nötig. Verschlüsselung: {0}." xml:space="preserve"><value>A password is required to open the file. Encryption: {0}.</value></data>
+  <data name="Zum Bearbeiten hebst du den Schutz zuerst unter Eigenschaften (Strg+I), Reiter „Sicherheit“, auf." xml:space="preserve"><value>To edit it, first lift the protection under Properties (Ctrl+I), “Security” tab.</value></data>
+  <data name="Öffne sie mit ihrem Kennwort – den Schutz hebst du dann unter Eigenschaften (Strg+I), Reiter „Sicherheit“, auf." xml:space="preserve"><value>Open it with its password – you can then lift the protection under Properties (Ctrl+I), “Security” tab.</value></data>
+  <data name="Kennwort.Info" xml:space="preserve"><value>The file will be encrypted with AES-256 (PDF 2.0).
+The password will be required each time the file is opened.
+Without it, the file can no longer be displayed.</value></data>
+  <data name="Die Einschränkungen der Datei entfallen." xml:space="preserve"><value>The file’s restrictions will be removed.</value></data>
+  <data name="Mit dem neuen Kennwort wird die Datei neu verschlüsselt (AES 256 Bit); Einschränkungen wie beim Drucken oder Kopieren gelten danach nicht mehr. Trotzdem speichern?" xml:space="preserve"><value>The file will be re-encrypted with the new password (AES 256-bit); restrictions such as on printing or copying will no longer apply. Save anyway?</value></data>
+  <data name="Die Datei wird mit dem Kennwort, mit dem du sie geöffnet hast, neu verschlüsselt (AES 256 Bit); Einschränkungen wie beim Drucken oder Kopieren gelten danach nicht mehr. Hast du sie mit dem Besitzerkennwort geöffnet, öffnet künftig dieses die Datei. Trotzdem speichern?" xml:space="preserve"><value>The file will be re-encrypted with the password you opened it with (AES 256-bit); restrictions such as on printing or copying will no longer apply. If you opened it with the owner password, that password will open the file from now on. Save anyway?</value></data>
 </root>

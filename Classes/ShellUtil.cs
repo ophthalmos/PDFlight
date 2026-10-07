@@ -184,6 +184,29 @@ internal static partial class ShellUtil
         ex is COMException or InvalidOperationException or ArgumentException or NotSupportedException
         or Microsoft.CSharp.RuntimeBinder.RuntimeBinderException;
 
+    [LibraryImport("shlwapi.dll", EntryPoint = "AssocIsDangerous", StringMarshalling = StringMarshalling.Utf16)] // nur als Unicode-Funktion
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool AssocIsDangerous(string assoc);
+
+    /// <summary>Dateitypen, die Windows' Liste (AssocIsDangerous) nicht kennt, die beim Öffnen aber Code ausführen oder die
+    /// Herkunftsmarke umgehen können (Skripte, App-Installer, Abbilder, die Windows einhängt).</summary>
+    private static readonly HashSet<string> ExtraDangerous = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".ps1", ".psm1", ".psd1", ".appref-ms", ".application", ".appx", ".appxbundle", ".msix", ".msixbundle", ".jar",
+        ".iso", ".img", ".vhd", ".vhdx", ".library-ms", ".settingcontent-ms", ".search-ms", ".searchconnector-ms", ".diagcab",
+    };
+
+    /// <summary>Würde das Öffnen dieser Datei Code ausführen (Programme, Skripte, Verknüpfungen, Installer …)? Dann öffnet PDFlight
+    /// Anhänge nicht, sondern bietet nur das Speichern an. Im Zweifel (Funktion fehlt) gilt der Typ als gefährlich.</summary>
+    public static bool IsDangerousFileType(string fileName)
+    {
+        var extension = Path.GetExtension(fileName);
+        if (extension.Length <= 1) { return false; } // ohne Endung fragt Windows nach dem Programm – es führt nichts aus
+        if (ExtraDangerous.Contains(extension)) { return true; }
+        try { return AssocIsDangerous(extension); }
+        catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException) { return true; }
+    }
+
     public static void ShowFileProperties(string fileName)
     {
         var verb = Marshal.StringToHGlobalUni("properties");

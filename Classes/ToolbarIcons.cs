@@ -36,8 +36,6 @@ internal static class ToolbarIcons
     public const char Interleave = '\uE8AB';   // Switch: Rückseiten-Scan verzahnen
     public const char Page = '\uE7C3';         // Seiten extrahieren
     public const char Undo = '\uE7A7';
-    public const char Lock = '\uE72E';         // Kennwort vergeben
-    public const char Unlock = '\uE785';       // Kennwort entfernen
     public const char Clear = '\uE894';        // Liste leeren
     public const char Keyboard = '\uE765';     // Tastenkürzel-Menüpunkt
     public const char UpdateSearch = '\uE777'; // UpdateRestore: nach Updates suchen

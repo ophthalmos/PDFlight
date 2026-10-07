@@ -839,18 +839,35 @@ internal sealed unsafe class PdfDocument : IDisposable
     /// Datei, auch wenn sie mit dem Besitzerkennwort geöffnet wurde (FPDF_GetDocPermissions meldete dann alles erlaubt).</summary>
     public (uint Permissions, int Revision) Security() => (Pdfium.GetDocUserPermissions(document), Pdfium.GetSecurityHandlerRevision(document));
 
-    /// <summary>Eingebettete Dateien (Namensbaum /EmbeddedFiles): Name und Größe (-1, wenn PDFium sie nicht liefern kann).</summary>
-    public List<(string Name, long Size)> Attachments()
+    /// <summary>Eingebettete Dateien (Namensbaum /EmbeddedFiles): Name, Größe (-1, wenn PDFium sie nicht liefern kann) und Änderungsdatum
+    /// als PDF-Datumszeichenfolge aus /Params /ModDate (leer, wenn der Ersteller keins eingetragen hat).</summary>
+    /// <summary>Anzahl der eingebetteten Dateien, ohne sie anzufassen.</summary>
+    public int AttachmentCount() => Math.Max(0, Pdfium.DocGetAttachmentCount(document));
+
+    public List<(string Name, long Size, string Modified)> Attachments()
     {
-        var result = new List<(string, long)>();
+        var result = new List<(string, long, string)>();
         var count = Pdfium.DocGetAttachmentCount(document);
         for (var i = 0; i < count; i++)
         {
             var attachment = Pdfium.DocGetAttachment(document, i);
-            if (attachment == 0) { result.Add(("?", -1)); continue; }
-            result.Add((AttachmentName(attachment), Pdfium.AttachmentGetFile(attachment, null, 0, out var size) != 0 ? size : -1));
+            if (attachment == 0) { result.Add(("?", -1, string.Empty)); continue; }
+            result.Add((AttachmentName(attachment), Pdfium.AttachmentGetFile(attachment, null, 0, out var size) != 0 ? size : -1, AttachmentModified(attachment)));
         }
         return result;
+    }
+
+    private static string AttachmentModified(nint attachment)
+    {
+        var key = "ModDate\0"u8;
+        fixed (byte* keyPointer = key)
+        {
+            var length = Pdfium.AttachmentGetStringValue(attachment, keyPointer, null, 0); // Bytes in UTF-16LE samt abschließender Null
+            if (length <= 2 || length > 512) { return string.Empty; }
+            var buffer = new byte[length];
+            fixed (byte* first = buffer) { _ = Pdfium.AttachmentGetStringValue(attachment, keyPointer, first, length); }
+            return System.Text.Encoding.Unicode.GetString(buffer, 0, (int)length - 2);
+        }
     }
 
     /// <summary>Inhalt einer eingebetteten Datei.</summary>
