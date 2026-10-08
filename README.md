@@ -1,5 +1,6 @@
-# PDFlight
-![PDFlight](PDFlight.ico)
+| | |
+| :--- | ---: |
+| # PDFlight | <img src="PDFlight.ico" alt="PDFlight"> |
 A lightweight PDF viewer with built-in file management for Windows.
 
 PDFlight is a lean PDF viewer for everyone who works through scans and incoming
