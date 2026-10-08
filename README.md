@@ -1,5 +1,5 @@
-# PDFlight
 <img src="PDFlight.ico" align="right" alt="PDFlight" />
+# PDFlight
 
 A lightweight PDF viewer with built-in file management for Windows.
 
