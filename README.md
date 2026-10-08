@@ -2,8 +2,6 @@
 
 A lightweight PDF viewer with built-in file management for Windows.
 
-![PDFlight](screenshot.png)
-
 PDFlight is a lean PDF viewer for everyone who works through scans and incoming
 documents every day. What other programs force you to do via a detour through Explorer,
 PDFlight does right at the open document: move or copy it to another folder – with a
