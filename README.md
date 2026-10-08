@@ -8,17 +8,8 @@ PDFlight does right at the open document: move or copy it to another folder – 
 single click if you like. Frequently used locations are kept in a list.
 
 Further actions are renaming, moving to the recycle bin, sending by e-mail or handing the
-file over to another program. One keystroke flips to the next file in the folder.
-
-The displayed file is never locked; other programs can change it at any time. The editing
-tools – deleting or rotating pages, extracting pages into a new file, appending PDFs,
-changing document properties or the password – save immediately. A slip can be undone
-with Ctrl+Z. PDFlight recognises PDF/A files and protects them from accidental editing.
-Form fields filled in the viewer are marked with an asterisk in the title bar; PDFlight asks
-before closing and writes them into the file silently before any other action.
-
-Selected text can be highlighted (right-click → Highlight) and the highlight removed again;
-both are saved immediately. A sidebar shows page thumbnails or the document's bookmarks.
+file over to another program. One keystroke flips to the next file in the folder. Document
+collaboration is achieved with support for commenting, drawing, stamping and highlighting. 
 
 PDFs are rendered with [PDFium](https://pdfium.googlesource.com/pdfium/) – not inside PDFlight
 itself, but in a separate helper process (`pdfhost.exe`) that runs in a Windows AppContainer
