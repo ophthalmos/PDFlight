@@ -156,8 +156,8 @@ internal static partial class ShortcutsPdf
     /// <summary>Fußzeile: Trennlinie, darunter zentriert Copyright und die Webadresse als klickbarer Link.</summary>
     private static void DrawFooter(XGraphics gfx, PdfSharp.Pdf.PdfPage page)
     {
-        const string LinkText = "www.netradio.de/pdf";
-        const string LinkUrl = "https://www.netradio.de/pdf/";
+        const string LinkText = "www.netradio.info/pdf/";
+        const string LinkUrl = "https://www.netradio.info/pdf/";
         XFont font = new("Segoe UI", 9);
         var lineY = page.Height.Point - FooterHeight;
         gfx.DrawLine(new XPen(RuleColor, 0.7), Margin, lineY, page.Width.Point - Margin, lineY);

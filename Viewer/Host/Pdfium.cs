@@ -175,6 +175,34 @@ internal static unsafe partial class Pdfium
     public const int FlattenForPrint = 1;         // FLAT_PRINT
     public const int FlattenFailed = 0;           // FLATTEN_FAIL (1 = erledigt, 2 = nichts einzubrennen)
 
+    // Seitenobjekte und Bilder (fpdf_edit.h) – fürs Kontextmenü „Bild speichern/kopieren“
+    public const int PageObjImage = 3, PageObjForm = 5; // FPDF_PAGEOBJ_IMAGE, FPDF_PAGEOBJ_FORM
+    [LibraryImport(Lib, EntryPoint = "FPDFPage_CountObjects")] public static partial int PageCountObjects(nint page);
+    [LibraryImport(Lib, EntryPoint = "FPDFPage_GetObject")] public static partial nint PageGetObject(nint page, int index);
+    [LibraryImport(Lib, EntryPoint = "FPDFPageObj_GetType")] public static partial int PageObjGetType(nint pageObject);
+    [LibraryImport(Lib, EntryPoint = "FPDFPageObj_GetBounds")] public static partial int PageObjGetBounds(nint pageObject, out float left, out float bottom, out float right, out float top);
+    [LibraryImport(Lib, EntryPoint = "FPDFPageObj_GetMatrix")] public static partial int PageObjGetMatrix(nint pageObject, Matrix* matrix);
+    [LibraryImport(Lib, EntryPoint = "FPDFPageObj_SetMatrix")] public static partial int PageObjSetMatrix(nint pageObject, Matrix* matrix);
+    [LibraryImport(Lib, EntryPoint = "FPDFFormObj_CountObjects")] public static partial int FormObjCountObjects(nint formObject);
+    [LibraryImport(Lib, EntryPoint = "FPDFFormObj_GetObject")] public static partial nint FormObjGetObject(nint formObject, uint index);
+    [LibraryImport(Lib, EntryPoint = "FPDFImageObj_GetImagePixelSize")] public static partial int ImageObjGetImagePixelSize(nint imageObject, out uint width, out uint height);
+    [LibraryImport(Lib, EntryPoint = "FPDFImageObj_GetRenderedBitmap")] public static partial nint ImageObjGetRenderedBitmap(nint document, nint page, nint imageObject);
+    [LibraryImport(Lib, EntryPoint = "FPDFImageObj_GetImageFilterCount")] public static partial int ImageObjGetImageFilterCount(nint imageObject);
+    [LibraryImport(Lib, EntryPoint = "FPDFImageObj_GetImageFilter")] public static partial uint ImageObjGetImageFilter(nint imageObject, int index, byte* buffer, uint length);
+    [LibraryImport(Lib, EntryPoint = "FPDFImageObj_GetImageDataRaw")] public static partial uint ImageObjGetImageDataRaw(nint imageObject, byte* buffer, uint length);
+    [LibraryImport(Lib, EntryPoint = "FPDFBitmap_GetBuffer")] public static partial nint BitmapGetBuffer(nint bitmap);
+    [LibraryImport(Lib, EntryPoint = "FPDFBitmap_GetWidth")] public static partial int BitmapGetWidth(nint bitmap);
+    [LibraryImport(Lib, EntryPoint = "FPDFBitmap_GetHeight")] public static partial int BitmapGetHeight(nint bitmap);
+    [LibraryImport(Lib, EntryPoint = "FPDFBitmap_GetStride")] public static partial int BitmapGetStride(nint bitmap);
+    [LibraryImport(Lib, EntryPoint = "FPDFBitmap_GetFormat")] public static partial int BitmapGetFormat(nint bitmap);
+
+    /// <summary>FS_MATRIX: x' = A·x + C·y + E, y' = B·x + D·y + F.</summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Matrix
+    {
+        public float A, B, C, D, E, F;
+    }
+
     [LibraryImport(Lib, EntryPoint = "FPDF_SaveAsCopy")] public static partial int SaveAsCopy(nint document, nint fileWrite, uint flags);
     [LibraryImport(Lib, EntryPoint = "FPDF_CreateNewDocument")] public static partial nint CreateNewDocument();
     [LibraryImport(Lib, EntryPoint = "FPDF_ImportPages")] public static partial int ImportPages(nint destination, nint source, nint pageRange, int index);

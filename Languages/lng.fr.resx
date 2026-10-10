@@ -237,8 +237,6 @@ Les deux fichiers doivent avoir le même nombre de pages.</value></data>
   <data name="Drucken" xml:space="preserve"><value>Imprimer</value></data>
   <data name="Datei drucken (Strg+P)" xml:space="preserve"><value>Imprimer le fichier (Ctrl+P)</value></data>
   <data name="Kennwort anzeigen" xml:space="preserve"><value>Afficher le mot de passe</value></data>
-  <data name="Drehen.Info" xml:space="preserve"><value>La rotation est enregistrée durablement dans le fichier.
-Le bouton de rotation de l'afficheur, lui, ne change que l'affichage.</value></data>
   <data name="Kennwort verbergen" xml:space="preserve"><value>Masquer le mot de passe</value></data>
   <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Répéter :</value></data>
   <data name="&amp;Kennwort:" xml:space="preserve"><value>&amp;Mot de passe :</value></data>
@@ -729,12 +727,7 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Zeichnen" xml:space="preserve"><value>Dessiner</value></data>
   <data name="Zeichnen (Esc beendet)" xml:space="preserve"><value>Dessiner (Échap termine)</value></data>
   <data name="Zeichnung" xml:space="preserve"><value>Dessin</value></data>
-  <data name="Änderungen in „{0}“ speichern?" xml:space="preserve"><value>Enregistrer les modifications de « {0} » ?</value></data>
-  <data name="Formulareingaben oder Anmerkungen sind noch nicht in der Datei gespeichert." xml:space="preserve"><value>Des saisies de formulaire ou des annotations ne sont pas encore enregistrées dans le fichier.</value></data>
   <data name="Freitext" xml:space="preserve"><value>Texte libre</value></data>
-  <data name="Alle Seiten drehen" xml:space="preserve"><value>Faire pivoter toutes les pages</value></data>
-  <data name="Alle Seiten nach links drehen (Strg+Umschalt+L)" xml:space="preserve"><value>Faire pivoter toutes les pages vers la gauche (Ctrl+Maj+L)</value></data>
-  <data name="Alle Seiten nach rechts drehen (Strg+Umschalt+R)" xml:space="preserve"><value>Faire pivoter toutes les pages vers la droite (Ctrl+Maj+R)</value></data>
   <data name="Zeichnung entfernen" xml:space="preserve"><value>Supprimer le dessin</value></data>
   <data name="Die Zeichnung wurde entfernt." xml:space="preserve"><value>Le dessin a été supprimé.</value></data>
   <data name="Zeichnen: Ziehe mit gedrückter Maustaste über die Seite – mit Strg eine gerade Linie. Esc beendet." xml:space="preserve"><value>Dessiner : fais glisser la souris sur la page en maintenant le bouton enfoncé – avec Ctrl pour une ligne droite. Échap termine.</value></data>
@@ -848,4 +841,23 @@ Sans lui, le fichier ne pourra plus être affiché.</value></data>
   <data name="Die Einschränkungen der Datei entfallen." xml:space="preserve"><value>Les restrictions du fichier seront supprimées.</value></data>
   <data name="Mit dem neuen Kennwort wird die Datei neu verschlüsselt (AES 256 Bit); Einschränkungen wie beim Drucken oder Kopieren gelten danach nicht mehr. Trotzdem speichern?" xml:space="preserve"><value>Le fichier sera chiffré à nouveau avec le nouveau mot de passe (AES 256 bits) ; les restrictions comme celles sur l’impression ou la copie ne s’appliqueront plus. Enregistrer quand même ?</value></data>
   <data name="Die Datei wird mit dem Kennwort, mit dem du sie geöffnet hast, neu verschlüsselt (AES 256 Bit); Einschränkungen wie beim Drucken oder Kopieren gelten danach nicht mehr. Hast du sie mit dem Besitzerkennwort geöffnet, öffnet künftig dieses die Datei. Trotzdem speichern?" xml:space="preserve"><value>Le fichier sera chiffré à nouveau avec le mot de passe que tu as utilisé pour l’ouvrir (AES 256 bits) ; les restrictions comme celles sur l’impression ou la copie ne s’appliqueront plus. Si tu l’as ouvert avec le mot de passe propriétaire, c’est désormais lui qui ouvrira le fichier. Enregistrer quand même ?</value></data>
+  <data name="Aktuelle Seite nach links drehen (Strg+Umschalt+L)" xml:space="preserve"><value>Faire pivoter la page actuelle vers la gauche (Ctrl+Maj+L)</value></data>
+  <data name="Aktuelle Seite nach rechts drehen (Strg+Umschalt+R)" xml:space="preserve"><value>Faire pivoter la page actuelle vers la droite (Ctrl+Maj+R)</value></data>
+  <data name="Seiten drehen (Strg+R)" xml:space="preserve"><value>Pivoter des pages (Ctrl+R)</value></data>
+  <data name="aktuelle Seite rechts / links drehen" xml:space="preserve"><value>faire pivoter la page actuelle à droite / à gauche</value></data>
+  <data name="Von" xml:space="preserve"><value>De</value></data>
+  <data name="bis" xml:space="preserve"><value>à</value></data>
+  <data name="Möchtest du die Änderungen an „{0}“ speichern?" xml:space="preserve"><value>Veux-tu enregistrer les modifications apportées à « {0} » ?</value></data>
+  <data name="Deine Änderungen gehen verloren, wenn du sie nicht speicherst." xml:space="preserve"><value>Tes modifications seront perdues si tu ne les enregistres pas.</value></data>
+  <data name="Alle Seiten" xml:space="preserve"><value>Toutes les pages</value></data>
+  <data name="Bild speichern…" xml:space="preserve"><value>Enregistrer l&apos;image…</value></data>
+  <data name="Bild kopieren" xml:space="preserve"><value>Copier l&apos;image</value></data>
+  <data name="Bild speichern" xml:space="preserve"><value>Enregistrer l&apos;image</value></data>
+  <data name="JPEG-Bild, wie in der PDF (*.jpg)|*.jpg|PNG-Bild (*.png)|*.png" xml:space="preserve"><value>Image JPEG, telle que dans le PDF (*.jpg)|*.jpg|Image PNG (*.png)|*.png</value></data>
+  <data name="PNG-Bild (*.png)|*.png" xml:space="preserve"><value>Image PNG (*.png)|*.png</value></data>
+  <data name="{0} – Bild von Seite {1}" xml:space="preserve"><value>{0} – image de la page {1}</value></data>
+  <data name="Bild gespeichert: {0}" xml:space="preserve"><value>Image enregistrée : {0}</value></data>
+  <data name="Das Bild konnte nicht gespeichert werden." xml:space="preserve"><value>Impossible d&apos;enregistrer l&apos;image.</value></data>
+  <data name="Das Bild konnte nicht kopiert werden." xml:space="preserve"><value>Impossible de copier l&apos;image.</value></data>
+  <data name="Das Bild wurde in die Zwischenablage kopiert." xml:space="preserve"><value>L&apos;image a été copiée dans le presse-papiers.</value></data>
 </root>

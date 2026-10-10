@@ -341,6 +341,29 @@ internal sealed class PdfiumDocument : IDisposable
         Query<(double X, double Y)?>(null, Protocol.PagePoint, w => { w.Write(index); w.Write(pageWidth); w.Write(pageHeight); w.Write(point.X); w.Write(point.Y); },
             r => (r.ReadDouble(), r.ReadDouble()));
 
+    /// <summary>Oberstes Bild an einer Stelle der Seite (Seitenpixel): seine Nummer, Pixelgröße, ob es als reines JPEG in der Datei
+    /// steckt, und sein Rechteck in Seitenpixeln; null, wenn dort keins ist.</summary>
+    public Task<(int Number, int Width, int Height, bool Jpeg, Rectangle Rect)?> ImageAtAsync(int index, int pageWidth, int pageHeight, Point point) =>
+        Query<(int Number, int Width, int Height, bool Jpeg, Rectangle Rect)?>(null, Protocol.ImageAt, w => { w.Write(index); w.Write(pageWidth); w.Write(pageHeight); w.Write(point.X); w.Write(point.Y); },
+            r =>
+            {
+                var (number, width, height, jpeg) = (r.ReadInt32(), r.ReadInt32(), r.ReadInt32(), r.ReadBoolean());
+                var rect = new Rectangle(r.ReadInt32(), r.ReadInt32(), r.ReadInt32(), r.ReadInt32());
+                return number < 0 ? null : (number, width, height, jpeg, rect);
+            });
+
+    /// <summary>Ein Bild der Seite (Nummer aus <see cref="ImageAtAsync"/>): mit <paramref name="original"/> bei reinen JPEGs die
+    /// unveränderten Bytes der JPEG-Datei (Jpeg), sonst die Pixel als Bitmap (Pixels, Originalauflösung samt Transparenz). Die Bytes
+    /// werden hier nie dekodiert – sie stammen aus der PDF und gehen nur in eine Datei.</summary>
+    public Task<(byte[]? Jpeg, Bitmap? Pixels)> ImageDataAsync(int index, int number, bool original) =>
+        Command(Protocol.ImageData, w => { w.Write(index); w.Write(number); w.Write(original); }, r =>
+        {
+            if (r.ReadBoolean()) { return (r.ReadBytes(r.ReadInt32()), (Bitmap?)null); }
+            var (width, height) = (r.ReadInt32(), r.ReadInt32());
+            var pixels = r.ReadBytes(width * height * 4); // erst ganz lesen, dann prüfen – sonst bliebe ein Rest in der Pipe
+            return ((byte[]?)null, ToBitmap(pixels, width, height));
+        });
+
     /// <summary>Oberste Anmerkung einer der Arten (Bitmaske 1 &lt;&lt; FPDF_ANNOT_*) an einer Stelle der Seite (Seitenpixel): ihre Nummer
     /// im /Annots-Array, ihre Art und ihr Rechteck in Seitenpixeln; null, wenn dort keine ist.</summary>
     public Task<(int Number, int Subtype, Rectangle Rect)?> AnnotationAtAsync(int index, int pageWidth, int pageHeight, Point point, int subtypes) =>

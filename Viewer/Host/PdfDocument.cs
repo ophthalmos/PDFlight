@@ -884,6 +884,138 @@ internal sealed unsafe class PdfDocument : IDisposable
         return data;
     }
 
+    // ================================================================== Bilder (Kontextmenü „Bild speichern/kopieren“, seit 10.10.2026)
+
+    private const int ImageMaxPixels = 64_000_000;  // größere Bilder kommen verkleinert (BGRA ≈ 256 MB)
+    private const int ImageMaxObjects = 200_000;    // Obergrenze beim Durchsuchen der Seitenobjekte (präparierte Dateien)
+    private const int ImageMaxDepth = 16;           // Verschachtelung von Formular-XObjects
+
+    /// <summary>Alle Bildobjekte einer Seite in Zeichenreihenfolge (das letzte liegt oben), auch in Formular-XObjects, je mit dem
+    /// umschließenden Rechteck in Seitenkoordinaten. Die Grenzen von Objekten in Formularen nennt PDFium im Raum des Formulars – sie werden
+    /// mit den Matrizen der umgebenden Formulare in die Seite umgerechnet.</summary>
+    private static List<(nint Image, double Left, double Bottom, double Right, double Top)> ImageObjects(nint page)
+    {
+        List<(nint, double, double, double, double)> result = [];
+        var visited = 0;
+        var identity = new Pdfium.Matrix { A = 1, D = 1 };
+        var count = Pdfium.PageCountObjects(page);
+        for (var i = 0; i < count && visited < ImageMaxObjects; i++) { Collect(Pdfium.PageGetObject(page, i), identity, 0); }
+        return result;
+
+        void Collect(nint pageObject, Pdfium.Matrix outer, int depth)
+        {
+            if (pageObject == 0 || ++visited > ImageMaxObjects) { return; }
+            switch (Pdfium.PageObjGetType(pageObject))
+            {
+                case Pdfium.PageObjImage when Pdfium.PageObjGetBounds(pageObject, out var left, out var bottom, out var right, out var top) != 0:
+                    {
+                        ReadOnlySpan<(double X, double Y)> corners = [Transform(outer, left, bottom), Transform(outer, right, bottom), Transform(outer, left, top), Transform(outer, right, top)];
+                        var (minX, maxX, minY, maxY) = (double.MaxValue, double.MinValue, double.MaxValue, double.MinValue);
+                        foreach (var (x, y) in corners) { (minX, maxX, minY, maxY) = (Math.Min(minX, x), Math.Max(maxX, x), Math.Min(minY, y), Math.Max(maxY, y)); }
+                        result.Add((pageObject, minX, minY, maxX, maxY));
+                        break;
+                    }
+                case Pdfium.PageObjForm when depth < ImageMaxDepth:
+                    {
+                        Pdfium.Matrix matrix;
+                        if (Pdfium.PageObjGetMatrix(pageObject, &matrix) == 0) { return; }
+                        var combined = Concat(matrix, outer);
+                        var children = Pdfium.FormObjCountObjects(pageObject);
+                        for (var i = 0; i < children && visited < ImageMaxObjects; i++) { Collect(Pdfium.FormObjGetObject(pageObject, (uint)i), combined, depth + 1); }
+                        break;
+                    }
+            }
+        }
+    }
+
+    private static (double X, double Y) Transform(Pdfium.Matrix m, double x, double y) => (m.A * x + m.C * y + m.E, m.B * x + m.D * y + m.F);
+
+    /// <summary>Erst <paramref name="first"/>, dann <paramref name="then"/>.</summary>
+    private static Pdfium.Matrix Concat(Pdfium.Matrix first, Pdfium.Matrix then) => new()
+    {
+        A = first.A * then.A + first.B * then.C, B = first.A * then.B + first.B * then.D,
+        C = first.C * then.A + first.D * then.C, D = first.C * then.B + first.D * then.D,
+        E = first.E * then.A + first.F * then.C + then.E, F = first.E * then.B + first.F * then.D + then.F,
+    };
+
+    /// <summary>Steckt das Bild als reines JPEG in der Datei (einziger Filter DCTDecode)? Dann sind seine Rohdaten eine JPEG-Datei.</summary>
+    private static bool IsPlainJpeg(nint image)
+    {
+        if (Pdfium.ImageObjGetImageFilterCount(image) != 1) { return false; }
+        var name = stackalloc byte[32];
+        var length = Pdfium.ImageObjGetImageFilter(image, 0, name, 32); // samt abschließender Null
+        return length == 10 && new ReadOnlySpan<byte>(name, 9).SequenceEqual("DCTDecode"u8);
+    }
+
+    /// <summary>Das oberste Bild an einer Stelle (Seitenpixel): Nummer in der Zeichenreihenfolge von <see cref="ImageObjects"/>, Größe in
+    /// Pixeln, ob es als reines JPEG vorliegt, und sein umschließendes Rechteck in Seitenpixeln (für die Auswahl wie in Acrobat); Nummer
+    /// -1, wenn dort keins ist.</summary>
+    public (int Number, int Width, int Height, bool Jpeg, (int X, int Y, int Width, int Height) Rect) ImageAt(int index, int pageWidth, int pageHeight, int x, int y)
+    {
+        var (page, px, py) = ToPagePoint(index, pageWidth, pageHeight, x, y);
+        var images = ImageObjects(page);
+        for (var i = images.Count - 1; i >= 0; i--)
+        {
+            var (image, left, bottom, right, top) = images[i];
+            if (px < left || px > right || py < bottom || py > top) { continue; }
+            if (Pdfium.ImageObjGetImagePixelSize(image, out var width, out var height) == 0 || width == 0 || height == 0) { continue; }
+            _ = Pdfium.PageToDevice(page, 0, 0, pageWidth, pageHeight, ViewRotation, left, top, out var x1, out var y1);
+            _ = Pdfium.PageToDevice(page, 0, 0, pageWidth, pageHeight, ViewRotation, right, bottom, out var x2, out var y2);
+            return (i, (int)Math.Min(width, int.MaxValue), (int)Math.Min(height, int.MaxValue), IsPlainJpeg(image),
+                (Math.Min(x1, x2), Math.Min(y1, y2), Math.Abs(x2 - x1), Math.Abs(y2 - y1)));
+        }
+        return (-1, 0, 0, false, (0, 0, 0, 0));
+    }
+
+    /// <summary>Ein Bild der Seite (Nummer aus <see cref="ImageAt"/>): mit <paramref name="original"/> und als reines JPEG gespeichert die
+    /// Rohdaten der Datei (Jpeg = true, unverändert), sonst die Pixel als BGRA in Originalauflösung samt Transparenzmaske, so ausgerichtet,
+    /// wie das Bild in der Datei steckt (eine Drehung oder Spiegelung durch die Seite bleibt außen vor – wie bei Chrome und Acrobat).
+    /// FPDFImageObj_GetRenderedBitmap rendert in der Größe der Bildmatrix (Elemente a und d in Punkt, also 72 dpi; gedrehte Matrizen
+    /// ergäben die Größe 0) – deshalb wird die Matrix für den Aufruf auf die Pixelgröße gesetzt und gleich danach zurückgestellt (nur im
+    /// Speicher: PDFlight erzeugt den Seiteninhalt nie neu, FPDFPage_GenerateContent wird nicht aufgerufen).</summary>
+    public (bool Jpeg, int Width, int Height, byte[] Data) ImageData(int index, int number, bool original)
+    {
+        var page = GetPage(index).Page;
+        var images = ImageObjects(page);
+        if (number < 0 || number >= images.Count) { throw new InvalidOperationException("Dieses Bild gibt es nicht."); }
+        var image = images[number].Image;
+        if (original && IsPlainJpeg(image))
+        {
+            var size = Pdfium.ImageObjGetImageDataRaw(image, null, 0);
+            if (size == 0 || size > 512_000_000) { throw new InvalidOperationException("PDFium konnte das Bild nicht lesen."); }
+            var data = new byte[size];
+            fixed (byte* buffer = data) { _ = Pdfium.ImageObjGetImageDataRaw(image, buffer, size); }
+            return (true, 0, 0, data);
+        }
+        if (Pdfium.ImageObjGetImagePixelSize(image, out var pixelWidth, out var pixelHeight) == 0 || pixelWidth == 0 || pixelHeight == 0) { throw new InvalidOperationException("PDFium konnte das Bild nicht lesen."); }
+        var scale = Math.Min(1.0, Math.Sqrt(ImageMaxPixels / ((double)pixelWidth * pixelHeight)));
+        var (w, h) = (Math.Max(1, (float)Math.Round(pixelWidth * scale)), Math.Max(1, (float)Math.Round(pixelHeight * scale)));
+        Pdfium.Matrix old;
+        if (Pdfium.PageObjGetMatrix(image, &old) == 0) { throw new InvalidOperationException("PDFium konnte das Bild nicht lesen."); }
+        var native = new Pdfium.Matrix { A = w, D = h };
+        nint bitmap;
+        try
+        {
+            _ = Pdfium.PageObjSetMatrix(image, &native);
+            bitmap = Pdfium.ImageObjGetRenderedBitmap(document, page, image);
+        }
+        finally { _ = Pdfium.PageObjSetMatrix(image, &old); }
+        if (bitmap == 0) { throw new InvalidOperationException("PDFium konnte das Bild nicht darstellen."); }
+        try
+        {
+            var (width, height, stride) = (Pdfium.BitmapGetWidth(bitmap), Pdfium.BitmapGetHeight(bitmap), Pdfium.BitmapGetStride(bitmap));
+            if (Pdfium.BitmapGetFormat(bitmap) != Pdfium.BitmapBgra || width <= 0 || height <= 0 || (long)width * height > MaxPixels || stride < width * 4)
+            {
+                throw new InvalidOperationException("PDFium lieferte das Bild in unerwartetem Format.");
+            }
+            var pixels = new byte[width * height * 4];
+            var source = (byte*)Pdfium.BitmapGetBuffer(bitmap);
+            for (var y = 0; y < height; y++) { new ReadOnlySpan<byte>(source + (long)y * stride, width * 4).CopyTo(pixels.AsSpan(y * width * 4)); }
+            return (false, width, height, pixels);
+        }
+        finally { Pdfium.BitmapDestroy(bitmap); }
+    }
+
     private static string AttachmentName(nint attachment)
     {
         var length = Pdfium.AttachmentGetName(attachment, null, 0); // Bytes in UTF-16LE samt abschließender Null

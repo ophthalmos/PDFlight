@@ -40,7 +40,8 @@ internal sealed class PageView : ScrollableControl
     private Point? pendingDragPoint;
     private bool dragQueryRunning;
     private readonly Dictionary<int, int> charCounts = [];
-    private readonly Dictionary<int, List<Rectangle>> selectionRects = []; // je Seite, in Seitenpixeln der aktuellen Zoomstufe
+    // je Seite, in Seitenpixeln der aktuellen Zoomstufe, mit dem Markierungsstand, zu dem sie gehören (ältere bleiben stehen, bis neue da sind)
+    private readonly Dictionary<int, (int Version, List<Rectangle> Rects)> selectionRects = [];
     private readonly HashSet<int> pendingSelectionRects = [];
     private int selectionVersion;
 
@@ -50,6 +51,9 @@ internal sealed class PageView : ScrollableControl
 
     /// <summary>Eine Markierung mit der Maus ist fertig (Ziehen losgelassen oder Doppelklick aufs Wort) – für den Hervorheben-Modus.</summary>
     public event EventHandler? SelectionFinished;
+
+    /// <summary>Strg+C bei ausgewähltem Bild (ohne Textmarkierung): das Hauptfenster kopiert es wie „Bild kopieren“ (<see cref="SelectedImageDataAsync"/>).</summary>
+    public event EventHandler? ImageCopyRequested;
 
     public PageView()
     {
@@ -136,6 +140,8 @@ internal sealed class PageView : ScrollableControl
         ResetSearch();
         hoverLink = linkOnMouseDown = null;
         markupUnderMouse = inkUnderMouse = stampUnderMouse = freeTextUnderMouse = null;
+        imageUnderMouse = null;
+        selectedImage = null;
         hoverAnnotation = null;
         ClearAnnotationGhost();
         inkStroke = null;
@@ -396,6 +402,7 @@ internal sealed class PageView : ScrollableControl
             }
             else { RequestPreview(page); }
             DrawTiles(g, page, rect, viewport);
+            DrawImageSelection(g, page, rect);
             DrawHits(g, page, rect);
             DrawSelection(g, page, rect);
             if (page == currentPage && ShowCurrentPageHighlight)
@@ -563,10 +570,13 @@ internal sealed class PageView : ScrollableControl
 
     private void DrawSelection(Graphics g, int page, Rectangle clientRect)
     {
-        if (SelectedRange(page) is not { } range) { return; }
-        if (!selectionRects.TryGetValue(page, out var rects)) { RequestSelectionRects(page, range); return; }
+        if (SelectedRange(page) is not { } range) { selectionRects.Remove(page); return; } // kommt die Seite wieder dazu, kein alter Stand
+        // Beim Ziehen bleibt der bisherige Stand sichtbar, bis der neue da ist – sonst verschwände die Markierung bei jeder
+        // Änderung kurz (Flackern, vor allem beim Wechsel in eine neue Zeile)
+        if (!selectionRects.TryGetValue(page, out var cached) || cached.Version != selectionVersion) { RequestSelectionRects(page, range); }
+        if (cached.Rects == null) { return; }
         using var brush = new SolidBrush(SelectionColor);
-        foreach (var r in rects) { g.FillRectangle(brush, clientRect.X + r.X, clientRect.Y + r.Y, r.Width, r.Height); }
+        foreach (var r in cached.Rects) { g.FillRectangle(brush, clientRect.X + r.X, clientRect.Y + r.Y, r.Width, r.Height); }
     }
 
     private async void RequestSelectionRects(int page, (int Start, int Count) range)
@@ -576,17 +586,21 @@ internal sealed class PageView : ScrollableControl
         var zoomGeneration = generation;
         var size = pageRects[page].Size;
         var rects = await document.SelectionRectsAsync(page, size.Width, size.Height, range.Start, range.Count);
-        if (version != selectionVersion || zoomGeneration != generation || IsDisposed) { return; }
-        pendingSelectionRects.Remove(page);
-        selectionRects[page] = rects;
+        if (zoomGeneration != generation || IsDisposed) { return; }
+        if (version == selectionVersion) { pendingSelectionRects.Remove(page); }
+        // auch eine inzwischen überholte Antwort ist näher am Stand als die gezeigte – sonst bliebe die Markierung beim
+        // schnellen Ziehen stehen, bis die Maus ruht
+        if (selectionRects.TryGetValue(page, out var shown) && shown.Version > version) { return; }
+        selectionRects[page] = (version, rects);
         Invalidate(ToClient(pageRects[page]));
     }
 
     private void SelectionUpdated()
     {
         selectionVersion++;
-        selectionRects.Clear();
         pendingSelectionRects.Clear();
+        if (!selectionActive) { selectionRects.Clear(); } // aufgehoben: sofort weg
+        else { selectedImage = null; } // Text markiert: kein Bild mehr ausgewählt (Invalidate folgt)
         Invalidate();
         SelectionChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -632,7 +646,123 @@ internal sealed class PageView : ScrollableControl
     private (int Page, int Number)? inkUnderMouse;   // ebenso eine Zeichnung (Freihand-Strich)
     private (int Page, int Number)? stampUnderMouse; // ebenso ein Stempel
     private (int Page, int Number)? freeTextUnderMouse; // ebenso ein Freitext-Kasten
+    private (int Page, int Number, int Width, int Height, bool Jpeg)? imageUnderMouse; // ebenso ein Bild („Bild speichern/kopieren“)
     private Task? markupQuery;
+
+    // Ausgewähltes Bild wie in Acrobat (seit 10.10.2026, Wunsch Wilhelms): ein Klick oder Rechtsklick auf ein Bild färbt es ein und rahmt
+    // es; ein Klick daneben, Esc, eine Textmarkierung oder eine andere Datei heben die Auswahl auf. Das Rechteck steht als Anteil der
+    // Seitengröße – so passt es auch nach dem Zoomen. Farben bei Acrobat gemessen: Einfärben multipliziert die Farben mit RGB(153, 193, 219)
+    // (Weiß wird hellblau, Schwarz bleibt schwarz – keine halbdurchsichtige Fläche), der Rahmen hat die halbe Farbe, 2 logische px, außen.
+    private (int Page, int Number, RectangleF Bounds)? selectedImage;
+    private static readonly Color ImageSelectionBorder = Color.FromArgb(77, 97, 109);
+    private static readonly ImageAttributes ImageSelectionTint = CreateImageSelectionTint();
+    private const int ImageSelectionBorderWidth = 2;
+
+    private static ImageAttributes CreateImageSelectionTint()
+    {
+        var attributes = new ImageAttributes();
+        attributes.SetColorMatrix(new ColorMatrix(new[]
+        {
+            new[] { 153f / 255, 0, 0, 0, 0 },
+            new[] { 0, 193f / 255, 0, 0, 0 },
+            new[] { 0, 0, 219f / 255, 0, 0 },
+            new[] { 0f, 0, 0, 1, 0 },
+            new[] { 0f, 0, 0, 0, 1 },
+        }));
+        return attributes;
+    }
+
+    /// <summary>Wählt das Bild an einer Stelle aus (Klick); trifft er keins, bleibt nichts ausgewählt.</summary>
+    private async Task SelectImageAtAsync(Point client)
+    {
+        var (page, point) = PageAt(client, clamp: false);
+        if (document is not { } doc || page < 0) { return; }
+        var size = pageRects[page].Size;
+        var hit = await doc.ImageAtAsync(page, size.Width, size.Height, point);
+        if (doc != document || hit is not { } image || selectionActive) { return; }
+        SelectImage(page, image.Number, image.Rect, size);
+    }
+
+    private void SelectImage(int page, int number, Rectangle rect, Size pageSize)
+    {
+        if (pageSize.Width <= 0 || pageSize.Height <= 0) { return; }
+        ClearImageSelection();
+        selectedImage = (page, number, new RectangleF((float)rect.X / pageSize.Width, (float)rect.Y / pageSize.Height, (float)rect.Width / pageSize.Width, (float)rect.Height / pageSize.Height));
+        InvalidateImageSelection();
+    }
+
+    private void ClearImageSelection()
+    {
+        if (selectedImage == null) { return; }
+        InvalidateImageSelection();
+        selectedImage = null;
+    }
+
+    /// <summary>Das ausgewählte Bild in Fensterkoordinaten (ohne Rahmen); leer ohne Auswahl.</summary>
+    private Rectangle ImageSelectionClientRect()
+    {
+        if (selectedImage is not { } image || image.Page >= pageRects.Length) { return Rectangle.Empty; }
+        var page = ToClient(pageRects[image.Page]);
+        var b = image.Bounds;
+        return Rectangle.FromLTRB(page.X + (int)Math.Floor(b.Left * page.Width), page.Y + (int)Math.Floor(b.Top * page.Height),
+            page.X + (int)Math.Ceiling(b.Right * page.Width), page.Y + (int)Math.Ceiling(b.Bottom * page.Height));
+    }
+
+    private void InvalidateImageSelection()
+    {
+        var box = ImageSelectionClientRect();
+        if (!box.IsEmpty) { box.Inflate(LogicalToDeviceUnits(ImageSelectionBorderWidth) + 1, LogicalToDeviceUnits(ImageSelectionBorderWidth) + 1); Invalidate(box); }
+    }
+
+    /// <summary>Das ausgewählte Bild einfärben (die schon gezeichneten Kacheln bzw. die Vorschau im Bildbereich noch einmal, mit
+    /// multiplizierten Farben) und rahmen.</summary>
+    private void DrawImageSelection(Graphics g, int page, Rectangle clientRect)
+    {
+        if (selectedImage is not { } image || image.Page != page) { return; }
+        var box = ImageSelectionClientRect();
+        if (box.Width <= 0 || box.Height <= 0) { return; }
+        var state = g.Save();
+        g.SetClip(box);
+        if (previews.TryGetValue(page, out var preview))
+        {
+            g.InterpolationMode = InterpolationMode.Bilinear;
+            g.DrawImage(preview, clientRect, 0, 0, preview.Width, preview.Height, GraphicsUnit.Pixel, ImageSelectionTint);
+        }
+        var inPage = box;
+        inPage.Offset(-clientRect.X, -clientRect.Y); // in Seitenpixeln
+        for (var ty = Math.Max(0, inPage.Top / TileSize); ty <= (inPage.Bottom - 1) / TileSize; ty++)
+        {
+            for (var tx = Math.Max(0, inPage.Left / TileSize); tx <= (inPage.Right - 1) / TileSize; tx++)
+            {
+                if (!tiles.TryGetValue((page, tx, ty), out var tile)) { continue; }
+                g.DrawImage(tile, new Rectangle(clientRect.X + tx * TileSize, clientRect.Y + ty * TileSize, tile.Width, tile.Height), 0, 0, tile.Width, tile.Height, GraphicsUnit.Pixel, ImageSelectionTint);
+            }
+        }
+        g.Restore(state);
+        var width = LogicalToDeviceUnits(ImageSelectionBorderWidth);
+        using var pen = new Pen(ImageSelectionBorder, width) { Alignment = PenAlignment.Inset };
+        g.DrawRectangle(pen, box.X - width, box.Y - width, box.Width + 2 * width - 1, box.Height + 2 * width - 1);
+    }
+
+    /// <summary>Das Bild unter dem letzten Rechtsklick (Seite, Größe in Pixeln, als reines JPEG gespeichert) – für „Bild speichern…“ und
+    /// „Bild kopieren“ im Kontextmenü (seit 10.10.2026); null, wenn dort keins liegt oder die Abfrage noch läuft.</summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
+    public (int Page, int Width, int Height, bool Jpeg)? ImageUnderMouse =>
+        markupQuery?.IsCompleted == true && imageUnderMouse is { } image ? (image.Page, image.Width, image.Height, image.Jpeg) : null;
+
+    /// <summary>Daten des Bilds unter dem letzten Rechtsklick (s. <see cref="PdfiumDocument.ImageDataAsync"/>); beides null ohne Bild.</summary>
+    public async Task<(byte[]? Jpeg, Bitmap? Pixels)> ImageUnderMouseDataAsync(bool original)
+    {
+        if (document == null || imageUnderMouse is not { } image) { return (null, null); }
+        return await document.ImageDataAsync(image.Page, image.Number, original);
+    }
+
+    /// <summary>Daten des ausgewählten Bilds (Klick wie in Acrobat) – für Strg+C; beides null ohne Auswahl.</summary>
+    public async Task<(byte[]? Jpeg, Bitmap? Pixels)> SelectedImageDataAsync(bool original)
+    {
+        if (document == null || selectedImage is not { } image) { return (null, null); }
+        return await document.ImageDataAsync(image.Page, image.Number, original);
+    }
 
     /// <summary>Hebt den markierten Text hervor (Farbe 0xRRGGBB); liefert die Zahl der Seiten, auf denen eine Hervorhebung entstand.</summary>
     public async Task<int> HighlightSelectionAsync(int color = PdfiumDocument.AcrobatYellow)
@@ -749,6 +879,7 @@ internal sealed class PageView : ScrollableControl
     private async Task QueryMarkupAsync(Point client)
     {
         markupUnderMouse = inkUnderMouse = stampUnderMouse = freeTextUnderMouse = null;
+        imageUnderMouse = null;
         var (page, point) = PageAt(client, clamp: false);
         if (document == null || page < 0) { return; }
         var (width, height) = (pageRects[page].Width, pageRects[page].Height);
@@ -762,6 +893,11 @@ internal sealed class PageView : ScrollableControl
         stampUnderMouse = await document.AnnotationAtAsync(page, width, height, point, 1 << Protocol.AnnotStamp) is { } stamp ? (page, stamp.Number) : null;
         if (document == null) { return; }
         freeTextUnderMouse = await document.AnnotationAtAsync(page, width, height, point, 1 << Protocol.AnnotFreeText) is { } freeText ? (page, freeText.Number) : null;
+        if (document == null) { return; }
+        var hit = await document.ImageAtAsync(page, width, height, point);
+        if (hit is not { } image) { return; }
+        imageUnderMouse = (page, image.Number, image.Width, image.Height, image.Jpeg);
+        if (!selectionActive) { SelectImage(page, image.Number, image.Rect, new Size(width, height)); } // wie Acrobat: der Rechtsklick wählt das Bild aus
     }
 
     // ================================================================== Suche
@@ -1613,6 +1749,7 @@ internal sealed class PageView : ScrollableControl
             if (e.Button == MouseButtons.Left) { EndPick(PageAt(e.Location, clamp: false).Page >= 0 ? e.Location : null); }
             return;
         }
+        if (!ImageSelectionClientRect().Contains(e.Location)) { ClearImageSelection(); } // daneben geklickt; aufs ausgewählte Bild bleibt es (kein Flackern)
         if (e.Button == MouseButtons.Right) { ContextMenuPoint = e.Location; }
         if (e.Button == MouseButtons.Right && document != null) { markupQuery = QueryMarkupAsync(e.Location); } // fürs Kontextmenü
         if (e.Button != MouseButtons.Left || document == null || pageRects.Length == 0) { return; }
@@ -1816,6 +1953,7 @@ internal sealed class PageView : ScrollableControl
             link = await document.LinkAtAsync(dragStart.Page, size.Width, size.Height, dragStart.Point);
         }
         if (e.Button == MouseButtons.Left && link != null && !selectionActive) { FollowLink(link); } // gezogen = markiert, nicht geklickt
+        else if (e.Button == MouseButtons.Left && link == null && !selectionActive && pick == null) { await SelectImageAtAsync(e.Location); } // Klick auf ein Bild: auswählen wie Acrobat
     }
 
     protected override void OnMouseWheel(MouseEventArgs e)
@@ -1857,6 +1995,7 @@ internal sealed class PageView : ScrollableControl
         var line = LogicalToDeviceUnits(40);
         switch (e.KeyData)
         {
+            case Keys.Control | Keys.C when selectedImage != null && !selectionActive: e.Handled = true; ImageCopyRequested?.Invoke(this, EventArgs.Empty); break; // ausgewähltes Bild wie in Acrobat
             case Keys.Control | Keys.C: e.Handled = true; await CopySelectionAsync(); break;
             case Keys.Control | Keys.A: e.Handled = true; SelectAll(); break;
             case Keys.Control | Keys.Add:
@@ -1865,7 +2004,7 @@ internal sealed class PageView : ScrollableControl
             case Keys.Control | Keys.OemMinus: e.Handled = true; ZoomOut(); break;
             case Keys.Control | Keys.D0:
             case Keys.Control | Keys.NumPad0: e.Handled = true; SetZoom(1f, null); break;
-            case Keys.Escape: ClearSelection(); break;
+            case Keys.Escape: ClearSelection(); ClearImageSelection(); break;
             case Keys.Down: ScrollBy(0, line); break;
             case Keys.Up: ScrollBy(0, -line); break;
             case Keys.Right: ScrollBy(line, 0); break;

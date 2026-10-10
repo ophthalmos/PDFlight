@@ -14,7 +14,7 @@ public partial class MainForm : Form
     private PdfiumDocument? document;       // das angezeigte Dokument im Hilfsprogramm (s. Viewer\SandboxClient)
     private int loadVersion;                // jedes Laden zählt hoch – ein überholtes Öffnen verwirft sein Ergebnis
     private bool documentDirty;             // ungespeicherte Formulareingaben („*“ im Titel)
-    private readonly Dictionary<string, string> passwords = new(StringComparer.OrdinalIgnoreCase); // Kennwörter geöffneter Dateien, nur für diese Sitzung
+    private readonly Dictionary<string, string> passwords = new(StringComparer.OrdinalIgnoreCase); // Kennwort der angezeigten Datei – nur solange sie angezeigt wird (ForgetPasswords)
     private readonly Dictionary<string, Image?> programIcons = new(StringComparer.OrdinalIgnoreCase);
     private FileInfo? currentFile;
     private int currentPageCount = -1;      // -1 = nicht bestimmbar (z.B. verschlüsselt)
@@ -356,6 +356,7 @@ public partial class MainForm : Form
         viewUndo.Clear(); // ungespeicherte Schritte der Anzeige gehören zum bisherigen Stand
         UpdateUndoMenu();
         if (RememberCurrentPage()) { settings.Save(); } // die Seite der bisherigen Datei merken, bevor sie ersetzt wird
+        ForgetPasswords(except: path); // das Kennwort gilt nur, solange seine Datei angezeigt wird
         byte[] bytes;
         try { bytes = File.ReadAllBytes(path); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -400,7 +401,7 @@ public partial class MainForm : Form
     private Task<PdfiumDocument?> WaitForDocumentAsync() => documentLoading;
 
     /// <summary>Öffnet die Datei im Hilfsprogramm und zeigt sie an – mit Kennwortabfrage, wenn die Datei ein Benutzer-Kennwort hat (das
-    /// Kennwort merkt sich PDFlight bis zum Beenden, damit das Neuladen nach einer Bearbeitung nicht erneut fragt).</summary>
+    /// Kennwort merkt sich PDFlight, solange die Datei angezeigt wird, damit das Neuladen nach einer Bearbeitung nicht erneut fragt).</summary>
     private async Task<PdfiumDocument?> OpenDocumentAsync(string path, byte[] bytes, int page, ViewState? view, bool newFile = false)
     {
         var version = ++loadVersion;
@@ -504,7 +505,7 @@ public partial class MainForm : Form
         // PDF/A-Schutz: verändernde Operationen bleiben gesperrt, bis „Bearbeitung aktivieren“ gedrückt wurde;
         // Extrahieren (neue Datei), Rückgängig (stellt alte Bytes wieder her) und Eigenschaften (dann nur lesend) bleiben frei
         pnlPdfA.Visible = hasFile && PdfALocked; // bei Kennwortschutz keine eigene Leiste – der Viewer zeigt selbst „eingeschränkte Berechtigungen“ (Wunsch vom 20.09.2026)
-        mnuDeletePages.Enabled = mnuRotatePages.Enabled = mnuAppendPdf.Enabled = mnuDuplex.Enabled = !EditLocked;
+        mnuDeletePages.Enabled = mnuAppendPdf.Enabled = mnuDuplex.Enabled = !EditLocked;
         mnuMovePage.Enabled = !EditLocked && currentPageCount > 1; // mit einer Seite gibt es nichts zu verschieben
         mnuInsertPage.Enabled = !EditLocked;
         mnuRemoveBookmarks.Enabled = !EditLocked && (currentPdfStatus?.OutlineCount ?? 0) > 0;
@@ -609,7 +610,7 @@ public partial class MainForm : Form
 
     private void StatusAttachments_Click(object? sender, EventArgs e)
     {
-        RunAfterCommit(() => ShowProperties(showAttachments: true));
+        RunUnlessEditing(() => ShowProperties(showAttachments: true)); // offene Änderungen schreibt erst „OK“ mit (WritePropertiesAsync)
     }
 
     private void OpenFile()
@@ -770,10 +771,20 @@ public partial class MainForm : Form
         Close();
     }
 
+    /// <summary>Gemerkte Kennwörter vergessen – alle außer dem der Datei, die gleich (wieder) angezeigt wird. Ein Kennwort gilt nur, solange
+    /// seine Datei angezeigt wird: Neuladen nach einer Bearbeitung, Umbenennen und Verschieben (`UpdateFilePaths` zieht es vorher auf den
+    /// neuen Pfad) fragen nicht erneut, eine geschlossene oder gegen eine andere getauschte Datei schon (Fehlerbericht 10.10.2026 – vorher
+    /// galt es bis zum Beenden, eine geschlossene Datei ließ sich ohne Kennwort wieder öffnen).</summary>
+    private void ForgetPasswords(string? except)
+    {
+        foreach (var key in passwords.Keys.Where(k => !string.Equals(k, except, StringComparison.OrdinalIgnoreCase)).ToList()) { passwords.Remove(key); }
+    }
+
     /// <summary>Anzeige leeren (kein Dateibezug mehr) und den Grund in der Statusleiste nennen.</summary>
     private void ClearDisplay(string status)
     {
         currentFile = null;
+        ForgetPasswords(except: null);
         loadVersion++; // ein noch laufendes Öffnen soll nichts mehr anzeigen
         ShowDocument(null);
         UpdateUiState();
@@ -1125,7 +1136,6 @@ public partial class MainForm : Form
         Set(btnSettings, ToolbarIcons.Settings);
         Set(ddbInfo, ToolbarIcons.Help, imageOnly: true);
         mnuDeletePages.Image = MenuIcon(ToolbarIcons.Delete); // Bearbeiten-Menü (Menüsymbole bleiben 16 px)
-        mnuRotatePages.Image = MenuIcon(ToolbarIcons.Rotate);
         mnuMovePage.Image = MenuIcon(ToolbarIcons.MovePage);
         mnuInsertPage.Image = MenuIcon(ToolbarIcons.NewPage);
         mnuAppendPdf.Image = MenuIcon(ToolbarIcons.Attach);
@@ -1135,7 +1145,7 @@ public partial class MainForm : Form
         // Symbol, auch ohne Programm-Icons, sonst stünde nur eine Zahl da
         statusAttachments.Image = ToolbarIcons.FontAvailable ? ToolbarIcons.Get(ToolbarIcons.Attach, LogicalToDeviceUnits(new Size(16, 16)), statusAttachments.LinkColor) : null;
         mnuThumbInsertPage.Image = mnuInsertPage.Image; // Kontextmenü der Miniaturen: dieselben Befehle
-        mnuThumbRotatePages.Image = mnuRotatePages.Image;
+        mnuThumbRotatePages.Image = MenuIcon(ToolbarIcons.Rotate);
         mnuThumbMovePage.Image = mnuMovePage.Image;
         mnuThumbExtractPages.Image = mnuExtractPages.Image;
         mnuThumbDeletePages.Image = mnuDeletePages.Image;
@@ -1155,6 +1165,8 @@ public partial class MainForm : Form
         mnuEditAnnotation.Image = MenuIcon(ToolbarIcons.Edit);
         mnuRemoveAnnotation.Image = MenuIcon(ToolbarIcons.Clear);
         mnuAddFreeTextHere.Image = MenuIcon(ToolbarIcons.Comment);
+        mnuSaveImage.Image = MenuIcon(ToolbarIcons.Save);
+        mnuCopyImage.Image = MenuIcon(ToolbarIcons.Copy); // wie „Kopieren“ (Edge zeigt bei „Bild kopieren“ ebenfalls das Kopier-Symbol)
         ApplyViewerIcons(); // die Viewer-Leiste folgt der Symbolgröße der Symbolleiste
         UpdateProgramIconVisibility(); // die Buttonbreiten haben sich geändert
     }
@@ -1270,7 +1282,7 @@ public partial class MainForm : Form
 
     /// <summary>Rückseiten-Scan einfügen (Duplex-Zusammenführung): Rückseiten aus einer zweiten Datei
     /// hinter die Seiten der aktuellen verzahnen — für Scanner ohne Duplex-Einheit.</summary>
-    private void MergeDuplexDialog()
+    private async void MergeDuplexDialog()
     {
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
@@ -1319,7 +1331,9 @@ public partial class MainForm : Form
         var result = TaskDialog.ShowDialog(Handle, page);
         if (result != btnReversed && result != btnSame) { return; }
         var backFile = dialog.FileName;
-        if (RunPdfEdit(() => PdfEditService.MergeDuplex(currentFile.FullName, backFile, result == btnReversed), Lng.T("Einfügen der Rückseiten")))
+        var (ok, pending) = await PendingViewChangesAsync(Lng.T("Einfügen der Rückseiten"));
+        if (!ok) { return; }
+        if (RunPdfEdit(() => PdfEditService.MergeDuplex(currentFile.FullName, backFile, result == btnReversed), Lng.T("Einfügen der Rückseiten"), viewChanges: pending))
         {
             LoadPdf(currentFile.FullName);
             statusPath.Text = string.Format(Lng.T("Die Rückseiten aus \"{0}\" wurden eingefügt."), Path.GetFileName(backFile));
@@ -1328,7 +1342,9 @@ public partial class MainForm : Form
 
     /// <summary>Führt eine Dokumentänderung mit vorheriger Undo-Sicherung aus; false bei Fehler.</summary>
     /// <param name="allowEncrypted">Nur für „Kennwort entfernen“: Die Bearbeitung läuft trotz Verschlüsselung (mit dem eingegebenen Kennwort).</param>
-    private bool RunPdfEdit(Action edit, string actionName, bool allowEncrypted = false)
+    /// <param name="viewChanges">Angezeigter Stand mit offenen Änderungen (<see cref="PendingViewChangesAsync"/>): kommt nach der Sicherung
+    /// und vor der Bearbeitung in die Datei – beides ist ein Rückgängig-Schritt.</param>
+    private bool RunPdfEdit(Action edit, string actionName, bool allowEncrypted = false, byte[]? viewChanges = null)
     {
         if (!allowEncrypted && Encrypted) { ShowEncryptedMessage(); return false; } // Sicherheitsnetz – die Menüpunkte sind bei Kennwortschutz gesperrt, die Eigenschaften nicht
         if (!EnsureWritable(actionName)) { return false; }
@@ -1336,6 +1352,7 @@ public partial class MainForm : Form
         try
         {
             BackupForUndo(actionName);
+            if (viewChanges != null) { File.WriteAllBytes(currentFile!.FullName, viewChanges); } // BackupForUndo setzt die Datei voraus
             edit();
             return true;
         }
@@ -1352,6 +1369,26 @@ public partial class MainForm : Form
         finally { Cursor.Current = Cursors.Default; }
     }
 
+    /// <summary>Offene Änderungen der Anzeige (Anmerkungen, Formulareingaben) für eine Bearbeitung, die sie im selben Schritt mitschreibt
+    /// (<see cref="RunPdfEdit"/>, Parameter viewChanges): Die Dialoge des Bearbeiten-Menüs speichern seit 10.10.2026 nicht mehr schon beim
+    /// Öffnen, sondern erst, wenn sie die Datei tatsächlich ändern (Wunsch Wilhelms; Abbrechen lässt alles ungespeichert). Bytes = null:
+    /// nichts offen. Ok = false: Fehler gemeldet oder inzwischen eine andere Datei – die Bearbeitung unterbleibt.</summary>
+    private async Task<(bool Ok, byte[]? Bytes)> PendingViewChangesAsync(string actionName)
+    {
+        if (!documentDirty || ShownDocument is not { } doc) { return (true, null); }
+        await pageView.EndFormInputAsync(); // übernimmt den Wert des Felds, in dem gerade getippt wurde
+        try
+        {
+            var bytes = await doc.SaveAsync();
+            return (doc == document, bytes);
+        }
+        catch (InvalidOperationException ex)
+        {
+            TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), actionName), ex);
+            return (false, null);
+        }
+    }
+
     /// <summary>Verschlüsselte Datei: Bearbeiten geht erst, wenn der Schutz in den Eigenschaften (Reiter „Sicherheit“) aufgehoben ist.</summary>
     private void ShowEncryptedMessage()
     {
@@ -1366,7 +1403,7 @@ public partial class MainForm : Form
             + Lng.T("Öffne sie mit ihrem Kennwort – den Schutz hebst du dann unter Eigenschaften (Strg+I), Reiter „Sicherheit“, auf."), TaskDialogIcon.Warning);
     }
 
-    private void DeletePagesDialog()
+    private async void DeletePagesDialog()
     {
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
@@ -1376,7 +1413,7 @@ public partial class MainForm : Form
             return;
         }
         var currentPage = ClampedCurrentPage();
-        using PageRangeForm dialog = new(Lng.T("Seiten löschen"), currentPageCount, emptyMeansAll: false, showRotation: false,
+        using PageRangeForm dialog = new(Lng.T("Seiten löschen"), currentPageCount, emptyMeansAll: false,
             defaultRange: currentPage > 0 ? currentPage.ToString() : null); // meist soll die gerade angezeigte Seite gelöscht werden
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         var pages = dialog.SelectedPages;
@@ -1386,7 +1423,9 @@ public partial class MainForm : Form
             return;
         }
         var remaining = currentPageCount - pages.Count;
-        if (RunPdfEdit(() => PdfEditService.DeletePages(currentFile.FullName, pages), Lng.T("Seiten löschen")))
+        var (ok, pending) = await PendingViewChangesAsync(Lng.T("Seiten löschen"));
+        if (!ok) { return; }
+        if (RunPdfEdit(() => PdfEditService.DeletePages(currentFile.FullName, pages), Lng.T("Seiten löschen"), viewChanges: pending))
         {
             LoadPdf(currentFile.FullName, Math.Min(pages[0], remaining));
             statusPath.Text = pages.Count == 1 ? string.Format(Lng.T("Seite {0} wurde gelöscht."), pages[0]) : string.Format(Lng.T("{0} Seiten wurden gelöscht."), pages.Count);
@@ -1401,24 +1440,54 @@ public partial class MainForm : Form
         return page >= 1 && page <= shown.PageCount ? page : 0;
     }
 
-    private void RotatePagesDialog()
+    // ------------------------------------------------------------------ Seiten drehen (Viewer-Leiste)
+
+    // Drehen gibt es seit 10.10.2026 nur noch in der Viewer-Leiste (Wunsch Wilhelms – „Seiten drehen…“ im Bearbeiten-Menü schrieb sofort in
+    // die Datei, die Knöpfe drehten ungespeichert; zwei Stellen verwirrten): Die Knöpfe drehen die angezeigte Seite, der Pfeil daneben
+    // (und Strg+R, Kontextmenü der Miniaturen) öffnet RotationForm für Bereiche und 180°. Alles ungespeichert bis „Speichern“.
+    private RotationForm? rotationForm;
+    private long rotationFormClosedAt; // ein Klick auf den Pfeil bei offenem Fenster schließt es nur (Deactivate kommt vor dem Klick)
+
+    /// <summary>Drehen-Fenster zeigen – unter dem Pfeil der Viewer-Leiste oder (Kontextmenü der Miniaturen) an <paramref name="at"/>.</summary>
+    private void ShowRotationForm(Point? at = null)
     {
-        if (currentFile == null) { return; }
-        if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
-        var currentPage = ClampedCurrentPage();
-        using PageRangeForm dialog = new(Lng.T("Seiten drehen"), currentPageCount, emptyMeansAll: true, showRotation: true,
-            defaultRange: currentPage > 0 ? currentPage.ToString() : null, // meist soll die gerade angezeigte Seite gedreht werden
-            infoText: Lng.T("Drehen.Info",
-                "Die Drehung wird dauerhaft in der Datei gespeichert." + Environment.NewLine +
-                "Die Drehen-Schaltfläche des Viewers ändert dagegen nur die Ansicht."));
-        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
-        var pages = dialog.SelectedPages;
-        if (RunPdfEdit(() => PdfEditService.RotatePages(currentFile.FullName, pages, dialog.RotationDelta), Lng.T("Seiten drehen")))
-        {
-            LoadPdf(currentFile.FullName, pages.Count == currentPageCount ? 0 : pages[0]);
-            statusPath.Text = pages.Count == currentPageCount ? Lng.T("Alle Seiten wurden gedreht.")
-                : (pages.Count == 1 ? string.Format(Lng.T("Seite {0} wurde gedreht."), pages[0]) : string.Format(Lng.T("{0} Seiten wurden gedreht."), pages.Count));
-        }
+        if (rotationForm != null) { rotationForm.Activate(); return; }
+        if (document == null || currentFile == null || EditLocked || currentPageCount <= 0) { return; }
+        RotationForm form = new(Math.Max(1, ClampedCurrentPage()), currentPageCount, settings.DarkViewer);
+        var location = at ?? viewerStrip.PointToScreen(new Point(btnRotateLeft.Bounds.Left, viewerStrip.Height - 1));
+        var area = Screen.FromPoint(location).WorkingArea;
+        form.Location = new Point(Math.Clamp(location.X, area.Left, Math.Max(area.Left, area.Right - form.Width)), Math.Clamp(location.Y, area.Top, Math.Max(area.Top, area.Bottom - form.Height)));
+        form.FormClosed += RotationForm_FormClosed;
+        rotationForm = form;
+        form.Show(this);
+    }
+
+    private async void RotationForm_FormClosed(object? sender, FormClosedEventArgs e)
+    {
+        if (sender is not RotationForm form) { return; }
+        rotationForm = null;
+        rotationFormClosedAt = Environment.TickCount64;
+        if (form.DialogResult != DialogResult.OK) { return; }
+        await RotatePagesInViewAsync(form.SelectedPages, form.RotationDelta); // vor dem await gelesen – das Fenster wird danach freigegeben
+    }
+
+    /// <summary>Seiten drehen – eine ungespeicherte Änderung wie die Anmerkungen (über <see cref="EditInViewAsync"/>, Rückgängig mit Strg+Z).
+    /// Die angezeigte Seite bleibt im Bild; liegt sie nicht im Bereich, wird zu dessen erster Seite geblättert.</summary>
+    private async Task RotatePagesInViewAsync(List<int> pages, int delta)
+    {
+        if (document == null || currentFile == null || EditLocked || currentPageCount <= 0 || pages.Count == 0) { return; }
+        var current = ClampedCurrentPage();
+        if (!await EditInViewAsync(path => PdfEditService.RotatePages(path, pages, delta), Lng.T("Seiten drehen"), keepPage: true)) { return; }
+        if (!pages.Contains(current)) { pageView.GoToPage(pages[0] - 1); }
+        statusPath.Text = pages.Count == currentPageCount ? Lng.T("Alle Seiten wurden gedreht.")
+            : (pages.Count == 1 ? string.Format(Lng.T("Seite {0} wurde gedreht."), pages[0]) : string.Format(Lng.T("{0} Seiten wurden gedreht."), pages.Count));
+    }
+
+    /// <summary>Knöpfe der Viewer-Leiste und Strg+Umschalt+L/R: die angezeigte Seite um 90° drehen.</summary>
+    private async void RotateCurrentPage(bool clockwise)
+    {
+        var page = ClampedCurrentPage();
+        if (page > 0) { await RotatePagesInViewAsync([page], clockwise ? 90 : -90); }
     }
 
     /// <summary>Textanmerkung (FreeText mit Erscheinungsbild) an einer Position einfügen; die Datei wird sofort gespeichert
@@ -1567,7 +1636,7 @@ public partial class MainForm : Form
 
     /// <summary>„PDF-Datei anhängen“: erst die Frage, woher – Dateidialog, die in anderen PDFlight-Fenstern geöffneten Dateien oder
     /// die PDF-Dateien des Ordners (die beiden Listen als Mehrfachauswahl in <see cref="FileListForm"/>, Wunsch vom 20.09.2026).</summary>
-    private void AppendPdfDialog()
+    private async void AppendPdfDialog()
     {
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
@@ -1612,7 +1681,9 @@ public partial class MainForm : Form
         }
         var firstNewPage = currentPageCount + 1;
         var totalPages = 0;
-        if (RunPdfEdit(() => totalPages = PdfEditService.AppendPdfs(file, files), Lng.T("Anhängen")))
+        var (ok, pending) = await PendingViewChangesAsync(Lng.T("Anhängen"));
+        if (!ok) { return; }
+        if (RunPdfEdit(() => totalPages = PdfEditService.AppendPdfs(file, files), Lng.T("Anhängen"), viewChanges: pending))
         {
             LoadPdf(file, firstNewPage);
             statusPath.Text = files.Count == 1 ? string.Format(Lng.T("\"{0}\" wurde angehängt."), Path.GetFileName(files[0])) : string.Format(Lng.T("{0} Dateien wurden angehängt."), files.Count);
@@ -1621,12 +1692,14 @@ public partial class MainForm : Form
         }
     }
 
-    private void ExtractPagesDialog()
+    /// <summary>Seiten in eine neue Datei extrahieren – aus dem angezeigten Stand samt ungespeicherten Anmerkungen; die Datei selbst bleibt
+    /// unverändert, offene Änderungen bleiben offen (bis 10.10.2026 wurden sie vorher still gespeichert).</summary>
+    private async void ExtractPagesDialog()
     {
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
         var currentPage = ClampedCurrentPage();
-        using PageRangeForm rangeDialog = new(Lng.T("Seiten extrahieren"), currentPageCount, emptyMeansAll: false, showRotation: false,
+        using PageRangeForm rangeDialog = new(Lng.T("Seiten extrahieren"), currentPageCount, emptyMeansAll: false,
             defaultRange: currentPage switch // Vorschlag: aktuelle bis letzte Seite
             {
                 0 => null,
@@ -1647,10 +1720,16 @@ public partial class MainForm : Form
             TaskDlg.MsgTaskDlg(Handle, Lng.T("Der Auszug kann die geöffnete Datei nicht überschreiben."), null, TaskDialogIcon.Warning);
             return;
         }
+        var source = await ViewStateFileAsync(); // ohne offene Änderungen die Datei selbst
+        if (source == null)
+        {
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Extrahieren fehlgeschlagen."), null, TaskDialogIcon.Warning);
+            return;
+        }
         try
         {
             Cursor.Current = Cursors.WaitCursor;
-            PdfEditService.ExtractPages(currentFile.FullName, saveDialog.FileName, rangeDialog.SelectedPages);
+            PdfEditService.ExtractPages(source, saveDialog.FileName, rangeDialog.SelectedPages);
             statusPath.Text = Lng.T("Auszug gespeichert:") + " " + saveDialog.FileName;
             OpenInNewInstance(saveDialog.FileName); // den Auszug gleich zeigen – in einer eigenen Instanz, das Original bleibt hier offen
         }
@@ -1658,7 +1737,11 @@ public partial class MainForm : Form
         {
             TaskDlg.ErrTaskDlg(Handle, Lng.T("Extrahieren fehlgeschlagen."), ex);
         }
-        finally { Cursor.Current = Cursors.Default; }
+        finally
+        {
+            Cursor.Current = Cursors.Default;
+            DeleteViewCopy(source);
+        }
     }
 
     /// <summary>Startet eine weitere PDFlight-Instanz mit dieser Datei (z.B. für einen frisch gespeicherten Auszug).</summary>
@@ -1735,11 +1818,15 @@ public partial class MainForm : Form
             Lng.T(action == PasswordChange.Set ? "Mit dem neuen Kennwort wird die Datei neu verschlüsselt (AES 256 Bit); Einschränkungen wie beim Drucken oder Kopieren gelten danach nicht mehr. Trotzdem speichern?"
                 : "Die Datei wird mit dem Kennwort, mit dem du sie geöffnet hast, neu verschlüsselt (AES 256 Bit); Einschränkungen wie beim Drucken oder Kopieren gelten danach nicht mehr. Hast du sie mit dem Besitzerkennwort geöffnet, öffnet künftig dieses die Datei. Trotzdem speichern?"),
             TaskDialogIcon.Warning)) { return; }
-        byte[]? decrypted = null;
-        if (Encrypted)
+        // Grundlage ist der angezeigte Stand, wenn er entschlüsselt werden muss oder ungespeicherte Änderungen hat – Anmerkungen und
+        // Formulareingaben kommen so mit den Eigenschaften in einem Schritt in die Datei (seit 10.10.2026; vorher speicherte schon das
+        // Öffnen des Dialogs sie still, auch wenn er ohne Änderung geschlossen wurde)
+        byte[]? source = null;
+        if (Encrypted || documentDirty)
         {
             if (shown == null) { ShowNotEditableMessage(); return; }
-            try { decrypted = await shown.SaveAsync(removeSecurity: true); }
+            await pageView.EndFormInputAsync(); // übernimmt den Wert des Felds, in dem gerade getippt wurde
+            try { source = await shown.SaveAsync(removeSecurity: Encrypted); }
             catch (InvalidOperationException ex)
             {
                 TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), Lng.T("Speichern der Eigenschaften")), ex);
@@ -1749,7 +1836,7 @@ public partial class MainForm : Form
         }
         DocumentText? text = dialog.InfoChanged || dialog.RemoveRequested ? new(dialog.DocTitle, dialog.DocAuthor, dialog.DocSubject, dialog.DocKeywords) : null;
         PropertyChanges changes = new(text, dialog.RemoveRequested, newPassword);
-        if (!RunPdfEdit(() => PdfEditService.WriteProperties(path, decrypted, changes), Lng.T("Speichern der Eigenschaften"), allowEncrypted: true)) { return; }
+        if (!RunPdfEdit(() => PdfEditService.WriteProperties(path, source, changes), Lng.T("Speichern der Eigenschaften"), allowEncrypted: true)) { return; }
         if (newPassword != null) { passwords[path] = newPassword; } else { passwords.Remove(path); } // das Neuladen fragt nicht nach
         LoadPdf(path, ClampedCurrentPage()); // Status, Sperren und Statusleiste neu
         statusPath.Text = action switch
@@ -1930,8 +2017,8 @@ public partial class MainForm : Form
         if (document != null && page >= 1 && page <= document.PageCount) { pageView.GoToPage(page - 1); }
     }
 
-    /// <summary>„Speichern“ im Editor: Datei unverändert? Offene Anzeigeänderungen zuerst wegschreiben (sie lassen die Gliederung
-    /// unberührt), dann die Gliederung schreiben, Editor schließen, neu laden.</summary>
+    /// <summary>„Speichern“ im Editor: Datei unverändert? Offene Anzeigeänderungen kommen im selben Schritt mit in die Datei (sie lassen
+    /// die Gliederung unberührt), dann die Gliederung schreiben, Editor schließen, neu laden.</summary>
     private async void BookmarkEditor_SaveRequested(object? sender, EventArgs e)
     {
         if (bookmarkEditor is not { } editor) { return; }
@@ -1942,9 +2029,10 @@ public partial class MainForm : Form
                 Lng.T("Die Lesezeichen wurden nicht gespeichert – schließe den Editor mit „Abbrechen“ und öffne ihn erneut."), TaskDialogIcon.Warning);
             return;
         }
-        if (documentDirty && !await CommitFormAsync()) { return; } // z. B. Formulareingaben, die während des Bearbeitens entstanden
+        var (ok, pending) = await PendingViewChangesAsync(Lng.T("Lesezeichen speichern")); // ungespeicherte Anmerkungen, Formulareingaben
+        if (!ok || bookmarkEditor != editor) { return; }
         var page = Math.Max(1, ClampedCurrentPage());
-        if (!RunPdfEdit(() => PdfEditService.WriteOutlines(file, editor.Bookmarks), Lng.T("Lesezeichen speichern"))) { return; }
+        if (!RunPdfEdit(() => PdfEditService.WriteOutlines(file, editor.Bookmarks), Lng.T("Lesezeichen speichern"), viewChanges: pending)) { return; }
         editor.CompleteSave(); // schließt den Editor und gibt das Hauptfenster frei (FormClosed)
         LoadPdf(file, page);
         statusPath.Text = Lng.T("Die Lesezeichen wurden gespeichert.");
@@ -1965,7 +2053,7 @@ public partial class MainForm : Form
     }
 
     /// <summary>Alle Lesezeichen (Gliederung) der Datei entfernen – für automatisch erzeugte, unsinnige Gliederungen (Bearbeiten-Menü).</summary>
-    private void RemoveBookmarks()
+    private async void RemoveBookmarks()
     {
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
@@ -1977,7 +2065,9 @@ public partial class MainForm : Form
             "Abschnitten ermöglicht. Um sie anzuzeigen, kannst du auf das\n" +
             "Inhaltsverzeichnis-Symbol in der PDF-Werkzeugleiste klicken\noder Strg+Umschalt+I drücken."), TaskDialogIcon.ShieldWarningYellowBar, defaultNo: true)) { return; }
         var page = Math.Max(1, ClampedCurrentPage());
-        if (RunPdfEdit(() => PdfEditService.RemoveOutlines(currentFile.FullName), Lng.T("Lesezeichen entfernen")))
+        var (ok, pending) = await PendingViewChangesAsync(Lng.T("Lesezeichen entfernen"));
+        if (!ok) { return; }
+        if (RunPdfEdit(() => PdfEditService.RemoveOutlines(currentFile.FullName), Lng.T("Lesezeichen entfernen"), viewChanges: pending))
         {
             LoadPdf(currentFile.FullName, page);
             statusPath.Text = Lng.T("Die Lesezeichen wurden entfernt.");
@@ -1985,7 +2075,7 @@ public partial class MainForm : Form
     }
 
     /// <summary>Leere Seite einfügen – Format, Position und wahlweise ein Bild wählt der Dialog (Bearbeiten-Menü).</summary>
-    private void InsertPageDialog()
+    private async void InsertPageDialog()
     {
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
@@ -1994,7 +2084,9 @@ public partial class MainForm : Form
         using InsertPageForm dialog = new(page, width, height);
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         var newPage = 0;
-        if (RunPdfEdit(() => newPage = PdfEditService.InsertBlankPage(currentFile.FullName, page, dialog.Options), Lng.T("Seite einfügen")))
+        var (ok, pending) = await PendingViewChangesAsync(Lng.T("Seite einfügen"));
+        if (!ok) { return; }
+        if (RunPdfEdit(() => newPage = PdfEditService.InsertBlankPage(currentFile.FullName, page, dialog.Options), Lng.T("Seite einfügen"), viewChanges: pending))
         {
             LoadPdf(currentFile.FullName, newPage);
             statusPath.Text = string.Format(dialog.ImagePath == null ? Lng.T("Eine leere Seite wurde als Seite {0} eingefügt.") : Lng.T("Eine Seite mit dem Bild wurde als Seite {0} eingefügt."), newPage);
@@ -2002,7 +2094,7 @@ public partial class MainForm : Form
     }
 
     /// <summary>Verschiebt die angezeigte Seite an eine andere Position (Bearbeiten-Menü).</summary>
-    private void MovePageDialog()
+    private async void MovePageDialog()
     {
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
@@ -2011,7 +2103,9 @@ public partial class MainForm : Form
         using MovePageForm dialog = new(page, currentPageCount);
         if (dialog.ShowDialog(this) != DialogResult.OK || dialog.TargetPage == page) { return; }
         var target = dialog.TargetPage;
-        if (RunPdfEdit(() => PdfEditService.MovePage(currentFile.FullName, page, target), Lng.T("Seite verschieben")))
+        var (ok, pending) = await PendingViewChangesAsync(Lng.T("Seite verschieben"));
+        if (!ok) { return; }
+        if (RunPdfEdit(() => PdfEditService.MovePage(currentFile.FullName, page, target), Lng.T("Seite verschieben"), viewChanges: pending))
         {
             LoadPdf(currentFile.FullName, target);
             statusPath.Text = string.Format(Lng.T("Seite {0} wurde an Position {1} verschoben."), page, target);
@@ -2536,7 +2630,9 @@ public partial class MainForm : Form
     }
 
     /// <summary>Einstieg für das Wechseln der Datei (Öffnen, Zuletzt-Liste, Favoriten, Blättern im Ordner): offene Änderungen nicht still
-    /// speichern – die Rückfrage stellt <see cref="LoadOtherFile"/>, sobald feststeht, dass eine andere Datei angezeigt wird.</summary>
+    /// speichern – die Rückfrage stellt <see cref="LoadOtherFile"/>, sobald feststeht, dass eine andere Datei angezeigt wird. Ebenso für
+    /// die Dialoge des Bearbeiten-Menüs und die Eigenschaften: Sie schreiben offene Änderungen erst mit, wenn sie die Datei ändern
+    /// (<see cref="PendingViewChangesAsync"/>).</summary>
     private void RunUnlessEditing(Action action)
     {
         if (bookmarkEditor != null) { bookmarkEditor.Activate(); return; } // Lesezeichen-Editor offen: die Datei bleibt angezeigt
@@ -2612,12 +2708,12 @@ public partial class MainForm : Form
         if (!documentDirty) { return true; }
         var save = new TaskDialogButton(Lng.T("Speichern"));
         var discard = new TaskDialogButton(Lng.T("Nicht speichern"));
-        var text = Lng.T("Formulareingaben oder Anmerkungen sind noch nicht in der Datei gespeichert.");
+        var text = Lng.T("Deine Änderungen gehen verloren, wenn du sie nicht speicherst."); // Texte wie Office (Wunsch vom 10.10.2026)
         if (PdfALocked) { text += Environment.NewLine + Environment.NewLine + Lng.T("Die Datei ist als PDF/A gekennzeichnet – nach dem Speichern entspricht sie dem Standard nicht mehr."); }
         var page = new TaskDialogPage
         {
             Caption = Application.ProductName,
-            Heading = string.Format(Lng.T("Änderungen in „{0}“ speichern?"), currentFile?.Name),
+            Heading = string.Format(Lng.T("Möchtest du die Änderungen an „{0}“ speichern?"), currentFile?.Name),
             Text = text,
             Icon = TaskDialogIcon.Warning,
             AllowCancel = true,
@@ -2712,7 +2808,7 @@ public partial class MainForm : Form
     private void UpdateAnnotationButtons()
     {
         var enabled = document != null && currentFile != null && !EditLocked && currentPageCount > 0;
-        btnHighlight.Enabled = ddbHighlight.Enabled = btnFreeText.Enabled = btnStamp.Enabled = btnDraw.Enabled = ddbInk.Enabled = btnErase.Enabled = btnManageAnnotations.Enabled = btnRotateLeft.Enabled = btnRotateRight.Enabled = enabled;
+        btnHighlight.Enabled = ddbHighlight.Enabled = btnFreeText.Enabled = btnStamp.Enabled = btnDraw.Enabled = ddbInk.Enabled = btnErase.Enabled = btnManageAnnotations.Enabled = btnRotateLeft.Enabled = btnRotateRight.Enabled = ddbRotate.Enabled = enabled;
         if (!enabled && AnnotationModeActive) { EndAnnotationModes(); }
     }
 
@@ -2861,6 +2957,8 @@ public partial class MainForm : Form
         // sperre steckt in Available von „… entfernen“ (UpdateUiState) – Visible läse vor dem Anzeigen false
         mnuHighlight.Available = mnuRemoveAnnotation.Available && shown && pageView.HasSelection;
         mnuViewSelectAll.Enabled = shown;
+        // „Bild speichern…“ / „Bild kopieren“ nur, wenn der Rechtsklick ein Bild getroffen hat – auch bei gesperrter Bearbeitung (nur lesen)
+        mnuSaveImage.Available = mnuCopyImage.Available = toolStripSeparatorC2.Available = shown && pageView.ImageUnderMouse != null;
         var removable = shown ? pageView.RemovableUnderMouse : RemovableAnnotation.None;
         mnuRemoveAnnotation.Enabled = removable != RemovableAnnotation.None;
         mnuRemoveAnnotation.Text = removable switch // nennt, was entfernt wird; ohne Treffer gesperrt und allgemein
@@ -2887,6 +2985,90 @@ public partial class MainForm : Form
     private void MnuViewSelectAll_Click(object? sender, EventArgs e)
     {
         pageView.SelectAll();
+    }
+
+    // Bilder der Seite (Kontextmenü, seit 10.10.2026, Wunsch Wilhelms): „Bild speichern…“ und „Bild kopieren“ erscheinen nur, wenn der
+    // Rechtsklick ein Bild getroffen hat (PageView.ImageUnderMouse). Das Hauptprogramm dekodiert dabei nie Bilddaten aus der PDF: JPEG-Bytes
+    // gehen unverändert in die Datei, PNG und Zwischenablage entstehen aus den Pixeln, die das Hilfsprogramm liefert.
+
+    /// <summary>„Bild speichern…“: Fotos, die als reines JPEG in der PDF stecken, unverändert als .jpg (Originalqualität), alle anderen als
+    /// PNG in Originalauflösung samt Transparenz; bei JPEGs bietet der Dialog auch PNG an. Wer bei einem anderen Bild selbst „.jpg“ tippt,
+    /// bekommt ein neu kodiertes JPEG.</summary>
+    private async void MnuSaveImage_Click(object? sender, EventArgs e)
+    {
+        if (currentFile == null || pageView.ImageUnderMouse is not { } image) { return; }
+        using SaveFileDialog dialog = new()
+        {
+            Title = Lng.T("Bild speichern"),
+            Filter = image.Jpeg ? Lng.T("JPEG-Bild, wie in der PDF (*.jpg)|*.jpg|PNG-Bild (*.png)|*.png") : Lng.T("PNG-Bild (*.png)|*.png"),
+            DefaultExt = image.Jpeg ? "jpg" : "png",
+            InitialDirectory = currentFile.DirectoryName,
+            FileName = string.Format(Lng.T("{0} – Bild von Seite {1}"), Path.GetFileNameWithoutExtension(currentFile.Name), image.Page + 1),
+        };
+        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
+        var path = dialog.FileName;
+        var asJpeg = Path.GetExtension(path).ToLowerInvariant() is ".jpg" or ".jpeg";
+        try
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            var (jpeg, pixels) = await pageView.ImageUnderMouseDataAsync(original: image.Jpeg && asJpeg);
+            using (pixels)
+            {
+                if (jpeg != null) { await File.WriteAllBytesAsync(path, jpeg); }
+                else if (pixels != null) { pixels.Save(path, asJpeg ? System.Drawing.Imaging.ImageFormat.Jpeg : System.Drawing.Imaging.ImageFormat.Png); }
+                else { return; } // inzwischen eine andere Datei
+            }
+            statusPath.Text = string.Format(Lng.T("Bild gespeichert: {0}"), path);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or InvalidDataException or IOException or UnauthorizedAccessException or ExternalException)
+        {
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Das Bild konnte nicht gespeichert werden."), ex);
+        }
+        finally { Cursor.Current = Cursors.Default; }
+    }
+
+    /// <summary>„Bild kopieren“: die Pixel als Bitmap auf weißem Grund (das Windows-Bitmapformat kennt keine Transparenz – durchsichtige
+    /// Stellen würden sonst schwarz) und zusätzlich als PNG mit Transparenz für Programme, die das lesen (Office, Browser).</summary>
+    private void MnuCopyImage_Click(object? sender, EventArgs e)
+    {
+        if (pageView.ImageUnderMouse != null) { CopyImage(pageView.ImageUnderMouseDataAsync); }
+    }
+
+    /// <summary>Strg+C bei ausgewähltem Bild (wie Acrobat, seit 10.10.2026): dasselbe wie „Bild kopieren“.</summary>
+    private void PageView_ImageCopyRequested(object? sender, EventArgs e)
+    {
+        CopyImage(pageView.SelectedImageDataAsync);
+    }
+
+    private async void CopyImage(Func<bool, Task<(byte[]? Jpeg, Bitmap? Pixels)>> loadImage)
+    {
+        try
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            var (_, pixels) = await loadImage(false); // immer die Pixel – JPEG-Bytes aus der PDF werden hier nie dekodiert
+            if (pixels == null) { return; }
+            using (pixels)
+            {
+                using Bitmap flat = new(pixels.Width, pixels.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                using (var graphics = Graphics.FromImage(flat))
+                {
+                    graphics.Clear(Color.White);
+                    graphics.DrawImage(pixels, 0, 0, pixels.Width, pixels.Height);
+                }
+                using MemoryStream png = new();
+                pixels.Save(png, System.Drawing.Imaging.ImageFormat.Png);
+                DataObject data = new();
+                data.SetData(DataFormats.Bitmap, true, flat);
+                data.SetData("PNG", false, png);
+                Clipboard.SetDataObject(data, copy: true); // copy: die Daten stehen sofort in der Zwischenablage, Bitmap und Strom dürfen danach weg
+            }
+            statusPath.Text = Lng.T("Das Bild wurde in die Zwischenablage kopiert.");
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or InvalidDataException or ExternalException or ArgumentException)
+        {
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Das Bild konnte nicht kopiert werden."), ex);
+        }
+        finally { Cursor.Current = Cursors.Default; }
     }
 
     // ------------------------------------------------------------------ Seitenansicht
@@ -3044,7 +3226,7 @@ public partial class MainForm : Form
     private void LayoutViewerStrip()
     {
         static int Width(ToolStripItem item) => item.Available ? item.GetPreferredSize(Size.Empty).Width + item.Margin.Horizontal : 0;
-        ToolStripItem[] center = [textPage, labelPageCount, toolStripSeparatorV2, btnZoomOut, comboZoom, btnZoomIn, btnFitWidth, btnTwoPage, toolStripSeparatorV3, btnRotateLeft, btnRotateRight];
+        ToolStripItem[] center = [textPage, labelPageCount, toolStripSeparatorV2, btnZoomOut, comboZoom, btnZoomIn, btnFitWidth, btnTwoPage, toolStripSeparatorV3, btnRotateLeft, btnRotateRight, ddbRotate];
         var centerWidth = center.Sum(Width);
         var rightWidth = viewerStrip.Items.Cast<ToolStripItem>().Where(i => i.Alignment == ToolStripItemAlignment.Right).Sum(Width);
         var available = viewerStrip.DisplayRectangle.Width;
@@ -3225,21 +3407,18 @@ public partial class MainForm : Form
 
     private void BtnRotateLeft_Click(object? sender, EventArgs e)
     {
-        RotateAllPages(clockwise: false);
+        RotateCurrentPage(clockwise: false);
     }
 
     private void BtnRotateRight_Click(object? sender, EventArgs e)
     {
-        RotateAllPages(clockwise: true);
+        RotateCurrentPage(clockwise: true);
     }
 
-    /// <summary>Viewer-Leiste und Strg+Umschalt+L/R: alle Seiten um 90° drehen – eine ungespeicherte Änderung wie die Anmerkungen (Wunsch
-    /// vom 03.10.2026; bis dahin drehte es nur die Ansicht, das verwirrte neben „Seiten drehen“). Die angezeigte Seite bleibt im Bild.</summary>
-    private async void RotateAllPages(bool clockwise)
+    private void DdbRotate_Click(object? sender, EventArgs e)
     {
-        if (document is not { } doc || currentFile == null || EditLocked || currentPageCount <= 0) { return; }
-        var pages = Enumerable.Range(1, doc.PageCount).ToList();
-        await EditInViewAsync(path => PdfEditService.RotatePages(path, pages, clockwise ? 90 : -90), Lng.T("Seiten drehen"), keepPage: true);
+        if (Environment.TickCount64 - rotationFormClosedAt < 300) { return; } // der Klick hat das offene Fenster eben geschlossen
+        ShowRotationForm();
     }
 
     private void PageView_CurrentPageChanged(object? sender, EventArgs e)
@@ -3418,7 +3597,7 @@ public partial class MainForm : Form
         if (currentFile == null || document == null) { e.Cancel = true; return; }
         var menu = ddbEdit.Enabled; // aus, solange der Lesezeichen-Editor offen ist
         mnuThumbInsertPage.Enabled = menu && mnuInsertPage.Enabled;
-        mnuThumbRotatePages.Enabled = menu && mnuRotatePages.Enabled;
+        mnuThumbRotatePages.Enabled = menu && ddbRotate.Enabled; // öffnet das Drehen-Fenster der Viewer-Leiste
         mnuThumbMovePage.Enabled = menu && mnuMovePage.Enabled;
         mnuThumbExtractPages.Enabled = menu && mnuExtractPages.Enabled;
         mnuThumbDeletePages.Enabled = menu && mnuDeletePages.Enabled;
@@ -3786,8 +3965,12 @@ public partial class MainForm : Form
     private static bool IsFileSwitch(Keys keyData) => keyData is (Keys.W | Keys.Control) or (Keys.O | Keys.Control)
         or (Keys.Right | Keys.Control | Keys.Shift) or (Keys.Left | Keys.Control | Keys.Shift);
 
-    /// <summary>Kürzel, die selbst in der Anzeige bearbeiten (Anmerkungen) oder deren Schritte zurücknehmen – davor wird nicht gespeichert.</summary>
+    /// <summary>Kürzel, die selbst in der Anzeige bearbeiten (Anmerkungen) oder deren Schritte zurücknehmen – davor wird nicht gespeichert.
+    /// Ebenso die Dialoge des Bearbeiten-Menüs und die Eigenschaften: Erst wenn sie die Datei ändern, schreiben sie offene Änderungen der
+    /// Anzeige im selben Schritt mit (<see cref="PendingViewChangesAsync"/>, <see cref="WritePropertiesAsync"/>; seit 10.10.2026).</summary>
     private bool IsViewEdit(Keys keyData) => keyData is (Keys.T | Keys.Control) or (Keys.H | Keys.Control) or (Keys.T | Keys.Control | Keys.Shift)
+        or (Keys.I | Keys.Control) or (Keys.Delete | Keys.Control) or (Keys.Insert | Keys.Control) or (Keys.X | Keys.Control) or (Keys.Y | Keys.Control)
+        or (Keys.N | Keys.Control) or (Keys.R | Keys.Control) or (Keys.F2 | Keys.Control) or (Keys.H | Keys.Control | Keys.Shift)
         || (keyData == (Keys.Z | Keys.Control) && viewUndo.Count > 0);
 
     /// <summary>Die Aktion zu einem Tastenkürzel – null, wenn die Taste keins ist (dann läuft sie an das Steuerelement mit dem Fokus weiter).</summary>
@@ -3814,14 +3997,14 @@ public partial class MainForm : Form
             case Keys.H | Keys.Control | Keys.Shift: return ManageStampsDialog;            // Stempelpalette pflegen
             case Keys.T | Keys.Control | Keys.Shift when btnManageAnnotations.Enabled: return ManageAnnotationsDialog;
             case Keys.Delete | Keys.Control | Keys.Shift when currentFile != null: return DeleteCurrent;
-            case Keys.R | Keys.Control when !EditLocked: return RotatePagesDialog;
+            case Keys.R | Keys.Control when !EditLocked: return () => ShowRotationForm(); // Drehen-Fenster der Viewer-Leiste
             case Keys.P | Keys.Control when currentFile != null: return PrintWithDialog;
             case Keys.W | Keys.Control when currentFile != null || document != null: return CloseDocument; // wie ein Tab im Browser
             case Keys.S | Keys.Control when documentDirty: return SaveFormInput;           // Formulareingaben speichern
             case Keys.P | Keys.Control | Keys.Shift when currentFile != null: return PrintWithSystemDialog; // wie in Edge
             // Ansicht
-            case Keys.R | Keys.Control | Keys.Shift when !EditLocked: return () => RotateAllPages(clockwise: true); // alle Seiten, ungespeichert
-            case Keys.L | Keys.Control | Keys.Shift when !EditLocked: return () => RotateAllPages(clockwise: false);
+            case Keys.R | Keys.Control | Keys.Shift when !EditLocked: return () => RotateCurrentPage(clockwise: true); // angezeigte Seite, ungespeichert
+            case Keys.L | Keys.Control | Keys.Shift when !EditLocked: return () => RotateCurrentPage(clockwise: false);
             case Keys.G | Keys.Control: return FocusPageBox;                               // Gehe zu Seite (Zahl + Enter)
             case Keys.F10:
             case Keys.I | Keys.Control | Keys.Shift: return ToggleSidebar;                 // Seitenleiste (F10 wie PDFMover, Strg+Umschalt+I wie Edge)
@@ -3996,35 +4179,35 @@ public partial class MainForm : Form
     }
     private void MnuDeletePages_Click(object? sender, EventArgs e)
     {
-        RunAfterCommit(DeletePagesDialog);
+        RunUnlessEditing(DeletePagesDialog);
     }
-    private void MnuRotatePages_Click(object? sender, EventArgs e)
+    private void MnuThumbRotatePages_Click(object? sender, EventArgs e)
     {
-        RunAfterCommit(RotatePagesDialog);
+        ShowRotationForm(Cursor.Position); // dasselbe Fenster wie der Pfeil der Viewer-Leiste, an der Stelle des Kontextmenüs
     }
     private void MnuMovePage_Click(object? sender, EventArgs e)
     {
-        RunAfterCommit(MovePageDialog);
+        RunUnlessEditing(MovePageDialog);
     }
     private void MnuInsertPage_Click(object? sender, EventArgs e)
     {
-        RunAfterCommit(InsertPageDialog);
+        RunUnlessEditing(InsertPageDialog);
     }
     private void MnuAppendPdf_Click(object? sender, EventArgs e)
     {
-        RunAfterCommit(AppendPdfDialog);
+        RunUnlessEditing(AppendPdfDialog);
     }
     private void MnuExtractPages_Click(object? sender, EventArgs e)
     {
-        RunAfterCommit(ExtractPagesDialog);
+        RunUnlessEditing(ExtractPagesDialog);
     }
     private void MnuRemoveBookmarks_Click(object? sender, EventArgs e)
     {
-        RunAfterCommit(RemoveBookmarks);
+        RunUnlessEditing(RemoveBookmarks);
     }
     private void MnuEditBookmarks_Click(object? sender, EventArgs e)
     {
-        RunAfterCommit(EditBookmarks);
+        RunUnlessEditing(EditBookmarks);
     }
     private void BtnManageAnnotations_Click(object? sender, EventArgs e)
     {
@@ -4032,11 +4215,11 @@ public partial class MainForm : Form
     }
     private void MnuManageStamps_Click(object? sender, EventArgs e)
     {
-        RunAfterCommit(ManageStampsDialog);
+        RunUnlessEditing(ManageStampsDialog);
     }
     private void MnuDuplex_Click(object? sender, EventArgs e)
     {
-        RunAfterCommit(MergeDuplexDialog);
+        RunUnlessEditing(MergeDuplexDialog);
     }
     private void BtnUndo_Click(object? sender, EventArgs e)
     {
@@ -4045,6 +4228,6 @@ public partial class MainForm : Form
     }
     private void MnuProperties_Click(object? sender, EventArgs e)
     {
-        RunAfterCommit(ShowProperties);
+        RunUnlessEditing(ShowProperties); // offene Änderungen schreibt erst „OK“ mit (WritePropertiesAsync)
     }
 }

@@ -32,13 +32,8 @@ namespace PDFLight.Forms
             labelPrompt = new Label();
             textBoxPages = new TextBox();
             labelHint = new Label();
-            groupRotation = new GroupBox();
-            radioRight = new RadioButton();
-            radioLeft = new RadioButton();
-            radioTurn = new RadioButton();
             buttonOK = new Button();
             buttonCancel = new Button();
-            groupRotation.SuspendLayout();
             SuspendLayout();
             // 
             // labelInfo
@@ -77,56 +72,11 @@ namespace PDFLight.Forms
             labelHint.TabIndex = 2;
             labelHint.Text = "z.B.  3   oder   2-5, 8";
             // 
-            // groupRotation
-            // 
-            groupRotation.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            groupRotation.Controls.Add(radioRight);
-            groupRotation.Controls.Add(radioLeft);
-            groupRotation.Controls.Add(radioTurn);
-            groupRotation.Location = new Point(12, 92);
-            groupRotation.Name = "groupRotation";
-            groupRotation.Size = new Size(269, 56);
-            groupRotation.TabIndex = 3;
-            groupRotation.TabStop = false;
-            groupRotation.Text = "Drehung";
-            // 
-            // radioRight
-            // 
-            radioRight.AutoSize = true;
-            radioRight.Checked = true;
-            radioRight.Location = new Point(12, 22);
-            radioRight.Name = "radioRight";
-            radioRight.Size = new Size(77, 19);
-            radioRight.TabIndex = 0;
-            radioRight.TabStop = true;
-            radioRight.Text = "90° &rechts";
-            radioRight.UseVisualStyleBackColor = true;
-            // 
-            // radioLeft
-            // 
-            radioLeft.AutoSize = true;
-            radioLeft.Location = new Point(110, 22);
-            radioLeft.Name = "radioLeft";
-            radioLeft.Size = new Size(69, 19);
-            radioLeft.TabIndex = 1;
-            radioLeft.Text = "90° &links";
-            radioLeft.UseVisualStyleBackColor = true;
-            // 
-            // radioTurn
-            // 
-            radioTurn.AutoSize = true;
-            radioTurn.Location = new Point(208, 22);
-            radioTurn.Name = "radioTurn";
-            radioTurn.Size = new Size(48, 19);
-            radioTurn.TabIndex = 2;
-            radioTurn.Text = "&180°";
-            radioTurn.UseVisualStyleBackColor = true;
-            // 
             // buttonOK
             // 
             buttonOK.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             buttonOK.DialogResult = DialogResult.OK;
-            buttonOK.Location = new Point(85, 160);
+            buttonOK.Location = new Point(85, 96);
             buttonOK.Name = "buttonOK";
             buttonOK.Size = new Size(95, 27);
             buttonOK.TabIndex = 4;
@@ -138,7 +88,7 @@ namespace PDFLight.Forms
             // 
             buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             buttonCancel.DialogResult = DialogResult.Cancel;
-            buttonCancel.Location = new Point(186, 160);
+            buttonCancel.Location = new Point(186, 96);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new Size(95, 27);
             buttonCancel.TabIndex = 5;
@@ -151,10 +101,9 @@ namespace PDFLight.Forms
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = buttonCancel;
-            ClientSize = new Size(293, 199);
+            ClientSize = new Size(293, 135);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOK);
-            Controls.Add(groupRotation);
             Controls.Add(labelHint);
             Controls.Add(textBoxPages);
             Controls.Add(labelPrompt);
@@ -166,8 +115,6 @@ namespace PDFLight.Forms
             ShowInTaskbar = false;
             StartPosition = FormStartPosition.CenterParent;
             Text = "Seiten";
-            groupRotation.ResumeLayout(false);
-            groupRotation.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -178,10 +125,6 @@ namespace PDFLight.Forms
         private System.Windows.Forms.Label labelPrompt;
         private System.Windows.Forms.TextBox textBoxPages;
         private System.Windows.Forms.Label labelHint;
-        private System.Windows.Forms.GroupBox groupRotation;
-        private System.Windows.Forms.RadioButton radioRight;
-        private System.Windows.Forms.RadioButton radioLeft;
-        private System.Windows.Forms.RadioButton radioTurn;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
     }

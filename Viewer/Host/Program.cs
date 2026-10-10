@@ -105,6 +105,24 @@ internal static class Program
                     var data = Document(id).AttachmentData(index);
                     return w => { w.Write(data.Length); w.Write(data); };
                 }
+            case Protocol.ImageAt:
+                {
+                    var (id, page, pageWidth, pageHeight) = (input.ReadInt32(), input.ReadInt32(), input.ReadInt32(), input.ReadInt32());
+                    var (x, y) = (input.ReadInt32(), input.ReadInt32());
+                    var (number, width, height, jpeg, rect) = Document(id).ImageAt(page, pageWidth, pageHeight, x, y);
+                    return w => { w.Write(number); w.Write(width); w.Write(height); w.Write(jpeg); w.Write(rect.X); w.Write(rect.Y); w.Write(rect.Width); w.Write(rect.Height); };
+                }
+            case Protocol.ImageData:
+                {
+                    var (id, page, number, original) = (input.ReadInt32(), input.ReadInt32(), input.ReadInt32(), input.ReadBoolean());
+                    var (jpeg, width, height, data) = Document(id).ImageData(page, number, original);
+                    return w =>
+                    {
+                        w.Write(jpeg);
+                        if (jpeg) { w.Write(data.Length); } else { w.Write(width); w.Write(height); }
+                        w.Write(data);
+                    };
+                }
             case Protocol.HighlightBoxes:
                 {
                     var (id, page, start, count) = (input.ReadInt32(), input.ReadInt32(), input.ReadInt32(), input.ReadInt32());

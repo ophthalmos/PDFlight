@@ -225,6 +225,48 @@ internal static class Program
             Console.WriteLine("FEHLER: Anhang mit ungültiger Nummer wurde geliefert");
         }
         catch (SandboxErrorException) { Console.WriteLine("Anhang mit ungültiger Nummer: abgewiesen (ok)"); }
+
+        // Kontextmenü „Bild speichern/kopieren“: Seite 1 in einem Raster nach Bildern abfragen, die gefundenen holen (JPEG-Original und Pixel);
+        // eine ungültige Bildnummer muss einen Fehler melden, keinen Absturz
+        var found = new SortedDictionary<int, (int Width, int Height, bool Jpeg)>();
+        watch.Restart();
+        for (var gy = 1; gy < 20; gy++)
+        {
+            for (var gx = 1; gx < 20; gx++)
+            {
+                var (number, imageWidth, imageHeight, jpeg) = sandbox.Call(Protocol.ImageAt, w => { w.Write(document); w.Write(0); w.Write(width); w.Write(height); w.Write(width * gx / 20); w.Write(height * gy / 20); },
+                    r =>
+                    {
+                        var hit = (r.ReadInt32(), r.ReadInt32(), r.ReadInt32(), r.ReadBoolean());
+                        _ = (r.ReadInt32(), r.ReadInt32(), r.ReadInt32(), r.ReadInt32()); // Rechteck in Seitenpixeln
+                        return hit;
+                    });
+                if (number >= 0) { found[number] = (imageWidth, imageHeight, jpeg); }
+            }
+        }
+        Console.WriteLine($"Bilder auf Seite 1 (Raster 19 × 19): {found.Count} in {watch.Elapsed.TotalMilliseconds:0} ms" +
+            (found.Count > 0 ? " – " + string.Join(", ", found.Select(f => $"Nr. {f.Key}: {f.Value.Width} × {f.Value.Height}{(f.Value.Jpeg ? " JPEG" : string.Empty)}")) : string.Empty));
+        foreach (var (number, info) in found.Take(5))
+        {
+            foreach (var original in info.Jpeg ? new[] { true, false } : [false])
+            {
+                var (isJpeg, length, imageWidth, imageHeight) = sandbox.Call(Protocol.ImageData, w => { w.Write(document); w.Write(0); w.Write(number); w.Write(original); }, r =>
+                {
+                    if (r.ReadBoolean()) { return (true, r.ReadBytes(r.ReadInt32()).Length, 0, 0); }
+                    var (w2, h2) = (r.ReadInt32(), r.ReadInt32());
+                    return (false, r.ReadBytes(w2 * h2 * 4).Length, w2, h2);
+                });
+                Console.WriteLine($"  Bild Nr. {number} {(isJpeg ? $"als JPEG-Original: {length} Byte" : $"als Pixel: {imageWidth} × {imageHeight} ({length / 1024} KB)")}");
+                if (!isJpeg && (imageWidth != info.Width || imageHeight != info.Height)) { Console.WriteLine("  FEHLER: Pixelgröße weicht ab"); failures++; }
+            }
+        }
+        try
+        {
+            sandbox.Call(Protocol.ImageData, w => { w.Write(document); w.Write(0); w.Write(1_000_000); w.Write(false); }, r => r.ReadBoolean());
+            Console.WriteLine("FEHLER: Bild mit ungültiger Nummer wurde geliefert");
+            failures++;
+        }
+        catch (SandboxErrorException) { Console.WriteLine("Bild mit ungültiger Nummer: abgewiesen (ok)"); }
     }
 
     private static Bitmap RenderBitmap(SandboxProcess sandbox, int document, int page, int width, int height) =>

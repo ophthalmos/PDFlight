@@ -1068,14 +1068,15 @@ internal static partial class PdfEditService
     }
 
     /// <summary>„OK“ im Eigenschaften-Dialog: Metadaten und Kennwortschutz in einem Durchgang schreiben (ein Rückgängig-Schritt).
-    /// <paramref name="decrypted"/> ist bei verschlüsselten Dateien die von PDFium entschlüsselte Fassung (PDFsharp kann verschlüsselte
-    /// Dateien nicht ändern), sonst null = die Datei selbst. Ändert sich weder an den Metadaten noch am Kennwort etwas – Schutz oder
+    /// <paramref name="shown"/> ist der angezeigte Stand aus PDFium – bei verschlüsselten Dateien entschlüsselt (PDFsharp kann verschlüsselte
+    /// Dateien nicht ändern), bei ungespeicherten Anmerkungen oder Formulareingaben mit ihnen (sie landen im selben Schritt in der Datei) –,
+    /// sonst null = die Datei selbst. Ändert sich weder an den Metadaten noch am Kennwort etwas – Schutz oder
     /// Einschränkungen nur aufheben –, kommt PDFiums Fassung unverändert und damit verlustfrei in die Datei. Verschlüsselt wird im
     /// Modify-Modus: Lesezeichen und Formularfelder bleiben (bis 06.10.2026 baute „Kennwort vergeben“ die Datei aus ihren Seiten neu auf
     /// und verlor beides).</summary>
-    public static void WriteProperties(string path, byte[]? decrypted, PropertyChanges changes)
+    public static void WriteProperties(string path, byte[]? shown, PropertyChanges changes)
     {
-        var bytes = decrypted ?? File.ReadAllBytes(path);
+        var bytes = shown ?? File.ReadAllBytes(path);
         if (changes.Info == null && !changes.RemoveMetadata && changes.Password == null)
         {
             File.WriteAllBytes(path, bytes);

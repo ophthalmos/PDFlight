@@ -162,6 +162,19 @@ internal static class Protocol
     /// Größen: die Größe verlangt von PDFium, jeden Anhang ganz zu entpacken (Review 06.10.2026).</summary>
     public const byte AttachmentCount = 39;
 
+    // ================================================================== Bilder (Kontextmenü „Bild speichern/kopieren“, seit 10.10.2026)
+
+    /// <summary>→ int Dok, int Seite, int Seitenbreite, int Seitenhöhe, int x, int y ← int Nummer des obersten Bilds an der Stelle (-1 =
+    /// keins; auch Bilder in Formular-XObjects), int Breite, int Höhe in Pixeln, bool als reines JPEG gespeichert, dann int x, y, Breite,
+    /// Höhe seines Rechtecks in Seitenpixeln (für die Auswahl wie in Acrobat).</summary>
+    public const byte ImageAt = 40;
+
+    /// <summary>→ int Dok, int Seite, int Nummer (aus <see cref="ImageAt"/>), bool Original ← bool JPEG; bei JPEG int Länge, Bytes der
+    /// JPEG-Datei (nur mit Original und wenn das Bild als reines JPEG vorliegt), sonst int Breite, int Höhe, Breite × Höhe × 4 Bytes BGRA
+    /// (Transparenzmaske eingerechnet, höchstens 64 Megapixel). Das Hauptprogramm dekodiert nie Bilddaten aus der PDF: JPEG-Bytes gehen
+    /// ungeprüft in die Datei, PNG und Zwischenablage entstehen aus den Pixeln.</summary>
+    public const byte ImageData = 41;
+
     // ================================================================== Umrechnung
 
     /// <summary>→ int Dok, int Seite, int Seitenbreite, int Seitenhöhe, int x, int y ← double x, double y: die Stelle in PDF-Koordinaten

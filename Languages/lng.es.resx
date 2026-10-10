@@ -237,8 +237,6 @@ Ambos archivos deben tener el mismo número de páginas.</value></data>
   <data name="Drucken" xml:space="preserve"><value>Imprimir</value></data>
   <data name="Datei drucken (Strg+P)" xml:space="preserve"><value>Imprimir el archivo (Ctrl+P)</value></data>
   <data name="Kennwort anzeigen" xml:space="preserve"><value>Mostrar la contraseña</value></data>
-  <data name="Drehen.Info" xml:space="preserve"><value>La rotación se guarda de forma permanente en el archivo.
-El botón de girar del visor, en cambio, solo cambia la vista.</value></data>
   <data name="Kennwort verbergen" xml:space="preserve"><value>Ocultar la contraseña</value></data>
   <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Repetir:</value></data>
   <data name="&amp;Kennwort:" xml:space="preserve"><value>&amp;Contraseña:</value></data>
@@ -729,12 +727,7 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="Zeichnen" xml:space="preserve"><value>Dibujar</value></data>
   <data name="Zeichnen (Esc beendet)" xml:space="preserve"><value>Dibujar (Esc termina)</value></data>
   <data name="Zeichnung" xml:space="preserve"><value>Dibujo</value></data>
-  <data name="Änderungen in „{0}“ speichern?" xml:space="preserve"><value>¿Guardar los cambios en «{0}»?</value></data>
-  <data name="Formulareingaben oder Anmerkungen sind noch nicht in der Datei gespeichert." xml:space="preserve"><value>Hay entradas de formulario o anotaciones que aún no se han guardado en el archivo.</value></data>
   <data name="Freitext" xml:space="preserve"><value>Texto libre</value></data>
-  <data name="Alle Seiten drehen" xml:space="preserve"><value>Girar todas las páginas</value></data>
-  <data name="Alle Seiten nach links drehen (Strg+Umschalt+L)" xml:space="preserve"><value>Girar todas las páginas a la izquierda (Ctrl+Mayús+L)</value></data>
-  <data name="Alle Seiten nach rechts drehen (Strg+Umschalt+R)" xml:space="preserve"><value>Girar todas las páginas a la derecha (Ctrl+Mayús+R)</value></data>
   <data name="Zeichnung entfernen" xml:space="preserve"><value>Quitar dibujo</value></data>
   <data name="Die Zeichnung wurde entfernt." xml:space="preserve"><value>Se quitó el dibujo.</value></data>
   <data name="Zeichnen: Ziehe mit gedrückter Maustaste über die Seite – mit Strg eine gerade Linie. Esc beendet." xml:space="preserve"><value>Dibujar: arrastra el ratón sobre la página con el botón pulsado – con Ctrl, una línea recta. Esc termina.</value></data>
@@ -848,4 +841,23 @@ Sin ella, el archivo ya no podrá mostrarse.</value></data>
   <data name="Die Einschränkungen der Datei entfallen." xml:space="preserve"><value>Se quitarán las restricciones del archivo.</value></data>
   <data name="Mit dem neuen Kennwort wird die Datei neu verschlüsselt (AES 256 Bit); Einschränkungen wie beim Drucken oder Kopieren gelten danach nicht mehr. Trotzdem speichern?" xml:space="preserve"><value>El archivo se volverá a cifrar con la nueva contraseña (AES de 256 bits); las restricciones como las de impresión o copia dejarán de aplicarse. ¿Guardar de todos modos?</value></data>
   <data name="Die Datei wird mit dem Kennwort, mit dem du sie geöffnet hast, neu verschlüsselt (AES 256 Bit); Einschränkungen wie beim Drucken oder Kopieren gelten danach nicht mehr. Hast du sie mit dem Besitzerkennwort geöffnet, öffnet künftig dieses die Datei. Trotzdem speichern?" xml:space="preserve"><value>El archivo se volverá a cifrar con la contraseña con la que lo abriste (AES de 256 bits); las restricciones como las de impresión o copia dejarán de aplicarse. Si lo abriste con la contraseña de propietario, a partir de ahora será esa la que abra el archivo. ¿Guardar de todos modos?</value></data>
+  <data name="Aktuelle Seite nach links drehen (Strg+Umschalt+L)" xml:space="preserve"><value>Girar la página actual a la izquierda (Ctrl+Mayús+L)</value></data>
+  <data name="Aktuelle Seite nach rechts drehen (Strg+Umschalt+R)" xml:space="preserve"><value>Girar la página actual a la derecha (Ctrl+Mayús+R)</value></data>
+  <data name="Seiten drehen (Strg+R)" xml:space="preserve"><value>Girar páginas (Ctrl+R)</value></data>
+  <data name="aktuelle Seite rechts / links drehen" xml:space="preserve"><value>girar la página actual a la derecha / izquierda</value></data>
+  <data name="Von" xml:space="preserve"><value>De</value></data>
+  <data name="bis" xml:space="preserve"><value>a</value></data>
+  <data name="Möchtest du die Änderungen an „{0}“ speichern?" xml:space="preserve"><value>¿Quieres guardar los cambios realizados en «{0}»?</value></data>
+  <data name="Deine Änderungen gehen verloren, wenn du sie nicht speicherst." xml:space="preserve"><value>Tus cambios se perderán si no los guardas.</value></data>
+  <data name="Alle Seiten" xml:space="preserve"><value>Todas las páginas</value></data>
+  <data name="Bild speichern…" xml:space="preserve"><value>Guardar imagen…</value></data>
+  <data name="Bild kopieren" xml:space="preserve"><value>Copiar imagen</value></data>
+  <data name="Bild speichern" xml:space="preserve"><value>Guardar imagen</value></data>
+  <data name="JPEG-Bild, wie in der PDF (*.jpg)|*.jpg|PNG-Bild (*.png)|*.png" xml:space="preserve"><value>Imagen JPEG, como en el PDF (*.jpg)|*.jpg|Imagen PNG (*.png)|*.png</value></data>
+  <data name="PNG-Bild (*.png)|*.png" xml:space="preserve"><value>Imagen PNG (*.png)|*.png</value></data>
+  <data name="{0} – Bild von Seite {1}" xml:space="preserve"><value>{0} – imagen de la página {1}</value></data>
+  <data name="Bild gespeichert: {0}" xml:space="preserve"><value>Imagen guardada: {0}</value></data>
+  <data name="Das Bild konnte nicht gespeichert werden." xml:space="preserve"><value>No se pudo guardar la imagen.</value></data>
+  <data name="Das Bild konnte nicht kopiert werden." xml:space="preserve"><value>No se pudo copiar la imagen.</value></data>
+  <data name="Das Bild wurde in die Zwischenablage kopiert." xml:space="preserve"><value>La imagen se copió al portapapeles.</value></data>
 </root>

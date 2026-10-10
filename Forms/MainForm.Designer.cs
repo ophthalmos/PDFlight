@@ -51,7 +51,6 @@
             toolStripSeparator4 = new ToolStripSeparator();
             ddbEdit = new ToolStripDropDownButton();
             mnuDeletePages = new ToolStripMenuItem();
-            mnuRotatePages = new ToolStripMenuItem();
             mnuMovePage = new ToolStripMenuItem();
             mnuInsertPage = new ToolStripMenuItem();
             toolStripSeparator15 = new ToolStripSeparator();
@@ -116,6 +115,7 @@
             toolStripSeparatorV3 = new ToolStripSeparator();
             btnRotateLeft = new ToolStripButton();
             btnRotateRight = new ToolStripButton();
+            ddbRotate = new ToolStripDropDownButton();
             btnCloseDocument = new ToolStripButton();
             toolStripSeparatorV6 = new ToolStripSeparator();
             btnFullScreen = new ToolStripButton();
@@ -144,6 +144,9 @@
             mnuViewCopy = new ToolStripMenuItem();
             mnuViewSelectAll = new ToolStripMenuItem();
             toolStripSeparatorC1 = new ToolStripSeparator();
+            toolStripSeparatorC2 = new ToolStripSeparator();
+            mnuSaveImage = new ToolStripMenuItem();
+            mnuCopyImage = new ToolStripMenuItem();
             mnuAddFreeTextHere = new ToolStripMenuItem();
             mnuHighlight = new ToolStripMenuItem();
             mnuEditAnnotation = new ToolStripMenuItem();
@@ -335,7 +338,7 @@
             // ddbEdit
             // 
             ddbEdit.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuRotatePages, mnuMovePage, mnuInsertPage, toolStripSeparator15, mnuAppendPdf, mnuDuplex, mnuExtractPages, toolStripSeparator14, mnuManageStamps, toolStripSeparator16, mnuRemoveBookmarks, mnuEditBookmarks, toolStripSeparator6, mnuProperties });
+            ddbEdit.DropDownItems.AddRange(new ToolStripItem[] { mnuDeletePages, mnuMovePage, mnuInsertPage, toolStripSeparator15, mnuAppendPdf, mnuDuplex, mnuExtractPages, toolStripSeparator14, mnuManageStamps, toolStripSeparator16, mnuRemoveBookmarks, mnuEditBookmarks, toolStripSeparator6, mnuProperties });
             ddbEdit.Enabled = false;
             ddbEdit.Name = "ddbEdit";
             ddbEdit.Size = new Size(76, 22);
@@ -349,15 +352,7 @@
             mnuDeletePages.Size = new Size(283, 22);
             mnuDeletePages.Text = "Seiten löschen…";
             mnuDeletePages.Click += MnuDeletePages_Click;
-            // 
-            // mnuRotatePages
-            // 
-            mnuRotatePages.Name = "mnuRotatePages";
-            mnuRotatePages.ShortcutKeyDisplayString = "Strg+R";
-            mnuRotatePages.Size = new Size(283, 22);
-            mnuRotatePages.Text = "Seiten drehen…";
-            mnuRotatePages.Click += MnuRotatePages_Click;
-            // 
+            //
             // mnuMovePage
             // 
             mnuMovePage.Name = "mnuMovePage";
@@ -684,7 +679,7 @@
             // 
             viewerStrip.AutoSize = false;
             viewerStrip.GripStyle = ToolStripGripStyle.Hidden;
-            viewerStrip.Items.AddRange(new ToolStripItem[] { btnSidebar, toolStripSeparatorV1, btnUndo, btnHighlight, ddbHighlight, btnDraw, ddbInk, btnErase, toolStripSeparatorV5, btnFreeText, btnStamp, btnManageAnnotations, labelViewerSpacer, textPage, labelPageCount, toolStripSeparatorV2, btnZoomOut, comboZoom, btnZoomIn, btnFitWidth, btnTwoPage, toolStripSeparatorV3, btnRotateLeft, btnRotateRight, btnCloseDocument, toolStripSeparatorV6, btnFullScreen, toolStripSeparatorV4, btnSearch, btnSearchClose, btnSearchNext, btnSearchPrev, labelMatches, btnWholeWord, btnMatchCase, textSearch, btnSaveDocument });
+            viewerStrip.Items.AddRange(new ToolStripItem[] { btnSidebar, toolStripSeparatorV1, btnUndo, btnHighlight, ddbHighlight, btnDraw, ddbInk, btnErase, toolStripSeparatorV5, btnFreeText, btnStamp, btnManageAnnotations, labelViewerSpacer, textPage, labelPageCount, toolStripSeparatorV2, btnZoomOut, comboZoom, btnZoomIn, btnFitWidth, btnTwoPage, toolStripSeparatorV3, btnRotateLeft, btnRotateRight, ddbRotate, btnCloseDocument, toolStripSeparatorV6, btnFullScreen, toolStripSeparatorV4, btnSearch, btnSearchClose, btnSearchNext, btnSearchPrev, labelMatches, btnWholeWord, btnMatchCase, textSearch, btnSaveDocument });
             viewerStrip.Location = new Point(0, 61);
             viewerStrip.Name = "viewerStrip";
             viewerStrip.Padding = new Padding(0, 4, 1, 0);
@@ -882,7 +877,7 @@
             btnRotateLeft.Name = "btnRotateLeft";
             btnRotateLeft.Size = new Size(23, 33);
             btnRotateLeft.Text = "↺";
-            btnRotateLeft.ToolTipText = "Alle Seiten nach links drehen (Strg+Umschalt+L)";
+            btnRotateLeft.ToolTipText = "Aktuelle Seite nach links drehen (Strg+Umschalt+L)";
             btnRotateLeft.Click += BtnRotateLeft_Click;
             // 
             // btnRotateRight
@@ -892,9 +887,20 @@
             btnRotateRight.Name = "btnRotateRight";
             btnRotateRight.Size = new Size(23, 33);
             btnRotateRight.Text = "↻";
-            btnRotateRight.ToolTipText = "Alle Seiten nach rechts drehen (Strg+Umschalt+R)";
+            btnRotateRight.ToolTipText = "Aktuelle Seite nach rechts drehen (Strg+Umschalt+R)";
             btnRotateRight.Click += BtnRotateRight_Click;
-            // 
+            //
+            // ddbRotate
+            //
+            ddbRotate.AutoSize = false;
+            ddbRotate.DisplayStyle = ToolStripItemDisplayStyle.None;
+            ddbRotate.Enabled = false;
+            ddbRotate.Margin = new Padding(0, 1, 2, 2);
+            ddbRotate.Name = "ddbRotate";
+            ddbRotate.Size = new Size(22, 33);
+            ddbRotate.ToolTipText = "Seiten drehen (Strg+R)";
+            ddbRotate.Click += DdbRotate_Click;
+            //
             // btnCloseDocument
             // 
             btnCloseDocument.Alignment = ToolStripItemAlignment.Right;
@@ -1166,6 +1172,7 @@
             pageView.ZoomChanged += PageView_ZoomChanged;
             pageView.CurrentPageChanged += PageView_CurrentPageChanged;
             pageView.SelectionFinished += PageView_SelectionFinished;
+            pageView.ImageCopyRequested += PageView_ImageCopyRequested;
             pageView.SearchChanged += PageView_SearchChanged;
             pageView.LinkHover += PageView_LinkHover;
             pageView.ExternalLinkClicked += PageView_ExternalLinkClicked;
@@ -1181,7 +1188,7 @@
             // 
             // contextMenuPage
             // 
-            contextMenuPage.Items.AddRange(new ToolStripItem[] { mnuViewCopy, mnuViewSelectAll, toolStripSeparatorC1, mnuAddFreeTextHere, mnuHighlight, mnuEditAnnotation, mnuRemoveAnnotation });
+            contextMenuPage.Items.AddRange(new ToolStripItem[] { mnuViewCopy, mnuViewSelectAll, toolStripSeparatorC2, mnuSaveImage, mnuCopyImage, toolStripSeparatorC1, mnuAddFreeTextHere, mnuHighlight, mnuEditAnnotation, mnuRemoveAnnotation });
             contextMenuPage.Name = "contextMenuPage";
             contextMenuPage.Size = new Size(206, 142);
             contextMenuPage.Opening += ContextMenuPage_Opening;
@@ -1201,7 +1208,26 @@
             mnuViewSelectAll.Size = new Size(205, 22);
             mnuViewSelectAll.Text = "Alles markieren";
             mnuViewSelectAll.Click += MnuViewSelectAll_Click;
-            // 
+            //
+            // toolStripSeparatorC2
+            //
+            toolStripSeparatorC2.Name = "toolStripSeparatorC2";
+            toolStripSeparatorC2.Size = new Size(202, 6);
+            //
+            // mnuSaveImage
+            //
+            mnuSaveImage.Name = "mnuSaveImage";
+            mnuSaveImage.Size = new Size(205, 22);
+            mnuSaveImage.Text = "Bild speichern…";
+            mnuSaveImage.Click += MnuSaveImage_Click;
+            //
+            // mnuCopyImage
+            //
+            mnuCopyImage.Name = "mnuCopyImage";
+            mnuCopyImage.Size = new Size(205, 22);
+            mnuCopyImage.Text = "Bild kopieren";
+            mnuCopyImage.Click += MnuCopyImage_Click;
+            //
             // toolStripSeparatorC1
             // 
             toolStripSeparatorC1.Name = "toolStripSeparatorC1";
@@ -1296,7 +1322,7 @@
             mnuThumbRotatePages.ShortcutKeyDisplayString = "Strg+R";
             mnuThumbRotatePages.Size = new Size(259, 22);
             mnuThumbRotatePages.Text = "Seiten drehen…";
-            mnuThumbRotatePages.Click += MnuRotatePages_Click;
+            mnuThumbRotatePages.Click += MnuThumbRotatePages_Click;
             //
             // mnuThumbMovePage
             //
@@ -1408,7 +1434,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripDropDownButton ddbEdit;
         private System.Windows.Forms.ToolStripMenuItem mnuDeletePages;
-        private System.Windows.Forms.ToolStripMenuItem mnuRotatePages;
         private System.Windows.Forms.ToolStripMenuItem mnuMovePage;
         private System.Windows.Forms.ToolStripMenuItem mnuInsertPage;
         private System.Windows.Forms.ToolStripMenuItem mnuAppendPdf;
@@ -1474,6 +1499,7 @@
         private ToolStripSeparator toolStripSeparatorV3;
         private ToolStripButton btnRotateLeft;
         private ToolStripButton btnRotateRight;
+        private ToolStripDropDownButton ddbRotate;
         private ToolStripButton btnSearch;
         private ToolStripButton btnFullScreen;
         private ToolStripTextBox textSearch;
@@ -1501,6 +1527,9 @@
         private PDFLight.Viewer.PageView pageView;
         private ContextMenuStrip contextMenuPage;
         private ToolStripMenuItem mnuViewCopy;
+        private ToolStripSeparator toolStripSeparatorC2;
+        private ToolStripMenuItem mnuSaveImage;
+        private ToolStripMenuItem mnuCopyImage;
         private ToolStripMenuItem mnuViewSelectAll;
         private ToolStripSeparator toolStripSeparatorC1;
         private ToolStripMenuItem mnuHighlight;
