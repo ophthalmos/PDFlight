@@ -17,6 +17,7 @@ internal sealed class ThumbnailGrid : ScrollableControl
 
     private PdfiumDocument? document;
     private readonly Dictionary<int, Bitmap> cache = [];
+    private readonly HashSet<int> stale = [];   // neuer Stand: neu rendern, bis dahin die alte Miniatur zeigen
     private readonly HashSet<int> pending = [];
     private int generation;                 // jede neue Datei oder Größe macht laufende Aufträge ungültig
     private int thumbnailSize = 160;
@@ -92,8 +93,19 @@ internal sealed class ThumbnailGrid : ScrollableControl
     }
 
     /// <summary>Zeigt ein Dokument (oder keins). Das bisherige gibt der Aufrufer selbst frei.</summary>
-    public void SetDocument(PdfiumDocument? value)
+    /// <summary>Zeigt ein Dokument. <paramref name="keepView"/>: neuer Stand desselben Dokuments mit gleichen Seitengrößen – Bildlauf und die
+    /// alten Miniaturen bleiben, bis die neuen da sind (sonst flackerte die Leiste und sprang an den Anfang).</summary>
+    public void SetDocument(PdfiumDocument? value, bool keepView = false)
     {
+        if (keepView && value != null && document != null && value.PageSizes.SequenceEqual(document.PageSizes))
+        {
+            document = value;
+            generation++;
+            pending.Clear();
+            stale.UnionWith(cache.Keys);
+            Invalidate();
+            return;
+        }
         document = value;
         currentPage = -1;
         tallest = value is { PageCount: > 0 } ? Math.Clamp(value.PageSizes.Max(p => p.Height / Math.Max(1, p.Width)), 0.25, 4) : 1.414;
@@ -109,6 +121,7 @@ internal sealed class ThumbnailGrid : ScrollableControl
     {
         if (!cache.Remove(index, out var bitmap)) { return; }
         bitmap.Dispose();
+        stale.Remove(index);
         if (document != null && index < document.PageCount) { Invalidate(CellBounds(index)); }
     }
 
@@ -118,6 +131,7 @@ internal sealed class ThumbnailGrid : ScrollableControl
         foreach (var bitmap in cache.Values) { bitmap.Dispose(); }
         cache.Clear();
         pending.Clear();
+        stale.Clear();
     }
 
     // ================================================================== Raster
@@ -205,7 +219,11 @@ internal sealed class ThumbnailGrid : ScrollableControl
         {
             var cell = CellBounds(index);
             var thumb = ThumbBounds(index);
-            if (cache.TryGetValue(index, out var bitmap)) { e.Graphics.DrawImage(bitmap, thumb); }
+            if (cache.TryGetValue(index, out var bitmap))
+            {
+                e.Graphics.DrawImage(bitmap, thumb);
+                if (stale.Contains(index)) { Request(index, thumb.Size); }
+            }
             else
             {
                 e.Graphics.FillRectangle(Brushes.White, thumb); // Platzhalter, bis die Miniatur fertig ist
@@ -226,6 +244,7 @@ internal sealed class ThumbnailGrid : ScrollableControl
     private async void Request(int index, Size pixels)
     {
         if (document == null || !pending.Add(index)) { return; }
+        var wasStale = stale.Remove(index);
         var requestGeneration = generation;
         var doc = document;
         Bitmap? bitmap;
@@ -242,7 +261,11 @@ internal sealed class ThumbnailGrid : ScrollableControl
             return;
         }
         pending.Remove(index);
-        if (bitmap == null) { return; } // verfallen – beim nächsten Zeichnen wird neu angefragt, falls die Seite wieder sichtbar ist
+        if (bitmap == null) // verfallen – beim nächsten Zeichnen wird neu angefragt, falls die Seite wieder sichtbar ist
+        {
+            if (wasStale && cache.ContainsKey(index)) { stale.Add(index); } // die alte Miniatur bleibt veraltet
+            return;
+        }
         if (cache.Remove(index, out var old)) { old.Dispose(); }
         cache[index] = bitmap;
         TrimCache();
@@ -259,6 +282,7 @@ internal sealed class ThumbnailGrid : ScrollableControl
         {
             cache[index].Dispose();
             cache.Remove(index);
+            stale.Remove(index);
         }
     }
 

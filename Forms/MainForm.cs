@@ -412,7 +412,7 @@ public partial class MainForm : Form
 
     /// <summary>Öffnet die Datei im Hilfsprogramm und zeigt sie an – mit Kennwortabfrage, wenn die Datei ein Benutzer-Kennwort hat (das
     /// Kennwort merkt sich PDFlight, solange die Datei angezeigt wird, damit das Neuladen nach einer Bearbeitung nicht erneut fragt).</summary>
-    private async Task<PdfiumDocument?> OpenDocumentAsync(string path, byte[] bytes, int page, ViewState? view, bool newFile = false)
+    private async Task<PdfiumDocument?> OpenDocumentAsync(string path, byte[] bytes, int page, ViewState? view, bool newFile = false, bool keepView = false)
     {
         var version = ++loadVersion;
         passwords.TryGetValue(path, out var password);
@@ -448,10 +448,12 @@ public partial class MainForm : Form
         }
         if (version != loadVersion || IsDisposed) { opened.Dispose(); return null; }
         if (password != null) { passwords[path] = password; }
-        ShowDocument(opened);
-        if (view != null) { if (view.Fit == PageFit.None) { pageView.SetZoom(view.Zoom, null); } else { pageView.SetFit(view.Fit); } }
-        if (view?.Scroll is { } scroll) { pageView.ScrollOffset = scroll; }
-        else if (page > 1) { pageView.GoToPage(page - 1); }
+        if (!ShowDocument(opened, keepView)) // behalten (neuer Stand, gleiche Seiten): Zoom und Ausschnitt stehen schon
+        {
+            if (view != null) { if (view.Fit == PageFit.None) { pageView.SetZoom(view.Zoom, null); } else { pageView.SetFit(view.Fit); } }
+            if (view?.Scroll is { } scroll) { pageView.ScrollOffset = scroll; }
+            else if (page > 1) { pageView.GoToPage(page - 1); }
+        }
         var (fileVersion, encrypted) = await opened.InfoAsync();
         var outline = await opened.OutlineAsync();
         // für den Hinweis in der Statusleiste – nur die Anzahl (die Liste entpackt jeden Anhang) und nur beim ersten Laden, nicht bei
@@ -477,8 +479,11 @@ public partial class MainForm : Form
         return opened;
     }
 
-    /// <summary>Wechselt das angezeigte Dokument (null = keins) in allen Ansichten; das bisherige wird danach im Hilfsprogramm geschlossen.</summary>
-    private void ShowDocument(PdfiumDocument? value)
+    /// <summary>Wechselt das angezeigte Dokument (null = keins) in allen Ansichten; das bisherige wird danach im Hilfsprogramm geschlossen.
+    /// <paramref name="keepView"/>: neuer Stand desselben Dokuments (<see cref="ShowBytesAsync"/>) – haben die Seiten dieselben Größen, bleiben
+    /// Zoom, Ausschnitt und Bilder bis zum Neuzeichnen stehen, und „Speichern“ blinkt nicht kurz weg (Fehlerbericht 11.10.2026). true =
+    /// behalten.</summary>
+    private bool ShowDocument(PdfiumDocument? value, bool keepView = false)
     {
         if (document != null && value == null) { startView = new ViewState(pageView.Fit, pageView.Zoom); } // die nächste Datei wieder so anzeigen
         CloseNoteCard(); // die Karte gehört zum bisherigen Stand (auch nach Rückgängig oder einem Schritt über PDFsharp)
@@ -486,15 +491,19 @@ public partial class MainForm : Form
         previous?.Changed -= Document_Changed;
         document = value;
         document?.Changed += Document_Changed;
-        documentDirty = false;
-        UpdateTitle(); // ohne „Speichern“ in der Viewer-Leiste
-        pageView.SetDocument(value);
-        thumbnailGrid.SetDocument(value);
+        var kept = pageView.SetDocument(value, keepView);
+        if (!kept)
+        {
+            documentDirty = false;
+            UpdateTitle(); // ohne „Speichern“ in der Viewer-Leiste
+        }
+        thumbnailGrid.SetDocument(value, kept);
         thumbnailGrid.CurrentPage = pageView.CurrentPage; // SetDocument der Miniaturen setzt sie zurück
-        FillOutline([]);
+        if (!kept) { FillOutline([]); } // behalten: dieselbe Gliederung, OpenDocumentAsync füllt sie gleich wieder
         previous?.Dispose(); // erst nach dem Umschalten der Ansichten – deren Aufträge für das alte Dokument verfallen damit
         if (SearchOpen && textSearch.Text.Length > 0) { StartSearch(); } // die Suche gilt auch für die nächste Datei
         UpdateViewerState();
+        return kept;
     }
 
     /// <summary>Die angezeigte Seite der aktuellen Datei ins Wörterbuch schreiben (Option); true, wenn etwas zu speichern ist.</summary>
@@ -2640,7 +2649,7 @@ public partial class MainForm : Form
         if (currentFile == null || document == null) { return false; }
         var path = currentFile.FullName;
         var view = new ViewState(pageView.Fit, pageView.Zoom, keepPage ? null : pageView.ScrollOffset);
-        documentLoading = OpenDocumentAsync(path, bytes, pageView.CurrentPage + 1, view);
+        documentLoading = OpenDocumentAsync(path, bytes, pageView.CurrentPage + 1, view, keepView: true);
         if (await documentLoading == null || currentFile?.FullName != path) { return false; }
         documentDirty = dirty;
         UpdateTitle();

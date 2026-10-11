@@ -195,8 +195,12 @@ internal sealed class PageView : ScrollableControl
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
     public bool HasSelection => OrderedSelection != null;
 
-    public void SetDocument(PdfiumDocument? value)
+    /// <summary>Zeigt ein Dokument. <paramref name="keepView"/>: ein neuer Stand desselben Dokuments (Anmerkung über PDFsharp, Rückgängig)
+    /// – haben alle Seiten dieselbe Größe, bleiben Zoom, Ausschnitt und die gezeichneten Kacheln stehen, bis die neuen da sind; sonst
+    /// flackerte die Seite beim Loslassen einer verschobenen Notiz einmal leer auf (Fehlerbericht 11.10.2026). Liefert, ob behalten wurde.</summary>
+    public bool SetDocument(PdfiumDocument? value, bool keepView = false)
     {
+        var keep = keepView && value != null && document != null && value.PageSizes.SequenceEqual(document.PageSizes);
         document?.FormInvalidated -= Document_FormInvalidated;
         document = value;
         document?.FormInvalidated += Document_FormInvalidated;
@@ -205,10 +209,14 @@ internal sealed class PageView : ScrollableControl
         formDragPage = -1;
         CancelPick();
         documentGeneration++;
-        foreach (var bitmap in previews.Values) { bitmap.Dispose(); }
-        previews.Clear();
         pendingPreviews.Clear();
-        stalePreviews.Clear();
+        if (keep) { stalePreviews.UnionWith(previews.Keys); } // die alten Bilder bleiben, bis die neuen da sind
+        else
+        {
+            foreach (var bitmap in previews.Values) { bitmap.Dispose(); }
+            previews.Clear();
+            stalePreviews.Clear();
+        }
         charCounts.Clear();
         ClearSelection();
         ResetSearch();
@@ -218,11 +226,21 @@ internal sealed class PageView : ScrollableControl
         imageUnderMouse = null;
         selectedImage = null;
         hoverAnnotation = null;
-        ClearAnnotationGhost();
+        if (keep && ghost != null) { ghostDragging = false; } // die verschobene Kopie bleibt stehen, bis die Seite neu gezeichnet ist (DrawAnnotationGhost)
+        else { ClearAnnotationGhost(); }
         inkStroke = null;
         pendingInk.Clear();
         eraseGesture = null;
         SearchChanged?.Invoke(this, EventArgs.Empty);
+        if (keep)
+        {
+            KeepTilesAsStale();
+            LayoutPages(); // gleiche Seitengrößen, gleicher Zoom: dieselben Rechtecke
+            if (currentPage >= 0) { value!.CurrentPageIndex = currentPage; } // keep setzt value voraus; das neue Dokument kennt die Seite sonst nicht (Formularbefehle)
+            UpdateCurrentPage();
+            Invalidate();
+            return true;
+        }
         fit = DefaultFit == PageFit.None ? PageFit.Height : DefaultFit;
         currentPage = -1; // die Seitenbreite richtet sich dann nach Seite 1 – nicht nach der Seite des vorigen Dokuments
         ClearTiles();
@@ -233,6 +251,20 @@ internal sealed class PageView : ScrollableControl
         UpdateCurrentPage();
         Invalidate();
         ZoomChanged?.Invoke(this, EventArgs.Empty);
+        return false;
+    }
+
+    /// <summary>Neuer Stand desselben Dokuments: alle Kacheln gelten als veraltet (neu rendern, bis dahin das alte Bild), laufende Aufträge
+    /// des alten Dokuments verfallen; Markierungs- und Trefferrechtecke gehören zum alten Stand.</summary>
+    private void KeepTilesAsStale()
+    {
+        generation++;
+        pendingTiles.Clear();
+        staleTiles.UnionWith(tiles.Keys);
+        selectionRects.Clear();
+        pendingSelectionRects.Clear();
+        hitRects.Clear();
+        pendingHitRects.Clear();
     }
 
     // ================================================================== Layout und Zoom
@@ -1559,6 +1591,11 @@ internal sealed class PageView : ScrollableControl
     private void DrawAnnotationGhost(Graphics g)
     {
         if (ghost is not { Moved: true } gh || gh.Page >= pageRects.Length) { return; }
+        if (gh.Document != document && !ghostDragging && !GhostAreaStale(gh))
+        {
+            BeginInvoke(() => { if (ghost == gh) { ClearAnnotationGhost(); } }); // neuer Stand gezeichnet: die Kopie wird nicht mehr gebraucht
+            return;
+        }
         var page = ToClient(pageRects[gh.Page]);
         var (sx, sy) = ((float)page.Width / gh.PageSize.Width, (float)page.Height / gh.PageSize.Height); // Zoom inzwischen geändert
         var rect = gh.Rect;
@@ -1570,6 +1607,19 @@ internal sealed class PageView : ScrollableControl
         g.DrawImage(gh.Image, target, 0, 0, gh.Image.Width, gh.Image.Height, GraphicsUnit.Pixel, attributes);
         using var pen = new Pen(Color.FromArgb(0, 120, 215)) { DashStyle = DashStyle.Dash };
         g.DrawRectangle(pen, target);
+    }
+
+    /// <summary>Warten im Bereich der Kopie (alte und neue Stelle) noch Kacheln auf den neuen Stand?</summary>
+    private bool GhostAreaStale(AnnotationGhost gh)
+    {
+        var size = pageRects[gh.Page].Size;
+        var (sx, sy) = ((float)size.Width / gh.PageSize.Width, (float)size.Height / gh.PageSize.Height);
+        var moved = gh.Rect;
+        moved.Offset(gh.Offset.Width, gh.Offset.Height);
+        var area = Rectangle.Union(gh.Rect, moved);
+        area = Rectangle.Round(new RectangleF(area.X * sx, area.Y * sy, area.Width * sx, area.Height * sy));
+        bool InArea((int Page, int X, int Y) k) => k.Page == gh.Page && TileRect(k.Page, k.X, k.Y).IntersectsWith(area);
+        return staleTiles.Any(InArea) || pendingTiles.Any(InArea);
     }
 
     /// <summary>Gezogener Kommentar wie bei Acrobat: ein blaues, halbdurchsichtiges Notizsymbol (Sprechblase mit Zeilen) – selbst
