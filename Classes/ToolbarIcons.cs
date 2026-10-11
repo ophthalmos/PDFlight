@@ -55,6 +55,7 @@ internal static class ToolbarIcons
     public const char BackToWindow = '\uE73F'; // Vollbild aus
     public const char CloseDocument = '\uE8BB'; // ChromeClose: Dokument schließen
     public const char Save = '\uE74E';         // Formulareingaben speichern (Viewer-Leiste)
+    public const char SaveAs = '\uE792';       // Speichern unter\u2026 (Viewer-Leiste, nur Symbol)
     public const char TwoPage = '\uE89A';    // TwoPage: zweiseitige Ansicht
     public const char Search = '\uE721';
     public const char ChevronUp = '\uE70E';    // Suche: vorheriger Treffer (nächster: ChevronDown)

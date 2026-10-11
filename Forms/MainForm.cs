@@ -565,12 +565,20 @@ public partial class MainForm : Form
     private void UpdateTitle()
     {
         Text = currentFile != null ? (settings.ShowFullPathInTitle ? currentFile.FullName : currentFile.Name) + " – PDFlight" : "PDFlight";
-        var showSave = documentDirty && ShownDocument != null; // „Speichern“ in der Viewer-Leiste bei offenen Formulareingaben oder Anmerkungen
-        if (btnSaveDocument.Visible != showSave)
-        {
-            btnSaveDocument.Visible = showSave;
-            UpdateViewerLayout();
-        }
+        UpdateSaveButton();
+    }
+
+    /// <summary>„Speichern“ in der Viewer-Leiste ist immer zu sehen – wie bei Edge (seit 11.10.2026, Wunsch Wilhelms; vorher erschien der
+    /// Knopf erst bei offenen Änderungen). Ohne offene Formulareingaben oder Anmerkungen nur das ausgegraute Symbol, mit ihnen frei und mit
+    /// Beschriftung, damit er auffällt; ohne Symbolschrift immer der Text.</summary>
+    private void UpdateSaveButton()
+    {
+        var dirty = documentDirty && ShownDocument != null;
+        var style = btnSaveDocument.Image == null ? ToolStripItemDisplayStyle.Text : dirty ? ToolStripItemDisplayStyle.ImageAndText : ToolStripItemDisplayStyle.Image;
+        btnSaveDocument.Enabled = dirty;
+        if (btnSaveDocument.DisplayStyle == style) { return; }
+        btnSaveDocument.DisplayStyle = style;
+        UpdateViewerLayout(); // die Breite ändert sich – die mittige Gruppe neu ausrichten
     }
 
     /// <summary>Seitenzahl, Größe und Datum in der Statusleiste. Die Seitenzahl kommt von PDFsharp, bei Kennwortschutz (PDFsharp
@@ -1693,13 +1701,13 @@ public partial class MainForm : Form
         List<(int Kind, string Text, string? Detail)> choices = [(0, Lng.T("Einzelne Datei auswählen"), Lng.T("Über den Dateidialog"))];
         if (shown.Count > 0) { choices.Add((1, Lng.T("Geöffnete Dateien hinzufügen"), Lng.T("In anderen Instanzen angezeigte PDF-Dateien"))); }
         if (siblings.Count > 0) { choices.Add((2, Lng.T("Dateien desselben Ordners"), Lng.T("PDF-Dateien aus dem Ordner der angezeigten Datei"))); }
-        var choice = 0;
-        if (choices.Count > 1)
-        {
-            var picked = TaskDlg.ChoiceTaskDlg(Handle, Lng.T("Was soll angehängt werden?"), null, [.. choices.Select(c => (c.Text, c.Detail))]);
-            if (picked < 0) { return; }
-            choice = choices[picked].Kind;
-        }
+        // der Dialog erscheint seit 11.10.2026 immer – auch mit nur einer Quelle: sein Kästchen legt statt des Anhängens eine neue Sammelmappe
+        // an (Wunsch Wilhelms: aus PDFlight heraus ging das nur über eine Kopie im selben Ordner)
+        var collection = false;
+        var picked = TaskDlg.ChoiceTaskDlg(Handle, Lng.T("Was soll angehängt werden?"), null, [.. choices.Select(c => (c.Text, c.Detail))],
+            Lng.T("Als neue Sammelmappe speichern"), ref collection);
+        if (picked < 0) { return; }
+        var choice = choices[picked].Kind;
         List<string> files;
         switch (choice)
         {
@@ -1725,6 +1733,7 @@ public partial class MainForm : Form
                 break;
             default: return;
         }
+        if (collection) { await CreateCollectionAsync(files); return; }
         var firstNewPage = currentPageCount + 1;
         var totalPages = 0;
         var (ok, pending) = await PendingViewChangesAsync(Lng.T("Anhängen"));
@@ -1736,6 +1745,105 @@ public partial class MainForm : Form
             var added = totalPages - firstNewPage + 1;
             ShowSplash(added == 1 ? Lng.T("1 Seite angehängt") : string.Format(Lng.T("{0} Seiten angehängt"), added)); // die Anzeige ändert sich sonst kaum sichtbar (Wunsch vom 20.09.2026)
         }
+    }
+
+    /// <summary>Neue Sammelmappe (Kästchen im Dialog von „PDF-Datei anhängen“, seit 11.10.2026): der angezeigte Stand samt ungespeicherten
+    /// Anmerkungen, dahinter die gewählten Dateien, als neue Datei; die angezeigte Datei bleibt unverändert. Gebaut wird in einer Temp-Kopie
+    /// und erst dann ans Ziel kopiert – so darf das Ziel auch eine der angehängten Dateien sein. Danach zeigt PDFlight die Sammelmappe (offene
+    /// Änderungen der bisherigen Datei: die übliche Rückfrage).</summary>
+    private async Task CreateCollectionAsync(List<string> files)
+    {
+        if (currentFile == null) { return; }
+        using SaveFileDialog dialog = new()
+        {
+            Filter = Lng.T("PDF-Dateien (*.pdf)|*.pdf"),
+            Title = Lng.T("Sammelmappe speichern"),
+            InitialDirectory = currentFile.DirectoryName,
+            FileName = Lng.T("Sammelmappe") + ".pdf",
+        };
+        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
+        var target = dialog.FileName;
+        if (string.Equals(target, currentFile.FullName, StringComparison.OrdinalIgnoreCase))
+        {
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Sammelmappe kann die geöffnete Datei nicht überschreiben."), null, TaskDialogIcon.Warning);
+            return;
+        }
+        await FinishNoteEditAsync();
+        await pageView.EndFormInputAsync();
+        var source = await ViewStateFileAsync(); // ohne offene Änderungen die Datei selbst
+        if (source == null) { TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Sammelmappe konnte nicht angelegt werden."), null, TaskDialogIcon.Warning); return; }
+        string? temp = null;
+        int totalPages;
+        try
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            temp = NewViewCopyPath();
+            File.Copy(source, temp, overwrite: true);
+            totalPages = PdfEditService.AppendPdfs(temp, files);
+            File.Copy(temp, target, overwrite: true);
+        }
+        catch (Exception ex) when (PdfEditService.IsPdfReadError(ex))
+        {
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Die Sammelmappe konnte nicht angelegt werden."), ex);
+            return;
+        }
+        finally
+        {
+            Cursor.Current = Cursors.Default;
+            DeleteViewCopy(temp);
+            DeleteViewCopy(source); // nie die Datei selbst
+        }
+        var created = string.Format(Lng.T("„{0}“ wurde als Sammelmappe angelegt."), Path.GetFileName(target));
+        if (!await ConfirmSaveChangesAsync()) { statusPath.Text = created; return; } // abgebrochen: die bisherige Datei bleibt angezeigt
+        LoadPdf(target, addToRecent: true);
+        statusPath.Text = created;
+        ShowSplash(string.Format(Lng.T("{0} Seiten"), totalPages));
+    }
+
+    /// <summary>„Speichern unter…“ (Symbol in der Viewer-Leiste, Strg+Umschalt+S; seit 11.10.2026, Wunsch Wilhelms): der angezeigte Stand
+    /// samt ungespeicherten Änderungen unter neuem Namen, auch im selben Ordner („Kopieren“ kann das nicht); danach wird die neue Datei
+    /// angezeigt. Wie in Office bleibt die bisherige Datei so, wie sie zuletzt gespeichert war. Dasselbe Ziel = normales Speichern.</summary>
+    private async void SaveAsDialog()
+    {
+        if (currentFile == null || ShownDocument is not { } doc) { return; }
+        using SaveFileDialog dialog = new()
+        {
+            Filter = Lng.T("PDF-Dateien (*.pdf)|*.pdf"),
+            Title = Lng.T("Speichern unter"),
+            InitialDirectory = currentFile.DirectoryName,
+            FileName = string.Format(Lng.T("{0} – Kopie"), Path.GetFileNameWithoutExtension(currentFile.Name)) + ".pdf",
+        };
+        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
+        var source = currentFile.FullName;
+        var target = dialog.FileName;
+        if (string.Equals(target, source, StringComparison.OrdinalIgnoreCase))
+        {
+            if (documentDirty) { await SaveDocumentAsync(Lng.T("Speichern")); }
+            return;
+        }
+        await FinishNoteEditAsync();
+        await pageView.EndFormInputAsync();
+        try
+        {
+            // offene Änderungen aus PDFium (eine Verschlüsselung bleibt erhalten), sonst die Datei unverändert
+            var bytes = documentDirty && doc == ShownDocument ? await doc.SaveAsync() : await File.ReadAllBytesAsync(source);
+            await File.WriteAllBytesAsync(target, bytes);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
+        {
+            TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), Lng.T("Speichern unter")), ex);
+            return;
+        }
+        if (passwords.TryGetValue(source, out var password)) { passwords[target] = password; } // die Kopie hat dasselbe Kennwort – nicht erneut fragen
+        var page = ClampedCurrentPage();
+        documentDirty = false; // die Änderungen stehen jetzt in der neuen Datei
+        LoadPdf(target, page, addToRecent: true);
+        statusPath.Text = string.Format(Lng.T("Gespeichert als „{0}“."), Path.GetFileName(target));
+    }
+
+    private void BtnSaveAs_Click(object? sender, EventArgs e)
+    {
+        RunUnlessEditing(SaveAsDialog); // offene Änderungen nicht still in die bisherige Datei – sie gehen in die neue
     }
 
     /// <summary>Seiten in eine neue Datei extrahieren – aus dem angezeigten Stand samt ungespeicherten Anmerkungen; die Datei selbst bleibt
@@ -2055,6 +2163,7 @@ public partial class MainForm : Form
             lockedToolbarStates = null;
         }
         btnCloseDocument.Enabled = !locked && (document != null || currentFile != null);
+        btnSaveAs.Enabled = !locked && document != null && currentFile != null;
         UpdateAnnotationButtons(); // EditLocked schließt den offenen Editor ein
     }
 
@@ -3560,8 +3669,9 @@ public partial class MainForm : Form
         Set(btnSearchClose, ToolbarIcons.Cancel);
         Set(btnFullScreen, isFullScreen ? ToolbarIcons.BackToWindow : ToolbarIcons.FullScreen);
         Set(btnCloseDocument, ToolbarIcons.CloseDocument);
-        btnSaveDocument.Image = ViewerIcon(ToolbarIcons.Save); // mit Beschriftung: sie erscheint nur bei offenen Formulareingaben und soll auffallen
-        btnSaveDocument.DisplayStyle = btnSaveDocument.Image != null ? ToolStripItemDisplayStyle.ImageAndText : ToolStripItemDisplayStyle.Text;
+        Set(btnSaveAs, ToolbarIcons.SaveAs); // immer nur das Symbol (Wunsch vom 11.10.2026), der Tooltip nennt die Funktion
+        btnSaveDocument.Image = ViewerIcon(ToolbarIcons.Save);
+        UpdateSaveButton(); // nur Symbol oder mit Beschriftung – je nach offenen Änderungen
         UpdateSidebarIcons();
         UpdateFitButton();
         UpdateViewerLayout();
@@ -3640,6 +3750,7 @@ public partial class MainForm : Form
         btnTwoPage.Checked = pageView.TwoPageLayout;
         UpdateAnnotationButtons();
         btnCloseDocument.Enabled = (has || currentFile != null) && bookmarkEditor == null; // nicht, solange der Lesezeichen-Editor offen ist
+        btnSaveAs.Enabled = has && currentFile != null && bookmarkEditor == null;
         labelPageCount.Text = has ? string.Format(Lng.T("von {0}"), document!.PageCount) : string.Empty; // has prüft document
         if (!textPage.Focused) { ShowCurrentPage(); }
         UpdateZoomDisplay();
@@ -3739,7 +3850,7 @@ public partial class MainForm : Form
     private async void SaveFormInput()
     {
         if (!documentDirty) { return; }
-        if (await CommitFormAsync() && !documentDirty) { statusPath.Text = Lng.T("Die Formulareingaben wurden gespeichert."); }
+        if (await CommitFormAsync() && !documentDirty) { statusPath.Text = Lng.T("Die Änderungen wurden gespeichert."); }
     }
 
     private void BtnCloseDocument_Click(object? sender, EventArgs e)
@@ -4334,7 +4445,8 @@ public partial class MainForm : Form
     /// <summary>Kürzel, die die angezeigte Datei schließen oder durch eine andere ersetzen – sie speichern nicht still, sondern fragen selbst
     /// (<see cref="CloseDocument"/>, <see cref="LoadOtherFile"/>).</summary>
     private static bool IsFileSwitch(Keys keyData) => keyData is (Keys.W | Keys.Control) or (Keys.O | Keys.Control)
-        or (Keys.Right | Keys.Control | Keys.Shift) or (Keys.Left | Keys.Control | Keys.Shift);
+        or (Keys.Right | Keys.Control | Keys.Shift) or (Keys.Left | Keys.Control | Keys.Shift)
+        or (Keys.S | Keys.Control | Keys.Shift); // Speichern unter: offene Änderungen gehen in die neue Datei, nicht still in die bisherige
 
     /// <summary>Kürzel, die selbst in der Anzeige bearbeiten (Anmerkungen) oder deren Schritte zurücknehmen – davor wird nicht gespeichert.
     /// Ebenso die Dialoge des Bearbeiten-Menüs und die Eigenschaften: Erst wenn sie die Datei ändern, schreiben sie offene Änderungen der
@@ -4373,6 +4485,7 @@ public partial class MainForm : Form
             case Keys.W | Keys.Control when currentFile != null || document != null: return CloseDocument; // wie ein Tab im Browser
             case Keys.S | Keys.Control when documentDirty: return SaveFormInput;           // Formulareingaben speichern
             case Keys.P | Keys.Control | Keys.Shift when currentFile != null: return PrintWithSystemDialog; // wie in Edge
+            case Keys.S | Keys.Control | Keys.Shift when currentFile != null && document != null: return SaveAsDialog; // Speichern unter… (wie Office)
             // Ansicht
             case Keys.R | Keys.Control | Keys.Shift when !EditLocked: return () => RotateCurrentPage(clockwise: true); // angezeigte Seite, ungespeichert
             case Keys.L | Keys.Control | Keys.Shift when !EditLocked: return () => RotateCurrentPage(clockwise: false);

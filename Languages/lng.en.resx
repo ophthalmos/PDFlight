@@ -699,10 +699,10 @@ or press Ctrl+Shift+I.</value></data>
   <data name="Das Dokument wurde geschlossen." xml:space="preserve"><value>The document has been closed.</value></data>
   <data name="Strg+W" xml:space="preserve"><value>Ctrl+W</value></data>
   <data name="Dokument schließen" xml:space="preserve"><value>close document</value></data>
-  <data name="Formulareingaben in der Datei speichern (Strg+S)" xml:space="preserve"><value>Save form entries to the file (Ctrl+S)</value></data>
-  <data name="Die Formulareingaben wurden gespeichert." xml:space="preserve"><value>The form entries have been saved.</value></data>
+  <data name="Änderungen in der Datei speichern (Strg+S)" xml:space="preserve"><value>Save changes to the file (Ctrl+S)</value></data>
+  <data name="Die Änderungen wurden gespeichert." xml:space="preserve"><value>The changes have been saved.</value></data>
   <data name="Strg+S" xml:space="preserve"><value>Ctrl+S</value></data>
-  <data name="Formulareingaben speichern" xml:space="preserve"><value>save form entries</value></data>
+  <data name="Änderungen speichern" xml:space="preserve"><value>save changes</value></data>
   <data name="Zum Beenden des Vollbildmodus Esc drücken" xml:space="preserve"><value>Press Esc to exit full screen</value></data>
   <data name="Klicke auf die Stelle für den Freitext – Esc bricht ab." xml:space="preserve"><value>Click where the free text should go – Esc cancels.</value></data>
   <data name="Freitext hier einfügen…" xml:space="preserve"><value>Insert free text here…</value></data>
@@ -874,6 +874,19 @@ Without it, the file can no longer be displayed.</value></data>
   <data name="Klicke auf die Stelle für die Notiz – Esc bricht ab." xml:space="preserve"><value>Click where the note should go – Esc cancels.</value></data>
   <data name="Übernehmen (Strg+Eingabe)" xml:space="preserve"><value>Apply (Ctrl+Enter)</value></data>
   <data name="Notiz übernehmen und schließen" xml:space="preserve"><value>Apply and close note</value></data>
+  <data name="{0} – Kopie" xml:space="preserve"><value>{0} – Copy</value></data>
+  <data name="{0} Seiten" xml:space="preserve"><value>{0} pages</value></data>
+  <data name="„{0}“ wurde als Sammelmappe angelegt." xml:space="preserve"><value>“{0}” was created as a combined file.</value></data>
+  <data name="Als neue Sammelmappe speichern" xml:space="preserve"><value>Save as new combined file</value></data>
+  <data name="Die Sammelmappe kann die geöffnete Datei nicht überschreiben." xml:space="preserve"><value>The combined file cannot overwrite the open file.</value></data>
+  <data name="Die Sammelmappe konnte nicht angelegt werden." xml:space="preserve"><value>The combined file could not be created.</value></data>
+  <data name="Gespeichert als „{0}“." xml:space="preserve"><value>Saved as “{0}”.</value></data>
+  <data name="Sammelmappe" xml:space="preserve"><value>Combined</value></data>
+  <data name="Sammelmappe speichern" xml:space="preserve"><value>Save combined file</value></data>
+  <data name="Speichern unter" xml:space="preserve"><value>Save as</value></data>
+  <data name="Speichern unter… (Strg+Umschalt+S)" xml:space="preserve"><value>Save as… (Ctrl+Shift+S)</value></data>
+  <data name="Strg+Umschalt+S" xml:space="preserve"><value>Ctrl+Shift+S</value></data>
+  <data name="unter neuem Namen speichern" xml:space="preserve"><value>save under a new name</value></data>
   <data name="Notiz hinzufügen" xml:space="preserve"><value>Add note</value></data>
   <data name="Notiz bearbeiten" xml:space="preserve"><value>Edit note</value></data>
   <data name="Notiz löschen" xml:space="preserve"><value>Delete note</value></data>

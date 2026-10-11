@@ -94,7 +94,16 @@ internal static class TaskDlg
     /// <summary>Auswahl aus Befehlsknöpfen (Text und Erläuterung) plus Abbrechen; liefert den Index des gewählten Knopfs, -1 bei Abbruch.</summary>
     public static int ChoiceTaskDlg(nint hwnd, string heading, string? message, IReadOnlyList<(string Text, string? Detail)> choices, TaskDialogIcon? icon = null)
     {
+        var unused = false;
+        return ChoiceTaskDlg(hwnd, heading, message, choices, null, ref unused, icon);
+    }
+
+    /// <summary>Wie oben, dazu ein Kontrollkästchen unten im Dialog (<paramref name="checkBoxText"/>, null = keins); sein Zustand steht danach
+    /// in <paramref name="isChecked"/> (z. B. „Als neue Sammelmappe speichern“ beim Anhängen, seit 11.10.2026).</summary>
+    public static int ChoiceTaskDlg(nint hwnd, string heading, string? message, IReadOnlyList<(string Text, string? Detail)> choices, string? checkBoxText, ref bool isChecked, TaskDialogIcon? icon = null)
+    {
         var page = new TaskDialogPage() { Caption = Application.ProductName, Heading = heading, Text = message, Icon = icon ?? TaskDialogIcon.None, AllowCancel = true, SizeToContent = true };
+        if (checkBoxText != null) { page.Verification = new TaskDialogVerificationCheckBox(checkBoxText, isChecked); }
         List<TaskDialogButton> buttons = [];
         foreach (var (text, detail) in choices)
         {
@@ -105,6 +114,7 @@ internal static class TaskDlg
         page.Buttons.Add(TaskDialogButton.Cancel);
         if (buttons.Count > 0) { page.DefaultButton = buttons[0]; }
         var result = TaskDialog.ShowDialog(hwnd, page);
+        if (page.Verification != null) { isChecked = page.Verification.Checked; }
         return buttons.IndexOf(result);
     }
 
@@ -272,7 +282,7 @@ internal static class TaskDlg
         ("Strg+O", "PDF-Datei öffnen", null),
         ("Strg+P", "Dokument drucken", null),
         ("Strg+R", "Seiten drehen", null),
-        ("Strg+S", "Formulareingaben speichern", null),
+        ("Strg+S", "Änderungen speichern", null),
         ("Strg+T", "Freitext einfügen", null),
         ("Strg+W", "Dokument schließen", null),
         ("Strg+X", "Seiten als neue Datei extrahieren", null),
@@ -291,6 +301,7 @@ internal static class TaskDlg
         ("Strg+Umschalt+M / Strg+F4", "sofort in den 1-Klick-Ordner verschieben", null),
         ("Strg+Umschalt+P", "mit dem Druckdialog von Windows drucken", null),
         ("Strg+Umschalt+R / L", "aktuelle Seite rechts / links drehen", null),
+        ("Strg+Umschalt+S", "unter neuem Namen speichern", null),
         ("Strg+Umschalt+T", "Anmerkungen verwalten (bearbeiten, löschen)", null),
         // Strg + Umschalt + Sondertaste
         ("Strg+Umschalt+Entf", "Datei in den Papierkorb verschieben", null),

@@ -699,10 +699,10 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Das Dokument wurde geschlossen." xml:space="preserve"><value>Le document a été fermé.</value></data>
   <data name="Strg+W" xml:space="preserve"><value>Ctrl+W</value></data>
   <data name="Dokument schließen" xml:space="preserve"><value>fermer le document</value></data>
-  <data name="Formulareingaben in der Datei speichern (Strg+S)" xml:space="preserve"><value>Enregistrer les saisies du formulaire dans le fichier (Ctrl+S)</value></data>
-  <data name="Die Formulareingaben wurden gespeichert." xml:space="preserve"><value>Les saisies du formulaire ont été enregistrées.</value></data>
+  <data name="Änderungen in der Datei speichern (Strg+S)" xml:space="preserve"><value>Enregistrer les modifications dans le fichier (Ctrl+S)</value></data>
+  <data name="Die Änderungen wurden gespeichert." xml:space="preserve"><value>Les modifications ont été enregistrées.</value></data>
   <data name="Strg+S" xml:space="preserve"><value>Ctrl+S</value></data>
-  <data name="Formulareingaben speichern" xml:space="preserve"><value>enregistrer les saisies du formulaire</value></data>
+  <data name="Änderungen speichern" xml:space="preserve"><value>enregistrer les modifications</value></data>
   <data name="Zum Beenden des Vollbildmodus Esc drücken" xml:space="preserve"><value>Appuie sur Échap pour quitter le plein écran</value></data>
   <data name="Klicke auf die Stelle für den Freitext – Esc bricht ab." xml:space="preserve"><value>Clique à l'endroit du texte libre – Échap annule.</value></data>
   <data name="Freitext hier einfügen…" xml:space="preserve"><value>Insérer du texte libre ici…</value></data>
@@ -874,6 +874,19 @@ Sans lui, le fichier ne pourra plus être affiché.</value></data>
   <data name="Klicke auf die Stelle für die Notiz – Esc bricht ab." xml:space="preserve"><value>Clique à l'endroit de la note – Échap annule.</value></data>
   <data name="Übernehmen (Strg+Eingabe)" xml:space="preserve"><value>Appliquer (Ctrl+Entrée)</value></data>
   <data name="Notiz übernehmen und schließen" xml:space="preserve"><value>Valider et fermer la note</value></data>
+  <data name="{0} – Kopie" xml:space="preserve"><value>{0} – Copie</value></data>
+  <data name="{0} Seiten" xml:space="preserve"><value>{0} pages</value></data>
+  <data name="„{0}“ wurde als Sammelmappe angelegt." xml:space="preserve"><value>« {0} » a été créé comme fichier combiné.</value></data>
+  <data name="Als neue Sammelmappe speichern" xml:space="preserve"><value>Créer un fichier combiné</value></data>
+  <data name="Die Sammelmappe kann die geöffnete Datei nicht überschreiben." xml:space="preserve"><value>Le fichier combiné ne peut pas remplacer le fichier ouvert.</value></data>
+  <data name="Die Sammelmappe konnte nicht angelegt werden." xml:space="preserve"><value>Impossible de créer le fichier combiné.</value></data>
+  <data name="Gespeichert als „{0}“." xml:space="preserve"><value>Enregistré sous « {0} ».</value></data>
+  <data name="Sammelmappe" xml:space="preserve"><value>Fichier combiné</value></data>
+  <data name="Sammelmappe speichern" xml:space="preserve"><value>Enregistrer le fichier combiné</value></data>
+  <data name="Speichern unter" xml:space="preserve"><value>Enregistrer sous</value></data>
+  <data name="Speichern unter… (Strg+Umschalt+S)" xml:space="preserve"><value>Enregistrer sous… (Ctrl+Maj+S)</value></data>
+  <data name="Strg+Umschalt+S" xml:space="preserve"><value>Ctrl+Maj+S</value></data>
+  <data name="unter neuem Namen speichern" xml:space="preserve"><value>enregistrer sous un nouveau nom</value></data>
   <data name="Notiz hinzufügen" xml:space="preserve"><value>Ajouter une note</value></data>
   <data name="Notiz bearbeiten" xml:space="preserve"><value>Modifier la note</value></data>
   <data name="Notiz löschen" xml:space="preserve"><value>Supprimer la note</value></data>
