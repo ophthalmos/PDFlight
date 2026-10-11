@@ -28,8 +28,13 @@ internal sealed partial record PdfStatus(int PageCount, string? Version, string?
     /// Endung: JPEG, PNG, GIF, BMP und TIFF – was GDI+ lesen kann (WebP und HEIC nicht).</summary>
     public static bool IsImage(ReadOnlySpan<byte> bytes) =>
         bytes.StartsWith((ReadOnlySpan<byte>)[0xFF, 0xD8, 0xFF]) || bytes.StartsWith((ReadOnlySpan<byte>)[0x89, 0x50, 0x4E, 0x47]) // JPEG, PNG
-        || bytes.StartsWith("GIF8"u8) || bytes.StartsWith("BM"u8)                                                                  // GIF, BMP
+        || bytes.StartsWith("GIF8"u8) || IsBmp(bytes)                                                                               // GIF, BMP
         || bytes.StartsWith((ReadOnlySpan<byte>)[0x49, 0x49, 0x2A, 0x00]) || bytes.StartsWith((ReadOnlySpan<byte>)[0x4D, 0x4D, 0x00, 0x2A]); // TIFF (II*, MM*)
+
+    /// <summary>BMP: „BM“ allein träfe auch Textdateien („BMW …“) – dazu die Größe des Bildkopfs an Stelle 14, die nur wenige Werte
+    /// annehmen kann (BITMAPCOREHEADER 12, INFO 40, V2/V3 52/56, OS/2 64, V4 108, V5 124; Review 11.10.2026).</summary>
+    private static bool IsBmp(ReadOnlySpan<byte> bytes) =>
+        bytes.Length >= 18 && bytes.StartsWith("BM"u8) && System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(bytes[14..18]) is 12 or 40 or 52 or 56 or 64 or 108 or 124;
 
     /// <summary>Wie <see cref="IsImage(ReadOnlySpan{byte})"/>, liest nur den Anfang der Datei; nicht lesbar = nein.</summary>
     public static bool IsImage(string path) => ReadHead(path) is { } head && IsImage(head);

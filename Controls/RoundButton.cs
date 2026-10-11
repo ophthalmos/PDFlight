@@ -95,8 +95,14 @@ internal class RoundButton : Button
         }
     }
 
+    // je Symbolbild einmal gerechnet – die Bilder kommen aus dem Zwischenspeicher von ToolbarIcons und ändern sich nicht; schwache Schlüssel,
+    // damit verworfene Bilder nicht festgehalten werden (Review 11.10.2026: vorher bei jedem Neuzeichnen per GetPixel)
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Image, System.Runtime.CompilerServices.StrongBox<Rectangle>> inkCache = [];
+
     /// <summary>Rechteck der sichtbaren Pixel eines Symbolbilds (Deckkraft über einem Viertel); das ganze Bild, wenn es keins gibt.</summary>
-    private static Rectangle InkBounds(Image image)
+    private static Rectangle InkBounds(Image image) => inkCache.GetValue(image, i => new System.Runtime.CompilerServices.StrongBox<Rectangle>(MeasureInk(i))).Value;
+
+    private static Rectangle MeasureInk(Image image)
     {
         if (image is not Bitmap bitmap) { return new Rectangle(Point.Empty, image.Size); }
         int left = bitmap.Width, top = bitmap.Height, right = -1, bottom = -1;

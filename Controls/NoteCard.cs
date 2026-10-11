@@ -36,16 +36,15 @@ public partial class NoteCard : UserControl
         toolTip.SetToolTip(labelClose, Lng.T("Schließen"));
         toolTip.SetToolTip(buttonCommit, Lng.T("Übernehmen (Strg+Eingabe)"));
         buttonCommit.Glyph = ToolbarIcons.CheckMark; // als Bild in der Häkchenfarbe gezeichnet (ohne Symbolschrift bleibt der Text)
-        readTextHeight = textNote.Height; // nach dem Skalieren: so hoch ist das Feld beim Lesen, beim Schreiben endet es über dem Häkchen
     }
-
-    private readonly int readTextHeight;
 
     /// <summary>Beim Schreiben unten rechts das Häkchen wie bei Edge (Wunsch vom 10.10.2026), das Textfeld endet dann darüber.</summary>
     private void ShowCommitButton(bool editing)
     {
         buttonCommit.Visible = editing;
-        textNote.Height = editing ? Math.Max(LogicalToDeviceUnits(20), buttonCommit.Top - LogicalToDeviceUnits(4) - textNote.Top) : readTextHeight;
+        // beim Lesen bis zur Unterkante des (unsichtbaren) Häkchens – sie ist die untere Innenkante der Karte; aus der Lage gerechnet, nicht
+        // im Konstruktor gemerkt: dort ist die Karte noch nicht skaliert (bei 150 % war das Feld sonst zu niedrig, Review 11.10.2026)
+        textNote.Height = editing ? Math.Max(LogicalToDeviceUnits(20), buttonCommit.Top - LogicalToDeviceUnits(4) - textNote.Top) : buttonCommit.Bottom - textNote.Top;
         UpdateScrollBar();
     }
 

@@ -281,6 +281,7 @@ internal static class TaskDlg
         // Strg + Sondertaste
         ("Strg+Einfg / Strg+Entf", "leere Seite einfügen / Seiten löschen", null), // eine Zeile für beide – die Hilfe-PDF ist voll (30.09.2026)
         ("Strg+Leertaste", "ein-/zweiseitiges Layout umschalten", null),
+        ("Strg+Eingabe", "Notiz übernehmen und schließen", null),
         ("Strg+,", "Einstellungen öffnen", null),
         // Strg + Umschalt + Buchstabe
         ("Strg+Umschalt+B", "an Breite / an Seite anpassen (wechselt)", null),

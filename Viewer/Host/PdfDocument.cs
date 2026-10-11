@@ -500,7 +500,7 @@ internal sealed unsafe class PdfDocument : IDisposable
         // über einem Kommentarsymbol bekommt PDFium eine Stelle weit neben der Seite: sein Formularmodul klappt sonst beim Überfahren
         // und Klicken die Popup-Notiz auf (großer gelber Kasten, bei Kommentaren aus Sumatra oder Acrobat) – PDFlight zeigt dafür einen
         // Tooltip bzw. die Karte. Ein Klick dorthin nimmt einem Feld den Fokus wie ein Klick neben die Felder (Fehlerbericht 10.10.2026).
-        if (AnnotAt(index, pageWidth, pageHeight, x, y, 1 << Pdfium.AnnotText).Number >= 0) { (px, py) = (-100_000, -100_000); }
+        if (HasNotes(index) && AnnotAt(index, pageWidth, pageHeight, x, y, 1 << Pdfium.AnnotText).Number >= 0) { (px, py) = (-100_000, -100_000); }
         switch (kind)
         {
             case Protocol.MouseMove:
@@ -633,16 +633,40 @@ internal sealed unsafe class PdfDocument : IDisposable
 
     private const float NoteSize = 16; // Seitenlänge des Notizsymbols in Punkt, wie bei Edge
 
+    // Seiten mit Notizen (Index → ja/nein): FormMouse fragt bei jeder Mausbewegung nach einer Notiz unter dem Zeiger, die allermeisten Seiten
+    // haben keine – so läuft der Durchgang durch alle Anmerkungen nur einmal je Seite (Review 11.10.2026). Neue Notizen kommen nur über
+    // AddNote, entfernt werden sie über RemoveMarkup; ein Stand über PDFsharp ist ein neues Dokument.
+    private readonly Dictionary<int, bool> notePages = [];
+
+    private bool HasNotes(int index)
+    {
+        if (notePages.TryGetValue(index, out var has)) { return has; }
+        var page = GetPage(index).Page;
+        has = false;
+        for (var i = Pdfium.PageGetAnnotCount(page) - 1; i >= 0 && !has; i--)
+        {
+            var annot = Pdfium.PageGetAnnot(page, i);
+            if (annot == 0) { continue; }
+            try { has = Pdfium.AnnotGetSubtype(annot) == Pdfium.AnnotText; }
+            finally { Pdfium.PageCloseAnnot(annot); }
+        }
+        return notePages[index] = has;
+    }
+
     /// <summary>Legt einen Kommentar als Notiz-Anmerkung (/Text) an: Symbol 16 × 16 pt mit der linken oberen Ecke an der Stelle
     /// (Seitenpixel), gelb, Flags Print | NoZoom | NoRotate, Text in /Contents, Autor in /T, Änderungsdatum /M (vom Hauptprogramm: die Zeitzone stünde in der Registry, die der Container nicht lesen darf) – so legt ihn auch Edge an.
     /// Das Symbol zeichnet PDFium beim nächsten Rendern selbst. Ein verknüpftes Popup entfällt: PDFiums öffentliche Schnittstelle kann
     /// keines anhängen, Acrobat und Edge zeigen den Text auch ohne. Liefert die Nummer der neuen Anmerkung (-1 bei Fehlschlag).</summary>
     public int AddNote(int index, int pageWidth, int pageHeight, int x, int y, string text, string author, string modified)
     {
+        // das Rechteck bewusst im ungedrehten Seitenraum ab der Stelle nach rechts und unten: Mit NoRotate zeichnet PDFium das Symbol auf
+        // gedrehten Seiten aufrecht an der linken oberen Ecke des Rechtecks – im Quadrat der Anzeige aufgespannt lag es auf einer um 90°
+        // gedrehten Seite 44 statt 11 px neben der Klickstelle (geprüft 11.10.2026, Test v85-rotatednote.ps1)
         var (page, px, py) = ToPagePoint(index, pageWidth, pageHeight, x, y);
         var number = Pdfium.PageGetAnnotCount(page); // die neue Anmerkung kommt ans Ende von /Annots
         var annot = Pdfium.PageCreateAnnot(page, Pdfium.AnnotText);
         if (annot == 0) { return -1; }
+        notePages[index] = true;
         try
         {
             var rect = new Pdfium.RectF { Left = (float)px, Top = (float)py, Right = (float)px + NoteSize, Bottom = (float)py - NoteSize };
@@ -904,6 +928,7 @@ internal sealed unsafe class PdfDocument : IDisposable
         if (popup > number && Pdfium.PageRemoveAnnot(page, popup) == 0) { popup = -1; } // die höhere Nummer zuerst – sonst rückte die andere nach vorn
         if (Pdfium.PageRemoveAnnot(page, number) == 0) { return false; }
         if (popup >= 0 && popup < number) { _ = Pdfium.PageRemoveAnnot(page, popup); }
+        if (subtype == Pdfium.AnnotText) { notePages.Remove(index); } // beim nächsten Mal neu nachsehen, ob die Seite noch Notizen hat
         Events.Invalidate(Id, index, 0, 0, 1, 1);
         Events.Changed(Id);
         return true;

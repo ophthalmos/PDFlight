@@ -1182,7 +1182,8 @@ internal sealed class PageView : ScrollableControl
                     if (document == null) { break; }
                 }
                 (int Number, int Subtype, Rectangle Rect)? annotation = null;
-                if (page >= 0 && field < 0 && AllowAnnotationMove && ghost == null)
+                var movableQueried = page >= 0 && field < 0 && AllowAnnotationMove && ghost == null;
+                if (movableQueried)
                 {
                     annotation = await document.AnnotationAtAsync(page, pageRects[page].Width, pageRects[page].Height, pagePoint, MovableAnnotations);
                     if (document == null) { break; }
@@ -1190,7 +1191,7 @@ internal sealed class PageView : ScrollableControl
                 var link = page < 0 || field >= 0 || annotation != null ? null : await document.LinkAtAsync(page, pageRects[page].Width, pageRects[page].Height, pagePoint);
                 if (document == null) { break; }
                 var noteAt = annotation is { Subtype: Protocol.AnnotText } ? annotation // verschiebbar: schon gefunden
-                    : page >= 0 && field < 0 && annotation == null && link == null
+                    : page >= 0 && field < 0 && annotation == null && link == null && !movableQueried // die Verschiebe-Abfrage umfasst Notizen schon
                     ? await document.AnnotationAtAsync(page, pageRects[page].Width, pageRects[page].Height, pagePoint, NoteMask) : null;
                 if (document == null) { break; }
                 var note = noteAt != null;
@@ -1923,6 +1924,7 @@ internal sealed class PageView : ScrollableControl
         Focus();
         // die angeklickte Seite wird die aktive (Rahmen, Seitenfeld) – zweiseitig etwa die rechte des Paars (Wunsch vom 04.10.2026)
         if (e.Button is MouseButtons.Left or MouseButtons.Right && PageAt(e.Location, clamp: false).Page is >= 0 and var clicked) { SetCurrentPage(clicked); }
+        pickMouseUp = false; // kam das Loslassen nach dem Wahlklick nie hier an (Freitext: der Dialog war schon offen), gälte es sonst diesem Klick (Review 11.10.2026)
         if (pick != null) // Stelle wählen: der Klick gehört nur dem Fadenkreuz
         {
             if (e.Button == MouseButtons.Left)

@@ -873,6 +873,7 @@ Without it, the file can no longer be displayed.</value></data>
   <data name="Notiz" xml:space="preserve"><value>Note</value></data>
   <data name="Klicke auf die Stelle für die Notiz – Esc bricht ab." xml:space="preserve"><value>Click where the note should go – Esc cancels.</value></data>
   <data name="Übernehmen (Strg+Eingabe)" xml:space="preserve"><value>Apply (Ctrl+Enter)</value></data>
+  <data name="Notiz übernehmen und schließen" xml:space="preserve"><value>Apply and close note</value></data>
   <data name="Notiz hinzufügen" xml:space="preserve"><value>Add note</value></data>
   <data name="Notiz bearbeiten" xml:space="preserve"><value>Edit note</value></data>
   <data name="Notiz löschen" xml:space="preserve"><value>Delete note</value></data>

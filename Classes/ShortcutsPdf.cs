@@ -131,7 +131,9 @@ internal static partial class ShortcutsPdf
             Lng.T("Änderungen über die Viewer-Leiste (Hervorheben, Zeichnen, Freitext, Stempel, Seiten drehen) bleiben ungespeichert, bis du auf „Speichern“ klickst."),
             Lng.T("Die Befehle im Menü „Bearbeiten“ und in der oberen Symbolleiste ändern die Datei sofort. Strg+Z macht einen Fehlgriff rückgängig."),
         ];
-        return [.. paragraphs.Select(p => Wrap(gfx, p, NoteFont, width))]; // der Text steht bündig mit der Tabelle, der Kasten ragt um NotePad darüber hinaus
+        // als ein Absatz – ohne die gewollten Umbrüche zwischen den drei Sätzen ist Platz für weitere Kürzelzeilen, die Hilfe-PDF bleibt
+        // einseitig (Wunsch vom 11.10.2026); der Text steht bündig mit der Tabelle, der Kasten ragt um NotePad darüber hinaus
+        return [Wrap(gfx, string.Join(" ", paragraphs), NoteFont, width)];
     }
 
     private static double NoteBoxHeight(List<List<string>> lines) =>

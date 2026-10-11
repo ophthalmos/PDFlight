@@ -2725,15 +2725,8 @@ public partial class MainForm : Form
     /// unverändert.</summary>
     private void ShowNotPdfMessage(string path)
     {
-        var page = new TaskDialogPage
-        {
-            Caption = Application.ProductName,
-            Text = string.Format(Lng.T("PDFlight konnte „{0}“ nicht öffnen, da entweder der Dateityp nicht unterstützt wird oder die Datei beschädigt ist."), Path.GetFileName(path)),
-            Icon = TaskDialogIcon.Warning,
-            AllowCancel = true,
-            Buttons = { TaskDialogButton.OK },
-        };
-        TaskDialog.ShowDialog(Handle, page);
+        // über TaskDlg wie alle Meldungen (Review 11.10.2026); ohne Überschrift – der Satz steht als Text wie bisher
+        TaskDlg.MsgTaskDlg(Handle, string.Empty, string.Format(Lng.T("PDFlight konnte „{0}“ nicht öffnen, da entweder der Dateityp nicht unterstützt wird oder die Datei beschädigt ist."), Path.GetFileName(path)), TaskDialogIcon.Warning);
     }
 
     /// <summary>Eine andere Datei anzeigen; bei offenen Änderungen der bisherigen vorher Speichern / Nicht speichern / Abbrechen fragen
