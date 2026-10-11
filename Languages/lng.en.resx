@@ -474,7 +474,6 @@ the latest version.</value></data>
   <data name="Text" xml:space="preserve"><value>Text</value></data>
   <data name="&amp;Bearbeiten…" xml:space="preserve"><value>&amp;Edit…</value></data>
   <data name="Schließen" xml:space="preserve"><value>Close</value></data>
-  <data name="Haftnotiz" xml:space="preserve"><value>Sticky note</value></data>
   <data name="Textanmerkung bearbeiten" xml:space="preserve"><value>Edit text annotation</value></data>
   <data name="(keine Anmerkungen)" xml:space="preserve"><value>(no annotations)</value></data>
   <data name="Anmerkung löschen" xml:space="preserve"><value>Delete annotation</value></data>
@@ -708,6 +707,8 @@ or press Ctrl+Shift+I.</value></data>
   <data name="Klicke auf die Stelle für den Freitext – Esc bricht ab." xml:space="preserve"><value>Click where the free text should go – Esc cancels.</value></data>
   <data name="Freitext hier einfügen…" xml:space="preserve"><value>Insert free text here…</value></data>
   <data name="Maße ab der linken oberen Ecke der Seite." xml:space="preserve"><value>Measured from the top left corner of the page.</value></data>
+  <data name="Notiz verschieben" xml:space="preserve"><value>Move note</value></data>
+  <data name="Die Notiz wurde auf Seite {0} verschoben." xml:space="preserve"><value>The note on page {0} was moved.</value></data>
   <data name="Textanmerkung verschieben" xml:space="preserve"><value>Move text annotation</value></data>
   <data name="Die Textanmerkung wurde auf Seite {0} verschoben." xml:space="preserve"><value>The text annotation on page {0} was moved.</value></data>
   <data name="Stempel verschieben" xml:space="preserve"><value>Move stamp</value></data>
@@ -860,4 +861,23 @@ Without it, the file can no longer be displayed.</value></data>
   <data name="Das Bild konnte nicht gespeichert werden." xml:space="preserve"><value>The image could not be saved.</value></data>
   <data name="Das Bild konnte nicht kopiert werden." xml:space="preserve"><value>The image could not be copied.</value></data>
   <data name="Das Bild wurde in die Zwischenablage kopiert." xml:space="preserve"><value>The image was copied to the clipboard.</value></data>
+  <data name="PDFlight konnte „{0}“ nicht öffnen, da entweder der Dateityp nicht unterstützt wird oder die Datei beschädigt ist." xml:space="preserve"><value>PDFlight could not open “{0}” because either the file type is not supported or the file is damaged.</value></data>
+  <data name="„{0}“ gibt es schon." xml:space="preserve"><value>“{0}” already exists.</value></data>
+  <data name="„{0}“ wurde aus dem Bild erstellt." xml:space="preserve"><value>“{0}” was created from the image.</value></data>
+  <data name="„{0}“ öffnen" xml:space="preserve"><value>Open “{0}”</value></data>
+  <data name="Als „{0}“ anlegen" xml:space="preserve"><value>Create as “{0}”</value></data>
+  <data name="Aus dem Bild eine weitere PDF-Datei erstellen" xml:space="preserve"><value>Create another PDF file from the image</value></data>
+  <data name="Aus dem Bild konnte keine PDF-Datei erstellt werden." xml:space="preserve"><value>No PDF file could be created from the image.</value></data>
+  <data name="Die vorhandene PDF-Datei anzeigen" xml:space="preserve"><value>Display the existing PDF file</value></data>
+  <data name="PDF-Dateien und Bilder|*.pdf;*.jpg;*.jpeg;*.png;*.tif;*.tiff;*.bmp;*.gif|PDF-Dateien (*.pdf)|*.pdf" xml:space="preserve"><value>PDF files and images|*.pdf;*.jpg;*.jpeg;*.png;*.tif;*.tiff;*.bmp;*.gif|PDF files (*.pdf)|*.pdf</value></data>
+  <data name="Notiz" xml:space="preserve"><value>Note</value></data>
+  <data name="Klicke auf die Stelle für die Notiz – Esc bricht ab." xml:space="preserve"><value>Click where the note should go – Esc cancels.</value></data>
+  <data name="Übernehmen (Strg+Eingabe)" xml:space="preserve"><value>Apply (Ctrl+Enter)</value></data>
+  <data name="Notiz hinzufügen" xml:space="preserve"><value>Add note</value></data>
+  <data name="Notiz bearbeiten" xml:space="preserve"><value>Edit note</value></data>
+  <data name="Notiz löschen" xml:space="preserve"><value>Delete note</value></data>
+  <data name="Die Notiz wurde hinzugefügt." xml:space="preserve"><value>The note was added.</value></data>
+  <data name="Die Notiz wurde geändert." xml:space="preserve"><value>The note was changed.</value></data>
+  <data name="Die Notiz wurde gelöscht." xml:space="preserve"><value>The note was deleted.</value></data>
+  <data name="Weitere Optionen" xml:space="preserve"><value>More options</value></data>
 </root>

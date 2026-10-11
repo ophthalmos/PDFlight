@@ -139,6 +139,10 @@ internal static unsafe partial class Pdfium
     [LibraryImport(Lib, EntryPoint = "FPDFAnnot_GetInkListPath")] public static partial uint AnnotGetInkListPath(nint annot, uint pathIndex, PointF* buffer, uint length);
     [LibraryImport(Lib, EntryPoint = "FPDF_GetPageWidthF")] public static partial float GetPageWidthF(nint page);
     [LibraryImport(Lib, EntryPoint = "FPDF_GetPageHeightF")] public static partial float GetPageHeightF(nint page);
+    public const int AnnotText = 1;        // FPDF_ANNOT_TEXT: Notiz (Kommentar wie in Edge, Haftnotiz in Acrobat)
+    public const int AnnotFlagNoZoom = 8, AnnotFlagNoRotate = 16; // FPDF_ANNOT_FLAG_NOZOOM/NOROTATE – Notizsymbole setzt Edge mit Print | NoZoom | NoRotate
+    [LibraryImport(Lib, EntryPoint = "FPDFAnnot_SetStringValue", StringMarshalling = StringMarshalling.Utf8)] public static partial int AnnotSetStringValue(nint annot, string key, ushort* value);
+    [LibraryImport(Lib, EntryPoint = "FPDFAnnot_GetStringValue", StringMarshalling = StringMarshalling.Utf8)] public static partial uint AnnotGetStringValue(nint annot, string key, ushort* buffer, uint length);
     public const int AnnotInk = 15;        // FPDF_ANNOT_INK
     public const int AnnotFreeText = 3;    // FPDF_ANNOT_FREETEXT
     public const int AnnotStamp = 13;      // FPDF_ANNOT_STAMP

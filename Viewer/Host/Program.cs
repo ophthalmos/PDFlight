@@ -123,6 +123,32 @@ internal static class Program
                         w.Write(data);
                     };
                 }
+            case Protocol.AddNote:
+                {
+                    var (id, page, pageWidth, pageHeight) = (input.ReadInt32(), input.ReadInt32(), input.ReadInt32(), input.ReadInt32());
+                    var (x, y, text, author, modified) = (input.ReadInt32(), input.ReadInt32(), input.ReadString(), input.ReadString(), input.ReadString());
+                    var number = Document(id).AddNote(page, pageWidth, pageHeight, x, y, text, author, modified);
+                    return w => w.Write(number);
+                }
+            case Protocol.Note:
+                {
+                    var (id, page, pageWidth, pageHeight, number) = (input.ReadInt32(), input.ReadInt32(), input.ReadInt32(), input.ReadInt32(), input.ReadInt32());
+                    var note = Document(id).Note(page, pageWidth, pageHeight, number);
+                    return w =>
+                    {
+                        w.Write(note != null);
+                        w.Write(note?.Text ?? string.Empty);
+                        var rect = note?.Rect ?? (0, 0, 0, 0);
+                        w.Write(rect.X); w.Write(rect.Y); w.Write(rect.Width); w.Write(rect.Height);
+                        w.Write(note?.Author ?? string.Empty);
+                    };
+                }
+            case Protocol.SetNoteText:
+                {
+                    var (id, page, number, text, modified) = (input.ReadInt32(), input.ReadInt32(), input.ReadInt32(), input.ReadString(), input.ReadString());
+                    var changed = Document(id).SetNoteText(page, number, text, modified);
+                    return w => w.Write(changed);
+                }
             case Protocol.HighlightBoxes:
                 {
                     var (id, page, start, count) = (input.ReadInt32(), input.ReadInt32(), input.ReadInt32(), input.ReadInt32());

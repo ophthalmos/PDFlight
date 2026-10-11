@@ -36,6 +36,7 @@
             buttonOK = new Button();
             comboBoxTarget = new ComboBox();
             shellTreeView = new PDFLight.Controls.FolderTreeView();
+            btnNewFolder = new PDFLight.Controls.RoundButton();
             contextMenuTree = new ContextMenuStrip(components);
             newFolderMenuItem = new ToolStripMenuItem();
             renameFolderMenuItem = new ToolStripMenuItem();
@@ -107,6 +108,25 @@
             comboBoxTarget.TabIndex = 1;
             comboBoxTarget.SelectedIndexChanged += ComboBoxTarget_SelectedIndexChanged;
             // 
+            // btnNewFolder
+            // 
+            btnNewFolder.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnNewFolder.BackColor = SystemColors.ButtonFace;
+            btnNewFolder.FlatAppearance.BorderSize = 0;
+            btnNewFolder.FlatStyle = FlatStyle.Flat;
+            btnNewFolder.HoverBackColor = Color.FromArgb(0, 120, 212);
+            btnNewFolder.HoverGlyphColor = Color.White;
+            btnNewFolder.Location = new Point(389, 87);
+            btnNewFolder.Name = "btnNewFolder";
+            btnNewFolder.Size = new Size(48, 48);
+            btnNewFolder.SurroundColor = SystemColors.Window;
+            btnNewFolder.TabIndex = 14;
+            btnNewFolder.TabStop = false;
+            btnNewFolder.Text = "Neuer Ordner";
+            toolTip.SetToolTip(btnNewFolder, "Neuer Ordner (Strg+N)");
+            btnNewFolder.UseVisualStyleBackColor = false;
+            btnNewFolder.Click += ButtonNewFolder_Clicked;
+            // 
             // shellTreeView
             // 
             shellTreeView.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
@@ -126,7 +146,6 @@
             shellTreeView.DoubleClick += ShellTreeView_DoubleClick;
             shellTreeView.KeyDown += ShellTreeView_KeyDown;
             shellTreeView.PreviewKeyDown += ShellTreeView_PreviewKeyDown;
-            shellTreeView.Resize += ShellTreeView_Resize;
             // 
             // contextMenuTree
             // 
@@ -251,6 +270,7 @@
             Controls.Add(cbAdd2Folderlist);
             Controls.Add(shellHistory);
             Controls.Add(pathEdit);
+            Controls.Add(btnNewFolder);
             Controls.Add(shellTreeView);
             Controls.Add(comboBoxTarget);
             Controls.Add(buttonOK);
@@ -286,6 +306,7 @@
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.ComboBox comboBoxTarget;
         private PDFLight.Controls.FolderTreeView shellTreeView;
+        private PDFLight.Controls.RoundButton btnNewFolder;
         private PDFLight.Controls.PathEditBox pathEdit;
         private PDFLight.Controls.FolderHistoryToolBar shellHistory;
         private System.Windows.Forms.CheckBox cbAdd2Folderlist;

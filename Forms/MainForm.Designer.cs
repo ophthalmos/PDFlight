@@ -103,6 +103,7 @@
             toolStripSeparatorV5 = new ToolStripSeparator();
             btnFreeText = new ToolStripButton();
             btnStamp = new ToolStripButton();
+            btnComment = new ToolStripButton();
             labelViewerSpacer = new ToolStripLabel();
             textPage = new ToolStripTextBox();
             labelPageCount = new ToolStripLabel();
@@ -140,6 +141,8 @@
             labelSidebarTitle = new ToolStripLabel();
             btnSidebarClose = new ToolStripButton();
             pageView = new PDFLight.Viewer.PageView();
+            noteCard = new PDFLight.Controls.NoteCard();
+            mnuAddComment = new ToolStripMenuItem();
             contextMenuPage = new ContextMenuStrip(components);
             mnuViewCopy = new ToolStripMenuItem();
             mnuViewSelectAll = new ToolStripMenuItem();
@@ -167,6 +170,7 @@
             printDocument = new System.Drawing.Printing.PrintDocument();
             printDialog = new PrintDialog();
             toolTipLink = new ToolTip(components);
+            toolTipNote = new ToolTip(components);
             toolStrip.SuspendLayout();
             statusStrip.SuspendLayout();
             pnlPdfA.SuspendLayout();
@@ -679,7 +683,7 @@
             // 
             viewerStrip.AutoSize = false;
             viewerStrip.GripStyle = ToolStripGripStyle.Hidden;
-            viewerStrip.Items.AddRange(new ToolStripItem[] { btnSidebar, toolStripSeparatorV1, btnUndo, btnHighlight, ddbHighlight, btnDraw, ddbInk, btnErase, toolStripSeparatorV5, btnFreeText, btnStamp, btnManageAnnotations, labelViewerSpacer, textPage, labelPageCount, toolStripSeparatorV2, btnZoomOut, comboZoom, btnZoomIn, btnFitWidth, btnTwoPage, toolStripSeparatorV3, btnRotateLeft, btnRotateRight, ddbRotate, btnCloseDocument, toolStripSeparatorV6, btnFullScreen, toolStripSeparatorV4, btnSearch, btnSearchClose, btnSearchNext, btnSearchPrev, labelMatches, btnWholeWord, btnMatchCase, textSearch, btnSaveDocument });
+            viewerStrip.Items.AddRange(new ToolStripItem[] { btnSidebar, toolStripSeparatorV1, btnUndo, btnHighlight, ddbHighlight, btnDraw, ddbInk, btnErase, toolStripSeparatorV5, btnFreeText, btnComment, btnStamp, btnManageAnnotations, labelViewerSpacer, textPage, labelPageCount, toolStripSeparatorV2, btnZoomOut, comboZoom, btnZoomIn, btnFitWidth, btnTwoPage, toolStripSeparatorV3, btnRotateLeft, btnRotateRight, ddbRotate, btnCloseDocument, toolStripSeparatorV6, btnFullScreen, toolStripSeparatorV4, btnSearch, btnSearchClose, btnSearchNext, btnSearchPrev, labelMatches, btnWholeWord, btnMatchCase, textSearch, btnSaveDocument });
             viewerStrip.Location = new Point(0, 61);
             viewerStrip.Name = "viewerStrip";
             viewerStrip.Padding = new Padding(0, 4, 1, 0);
@@ -785,6 +789,16 @@
             btnStamp.Text = "Stempel";
             btnStamp.ToolTipText = "Stempel einfügen (Strg+H)";
             btnStamp.Click += BtnStamp_Click;
+            // 
+            // btnComment
+            // 
+            btnComment.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            btnComment.Enabled = false;
+            btnComment.Name = "btnComment";
+            btnComment.Size = new Size(70, 33);
+            btnComment.Text = "Notiz";
+            btnComment.ToolTipText = "Notiz hinzufügen";
+            btnComment.Click += BtnComment_Click;
             // 
             // labelViewerSpacer
             // 
@@ -1159,6 +1173,7 @@
             // pageView
             // 
             pageView.AllowDrop = true;
+            pageView.Controls.Add(noteCard);
             pageView.AutoScroll = true;
             pageView.BackColor = Color.FromArgb(243, 243, 243);
             pageView.ContextMenuStrip = contextMenuPage;
@@ -1172,6 +1187,9 @@
             pageView.ZoomChanged += PageView_ZoomChanged;
             pageView.CurrentPageChanged += PageView_CurrentPageChanged;
             pageView.SelectionFinished += PageView_SelectionFinished;
+            pageView.NoteClicked += PageView_NoteClicked;
+            pageView.NoteHover += PageView_NoteHover;
+            pageView.MouseUp += PageView_MouseUp;
             pageView.ImageCopyRequested += PageView_ImageCopyRequested;
             pageView.SearchChanged += PageView_SearchChanged;
             pageView.LinkHover += PageView_LinkHover;
@@ -1188,7 +1206,7 @@
             // 
             // contextMenuPage
             // 
-            contextMenuPage.Items.AddRange(new ToolStripItem[] { mnuViewCopy, mnuViewSelectAll, toolStripSeparatorC2, mnuSaveImage, mnuCopyImage, toolStripSeparatorC1, mnuAddFreeTextHere, mnuHighlight, mnuEditAnnotation, mnuRemoveAnnotation });
+            contextMenuPage.Items.AddRange(new ToolStripItem[] { mnuViewCopy, mnuViewSelectAll, toolStripSeparatorC2, mnuSaveImage, mnuCopyImage, toolStripSeparatorC1, mnuAddFreeTextHere, mnuHighlight, mnuAddComment, mnuEditAnnotation, mnuRemoveAnnotation });
             contextMenuPage.Name = "contextMenuPage";
             contextMenuPage.Size = new Size(206, 142);
             contextMenuPage.Opening += ContextMenuPage_Opening;
@@ -1246,6 +1264,25 @@
             mnuHighlight.Size = new Size(205, 22);
             mnuHighlight.Text = "Hervorheben";
             mnuHighlight.Click += MnuHighlight_Click;
+            // 
+            // mnuAddComment
+            // 
+            mnuAddComment.Name = "mnuAddComment";
+            mnuAddComment.Size = new Size(205, 22);
+            mnuAddComment.Text = "Notiz hinzufügen";
+            mnuAddComment.Click += MnuAddComment_Click;
+            // 
+            // noteCard
+            // 
+            noteCard.Location = new Point(0, 0);
+            noteCard.Name = "noteCard";
+            noteCard.Size = new Size(231, 136);
+            noteCard.TabIndex = 0;
+            noteCard.Visible = false;
+            noteCard.Committed += NoteCard_Committed;
+            noteCard.EditCanceled += NoteCard_EditCanceled;
+            noteCard.DeleteRequested += NoteCard_DeleteRequested;
+            noteCard.CloseRequested += NoteCard_CloseRequested;
             // 
             // mnuEditAnnotation
             // 
@@ -1484,6 +1521,7 @@
         private ToolStripDropDownButton ddbHighlight;
         private ToolStripButton btnFreeText;
         private ToolStripButton btnStamp;
+        private ToolStripButton btnComment;
         private ToolStripButton btnDraw;
         private ToolStripDropDownButton ddbInk;
         private ToolStripButton btnErase;
@@ -1525,6 +1563,8 @@
         private ToolStripLabel labelSidebarTitle;
         private ToolStripButton btnSidebarClose;
         private PDFLight.Viewer.PageView pageView;
+        private PDFLight.Controls.NoteCard noteCard;
+        private ToolStripMenuItem mnuAddComment;
         private ContextMenuStrip contextMenuPage;
         private ToolStripMenuItem mnuViewCopy;
         private ToolStripSeparator toolStripSeparatorC2;
@@ -1552,5 +1592,6 @@
         private System.Drawing.Printing.PrintDocument printDocument;
         private PrintDialog printDialog;
         private ToolTip toolTipLink;
+        private ToolTip toolTipNote;
     }
 }

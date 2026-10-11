@@ -474,7 +474,6 @@ d'installation pour installer la dernière version.</value></data>
   <data name="Text" xml:space="preserve"><value>Texte</value></data>
   <data name="&amp;Bearbeiten…" xml:space="preserve"><value>&amp;Modifier…</value></data>
   <data name="Schließen" xml:space="preserve"><value>Fermer</value></data>
-  <data name="Haftnotiz" xml:space="preserve"><value>Note</value></data>
   <data name="Textanmerkung bearbeiten" xml:space="preserve"><value>Modifier l'annotation de texte</value></data>
   <data name="(keine Anmerkungen)" xml:space="preserve"><value>(aucune annotation)</value></data>
   <data name="Anmerkung löschen" xml:space="preserve"><value>Supprimer l'annotation</value></data>
@@ -708,6 +707,8 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Klicke auf die Stelle für den Freitext – Esc bricht ab." xml:space="preserve"><value>Clique à l'endroit du texte libre – Échap annule.</value></data>
   <data name="Freitext hier einfügen…" xml:space="preserve"><value>Insérer du texte libre ici…</value></data>
   <data name="Maße ab der linken oberen Ecke der Seite." xml:space="preserve"><value>Mesures depuis le coin supérieur gauche de la page.</value></data>
+  <data name="Notiz verschieben" xml:space="preserve"><value>Déplacer la note</value></data>
+  <data name="Die Notiz wurde auf Seite {0} verschoben." xml:space="preserve"><value>La note de la page {0} a été déplacée.</value></data>
   <data name="Textanmerkung verschieben" xml:space="preserve"><value>Déplacer l'annotation de texte</value></data>
   <data name="Die Textanmerkung wurde auf Seite {0} verschoben." xml:space="preserve"><value>L'annotation de texte de la page {0} a été déplacée.</value></data>
   <data name="Stempel verschieben" xml:space="preserve"><value>Déplacer le tampon</value></data>
@@ -860,4 +861,23 @@ Sans lui, le fichier ne pourra plus être affiché.</value></data>
   <data name="Das Bild konnte nicht gespeichert werden." xml:space="preserve"><value>Impossible d&apos;enregistrer l&apos;image.</value></data>
   <data name="Das Bild konnte nicht kopiert werden." xml:space="preserve"><value>Impossible de copier l&apos;image.</value></data>
   <data name="Das Bild wurde in die Zwischenablage kopiert." xml:space="preserve"><value>L&apos;image a été copiée dans le presse-papiers.</value></data>
+  <data name="PDFlight konnte „{0}“ nicht öffnen, da entweder der Dateityp nicht unterstützt wird oder die Datei beschädigt ist." xml:space="preserve"><value>PDFlight n&apos;a pas pu ouvrir « {0} », car le type de fichier n&apos;est pas pris en charge ou le fichier est endommagé.</value></data>
+  <data name="„{0}“ gibt es schon." xml:space="preserve"><value>« {0} » existe déjà.</value></data>
+  <data name="„{0}“ wurde aus dem Bild erstellt." xml:space="preserve"><value>« {0} » a été créé à partir de l&apos;image.</value></data>
+  <data name="„{0}“ öffnen" xml:space="preserve"><value>Ouvrir « {0} »</value></data>
+  <data name="Als „{0}“ anlegen" xml:space="preserve"><value>Créer sous le nom « {0} »</value></data>
+  <data name="Aus dem Bild eine weitere PDF-Datei erstellen" xml:space="preserve"><value>Créer un autre fichier PDF à partir de l&apos;image</value></data>
+  <data name="Aus dem Bild konnte keine PDF-Datei erstellt werden." xml:space="preserve"><value>Impossible de créer un fichier PDF à partir de l&apos;image.</value></data>
+  <data name="Die vorhandene PDF-Datei anzeigen" xml:space="preserve"><value>Afficher le fichier PDF existant</value></data>
+  <data name="PDF-Dateien und Bilder|*.pdf;*.jpg;*.jpeg;*.png;*.tif;*.tiff;*.bmp;*.gif|PDF-Dateien (*.pdf)|*.pdf" xml:space="preserve"><value>Fichiers PDF et images|*.pdf;*.jpg;*.jpeg;*.png;*.tif;*.tiff;*.bmp;*.gif|Fichiers PDF (*.pdf)|*.pdf</value></data>
+  <data name="Notiz" xml:space="preserve"><value>Note</value></data>
+  <data name="Klicke auf die Stelle für die Notiz – Esc bricht ab." xml:space="preserve"><value>Clique à l'endroit de la note – Échap annule.</value></data>
+  <data name="Übernehmen (Strg+Eingabe)" xml:space="preserve"><value>Appliquer (Ctrl+Entrée)</value></data>
+  <data name="Notiz hinzufügen" xml:space="preserve"><value>Ajouter une note</value></data>
+  <data name="Notiz bearbeiten" xml:space="preserve"><value>Modifier la note</value></data>
+  <data name="Notiz löschen" xml:space="preserve"><value>Supprimer la note</value></data>
+  <data name="Die Notiz wurde hinzugefügt." xml:space="preserve"><value>La note a été ajoutée.</value></data>
+  <data name="Die Notiz wurde geändert." xml:space="preserve"><value>La note a été modifiée.</value></data>
+  <data name="Die Notiz wurde gelöscht." xml:space="preserve"><value>La note a été supprimée.</value></data>
+  <data name="Weitere Optionen" xml:space="preserve"><value>Plus d&apos;options</value></data>
 </root>

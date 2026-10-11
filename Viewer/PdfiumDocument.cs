@@ -341,6 +341,34 @@ internal sealed class PdfiumDocument : IDisposable
         Query<(double X, double Y)?>(null, Protocol.PagePoint, w => { w.Write(index); w.Write(pageWidth); w.Write(pageHeight); w.Write(point.X); w.Write(point.Y); },
             r => (r.ReadDouble(), r.ReadDouble()));
 
+    /// <summary>Legt einen Kommentar (Notiz-Anmerkung) an: Symbol mit der linken oberen Ecke an <paramref name="topLeft"/> (Seitenpixel).
+    /// Liefert seine Nummer, -1 bei Fehlschlag.</summary>
+    public Task<int> AddNoteAsync(int index, int pageWidth, int pageHeight, Point topLeft, string text, string author) =>
+        Command(Protocol.AddNote, w => { w.Write(index); w.Write(pageWidth); w.Write(pageHeight); w.Write(topLeft.X); w.Write(topLeft.Y); w.Write(text); w.Write(author); w.Write(PdfDateNow()); }, r => r.ReadInt32());
+
+    /// <summary>Jetzt als PDF-Datum „D:JJJJMMTTHHmmSS+hh'mm'“ – hier und nicht im Hilfsprogramm: die Zeitzone steht in der Registry, die
+    /// der Container nicht lesen darf (dort scheiterte DateTimeOffset.Now mit „Requested registry access is not allowed“).</summary>
+    private static string PdfDateNow()
+    {
+        var now = DateTimeOffset.Now;
+        var offset = now.Offset;
+        return string.Create(System.Globalization.CultureInfo.InvariantCulture, $"D:{now:yyyyMMddHHmmss}{(offset < TimeSpan.Zero ? '-' : '+')}{Math.Abs(offset.Hours):00}'{Math.Abs(offset.Minutes):00}'");
+    }
+
+    /// <summary>Text, Autor und Symbolrechteck (Seitenpixel) eines Kommentars; null, wenn die Nummer keine Notiz ist.</summary>
+    public Task<(string Text, string Author, Rectangle Rect)?> NoteAsync(int index, int pageWidth, int pageHeight, int number) =>
+        Query<(string Text, string Author, Rectangle Rect)?>(null, Protocol.Note, w => { w.Write(index); w.Write(pageWidth); w.Write(pageHeight); w.Write(number); }, r =>
+        {
+            var (found, text) = (r.ReadBoolean(), r.ReadString());
+            var rect = new Rectangle(r.ReadInt32(), r.ReadInt32(), r.ReadInt32(), r.ReadInt32());
+            var author = r.ReadString();
+            return found ? (text, author, rect) : null;
+        });
+
+    /// <summary>Ändert den Text eines Kommentars.</summary>
+    public Task<bool> SetNoteTextAsync(int index, int number, string text) =>
+        Command(Protocol.SetNoteText, w => { w.Write(index); w.Write(number); w.Write(text); w.Write(PdfDateNow()); }, r => r.ReadBoolean());
+
     /// <summary>Oberstes Bild an einer Stelle der Seite (Seitenpixel): seine Nummer, Pixelgröße, ob es als reines JPEG in der Datei
     /// steckt, und sein Rechteck in Seitenpixeln; null, wenn dort keins ist.</summary>
     public Task<(int Number, int Width, int Height, bool Jpeg, Rectangle Rect)?> ImageAtAsync(int index, int pageWidth, int pageHeight, Point point) =>

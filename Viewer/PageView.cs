@@ -55,6 +55,80 @@ internal sealed class PageView : ScrollableControl
     /// <summary>Strg+C bei ausgewähltem Bild (ohne Textmarkierung): das Hauptfenster kopiert es wie „Bild kopieren“ (<see cref="SelectedImageDataAsync"/>).</summary>
     public event EventHandler? ImageCopyRequested;
 
+    /// <summary>Klick auf das Symbol eines Kommentars (Notiz-Anmerkung, seit 10.10.2026): das Hauptfenster zeigt seine Karte wie Edge.</summary>
+    public event EventHandler<AnnotationEventArgs>? NoteClicked;
+
+    /// <summary>Die Maus steht über dem Symbol eines Kommentars bzw. hat es verlassen (null): das Hauptfenster zeigt einen Tooltip.</summary>
+    public event EventHandler<AnnotationEventArgs?>? NoteHover;
+
+    private const int NoteMask = 1 << Protocol.AnnotText;
+
+    /// <summary>Ein Rechteck der Seite (Seitenpixel der aktuellen Zoomstufe) in Fensterkoordinaten.</summary>
+    public Rectangle PageToClient(int page, Rectangle pageRect)
+    {
+        if (page < 0 || page >= pageRects.Length) { return Rectangle.Empty; }
+        var rect = ToClient(pageRects[page]);
+        return new Rectangle(rect.X + pageRect.X, rect.Y + pageRect.Y, pageRect.Width, pageRect.Height);
+    }
+
+    /// <summary>Seite und Stelle (Seitenpixel) unter einem Punkt des Fensters; null neben den Seiten.</summary>
+    public (int Page, Point Point)? PagePointAt(Point client) => document != null && PageAt(client, clamp: false) is { Page: >= 0 } hit ? hit : null;
+
+    /// <summary>Größe einer Seite in Pixeln der aktuellen Zoomstufe.</summary>
+    public Size PageSize(int page) => page >= 0 && page < pageRects.Length ? pageRects[page].Size : Size.Empty;
+
+    /// <summary>Linke obere Ecke des markierten Texts (erste Zeile, Seitenpixel) – dort setzt „Kommentar hinzufügen“ das Symbol an; null ohne Markierung.</summary>
+    public async Task<(int Page, Point TopLeft)?> SelectionStartAsync()
+    {
+        if (document is not { } doc || OrderedSelection is not { } selection) { return null; }
+        var page = selection.Start.Page;
+        if (!charCounts.ContainsKey(page)) { charCounts[page] = await doc.CharCountAsync(page); }
+        if (doc != document || SelectedRange(page) is not { } range) { return null; }
+        var size = pageRects[page].Size;
+        var rects = await doc.SelectionRectsAsync(page, size.Width, size.Height, range.Start, range.Count);
+        return rects.Count == 0 ? null : (page, new Point(rects[0].Left, rects[0].Top));
+    }
+
+    /// <summary>Die markierten Zeichenbereiche je Seite – für einen Kommentar an markiertem Text: Der Klick neben die Karte, der ihn
+    /// übernimmt, beginnt eine neue Markierung, hervorgehoben wird deshalb dieser Stand (<see cref="HighlightRangesAsync"/>).</summary>
+    public async Task<List<(int Page, int Start, int Count)>> SelectionRangesAsync()
+    {
+        List<(int, int, int)> result = [];
+        if (document is not { } doc || OrderedSelection is not { } selection) { return result; }
+        for (var page = selection.Start.Page; page <= selection.End.Page; page++)
+        {
+            if (!charCounts.ContainsKey(page)) { charCounts[page] = await doc.CharCountAsync(page); }
+            if (doc != document) { return []; }
+            if (SelectedRange(page) is { } range) { result.Add((page, range.Start, range.Count)); }
+        }
+        return result;
+    }
+
+    /// <summary>Hebt gemerkte Zeichenbereiche hervor (Farbe 0xRRGGBB); liefert die Zahl der Seiten mit neuer Hervorhebung.</summary>
+    public async Task<int> HighlightRangesAsync(IReadOnlyList<(int Page, int Start, int Count)> ranges, int color)
+    {
+        if (document is not { } doc) { return 0; }
+        var pages = 0;
+        foreach (var (page, start, count) in ranges)
+        {
+            if (doc != document) { break; }
+            if (await doc.AddHighlightAsync(page, start, count, color)) { pages++; }
+        }
+        return pages;
+    }
+
+    /// <summary>Kommentar unter einem Klick? Dann <see cref="NoteClicked"/> melden (true).</summary>
+    private async Task<bool> TryOpenNoteAsync(Point client)
+    {
+        var (page, point) = PageAt(client, clamp: false);
+        if (document is not { } doc || page < 0) { return false; }
+        var control = (ModifierKeys & Keys.Control) != 0; // Strg+Klick: gleich bearbeiten – vor dem Warten abfragen
+        var size = pageRects[page].Size;
+        if (await doc.AnnotationAtAsync(page, size.Width, size.Height, point, NoteMask) is not { } note || doc != document) { return false; }
+        NoteClicked?.Invoke(this, new AnnotationEventArgs(page, note.Number, Protocol.AnnotText) { Control = control });
+        return true;
+    }
+
     public PageView()
     {
         DoubleBuffered = true;
@@ -139,6 +213,7 @@ internal sealed class PageView : ScrollableControl
         ClearSelection();
         ResetSearch();
         hoverLink = linkOnMouseDown = null;
+        SetHoverNote(null);
         markupUnderMouse = inkUnderMouse = stampUnderMouse = freeTextUnderMouse = null;
         imageUnderMouse = null;
         selectedImage = null;
@@ -672,13 +747,14 @@ internal sealed class PageView : ScrollableControl
         return attributes;
     }
 
-    /// <summary>Wählt das Bild an einer Stelle aus (Klick); trifft er keins, bleibt nichts ausgewählt.</summary>
+    /// <summary>Wählt das Bild an einer Stelle aus (Klick); trifft er keins oder liegt dort Text, bleibt nichts ausgewählt.</summary>
     private async Task SelectImageAtAsync(Point client)
     {
         var (page, point) = PageAt(client, clamp: false);
         if (document is not { } doc || page < 0) { return; }
         var size = pageRects[page].Size;
-        var hit = await doc.ImageAtAsync(page, size.Width, size.Height, point);
+        if (await doc.CharAtAsync(page, size.Width, size.Height, point) >= 0) { return; } // Text über einem Bild hat Vorrang (Fehlerbericht 10.10.2026)
+        var hit = doc == document ? await doc.ImageAtAsync(page, size.Width, size.Height, point) : null;
         if (doc != document || hit is not { } image || selectionActive) { return; }
         SelectImage(page, image.Number, image.Rect, size);
     }
@@ -894,6 +970,9 @@ internal sealed class PageView : ScrollableControl
         if (document == null) { return; }
         freeTextUnderMouse = await document.AnnotationAtAsync(page, width, height, point, 1 << Protocol.AnnotFreeText) is { } freeText ? (page, freeText.Number) : null;
         if (document == null) { return; }
+        // Text über einem Bild hat Vorrang: kein Bild auswählen, keine Bild-Einträge im Menü (wie Acrobat; Fehlerbericht 10.10.2026 –
+        // auf Text über einem Hintergrundbild wurde sonst das ganze Bild gerahmt)
+        if (await document.CharAtAsync(page, width, height, point) >= 0 || document == null) { return; }
         var hit = await document.ImageAtAsync(page, width, height, point);
         if (hit is not { } image) { return; }
         imageUnderMouse = (page, image.Number, image.Width, image.Height, image.Jpeg);
@@ -1077,9 +1156,16 @@ internal sealed class PageView : ScrollableControl
                     if (document == null) { break; }
                 }
                 var link = page < 0 || field >= 0 || annotation != null ? null : await document.LinkAtAsync(page, pageRects[page].Width, pageRects[page].Height, pagePoint);
+                if (document == null) { break; }
+                var noteAt = annotation is { Subtype: Protocol.AnnotText } ? annotation // verschiebbar: schon gefunden
+                    : page >= 0 && field < 0 && annotation == null && link == null
+                    ? await document.AnnotationAtAsync(page, pageRects[page].Width, pageRects[page].Height, pagePoint, NoteMask) : null;
+                if (document == null) { break; }
+                var note = noteAt != null;
                 if (dragging || formDragPage >= 0 || pick != null || ghost != null || InkMode || EraseMode || IsDisposed) { continue; } // beim Wählen einer Stelle und beim Zeichnen bleibt das Fadenkreuz
                 hoverAnnotation = annotation is { } a && page < pageRects.Length ? (page, a.Number, a.Subtype, a.Rect, pageRects[page].Size) : null;
-                Cursor = annotation != null ? Cursors.SizeAll
+                Cursor = note ? Cursors.Hand // Kommentar: Klick zeigt die Karte, Ziehen verschiebt
+                    : annotation != null ? Cursors.SizeAll
                     : field is PdfiumForms.FieldTextField or PdfiumForms.FieldComboBox ? Cursors.IBeam
                     : field >= 0 || link != null ? Cursors.Hand
                     : page >= 0 ? Cursors.IBeam : Cursors.Default;
@@ -1088,6 +1174,7 @@ internal sealed class PageView : ScrollableControl
                     hoverLink = link;
                     LinkHover?.Invoke(this, link);
                 }
+                SetHoverNote(noteAt is { } n ? (page, n.Number) : null);
             }
         }
         finally { hoverQueryRunning = false; }
@@ -1099,6 +1186,17 @@ internal sealed class PageView : ScrollableControl
         pendingHoverPoint = null;
         if (!ghostDragging) { hoverAnnotation = null; }
         if (hoverLink != null) { hoverLink = null; LinkHover?.Invoke(this, null); }
+        SetHoverNote(null);
+    }
+
+    private (int Page, int Number)? hoverNote;
+
+    /// <summary>Kommentar unter der Maus gewechselt: <see cref="NoteHover"/> melden (null = keiner mehr).</summary>
+    private void SetHoverNote((int Page, int Number)? note)
+    {
+        if (note == hoverNote) { return; }
+        hoverNote = note;
+        NoteHover?.Invoke(this, note is { } n ? new AnnotationEventArgs(n.Page, n.Number, Protocol.AnnotText) : null);
     }
 
     private void FollowLink(LinkTarget link)
@@ -1237,13 +1335,17 @@ internal sealed class PageView : ScrollableControl
     // Stelle, Esc oder ein Klick neben die Seiten bricht ab (null). Die Stelle unter dem letzten Rechtsklick merkt ContextMenuPoint.
     private TaskCompletionSource<Point?>? pick;
 
-    /// <summary>Wartet auf einen Klick auf eine Seite (Client-Koordinaten); null bei Abbruch.</summary>
-    public Task<Point?> PickPointAsync()
+    private Cursor pickCursor = Cursors.Cross;
+
+    /// <summary>Wartet auf einen Klick auf eine Seite (Client-Koordinaten); null bei Abbruch. <paramref name="cursor"/>: Zeiger über den
+    /// Seiten (Vorgabe Fadenkreuz; beim Kommentar das Symbol, das am Zeiger „haftet“ wie bei Acrobat).</summary>
+    public Task<Point?> PickPointAsync(Cursor? cursor = null)
     {
         CancelPick();
         if (document == null) { return Task.FromResult<Point?>(null); }
         pick = new TaskCompletionSource<Point?>();
-        Cursor = Cursors.Cross;
+        pickCursor = cursor ?? Cursors.Cross;
+        Cursor = pickCursor;
         Focus();
         return pick.Task;
     }
@@ -1301,7 +1403,9 @@ internal sealed class PageView : ScrollableControl
     // AnnotationMoved den Versatz in PDF-Punkten – in die Datei schreiben und neu laden muss der Aufrufer; bis dahin bleibt die Kopie an
     // der neuen Stelle stehen (ClearAnnotationGhost, wenn es scheitert – das blendet das Original wieder ein). Ein Doppelklick meldet
     // AnnotationDoubleClicked (Bearbeiten).
-    private const int MovableAnnotations = (1 << Protocol.AnnotFreeText) | (1 << Protocol.AnnotStamp);
+    // Kommentare (Notizen) seit 10.10.2026 ebenfalls (Wunsch Wilhelms, wie Acrobat): ein Klick ohne Ziehen zeigt weiter ihre Karte, die
+    // Kopie beim Ziehen ist bläulich und halbdurchsichtig, der Zeiger das Verschiebekreuz
+    private const int MovableAnnotations = (1 << Protocol.AnnotFreeText) | (1 << Protocol.AnnotStamp) | (1 << Protocol.AnnotText);
 
     private sealed class AnnotationGhost(PdfiumDocument document, int page, int number, int subtype, Rectangle rect, Size pageSize, Point start, Bitmap image)
     {
@@ -1378,13 +1482,13 @@ internal sealed class PageView : ScrollableControl
         if (ghost != null || document == null || AnnotationUnder(client) is not { } hit) { return false; }
         ghost = new AnnotationGhost(document, hit.Page, hit.Number, hit.Subtype, hit.Rect, hit.PageSize, hit.Point, CopyPageArea(hit.Page, hit.Rect));
         ghostDragging = true;
-        Cursor = Cursors.SizeAll;
+        if (hit.Subtype != Protocol.AnnotText) { Cursor = Cursors.SizeAll; } // beim Kommentar erst beim Ziehen – ein Klick zeigt die Karte
         return true;
     }
 
     private bool TryAnnotationDoubleClick(Point client)
     {
-        if (AnnotationUnder(client) is not { } hit) { return false; }
+        if (AnnotationUnder(client) is not { } hit || hit.Subtype == Protocol.AnnotText) { return false; } // Kommentar: Klicks öffnen die Karte
         ClearAnnotationGhost();
         annotationClick = true;
         var args = new AnnotationEventArgs(hit.Page, hit.Number, hit.Subtype);
@@ -1418,6 +1522,7 @@ internal sealed class PageView : ScrollableControl
         if (!gh.Moved && (Math.Abs(dx) >= SystemInformation.DragSize.Width || Math.Abs(dy) >= SystemInformation.DragSize.Height))
         {
             gh.Moved = true;
+            if (gh.Subtype == Protocol.AnnotText) { Cursor = Cursors.SizeAll; } // wie Acrobat (beim Überfahren Hand)
             SetOriginalHidden(gh, true); // erst jetzt: ein bloßer Klick soll nichts flackern lassen
         }
         gh.Offset = new Size(Keep(dx, -gh.Rect.X, gh.PageSize.Width - gh.Rect.Right), Keep(dy, -gh.Rect.Y, gh.PageSize.Height - gh.Rect.Bottom));
@@ -1459,11 +1564,35 @@ internal sealed class PageView : ScrollableControl
         var rect = gh.Rect;
         rect.Offset(gh.Offset.Width, gh.Offset.Height);
         var target = Rectangle.Round(new RectangleF(page.X + rect.X * sx, page.Y + rect.Y * sy, rect.Width * sx, rect.Height * sy));
+        if (gh.Subtype == Protocol.AnnotText) { DrawNoteGhost(g, target); return; }
         using var attributes = new ImageAttributes();
         attributes.SetColorMatrix(new ColorMatrix { Matrix33 = 0.7f });
         g.DrawImage(gh.Image, target, 0, 0, gh.Image.Width, gh.Image.Height, GraphicsUnit.Pixel, attributes);
         using var pen = new Pen(Color.FromArgb(0, 120, 215)) { DashStyle = DashStyle.Dash };
         g.DrawRectangle(pen, target);
+    }
+
+    /// <summary>Gezogener Kommentar wie bei Acrobat: ein blaues, halbdurchsichtiges Notizsymbol (Sprechblase mit Zeilen) – selbst
+    /// gezeichnet statt aus den Kacheln kopiert, sonst färbte sich der Hintergrund im Rechteck mit (Weiß wurde ein blauer Streifen).</summary>
+    private static void DrawNoteGhost(Graphics g, Rectangle target)
+    {
+        var (x, y, w, h) = ((float)target.X, (float)target.Y, (float)Math.Max(6, target.Width), (float)Math.Max(6, target.Height));
+        var state = g.Save();
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        var bottom = y + h * 0.8f; // darunter die Spitze der Sprechblase
+        using var path = new GraphicsPath();
+        path.AddLines([new PointF(x + 0.5f, y + 0.5f), new PointF(x + w - 0.5f, y + 0.5f), new PointF(x + w - 0.5f, bottom),
+            new PointF(x + w * 0.45f, bottom), new PointF(x + w * 0.32f, y + h - 0.5f), new PointF(x + w * 0.3f, bottom), new PointF(x + 0.5f, bottom)]);
+        path.CloseFigure();
+        using (var fill = new SolidBrush(Color.FromArgb(170, 128, 170, 255))) { g.FillPath(fill, path); }
+        using var pen = new Pen(Color.FromArgb(210, 40, 50, 75), Math.Max(1f, w / 16));
+        g.DrawPath(pen, path);
+        for (var i = 0; i < 4; i++) // Zeilen wie im Notizsymbol
+        {
+            var lineY = y + (bottom - y) * (0.22f + 0.19f * i);
+            g.DrawLine(pen, x + w * 0.2f, lineY, x + w * 0.8f, lineY);
+        }
+        g.Restore(state);
     }
 
     // ================================================================== Zeichnen (Freihand)
@@ -1746,7 +1875,11 @@ internal sealed class PageView : ScrollableControl
         if (e.Button is MouseButtons.Left or MouseButtons.Right && PageAt(e.Location, clamp: false).Page is >= 0 and var clicked) { SetCurrentPage(clicked); }
         if (pick != null) // Stelle wählen: der Klick gehört nur dem Fadenkreuz
         {
-            if (e.Button == MouseButtons.Left) { EndPick(PageAt(e.Location, clamp: false).Page >= 0 ? e.Location : null); }
+            if (e.Button == MouseButtons.Left)
+            {
+                pickMouseUp = true; // auch das Loslassen – sonst schlösse es gleich die Kommentarkarte, die der Klick geöffnet hat
+                EndPick(PageAt(e.Location, clamp: false).Page >= 0 ? e.Location : null);
+            }
             return;
         }
         if (!ImageSelectionClientRect().Contains(e.Location)) { ClearImageSelection(); } // daneben geklickt; aufs ausgewählte Bild bleibt es (kein Flackern)
@@ -1808,7 +1941,7 @@ internal sealed class PageView : ScrollableControl
         base.OnMouseMove(e);
         if (pick != null)
         {
-            Cursor = PageAt(e.Location, clamp: false).Page >= 0 ? Cursors.Cross : Cursors.No;
+            Cursor = PageAt(e.Location, clamp: false).Page >= 0 ? pickCursor : Cursors.No;
             return;
         }
         if (formDragPage >= 0 && document != null) // Ziehen in einem Feld: Text darin markieren
@@ -1904,8 +2037,11 @@ internal sealed class PageView : ScrollableControl
         finally { dragQueryRunning = false; }
     }
 
+    private bool pickMouseUp; // das Loslassen nach dem Klick, der eine Stelle gewählt hat: nicht auswerten, auch nicht als MouseUp melden
+
     protected async override void OnMouseUp(MouseEventArgs e)
     {
+        if (pickMouseUp && e.Button == MouseButtons.Left) { pickMouseUp = false; return; }
         base.OnMouseUp(e);
         if (InkMode)
         {
@@ -1919,7 +2055,12 @@ internal sealed class PageView : ScrollableControl
         }
         if (ghostDragging)
         {
-            if (e.Button == MouseButtons.Left) { await FinishAnnotationDragAsync(); }
+            if (e.Button == MouseButtons.Left)
+            {
+                var noteClick = ghost is { Moved: false, Subtype: Protocol.AnnotText }; // nicht gezogen: wie bisher die Karte zeigen
+                await FinishAnnotationDragAsync();
+                if (noteClick) { await TryOpenNoteAsync(e.Location); }
+            }
             return;
         }
         if (annotationClick) { annotationClick = false; return; }
@@ -1953,7 +2094,10 @@ internal sealed class PageView : ScrollableControl
             link = await document.LinkAtAsync(dragStart.Page, size.Width, size.Height, dragStart.Point);
         }
         if (e.Button == MouseButtons.Left && link != null && !selectionActive) { FollowLink(link); } // gezogen = markiert, nicht geklickt
-        else if (e.Button == MouseButtons.Left && link == null && !selectionActive && pick == null) { await SelectImageAtAsync(e.Location); } // Klick auf ein Bild: auswählen wie Acrobat
+        else if (e.Button == MouseButtons.Left && link == null && !selectionActive && pick == null && !await TryOpenNoteAsync(e.Location)) // Kommentar: Karte zeigen
+        {
+            await SelectImageAtAsync(e.Location); // Klick auf ein Bild: auswählen wie Acrobat
+        }
     }
 
     protected override void OnMouseWheel(MouseEventArgs e)
@@ -2046,6 +2190,7 @@ internal class AnnotationEventArgs(int page, int number, int subtype) : EventArg
     public int Number { get; } = number;
     public int Subtype { get; } = subtype;
     public bool IsStamp => Subtype == Protocol.AnnotStamp;
+    public bool Control { get; init; } // mit gedrückter Strg-Taste geklickt
 }
 
 /// <summary>Eine Anmerkung wurde gezogen: dazu der Versatz in PDF-Punkten (y nach oben).</summary>

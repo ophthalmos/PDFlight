@@ -175,6 +175,22 @@ internal static class Protocol
     /// ungeprüft in die Datei, PNG und Zwischenablage entstehen aus den Pixeln.</summary>
     public const byte ImageData = 41;
 
+    // ================================================================== Kommentare (Notizen wie in Edge, seit 10.10.2026)
+
+    /// <summary>→ int Dok, int Seite, int Seitenbreite, int Seitenhöhe, int x, int y (linke obere Ecke des Symbols in Seitenpixeln),
+    /// Zeichenfolge Text, Zeichenfolge Autor, Zeichenfolge PDF-Datum (/M – vom Hauptprogramm, der Container darf die Zeitzone nicht lesen)
+    /// ← int Nummer der neuen Notiz (-1 = nicht angelegt).</summary>
+    public const byte AddNote = 42;
+
+    /// <summary>→ int Dok, int Seite, int Seitenbreite, int Seitenhöhe, int Nummer ← bool gefunden, Zeichenfolge Text, int x, y, Breite,
+    /// Höhe des Symbols in Seitenpixeln, Zeichenfolge Autor (/T).</summary>
+    public const byte Note = 43;
+
+    /// <summary>→ int Dok, int Seite, int Nummer, Zeichenfolge Text, Zeichenfolge PDF-Datum ← bool geändert.</summary>
+    public const byte SetNoteText = 44;
+
+    public const int AnnotText = 1; // FPDF_ANNOT_TEXT – für AnnotAt
+
     // ================================================================== Umrechnung
 
     /// <summary>→ int Dok, int Seite, int Seitenbreite, int Seitenhöhe, int x, int y ← double x, double y: die Stelle in PDF-Koordinaten

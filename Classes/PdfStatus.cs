@@ -15,6 +15,35 @@ namespace PDFLight.Classes;
 internal sealed partial record PdfStatus(int PageCount, string? Version, string? PdfALevel, int OutlineCount = 0, bool Encrypted = false, int AttachmentCount = 0)
 {
     private static readonly byte[] PartKey = "pdfaid:part"u8.ToArray();
+    private const int HeaderSearchLength = 1024; // so weit sucht auch PDFium nach dem Dateikopf (davor darf Fremdes stehen)
+
+    /// <summary>Steht „%PDF-“ in den ersten 1024 Bytes? Sonst ist es keine PDF (Foto, Word-Datei, eine als .pdf gespeicherte Webseite …) –
+    /// PDFlight meldet das selbst, statt PDFiums Fehlertext zu zeigen (seit 10.10.2026).</summary>
+    public static bool HasPdfHeader(ReadOnlySpan<byte> bytes) => bytes[..Math.Min(bytes.Length, HeaderSearchLength)].IndexOf("%PDF-"u8) >= 0;
+
+    /// <summary>Wie <see cref="HasPdfHeader(ReadOnlySpan{byte})"/>, liest nur den Anfang der Datei; nicht lesbar = ja (den Fehler meldet dann das Laden).</summary>
+    public static bool HasPdfHeader(string path) => ReadHead(path) is not { } head || HasPdfHeader(head);
+
+    /// <summary>Ein Bild, aus dem PDFlight eine PDF machen kann (seit 10.10.2026, wie Acrobat)? Nach den ersten Bytes, nicht nach der
+    /// Endung: JPEG, PNG, GIF, BMP und TIFF – was GDI+ lesen kann (WebP und HEIC nicht).</summary>
+    public static bool IsImage(ReadOnlySpan<byte> bytes) =>
+        bytes.StartsWith((ReadOnlySpan<byte>)[0xFF, 0xD8, 0xFF]) || bytes.StartsWith((ReadOnlySpan<byte>)[0x89, 0x50, 0x4E, 0x47]) // JPEG, PNG
+        || bytes.StartsWith("GIF8"u8) || bytes.StartsWith("BM"u8)                                                                  // GIF, BMP
+        || bytes.StartsWith((ReadOnlySpan<byte>)[0x49, 0x49, 0x2A, 0x00]) || bytes.StartsWith((ReadOnlySpan<byte>)[0x4D, 0x4D, 0x00, 0x2A]); // TIFF (II*, MM*)
+
+    /// <summary>Wie <see cref="IsImage(ReadOnlySpan{byte})"/>, liest nur den Anfang der Datei; nicht lesbar = nein.</summary>
+    public static bool IsImage(string path) => ReadHead(path) is { } head && IsImage(head);
+
+    private static byte[]? ReadHead(string path)
+    {
+        try
+        {
+            using var stream = File.OpenRead(path);
+            var head = new byte[HeaderSearchLength];
+            return head[..stream.ReadAtLeast(head, HeaderSearchLength, throwOnEndOfStream: false)];
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return null; }
+    }
 
     /// <summary>Deklarierte PDF/A-Stufe aus den XMP-Metadaten, ohne die PDF zu parsen: PDF/A verbietet Filter auf dem Metadaten-Strom, er
     /// steht also lesbar in der Datei. Attribut- und Element-Schreibweise (pdfaid:part="2" bzw. &lt;pdfaid:part&gt;2&lt;/pdfaid:part&gt;);

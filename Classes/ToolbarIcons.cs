@@ -61,6 +61,7 @@ internal static class ToolbarIcons
     public const char Cancel = '\uE711';       // Suchleiste schließen
     public const char Draw = '\uE76D';         // InkingTool: Zeichnen in der Viewer-Leiste (wie Edge)
     public const char Erase = '\uE75C';        // EraseTool: Radierer in der Viewer-Leiste (wie Chrome)
+    public const char CheckMark = '\uE73E';    // H\u00E4kchen \u201E\u00DCbernehmen\u201C in der Notizkarte (wie Edge)
     public const char ManageAnnotations = '\uF0E3'; // ClipboardList: \u201EAnmerkungen verwalten\u201C in der Viewer-Leiste (E8FD ist die Dokumentstruktur)
     public const char HighlightFill = '\uE891'; // F\u00FCllung zu Highlight: Kappe und Spitze des Markers in der gew\u00E4hlten Farbe
     public const char DrawFill = '\uE88F';     // InkingColorOutline: Kappe und Stiftspitze zu Draw in der Stiftfarbe

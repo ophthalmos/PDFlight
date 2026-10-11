@@ -76,7 +76,6 @@ public partial class FolderSelectForm : Form
     private const string NewFolderName = "Neuer Ordner";
     private readonly bool copyMode;
     private readonly bool jumpToLastUsed;
-    private readonly RoundButton btnNewFolder = new();
     private bool selectAllDone;
 
     public FolderSelectForm(string startFolder, bool copyMode, bool jumpToLastUsed)
@@ -95,14 +94,11 @@ public partial class FolderSelectForm : Form
 
         if (!jumpToLastUsed) { shellTreeView.SelectedPath = string.IsNullOrEmpty(startFolder) ? Environment.GetFolderPath(Environment.SpecialFolder.Desktop) : startFolder; }
 
-        btnNewFolder.Glyph = ToolbarIcons.Add;
-        btnNewFolder.Text = Lng.T(NewFolderName); // nicht gezeichnet — Name für UI Automation
-        btnNewFolder.BackColor = SystemColors.ButtonFace;
+        btnNewFolder.Glyph = ToolbarIcons.Add; // der Text aus dem Designer wird nicht gezeichnet – er ist der Name für UI Automation
         pathEdit.TextBox.PreviewKeyDown += (sender, e) => e.IsInputKey = e.KeyCode is Keys.Return or Keys.Enter; // verhindert, dass Enter das Formular schließt
         pathEdit.TextBox.KeyDown += PathEditTextBox_KeyDown;
         shellHistory.DropDownAnchor = pathEdit.HistoryButton; // Verlaufsmenü klappt unter dem ▼-Button des Pfadfelds auf
         pathEdit.HistoryButtonClick += (sender, e) => shellHistory.ShowDropDown();
-        btnNewFolder.Click += ButtonNewFolder_Clicked;
         toolTip.SetToolTip(btnNewFolder, Lng.T("Neuer Ordner (Strg+N)"));
         toolTip.SetToolTip(btnTargetSettings, Lng.T("Zielliste in den Einstellungen bearbeiten"));
         toolTip.SetToolTip(numUpDownMaxRecent, Lng.T("Höchstzahl der gemerkten Ordner in der Zuletzt-Liste (0 = keine)"));
@@ -120,9 +116,7 @@ public partial class FolderSelectForm : Form
     private void FolderSelectForm_Shown(object? sender, EventArgs e)
     {
         Cursor.Current = Cursors.Default;
-        btnNewFolder.Size = new Size(48, 48);
-        btnNewFolder.Location = new Point(shellTreeView.Width - btnNewFolder.Width - SystemInformation.VerticalScrollBarWidth * 2, SystemInformation.VerticalScrollBarWidth);
-        shellTreeView.Controls.Add(btnNewFolder);
+
         pathEdit.TextBox.Focus();
         if (jumpToLastUsed) { LinkLabelRecent_LinkClicked(null, null); }
         BeginInvoke(pathEdit.TextBox.SelectAll); // nach dem Befüllen (Baum, Zuletzt-Sprung) den ganzen Pfad markieren, damit Strg+V ihn ersetzt
@@ -230,10 +224,6 @@ public partial class FolderSelectForm : Form
         btnNewFolder.Visible = shellTreeView.SelectedNode != null && FileUtil.HasFolderWritePermission(shellTreeView.SelectedPath);
     }
 
-    private void ShellTreeView_Resize(object? sender, EventArgs e)
-    {
-        btnNewFolder.Location = new Point(shellTreeView.Width - btnNewFolder.Width - SystemInformation.VerticalScrollBarWidth * 2, SystemInformation.VerticalScrollBarWidth);
-    }
 
     private void ShowHiddenFolders()
     {

@@ -71,7 +71,7 @@ public partial class AnnotationListForm : Form
     private static string TypeName(string subtype) => subtype switch
     {
         "FreeText" => Lng.T("Textanmerkung"),
-        "Text" => Lng.T("Haftnotiz"),
+        "Text" => Lng.T("Notiz"),
         "Stamp" => Lng.T("Stempel"),
         "Ink" => Lng.T("Zeichnung"), // Freihand-Striche aus „Zeichnen“ in der Viewer-Leiste
         _ => subtype, // andere Arten sprachneutral mit ihrem PDF-Namen (Highlight, Square, …)
@@ -87,7 +87,7 @@ public partial class AnnotationListForm : Form
     private void UpdateButtons()
     {
         var selected = Selected;
-        btnEdit.Enabled = selected?.Subtype is "FreeText" or "Stamp"; // nur eigene Arten lassen sich neu zeichnen (Stempel: Eigenschaften im Verwalten-Dialog ändern)
+        btnEdit.Enabled = selected?.Subtype is "FreeText" or "Stamp" or "Text"; // nur eigene Arten lassen sich neu zeichnen (Stempel: Eigenschaften im Verwalten-Dialog ändern; Kommentar: seine Karte)
         btnDelete.Enabled = selected != null;
         btnDeleteAll.Enabled = listView.Items.Count > 1;
     }
@@ -114,7 +114,7 @@ public partial class AnnotationListForm : Form
 
     private void EditSelected()
     {
-        if (Selected is not { Subtype: "FreeText" or "Stamp" } annotation) { return; }
+        if (Selected is not { Subtype: "FreeText" or "Stamp" or "Text" } annotation) { return; }
         EditRequested = annotation;
         Close();
     }

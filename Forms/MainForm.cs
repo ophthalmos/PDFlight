@@ -364,6 +364,16 @@ public partial class MainForm : Form
             TaskDlg.ErrTaskDlg(Handle, Lng.T("Die Datei konnte nicht geladen werden."), ex);
             return;
         }
+        if (!PdfStatus.HasPdfHeader(bytes)) // vor jeder Änderung am Zustand: Titel, Zuletzt-Liste und Anzeige bleiben
+        {
+            if (!PdfStatus.IsImage(bytes)) { ShowNotPdfMessage(path); }
+            else if (CreatePdfFromImage(path) is { } created) // ein Bild: daraus eine PDF neben dem Bild anlegen und diese zeigen
+            {
+                LoadPdf(created.Path, addToRecent: addToRecent);
+                if (created.New) { statusPath.Text = string.Format(Lng.T("„{0}“ wurde aus dem Bild erstellt."), Path.GetFileName(created.Path)); }
+            }
+            return;
+        }
         // PDF/A per Textsuche; Seitenzahl, Version, Verschlüsselung und Lesezeichen liefert das Hilfsprogramm nach dem Laden (OpenDocumentAsync)
         var status = new PdfStatus(-1, null, PdfStatus.DetectPdfALevel(bytes));
         var targetPage = page > 0 ? page : settings.RememberLastPage && settings.GetLastPage(path) is > 1 and var remembered ? remembered : 0;
@@ -421,7 +431,8 @@ public partial class MainForm : Form
                 using PasswordForm dialog = new(Path.GetFileName(path));
                 if (dialog.ShowDialog(this) != DialogResult.OK || version != loadVersion)
                 {
-                    if (version == loadVersion) { ShowDocument(null); statusPath.Text = Lng.T("Ohne Kennwort lässt sich die Datei nicht anzeigen."); }
+                    // wie „Dokument schließen“ – sonst blieb der Pfad der nicht angezeigten Datei im Titel (Fehlerbericht 10.10.2026)
+                    if (version == loadVersion) { ClearDisplay(Lng.T("Ohne Kennwort lässt sich die Datei nicht anzeigen.")); }
                     return null;
                 }
                 password = dialog.Password;
@@ -429,7 +440,8 @@ public partial class MainForm : Form
             catch (InvalidOperationException ex)
             {
                 if (version != loadVersion || IsDisposed) { return null; }
-                ShowDocument(null);
+                // wie „Dokument schließen“ – sonst blieben Pfad im Titel und Datei-Befehle der nicht angezeigten Datei stehen (Fehlerbericht 10.10.2026)
+                ClearDisplay(Lng.T("Die Datei konnte nicht angezeigt werden."));
                 TaskDlg.ErrTaskDlg(Handle, Lng.T("Die Datei konnte nicht angezeigt werden."), ex);
                 return null;
             }
@@ -469,6 +481,7 @@ public partial class MainForm : Form
     private void ShowDocument(PdfiumDocument? value)
     {
         if (document != null && value == null) { startView = new ViewState(pageView.Fit, pageView.Zoom); } // die nächste Datei wieder so anzeigen
+        CloseNoteCard(); // die Karte gehört zum bisherigen Stand (auch nach Rückgängig oder einem Schritt über PDFsharp)
         var previous = document;
         previous?.Changed -= Document_Changed;
         document = value;
@@ -615,7 +628,8 @@ public partial class MainForm : Form
 
     private void OpenFile()
     {
-        using OpenFileDialog dialog = new() { Filter = Lng.T("PDF-Dateien (*.pdf)|*.pdf"), Title = Lng.T("PDF-Datei öffnen") };
+        // Bilder werden beim Öffnen zu einer PDF daneben (CreatePdfFromImage) – deshalb im Filter mit angeboten
+        using OpenFileDialog dialog = new() { Filter = Lng.T("PDF-Dateien und Bilder|*.pdf;*.jpg;*.jpeg;*.png;*.tif;*.tiff;*.bmp;*.gif|PDF-Dateien (*.pdf)|*.pdf"), Title = Lng.T("PDF-Datei öffnen") };
         if (currentFile != null) { dialog.InitialDirectory = currentFile.DirectoryName; }
         if (dialog.ShowDialog(this) == DialogResult.OK) { LoadOtherFile(dialog.FileName, addToRecent: true); }
     }
@@ -666,10 +680,14 @@ public partial class MainForm : Form
     {
         if (e.Data?.GetDataPresent(DataFormats.FileDrop) == true && e.Data.GetData(DataFormats.FileDrop) is string[] files)
         {
-            return [.. files.Where(f => f.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase) && File.Exists(f))];
+            return [.. files.Where(f => DroppableExtensions.Contains(Path.GetExtension(f)) && File.Exists(f))];
         }
         return [];
     }
+
+    // PDFs und Bilder, aus denen beim Öffnen eine PDF daneben entsteht (CreatePdfFromImage, seit 10.10.2026) – hier nach der Endung,
+    // die Prüfung beim Ziehen soll keine Dateien lesen; geöffnet wird nach dem Dateikopf
+    private static readonly HashSet<string> DroppableExtensions = new([".pdf", ".jpg", ".jpeg", ".png", ".tif", ".tiff", ".bmp", ".gif"], StringComparer.OrdinalIgnoreCase);
 
     /// <summary>Verteilt abgelegte Dateien: solange hier nichts angezeigt wird, übernimmt diese Instanz
     /// die erste Datei; jede weitere — und bei bereits angezeigtem Dokument jede — öffnet eine neue
@@ -756,19 +774,25 @@ public partial class MainForm : Form
         if (pid == null || !InstanceRegistry.Activate(pid.Value)) { LoadOtherFile(files[next]); }
     }
 
-    /// <summary>Nach dem Löschen: nächste Datei an gleicher Position laden oder Anzeige leeren. Zeigt eine andere Instanz die
-    /// nachrückende Datei bereits an, kommt diese nach vorn und dieses Fenster schließt sich – ohne Rückfrage (Wunsch vom 26.09.2026;
-    /// vorher ein Dialog mit diesem Weg als Vorgabe). Ist das andere Fenster inzwischen weg: hier anzeigen.</summary>
+    /// <summary>Nach dem Löschen: nächste Datei an gleicher Position laden oder Anzeige leeren. Zeigt eine andere Instanz bereits eine
+    /// Datei desselben Ordners an, kommt diese nach vorn und dieses Fenster schließt sich – ohne Rückfrage (Wunsch vom 26.09.2026, seit
+    /// 10.10.2026 für jede Datei des Ordners, vorher nur für die nachrückende). Zeigen mehrere Instanzen Dateien des Ordners, gewinnt die
+    /// in Ordnerreihenfolge ab der nachrückenden Datei erste. Sind die anderen Fenster inzwischen weg: hier anzeigen.</summary>
     private void LoadNextAfterRemoval(List<string> files, int removedIndex)
     {
         if (removedIndex >= 0) { files.RemoveAt(removedIndex); } else { removedIndex = 0; }
         if (files.Count == 0) { ClearDisplay(Lng.T("Der Ordner enthält keine weiteren PDF-Dateien.")); return; }
         var nextIndex = removedIndex % files.Count;
-        var next = files[nextIndex];
-        var pid = InstanceRegistry.FindInstanceShowing(next);
-        if (pid == null || !InstanceRegistry.Activate(pid.Value)) { LoadPdf(next); return; }
-        currentFile = null; // sonst meldet MainForm_Activated beim Schließen die gelöschte Datei als extern verschwunden
-        Close();
+        var shownElsewhere = InstanceRegistry.ShownElsewhere().ToHashSet(StringComparer.OrdinalIgnoreCase);
+        for (var i = 0; i < files.Count && shownElsewhere.Count > 0; i++)
+        {
+            var candidate = files[(nextIndex + i) % files.Count];
+            if (!shownElsewhere.Contains(candidate) || InstanceRegistry.FindInstanceShowing(candidate) is not { } pid || !InstanceRegistry.Activate(pid)) { continue; }
+            currentFile = null; // sonst meldet MainForm_Activated beim Schließen die gelöschte Datei als extern verschwunden
+            Close();
+            return;
+        }
+        LoadPdf(files[nextIndex]);
     }
 
     /// <summary>Gemerkte Kennwörter vergessen – alle außer dem der Datei, die gleich (wieder) angezeigt wird. Ein Kennwort gilt nur, solange
@@ -1163,6 +1187,7 @@ public partial class MainForm : Form
         mnuViewSelectAll.Image = MenuIcon(ToolbarIcons.SelectAll);
         mnuHighlight.Image = MenuIcon(ToolbarIcons.Highlight);
         mnuEditAnnotation.Image = MenuIcon(ToolbarIcons.Edit);
+        noteCard.SetMenuIcons(MenuIcon(ToolbarIcons.Delete), MenuIcon(ToolbarIcons.Edit)); // „…“-Menü der Kommentarkarte
         mnuRemoveAnnotation.Image = MenuIcon(ToolbarIcons.Clear);
         mnuAddFreeTextHere.Image = MenuIcon(ToolbarIcons.Comment);
         mnuSaveImage.Image = MenuIcon(ToolbarIcons.Save);
@@ -1375,6 +1400,7 @@ public partial class MainForm : Form
     /// nichts offen. Ok = false: Fehler gemeldet oder inzwischen eine andere Datei – die Bearbeitung unterbleibt.</summary>
     private async Task<(bool Ok, byte[]? Bytes)> PendingViewChangesAsync(string actionName)
     {
+        await FinishNoteEditAsync();
         if (!documentDirty || ShownDocument is not { } doc) { return (true, null); }
         await pageView.EndFormInputAsync(); // übernimmt den Wert des Felds, in dem gerade getippt wurde
         try
@@ -1500,8 +1526,10 @@ public partial class MainForm : Form
         var status = statusPath.Text;
         statusPath.Text = Lng.T("Klicke auf die Stelle für den Freitext – Esc bricht ab.");
         var picking = pageView.PickPointAsync();
+        pickingItem = btnFreeText;
         viewerStrip.Invalidate(); // „Freitext“ zeigt die Modus-Linie, solange das Fadenkreuz aktiv ist (IsActiveModeItem)
         var point = await picking;
+        if (pickingItem == btnFreeText && !pageView.IsPicking) { pickingItem = null; }
         viewerStrip.Invalidate();
         if (statusPath.Text == Lng.T("Klicke auf die Stelle für den Freitext – Esc bricht ab.")) { statusPath.Text = status; }
         if (point is { } client) { await AddAnnotationAtAsync(client); }
@@ -1549,9 +1577,12 @@ public partial class MainForm : Form
         if (currentFile == null || EditLocked) { pageView.ClearAnnotationGhost(); return; }
         await pageView.RestoreHiddenAnnotationAsync(); // das Original nicht als ausgeblendet mitspeichern; die Kopie bleibt bis zum Neuanzeigen
         var page = e.Page + 1;
-        if (await EditInViewAsync(path => PdfEditService.MoveAnnotation(path, page, e.Number, e.Dx, e.Dy), e.IsStamp ? Lng.T("Stempel verschieben") : Lng.T("Textanmerkung verschieben")))
+        var note = e.Subtype == Protocol.AnnotText;
+        if (await EditInViewAsync(path => PdfEditService.MoveAnnotation(path, page, e.Number, e.Dx, e.Dy),
+            note ? Lng.T("Notiz verschieben") : e.IsStamp ? Lng.T("Stempel verschieben") : Lng.T("Textanmerkung verschieben")))
         {
-            statusPath.Text = string.Format(e.IsStamp ? Lng.T("Der Stempel wurde auf Seite {0} verschoben.") : Lng.T("Die Textanmerkung wurde auf Seite {0} verschoben."), page);
+            statusPath.Text = string.Format(note ? Lng.T("Die Notiz wurde auf Seite {0} verschoben.")
+                : e.IsStamp ? Lng.T("Der Stempel wurde auf Seite {0} verschoben.") : Lng.T("Die Textanmerkung wurde auf Seite {0} verschoben."), page);
         }
         else { pageView.ClearAnnotationGhost(); }
     }
@@ -1623,6 +1654,12 @@ public partial class MainForm : Form
     {
         if (currentFile == null) { return; }
         if (annotation.Subtype == "Stamp") { EditStamp(annotation); return; } // Stempel: Eigenschaften im Verwalten-Dialog ändern
+        if (annotation.Subtype == "Text") // Kommentar: seine Karte zum Bearbeiten öffnen
+        {
+            pageView.GoToPage(annotation.Page - 1);
+            await OpenNoteAsync(annotation.Page - 1, annotation.Index, edit: true);
+            return;
+        }
         using AnnotationForm dialog = new(currentFile.FullName, currentPageCount, annotation.Page);
         dialog.Preset(annotation.Contents, annotation.LeftMm, annotation.TopMm, annotation.FontSize, annotation.Style);
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
@@ -2639,10 +2676,62 @@ public partial class MainForm : Form
         action();
     }
 
+    /// <summary>Ein Bild öffnen (seit 10.10.2026, Wunsch Wilhelms nach Acrobats Vorbild, Variante „gleich als Datei“): aus „Foto.jpg“ wird
+    /// „Foto.pdf“ im selben Ordner, eine Seite in Bildgröße (<see cref="PdfEditService.CreatePdfFromImage"/>). Gibt es den Namen schon,
+    /// wird gefragt: die vorhandene Datei öffnen oder als „Foto (2).pdf“ anlegen. Acrobat hält die neue PDF bis zum Speichern im Speicher –
+    /// in PDFlight setzen Verschieben, Umbenennen, Blättern und Rückgängig eine Datei voraus. Null = abgebrochen oder gescheitert (gemeldet).</summary>
+    private (string Path, bool New)? CreatePdfFromImage(string imagePath)
+    {
+        var pdfPath = Path.ChangeExtension(imagePath, ".pdf");
+        if (File.Exists(pdfPath))
+        {
+            var free = pdfPath;
+            for (var i = 2; File.Exists(free); i++) { free = Path.Combine(Path.GetDirectoryName(pdfPath) ?? string.Empty, $"{Path.GetFileNameWithoutExtension(pdfPath)} ({i}).pdf"); }
+            var choice = TaskDlg.ChoiceTaskDlg(Handle, string.Format(Lng.T("„{0}“ gibt es schon."), Path.GetFileName(pdfPath)), null,
+            [
+                (string.Format(Lng.T("„{0}“ öffnen"), Path.GetFileName(pdfPath)), Lng.T("Die vorhandene PDF-Datei anzeigen")),
+                (string.Format(Lng.T("Als „{0}“ anlegen"), Path.GetFileName(free)), Lng.T("Aus dem Bild eine weitere PDF-Datei erstellen")),
+            ]);
+            if (choice < 0) { return null; }
+            if (choice == 0) { return (pdfPath, false); }
+            pdfPath = free;
+        }
+        try
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            PdfEditService.CreatePdfFromImage(imagePath, pdfPath);
+            return (pdfPath, true);
+        }
+        catch (Exception ex) when (PdfEditService.IsPdfReadError(ex))
+        {
+            try { if (File.Exists(pdfPath)) { File.Delete(pdfPath); } } catch (Exception cleanup) when (cleanup is IOException or UnauthorizedAccessException) { } // keine halbe Datei liegen lassen
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Aus dem Bild konnte keine PDF-Datei erstellt werden."), ex);
+            return null;
+        }
+        finally { Cursor.Current = Cursors.Default; }
+    }
+
+    /// <summary>Keine PDF (etwa ein Foto über „Öffnen mit“, Ablegen oder einen getippten Namen im Öffnen-Dialog): eigene Meldung statt
+    /// PDFiums Fehlertext, nur mit OK (Wortlaut Wilhelms vom 10.10.2026; „PDFlight beenden“ war kurz dabei). Eine angezeigte Datei bleibt
+    /// unverändert.</summary>
+    private void ShowNotPdfMessage(string path)
+    {
+        var page = new TaskDialogPage
+        {
+            Caption = Application.ProductName,
+            Text = string.Format(Lng.T("PDFlight konnte „{0}“ nicht öffnen, da entweder der Dateityp nicht unterstützt wird oder die Datei beschädigt ist."), Path.GetFileName(path)),
+            Icon = TaskDialogIcon.Warning,
+            AllowCancel = true,
+            Buttons = { TaskDialogButton.OK },
+        };
+        TaskDialog.ShowDialog(Handle, page);
+    }
+
     /// <summary>Eine andere Datei anzeigen; bei offenen Änderungen der bisherigen vorher Speichern / Nicht speichern / Abbrechen fragen
     /// wie beim Schließen (Wunsch vom 05.10.2026 – vorher wurde still gespeichert).</summary>
     private async void LoadOtherFile(string path, bool addToRecent = false)
     {
+        if (!PdfStatus.HasPdfHeader(path) && !PdfStatus.IsImage(path)) { ShowNotPdfMessage(path); return; } // erst prüfen, dann nach offenen Änderungen fragen
         if (!await ConfirmSaveChangesAsync()) { return; }
         LoadPdf(path, addToRecent: addToRecent);
     }
@@ -2673,6 +2762,7 @@ public partial class MainForm : Form
     /// Dateidaten werden nachgezogen. Ohne PDFsharp – deshalb auch bei Kennwortschutz.</summary>
     private async Task<bool> SaveDocumentAsync(string actionName)
     {
+        await FinishNoteEditAsync(); // ein Kommentar, an dem gerade getippt wird, gehört zum Stand
         if (ShownDocument is not { } doc || currentFile == null) { return false; }
         await pageView.EndFormInputAsync(); // übernimmt den Wert des Felds, in dem gerade getippt wird
         byte[] bytes;
@@ -2705,6 +2795,7 @@ public partial class MainForm : Form
     /// Abbrechen. false = abgebrochen oder Speichern gescheitert, das Schließen unterbleibt.</summary>
     private async Task<bool> ConfirmSaveChangesAsync()
     {
+        await FinishNoteEditAsync(); // sonst ginge ein gerade getippter Kommentar ohne Rückfrage verloren
         if (!documentDirty) { return true; }
         var save = new TaskDialogButton(Lng.T("Speichern"));
         var discard = new TaskDialogButton(Lng.T("Nicht speichern"));
@@ -2808,7 +2899,7 @@ public partial class MainForm : Form
     private void UpdateAnnotationButtons()
     {
         var enabled = document != null && currentFile != null && !EditLocked && currentPageCount > 0;
-        btnHighlight.Enabled = ddbHighlight.Enabled = btnFreeText.Enabled = btnStamp.Enabled = btnDraw.Enabled = ddbInk.Enabled = btnErase.Enabled = btnManageAnnotations.Enabled = btnRotateLeft.Enabled = btnRotateRight.Enabled = ddbRotate.Enabled = enabled;
+        btnHighlight.Enabled = ddbHighlight.Enabled = btnFreeText.Enabled = btnComment.Enabled = btnStamp.Enabled = btnDraw.Enabled = ddbInk.Enabled = btnErase.Enabled = btnManageAnnotations.Enabled = btnRotateLeft.Enabled = btnRotateRight.Enabled = ddbRotate.Enabled = enabled;
         if (!enabled && AnnotationModeActive) { EndAnnotationModes(); }
     }
 
@@ -2853,7 +2944,19 @@ public partial class MainForm : Form
         (highlightMode && (item == btnHighlight || item == ddbHighlight)) ||
         (pageView.InkMode && (item == btnDraw || item == ddbInk)) ||
         (pageView.EraseMode && item == btnErase) ||
-        (pageView.IsPicking && item == btnFreeText); // Stelle für den Freitext wählen (Wunsch vom 04.10.2026)
+        (pageView.IsPicking && item == pickingItem); // Stelle für Freitext bzw. Kommentar wählen (Wunsch vom 04.10.2026)
+
+    private ToolStripItem? pickingItem; // wofür gerade eine Stelle gewählt wird (btnFreeText oder btnComment)
+
+    /// <summary>Zweiter Klick auf den Knopf, für den gerade eine Stelle gewählt wird: abbrechen (true). Wird für den anderen gewählt,
+    /// bricht das ebenfalls ab, und es geht mit diesem weiter (false).</summary>
+    private bool CancelPickFor(ToolStripItem item)
+    {
+        if (!pageView.IsPicking) { return false; }
+        var same = pickingItem == item;
+        pageView.CancelPick();
+        return same;
+    }
 
     private void SetAnnotationMode(bool highlight, bool ink, bool erase = false)
     {
@@ -2892,8 +2995,54 @@ public partial class MainForm : Form
 
     private void BtnFreeText_Click(object? sender, EventArgs e)
     {
-        if (pageView.IsPicking) { pageView.CancelPick(); return; } // zweiter Klick beendet das Wählen der Stelle wie bei den Modi
+        if (CancelPickFor(btnFreeText)) { return; } // zweiter Klick beendet das Wählen der Stelle wie bei den Modi
         AddAnnotationDialog(); // bearbeitet nur die Anzeige – vorher nichts speichern
+    }
+
+    /// <summary>„Kommentar“ in der Viewer-Leiste wie bei Acrobat (Wunsch vom 10.10.2026): Das Kommentarsymbol haftet am Zeiger, ein Klick
+    /// auf die Seite legt dort einen neuen Kommentar an (Karte zum Schreiben); Esc, ein zweiter Klick oder ein Klick neben die Seiten
+    /// bricht ab.</summary>
+    private async void BtnComment_Click(object? sender, EventArgs e)
+    {
+        if (CancelPickFor(btnComment) || EditLocked || ShownDocument == null) { return; }
+        EndAnnotationModes();
+        await FinishNoteEditAsync();
+        CloseNoteCard();
+        var status = statusPath.Text;
+        var hint = Lng.T("Klicke auf die Stelle für die Notiz – Esc bricht ab.");
+        statusPath.Text = hint;
+        commentCursor ??= CreateCommentCursor();
+        var picking = pageView.PickPointAsync(commentCursor);
+        pickingItem = btnComment;
+        viewerStrip.Invalidate();
+        var point = await picking;
+        if (pickingItem == btnComment && !pageView.IsPicking) { pickingItem = null; }
+        viewerStrip.Invalidate();
+        if (statusPath.Text == hint) { statusPath.Text = status; }
+        if (point is { } client && pageView.PagePointAt(client) is { } hit) { StartNewNote(hit.Page, hit.Point, []); }
+    }
+
+    private Cursor? commentCursor;
+
+    /// <summary>Zeiger „Kommentar einfügen“: das Kommentarsymbol schwarz mit weißem Saum, die Spitze (Hotspot) an seiner linken oberen
+    /// Ecke – dort entsteht das Notizsymbol. Ein Cursor aus einem Icon hat den Hotspot in der Mitte, deshalb steht das Symbol im
+    /// rechten unteren Viertel einer doppelt so großen Fläche.</summary>
+    private Cursor CreateCommentCursor()
+    {
+        if (!ToolbarIcons.FontAvailable) { return Cursors.Cross; }
+        var size = new Size(LogicalToDeviceUnits(20), LogicalToDeviceUnits(20));
+        var offset = size.Width + 2;
+        using Bitmap bitmap = new(2 * offset, 2 * offset);
+        using (var g = Graphics.FromImage(bitmap))
+        {
+            var halo = ToolbarIcons.Get(ToolbarIcons.Comment, size, Color.White); // aus dem Zwischenspeicher – nicht freigeben
+            for (var dx = -1; dx <= 1; dx++)
+            {
+                for (var dy = -1; dy <= 1; dy++) { g.DrawImage(halo, offset + dx, offset + dy); }
+            }
+            g.DrawImage(ToolbarIcons.Get(ToolbarIcons.Comment, size, Color.Black), offset, offset);
+        }
+        return new Cursor(bitmap.GetHicon());
     }
 
     private void BtnStamp_Click(object? sender, EventArgs e)
@@ -2956,6 +3105,8 @@ public partial class MainForm : Form
         // „Hervorheben“ nur mit markiertem Text, sonst ausgeblendet statt ausgegraut (Wunsch vom 04.10.2026, wie Edge); die Bearbeitungs-
         // sperre steckt in Available von „… entfernen“ (UpdateUiState) – Visible läse vor dem Anzeigen false
         mnuHighlight.Available = mnuRemoveAnnotation.Available && shown && pageView.HasSelection;
+        // „Kommentar hinzufügen“ an markiertem Text oder an der Stelle des Rechtsklicks (seit 10.10.2026, wie Edge) – gesperrt wie das Hervorheben
+        mnuAddComment.Available = mnuRemoveAnnotation.Available && shown && (pageView.HasSelection || pageView.IsOnPage(pageView.ContextMenuPoint));
         mnuViewSelectAll.Enabled = shown;
         // „Bild speichern…“ / „Bild kopieren“ nur, wenn der Rechtsklick ein Bild getroffen hat – auch bei gesperrter Bearbeitung (nur lesen)
         mnuSaveImage.Available = mnuCopyImage.Available = toolStripSeparatorC2.Available = shown && pageView.ImageUnderMouse != null;
@@ -3071,6 +3222,222 @@ public partial class MainForm : Form
         finally { Cursor.Current = Cursors.Default; }
     }
 
+    // ------------------------------------------------------------------ Kommentare (Notizen wie in Edge)
+
+    // Kommentare (seit 10.10.2026, Wunsch Wilhelms nach Edges Vorbild, ohne Antworten): Notiz-Anmerkungen (/Text) mit einer gelben Karte
+    // (Controls\NoteCard, Kind der Seitenansicht). Ein Klick aufs Symbol zeigt die Karte, „Kommentar hinzufügen“ im Kontextmenü legt einen
+    // an – mit markiertem Text wird dieser hervorgehoben und das Symbol über den Anfang gesetzt, sonst an die Stelle des Rechtsklicks.
+    // Angelegt wird erst beim Übernehmen eines nicht leeren Texts; alles ungespeichert wie die anderen Anmerkungen, je ein Rückgängig-Schritt
+    // (Hervorhebung und Kommentar zusammen einer). „Löschen“ entfernt nur den Kommentar (Entscheidung Wilhelms).
+    private (int Page, int Number, RectangleF Icon)? noteShown; // offene Karte: Seite, Nummer (-1 = noch nicht angelegt), Symbol als Anteil der Seite
+    private string noteOriginalText = string.Empty;
+    private List<(int Page, int Start, int Count)> noteHighlight = []; // neuer Kommentar an markiertem Text: diese Bereiche beim Übernehmen hervorheben
+    private Task? noteTask;          // läuft gerade das Übernehmen (Anlegen/Ändern)?
+    private const float NoteIconPt = 16; // wie Edge (und PdfDocument.NoteSize im Hilfsprogramm)
+
+    private async void PageView_NoteClicked(object? sender, AnnotationEventArgs e)
+    {
+        await FinishNoteEditAsync();
+        await OpenNoteAsync(e.Page, e.Number, edit: e.Control); // Strg+Klick: gleich bearbeiten (Wunsch vom 10.10.2026)
+    }
+
+    private int noteHoverVersion; // zählt die Wechsel des Kommentars unter der Maus – eine überholte Antwort zeigt keinen Tooltip mehr
+
+    /// <summary>Tooltip über einem Kommentarsymbol wie bei Acrobat: Autor fett als Überschrift, darunter der Text (Wunsch vom 10.10.2026).
+    /// Eine eigene ToolTip-Komponente, damit sich Überschrift und Link-Tooltip nicht in die Quere kommen.</summary>
+    private async void PageView_NoteHover(object? sender, AnnotationEventArgs? e)
+    {
+        var version = ++noteHoverVersion;
+        toolTipNote.SetToolTip(pageView, null);
+        if (e == null || ShownDocument is not { } doc) { return; }
+        if (noteCard.Visible && noteShown is { } shown && shown.Page == e.Page && shown.Number == e.Number) { return; } // die Karte zeigt ihn schon
+        var size = pageView.PageSize(e.Page);
+        if (size.IsEmpty) { return; }
+        var note = await doc.NoteAsync(e.Page, size.Width, size.Height, e.Number);
+        if (version != noteHoverVersion || doc != ShownDocument || note is not { } n || n.Text.Length == 0) { return; }
+        toolTipNote.ToolTipTitle = n.Author;
+        toolTipNote.SetToolTip(pageView, WrapToolTip(n.Text));
+    }
+
+    /// <summary>Langen Text für einen Tooltip umbrechen (Windows bricht erst am Bildschirmrand um) und kürzen.</summary>
+    private static string WrapToolTip(string text, int width = 60, int limit = 600)
+    {
+        if (text.Length > limit) { text = text[..limit].TrimEnd() + "…"; }
+        var lines = new List<string>();
+        foreach (var paragraph in text.ReplaceLineEndings("\n").Split('\n'))
+        {
+            var line = string.Empty;
+            foreach (var word in paragraph.Split(' '))
+            {
+                if (line.Length > 0 && line.Length + 1 + word.Length > width) { lines.Add(line); line = word; }
+                else { line = line.Length == 0 ? word : line + " " + word; }
+            }
+            lines.Add(line);
+        }
+        return string.Join("\n", lines);
+    }
+
+    /// <summary>Karte eines vorhandenen Kommentars zeigen (Klick aufs Symbol, „Bearbeiten“ in „Anmerkungen verwalten“).</summary>
+    private async Task OpenNoteAsync(int page, int number, bool edit = false)
+    {
+        if (ShownDocument is not { } doc) { return; }
+        noteHoverVersion++; // ein Tooltip über dem Symbol hätte jetzt nichts mehr zu sagen
+        toolTipNote.SetToolTip(pageView, null);
+        var size = pageView.PageSize(page);
+        if (size.IsEmpty || await doc.NoteAsync(page, size.Width, size.Height, number) is not { } note || doc != ShownDocument) { return; }
+        noteShown = (page, number, new RectangleF((float)note.Rect.X / size.Width, (float)note.Rect.Y / size.Height, (float)note.Rect.Width / size.Width, (float)note.Rect.Height / size.Height));
+        noteOriginalText = note.Text;
+        noteHighlight = [];
+        PlaceNoteCard();
+        noteCard.ShowNote(note.Text, edit, canEdit: !EditLocked);
+    }
+
+    private async void MnuAddComment_Click(object? sender, EventArgs e)
+    {
+        if (EditLocked || ShownDocument is not { } doc) { return; }
+        await FinishNoteEditAsync();
+        int page;
+        Point topLeft;
+        List<(int Page, int Start, int Count)> ranges = [];
+        if (pageView.HasSelection && await pageView.SelectionStartAsync() is { } start)
+        {
+            page = start.Page;
+            topLeft = new Point(start.TopLeft.X, Math.Max(0, start.TopLeft.Y - NoteIconPixels(page))); // Symbol über dem Anfang der Markierung, wie Edge
+            ranges = await pageView.SelectionRangesAsync(); // jetzt merken – der Klick, der den Kommentar übernimmt, hebt die Markierung auf
+        }
+        else if (pageView.PagePointAt(pageView.ContextMenuPoint) is { } hit) { (page, topLeft) = hit; }
+        else { return; }
+        if (doc != ShownDocument) { return; }
+        StartNewNote(page, topLeft, ranges);
+    }
+
+    /// <summary>Karte für einen neuen Kommentar öffnen: Symbol mit der linken oberen Ecke an <paramref name="topLeft"/> (Seitenpixel);
+    /// angelegt wird erst beim Übernehmen des Texts, dann auch die Hervorhebung der gemerkten Bereiche.</summary>
+    private void StartNewNote(int page, Point topLeft, List<(int Page, int Start, int Count)> ranges)
+    {
+        if (EditLocked || ShownDocument == null) { return; }
+        var size = pageView.PageSize(page);
+        var icon = NoteIconPixels(page);
+        noteShown = (page, -1, new RectangleF((float)topLeft.X / size.Width, (float)topLeft.Y / size.Height, (float)icon / size.Width, (float)icon / size.Height));
+        noteOriginalText = string.Empty;
+        noteHighlight = ranges;
+        PlaceNoteCard();
+        noteCard.ShowNote(string.Empty, edit: true, canEdit: true);
+    }
+
+    /// <summary>Seitenlänge des Notizsymbols in Seitenpixeln der aktuellen Zoomstufe (16 pt).</summary>
+    private int NoteIconPixels(int page)
+    {
+        var size = pageView.PageSize(page);
+        if (ShownDocument is not { } doc || page >= doc.PageCount || size.IsEmpty) { return 16; }
+        var points = doc.PageSizes[page];
+        return Math.Max(1, (int)Math.Round(NoteIconPt * (size.Width + size.Height) / (points.Width + points.Height))); // unabhängig von der Seitendrehung
+    }
+
+    /// <summary>Karte neben das Symbol setzen: ihre rechte untere Ecke an die obere Kante des Symbols wie bei Edge, bei Platzmangel
+    /// darunter bzw. rechts daneben; ganz im Fenster.</summary>
+    private void PlaceNoteCard()
+    {
+        if (noteShown is not { } note) { return; }
+        var size = pageView.PageSize(note.Page);
+        var icon = pageView.PageToClient(note.Page, Rectangle.Round(new RectangleF(note.Icon.X * size.Width, note.Icon.Y * size.Height, note.Icon.Width * size.Width, note.Icon.Height * size.Height)));
+        var shadow = noteCard.LogicalToDeviceUnits(8);
+        var x = icon.Left + icon.Width / 2 + shadow - noteCard.Width;
+        var y = icon.Top + shadow - noteCard.Height;
+        if (y < 0) { y = icon.Bottom - shadow; }
+        if (x < 0) { x = icon.Left - shadow; }
+        var client = pageView.ClientSize;
+        noteCard.Location = new Point(Math.Clamp(x, 0, Math.Max(0, client.Width - noteCard.Width)), Math.Clamp(y, 0, Math.Max(0, client.Height - noteCard.Height)));
+    }
+
+    private void CloseNoteCard()
+    {
+        noteShown = null;
+        noteHighlight = [];
+        if (noteCard.Visible) { noteCard.Visible = false; }
+    }
+
+    /// <summary>Läuft ein Bearbeiten in der Karte, übernehmen und abwarten – vor dem Speichern, dem Schließen und anderen Kommentaren.</summary>
+    private async Task FinishNoteEditAsync()
+    {
+        if (noteCard.IsEditing) { noteCard.CommitEdit(); }
+        if (noteTask != null) { await noteTask; }
+    }
+
+    private void NoteCard_Committed(object? sender, string text)
+    {
+        noteTask = ApplyNoteTextGuardedAsync(text);
+    }
+
+    /// <summary>Fehler melden statt sie in der nie abgewarteten Aufgabe verschwinden zu lassen.</summary>
+    private async Task ApplyNoteTextGuardedAsync(string text)
+    {
+        try { await ApplyNoteTextAsync(text); }
+        catch (InvalidOperationException ex) { TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), Lng.T("Notiz hinzufügen")), ex); }
+    }
+
+    private async Task ApplyNoteTextAsync(string text)
+    {
+        if (noteShown is not { } note || ShownDocument is not { } doc) { return; }
+        var highlight = noteHighlight;
+        if (note.Number < 0) // neu: erst jetzt anlegen, leer = verworfen
+        {
+            if (text.Length == 0) { CloseNoteCard(); return; }
+            if (!await PushViewUndoAsync(Lng.T("Notiz hinzufügen"))) { return; }
+            if (highlight.Count > 0)
+            {
+                var color = highlightPalette.SelectedColor.ToArgb() == Color.White.ToArgb() ? PdfiumDocument.AcrobatYellow : highlightPalette.SelectedColor.ToArgb() & 0xFFFFFF; // Weiß (Umkehren) schreibt PDFsharp – hier das übliche Gelb
+                await pageView.HighlightRangesAsync(highlight, color);
+                pageView.ClearSelection(); // die Hervorhebung soll man sehen, nicht die Markierung darüber
+            }
+            var size = pageView.PageSize(note.Page);
+            var topLeft = new Point((int)Math.Round(note.Icon.X * size.Width), (int)Math.Round(note.Icon.Y * size.Height));
+            var number = doc == ShownDocument ? await doc.AddNoteAsync(note.Page, size.Width, size.Height, topLeft, text, Environment.UserName) : -1;
+            if (number < 0) { CloseNoteCard(); return; }
+            if (noteShown is { Number: < 0 } still && still.Page == note.Page) { noteShown = (note.Page, number, note.Icon); } // die Karte zeigt jetzt den angelegten Kommentar
+            noteOriginalText = text;
+            noteHighlight = [];
+            statusPath.Text = Lng.T("Die Notiz wurde hinzugefügt.");
+            return;
+        }
+        if (text.Length == 0 || text == noteOriginalText) // leer = alter Text bleibt (Löschen geht über „…“)
+        {
+            if (text.Length == 0 && noteShown != null) { noteCard.ShowNote(noteOriginalText, edit: false, canEdit: !EditLocked); } // nicht nach Strg+Enter, das die Karte schließt
+            return;
+        }
+        if (!await PushViewUndoAsync(Lng.T("Notiz bearbeiten"))) { return; }
+        if (await doc.SetNoteTextAsync(note.Page, note.Number, text)) { noteOriginalText = text; statusPath.Text = Lng.T("Die Notiz wurde geändert."); }
+    }
+
+    private void NoteCard_EditCanceled(object? sender, EventArgs e)
+    {
+        if (noteShown is { Number: < 0 }) { CloseNoteCard(); } // ein neuer Kommentar ohne Text entsteht gar nicht
+    }
+
+    private async void NoteCard_DeleteRequested(object? sender, EventArgs e)
+    {
+        var note = noteShown;
+        CloseNoteCard();
+        if (note is not { Number: >= 0 } shown || ShownDocument is not { } doc) { return; }
+        if (!await PushViewUndoAsync(Lng.T("Notiz löschen"))) { return; }
+        if (await doc.RemoveMarkupAsync(shown.Page, shown.Number)) { statusPath.Text = Lng.T("Die Notiz wurde gelöscht."); }
+    }
+
+    private void NoteCard_CloseRequested(object? sender, EventArgs e)
+    {
+        CloseNoteCard();
+    }
+
+    /// <summary>Klick in die Seitenansicht neben die Karte: übernehmen und schließen wie bei Edge.</summary>
+    private void PageView_MouseUp(object? sender, MouseEventArgs e)
+    {
+        if (!noteCard.Visible) { return; }
+        // erst beim Loslassen schließen: Das Ausblenden schickt eine Mausbewegung an die Stelle des Zeigers – beim Drücken kam sie noch
+        // ins Ziehen und markierte Text bis dorthin (Test v75b-stuckdrag.ps1)
+        noteCard.CommitEdit();
+        CloseNoteCard();
+    }
+
     // ------------------------------------------------------------------ Seitenansicht
 
     /// <summary>Hintergrund der Anzeige (Einstellung „Anzeigehintergrund“): die Fläche neben den Seiten, die Seitenleiste und die
@@ -3173,6 +3540,7 @@ public partial class MainForm : Form
         btnSidebar.Image = ViewerIcon(ToolbarIcons.Sidebar); // Beschriftung „Inhaltsverzeichnis“ nur bei geschlossener Seitenleiste (UpdateViewerLayout)
         // Hervorheben: Symbol mit Farbbalken aus UpdateAnnotationIcons; Anzeige mit oder ohne Beschriftung entscheidet UpdateViewerLayout
         btnStamp.Image = ViewerIcon(ToolbarIcons.Stamp);
+        btnComment.Image = ViewerIcon(ToolbarIcons.Comment);
         Set(btnErase, ToolbarIcons.Erase); // nur das Symbol wie der Rückgängig-Knopf (Wunsch vom 04.10.2026)
         Set(btnManageAnnotations, ToolbarIcons.ManageAnnotations); // nur Symbol – „Anmerkungen verwalten“ (Wunsch vom 04.10.2026, vorher im Bearbeiten-Menü)
         if (ToolbarIcons.FontAvailable) { pageView.EraseCursor ??= CreateEraseCursor(); }
@@ -3211,7 +3579,7 @@ public partial class MainForm : Form
     /// <summary>Seitenfeld, Zoom, Anpassen und Drehen stehen wie bei Edge mittig in der Viewer-Leiste: Ein Platzhalter hinter der
     /// Seitenleisten-Schaltfläche schiebt sie dorthin – nur so weit, dass rechts Suche und Vollbild Platz behalten.</summary>
     /// <summary>Schaltflächen der Viewer-Leiste, die wie die Symbolleiste Symbol und Text zeigen (Wunsch vom 03.10.2026).</summary>
-    private ToolStripItem[] ViewerTextItems => [btnSidebar, btnHighlight, btnFreeText, btnStamp, btnDraw];
+    private ToolStripItem[] ViewerTextItems => [btnSidebar, btnHighlight, btnFreeText, btnComment, btnStamp, btnDraw];
 
     private bool updatingViewerLayout;
 
@@ -3281,6 +3649,7 @@ public partial class MainForm : Form
     private void PageView_ZoomChanged(object? sender, EventArgs e)
     {
         UpdateZoomDisplay();
+        if (noteCard.Visible) { PlaceNoteCard(); } // die Karte bleibt am Symbol
     }
 
     private void UpdateZoomDisplay()
@@ -4096,7 +4465,7 @@ public partial class MainForm : Form
     }
 
     /// <summary>Getippt wird gerade in ein Textfeld: Seitenfeld, Zoomfeld, Suchfeld oder ein Formularfeld der angezeigten Seite.</summary>
-    private bool TextInputFocused => textPage.Focused || textSearch.Focused || comboZoom.Focused || (pageView.Focused && pageView.FormFocused);
+    private bool TextInputFocused => textPage.Focused || textSearch.Focused || comboZoom.Focused || noteCard.ContainsFocus || (pageView.Focused && pageView.FormFocused);
 
     /// <summary>Tasten, die ein Textfeld selbst braucht (Bearbeiten, Markieren, Zwischenablage, Esc) – dort haben sie Vorrang vor den
     /// Kürzeln. Strg+Umschalt+Entf (Datei löschen) bleibt ein Kürzel.</summary>

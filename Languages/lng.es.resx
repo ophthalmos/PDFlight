@@ -474,7 +474,6 @@ para instalar la última versión.</value></data>
   <data name="Text" xml:space="preserve"><value>Texto</value></data>
   <data name="&amp;Bearbeiten…" xml:space="preserve"><value>&amp;Editar…</value></data>
   <data name="Schließen" xml:space="preserve"><value>Cerrar</value></data>
-  <data name="Haftnotiz" xml:space="preserve"><value>Nota adhesiva</value></data>
   <data name="Textanmerkung bearbeiten" xml:space="preserve"><value>Editar anotación de texto</value></data>
   <data name="(keine Anmerkungen)" xml:space="preserve"><value>(sin anotaciones)</value></data>
   <data name="Anmerkung löschen" xml:space="preserve"><value>Eliminar anotación</value></data>
@@ -708,6 +707,8 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="Klicke auf die Stelle für den Freitext – Esc bricht ab." xml:space="preserve"><value>Haz clic donde debe ir el texto libre – Esc cancela.</value></data>
   <data name="Freitext hier einfügen…" xml:space="preserve"><value>Insertar texto libre aquí…</value></data>
   <data name="Maße ab der linken oberen Ecke der Seite." xml:space="preserve"><value>Medidas desde la esquina superior izquierda de la página.</value></data>
+  <data name="Notiz verschieben" xml:space="preserve"><value>Mover nota</value></data>
+  <data name="Die Notiz wurde auf Seite {0} verschoben." xml:space="preserve"><value>La nota de la página {0} se movió.</value></data>
   <data name="Textanmerkung verschieben" xml:space="preserve"><value>Mover anotación de texto</value></data>
   <data name="Die Textanmerkung wurde auf Seite {0} verschoben." xml:space="preserve"><value>La anotación de texto de la página {0} se movió.</value></data>
   <data name="Stempel verschieben" xml:space="preserve"><value>Mover sello</value></data>
@@ -860,4 +861,23 @@ Sin ella, el archivo ya no podrá mostrarse.</value></data>
   <data name="Das Bild konnte nicht gespeichert werden." xml:space="preserve"><value>No se pudo guardar la imagen.</value></data>
   <data name="Das Bild konnte nicht kopiert werden." xml:space="preserve"><value>No se pudo copiar la imagen.</value></data>
   <data name="Das Bild wurde in die Zwischenablage kopiert." xml:space="preserve"><value>La imagen se copió al portapapeles.</value></data>
+  <data name="PDFlight konnte „{0}“ nicht öffnen, da entweder der Dateityp nicht unterstützt wird oder die Datei beschädigt ist." xml:space="preserve"><value>PDFlight no pudo abrir «{0}» porque el tipo de archivo no es compatible o el archivo está dañado.</value></data>
+  <data name="„{0}“ gibt es schon." xml:space="preserve"><value>«{0}» ya existe.</value></data>
+  <data name="„{0}“ wurde aus dem Bild erstellt." xml:space="preserve"><value>«{0}» se creó a partir de la imagen.</value></data>
+  <data name="„{0}“ öffnen" xml:space="preserve"><value>Abrir «{0}»</value></data>
+  <data name="Als „{0}“ anlegen" xml:space="preserve"><value>Crear como «{0}»</value></data>
+  <data name="Aus dem Bild eine weitere PDF-Datei erstellen" xml:space="preserve"><value>Crear otro archivo PDF a partir de la imagen</value></data>
+  <data name="Aus dem Bild konnte keine PDF-Datei erstellt werden." xml:space="preserve"><value>No se pudo crear un archivo PDF a partir de la imagen.</value></data>
+  <data name="Die vorhandene PDF-Datei anzeigen" xml:space="preserve"><value>Mostrar el archivo PDF existente</value></data>
+  <data name="PDF-Dateien und Bilder|*.pdf;*.jpg;*.jpeg;*.png;*.tif;*.tiff;*.bmp;*.gif|PDF-Dateien (*.pdf)|*.pdf" xml:space="preserve"><value>Archivos PDF e imágenes|*.pdf;*.jpg;*.jpeg;*.png;*.tif;*.tiff;*.bmp;*.gif|Archivos PDF (*.pdf)|*.pdf</value></data>
+  <data name="Notiz" xml:space="preserve"><value>Nota</value></data>
+  <data name="Klicke auf die Stelle für die Notiz – Esc bricht ab." xml:space="preserve"><value>Haz clic donde debe ir la nota – Esc cancela.</value></data>
+  <data name="Übernehmen (Strg+Eingabe)" xml:space="preserve"><value>Aplicar (Ctrl+Entrar)</value></data>
+  <data name="Notiz hinzufügen" xml:space="preserve"><value>Añadir nota</value></data>
+  <data name="Notiz bearbeiten" xml:space="preserve"><value>Editar nota</value></data>
+  <data name="Notiz löschen" xml:space="preserve"><value>Eliminar nota</value></data>
+  <data name="Die Notiz wurde hinzugefügt." xml:space="preserve"><value>Se añadió la nota.</value></data>
+  <data name="Die Notiz wurde geändert." xml:space="preserve"><value>Se modificó la nota.</value></data>
+  <data name="Die Notiz wurde gelöscht." xml:space="preserve"><value>Se eliminó la nota.</value></data>
+  <data name="Weitere Optionen" xml:space="preserve"><value>Más opciones</value></data>
 </root>

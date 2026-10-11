@@ -497,6 +497,10 @@ internal sealed unsafe class PdfDocument : IDisposable
     {
         if (form == 0) { return -1; }
         var (page, px, py) = ToPagePoint(index, pageWidth, pageHeight, x, y);
+        // über einem Kommentarsymbol bekommt PDFium eine Stelle weit neben der Seite: sein Formularmodul klappt sonst beim Überfahren
+        // und Klicken die Popup-Notiz auf (großer gelber Kasten, bei Kommentaren aus Sumatra oder Acrobat) – PDFlight zeigt dafür einen
+        // Tooltip bzw. die Karte. Ein Klick dorthin nimmt einem Feld den Fokus wie ein Klick neben die Felder (Fehlerbericht 10.10.2026).
+        if (AnnotAt(index, pageWidth, pageHeight, x, y, 1 << Pdfium.AnnotText).Number >= 0) { (px, py) = (-100_000, -100_000); }
         switch (kind)
         {
             case Protocol.MouseMove:
@@ -623,6 +627,85 @@ internal sealed unsafe class PdfDocument : IDisposable
         Events.Invalidate(Id, index, 0, 0, 1, 1); // die ganze Seite neu zeichnen
         Events.Changed(Id);
         return true;
+    }
+
+    // ================================================================== Kommentare (Notizen, seit 10.10.2026 – wie in Edge)
+
+    private const float NoteSize = 16; // Seitenlänge des Notizsymbols in Punkt, wie bei Edge
+
+    /// <summary>Legt einen Kommentar als Notiz-Anmerkung (/Text) an: Symbol 16 × 16 pt mit der linken oberen Ecke an der Stelle
+    /// (Seitenpixel), gelb, Flags Print | NoZoom | NoRotate, Text in /Contents, Autor in /T, Änderungsdatum /M (vom Hauptprogramm: die Zeitzone stünde in der Registry, die der Container nicht lesen darf) – so legt ihn auch Edge an.
+    /// Das Symbol zeichnet PDFium beim nächsten Rendern selbst. Ein verknüpftes Popup entfällt: PDFiums öffentliche Schnittstelle kann
+    /// keines anhängen, Acrobat und Edge zeigen den Text auch ohne. Liefert die Nummer der neuen Anmerkung (-1 bei Fehlschlag).</summary>
+    public int AddNote(int index, int pageWidth, int pageHeight, int x, int y, string text, string author, string modified)
+    {
+        var (page, px, py) = ToPagePoint(index, pageWidth, pageHeight, x, y);
+        var number = Pdfium.PageGetAnnotCount(page); // die neue Anmerkung kommt ans Ende von /Annots
+        var annot = Pdfium.PageCreateAnnot(page, Pdfium.AnnotText);
+        if (annot == 0) { return -1; }
+        try
+        {
+            var rect = new Pdfium.RectF { Left = (float)px, Top = (float)py, Right = (float)px + NoteSize, Bottom = (float)py - NoteSize };
+            _ = Pdfium.AnnotSetRect(annot, &rect);
+            _ = Pdfium.AnnotSetColor(annot, Pdfium.AnnotColor, 255, 255, 0, 255);
+            _ = Pdfium.AnnotSetFlags(annot, Pdfium.AnnotFlagPrint | Pdfium.AnnotFlagNoZoom | Pdfium.AnnotFlagNoRotate);
+            SetString(annot, "Contents", text);
+            SetString(annot, "T", author);
+            SetString(annot, "M", modified);
+        }
+        finally { Pdfium.PageCloseAnnot(annot); }
+        Events.Invalidate(Id, index, 0, 0, 1, 1);
+        Events.Changed(Id);
+        return number;
+    }
+
+    /// <summary>Text, Autor und Symbolrechteck (Seitenpixel) eines Kommentars; null, wenn die Nummer keine Notiz ist.</summary>
+    public (string Text, string Author, (int X, int Y, int Width, int Height) Rect)? Note(int index, int pageWidth, int pageHeight, int number)
+    {
+        var page = GetPage(index).Page;
+        if (number < 0 || number >= Pdfium.PageGetAnnotCount(page)) { return null; }
+        var annot = Pdfium.PageGetAnnot(page, number);
+        if (annot == 0) { return null; }
+        try
+        {
+            if (Pdfium.AnnotGetSubtype(annot) != Pdfium.AnnotText || Pdfium.AnnotGetRect(annot, out var r) == 0) { return null; }
+            _ = Pdfium.PageToDevice(page, 0, 0, pageWidth, pageHeight, ViewRotation, Math.Min(r.Left, r.Right), Math.Max(r.Top, r.Bottom), out var x1, out var y1);
+            _ = Pdfium.PageToDevice(page, 0, 0, pageWidth, pageHeight, ViewRotation, Math.Max(r.Left, r.Right), Math.Min(r.Top, r.Bottom), out var x2, out var y2);
+            return (GetString(annot, "Contents"), GetString(annot, "T"), (Math.Min(x1, x2), Math.Min(y1, y2), Math.Abs(x2 - x1), Math.Abs(y2 - y1)));
+        }
+        finally { Pdfium.PageCloseAnnot(annot); }
+    }
+
+    /// <summary>Ändert den Text eines Kommentars (und sein Änderungsdatum); false, wenn die Nummer keine Notiz ist.</summary>
+    public bool SetNoteText(int index, int number, string text, string modified)
+    {
+        var page = GetPage(index).Page;
+        if (number < 0 || number >= Pdfium.PageGetAnnotCount(page)) { return false; }
+        var annot = Pdfium.PageGetAnnot(page, number);
+        if (annot == 0) { return false; }
+        try
+        {
+            if (Pdfium.AnnotGetSubtype(annot) != Pdfium.AnnotText) { return false; }
+            SetString(annot, "Contents", text);
+            SetString(annot, "M", modified);
+        }
+        finally { Pdfium.PageCloseAnnot(annot); }
+        Events.Changed(Id);
+        return true;
+    }
+
+    private static void SetString(nint annot, string key, string value)
+    {
+        fixed (char* text = value + "\0") { _ = Pdfium.AnnotSetStringValue(annot, key, (ushort*)text); }
+    }
+
+    private static string GetString(nint annot, string key)
+    {
+        var length = Pdfium.AnnotGetStringValue(annot, key, null, 0); // Bytes in UTF-16LE samt abschließender Null
+        if (length <= 2 || length > 1_000_000) { return string.Empty; }
+        var buffer = new char[length / 2];
+        fixed (char* first = buffer) { _ = Pdfium.AnnotGetStringValue(annot, key, (ushort*)first, length); }
+        return new string(buffer, 0, buffer.Length - 1);
     }
 
     /// <summary>Die Vierecke je Textzeile, die <see cref="AddHighlight"/> für den Zeichenbereich anlegen würde (PDF-Koordinaten) – für
@@ -817,7 +900,7 @@ internal sealed unsafe class PdfDocument : IDisposable
             }
         }
         finally { Pdfium.PageCloseAnnot(annot); }
-        if (subtype is not ((>= Pdfium.AnnotHighlight and <= Pdfium.AnnotStrikeOut) or Pdfium.AnnotInk or Pdfium.AnnotStamp or Pdfium.AnnotFreeText)) { return false; }
+        if (subtype is not ((>= Pdfium.AnnotHighlight and <= Pdfium.AnnotStrikeOut) or Pdfium.AnnotInk or Pdfium.AnnotStamp or Pdfium.AnnotFreeText or Pdfium.AnnotText)) { return false; }
         if (popup > number && Pdfium.PageRemoveAnnot(page, popup) == 0) { popup = -1; } // die höhere Nummer zuerst – sonst rückte die andere nach vorn
         if (Pdfium.PageRemoveAnnot(page, number) == 0) { return false; }
         if (popup >= 0 && popup < number) { _ = Pdfium.PageRemoveAnnot(page, popup); }

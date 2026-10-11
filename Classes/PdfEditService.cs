@@ -202,13 +202,20 @@ internal static partial class PdfEditService
         using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
         var pdfPage = document.Pages[page - 1];
         var annotation = AnnotationAt(pdfPage.Annotations, index);
-        if (annotation.Elements.GetName("/Subtype") is not ("/FreeText" or "/Stamp")) { throw new InvalidOperationException("An dieser Stelle steht keine Textanmerkung und kein Stempel mehr."); }
+        if (annotation.Elements.GetName("/Subtype") is not ("/FreeText" or "/Stamp" or "/Text")) { throw new InvalidOperationException("An dieser Stelle steht keine Textanmerkung, kein Stempel und keine Notiz mehr."); }
         var rect = annotation.Elements.GetRectangle("/Rect");
         var box = pdfPage.MediaBox;
         var (width, height) = (rect.Width, rect.Height);
         var x = Math.Clamp(Math.Min(rect.X1, rect.X2) + dx, box.X1, Math.Max(box.X1, box.X2 - width));
         var y = Math.Clamp(Math.Min(rect.Y1, rect.Y2) + dy, box.Y1, Math.Max(box.Y1, box.Y2 - height));
         annotation.Elements.SetRectangle("/Rect", new PdfRectangle(new XRect(x, y, width, height)));
+        // die Popup-Notiz eines Kommentars (Sumatra, Acrobat) wandert mit – um denselben Versatz, sie darf neben der Seite liegen
+        if ((annotation.Elements.GetObject("/Popup") as PdfDictionary)?.Elements is { } popup && popup.ContainsKey("/Rect"))
+        {
+            var (shiftX, shiftY) = (x - Math.Min(rect.X1, rect.X2), y - Math.Min(rect.Y1, rect.Y2));
+            var old = popup.GetRectangle("/Rect");
+            popup.SetRectangle("/Rect", new PdfRectangle(new XRect(Math.Min(old.X1, old.X2) + shiftX, Math.Min(old.Y1, old.Y2) + shiftY, old.Width, old.Height)));
+        }
         SaveCompact(document, path);
     }
 
@@ -1201,6 +1208,56 @@ internal static partial class PdfEditService
             return p.Rotate % 180 != 0 ? (p.Height.Point, p.Width.Point) : (p.Width.Point, p.Height.Point);
         }
         catch (Exception ex) when (IsPdfReadError(ex)) { return (0, 0); }
+    }
+
+    /// <summary>Neue PDF aus einem Bild, Seite in der Größe des Bildes ohne Rand – wie Acrobat beim Öffnen eines Bildes (Wunsch vom
+    /// 10.10.2026; anders als dort entsteht die Datei gleich, s. MainForm.CreatePdfFromImage). Maße aus Pixeln und der Auflösung der
+    /// Datei (10–2400 dpi, sonst 96 wie GDI+ ohne Angabe), höchstens 14 400 pt (<see cref="LayoutNewPage"/>). JPEGs übernimmt PDFsharp
+    /// unverändert; mehrseitige TIFF (Scans, Faxe) ergeben je Bild eine Seite. Liefert die Seitenzahl.</summary>
+    public static int CreatePdfFromImage(string imagePath, string pdfPath)
+    {
+        using PdfDocument document = new();
+        document.Info.Title = Path.GetFileNameWithoutExtension(imagePath);
+        int frames;
+        try
+        {
+            using var probe = System.Drawing.Image.FromFile(imagePath);
+            frames = probe.FrameDimensionsList.Contains(System.Drawing.Imaging.FrameDimension.Page.Guid) ? probe.GetFrameCount(System.Drawing.Imaging.FrameDimension.Page) : 1;
+            if (frames > 1)
+            {
+                for (var i = 0; i < frames; i++)
+                {
+                    probe.SelectActiveFrame(System.Drawing.Imaging.FrameDimension.Page, i);
+                    using System.Drawing.Bitmap frame = new(probe);
+                    frame.SetResolution(probe.HorizontalResolution, probe.VerticalResolution);
+                    using var image = XImage.FromGdiPlusImage(frame);
+                    AddImagePage(document, image);
+                }
+            }
+        }
+        catch (Exception ex) when (ex is OutOfMemoryException or System.Runtime.InteropServices.ExternalException)
+        {
+            throw new InvalidOperationException(Lng.T("Die Bilddatei konnte nicht gelesen werden.") + " " + imagePath, ex);
+        }
+        if (frames <= 1)
+        {
+            using var image = LoadImage(imagePath); // aus der Datei, nicht aus dem GDI+-Bild: so bleibt ein JPEG unverändert
+            AddImagePage(document, image);
+        }
+        var pages = document.PageCount; // nach dem Speichern sperrt PDFsharp das Dokument auch gegen Lesezugriffe
+        SaveCompact(document, pdfPath);
+        return pages;
+    }
+
+    private static void AddImagePage(PdfDocument document, XImage image)
+    {
+        var dpi = image.HorizontalResolution is >= 10 and <= 2400 ? image.HorizontalResolution : 96;
+        var layout = LayoutNewPage(new NewPageOptions(InsertPosition.Last, NewPageFormat.FromImage, false, null, false, dpi), 0, 0, image.PixelWidth, image.PixelHeight);
+        var page = document.AddPage();
+        page.Width = XUnit.FromPoint(layout.Width);
+        page.Height = XUnit.FromPoint(layout.Height);
+        using var gfx = XGraphics.FromPdfPage(page);
+        gfx.DrawImage(image, layout.Image ?? new XRect(0, 0, layout.Width, layout.Height));
     }
 
     /// <summary>Bild für eine neue Seite laden. GDI+ meldet unlesbare oder unbekannte Bilddaten als OutOfMemoryException – die
