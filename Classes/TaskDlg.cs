@@ -298,7 +298,7 @@ internal static class TaskDlg
         ("Strg+Umschalt+C", "Dateipfad in die Zwischenablage kopieren", null),
         ("Strg+Umschalt+H", "Stempel verwalten", null),
         ("Strg+Umschalt+K", "sofort in den 1-Klick-Ordner kopieren", null),
-        ("Strg+Umschalt+M / Strg+F4", "sofort in den 1-Klick-Ordner verschieben", null),
+        ("Strg+Umschalt+M / Umschalt+F4", "sofort in den 1-Klick-Ordner verschieben", null),
         ("Strg+Umschalt+P", "mit dem Druckdialog von Windows drucken", null),
         ("Strg+Umschalt+R / L", "aktuelle Seite rechts / links drehen", null),
         ("Strg+Umschalt+S", "unter neuem Namen speichern", null),

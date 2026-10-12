@@ -427,6 +427,8 @@ public partial class MainForm : Form
             catch (PasswordRequiredException ex)
             {
                 if (version != loadVersion || IsDisposed) { return null; }
+                // die bisherige Datei nicht hinter der Abfrage stehen lassen – nach dem Löschen sah man sonst die gelöschte (Fehlerbericht 12.10.2026)
+                if (document != null && !string.Equals(document.Path, path, StringComparison.OrdinalIgnoreCase)) { ShowDocument(null); }
                 if (ex.WrongPassword) { TaskDlg.MsgTaskDlg(Handle, Lng.T("Das Kennwort ist falsch."), null, TaskDialogIcon.Warning); }
                 using PasswordForm dialog = new(Path.GetFileName(path));
                 if (dialog.ShowDialog(this) != DialogResult.OK || version != loadVersion)
@@ -4444,7 +4446,7 @@ public partial class MainForm : Form
 
     /// <summary>Kürzel, die die angezeigte Datei schließen oder durch eine andere ersetzen – sie speichern nicht still, sondern fragen selbst
     /// (<see cref="CloseDocument"/>, <see cref="LoadOtherFile"/>).</summary>
-    private static bool IsFileSwitch(Keys keyData) => keyData is (Keys.W | Keys.Control) or (Keys.O | Keys.Control)
+    private static bool IsFileSwitch(Keys keyData) => keyData is (Keys.W | Keys.Control) or (Keys.F4 | Keys.Control) or (Keys.O | Keys.Control)
         or (Keys.Right | Keys.Control | Keys.Shift) or (Keys.Left | Keys.Control | Keys.Shift)
         or (Keys.S | Keys.Control | Keys.Shift); // Speichern unter: offene Änderungen gehen in die neue Datei, nicht still in die bisherige
 
@@ -4466,7 +4468,7 @@ public partial class MainForm : Form
             case Keys.M | Keys.Control: return () => MoveCopyDialog(copy: false);
             case Keys.K | Keys.Control: return () => MoveCopyDialog(copy: true);
             case Keys.M | Keys.Control | Keys.Shift:
-            case Keys.F4 | Keys.Control: return () => { if (!OneClickAction(copy: false)) { MoveCopyDialog(copy: false); } };
+            case Keys.F4 | Keys.Shift: return () => { if (!OneClickAction(copy: false)) { MoveCopyDialog(copy: false); } };
             case Keys.K | Keys.Control | Keys.Shift: return () => { if (!OneClickAction(copy: true)) { MoveCopyDialog(copy: true); } };
             case Keys.F2:
             case Keys.U | Keys.Control: return RenameCurrent;
@@ -4483,6 +4485,7 @@ public partial class MainForm : Form
             case Keys.R | Keys.Control when !EditLocked: return () => ShowRotationForm(); // Drehen-Fenster der Viewer-Leiste
             case Keys.P | Keys.Control when currentFile != null: return PrintWithDialog;
             case Keys.W | Keys.Control when currentFile != null || document != null: return CloseDocument; // wie ein Tab im Browser
+            case Keys.F4 | Keys.Control when currentFile != null || document != null: return CloseDocument; // wie in Word – bewusst nicht in der Kürzeltabelle
             case Keys.S | Keys.Control when documentDirty: return SaveFormInput;           // Formulareingaben speichern
             case Keys.P | Keys.Control | Keys.Shift when currentFile != null: return PrintWithSystemDialog; // wie in Edge
             case Keys.S | Keys.Control | Keys.Shift when currentFile != null && document != null: return SaveAsDialog; // Speichern unter… (wie Office)

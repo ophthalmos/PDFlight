@@ -2205,11 +2205,31 @@ internal sealed class PageView : ScrollableControl
             case Keys.Up: ScrollBy(0, -line); break;
             case Keys.Right: ScrollBy(line, 0); break;
             case Keys.Left: ScrollBy(-line, 0); break;
-            case Keys.PageDown: ScrollBy(0, ClientSize.Height - line); break;
-            case Keys.PageUp: ScrollBy(0, -(ClientSize.Height - line)); break;
+            case Keys.PageDown: ScrollPage(down: true, line); break;
+            case Keys.PageUp: ScrollPage(down: false, line); break;
             case Keys.Control | Keys.Home: GoToPage(0); break;
             case Keys.Control | Keys.End: if (pageRects.Length > 0) { GoToPage(pageRects.Length - 1); } break;
         }
+    }
+
+    /// <summary>Bild↓/Bild↑: Liegt der Anfang einer Seite höchstens eine Fensterhöhe entfernt, steht danach sie oben (wie nach
+    /// <see cref="GoToPage"/>) – bei der fernsten solchen Seite, damit bei kleinem Zoom fast ein ganzes Fenster weitergeht. Sonst
+    /// (Seite höher als das Fenster) eine Fensterhöhe abzüglich einer Zeile. Vorher ging es immer um diesen Betrag weiter, und der
+    /// Seitenanfang wanderte bei „An Höhe anpassen“ mit jedem Druck ein Stück nach unten.</summary>
+    private void ScrollPage(bool down, int line)
+    {
+        var scroll = -AutoScrollPosition.Y;
+        var margin = LogicalToDeviceUnits(PageMargin);
+        var height = ClientSize.Height;
+        int? target = null;
+        foreach (var rect in pageRects)
+        {
+            var top = rect.Y - margin;
+            var distance = down ? top - scroll : scroll - top;
+            if (distance <= line / 2 || distance > height) { continue; } // ganz nahe Seitenanfänge zählen nicht – sonst ginge es nur ein paar Pixel weiter
+            if (target == null || (down ? top > target : top < target)) { target = top; }
+        }
+        ScrollBy(0, target is { } y ? y - scroll : down ? height - line : -(height - line));
     }
 
     private void ScrollBy(int dx, int dy)
