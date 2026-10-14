@@ -30,7 +30,7 @@ public sealed class Stamp
     public double FontSize { get; set; } = 24;
     public string TextColor { get; set; } = "C00000";
     public string Background { get; set; } = string.Empty;
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter<StampPosition>))] // generisch: tauglich für den Quellgenerator der Einstellungen
     public StampPosition Position { get; set; } = StampPosition.TopRight;
     public bool WithDate { get; set; } = true;  // Datum und Uhrzeit als zweite Zeile
     public bool Border { get; set; } = true;    // Rahmen in der Schriftfarbe
