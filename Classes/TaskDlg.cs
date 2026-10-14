@@ -149,8 +149,8 @@ internal static class TaskDlg
         var indent = new string(' ', 14);
         var foot = $"{indent}© {buildDate:yyyy} Wilhelm Happe · Version {threeVersion} ({buildDate:d.M.yyyy})" +
             $"\n{indent}PDFium {pdfium}" +
-            $"\n{indent}PDFsharp {typeof(PdfSharp.Pdf.PdfDocument).Assembly.GetName().Version?.ToString(3)}" +
-            $"\n{indent}<a href=\"https://www.netradio.info/pdf/\">www.netradio.info</a>";
+            $"\n{indent}PDFsharp {typeof(PdfSharp.Pdf.PdfDocument).Assembly.GetName().Version?.ToString(3)} (AGPL-3.0)" + // seit 6.5 – das Programm als Ganzes unterliegt der AGPL (NOTICE.txt)
+            $"\n{indent}<a href=\"https://www.netradio.info/pdf/\">www.netradio.info</a> · <a href=\"https://github.com/ophthalmos/PDFlight\">{Lng.T("Quelltext auf GitHub")}</a>";
         var initialPage = new TaskDialogPage()
         {
             Caption = Lng.T("Über") + " " + Application.ProductName,

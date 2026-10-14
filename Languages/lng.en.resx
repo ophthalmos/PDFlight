@@ -256,6 +256,7 @@ Both files must have the same number of pages.</value></data>
   <data name="unbekannt" xml:space="preserve"><value>unknown</value></data>
   <data name="nicht gefunden" xml:space="preserve"><value>not found</value></data>
   <data name="Über" xml:space="preserve"><value>About</value></data>
+  <data name="Quelltext auf GitHub" xml:space="preserve"><value>Source code on GitHub</value></data>
   <data name="About.Text" xml:space="preserve"><value>PDFlight is a viewer for typical file operations
 (move, copy, delete, rename, mail).
 Frequently used target folders are kept in a list, so

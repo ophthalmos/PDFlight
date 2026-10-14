@@ -256,6 +256,7 @@ Les deux fichiers doivent avoir le même nombre de pages.</value></data>
   <data name="unbekannt" xml:space="preserve"><value>inconnue</value></data>
   <data name="nicht gefunden" xml:space="preserve"><value>introuvable</value></data>
   <data name="Über" xml:space="preserve"><value>À propos de</value></data>
+  <data name="Quelltext auf GitHub" xml:space="preserve"><value>Code source sur GitHub</value></data>
   <data name="About.Text" xml:space="preserve"><value>PDFlight est une visionneuse pour les opérations de
 fichiers courantes (déplacer, copier, supprimer, renommer,
 envoyer). Les dossiers cibles fréquents sont conservés

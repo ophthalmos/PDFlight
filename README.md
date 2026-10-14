@@ -18,8 +18,8 @@ ahead of time so it may not generate executable code at run time. PDFlight hands
 document as bytes; if a malformed PDF crashes it, PDFlight simply offers to reload. PDF
 JavaScript is never executed.
 
-PDFlight is open source (MIT), runs on Windows 10 and 11 and speaks German, English,
-French and Spanish.
+PDFlight is open source (own code MIT, the distributed program AGPL 3.0 – see [License](#license)),
+runs on Windows 10 and 11 and speaks German, English, French and Spanish.
 
 ## Requirements
 
@@ -34,4 +34,9 @@ the helper `pdfhost.exe` with Native AOT, which needs the C++ build tools of Vis
 
 ## License
 
-[MIT](LICENSE) – © 2026 Wilhelm Happe
+PDFlight's own source code is licensed under the [MIT License](LICENSE) – © 2026 Wilhelm Happe.
+
+PDFlight uses [PDFsharp](https://www.pdfsharp.com) 6.5 for page editing, which is licensed under the
+[GNU AGPL 3.0](LICENSE-AGPL-3.0.txt). The program as distributed (setup and binaries) is therefore
+subject to the AGPL 3.0 as a whole; this repository is its complete source code. Bundled third-party
+components and their licenses are listed in [NOTICE.txt](NOTICE.txt).
