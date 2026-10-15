@@ -139,7 +139,6 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
   <data name="Strg+F" xml:space="preserve"><value>Ctrl+F</value></data>
   <data name="Strg+P" xml:space="preserve"><value>Ctrl+P</value></data>
   <data name="Strg+R" xml:space="preserve"><value>Ctrl+R</value></data>
-  <data name="Strg+Z" xml:space="preserve"><value>Ctrl+Z</value></data>
   <data name="Strg+I" xml:space="preserve"><value>Ctrl+I</value></data>
   <data name="Strg+X" xml:space="preserve"><value>Ctrl+X</value></data>
   <data name="Strg+Entf" xml:space="preserve"><value>Ctrl+Supr</value></data>
@@ -295,7 +294,6 @@ para instalar la última versión.</value></data>
   <data name="Datei umbenennen" xml:space="preserve"><value>renombrar archivo</value></data>
   <data name="Datei in den Papierkorb verschieben" xml:space="preserve"><value>mover el archivo a la papelera</value></data>
   <data name="Seiten als neue Datei extrahieren" xml:space="preserve"><value>extraer páginas a un archivo nuevo</value></data>
-  <data name="Dokumentänderung rückgängig machen" xml:space="preserve"><value>deshacer cambio del documento</value></data>
   <data name="Dokumenteigenschaften" xml:space="preserve"><value>Propiedades del documento</value></data>
   <data name="Windows-Dateieigenschaften" xml:space="preserve"><value>Propiedades de archivo de Windows</value></data>
   <data name="als E-Mail-Anhang senden" xml:space="preserve"><value>enviar como adjunto de correo</value></data>
@@ -520,8 +518,6 @@ para instalar la última versión.</value></data>
   <data name="Das gilt für alle Seiten und lässt sich mit Strg+Z rückgängig machen." xml:space="preserve"><value>Afecta a todas las páginas y se puede deshacer con Ctrl+Z.</value></data>
   <data name="Anmerkungen löschen" xml:space="preserve"><value>Eliminación de anotaciones</value></data>
   <data name="&amp;Vorgaben" xml:space="preserve"><value>&amp;Predefinidos</value></data>
-  <data name="Strg+Y" xml:space="preserve"><value>Ctrl+Y</value></data>
-  <data name="aktuelle Seite an eine andere Position verschieben" xml:space="preserve"><value>mover la página actual a otra posición</value></data>
   <data name="&amp;Deckkraft (%):" xml:space="preserve"><value>&amp;Opacidad (%):</value></data>
 
   <!-- Leere Seite einfügen -->
@@ -561,8 +557,8 @@ para instalar la última versión.</value></data>
   <data name="Alle {0} Lesezeichen entfernen?" xml:space="preserve"><value>¿Eliminar los {0} marcadores?</value></data>
   <data name="Lesezeichen.Info" xml:space="preserve"><value>Los marcadores forman un índice interactivo que permite saltar
 rápidamente a capítulos, títulos o secciones concretos.
-Para mostrarlos, haz clic en el icono de índice de la barra
-de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
+Para mostrarlos, haz clic en «Esquema del documento» en la
+barra de la izquierda o pulsa Mayús+F10.</value></data>
   <data name="Lesezeichen entfernen" xml:space="preserve"><value>Eliminación de marcadores</value></data>
   <data name="Die Lesezeichen wurden entfernt." xml:space="preserve"><value>Los marcadores se han eliminado.</value></data>
   <data name="„{0}“ ersetzen" xml:space="preserve"><value>Reemplazar «{0}»</value></data>
@@ -632,7 +628,6 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="Hervorhebung entfernen" xml:space="preserve"><value>Quitar resaltado</value></data>
   <data name="Im Dokument suchen (Strg+F)" xml:space="preserve"><value>Buscar en el documento (Ctrl+F)</value></data>
   <data name="Keine Treffer" xml:space="preserve"><value>Sin coincidencias</value></data>
-  <data name="Miniaturen" xml:space="preserve"><value>Miniaturas</value></data>
   <data name="nächster / vorheriger Suchtreffer" xml:space="preserve"><value>coincidencia siguiente / anterior</value></data>
   <data name="Nächster Treffer (F3, Enter)" xml:space="preserve"><value>Coincidencia siguiente (F3, Intro)</value></data>
   <data name="Ohne Kennwort lässt sich die Datei nicht anzeigen." xml:space="preserve"><value>El archivo no se puede mostrar sin contraseña.</value></data>
@@ -742,7 +737,6 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="Erstellt am:" xml:space="preserve"><value>Creado:</value></data>
   <data name="Erweitert" xml:space="preserve"><value>Avanzado</value></data>
   <data name="Geändert am:" xml:space="preserve"><value>Modificado:</value></data>
-  <data name="Größe" xml:space="preserve"><value>Tamaño</value></data>
   <data name="In diesem Dokument verwendete Schriften" xml:space="preserve"><value>Fuentes usadas en este documento</value></data>
   <data name="Integriert" xml:space="preserve"><value>Integrada</value></data>
   <data name="Ja" xml:space="preserve"><value>Sí</value></data>
@@ -787,9 +781,6 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="Stempel bearbeiten…" xml:space="preserve"><value>Editar sello…</value></data>
   <data name="Freitext entfernen" xml:space="preserve"><value>Eliminar texto libre</value></data>
   <data name="Der Freitext wurde entfernt." xml:space="preserve"><value>Se eliminó el texto libre.</value></data>
-  <data name="F10 / Strg+F10 / Umschalt+F10" xml:space="preserve"><value>F10 / Ctrl+F10 / Mayús+F10</value></data>
-  <data name="Seitenleiste ein/aus / mit Miniaturen / mit Lesezeichen" xml:space="preserve"><value>Barra lateral sí/no / con miniaturas / con marcadores</value></data>
-  <data name="Seitenleiste mit Miniaturen und Lesezeichen (F10)" xml:space="preserve"><value>Barra lateral con miniaturas y marcadores (F10)</value></data>
   <data name="Änderungen über die Viewer-Leiste (Hervorheben, Zeichnen, Freitext, Stempel, Seiten drehen) bleiben ungespeichert, bis du auf „Speichern“ klickst." xml:space="preserve"><value>Los cambios hechos con la barra del visor (resaltar, dibujar, texto libre, sello, girar páginas) quedan sin guardar hasta que haces clic en «Guardar».</value></data>
   <data name="Die Befehle im Menü „Bearbeiten“ und in der oberen Symbolleiste ändern die Datei sofort. Strg+Z macht einen Fehlgriff rückgängig." xml:space="preserve"><value>Los comandos del menú «Editar» y de la barra de herramientas superior cambian el archivo de inmediato. Ctrl+Z deshace un desliz.</value></data>
   <data name="Angezeigte S&amp;eite" xml:space="preserve"><value>Página &amp;mostrada</value></data>
@@ -804,13 +795,9 @@ de herramientas del PDF o pulsa Ctrl+Mayús+I.</value></data>
   <data name="„{0}“ öffnen?" xml:space="preserve"><value>¿Abrir «{0}»?</value></data>
   <data name="Anhänge können Makros oder Schadcode enthalten. Öffne die Datei nur, wenn die PDF aus einer sicheren Quelle stammt." xml:space="preserve"><value>Los adjuntos pueden contener macros o software malicioso. Abre el archivo solo si el PDF procede de una fuente segura.</value></data>
   <data name="Die eingebettete Datei konnte nicht geöffnet werden." xml:space="preserve"><value>No se pudo abrir el archivo incrustado.</value></data>
-  <data name="Programme und Skripte lassen sich nur speichern." xml:space="preserve"><value>Los programas y scripts solo se pueden guardar.</value></data>
   <data name="Programme, Skripte und ähnliche Dateien öffnet PDFlight aus Sicherheitsgründen nicht. Möchtest du die Datei stattdessen speichern?" xml:space="preserve"><value>Por motivos de seguridad, PDFlight no abre programas, scripts ni archivos similares. ¿Quieres guardar el archivo en su lugar?</value></data>
   <data name="Ö&amp;ffnen" xml:space="preserve"><value>&amp;Abrir</value></data>
   <data name="Speichern unter…" xml:space="preserve"><value>Guardar como…</value></data>
-  <data name="Geändert am" xml:space="preserve"><value>Modificado</value></data>
-  <data name="Anhang anzeigen" xml:space="preserve"><value>Mostrar el adjunto</value></data>
-  <data name="{0} Anhänge anzeigen" xml:space="preserve"><value>Mostrar los {0} adjuntos</value></data>
   <data name="Das Kennwort ist sehr kurz." xml:space="preserve"><value>La contraseña es muy corta.</value></data>
   <data name="Der Kennwortschutz wurde entfernt." xml:space="preserve"><value>Se ha quitado la protección con contraseña.</value></data>
   <data name="Die Datei ist jetzt mit einem Kennwort geschützt (AES 256 Bit)." xml:space="preserve"><value>El archivo ahora está protegido con contraseña (AES de 256 bits).</value></data>
@@ -893,7 +880,6 @@ Sin ella, el archivo ya no podrá mostrarse.</value></data>
   <data name="Alle anzeigen" xml:space="preserve"><value>Mostrar todo</value></data>
   <data name="Alle löschen…" xml:space="preserve"><value>Eliminar todo…</value></data>
   <data name="Anmerkung" xml:space="preserve"><value>Anotación</value></data>
-  <data name="Anmerkungen (Strg+Umschalt+T)" xml:space="preserve"><value>Anotaciones (Ctrl+Mayús+T)</value></data>
   <data name="Anmerkungen durchsuchen" xml:space="preserve"><value>Buscar en las anotaciones</value></data>
   <data name="Anmerkungen in der Seitenleiste anzeigen" xml:space="preserve"><value>mostrar las anotaciones en la barra lateral</value></data>
   <data name="Art" xml:space="preserve"><value>Tipo</value></data>
@@ -915,7 +901,6 @@ Sin ella, el archivo ya no podrá mostrarse.</value></data>
   <data name="Nach Seite" xml:space="preserve"><value>Por página</value></data>
   <data name="Ohne Autor" xml:space="preserve"><value>Sin autor</value></data>
   <data name="Ohne Datum" xml:space="preserve"><value>Sin fecha</value></data>
-  <data name="Ohne Farbe" xml:space="preserve"><value>Sin color</value></data>
   <data name="Polygon" xml:space="preserve"><value>Polígono</value></data>
   <data name="Polylinie" xml:space="preserve"><value>Polilínea</value></data>
   <data name="Rechteck" xml:space="preserve"><value>Rectángulo</value></data>
@@ -927,4 +912,35 @@ Sin ella, el archivo ya no podrá mostrarse.</value></data>
   <data name="Weitere Befehle" xml:space="preserve"><value>Más comandos</value></data>
   <data name="Wellenlinie" xml:space="preserve"><value>Línea ondulada</value></data>
   <data name="Wird gelesen…" xml:space="preserve"><value>Leyendo…</value></data>
+  <data name="Anmerkungen filtern" xml:space="preserve"><value>Filtrar anotaciones</value></data>
+  <data name="Anwenden" xml:space="preserve"><value>Aplicar</value></data>
+  <data name="Geschützt" xml:space="preserve"><value>Protegido</value></data>
+  <data name="Bearbeiten nicht möglich – Sicherheit anzeigen" xml:space="preserve"><value>No se puede editar – mostrar seguridad</value></data>
+  <data name="(keine Anhänge)" xml:space="preserve"><value>(sin archivos adjuntos)</value></data>
+  <data name="{0} Anhänge" xml:space="preserve"><value>{0} archivos adjuntos</value></data>
+  <data name="1 Anhang" xml:space="preserve"><value>1 archivo adjunto</value></data>
+  <data name="{0} Anhänge wurden in „{1}“ gespeichert." xml:space="preserve"><value>Se guardaron {0} archivos adjuntos en «{1}».</value></data>
+  <data name="1 Anhang wurde in „{1}“ gespeichert." xml:space="preserve"><value>Se guardó 1 archivo adjunto en «{1}».</value></data>
+  <data name="„{0}“ wurde gespeichert." xml:space="preserve"><value>Se guardó «{0}».</value></data>
+  <data name="Alle speichern…" xml:space="preserve"><value>Guardar todo…</value></data>
+  <data name="Ordner für die eingebetteten Dateien" xml:space="preserve"><value>Carpeta para los archivos incrustados</value></data>
+  <data name="Seitenleiste einblenden (F10)" xml:space="preserve"><value>Mostrar la barra lateral (F10)</value></data>
+  <data name="Seitenleiste ausblenden (F10)" xml:space="preserve"><value>Ocultar la barra lateral (F10)</value></data>
+  <data name="Änderung rückgängig machen / wiederherstellen" xml:space="preserve"><value>deshacer / rehacer el cambio</value></data>
+  <data name="Wiederhergestellt:" xml:space="preserve"><value>Rehacer:</value></data>
+  <data name="Wiederherstellen" xml:space="preserve"><value>Rehacer</value></data>
+  <data name="Strg+Z / Strg+Y" xml:space="preserve"><value>Ctrl+Z / Ctrl+Y</value></data>
+  <data name="Wiederherstellen (Strg+Y)" xml:space="preserve"><value>Rehacer (Ctrl+Y)</value></data>
+  <data name="Wiederherstellen: {0} (Strg+Y)" xml:space="preserve"><value>Rehacer: {0} (Ctrl+Y)</value></data>
+  <data name="Miniaturen (Strg+F10)" xml:space="preserve"><value>Miniaturas (Ctrl+F10)</value></data>
+  <data name="Dokumentstruktur (Umschalt+F10)" xml:space="preserve"><value>Esquema del documento (Mayús+F10)</value></data>
+  <data name="Anmerkungen (Alt+F10)" xml:space="preserve"><value>Anotaciones (Alt+F10)</value></data>
+  <data name="F10 / Strg+F10" xml:space="preserve"><value>F10 / Ctrl+F10</value></data>
+  <data name="Seitenleiste ein/aus / mit Miniaturen" xml:space="preserve"><value>Barra lateral sí/no / con miniaturas</value></data>
+  <data name="Umschalt+F10 / Alt+F10" xml:space="preserve"><value>Mayús+F10 / Alt+F10</value></data>
+  <data name="Seitenleiste mit Lesezeichen / mit Anmerkungen" xml:space="preserve"><value>Barra lateral con marcadores / con anotaciones</value></data>
+  <data name="Lesezeichen" xml:space="preserve"><value>Marcadores</value></data>
+  <data name="1 Lesezeichen" xml:space="preserve"><value>1 marcador</value></data>
+  <data name="{0} Lesezeichen" xml:space="preserve"><value>{0} marcadores</value></data>
+  <data name="Lesezeichen bearbeiten… (Strg+F2)" xml:space="preserve"><value>Editar marcadores… (Ctrl+F2)</value></data>
 </root>

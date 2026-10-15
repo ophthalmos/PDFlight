@@ -24,12 +24,7 @@
             mnuCollapseAll = new ToolStripMenuItem();
             toolStripSeparatorM1 = new ToolStripSeparator();
             mnuDeleteAll = new ToolStripMenuItem();
-            btnFilter = new ToolStripDropDownButton();
-            mnuFilterType = new ToolStripMenuItem();
-            mnuFilterAuthor = new ToolStripMenuItem();
-            mnuFilterColor = new ToolStripMenuItem();
-            toolStripSeparatorF1 = new ToolStripSeparator();
-            mnuFilterReset = new ToolStripMenuItem();
+            btnFilter = new ToolStripButton();
             btnSort = new ToolStripDropDownButton();
             mnuSortPage = new ToolStripMenuItem();
             mnuSortDate = new ToolStripMenuItem();
@@ -110,43 +105,11 @@
             //
             btnFilter.Alignment = ToolStripItemAlignment.Right;
             btnFilter.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            btnFilter.DropDownItems.AddRange(new ToolStripItem[] { mnuFilterType, mnuFilterAuthor, mnuFilterColor, toolStripSeparatorF1, mnuFilterReset });
             btnFilter.Name = "btnFilter";
-            btnFilter.ShowDropDownArrow = false;
             btnFilter.Size = new Size(36, 33);
             btnFilter.Text = "Filter";
             btnFilter.ToolTipText = "Filtern";
-            btnFilter.DropDownOpening += BtnFilter_DropDownOpening;
-            //
-            // mnuFilterType
-            //
-            mnuFilterType.Name = "mnuFilterType";
-            mnuFilterType.Size = new Size(180, 22);
-            mnuFilterType.Text = "Art";
-            //
-            // mnuFilterAuthor
-            //
-            mnuFilterAuthor.Name = "mnuFilterAuthor";
-            mnuFilterAuthor.Size = new Size(180, 22);
-            mnuFilterAuthor.Text = "Autor";
-            //
-            // mnuFilterColor
-            //
-            mnuFilterColor.Name = "mnuFilterColor";
-            mnuFilterColor.Size = new Size(180, 22);
-            mnuFilterColor.Text = "Farbe";
-            //
-            // toolStripSeparatorF1
-            //
-            toolStripSeparatorF1.Name = "toolStripSeparatorF1";
-            toolStripSeparatorF1.Size = new Size(177, 6);
-            //
-            // mnuFilterReset
-            //
-            mnuFilterReset.Name = "mnuFilterReset";
-            mnuFilterReset.Size = new Size(180, 22);
-            mnuFilterReset.Text = "Alle anzeigen";
-            mnuFilterReset.Click += MnuFilterReset_Click;
+            btnFilter.Click += BtnFilter_Click;
             //
             // btnSort
             //
@@ -307,12 +270,7 @@
         private ToolStripMenuItem mnuCollapseAll;
         private ToolStripSeparator toolStripSeparatorM1;
         private ToolStripMenuItem mnuDeleteAll;
-        private ToolStripDropDownButton btnFilter;
-        private ToolStripMenuItem mnuFilterType;
-        private ToolStripMenuItem mnuFilterAuthor;
-        private ToolStripMenuItem mnuFilterColor;
-        private ToolStripSeparator toolStripSeparatorF1;
-        private ToolStripMenuItem mnuFilterReset;
+        private ToolStripButton btnFilter;
         private ToolStripDropDownButton btnSort;
         private ToolStripMenuItem mnuSortPage;
         private ToolStripMenuItem mnuSortDate;

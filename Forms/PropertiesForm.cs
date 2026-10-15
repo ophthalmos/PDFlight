@@ -1,14 +1,12 @@
-using System.Diagnostics;
 using PDFLight.Classes;
 
 namespace PDFLight.Forms;
 
 /// <summary>Dokumenteigenschaften der aktuellen PDF-Datei nach dem Vorbild von Acrobat: Beschreibung (Metadaten bearbeiten, technische
-/// Angaben), Sicherheit (Verschlüsselung, Berechtigungen), Schriften und Anhänge (eingebettete Dateien öffnen und speichern).</summary>
+/// Angaben), Sicherheit (Verschlüsselung, Berechtigungen) und Schriften. Die Anhänge stehen seit 15.10.2026 in der Seitenleiste.</summary>
 internal partial class PropertiesForm : Form
 {
     private readonly PdfInfo original;
-    private readonly Func<int, Task<byte[]>>? loadAttachment;
     private readonly bool pdfALocked;   // PDF/A ohne Bearbeitungsfreigabe: nichts ändern, auch nicht verschlüsseln (PDF/A verbietet es)
     private readonly bool encrypted;    // die Datei ist verschlüsselt (Kennwort zum Öffnen oder nur Einschränkungen)
     private readonly bool openPassword; // … und verlangt ein Kennwort zum Öffnen
@@ -60,26 +58,20 @@ internal partial class PropertiesForm : Form
     /// <param name="pdfALocked">PDF/A ohne Bearbeitungsfreigabe: nur anzeigen.</param>
     /// <param name="security">Berechtigungsbits und Revision des Sicherheits-Handlers aus PDFium; Revision -1 = unverschlüsselt.</param>
     /// <param name="openPassword">Die Datei verlangt ein Kennwort zum Öffnen.</param>
-    /// <param name="attachments">Eingebettete Dateien (Name, Größe in Byte, -1 = unbekannt).</param>
-    /// <param name="loadAttachment">Liest den Inhalt einer eingebetteten Datei über ihre Nummer.</param>
-    public PropertiesForm(PdfInfo info, FileInfo file, PdfStatus? status, bool pdfALocked, (uint Permissions, int Revision) security, bool openPassword,
-        IReadOnlyList<(string Name, long Size, DateTime? Modified)> attachments, Func<int, Task<byte[]>>? loadAttachment)
+    public PropertiesForm(PdfInfo info, FileInfo file, PdfStatus? status, bool pdfALocked, (uint Permissions, int Revision) security, bool openPassword)
     {
         InitializeComponent();
         Lng.Apply(this);
-        Lng.Apply(contextMenuAttachments); // Kontextmenüs hängen nicht im Control-Baum
         TextBoxMargins.Apply(this);
         PasswordReveal.Attach(textPassword, toolTipReveal); // Augensymbol: Eingabe sichtbar machen
         PasswordReveal.Attach(textPasswordRepeat, toolTipReveal);
         original = info;
-        this.loadAttachment = loadAttachment;
         this.pdfALocked = pdfALocked;
         encrypted = security.Revision >= 0;
         this.openPassword = encrypted && openPassword;
         FillDescription(info, file, status);
         FillSecurity(security);
         FillFonts(info.Fonts ?? []);
-        FillAttachments(attachments);
         UpdateEditing();
     }
 
@@ -116,7 +108,7 @@ internal partial class PropertiesForm : Form
         labelVersionValue.Text = versionText;
 
         labelLocationValue.Text = file.DirectoryName ?? "–";
-        labelSizeValue.Text = file.Length < 1024 ? FormatSize(file.Length) : $"{FormatSize(file.Length)} ({file.Length:N0} Byte)";
+        labelSizeValue.Text = file.Length < 1024 ? FileUtil.FormatSize(file.Length) : $"{FileUtil.FormatSize(file.Length)} ({file.Length:N0} Byte)";
         if (info.PageWidthPt > 0 && info.PageHeightPt > 0)
         {
             // „210 × 297 mm (DIN A4, Hochformat)“; ohne bekanntes Format nennt Describe selbst die Maße
@@ -145,14 +137,6 @@ internal partial class PropertiesForm : Form
         catch (IOException) { return false; }
         catch (UnauthorizedAccessException) { return false; }
     }
-
-    internal static string FormatSize(long bytes) => bytes switch
-    {
-        < 1024 => $"{bytes:N0} Byte",
-        < 1024 * 1024 => $"{bytes / 1024.0:N2} KB",
-        < 1024L * 1024 * 1024 => $"{bytes / (1024.0 * 1024):N2} MB",
-        _ => $"{bytes / (1024.0 * 1024 * 1024):N2} GB",
-    };
 
     /// <summary>Leert die Felder und merkt sich, dass auch die unsichtbaren Metadaten weg sollen; gespeichert wird erst mit „Speichern“.</summary>
     private void ButtonRemove_Click(object? sender, EventArgs e)
@@ -284,164 +268,10 @@ internal partial class PropertiesForm : Form
         treeFonts.EndUpdate();
     }
 
-    // ==== Anhänge =========================================================================================================================
+    // ==== Reiter wählen ===================================================================================================================
 
-    /// <summary>Mit dem Reiter „Anhänge“ öffnen (Klick auf die Büroklammer in der Statusleiste), sofern es ihn gibt.</summary>
-    public void SelectAttachments()
-    {
-        if (tabControl.TabPages.Contains(tabAttachments)) { tabControl.SelectedTab = tabAttachments; }
-    }
-
-    private void FillAttachments(IReadOnlyList<(string Name, long Size, DateTime? Modified)> attachments)
-    {
-        if (attachments.Count == 0 || loadAttachment == null)
-        {
-            tabControl.TabPages.Remove(tabAttachments);
-            return;
-        }
-        listAttachments.BeginUpdate();
-        for (var i = 0; i < attachments.Count; i++)
-        {
-            var (name, size, modified) = attachments[i];
-            listAttachments.Items.Add(new ListViewItem([name.Length > 0 ? name : "?", modified?.ToString("g") ?? "–", size >= 0 ? FormatSize(size) : "–"]) { Tag = i });
-        }
-        listAttachments.EndUpdate();
-        tabAttachments.Text += $" ({attachments.Count})";
-    }
-
-    private void ListAttachments_SelectedIndexChanged(object? sender, EventArgs e) => UpdateAttachmentButtons();
-
-    private void UpdateAttachmentButtons()
-    {
-        var selected = listAttachments.SelectedItems.Count == 1;
-        buttonSaveAttachment.Enabled = selected;
-        buttonOpenAttachment.Enabled = selected && !ShellUtil.IsDangerousFileType(SafeFileName(listAttachments.SelectedItems[0].Text));
-    }
-
-    private void ListAttachments_DoubleClick(object? sender, EventArgs e) => OpenSelectedAttachment(); // wie Acrobat
-
-    private void ButtonSaveAttachment_Click(object? sender, EventArgs e) => SaveSelectedAttachment();
-
-    private void ButtonOpenAttachment_Click(object? sender, EventArgs e) => OpenSelectedAttachment();
-
-    private void ContextMenuAttachments_Opening(object? sender, System.ComponentModel.CancelEventArgs e)
-    {
-        if (listAttachments.SelectedItems.Count != 1) { e.Cancel = true; return; }
-        mnuOpenAttachment.Enabled = buttonOpenAttachment.Enabled;
-        mnuSaveAttachment.Enabled = buttonSaveAttachment.Enabled;
-    }
-
-    /// <summary>Öffnet die gewählte eingebettete Datei mit dem Programm, das Windows ihrem Typ zuordnet (Wunsch vom 05.10.2026, wie Acrobat;
-    /// vorher nur Speichern). Drei Schutzmaßnahmen: Programme, Skripte und Ähnliches (<see cref="ShellUtil.IsDangerousFileType"/>) werden
-    /// nie geöffnet, nur zum Speichern angeboten; vor dem Öffnen eine Rückfrage; die Kopie im Temp-Ordner bekommt die Herkunftsmarke
-    /// „aus dem Internet“ (Mark of the Web) – Office öffnet sie dann in der geschützten Ansicht, SmartScreen greift.</summary>
-    private async void OpenSelectedAttachment()
-    {
-        if (loadAttachment == null || listAttachments.SelectedItems.Count != 1 || listAttachments.SelectedItems[0].Tag is not int index) { return; }
-        var fileName = SafeFileName(listAttachments.SelectedItems[0].Text);
-        if (ShellUtil.IsDangerousFileType(fileName))
-        {
-            if (Ask(string.Format(Lng.T("„{0}“ wird nicht geöffnet."), fileName),
-                Lng.T("Programme, Skripte und ähnliche Dateien öffnet PDFlight aus Sicherheitsgründen nicht. Möchtest du die Datei stattdessen speichern?"),
-                TaskDialogIcon.Shield, Lng.T("Speichern unter…"))) { SaveSelectedAttachment(); }
-            return;
-        }
-        if (!Ask(string.Format(Lng.T("„{0}“ öffnen?"), fileName),
-            Lng.T("Anhänge können Makros oder Schadcode enthalten. Öffne die Datei nur, wenn die PDF aus einer sicheren Quelle stammt."),
-            TaskDialogIcon.Warning, Lng.T("Öffnen"))) { return; }
-        UseWaitCursor = true;
-        try
-        {
-            var bytes = await loadAttachment(index);
-            var path = Path.Combine(AttachmentTempFolder(), fileName);
-            await File.WriteAllBytesAsync(path, bytes);
-            MarkFromInternet(path);
-            Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or System.ComponentModel.Win32Exception)
-        {
-            TaskDlg.ErrTaskDlg(Handle, Lng.T("Die eingebettete Datei konnte nicht geöffnet werden."), ex);
-        }
-        finally
-        {
-            if (!IsDisposed) { UseWaitCursor = false; }
-        }
-    }
-
-    /// <summary>Rückfrage mit der Aktion als Schaltfläche („Öffnen“, „Speichern unter…“) und Abbrechen – klarer als Ja/Nein.</summary>
-    private bool Ask(string heading, string text, TaskDialogIcon icon, string action)
-    {
-        var ok = new TaskDialogButton(action);
-        TaskDialogPage page = new() { Caption = Application.ProductName, SizeToContent = true, Heading = heading, Text = text, Icon = icon, AllowCancel = true, Buttons = { ok, TaskDialogButton.Cancel } };
-        return TaskDialog.ShowDialog(Handle, page) == ok;
-    }
-
-    /// <summary>Eigener Unterordner je geöffnetem Anhang unter %TEMP%\PDFlight\Anhänge (gleiche Namen aus verschiedenen PDFs kommen sich
-    /// nicht in die Quere); Ordner älter als einen Tag werden dabei weggeräumt – geöffnete Dateien sind dann meist längst geschlossen.</summary>
-    private static string AttachmentTempFolder()
-    {
-        var root = Path.Combine(Path.GetTempPath(), "PDFlight", "Anhänge");
-        if (Directory.Exists(root))
-        {
-            foreach (var old in Directory.GetDirectories(root).Where(d => Directory.GetCreationTimeUtc(d) < DateTime.UtcNow.AddDays(-1)))
-            {
-                try { Directory.Delete(old, recursive: true); }
-                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { Debug.WriteLine(ex.Message); } // noch geöffnet
-            }
-        }
-        var folder = Path.Combine(root, Guid.NewGuid().ToString("N")[..8]);
-        Directory.CreateDirectory(folder);
-        return folder;
-    }
-
-    /// <summary>Herkunftsmarke wie bei einem Download (Zone.Identifier, Zone 3 = Internet): Word/Excel öffnen in der geschützten Ansicht,
-    /// SmartScreen prüft. Ohne NTFS (z. B. Temp auf FAT) geht das nicht – dann bleibt es bei Rückfrage und Typsperre.</summary>
-    private static void MarkFromInternet(string path)
-    {
-        try { File.WriteAllText(path + ":Zone.Identifier", "[ZoneTransfer]\r\nZoneId=3\r\n"); }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException) { Debug.WriteLine(ex.Message); }
-    }
-
-    /// <summary>Speichert die gewählte eingebettete Datei.</summary>
-    private async void SaveSelectedAttachment()
-    {
-        if (loadAttachment == null || listAttachments.SelectedItems.Count != 1 || listAttachments.SelectedItems[0].Tag is not int index) { return; }
-        var name = listAttachments.SelectedItems[0].Text;
-        saveAttachmentDialog.Title = Lng.T("Eingebettete Datei speichern");
-        saveAttachmentDialog.Filter = Lng.T("Alle Dateien (*.*)|*.*");
-        saveAttachmentDialog.FileName = SafeFileName(name);
-        if (saveAttachmentDialog.ShowDialog(this) != DialogResult.OK) { return; }
-        var target = saveAttachmentDialog.FileName;
-        UseWaitCursor = true;
-        buttonSaveAttachment.Enabled = false;
-        try
-        {
-            var bytes = await loadAttachment(index);
-            await File.WriteAllBytesAsync(target, bytes);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
-        {
-            TaskDlg.ErrTaskDlg(Handle, Lng.T("Die eingebettete Datei konnte nicht gespeichert werden."), ex);
-        }
-        finally
-        {
-            if (!IsDisposed)
-            {
-                UseWaitCursor = false;
-                UpdateAttachmentButtons();
-            }
-        }
-    }
-
-    /// <summary>Nur der Dateiname, ohne Pfadanteile und unzulässige Zeichen – der Name in der PDF stammt vom Ersteller der Datei.</summary>
-    private static string SafeFileName(string name)
-    {
-        var fileName = name.Replace('/', '\\');
-        fileName = fileName[(fileName.LastIndexOf('\\') + 1)..];
-        foreach (var c in Path.GetInvalidFileNameChars()) { fileName = fileName.Replace(c, '_'); }
-        fileName = fileName.Trim().TrimEnd('.');
-        return fileName.Length > 0 ? fileName : "attachment";
-    }
+    /// <summary>Reiter „Sicherheit“ – für das Schloss in der Statusleiste.</summary>
+    public void SelectSecurity() => tabControl.SelectedTab = tabSecurity;
 }
 
 /// <summary>Kennwortschutz nach „OK“ im Eigenschaften-Dialog (steht hinter der Form – der VS-Designer verlangt die Form als erste Klasse).</summary>

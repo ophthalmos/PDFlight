@@ -354,7 +354,7 @@ public partial class MainForm : Form
     private void LoadPdf(string path, int page = 0, bool addToRecent = false)
     {
         if (addToRecent) { previousFolder = null; } // bewusstes Öffnen beendet den Verschieben-Kontext fürs Blättern
-        viewUndo.Clear(); // ungespeicherte Schritte der Anzeige gehören zum bisherigen Stand
+        ClearViewHistory(); // ungespeicherte Schritte der Anzeige gehören zum bisherigen Stand
         UpdateUndoMenu();
         if (RememberCurrentPage()) { settings.Save(); } // die Seite der bisherigen Datei merken, bevor sie ersetzt wird
         ForgetPasswords(except: path); // das Kennwort gilt nur, solange seine Datei angezeigt wird
@@ -465,7 +465,7 @@ public partial class MainForm : Form
                 if (dialog.ShowDialog(this) != DialogResult.OK || version != loadVersion)
                 {
                     // wie „Dokument schließen“ – sonst blieb der Pfad der nicht angezeigten Datei im Titel (Fehlerbericht 10.10.2026)
-                    if (version == loadVersion) { ClearDisplay(Lng.T("Ohne Kennwort lässt sich die Datei nicht anzeigen.")); }
+                    if (version == loadVersion) { ClearDisplay(Lng.T("Ohne Kennwort lässt sich die Datei nicht anzeigen."), keepFolderPosition: true); }
                     return null;
                 }
                 password = dialog.Password;
@@ -474,7 +474,7 @@ public partial class MainForm : Form
             {
                 if (version != loadVersion || IsDisposed) { return null; }
                 // wie „Dokument schließen“ – sonst blieben Pfad im Titel und Datei-Befehle der nicht angezeigten Datei stehen (Fehlerbericht 10.10.2026)
-                ClearDisplay(Lng.T("Die Datei konnte nicht angezeigt werden."));
+                ClearDisplay(Lng.T("Die Datei konnte nicht angezeigt werden."), keepFolderPosition: true);
                 TaskDlg.ErrTaskDlg(Handle, Lng.T("Die Datei konnte nicht angezeigt werden."), ex);
                 return null;
             }
@@ -489,9 +489,6 @@ public partial class MainForm : Form
         }
         var (fileVersion, encrypted) = await opened.InfoAsync();
         var outline = await opened.OutlineAsync();
-        // für den Hinweis in der Statusleiste – nur die Anzahl (die Liste entpackt jeden Anhang) und nur beim ersten Laden, nicht bei
-        // jedem Stand aus dem Speicher (Anmerkungsschritte, Rückgängig), dort wird der Status nicht neu gesetzt (Review 06.10.2026)
-        var attachmentCount = currentPageCount < 0 ? await opened.AttachmentCountAsync() : 0;
         if (opened == document)
         {
             FillOutline(outline);
@@ -501,7 +498,7 @@ public partial class MainForm : Form
             if (currentPageCount < 0)
             {
                 static int Count(IEnumerable<OutlineItem> items) => items.Sum(i => 1 + Count(i.Children));
-                currentPdfStatus = (currentPdfStatus ?? new PdfStatus(-1, null, null)) with { PageCount = opened.PageCount, Version = fileVersion, Encrypted = encrypted, OutlineCount = Count(outline), AttachmentCount = attachmentCount };
+                currentPdfStatus = (currentPdfStatus ?? new PdfStatus(-1, null, null)) with { PageCount = opened.PageCount, Version = fileVersion, Encrypted = encrypted, OutlineCount = Count(outline) };
                 currentPageCount = opened.PageCount;
                 var message = statusPath.Text;
                 UpdateUiState();
@@ -509,6 +506,7 @@ public partial class MainForm : Form
             }
             if (newFile) { ApplySidebarForDocument(hasOutline: outline.Count > 0); } // nicht beim Neuladen derselben Datei
             RefreshAnnotations(); // Liste bzw. Symbol der Umschaltleiste für den neuen Stand
+            _ = RefreshAttachmentsAsync();
         }
         return opened;
     }
@@ -540,6 +538,8 @@ public partial class MainForm : Form
         {
             annotationsFound = false;
             annotationPanel.Clear(); // andere Datei: auch Filter und Suche zurück
+            attachmentCount = 0;
+            attachmentPanel.Clear();
             UpdateAnnotationRail();
         }
         previous?.Dispose(); // erst nach dem Umschalten der Ansichten – deren Aufträge für das alte Dokument verfallen damit
@@ -568,12 +568,13 @@ public partial class MainForm : Form
         splitButtonMove.Enabled = btnCopy.Enabled = btnRename.Enabled = btnDelete.Enabled = btnShowInFolder.Enabled = ddbEdit.Enabled = btnPrint.Enabled = btnEmail.Enabled = hasFile;
         // PDF/A-Schutz: verändernde Operationen bleiben gesperrt, bis „Bearbeitung aktivieren“ gedrückt wurde;
         // Extrahieren (neue Datei), Rückgängig (stellt alte Bytes wieder her) und Eigenschaften (dann nur lesend) bleiben frei
-        pnlPdfA.Visible = hasFile && PdfALocked; // bei Kennwortschutz keine eigene Leiste – der Viewer zeigt selbst „eingeschränkte Berechtigungen“ (Wunsch vom 20.09.2026)
+        pnlPdfA.Visible = hasFile && PdfALocked; // bei Kennwortschutz keine eigene Leiste (Wunsch vom 20.09.2026), dafür das Schloss in der Statusleiste (statusSecurity)
         mnuDeletePages.Enabled = mnuAppendPdf.Enabled = mnuDuplex.Enabled = !EditLocked;
         mnuMovePage.Enabled = !EditLocked && currentPageCount > 1; // mit einer Seite gibt es nichts zu verschieben
         mnuInsertPage.Enabled = !EditLocked;
         mnuRemoveBookmarks.Enabled = !EditLocked && (currentPdfStatus?.OutlineCount ?? 0) > 0;
         mnuEditBookmarks.Enabled = !EditLocked; // auch ohne Lesezeichen: dann legt der Editor welche an
+        btnOutlineEdit.Enabled = hasFile && (!EditLocked || bookmarkEditor != null); // Kopfzeile der Dokumentstruktur; ein offener Editor kommt nach vorn
         foreach (var button in programIconButtons) { button.Enabled = hasFile; }
         mnuHighlight.Visible = mnuRemoveAnnotation.Visible = mnuAddFreeTextHere.Visible = toolStripSeparatorC1.Visible = hasFile && !EditLocked; // ändern das Dokument
         pageView.AllowAnnotationMove = hasFile && !EditLocked && currentPageCount > 0; // Textanmerkungen und Stempel verschieben (Ziehen) und bearbeiten (Doppelklick)
@@ -594,9 +595,10 @@ public partial class MainForm : Form
             statusIndex.Text = Lng.T("Datei") + " 0/0";
             statusPath.Text = Lng.T("Keine Datei geöffnet");
             statusInfo.Text = string.Empty;
-            statusFormat.Visible = statusAttachments.Visible = false;
+            statusFormat.Visible = statusSecurity.Visible = false;
             statusZoom.Visible = false;
-            btnPrev.Enabled = btnNext.Enabled = false;
+            btnPrev.Enabled = btnNext.Enabled = browseAnchor?.DirectoryName is { } folder
+                && FileUtil.GetPdfFilesInFolder(folder).Any(f => !string.Equals(f, browseAnchor.FullName, StringComparison.OrdinalIgnoreCase));
         }
         UpdateOneClickLabel();
         UpdateViewerState();
@@ -672,17 +674,15 @@ public partial class MainForm : Form
             ? Lng.T("PDF/A: Format für die Langzeitarchivierung") + $" (PDF {currentPdfStatus!.Version})"
             : Lng.T("PDF-Version der angezeigten Datei");
         statusFormat.Visible = currentPdfStatus?.Version != null;
-        // Anhänge (Wunsch vom 05.10.2026): sonst sah man sie nur, wenn man zufällig die Eigenschaften öffnete – E-Rechnungen tragen z. B.
-        // ihre XML so mit; ein Klick öffnet die Eigenschaften auf dem Reiter „Anhänge“
-        var attachments = currentPdfStatus?.AttachmentCount ?? 0;
-        statusAttachments.Text = statusAttachments.Image != null ? attachments.ToString() : Lng.T("Anhänge") + ": " + attachments; // ohne Symbolschrift ausgeschrieben
-        statusAttachments.ToolTipText = string.Format(Lng.T(attachments == 1 ? "Anhang anzeigen" : "{0} Anhänge anzeigen"), attachments); // kurz: ein langer Tooltip stieß maximiert an den Bildschirmrand und flackerte (05.10.2026)
-        statusAttachments.Visible = attachments > 0;
+        // (Anhänge zeigte hier bis 15.10.2026 eine Büroklammer – seitdem das Symbol der Anhangliste in der Umschaltleiste der Seitenleiste)
+        // Geschützte Datei (Kennwort oder bloße Einschränkungen, Wunsch vom 15.10.2026): Bis 1.0.3 zeigte der Chromium-Viewer selbst
+        // „eingeschränkte Berechtigungen“ – mit PDFium waren nur noch die Anmerkungsknöpfe grau, ohne Grund. Farbig, damit es auffällt.
+        statusSecurity.Visible = currentPdfStatus?.Encrypted == true;
     }
 
-    private void StatusAttachments_Click(object? sender, EventArgs e)
+    private void StatusSecurity_Click(object? sender, EventArgs e)
     {
-        RunUnlessEditing(() => ShowProperties(showAttachments: true)); // offene Änderungen schreibt erst „OK“ mit (WritePropertiesAsync)
+        RunUnlessEditing(() => ShowProperties(showSecurity: true));
     }
 
     private void OpenFile()
@@ -775,10 +775,16 @@ public partial class MainForm : Form
     /// <summary>Blättert zur nächsten/vorherigen PDF-Datei im Ordner (mit Umlauf, wie in PDFMover).</summary>
     private string? previousFolder; // Quellordner des letzten Verschiebens — fürs Blättern (Dialog wie in PDFMover)
 
+    // Datei, die sich beim Blättern nicht anzeigen ließ (Kennwortabfrage abgebrochen, beschädigt): Das Blättern setzt an ihr an –
+    // vorher waren „Nächste/Vorherige Datei“ danach gesperrt, man kam aus der Datei nicht weiter (Fehlerbericht 15.10.2026)
+    private FileInfo? browseAnchor;
+
+    private FileInfo? BrowsePosition => currentFile ?? browseAnchor;
+
     private void StepFile(int step)
     {
-        if (currentFile == null) { return; }
-        var folder = currentFile.DirectoryName!;
+        if (BrowsePosition is not { } position) { return; }
+        var folder = position.DirectoryName!;
         // Nach einem Verschieben: im Zielordner weiterblättern oder zurück in den bisherigen Ordner? (wie in PDFMover)
         if (previousFolder != null && Directory.Exists(previousFolder) && !string.Equals(previousFolder, folder, StringComparison.OrdinalIgnoreCase))
         {
@@ -811,8 +817,9 @@ public partial class MainForm : Form
     /// wird sie virtuell einsortiert, damit das Blättern an ihrer alten Position ansetzt.</summary>
     private void StepFileInFolder(string folder, int step)
     {
+        if (BrowsePosition is not { } position) { return; }
         var files = FileUtil.GetPdfFilesInFolder(folder);
-        var reference = Path.Combine(folder, currentFile!.Name);
+        var reference = Path.Combine(folder, position.Name);
         var index = files.FindIndex(f => string.Equals(f, reference, StringComparison.OrdinalIgnoreCase));
         if (index < 0)
         {
@@ -826,7 +833,7 @@ public partial class MainForm : Form
             index = files.FindIndex(f => string.Equals(f, reference, StringComparison.OrdinalIgnoreCase));
         }
         var next = (index + step + files.Count) % files.Count;
-        if (next == index || string.Equals(files[next], currentFile.FullName, StringComparison.OrdinalIgnoreCase)) { return; }
+        if (next == index || (currentFile != null && string.Equals(files[next], currentFile.FullName, StringComparison.OrdinalIgnoreCase))) { return; }
         // Steht die Zieldatei schon in einem anderen Fenster, kommt dieses nach vorn und hier bleibt die aktuelle Datei – ohne Rückfrage
         // (Wunsch vom 26.09.2026; vorher ein Dialog mit „Anderes Fenster aktivieren“ als Vorgabe). Ist das Fenster inzwischen weg: hier anzeigen.
         var pid = InstanceRegistry.FindInstanceShowing(files[next]);
@@ -863,9 +870,11 @@ public partial class MainForm : Form
         foreach (var key in passwords.Keys.Where(k => !string.Equals(k, except, StringComparison.OrdinalIgnoreCase)).ToList()) { passwords.Remove(key); }
     }
 
-    /// <summary>Anzeige leeren (kein Dateibezug mehr) und den Grund in der Statusleiste nennen.</summary>
-    private void ClearDisplay(string status)
+    /// <summary>Anzeige leeren (kein Dateibezug mehr) und den Grund in der Statusleiste nennen. <paramref name="keepFolderPosition"/>: die
+    /// Datei ließ sich nicht anzeigen (Kennwortabfrage abgebrochen, beschädigt) – das Blättern im Ordner setzt dann an ihr an.</summary>
+    private void ClearDisplay(string status, bool keepFolderPosition = false)
     {
+        browseAnchor = keepFolderPosition ? currentFile : null;
         currentFile = null;
         ForgetPasswords(except: null);
         loadVersion++; // ein noch laufendes Öffnen soll nichts mehr anzeigen
@@ -1224,9 +1233,7 @@ public partial class MainForm : Form
         mnuAppendPdf.Image = MenuIcon(ToolbarIcons.Attach);
         mnuDuplex.Image = MenuIcon(ToolbarIcons.Interleave);
         mnuExtractPages.Image = MenuIcon(ToolbarIcons.Page);
-        // Büroklammer in der Statusleiste: in der Linkfarbe wie die Zahl daneben – das Feld ist ein Link (Wunsch vom 05.10.2026); immer mit
-        // Symbol, auch ohne Programm-Icons, sonst stünde nur eine Zahl da
-        statusAttachments.Image = ToolbarIcons.FontAvailable ? ToolbarIcons.Get(ToolbarIcons.Attach, LogicalToDeviceUnits(new Size(16, 16)), statusAttachments.LinkColor) : null;
+        statusSecurity.Image = ToolbarIcons.FontAvailable ? ToolbarIcons.Get(ToolbarIcons.Lock, LogicalToDeviceUnits(new Size(16, 16)), statusSecurity.LinkColor) : null; // Schloss in der Farbe des Texts
         mnuThumbInsertPage.Image = mnuInsertPage.Image; // Kontextmenü der Miniaturen: dieselben Befehle
         mnuThumbRotatePages.Image = MenuIcon(ToolbarIcons.Rotate);
         mnuThumbMovePage.Image = mnuMovePage.Image;
@@ -1247,6 +1254,11 @@ public partial class MainForm : Form
         mnuHighlight.Image = MenuIcon(ToolbarIcons.Highlight);
         mnuEditAnnotation.Image = MenuIcon(ToolbarIcons.Edit);
         noteCard.SetMenuIcons(MenuIcon(ToolbarIcons.Delete), MenuIcon(ToolbarIcons.Edit)); // „…“-Menü der Kommentarkarte
+        annotationPanel.UpdateMenuIcons(); // Menüs der Anmerkungs- und der Anhangliste in der Seitenleiste
+        attachmentPanel.UpdateMenuIcons();
+        UpdateOutlineStripIcons();
+        mnuOutlineExpandAll.Image = MenuIcon(ToolbarIcons.ChevronDown); // Kontextmenü der Dokumentstruktur
+        mnuOutlineCollapseAll.Image = MenuIcon(ToolbarIcons.ChevronUp);
         mnuRemoveAnnotation.Image = MenuIcon(ToolbarIcons.Clear);
         mnuAddFreeTextHere.Image = MenuIcon(ToolbarIcons.Comment);
         mnuSaveImage.Image = MenuIcon(ToolbarIcons.Save);
@@ -1676,7 +1688,7 @@ public partial class MainForm : Form
     // Nach jeder Änderung (PdfiumDocument.Changed, neuer Stand) liest annotationRefreshTimer kurz darauf neu; bis dahin gelten die
     // Nummern der Liste nicht mehr (annotationListStale) – Bearbeiten und Löschen warten dann auf die frische Liste.
 
-    private enum SidebarView { Thumbnails, Outline, Annotations }
+    private enum SidebarView { Thumbnails, Outline, Annotations, Attachments }
 
     private SidebarView sidebarView = SidebarView.Thumbnails;
     private CancellationTokenSource? annotationScan;
@@ -1693,7 +1705,11 @@ public partial class MainForm : Form
         annotationRefreshTimer.Start();
     }
 
-    private void AnnotationRefreshTimer_Tick(object? sender, EventArgs e) => RefreshAnnotations();
+    private void AnnotationRefreshTimer_Tick(object? sender, EventArgs e)
+    {
+        RefreshAnnotations();
+        _ = RefreshAttachmentsAsync(); // auch Anhänge ändern sich in der Anzeige (Hinzufügen, Rückgängig)
+    }
 
     /// <summary>Liest die Anmerkungen des angezeigten Stands neu (ein laufendes Lesen wird abgebrochen): mit sichtbarer Liste alle Seiten
     /// (die Liste füllt sich dabei schrittweise), sonst nur bis zur ersten Anmerkung – und gar nicht, wenn das Symbol schon steht.</summary>
@@ -1731,6 +1747,7 @@ public partial class MainForm : Form
             annotationKeepPosition = false;
         }
         UpdateAnnotationRail();
+        DecideAnnotationSidebar(found.Count > 0);
     }
 
     /// <summary>Symbol der Umschaltleiste (nur mit Anmerkungen oder solange ihre Ansicht gewählt ist) und Bearbeiten in der Liste.</summary>
@@ -1738,6 +1755,8 @@ public partial class MainForm : Form
     {
         var visible = annotationsFound || sidebarView == SidebarView.Annotations;
         if (btnSideAnnotations.Visible != visible) { btnSideAnnotations.Visible = visible; }
+        var attachments = attachmentCount > 0 || sidebarView == SidebarView.Attachments;
+        if (btnSideAttachments.Visible != attachments) { btnSideAttachments.Visible = attachments; }
         annotationPanel.Editable = document != null && currentFile != null && !EditLocked && currentPageCount > 0;
     }
 
@@ -1753,10 +1772,7 @@ public partial class MainForm : Form
         annotationPanel.FocusList();
     }
 
-    private void BtnSideAnnotations_Click(object? sender, EventArgs e)
-    {
-        ShowSidebarPanel(SidebarView.Annotations);
-    }
+    private void BtnSideAnnotations_Click(object? sender, EventArgs e) => SelectSidebarView(SidebarView.Annotations);
 
     private void AnnotationPanel_EntryActivated(object? sender, AnnotationEntry e)
     {
@@ -1798,6 +1814,71 @@ public partial class MainForm : Form
         if (await EditInViewAsync(path => PdfEditService.DeleteAllAnnotations(path), Lng.T("Anmerkungen löschen"), keepPage: true))
         {
             statusPath.Text = Lng.T("Alle Anmerkungen wurden gelöscht.");
+        }
+    }
+
+    // ------------------------------------------------------------------ Anhangliste der Seitenleiste (seit 15.10.2026)
+
+    // Wunsch Wilhelms nach dem Vorbild von Acrobats Anlagen: eine vierte Ansicht der Seitenleiste mit den eingebetteten Dateien – sie
+    // ersetzt den Reiter „Anhänge“ des Eigenschaften-Dialogs und die Büroklammer in der Statusleiste. Das Symbol der Umschaltleiste steht
+    // nur bei Dateien mit Anhängen; die Seitenleiste geht dafür nicht von selbst auf (jede E-Rechnung trägt ihre XML als Anhang). Die
+    // Liste samt Größen liest PDFium nur, solange sie zu sehen ist – für die Größe muss es jeden Anhang entpacken; sonst nur die Anzahl.
+
+    private int attachmentCount;   // eingebettete Dateien des angezeigten Stands: Symbol in der Umschaltleiste
+    private int attachmentReads;   // Zähler gegen überholte Antworten
+
+    private bool AttachmentListShown => sidebarView == SidebarView.Attachments && !splitViewer.Panel1Collapsed;
+
+    /// <summary>Liest die Anhänge des angezeigten Stands: mit sichtbarer Liste vollständig, sonst nur ihre Anzahl (für das Symbol).</summary>
+    private async Task RefreshAttachmentsAsync()
+    {
+        var read = ++attachmentReads;
+        if (document is not { } doc) { attachmentCount = 0; attachmentPanel.Clear(); UpdateAnnotationRail(); return; }
+        try
+        {
+            if (AttachmentListShown)
+            {
+                var list = await doc.AttachmentsAsync();
+                if (read != attachmentReads || doc != document) { return; }
+                attachmentPanel.SetEntries([.. list.Select((a, i) => new AttachmentEntry(i, a.Name, a.Size, a.Modified))]);
+                attachmentCount = list.Count;
+            }
+            else
+            {
+                var count = await doc.AttachmentCountAsync();
+                if (read != attachmentReads || doc != document) { return; }
+                attachmentCount = count;
+            }
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or IOException) { Debug.WriteLine(ex); return; } // Symbol und Liste bleiben, wie sie sind
+        UpdateAnnotationRail();
+    }
+
+    private void BtnSideAttachments_Click(object? sender, EventArgs e) => SelectSidebarView(SidebarView.Attachments);
+
+    /// <summary>Doppelklick, Enter oder „Öffnen“: mit Typsperre, Rückfrage und Herkunftsmarke (<see cref="AttachmentFiles.OpenAsync"/>).</summary>
+    private async void AttachmentPanel_OpenRequested(object? sender, AttachmentEntry e)
+    {
+        if (document is not { } doc) { return; }
+        await AttachmentFiles.OpenAsync(this, e.Name, () => doc.AttachmentDataAsync(e.Index));
+    }
+
+    private async void AttachmentPanel_SaveRequested(object? sender, AttachmentEntry e)
+    {
+        if (document is not { } doc) { return; }
+        if (await AttachmentFiles.SaveAsAsync(this, e.Name, () => doc.AttachmentDataAsync(e.Index)))
+        {
+            statusPath.Text = string.Format(Lng.T("„{0}“ wurde gespeichert."), AttachmentFiles.SafeFileName(e.Name));
+        }
+    }
+
+    private async void AttachmentPanel_SaveAllRequested(object? sender, EventArgs e)
+    {
+        if (document is not { } doc || attachmentPanel.Entries.Count == 0) { return; }
+        var files = attachmentPanel.Entries.Select(a => (a.Name, (Func<Task<byte[]>>)(() => doc.AttachmentDataAsync(a.Index)))).ToList();
+        if (await AttachmentFiles.SaveAllAsync(this, files, currentFile?.DirectoryName ?? string.Empty) is { Count: > 0 } saved)
+        {
+            statusPath.Text = string.Format(Lng.T(saved.Count == 1 ? "1 Anhang wurde in „{1}“ gespeichert." : "{0} Anhänge wurden in „{1}“ gespeichert."), saved.Count, saved.Folder);
         }
     }
 
@@ -2044,9 +2125,10 @@ public partial class MainForm : Form
         }
     }
 
-    private void ShowProperties() => ShowProperties(showAttachments: false);
+    private void ShowProperties() => ShowProperties(showSecurity: false);
 
-    private async void ShowProperties(bool showAttachments)
+    /// <param name="showSecurity">Mit dem Reiter „Sicherheit“ öffnen (Schloss in der Statusleiste).</param>
+    private async void ShowProperties(bool showSecurity)
     {
         if (currentFile == null) { return; }
         PdfInfo info;
@@ -2054,23 +2136,17 @@ public partial class MainForm : Form
         try { info = PdfEditService.ReadInfo(currentFile.FullName, password); }
         catch (Exception ex) when (PdfEditService.IsPdfReadError(ex)) { ShowNotEditableMessage(); return; }
         currentFile.Refresh();
-        // Sicherheit und Anhänge aus PDFium – das Hilfsprogramm hat die Datei ohnehin offen
+        // Sicherheit aus PDFium – das Hilfsprogramm hat die Datei ohnehin offen (die Anhänge stehen seit 15.10.2026 in der Seitenleiste)
         (uint Permissions, int Revision) security = (uint.MaxValue, -1);
-        IReadOnlyList<(string Name, long Size, DateTime? Modified)> attachments = [];
         var document = ShownDocument;
         if (document != null)
         {
-            try
-            {
-                security = await document.SecurityAsync();
-                attachments = await document.AttachmentsAsync();
-            }
+            try { security = await document.SecurityAsync(); }
             catch (Exception ex) when (ex is InvalidOperationException or IOException) { Debug.WriteLine(ex); } // Dialog trotzdem zeigen, ohne diese Angaben
             if (currentFile == null || ShownDocument != document) { return; } // inzwischen eine andere Datei
         }
-        Func<int, Task<byte[]>>? loadAttachment = document == null ? null : document.AttachmentDataAsync;
-        using PropertiesForm dialog = new(info, currentFile, currentPdfStatus, PdfALocked, security, password != null, attachments, loadAttachment);
-        if (showAttachments) { dialog.SelectAttachments(); }
+        using PropertiesForm dialog = new(info, currentFile, currentPdfStatus, PdfALocked, security, password != null);
+        if (showSecurity) { dialog.SelectSecurity(); }
         if (dialog.ShowDialog(this) != DialogResult.OK || !dialog.HasChanges) { return; } // „OK“ ohne Änderung schreibt nichts
         await WritePropertiesAsync(dialog, document, password, security);
     }
@@ -2353,8 +2429,8 @@ public partial class MainForm : Form
             Lng.T("Lesezeichen.Info", // mehrzeilig → expliziter Schlüssel (wie Drehen.Info)
             "Lesezeichen bilden ein interaktives Inhaltsverzeichnis, das eine\n" +
             "schnelle Navigation zu bestimmten Kapiteln, Überschriften oder\n" +
-            "Abschnitten ermöglicht. Um sie anzuzeigen, kannst du auf das\n" +
-            "Inhaltsverzeichnis-Symbol in der PDF-Werkzeugleiste klicken\noder Strg+Umschalt+I drücken."), TaskDialogIcon.ShieldWarningYellowBar, defaultNo: true)) { return; }
+            "Abschnitten ermöglicht. Um sie anzuzeigen, klickst du links in der\n" +
+            "Umschaltleiste auf „Dokumentstruktur“ oder drückst Umschalt+F10."), TaskDialogIcon.ShieldWarningYellowBar, defaultNo: true)) { return; }
         var page = Math.Max(1, ClampedCurrentPage());
         var (ok, pending) = await PendingViewChangesAsync(Lng.T("Lesezeichen entfernen"));
         if (!ok) { return; }
@@ -2460,6 +2536,9 @@ public partial class MainForm : Form
         var description = viewUndo.Count > 0 ? viewUndo[^1].Description : undoAction?.Description;
         btnUndo.Enabled = description != null;
         btnUndo.ToolTipText = description == null ? Lng.T("Rückgängig (Strg+Z)") : string.Format(Lng.T("Rückgängig: {0} (Strg+Z)"), description);
+        var redo = viewRedo.Count > 0 ? viewRedo[^1].Description : null;
+        btnRedo.Enabled = redo != null;
+        btnRedo.ToolTipText = redo == null ? Lng.T("Wiederherstellen (Strg+Y)") : string.Format(Lng.T("Wiederherstellen: {0} (Strg+Y)"), redo);
     }
 
     private void UndoLastChange()
@@ -2805,12 +2884,31 @@ public partial class MainForm : Form
     private const int ViewUndoLimit = 20;                       // so viele Stände höchstens im Speicher (je ein vollständiges PDF) …
     private const long ViewUndoBytesLimit = 256L * 1024 * 1024; // … und zusammen höchstens so groß – ein 80-MB-Handbuch hätte sonst 1,6 GB belegt (Review 04.10.2026)
 
+    // Wiederherstellen (seit 15.10.2026, Wunsch Wilhelms): Strg+Z merkt vor dem Zurücknehmen den Stand danach in viewRedo, Strg+Y (auch Strg+Umschalt+Z)
+    // bzw. der Knopf neben Rückgängig zeigt ihn wieder an. Nur für die ungespeicherten Schritte der Anzeige – Dateiaktionen (Löschen,
+    // Verschieben, Umbenennen, Bearbeiten-Menü) haben keins. Jeder neue Schritt, jede andere Änderung im Dokument (auch eine Formulareingabe),
+    // Speichern und jedes Laden leeren die Liste.
+    private readonly List<ViewUndo> viewRedo = [];
+    private bool viewHistoryBusy; // Rückgängig/Wiederherstellen läuft (der Stand wird erst aus PDFium geholt)
+
     private void AddViewUndo(ViewUndo entry)
     {
-        viewUndo.Add(entry);
-        // die ältesten fallen weg; der jüngste Stand bleibt immer, auch wenn er allein schon über der Grenze liegt
-        while (viewUndo.Count > ViewUndoLimit || (viewUndo.Count > 1 && viewUndo.Sum(u => (long)u.Bytes.Length) > ViewUndoBytesLimit)) { viewUndo.RemoveAt(0); }
+        viewRedo.Clear(); // ein neuer Schritt: das Zurückgenommene lässt sich nicht mehr wiederherstellen
+        PushLimited(viewUndo, entry);
         UpdateUndoMenu();
+    }
+
+    /// <summary>Anhängen; die ältesten fallen weg – der jüngste Stand bleibt immer, auch wenn er allein schon über der Grenze liegt.</summary>
+    private static void PushLimited(List<ViewUndo> list, ViewUndo entry)
+    {
+        list.Add(entry);
+        while (list.Count > ViewUndoLimit || (list.Count > 1 && list.Sum(u => (long)u.Bytes.Length) > ViewUndoBytesLimit)) { list.RemoveAt(0); }
+    }
+
+    private void ClearViewHistory()
+    {
+        viewUndo.Clear();
+        viewRedo.Clear();
     }
 
     /// <summary>Den angezeigten Stand vor einem Schritt im Hilfsprogramm merken (Hervorheben, Hervorhebung entfernen).</summary>
@@ -2901,14 +2999,48 @@ public partial class MainForm : Form
         return true;
     }
 
-    /// <summary>Strg+Z bei ungespeicherten Schritten: den Stand vor dem letzten anzeigen.</summary>
+    /// <summary>Strg+Z bei ungespeicherten Schritten: den Stand vor dem letzten anzeigen; der jetzige kommt in viewRedo.</summary>
     private async void UndoViewChange()
     {
-        if (viewUndo.Count == 0) { return; }
-        var entry = viewUndo[^1];
-        viewUndo.RemoveAt(viewUndo.Count - 1);
-        UpdateUndoMenu();
-        if (await ShowBytesAsync(entry.Bytes, entry.WasDirty, entry.KeepPage)) { statusPath.Text = Lng.T("Rückgängig:") + " " + entry.Description; }
+        if (viewUndo.Count == 0 || viewHistoryBusy || ShownDocument is not { } doc) { return; }
+        viewHistoryBusy = true;
+        try
+        {
+            var entry = viewUndo[^1];
+            byte[]? now = null;
+            try { now = await doc.SaveAsync(); }
+            catch (InvalidOperationException ex) { Debug.WriteLine(ex); } // dann eben ohne Wiederherstellen
+            if (doc != document) { return; }
+            viewUndo.RemoveAt(viewUndo.Count - 1);
+            if (now != null) { PushLimited(viewRedo, new ViewUndo(now, documentDirty, entry.Description, entry.KeepPage)); }
+            UpdateUndoMenu();
+            if (await ShowBytesAsync(entry.Bytes, entry.WasDirty, entry.KeepPage)) { statusPath.Text = Lng.T("Rückgängig:") + " " + entry.Description; }
+        }
+        finally { viewHistoryBusy = false; }
+    }
+
+    /// <summary>Strg+Y (auch Strg+Umschalt+Z) bzw. der Knopf neben Rückgängig: den zuletzt zurückgenommenen Schritt wieder anzeigen.</summary>
+    private async void RedoViewChange()
+    {
+        if (viewRedo.Count == 0 || viewHistoryBusy || ShownDocument is not { } doc) { return; }
+        viewHistoryBusy = true;
+        try
+        {
+            var entry = viewRedo[^1];
+            byte[] now;
+            try { now = await doc.SaveAsync(); }
+            catch (InvalidOperationException ex)
+            {
+                TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), Lng.T("Wiederherstellen")), ex);
+                return;
+            }
+            if (doc != document) { return; }
+            viewRedo.RemoveAt(viewRedo.Count - 1);
+            PushLimited(viewUndo, new ViewUndo(now, documentDirty, entry.Description, entry.KeepPage)); // nicht AddViewUndo – das leerte viewRedo
+            UpdateUndoMenu();
+            if (await ShowBytesAsync(entry.Bytes, entry.WasDirty, entry.KeepPage)) { statusPath.Text = Lng.T("Wiederhergestellt:") + " " + entry.Description; }
+        }
+        finally { viewHistoryBusy = false; }
     }
 
     /// <summary>Einstieg für Schaltflächen und Menüs (die Kürzel kommen über <see cref="ProcessCmdKey"/>): Offene Formulareingaben werden
@@ -2939,8 +3071,7 @@ public partial class MainForm : Form
         var pdfPath = Path.ChangeExtension(imagePath, ".pdf");
         if (File.Exists(pdfPath))
         {
-            var free = pdfPath;
-            for (var i = 2; File.Exists(free); i++) { free = Path.Combine(Path.GetDirectoryName(pdfPath) ?? string.Empty, $"{Path.GetFileNameWithoutExtension(pdfPath)} ({i}).pdf"); }
+            var free = FileUtil.UniquePath(pdfPath);
             var choice = TaskDlg.ChoiceTaskDlg(Handle, string.Format(Lng.T("„{0}“ gibt es schon."), Path.GetFileName(pdfPath)), null,
             [
                 (string.Format(Lng.T("„{0}“ öffnen"), Path.GetFileName(pdfPath)), Lng.T("Die vorhandene PDF-Datei anzeigen")),
@@ -2993,7 +3124,11 @@ public partial class MainForm : Form
             BeginInvoke(() =>
             {
                 MarkDirty(sender);
-                if (sender == document) { ScheduleAnnotationRefresh(); } // Anmerkung angelegt, entfernt, geändert – oder ein Formularwert
+                if (sender == document)
+                {
+                    ScheduleAnnotationRefresh(); // Anmerkung angelegt, entfernt, geändert – oder ein Formularwert
+                    if (!viewHistoryBusy && viewRedo.Count > 0) { viewRedo.Clear(); UpdateUndoMenu(); } // danach passt der zurückgenommene Stand nicht mehr
+                }
             });
         }
     }
@@ -3031,7 +3166,7 @@ public partial class MainForm : Form
         if (!RunPdfEdit(() => File.WriteAllBytes(path, bytes), actionName, allowEncrypted: true)) { return false; }
         doc.Bytes = bytes; // für das Wiederherstellen einer extern gelöschten Datei
         documentDirty = false;
-        viewUndo.Clear(); // gespeichert: ab jetzt nimmt Rückgängig die ganze Speicherung zurück (Sicherung von RunPdfEdit)
+        ClearViewHistory(); // gespeichert: ab jetzt nimmt Rückgängig die ganze Speicherung zurück (Sicherung von RunPdfEdit)
         UpdateUndoMenu();
         RefreshCurrentFile();
         return true;
@@ -3069,7 +3204,7 @@ public partial class MainForm : Form
         if (result == save) { return await CommitFormAsync(); }
         if (result != discard) { return false; }
         documentDirty = false;
-        viewUndo.Clear();
+        ClearViewHistory();
         UpdateUndoMenu();
         return true;
     }
@@ -3706,11 +3841,22 @@ public partial class MainForm : Form
         outlineView.SelectionBackColor = dark ? Color.FromArgb(77, 77, 77) : Color.FromArgb(204, 228, 247); // wie die Auswahl im Explorer
         outlineView.HoverBackColor = dark ? Color.FromArgb(56, 56, 56) : Color.FromArgb(229, 243, 255);
         splitViewer.BackColor = dark ? Color.FromArgb(40, 40, 40) : SystemColors.Control; // die Trennlinie zur Seitenleiste
-        annotationPanel.ApplyTheme(outlineView.BackColor, outlineView.ForeColor, dark ? Color.FromArgb(165, 165, 165) : SystemColors.GrayText,
+        annotationPanel.ApplyTheme(dark, outlineView.BackColor, outlineView.ForeColor, dark ? Color.FromArgb(165, 165, 165) : SystemColors.GrayText,
             dark ? Color.FromArgb(52, 52, 52) : Color.FromArgb(240, 240, 240), outlineView.SelectionBackColor, outlineView.HoverBackColor,
             ViewerIconColor, SidebarRailRenderer.Accent(dark), new SidebarRailRenderer(dark)); // wie die übrige Seitenleiste
+        outlineStrip.Renderer = new SidebarRailRenderer(dark); // Kopfzeile der Dokumentstruktur wie die der Anmerkungs- und Anhangliste
+        outlineStrip.BackColor = outlineView.BackColor;
+        labelOutlineCount.ForeColor = outlineView.ForeColor;
+        btnOutlineMore.DropDown.Renderer = new ViewerStripRenderer(dark);
+        UpdateOutlineStripIcons();
+        attachmentPanel.ApplyTheme(outlineView.BackColor, outlineView.ForeColor, dark ? Color.FromArgb(165, 165, 165) : SystemColors.GrayText,
+            outlineView.SelectionBackColor, outlineView.HoverBackColor, ViewerIconColor, new SidebarRailRenderer(dark));
         viewerStrip.Renderer = new ViewerStripRenderer(dark) { IsActiveMode = IsActiveModeItem }; // hell wie der Standard, aktive Modi wie Edge
         sidebarStrip.Renderer = new SidebarRailRenderer(dark); // senkrechte Umschaltleiste wie in Chrome, in beiden Modi
+        // Streifen zum Auf- und Zuklappen wie bei Acrobat: etwas dunkler als die Fläche neben den Seiten (hell 232, dunkel 51)
+        sidebarToggle.BackColor = dark ? Color.FromArgb(66, 66, 66) : Color.FromArgb(214, 214, 214);
+        sidebarToggle.HoverBackColor = dark ? Color.FromArgb(84, 84, 84) : Color.FromArgb(196, 196, 196);
+        sidebarToggle.ArrowColor = dark ? Color.FromArgb(215, 215, 215) : Color.FromArgb(70, 70, 70);
         sidebarHeader.Renderer = new SidebarRailRenderer(dark); // Kopfzeile „Inhaltsverzeichnis“ wie in Edge
         foreach (var field in new Control[] { textPage.TextBox, comboZoom.ComboBox, textSearch.TextBox })
         {
@@ -3796,7 +3942,6 @@ public partial class MainForm : Form
             item.Image = image;
             item.DisplayStyle = image != null ? ToolStripItemDisplayStyle.Image : ToolStripItemDisplayStyle.Text;
         }
-        btnSidebar.Image = ViewerIcon(ToolbarIcons.Sidebar); // Beschriftung „Inhaltsverzeichnis“ nur bei geschlossener Seitenleiste (UpdateViewerLayout)
         // Hervorheben: Symbol mit Farbbalken aus UpdateAnnotationIcons; Anzeige mit oder ohne Beschriftung entscheidet UpdateViewerLayout
         btnStamp.Image = ViewerIcon(ToolbarIcons.Stamp);
         btnComment.Image = ViewerIcon(ToolbarIcons.Comment);
@@ -3805,6 +3950,7 @@ public partial class MainForm : Form
         foreach (var item in ViewerTextItems) { item.Font = toolStrip.Font; } // Beschriftung so groß wie in der Symbolleiste
         UpdateAnnotationIcons();
         Set(btnUndo, ToolbarIcons.Undo); // nur das Symbol wie bei Edge; der Tooltip nennt den Schritt
+        Set(btnRedo, ToolbarIcons.Redo);
         Set(btnZoomOut, ToolbarIcons.ZoomOut);
         Set(btnZoomIn, ToolbarIcons.ZoomIn);
         Set(btnTwoPage, ToolbarIcons.TwoPage);
@@ -3824,11 +3970,10 @@ public partial class MainForm : Form
         UpdateViewerLayout();
     }
 
-    /// <summary>Symbol mit oder ohne Text; ohne Symbolschrift nur der Text. „Inhaltsverzeichnis“ nur bei geschlossener Seitenleiste –
-    /// offen steht dieselbe Überschrift darunter in ihrer Kopfzeile.</summary>
+    /// <summary>Symbol mit oder ohne Text; ohne Symbolschrift nur der Text.</summary>
     private ToolStripItemDisplayStyle TextStyle(ToolStripItem item, bool text) =>
         item.Image == null ? ToolStripItemDisplayStyle.Text
-        : text && (item != btnSidebar || splitViewer.Panel1Collapsed) ? ToolStripItemDisplayStyle.ImageAndText : ToolStripItemDisplayStyle.Image;
+        : text ? ToolStripItemDisplayStyle.ImageAndText : ToolStripItemDisplayStyle.Image;
 
     private void ViewerStrip_Resize(object? sender, EventArgs e)
     {
@@ -3836,9 +3981,9 @@ public partial class MainForm : Form
     }
 
     /// <summary>Seitenfeld, Zoom, Anpassen und Drehen stehen wie bei Edge mittig in der Viewer-Leiste: Ein Platzhalter hinter der
-    /// Seitenleisten-Schaltfläche schiebt sie dorthin – nur so weit, dass rechts Suche und Vollbild Platz behalten.</summary>
+    /// Anmerkungs-Schaltflächen schiebt sie dorthin – nur so weit, dass rechts Suche und Vollbild Platz behalten.</summary>
     /// <summary>Schaltflächen der Viewer-Leiste, die wie die Symbolleiste Symbol und Text zeigen (Wunsch vom 03.10.2026).</summary>
-    private ToolStripItem[] ViewerTextItems => [btnSidebar, btnHighlight, btnFreeText, btnComment, btnStamp, btnDraw];
+    private ToolStripItem[] ViewerTextItems => [btnHighlight, btnFreeText, btnComment, btnStamp, btnDraw];
 
     private bool updatingViewerLayout;
 
@@ -3883,7 +4028,7 @@ public partial class MainForm : Form
             var style = TextStyle(item, showText);
             if (item.DisplayStyle != style) { item.DisplayStyle = style; }
         }
-        var leftWidth = left.Sum(Width) + labelViewerSpacer.Margin.Horizontal; // Seitenleiste und Anmerkungen
+        var leftWidth = left.Sum(Width) + labelViewerSpacer.Margin.Horizontal; // Rückgängig und Anmerkungen
         var centered = (available - centerWidth) / 2 - leftWidth;
         var spacer = Math.Max(0, Math.Min(centered, available - leftWidth - centerWidth - rightWidth - LogicalToDeviceUnits(8)));
         if (labelViewerSpacer.Width != spacer) { labelViewerSpacer.Width = spacer; }
@@ -4113,11 +4258,31 @@ public partial class MainForm : Form
     // Öffnen nicht –, gespeichert wird sie beim Beenden.
     private bool sidebarUserVisible, sidebarUserBookmarks;
 
+    // Seit 15.10.2026 (Wunsch Wilhelms) haben Anmerkungen Vorrang, auch vor Lesezeichen: Findet das erste Lesen der Anmerkungen welche,
+    // geht die Seitenleiste mit der Anmerkungsliste auf (RefreshAnnotations → DecideAnnotationSidebar). Bis dahin gilt die Regel oben;
+    // eine schon offene Anmerkungsliste bleibt bis zum Ergebnis stehen und weicht ihr nur, wenn die neue Datei keine Anmerkungen hat.
+    private bool? annotationSidebarPending; // neue Datei, Anmerkungen noch nicht gelesen: hat sie Lesezeichen?
+
     private void ApplySidebarForDocument(bool hasOutline)
     {
-        if (AnnotationListShown) { return; } // eine offene Anmerkungsliste bleibt offen und zeigt die Anmerkungen der neuen Datei
+        annotationSidebarPending = hasOutline;
+        if (!AnnotationListShown) { ApplyOutlineSidebar(hasOutline); }
+    }
+
+    private void ApplyOutlineSidebar(bool hasOutline)
+    {
         if (hasOutline) { ShowSidebarPanel(SidebarView.Outline); SetSidebarVisible(true); }
         else { ShowSidebarPanel(SidebarView.Thumbnails); SetSidebarVisible(sidebarUserVisible); } // ohne Lesezeichen wären es nur „(keine Lesezeichen)“
+    }
+
+    /// <summary>Nach dem ersten Lesen der Anmerkungen einer neuen Datei: mit Anmerkungen die Liste zeigen, sonst die Regel für Lesezeichen
+    /// und Miniaturen (falls noch die Liste der vorigen Datei offen war).</summary>
+    private void DecideAnnotationSidebar(bool found)
+    {
+        if (annotationSidebarPending is not { } hasOutline) { return; }
+        annotationSidebarPending = null;
+        if (found) { if (!AnnotationListShown) { ShowSidebarPanel(SidebarView.Annotations); SetSidebarVisible(true); } }
+        else if (sidebarView == SidebarView.Annotations) { ApplyOutlineSidebar(hasOutline); }
     }
 
     /// <summary>Anzeigeeinstellungen vom letzten Beenden: Anpassung bzw. Zoomstufe (für die erste Datei, danach gilt die jeweils letzte),
@@ -4142,53 +4307,60 @@ public partial class MainForm : Form
 
     private void SetSidebarVisible(bool visible)
     {
-        var listWasShown = AnnotationListShown;
+        var (listWasShown, attachmentsWereShown) = (AnnotationListShown, AttachmentListShown);
         splitViewer.Panel1Collapsed = !visible;
-        btnSidebar.Checked = visible;
-        UpdateViewerLayout(); // die Beschriftung „Inhaltsverzeichnis“ kommt bzw. geht
+        sidebarToggle.Collapsed = !visible;
+        sidebarToggle.ToolTipText = Lng.T(visible ? "Seitenleiste ausblenden (F10)" : "Seitenleiste einblenden (F10)");
+        UpdateSidebarIcons(); // die gewählte Ansicht ist nur bei offener Seitenleiste markiert (wie Acrobat)
         if (AnnotationListShown && !listWasShown) { RefreshAnnotations(); } // die Liste liest erst, wenn sie zu sehen ist
+        if (AttachmentListShown && !attachmentsWereShown) { _ = RefreshAttachmentsAsync(); }
     }
 
-    /// <summary>F10, Strg+Umschalt+I (wie Edge) und die Schaltfläche links in der Viewer-Leiste.</summary>
+    /// <summary>F10, Strg+Umschalt+I (wie Edge) und der Streifen am Rand der Seitenleiste (bis 15.10.2026 ein Knopf in der Viewer-Leiste).</summary>
     private void ToggleSidebar()
     {
         SetSidebarVisible(splitViewer.Panel1Collapsed);
         sidebarUserVisible = !splitViewer.Panel1Collapsed;
     }
 
-    /// <summary>Strg+F10 bzw. Umschalt+F10 (wie in PDFMover, Wunsch vom 04.10.2026): Seitenleiste ein/aus, beim Einblenden mit den
-    /// Miniaturen bzw. der Dokumentstruktur (Lesezeichen).</summary>
-    private void ToggleSidebar(bool bookmarks)
+    /// <summary>Strg+F10, Umschalt+F10 (wie in PDFMover, Wunsch vom 04.10.2026) bzw. Alt+F10 (seit 15.10.2026): Seitenleiste ein/aus, beim
+    /// Einblenden mit den Miniaturen, der Dokumentstruktur (Lesezeichen) bzw. den Anmerkungen.</summary>
+    private void ToggleSidebar(SidebarView view)
     {
         if (splitViewer.Panel1Collapsed)
         {
-            ShowSidebarPanel(bookmarks ? SidebarView.Outline : SidebarView.Thumbnails);
-            sidebarUserBookmarks = bookmarks;
+            ShowSidebarPanel(view);
+            if (view is SidebarView.Thumbnails or SidebarView.Outline) { sidebarUserBookmarks = view == SidebarView.Outline; } // gemerkt werden nur diese beiden
         }
         ToggleSidebar();
     }
 
     private void ShowSidebarPanel(SidebarView view)
     {
-        var listWasShown = AnnotationListShown;
+        var (listWasShown, attachmentsWereShown) = (AnnotationListShown, AttachmentListShown);
         sidebarView = view;
-        outlineView.Visible = view == SidebarView.Outline;
+        panelOutline.Visible = view == SidebarView.Outline; // Kopfzeile und Baum
         thumbnailGrid.Visible = view == SidebarView.Thumbnails;
         annotationPanel.Visible = view == SidebarView.Annotations;
-        btnSideBookmarks.Checked = view == SidebarView.Outline;
-        btnSideThumbnails.Checked = view == SidebarView.Thumbnails;
-        btnSideAnnotations.Checked = view == SidebarView.Annotations;
+        attachmentPanel.Visible = view == SidebarView.Attachments;
         UpdateSidebarIcons();
         UpdateAnnotationRail();
         if (AnnotationListShown && !listWasShown) { RefreshAnnotations(); }
+        if (AttachmentListShown && !attachmentsWereShown) { _ = RefreshAttachmentsAsync(); }
     }
 
-    /// <summary>Symbole der Umschaltleiste links in der Seitenleiste (wie Chrome): die gewählte Ansicht in der Akzentfarbe.</summary>
+    /// <summary>Symbole der Umschaltleiste am linken Fensterrand (wie Chrome und Acrobat): die gewählte Ansicht in der Akzentfarbe – nur bei
+    /// offener Seitenleiste; geschlossen ist keine markiert, ein Klick öffnet die Ansicht (Wunsch vom 15.10.2026).</summary>
     private void UpdateSidebarIcons()
     {
+        var open = !splitViewer.Panel1Collapsed;
+        btnSideThumbnails.Checked = open && sidebarView == SidebarView.Thumbnails;
+        btnSideBookmarks.Checked = open && sidebarView == SidebarView.Outline;
+        btnSideAnnotations.Checked = open && sidebarView == SidebarView.Annotations;
+        btnSideAttachments.Checked = open && sidebarView == SidebarView.Attachments;
         sidebarStrip.ImageScalingSize = toolStrip.ImageScalingSize;
         var dark = settings.DarkViewer;
-        foreach (var (button, glyph) in new[] { (btnSideThumbnails, ToolbarIcons.Thumbnails), (btnSideBookmarks, ToolbarIcons.Outline), (btnSideAnnotations, ToolbarIcons.ManageAnnotations) })
+        foreach (var (button, glyph) in new[] { (btnSideThumbnails, ToolbarIcons.Thumbnails), (btnSideBookmarks, ToolbarIcons.Outline), (btnSideAnnotations, ToolbarIcons.ManageAnnotations), (btnSideAttachments, ToolbarIcons.Attach) })
         {
             var color = button.Checked ? SidebarRailRenderer.Accent(dark) : ViewerIconColor;
             button.Image = ToolbarIcons.FontAvailable ? ToolbarIcons.Get(glyph, toolStrip.ImageScalingSize, color) : null;
@@ -4200,7 +4372,36 @@ public partial class MainForm : Form
         btnSidebarClose.DisplayStyle = btnSidebarClose.Image != null ? ToolStripItemDisplayStyle.Image : ToolStripItemDisplayStyle.Text;
     }
 
-    private void BtnSidebar_Click(object? sender, EventArgs e) => ToggleSidebar();
+    private void SidebarToggle_Click(object? sender, EventArgs e) => ToggleSidebar();
+
+    /// <summary>Teiler zwischen Seitenleiste und Streifen: eine senkrechte gestrichelte Linie zeigt, wo man die Breite der Seitenleiste zieht
+    /// (Wunsch vom 15.10.2026 – neben dem Streifen war die Stelle schwer zu finden). Nur bei offener Seitenleiste.</summary>
+    private void SplitViewer_Paint(object? sender, PaintEventArgs e)
+    {
+        if (splitViewer.Panel1Collapsed) { return; }
+        var area = splitViewer.SplitterRectangle;
+        var x = area.X + area.Width / 2;
+        using Pen pen = new(settings.DarkViewer ? Color.FromArgb(110, 110, 110) : Color.FromArgb(150, 150, 150)) { DashPattern = [2f, 2f] }; // 2 px Strich, 2 px Lücke
+        e.Graphics.DrawLine(pen, x, area.Top, x, area.Bottom);
+    }
+
+    /// <summary>Klick in die Umschaltleiste (wie Acrobat): bei geschlossener Seitenleiste öffnet er sie mit dieser Ansicht, ein Klick auf die
+    /// schon offene Ansicht schließt sie, sonst wechselt er die Ansicht.</summary>
+    private void SelectSidebarView(SidebarView view)
+    {
+        if (!splitViewer.Panel1Collapsed && sidebarView == view)
+        {
+            SetSidebarVisible(false);
+            sidebarUserVisible = false;
+            return;
+        }
+        ShowSidebarPanel(view);
+        if (splitViewer.Panel1Collapsed)
+        {
+            SetSidebarVisible(true);
+            sidebarUserVisible = true;
+        }
+    }
 
     private void BtnSidebarClose_Click(object? sender, EventArgs e)
     {
@@ -4210,13 +4411,13 @@ public partial class MainForm : Form
 
     private void BtnSideThumbnails_Click(object? sender, EventArgs e)
     {
-        ShowSidebarPanel(SidebarView.Thumbnails);
+        SelectSidebarView(SidebarView.Thumbnails);
         sidebarUserBookmarks = false;
     }
 
     private void BtnSideBookmarks_Click(object? sender, EventArgs e)
     {
-        ShowSidebarPanel(SidebarView.Outline);
+        SelectSidebarView(SidebarView.Outline);
         sidebarUserBookmarks = true;
     }
 
@@ -4239,16 +4440,30 @@ public partial class MainForm : Form
     /// wirkungslose Einträge (der Baum steht schon so) ausgegraut.</summary>
     private void ContextMenuOutline_Opening(object? sender, System.ComponentModel.CancelEventArgs e)
     {
+        if (!PrepareOutlineMenu(mnuOutlineExpandAll, mnuOutlineCollapseAll, toolStripSeparatorO1, mnuOutlineLevel2, mnuOutlineLevel3)) { e.Cancel = true; } // nichts zum Aufklappen
+    }
+
+    /// <summary>„…“ der Kopfzeile (seit 15.10.2026): dieselben Einträge wie das Kontextmenü, eigene Menüpunkte – im Dunkelmodus ist dieses Menü
+    /// dunkel, das Kontextmenü hell wie alle Kontextmenüs.</summary>
+    private void BtnOutlineMore_DropDownOpening(object? sender, EventArgs e)
+    {
+        PrepareOutlineMenu(mnuOutlineBarExpandAll, mnuOutlineBarCollapseAll, toolStripSeparatorO2, mnuOutlineBarLevel2, mnuOutlineBarLevel3);
+    }
+
+    /// <summary>Ebenen-Einträge nur, wenn die Gliederung tiefer ist; was nichts ändern würde, ausgegraut (Wunsch vom 05.10.2026). False ohne
+    /// Unterpunkte – dann gibt es nichts aufzuklappen.</summary>
+    private bool PrepareOutlineMenu(ToolStripItem expandAll, ToolStripItem collapseAll, ToolStripItem separator, ToolStripItem level2, ToolStripItem level3)
+    {
         var depth = outlineView.Depth;
-        if (depth < 2) { e.Cancel = true; return; } // nichts zum Aufklappen
-        mnuOutlineLevel2.Available = depth > 2;
-        mnuOutlineLevel3.Available = depth > 3;
-        toolStripSeparatorO1.Available = depth > 2;
-        // was gerade nichts ändern würde, ausgegraut (Wunsch vom 05.10.2026)
-        mnuOutlineExpandAll.Enabled = !outlineView.IsAtLevel(int.MaxValue);
-        mnuOutlineCollapseAll.Enabled = !outlineView.IsAtLevel(1);
-        mnuOutlineLevel2.Enabled = !outlineView.IsAtLevel(2);
-        mnuOutlineLevel3.Enabled = !outlineView.IsAtLevel(3);
+        if (depth < 2) { return false; }
+        level2.Available = depth > 2;
+        level3.Available = depth > 3;
+        separator.Available = depth > 2;
+        expandAll.Enabled = !outlineView.IsAtLevel(int.MaxValue);
+        collapseAll.Enabled = !outlineView.IsAtLevel(1);
+        level2.Enabled = !outlineView.IsAtLevel(2);
+        level3.Enabled = !outlineView.IsAtLevel(3);
+        return true;
     }
 
     private void MnuOutlineExpandAll_Click(object? sender, EventArgs e)
@@ -4277,6 +4492,27 @@ public partial class MainForm : Form
     {
         outlineView.EmptyText = document != null ? Lng.T("(keine Lesezeichen)") : string.Empty;
         outlineView.SetItems(outline);
+        static int Count(IEnumerable<OutlineItem> items) => items.Sum(i => 1 + Count(i.Children));
+        var count = Count(outline);
+        labelOutlineCount.Text = count == 1 ? Lng.T("1 Lesezeichen") : string.Format(Lng.T("{0} Lesezeichen"), count); // Kopfzeile wie bei Anmerkungen und Anhängen
+        btnOutlineMore.Enabled = outlineView.Depth >= 2; // Auf-/Zuklappen nur mit Unterpunkten
+    }
+
+    /// <summary>Symbole der Kopfzeile in der Größe der Viewer-Leiste, die des „…“-Menüs im Dunkelmodus hell.</summary>
+    private void UpdateOutlineStripIcons()
+    {
+        if (ToolbarIcons.FontAvailable)
+        {
+            var size = new Size(LogicalToDeviceUnits(16), LogicalToDeviceUnits(16));
+            outlineStrip.ImageScalingSize = size;
+            btnOutlineEdit.Image = ToolbarIcons.Get(ToolbarIcons.Edit, size, ViewerIconColor);
+            btnOutlineMore.Image = ToolbarIcons.Get(ToolbarIcons.More, size, ViewerIconColor);
+            btnOutlineEdit.DisplayStyle = btnOutlineMore.DisplayStyle = ToolStripItemDisplayStyle.Image;
+        }
+        Image? Icon(char glyph) => settings.DarkViewer && ToolbarIcons.MenuIconsEnabled
+            ? ToolbarIcons.Get(glyph, LogicalToDeviceUnits(new Size(16, 16)), ViewerStripRenderer.Foreground) : MenuIcon(glyph);
+        mnuOutlineBarExpandAll.Image = Icon(ToolbarIcons.ChevronDown);
+        mnuOutlineBarCollapseAll.Image = Icon(ToolbarIcons.ChevronUp);
     }
 
     private void OutlineView_ItemActivated(object? sender, OutlineItem item)
@@ -4588,7 +4824,7 @@ public partial class MainForm : Form
     private static bool IsViewNeutral(Keys keyData) => keyData is Keys.F1 or Keys.F3 or (Keys.F3 | Keys.Shift) or Keys.F11 or Keys.Escape or (Keys.Escape | Keys.Shift)
         or (Keys.Oemcomma | Keys.Control) or (Keys.F2 | Keys.Control | Keys.Shift) or (Keys.C | Keys.Control | Keys.Shift)
         or (Keys.D | Keys.Control) or (Keys.Enter | Keys.Alt) or (Keys.F | Keys.Control) or (Keys.G | Keys.Control)
-        or (Keys.I | Keys.Control | Keys.Shift) or Keys.F10 or (Keys.F10 | Keys.Control) or (Keys.F10 | Keys.Shift) or (Keys.B | Keys.Control | Keys.Shift) or (Keys.R | Keys.Control | Keys.Shift) or (Keys.L | Keys.Control | Keys.Shift)
+        or (Keys.I | Keys.Control | Keys.Shift) or Keys.F10 or (Keys.F10 | Keys.Control) or (Keys.F10 | Keys.Shift) or (Keys.F10 | Keys.Alt) or (Keys.B | Keys.Control | Keys.Shift) or (Keys.R | Keys.Control | Keys.Shift) or (Keys.L | Keys.Control | Keys.Shift)
         or (Keys.Add | Keys.Control) or (Keys.Oemplus | Keys.Control) or (Keys.Subtract | Keys.Control) or (Keys.OemMinus | Keys.Control)
         or (Keys.D0 | Keys.Control) or (Keys.NumPad0 | Keys.Control) or (Keys.Space | Keys.Control) or (Keys.S | Keys.Control)
         or (Keys.T | Keys.Control | Keys.Shift); // Anmerkungsliste der Seitenleiste – sie zeigt den angezeigten Stand, nichts muss gespeichert sein
@@ -4603,9 +4839,9 @@ public partial class MainForm : Form
     /// Ebenso die Dialoge des Bearbeiten-Menüs und die Eigenschaften: Erst wenn sie die Datei ändern, schreiben sie offene Änderungen der
     /// Anzeige im selben Schritt mit (<see cref="PendingViewChangesAsync"/>, <see cref="WritePropertiesAsync"/>; seit 10.10.2026).</summary>
     private bool IsViewEdit(Keys keyData) => keyData is (Keys.T | Keys.Control) or (Keys.H | Keys.Control)
-        or (Keys.I | Keys.Control) or (Keys.Delete | Keys.Control) or (Keys.Insert | Keys.Control) or (Keys.X | Keys.Control) or (Keys.Y | Keys.Control)
+        or (Keys.I | Keys.Control) or (Keys.Delete | Keys.Control) or (Keys.Insert | Keys.Control) or (Keys.X | Keys.Control)
         or (Keys.N | Keys.Control) or (Keys.R | Keys.Control) or (Keys.F2 | Keys.Control) or (Keys.H | Keys.Control | Keys.Shift)
-        || (keyData == (Keys.Z | Keys.Control) && viewUndo.Count > 0);
+        || (keyData == (Keys.Z | Keys.Control) && viewUndo.Count > 0) || (keyData is (Keys.Y | Keys.Control) or (Keys.Z | Keys.Control | Keys.Shift) && viewRedo.Count > 0);
 
     /// <summary>Die Aktion zu einem Tastenkürzel – null, wenn die Taste keins ist (dann läuft sie an das Steuerelement mit dem Fokus weiter).</summary>
     private Action? ResolveShortcut(Keys keyData)
@@ -4624,7 +4860,6 @@ public partial class MainForm : Form
             case Keys.Delete | Keys.Control when !EditLocked: return DeletePagesDialog;
             case Keys.Insert | Keys.Control when !EditLocked: return InsertPageDialog;     // Gegenstück zu Strg+Entf
             case Keys.X | Keys.Control: return ExtractPagesDialog;                         // eXtrahieren
-            case Keys.Y | Keys.Control when mnuMovePage.Enabled: return MovePageDialog;    // aktuelle Seite verschieben
             case Keys.N | Keys.Control when !EditLocked: return AppendPdfDialog;           // PDF-Datei anhängen
             case Keys.T | Keys.Control when !EditLocked: return AddAnnotationDialog;       // Textanmerkung
             case Keys.H | Keys.Control when !EditLocked: return AddStampDialog;            // Stempel
@@ -4644,8 +4879,9 @@ public partial class MainForm : Form
             case Keys.G | Keys.Control: return FocusPageBox;                               // Gehe zu Seite (Zahl + Enter)
             case Keys.F10:
             case Keys.I | Keys.Control | Keys.Shift: return ToggleSidebar;                 // Seitenleiste (F10 wie PDFMover, Strg+Umschalt+I wie Edge)
-            case Keys.F10 | Keys.Control: return () => ToggleSidebar(bookmarks: false);   // … beim Einblenden mit Miniaturen
-            case Keys.F10 | Keys.Shift: return () => ToggleSidebar(bookmarks: true);      // … beim Einblenden mit der Dokumentstruktur
+            case Keys.F10 | Keys.Control: return () => ToggleSidebar(SidebarView.Thumbnails); // … beim Einblenden mit Miniaturen
+            case Keys.F10 | Keys.Shift: return () => ToggleSidebar(SidebarView.Outline);    // … beim Einblenden mit der Dokumentstruktur
+            case Keys.F10 | Keys.Alt: return () => ToggleSidebar(SidebarView.Annotations);  // … beim Einblenden mit den Anmerkungen (seit 15.10.2026)
             case Keys.B | Keys.Control | Keys.Shift: return ToggleFit;                     // an Breite / an Seite anpassen
             case Keys.Space | Keys.Control: return ToggleTwoPage;                         // ein-/zweiseitig
             case Keys.F | Keys.Control: return ShowSearch;
@@ -4660,6 +4896,8 @@ public partial class MainForm : Form
             // Datei und Programm
             case Keys.Z | Keys.Control when viewUndo.Count > 0: return UndoViewChange;     // ungespeicherte Schritte in der Anzeige
             case Keys.Z | Keys.Control when undoAction != null: return UndoLastChange;
+            case Keys.Y | Keys.Control when viewRedo.Count > 0:
+            case Keys.Z | Keys.Control | Keys.Shift when viewRedo.Count > 0: return RedoViewChange; // nur Schritte der Anzeige; Strg+Y war bis 15.10.2026 „Seite verschieben“
             case Keys.I | Keys.Control: return ShowProperties;
             case Keys.Oemcomma | Keys.Control: return () => OpenSettings(SettingsForm.TabGeneral); // Strg+, wie in vielen Editoren
             case Keys.Enter | Keys.Alt when currentFile != null: return () => { if (currentFile != null) { ShellUtil.ShowFileProperties(currentFile.FullName); } }; // Windows-Dateieigenschaften, wie im Explorer
@@ -4858,6 +5096,7 @@ public partial class MainForm : Form
         if (viewUndo.Count > 0) { UndoViewChange(); return; } // ungespeicherte Schritte in der Anzeige zuerst
         RunAfterCommit(UndoLastChange);
     }
+    private void BtnRedo_Click(object? sender, EventArgs e) => RedoViewChange();
     private void MnuProperties_Click(object? sender, EventArgs e)
     {
         RunUnlessEditing(ShowProperties); // offene Änderungen schreibt erst „OK“ mit (WritePropertiesAsync)

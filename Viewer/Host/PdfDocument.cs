@@ -946,11 +946,12 @@ internal sealed unsafe class PdfDocument : IDisposable
 
     /// <summary>Die Anmerkungen einer Seite für die Liste: Nummer (Position in /Annots), Art, Autor (/T), Änderungsdatum (/M, roh),
     /// Text (/Contents), Farbe (/C, falls vorhanden) und Lage als Anteil der angezeigten Seite (0…1, Drehung berücksichtigt). Im
-    /// Original ausgeblendete fehlen – außer denen, die nur das Verschieben gerade ausblendet.</summary>
-    public List<(int Number, int Subtype, string Author, string Modified, string Contents, uint Color, bool HasColor, float Left, float Top, float Right, float Bottom)> Annotations(int index)
+    /// Original ausgeblendete fehlen – außer denen, die nur das Verschieben gerade ausblendet. Textmarkierungen ohne eigenen Text
+    /// bekommen als Auszug den markierten Text (seit 15.10.2026, Wunsch Wilhelms – vorher stand dort nur „Hervorhebung“).</summary>
+    public List<(int Number, int Subtype, string Author, string Modified, string Contents, string Excerpt, uint Color, bool HasColor, float Left, float Top, float Right, float Bottom)> Annotations(int index)
     {
         var page = GetPage(index).Page;
-        List<(int, int, string, string, string, uint, bool, float, float, float, float)> list = [];
+        List<(int, int, string, string, string, string, uint, bool, float, float, float, float)> list = [];
         var count = Pdfium.PageGetAnnotCount(page);
         for (var i = 0; i < count; i++)
         {
@@ -970,12 +971,48 @@ internal sealed unsafe class PdfDocument : IDisposable
                     (left, right) = (Math.Min(x1, x2) / (float)FractionScale, Math.Max(x1, x2) / (float)FractionScale);
                     (top, bottom) = (Math.Min(y1, y2) / (float)FractionScale, Math.Max(y1, y2) / (float)FractionScale);
                 }
-                list.Add((i, subtype, GetString(annot, "T"), GetString(annot, "M"), GetString(annot, "Contents"),
+                var contents = GetString(annot, "Contents");
+                var excerpt = contents.Length == 0 && subtype is >= Pdfium.AnnotHighlight and <= Pdfium.AnnotStrikeOut ? MarkedText(index, annot) : string.Empty;
+                list.Add((i, subtype, GetString(annot, "T"), GetString(annot, "M"), contents, excerpt,
                     hasColor ? (r & 0xFF) << 16 | (g & 0xFF) << 8 | (b & 0xFF) : 0, hasColor, left, top, right, bottom));
             }
             finally { Pdfium.PageCloseAnnot(annot); }
         }
         return list;
+    }
+
+    private const int ExcerptLimit = 200; // die Liste zeigt ohnehin nur eine Zeile
+
+    /// <summary>Der Text unter einer Textmarkierung: alle Zeichen, deren Mitte in einem ihrer Vierecke (/QuadPoints) liegt, in
+    /// Lesereihenfolge, Leerraum zusammengefasst. Die Mitte statt der Überlappung – die Vierecke reichen etwas über die Schrift
+    /// hinaus und berührten sonst Zeichen der Nachbarzeilen und -wörter.</summary>
+    private string MarkedText(int index, nint annot)
+    {
+        var quadCount = (int)Math.Min(Pdfium.AnnotCountAttachmentPoints(annot), 10_000);
+        if (quadCount == 0) { return string.Empty; }
+        var quads = new List<(double Left, double Right, double Bottom, double Top)>(quadCount);
+        for (nuint j = 0; j < (nuint)quadCount; j++)
+        {
+            Pdfium.QuadPointsF quad;
+            if (Pdfium.AnnotGetAttachmentPoints(annot, j, &quad) == 0) { continue; }
+            quads.Add((Math.Min(Math.Min(quad.X1, quad.X2), Math.Min(quad.X3, quad.X4)), Math.Max(Math.Max(quad.X1, quad.X2), Math.Max(quad.X3, quad.X4)),
+                Math.Min(Math.Min(quad.Y1, quad.Y2), Math.Min(quad.Y3, quad.Y4)), Math.Max(Math.Max(quad.Y1, quad.Y2), Math.Max(quad.Y3, quad.Y4))));
+        }
+        var text = TextPage(index);
+        var boxes = CharBoxes(index);
+        var builder = new StringBuilder();
+        var gap = false; // zwischen zwei markierten Zeichen lag Leerraum, ein Zeilenende oder Nichtmarkiertes
+        for (var i = 0; i < boxes.Length && builder.Length < ExcerptLimit; i++)
+        {
+            var (left, right, bottom, top) = boxes[i];
+            var c = (char)Pdfium.TextGetUnicode(text, i);
+            var (x, y) = ((left + right) / 2, (bottom + top) / 2);
+            var inside = right > left && top > bottom && quads.Exists(q => x >= q.Left && x <= q.Right && y >= q.Bottom && y <= q.Top);
+            if (!inside || char.IsWhiteSpace(c) || char.IsControl(c)) { gap |= builder.Length > 0; continue; }
+            if (gap) { builder.Append(' '); gap = false; }
+            builder.Append(c);
+        }
+        return builder.ToString();
     }
 
     // ================================================================== Speichern und Druckkopie

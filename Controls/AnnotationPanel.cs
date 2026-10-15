@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using PDFLight.Classes;
+using PDFLight.Forms;
 using PDFLight.Viewer;
 
 namespace PDFLight.Controls;
@@ -15,10 +16,10 @@ public partial class AnnotationPanel : UserControl
     private List<AnnotationEntry> all = [];
     private bool loading;
     private SortOrder sort = SortOrder.Page;
-    private readonly HashSet<int> hiddenTypes = [];
-    private readonly HashSet<string> hiddenAuthors = [];
-    private readonly HashSet<int> hiddenColors = []; // ARGB, NoColor = ohne Farbe
-    private const int NoColor = 0;
+    private AnnotationFilter filter = new();
+    private AnnotationFilterForm? filterForm;
+    private long filterClosedAt;
+    private bool dark;
     private Color iconColor = Color.FromArgb(64, 64, 64), accentColor = Color.FromArgb(0, 120, 212);
 
     /// <summary>Klick oder Pfeiltaste auf einen Eintrag: zur Anmerkung springen.</summary>
@@ -41,6 +42,9 @@ public partial class AnnotationPanel : UserControl
         textSearch.PlaceholderText = Lng.T(textSearch.PlaceholderText);
         listView.TypeName = e => TypeName(e.Subtype);
         listView.EmptyText = Lng.T("(keine Anmerkungen)");
+        // Haken in eigener Spalte vor den Symbolen – sonst überdeckte er das Symbol (dunkel) bzw. war kaum zu sehen (hell); das Menü des
+        // Knopfs entsteht erst zur Laufzeit, der Designer kommt an die Eigenschaft nicht heran
+        ((ToolStripDropDownMenu)btnSort.DropDown).ShowCheckMargin = true;
         UpdateSortChecks();
         UpdateCount();
     }
@@ -94,17 +98,19 @@ public partial class AnnotationPanel : UserControl
     /// <summary>Kein Dokument: leer, Filter und Suche zurückgesetzt.</summary>
     public void Clear()
     {
-        hiddenTypes.Clear();
-        hiddenAuthors.Clear();
-        hiddenColors.Clear();
+        filter = new();
         textSearch.Text = string.Empty;
         btnSearch.Checked = false;
         SetEntries([], stillLoading: false);
     }
 
-    /// <summary>Farben wie die übrige Seitenleiste (hell oder dunkel).</summary>
-    public void ApplyTheme(Color back, Color fore, Color secondary, Color header, Color selection, Color hover, Color icon, Color accent, ToolStripRenderer renderer)
+    /// <summary>Farben wie die übrige Seitenleiste (hell oder dunkel); das Suchfeld wie das der Viewer-Leiste.</summary>
+    public void ApplyTheme(bool darkTheme, Color back, Color fore, Color secondary, Color header, Color selection, Color hover, Color icon, Color accent, ToolStripRenderer renderer)
     {
+        dark = darkTheme;
+        textSearch.BackColor = dark ? ViewerStripRenderer.FieldBackground : SystemColors.Window;
+        textSearch.ForeColor = dark ? ViewerStripRenderer.Foreground : SystemColors.WindowText;
+        textSearch.BorderStyle = dark ? BorderStyle.FixedSingle : BorderStyle.Fixed3D; // der helle 3D-Rand stach im Dunkeln heraus
         BackColor = listView.BackColor = panelSearch.BackColor = back;
         ForeColor = listView.ForeColor = fore;
         listView.SecondaryForeColor = secondary;
@@ -112,10 +118,13 @@ public partial class AnnotationPanel : UserControl
         listView.SelectionBackColor = selection;
         listView.HoverBackColor = hover;
         toolStripTop.Renderer = renderer;
+        // die Menüs der Knöpfe erbten sonst den Renderer der Seitenleiste – ohne Hervorhebung beim Überfahren; so wie die Dropdowns der Viewer-Leiste
+        btnMore.DropDown.Renderer = btnSort.DropDown.Renderer = new ViewerStripRenderer(dark);
         toolStripTop.BackColor = back;
         labelCount.ForeColor = fore;
         (iconColor, accentColor) = (icon, accent);
         UpdateIcons();
+        UpdateMenuIcons();
     }
 
     /// <summary>Symbole der oberen Zeile in der Größe der Viewer-Leiste; ein aktiver Filter oder eine Suche in der Akzentfarbe.</summary>
@@ -124,7 +133,7 @@ public partial class AnnotationPanel : UserControl
         if (!ToolbarIcons.FontAvailable) { return; }
         var size = new Size(LogicalToDeviceUnits(16), LogicalToDeviceUnits(16));
         toolStripTop.ImageScalingSize = size;
-        var filtered = hiddenTypes.Count + hiddenAuthors.Count + hiddenColors.Count > 0;
+        var filtered = !filter.IsEmpty;
         foreach (var (item, glyph, active) in new (ToolStripItem, char, bool)[]
         {
             (btnSearch, ToolbarIcons.Search, textSearch.Text.Length > 0),
@@ -140,14 +149,32 @@ public partial class AnnotationPanel : UserControl
 
     // ================================================================== Filtern, Sortieren, Gruppieren
 
-    private static int ColorKey(AnnotationEntry entry) => entry.Color?.ToArgb() ?? NoColor;
+    /// <summary>Menüsymbole in der Größe der übrigen Menüs (nach der Einstellung „Symbole anzeigen“ – MainForm.ApplyToolbarIcons); die
+    /// Menüs der Knöpfe sind im Dunkelmodus dunkel und bekommen helle Symbole, das Kontextmenü bleibt hell wie alle Kontextmenüs.</summary>
+    public void UpdateMenuIcons()
+    {
+        Image? DropIcon(char glyph) => dark && ToolbarIcons.MenuIconsEnabled
+            ? ToolbarIcons.Get(glyph, LogicalToDeviceUnits(new Size(16, 16)), ViewerStripRenderer.Foreground) : ToolbarIcons.MenuIcon(glyph, this);
+        mnuExpandAll.Image = DropIcon(ToolbarIcons.ChevronDown);
+        mnuCollapseAll.Image = DropIcon(ToolbarIcons.ChevronUp);
+        mnuDeleteAll.Image = DropIcon(ToolbarIcons.Clear);
+        mnuSortPage.Image = DropIcon(ToolbarIcons.Page);
+        mnuSortDate.Image = DropIcon(ToolbarIcons.Calendar);
+        mnuSortAuthor.Image = DropIcon(ToolbarIcons.Person);
+        mnuSortType.Image = DropIcon(ToolbarIcons.Tag);
+        mnuCtxExpandAll.Image = ToolbarIcons.MenuIcon(ToolbarIcons.ChevronDown, this);
+        mnuCtxCollapseAll.Image = ToolbarIcons.MenuIcon(ToolbarIcons.ChevronUp, this);
+        mnuEdit.Image = ToolbarIcons.MenuIcon(ToolbarIcons.Edit, this);
+        mnuDelete.Image = ToolbarIcons.MenuIcon(ToolbarIcons.Delete, this);
+    }
 
     private bool Matches(AnnotationEntry entry)
     {
-        if (hiddenTypes.Contains(entry.Subtype) || hiddenAuthors.Contains(entry.Author) || hiddenColors.Contains(ColorKey(entry))) { return false; }
+        if (!filter.Matches(entry)) { return false; }
         var search = textSearch.Text.Trim();
         return search.Length == 0
             || entry.Contents.Contains(search, StringComparison.CurrentCultureIgnoreCase)
+            || entry.Excerpt.Contains(search, StringComparison.CurrentCultureIgnoreCase)
             || entry.Author.Contains(search, StringComparison.CurrentCultureIgnoreCase)
             || TypeName(entry.Subtype).Contains(search, StringComparison.CurrentCultureIgnoreCase);
     }
@@ -178,6 +205,7 @@ public partial class AnnotationPanel : UserControl
         };
         listView.EmptyText = all.Count == 0 ? (loading ? Lng.T("Wird gelesen…") : Lng.T("(keine Anmerkungen)")) : Lng.T("Keine passenden Anmerkungen");
         listView.SetGroups([.. groups], keepPosition);
+        btnFilter.Enabled = all.Count > 0 || !filter.IsEmpty;
         UpdateCount(shown.Count);
         UpdateIcons();
     }
@@ -207,76 +235,30 @@ public partial class AnnotationPanel : UserControl
         Rebuild();
     }
 
-    /// <summary>Filtermenü: je Art, Autor und Farbe, die im Dokument vorkommen, ein Haken (gesetzt = sichtbar). Das Menü bleibt beim
-    /// Anklicken offen, damit sich mehrere Haken in einem Zug setzen lassen.</summary>
-    private void BtnFilter_DropDownOpening(object? sender, EventArgs e)
+    /// <summary>Filter-Fenster (seit 15.10.2026 statt des Menüs mit Untermenüs und Haken – Wunsch Wilhelms): je Autor, Art und bekannter
+    /// Farbe eine Schaltfläche, darunter „Alle anzeigen“ und „Anwenden“. Ein zweiter Klick auf den Knopf, der das offene Fenster gerade
+    /// geschlossen hat, öffnet es nicht gleich wieder.</summary>
+    private void BtnFilter_Click(object? sender, EventArgs e)
     {
-        Fill(mnuFilterType, all.Select(a => a.Subtype).Distinct().OrderBy(TypeName, StringComparer.CurrentCultureIgnoreCase)
-            .Select(t => (TypeName(t), (object)t, !hiddenTypes.Contains(t), (Image?)null)));
-        Fill(mnuFilterAuthor, all.Select(a => a.Author).Distinct().OrderBy(a => a.Length == 0).ThenBy(a => a, StringComparer.CurrentCultureIgnoreCase)
-            .Select(a => (a.Length > 0 ? a : Lng.T("Ohne Autor"), (object)a, !hiddenAuthors.Contains(a), (Image?)null)));
-        Fill(mnuFilterColor, all.Select(ColorKey).Distinct().OrderBy(c => c)
-            .Select(c => (c == NoColor ? Lng.T("Ohne Farbe") : "#" + (c & 0xFFFFFF).ToString("X6", CultureInfo.InvariantCulture), (object)c, !hiddenColors.Contains(c), c == NoColor ? null : (Image?)Swatch(Color.FromArgb(c)))));
+        if (filterForm != null || Environment.TickCount64 - filterClosedAt < 300) { return; }
+        var authors = all.Select(a => a.Author).Distinct().OrderBy(a => a.Length == 0).ThenBy(a => a, StringComparer.CurrentCultureIgnoreCase);
+        var types = all.Select(a => a.Subtype).Distinct().Select(t => (t, TypeName(t))).OrderBy(t => t.Item2, StringComparer.CurrentCultureIgnoreCase);
         // die Farbe verrät PDFium nur bei Anmerkungen ohne eigenes Erscheinungsbild (FPDFAnnot_GetColor) – fast alle haben eins
-        mnuFilterColor.Visible = all.Any(a => a.Color != null);
-        mnuFilterReset.Enabled = hiddenTypes.Count + hiddenAuthors.Count + hiddenColors.Count > 0;
+        var colors = all.Where(a => a.Color != null).Select(a => a.Color!.Value.ToArgb()).Distinct().OrderBy(c => c); // Where prüft Color
+        var anchor = toolStripTop.PointToScreen(new Point(btnFilter.Bounds.Right, btnFilter.Bounds.Bottom));
+        AnnotationFilterForm form = new(authors, types, colors, filter, anchor, dark);
+        form.FormClosed += FilterForm_FormClosed;
+        filterForm = form;
+        form.Show(FindForm());
     }
 
-    private void Fill(ToolStripMenuItem menu, IEnumerable<(string Text, object Key, bool Checked, Image? Image)> items)
+    private void FilterForm_FormClosed(object? sender, FormClosedEventArgs e)
     {
-        foreach (ToolStripItem old in menu.DropDownItems) { old.Image?.Dispose(); }
-        menu.DropDownItems.Clear();
-        foreach (var (text, key, isChecked, image) in items)
-        {
-            ToolStripMenuItem item = new(text) { Tag = key, Checked = isChecked, Image = image };
-            item.Click += FilterItem_Click;
-            menu.DropDownItems.Add(item);
-        }
-        menu.Enabled = menu.DropDownItems.Count > 0;
-        menu.DropDown.Closing -= FilterDropDown_Closing;
-        menu.DropDown.Closing += FilterDropDown_Closing;
-    }
-
-    private Bitmap Swatch(Color color)
-    {
-        var size = LogicalToDeviceUnits(14);
-        Bitmap bitmap = new(size, size);
-        using var g = Graphics.FromImage(bitmap);
-        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-        using (SolidBrush brush = new(color)) { g.FillEllipse(brush, 1, 1, size - 3, size - 3); }
-        using (Pen pen = new(Color.FromArgb(160, 160, 160))) { g.DrawEllipse(pen, 1, 1, size - 3, size - 3); }
-        return bitmap;
-    }
-
-    private void FilterDropDown_Closing(object? sender, ToolStripDropDownClosingEventArgs e)
-    {
-        if (e.CloseReason == ToolStripDropDownCloseReason.ItemClicked) { e.Cancel = true; } // mehrere Haken in einem Zug
-    }
-
-    private void FilterItem_Click(object? sender, EventArgs e)
-    {
-        if (sender is not ToolStripMenuItem { Tag: { } key } item) { return; }
-        item.Checked = !item.Checked;
-        switch (key)
-        {
-            case int subtype when item.OwnerItem == mnuFilterType: Toggle(hiddenTypes, subtype, item.Checked); break;
-            case string author: Toggle(hiddenAuthors, author, item.Checked); break;
-            case int color: Toggle(hiddenColors, color, item.Checked); break;
-        }
-        mnuFilterReset.Enabled = hiddenTypes.Count + hiddenAuthors.Count + hiddenColors.Count > 0;
-        Rebuild();
-
-        static void Toggle<T>(HashSet<T> hidden, T key, bool visible)
-        {
-            if (visible) { hidden.Remove(key); } else { hidden.Add(key); }
-        }
-    }
-
-    private void MnuFilterReset_Click(object? sender, EventArgs e)
-    {
-        hiddenTypes.Clear();
-        hiddenAuthors.Clear();
-        hiddenColors.Clear();
+        if (sender is not AnnotationFilterForm form) { return; }
+        filterForm = null;
+        filterClosedAt = Environment.TickCount64;
+        if (form.DialogResult != DialogResult.OK) { return; }
+        filter = form.Result;
         Rebuild();
     }
 

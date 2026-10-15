@@ -34,8 +34,10 @@ internal static class ToolbarIcons
     public const char List = '\uE8FD';         // Stempel verwalten
     public const char Attach = '\uE723';       // PDF-Datei anhängen
     public const char Interleave = '\uE8AB';   // Switch: Rückseiten-Scan verzahnen
+    public const char Lock = '\uE72E';         // Statusleiste: geschützte Datei
     public const char Page = '\uE7C3';         // Seiten extrahieren
     public const char Undo = '\uE7A7';
+    public const char Redo = '\uE7A6';         // Wiederherstellen (Viewer-Leiste, neben Rückgängig)
     public const char Clear = '\uE894';        // Liste leeren
     public const char Keyboard = '\uE765';     // Tastenkürzel-Menüpunkt
     public const char UpdateSearch = '\uE777'; // UpdateRestore: nach Updates suchen
@@ -46,7 +48,6 @@ internal static class ToolbarIcons
     public const char Comment = '\uE90A';      // Textanmerkung einfügen (Bearbeiten-Menü)
     public const char Favorite = '\uE734';     // FavoriteStar: Favoriten-Menü und Hinzufügen-Eintrag
     public const char Bookmarks = '\uE8A4';    // Lesezeichen entfernen (Bearbeiten-Menü)
-    public const char Sidebar = '\uE700';      // GlobalNavigationButton (☰): Seitenleiste der Anzeige ein/aus
     public const char ZoomIn = '\uE8A3';
     public const char ZoomOut = '\uE71F';
     public const char FitWidth = '\uE799';     // Seite zwischen senkrechten Strichen: an Breite anpassen
@@ -72,6 +73,9 @@ internal static class ToolbarIcons
     public const char Sort = '\uE8CB';         // Anmerkungsliste der Seitenleiste: sortieren
     public const char Filter = '\uE71C';       // Anmerkungsliste: filtern
     public const char More = '\uE712';         // Anmerkungsliste: weitere Befehle
+    public const char Calendar = '\uE787';     // Anmerkungsliste: nach Datum sortieren
+    public const char Person = '\uE77B';       // Contact: Anmerkungsliste nach Autor sortieren
+    public const char Tag = '\uE8EC';          // Anmerkungsliste: nach Art sortieren
 
     public const char Highlight = '';    // Textmarker: Kontextmenü „Hervorheben“ der Anzeige
 

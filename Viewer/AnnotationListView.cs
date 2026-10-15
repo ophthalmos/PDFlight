@@ -8,7 +8,8 @@ namespace PDFLight.Viewer;
 /// <summary>Eine Anmerkung der Seite <see cref="Page"/> (0-basiert) für die Liste der Seitenleiste: <see cref="Number"/> ist die
 /// Position im /Annots-Array der Seite (dieselbe Nummer wie in PDFium und PDFsharp), <see cref="Subtype"/> die Art (FPDF_ANNOT_*),
 /// <see cref="Bounds"/> die Lage als Anteil der angezeigten Seite (0…1).</summary>
-public sealed record AnnotationEntry(int Page, int Number, int Subtype, string Author, DateTime? Modified, string Contents, Color? Color, RectangleF Bounds);
+/// <param name="Excerpt">Bei Textmarkierungen ohne eigenen Text der markierte Text (sonst leer).</param>
+public sealed record AnnotationEntry(int Page, int Number, int Subtype, string Author, DateTime? Modified, string Contents, string Excerpt, Color? Color, RectangleF Bounds);
 
 /// <summary>Eine Gruppe der Liste – je nach Sortierung eine Seite, ein Autor, ein Tag oder eine Art.</summary>
 public sealed record AnnotationGroup(string Key, string Header, IReadOnlyList<AnnotationEntry> Entries);
@@ -158,8 +159,10 @@ internal sealed class AnnotationListView : ScrollableControl
             if (collapsed.Contains(group.Key)) { continue; }
             foreach (var entry in group.Entries)
             {
-                var placeholder = string.IsNullOrWhiteSpace(entry.Contents);
-                var lines = placeholder ? [TypeName(entry)] : Wrap(entry.Contents, width, Font);
+                var hasText = !string.IsNullOrWhiteSpace(entry.Contents);
+                var placeholder = !hasText && entry.Excerpt.Length == 0;
+                // markierter Text einer Hervorhebung: nur eine Zeile, notfalls gekürzt (Wunsch vom 15.10.2026)
+                var lines = hasText ? Wrap(entry.Contents, width, Font) : placeholder ? [TypeName(entry)] : [FitLine(entry.Excerpt, Font, width)];
                 var height = 2 * Scale(EntryPadding) + Scale(IconSize) + Scale(4) + lines.Count * Scale(LineHeight);
                 rows.Add(new Row(group, entry, top, height, lines, placeholder));
                 top += height;
@@ -335,6 +338,20 @@ internal sealed class AnnotationListView : ScrollableControl
             TextRenderer.DrawText(g, line, font, new Point(left, y), color, TextFlags);
             y += Scale(LineHeight);
         }
+    }
+
+    /// <summary>Wie <see cref="Ellipsize"/>, aber mit Intervallhalbierung – Auszüge sind bis zu 200 Zeichen lang, und die Liste ordnet
+    /// bei jeder Breitenänderung neu an.</summary>
+    private static string FitLine(string text, Font font, int width)
+    {
+        if (TextWidth(text, font) <= width) { return text; }
+        var (low, high) = (0, text.Length - 1); // längster Anfang, der samt „…“ passt
+        while (low < high)
+        {
+            var middle = (low + high + 1) / 2;
+            if (TextWidth(text[..middle] + "…", font) <= width) { low = middle; } else { high = middle - 1; }
+        }
+        return text[..low].TrimEnd() + "…";
     }
 
     private static string Ellipsize(string text, Font font, int width)

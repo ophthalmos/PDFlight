@@ -84,20 +84,8 @@ namespace PDFLight.Forms
             tabFonts = new TabPage();
             groupFonts = new GroupBox();
             treeFonts = new TreeView();
-            tabAttachments = new TabPage();
-            labelAttachmentHint = new Label();
-            buttonOpenAttachment = new Button();
-            buttonSaveAttachment = new Button();
-            listAttachments = new PDFLight.Controls.StaticHeaderListView();
-            columnAttachmentName = new ColumnHeader();
-            columnAttachmentModified = new ColumnHeader();
-            columnAttachmentSize = new ColumnHeader();
-            contextMenuAttachments = new ContextMenuStrip(components);
-            mnuOpenAttachment = new ToolStripMenuItem();
-            mnuSaveAttachment = new ToolStripMenuItem();
             buttonOK = new Button();
             buttonCancel = new Button();
-            saveAttachmentDialog = new SaveFileDialog();
             tabControl.SuspendLayout();
             tabDescription.SuspendLayout();
             groupAdvanced.SuspendLayout();
@@ -107,8 +95,6 @@ namespace PDFLight.Forms
             groupSecurity.SuspendLayout();
             tabFonts.SuspendLayout();
             groupFonts.SuspendLayout();
-            tabAttachments.SuspendLayout();
-            contextMenuAttachments.SuspendLayout();
             SuspendLayout();
             // 
             // tabControl
@@ -117,7 +103,6 @@ namespace PDFLight.Forms
             tabControl.Controls.Add(tabDescription);
             tabControl.Controls.Add(tabSecurity);
             tabControl.Controls.Add(tabFonts);
-            tabControl.Controls.Add(tabAttachments);
             tabControl.Location = new Point(12, 12);
             tabControl.Name = "tabControl";
             tabControl.SelectedIndex = 0;
@@ -661,110 +646,6 @@ namespace PDFLight.Forms
             treeFonts.Size = new Size(572, 418);
             treeFonts.TabIndex = 0;
             // 
-            // tabAttachments
-            // 
-            tabAttachments.Controls.Add(labelAttachmentHint);
-            tabAttachments.Controls.Add(buttonOpenAttachment);
-            tabAttachments.Controls.Add(buttonSaveAttachment);
-            tabAttachments.Controls.Add(listAttachments);
-            tabAttachments.Location = new Point(4, 24);
-            tabAttachments.Name = "tabAttachments";
-            tabAttachments.Padding = new Padding(3);
-            tabAttachments.Size = new Size(608, 470);
-            tabAttachments.TabIndex = 3;
-            tabAttachments.Text = "Anhänge";
-            tabAttachments.UseVisualStyleBackColor = true;
-            // 
-            // labelAttachmentHint
-            // 
-            labelAttachmentHint.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            labelAttachmentHint.ForeColor = SystemColors.GrayText;
-            labelAttachmentHint.Location = new Point(8, 438);
-            labelAttachmentHint.Name = "labelAttachmentHint";
-            labelAttachmentHint.Size = new Size(312, 15);
-            labelAttachmentHint.TabIndex = 3;
-            labelAttachmentHint.Text = "Programme und Skripte lassen sich nur speichern.";
-            // 
-            // buttonOpenAttachment
-            // 
-            buttonOpenAttachment.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            buttonOpenAttachment.Enabled = false;
-            buttonOpenAttachment.Location = new Point(326, 432);
-            buttonOpenAttachment.Name = "buttonOpenAttachment";
-            buttonOpenAttachment.Size = new Size(108, 27);
-            buttonOpenAttachment.TabIndex = 1;
-            buttonOpenAttachment.Text = "Ö&ffnen";
-            buttonOpenAttachment.UseVisualStyleBackColor = true;
-            buttonOpenAttachment.Click += ButtonOpenAttachment_Click;
-            // 
-            // buttonSaveAttachment
-            // 
-            buttonSaveAttachment.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            buttonSaveAttachment.Enabled = false;
-            buttonSaveAttachment.Location = new Point(440, 432);
-            buttonSaveAttachment.Name = "buttonSaveAttachment";
-            buttonSaveAttachment.Size = new Size(160, 27);
-            buttonSaveAttachment.TabIndex = 2;
-            buttonSaveAttachment.Text = "Speichern &unter…";
-            buttonSaveAttachment.UseVisualStyleBackColor = true;
-            buttonSaveAttachment.Click += ButtonSaveAttachment_Click;
-            // 
-            // listAttachments
-            // 
-            listAttachments.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            listAttachments.Columns.AddRange(new ColumnHeader[] { columnAttachmentName, columnAttachmentModified, columnAttachmentSize });
-            listAttachments.ContextMenuStrip = contextMenuAttachments;
-            listAttachments.FullRowSelect = true;
-            listAttachments.HeaderStyle = ColumnHeaderStyle.Nonclickable;
-            listAttachments.Location = new Point(8, 8);
-            listAttachments.MultiSelect = false;
-            listAttachments.Name = "listAttachments";
-            listAttachments.OwnerDraw = true;
-            listAttachments.Size = new Size(592, 416);
-            listAttachments.TabIndex = 0;
-            listAttachments.UseCompatibleStateImageBehavior = false;
-            listAttachments.View = View.Details;
-            listAttachments.SelectedIndexChanged += ListAttachments_SelectedIndexChanged;
-            listAttachments.DoubleClick += ListAttachments_DoubleClick;
-            // 
-            // columnAttachmentName
-            // 
-            columnAttachmentName.Text = "Name";
-            columnAttachmentName.Width = 300;
-            // 
-            // columnAttachmentModified
-            // 
-            columnAttachmentModified.Text = "Geändert am";
-            columnAttachmentModified.Width = 140;
-            // 
-            // columnAttachmentSize
-            // 
-            columnAttachmentSize.Text = "Größe";
-            columnAttachmentSize.TextAlign = HorizontalAlignment.Right;
-            columnAttachmentSize.Width = 120;
-            // 
-            // contextMenuAttachments
-            // 
-            contextMenuAttachments.Items.AddRange(new ToolStripItem[] { mnuOpenAttachment, mnuSaveAttachment });
-            contextMenuAttachments.Name = "contextMenuAttachments";
-            contextMenuAttachments.Size = new Size(167, 48);
-            contextMenuAttachments.Opening += ContextMenuAttachments_Opening;
-            // 
-            // mnuOpenAttachment
-            // 
-            mnuOpenAttachment.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            mnuOpenAttachment.Name = "mnuOpenAttachment";
-            mnuOpenAttachment.Size = new Size(166, 22);
-            mnuOpenAttachment.Text = "Ö&ffnen";
-            mnuOpenAttachment.Click += ButtonOpenAttachment_Click;
-            // 
-            // mnuSaveAttachment
-            // 
-            mnuSaveAttachment.Name = "mnuSaveAttachment";
-            mnuSaveAttachment.Size = new Size(166, 22);
-            mnuSaveAttachment.Text = "Speichern &unter…";
-            mnuSaveAttachment.Click += ButtonSaveAttachment_Click;
-            // 
             // buttonOK
             // 
             buttonOK.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
@@ -818,8 +699,6 @@ namespace PDFLight.Forms
             groupSecurity.PerformLayout();
             tabFonts.ResumeLayout(false);
             groupFonts.ResumeLayout(false);
-            tabAttachments.ResumeLayout(false);
-            contextMenuAttachments.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -880,19 +759,7 @@ namespace PDFLight.Forms
         private TabPage tabFonts;
         private GroupBox groupFonts;
         private TreeView treeFonts;
-        private TabPage tabAttachments;
-        private PDFLight.Controls.StaticHeaderListView listAttachments;
-        private ColumnHeader columnAttachmentName;
-        private ColumnHeader columnAttachmentModified;
-        private ColumnHeader columnAttachmentSize;
-        private Button buttonSaveAttachment;
-        private Label labelAttachmentHint;
         private Button buttonOK;
         private Button buttonCancel;
-        private SaveFileDialog saveAttachmentDialog;
-        private Button buttonOpenAttachment;
-        private ContextMenuStrip contextMenuAttachments;
-        private ToolStripMenuItem mnuOpenAttachment;
-        private ToolStripMenuItem mnuSaveAttachment;
     }
 }

@@ -23,6 +23,24 @@ public readonly record struct FileStamp(DateTime LastWriteUtc, long Length)
 
 internal static class FileUtil
 {
+    /// <summary>Der Pfad selbst, wenn es ihn noch nicht gibt, sonst „Name (2).ext“, „Name (3).ext“ … im selben Ordner.</summary>
+    public static string UniquePath(string path)
+    {
+        var (folder, stem, extension) = (Path.GetDirectoryName(path) ?? string.Empty, Path.GetFileNameWithoutExtension(path), Path.GetExtension(path));
+        var free = path;
+        for (var i = 2; File.Exists(free) || Directory.Exists(free); i++) { free = Path.Combine(folder, $"{stem} ({i}){extension}"); }
+        return free;
+    }
+
+    /// <summary>Dateigröße zum Anzeigen: „512 Byte“, „217,20 KB“, „3,25 MB“ (Eigenschaften, Anhangliste).</summary>
+    public static string FormatSize(long bytes) => bytes switch
+    {
+        < 1024 => $"{bytes:N0} Byte",
+        < 1024 * 1024 => $"{bytes / 1024.0:N2} KB",
+        < 1024L * 1024 * 1024 => $"{bytes / (1024.0 * 1024):N2} MB",
+        _ => $"{bytes / (1024.0 * 1024 * 1024):N2} GB",
+    };
+
     /// <summary>Ersetzt Umlaute/ß und entfernt alle übrigen diakritischen Zeichen ("Café" → "Cafe").</summary>
     /// <summary>Kürzt einen Text auf maxLength Zeichen, indem die Mitte durch „…“ ersetzt wird (lange Pfade in Menütexten).</summary>
     public static string ShortenMiddle(string text, int maxLength)

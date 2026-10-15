@@ -266,7 +266,8 @@ internal static class TaskDlg
         ("F1", "diese Hilfedatei (PDF)", null),
         ("F2", "Datei umbenennen", null),
         ("F3 / Umschalt+F3", "nächster / vorheriger Suchtreffer", null),
-        ("F10 / Strg+F10 / Umschalt+F10", "Seitenleiste ein/aus / mit Miniaturen / mit Lesezeichen", null), // auch Strg+Umschalt+I (wie Edge) – eine Zeile, die Hilfe-PDF ist voll
+        ("F10 / Strg+F10", "Seitenleiste ein/aus / mit Miniaturen", null), // zwei Zeilen: in einer lief die Kürzelspalte im Spanischen in den Text (15.10.2026)
+        ("Umschalt+F10 / Alt+F10", "Seitenleiste mit Lesezeichen / mit Anmerkungen", null), // auch Strg+Umschalt+I (wie Edge) – eine Zeile, die Hilfe-PDF ist voll
         ("F11", "Vollbild ein/aus", null),
         // Strg + Zahl
         ("Strg+1 … 9", "in externem Programm öffnen", null),
@@ -287,8 +288,7 @@ internal static class TaskDlg
         ("Strg+T", "Freitext einfügen", null),
         ("Strg+W", "Dokument schließen", null),
         ("Strg+X", "Seiten als neue Datei extrahieren", null),
-        ("Strg+Y", "aktuelle Seite an eine andere Position verschieben", null),
-        ("Strg+Z", "Dokumentänderung rückgängig machen", null),
+        ("Strg+Z / Strg+Y", "Änderung rückgängig machen / wiederherstellen", null), // eine Zeile für beide – die Hilfe-PDF ist voll (15.10.2026)
         // Strg + Sondertaste
         ("Strg+Einfg / Strg+Entf", "leere Seite einfügen / Seiten löschen", null), // eine Zeile für beide – die Hilfe-PDF ist voll (30.09.2026)
         ("Strg+Leertaste", "ein-/zweiseitiges Layout umschalten", null),

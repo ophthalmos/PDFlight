@@ -47,7 +47,14 @@ internal sealed class SidebarRailRenderer(bool dark) : ToolStripRenderer
             using var path = RoundedRectangle(new Rectangle(inset + bar, inset, size.Width - 2 * inset - bar, size.Height - 2 * inset), Scale(HoverRadius));
             g.FillPath(brush, path);
         }
-        if (e.Item is ToolStripButton { Checked: true })
+        if (e.Item is ToolStripButton { Checked: true } && e.ToolStrip?.Dock != DockStyle.Left && !e.Item.Selected && !e.Item.Pressed)
+        {
+            // waagerechte Leiste (Kopf der Anmerkungsliste): eingeschaltet als ruhiges Feld – der Balken am linken Rand gehört zur Umschaltleiste
+            using var brush = new SolidBrush(dark ? Color.FromArgb(58, 58, 58) : Color.FromArgb(225, 225, 225));
+            using var path = RoundedRectangle(new Rectangle(0, 0, size.Width, size.Height), Scale(HoverRadius));
+            g.FillPath(brush, path);
+        }
+        else if (e.Item is ToolStripButton { Checked: true } && e.ToolStrip?.Dock == DockStyle.Left)
         {
             var width = Scale(BarWidth);
             using var brush = new SolidBrush(Accent(dark));

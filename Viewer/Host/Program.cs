@@ -150,9 +150,9 @@ internal static class Program
                     return w =>
                     {
                         w.Write(annotations.Count);
-                        foreach (var (Number, Subtype, Author, Modified, Contents, Color, HasColor, Left, Top, Right, Bottom) in annotations)
+                        foreach (var (Number, Subtype, Author, Modified, Contents, Excerpt, Color, HasColor, Left, Top, Right, Bottom) in annotations)
                         {
-                            w.Write(Number); w.Write(Subtype); w.Write(Author); w.Write(Modified); w.Write(Contents);
+                            w.Write(Number); w.Write(Subtype); w.Write(Author); w.Write(Modified); w.Write(Contents); w.Write(Excerpt);
                             w.Write(Color); w.Write(HasColor); w.Write(Left); w.Write(Top); w.Write(Right); w.Write(Bottom);
                         }
                     };

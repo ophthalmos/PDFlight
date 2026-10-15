@@ -139,7 +139,6 @@ extraire des pages, propriétés (raccourcis dans le menu)</value></data>
   <data name="Strg+F" xml:space="preserve"><value>Ctrl+F</value></data>
   <data name="Strg+P" xml:space="preserve"><value>Ctrl+P</value></data>
   <data name="Strg+R" xml:space="preserve"><value>Ctrl+R</value></data>
-  <data name="Strg+Z" xml:space="preserve"><value>Ctrl+Z</value></data>
   <data name="Strg+I" xml:space="preserve"><value>Ctrl+I</value></data>
   <data name="Strg+X" xml:space="preserve"><value>Ctrl+X</value></data>
   <data name="Strg+Entf" xml:space="preserve"><value>Ctrl+Suppr</value></data>
@@ -295,7 +294,6 @@ d'installation pour installer la dernière version.</value></data>
   <data name="Datei umbenennen" xml:space="preserve"><value>renommer le fichier</value></data>
   <data name="Datei in den Papierkorb verschieben" xml:space="preserve"><value>déplacer le fichier vers la corbeille</value></data>
   <data name="Seiten als neue Datei extrahieren" xml:space="preserve"><value>extraire des pages vers un nouveau fichier</value></data>
-  <data name="Dokumentänderung rückgängig machen" xml:space="preserve"><value>annuler la modification du document</value></data>
   <data name="Dokumenteigenschaften" xml:space="preserve"><value>Propriétés du document</value></data>
   <data name="Windows-Dateieigenschaften" xml:space="preserve"><value>Propriétés de fichier Windows</value></data>
   <data name="als E-Mail-Anhang senden" xml:space="preserve"><value>envoyer comme pièce jointe</value></data>
@@ -520,8 +518,6 @@ d'installation pour installer la dernière version.</value></data>
   <data name="Das gilt für alle Seiten und lässt sich mit Strg+Z rückgängig machen." xml:space="preserve"><value>Cela concerne toutes les pages et peut être annulé avec Ctrl+Z.</value></data>
   <data name="Anmerkungen löschen" xml:space="preserve"><value>Suppression des annotations</value></data>
   <data name="&amp;Vorgaben" xml:space="preserve"><value>Par &amp;défaut</value></data>
-  <data name="Strg+Y" xml:space="preserve"><value>Ctrl+Y</value></data>
-  <data name="aktuelle Seite an eine andere Position verschieben" xml:space="preserve"><value>déplacer la page actuelle à une autre position</value></data>
   <data name="&amp;Deckkraft (%):" xml:space="preserve"><value>&amp;Opacité (%) :</value></data>
 
   <!-- Leere Seite einfügen -->
@@ -561,8 +557,8 @@ d'installation pour installer la dernière version.</value></data>
   <data name="Alle {0} Lesezeichen entfernen?" xml:space="preserve"><value>Supprimer les {0} signets ?</value></data>
   <data name="Lesezeichen.Info" xml:space="preserve"><value>Les signets forment une table des matières interactive qui permet
 d’accéder rapidement à des chapitres, titres ou sections précis.
-Pour les afficher, clique sur l’icône de table des matières
-dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
+Pour les afficher, clique sur « Plan du document » dans
+la barre de gauche ou appuie sur Maj+F10.</value></data>
   <data name="Lesezeichen entfernen" xml:space="preserve"><value>Suppression des signets</value></data>
   <data name="Die Lesezeichen wurden entfernt." xml:space="preserve"><value>Les signets ont été supprimés.</value></data>
   <data name="„{0}“ ersetzen" xml:space="preserve"><value>Remplacer « {0} »</value></data>
@@ -632,7 +628,6 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Hervorhebung entfernen" xml:space="preserve"><value>Supprimer le surlignage</value></data>
   <data name="Im Dokument suchen (Strg+F)" xml:space="preserve"><value>Rechercher dans le document (Ctrl+F)</value></data>
   <data name="Keine Treffer" xml:space="preserve"><value>Aucun résultat</value></data>
-  <data name="Miniaturen" xml:space="preserve"><value>Miniatures</value></data>
   <data name="nächster / vorheriger Suchtreffer" xml:space="preserve"><value>résultat de recherche suivant / précédent</value></data>
   <data name="Nächster Treffer (F3, Enter)" xml:space="preserve"><value>Résultat suivant (F3, Entrée)</value></data>
   <data name="Ohne Kennwort lässt sich die Datei nicht anzeigen." xml:space="preserve"><value>Le fichier ne peut pas être affiché sans mot de passe.</value></data>
@@ -742,7 +737,6 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Erstellt am:" xml:space="preserve"><value>Créé le :</value></data>
   <data name="Erweitert" xml:space="preserve"><value>Avancé</value></data>
   <data name="Geändert am:" xml:space="preserve"><value>Modifié le :</value></data>
-  <data name="Größe" xml:space="preserve"><value>Taille</value></data>
   <data name="In diesem Dokument verwendete Schriften" xml:space="preserve"><value>Polices utilisées dans ce document</value></data>
   <data name="Integriert" xml:space="preserve"><value>Intégré</value></data>
   <data name="Ja" xml:space="preserve"><value>Oui</value></data>
@@ -787,9 +781,6 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Stempel bearbeiten…" xml:space="preserve"><value>Modifier le tampon…</value></data>
   <data name="Freitext entfernen" xml:space="preserve"><value>Supprimer le texte libre</value></data>
   <data name="Der Freitext wurde entfernt." xml:space="preserve"><value>Le texte libre a été supprimé.</value></data>
-  <data name="F10 / Strg+F10 / Umschalt+F10" xml:space="preserve"><value>F10 / Ctrl+F10 / Maj+F10</value></data>
-  <data name="Seitenleiste ein/aus / mit Miniaturen / mit Lesezeichen" xml:space="preserve"><value>Volet latéral activé/désactivé / avec miniatures / avec signets</value></data>
-  <data name="Seitenleiste mit Miniaturen und Lesezeichen (F10)" xml:space="preserve"><value>Volet latéral avec miniatures et signets (F10)</value></data>
   <data name="Änderungen über die Viewer-Leiste (Hervorheben, Zeichnen, Freitext, Stempel, Seiten drehen) bleiben ungespeichert, bis du auf „Speichern“ klickst." xml:space="preserve"><value>Les modifications faites avec la barre de l’afficheur (surligner, dessiner, texte libre, tampon, rotation) restent non enregistrées jusqu’à ce que tu cliques sur « Enregistrer ».</value></data>
   <data name="Die Befehle im Menü „Bearbeiten“ und in der oberen Symbolleiste ändern die Datei sofort. Strg+Z macht einen Fehlgriff rückgängig." xml:space="preserve"><value>Les commandes du menu « Édition » et de la barre d’outils supérieure modifient le fichier immédiatement. Ctrl+Z annule une fausse manœuvre.</value></data>
   <data name="Angezeigte S&amp;eite" xml:space="preserve"><value>Pa&amp;ge affichée</value></data>
@@ -804,13 +795,9 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="„{0}“ öffnen?" xml:space="preserve"><value>Ouvrir « {0} » ?</value></data>
   <data name="Anhänge können Makros oder Schadcode enthalten. Öffne die Datei nur, wenn die PDF aus einer sicheren Quelle stammt." xml:space="preserve"><value>Les pièces jointes peuvent contenir des macros ou des logiciels malveillants. N’ouvre le fichier que si le PDF provient d’une source sûre.</value></data>
   <data name="Die eingebettete Datei konnte nicht geöffnet werden." xml:space="preserve"><value>Le fichier incorporé n’a pas pu être ouvert.</value></data>
-  <data name="Programme und Skripte lassen sich nur speichern." xml:space="preserve"><value>Programmes et scripts : enregistrement seulement.</value></data>
   <data name="Programme, Skripte und ähnliche Dateien öffnet PDFlight aus Sicherheitsgründen nicht. Möchtest du die Datei stattdessen speichern?" xml:space="preserve"><value>Pour des raisons de sécurité, PDFlight n’ouvre pas les programmes, scripts et fichiers similaires. Veux-tu plutôt enregistrer le fichier ?</value></data>
   <data name="Ö&amp;ffnen" xml:space="preserve"><value>&amp;Ouvrir</value></data>
   <data name="Speichern unter…" xml:space="preserve"><value>Enregistrer sous…</value></data>
-  <data name="Geändert am" xml:space="preserve"><value>Modifié le</value></data>
-  <data name="Anhang anzeigen" xml:space="preserve"><value>Afficher la pièce jointe</value></data>
-  <data name="{0} Anhänge anzeigen" xml:space="preserve"><value>Afficher les {0} pièces jointes</value></data>
   <data name="Das Kennwort ist sehr kurz." xml:space="preserve"><value>Le mot de passe est très court.</value></data>
   <data name="Der Kennwortschutz wurde entfernt." xml:space="preserve"><value>La protection par mot de passe a été supprimée.</value></data>
   <data name="Die Datei ist jetzt mit einem Kennwort geschützt (AES 256 Bit)." xml:space="preserve"><value>Le fichier est maintenant protégé par mot de passe (AES 256 bits).</value></data>
@@ -893,7 +880,6 @@ Sans lui, le fichier ne pourra plus être affiché.</value></data>
   <data name="Alle anzeigen" xml:space="preserve"><value>Tout afficher</value></data>
   <data name="Alle löschen…" xml:space="preserve"><value>Tout supprimer…</value></data>
   <data name="Anmerkung" xml:space="preserve"><value>Annotation</value></data>
-  <data name="Anmerkungen (Strg+Umschalt+T)" xml:space="preserve"><value>Annotations (Ctrl+Maj+T)</value></data>
   <data name="Anmerkungen durchsuchen" xml:space="preserve"><value>Rechercher dans les annotations</value></data>
   <data name="Anmerkungen in der Seitenleiste anzeigen" xml:space="preserve"><value>afficher les annotations dans le volet latéral</value></data>
   <data name="Art" xml:space="preserve"><value>Type</value></data>
@@ -915,7 +901,6 @@ Sans lui, le fichier ne pourra plus être affiché.</value></data>
   <data name="Nach Seite" xml:space="preserve"><value>Par page</value></data>
   <data name="Ohne Autor" xml:space="preserve"><value>Sans auteur</value></data>
   <data name="Ohne Datum" xml:space="preserve"><value>Sans date</value></data>
-  <data name="Ohne Farbe" xml:space="preserve"><value>Sans couleur</value></data>
   <data name="Polygon" xml:space="preserve"><value>Polygone</value></data>
   <data name="Polylinie" xml:space="preserve"><value>Polyligne</value></data>
   <data name="Rechteck" xml:space="preserve"><value>Rectangle</value></data>
@@ -927,4 +912,35 @@ Sans lui, le fichier ne pourra plus être affiché.</value></data>
   <data name="Weitere Befehle" xml:space="preserve"><value>Plus de commandes</value></data>
   <data name="Wellenlinie" xml:space="preserve"><value>Ligne ondulée</value></data>
   <data name="Wird gelesen…" xml:space="preserve"><value>Lecture…</value></data>
+  <data name="Anmerkungen filtern" xml:space="preserve"><value>Filtrer les annotations</value></data>
+  <data name="Anwenden" xml:space="preserve"><value>Appliquer</value></data>
+  <data name="Geschützt" xml:space="preserve"><value>Protégé</value></data>
+  <data name="Bearbeiten nicht möglich – Sicherheit anzeigen" xml:space="preserve"><value>Modification impossible – afficher la sécurité</value></data>
+  <data name="(keine Anhänge)" xml:space="preserve"><value>(aucune pièce jointe)</value></data>
+  <data name="{0} Anhänge" xml:space="preserve"><value>{0} pièces jointes</value></data>
+  <data name="1 Anhang" xml:space="preserve"><value>1 pièce jointe</value></data>
+  <data name="{0} Anhänge wurden in „{1}“ gespeichert." xml:space="preserve"><value>{0} pièces jointes ont été enregistrées dans « {1} ».</value></data>
+  <data name="1 Anhang wurde in „{1}“ gespeichert." xml:space="preserve"><value>1 pièce jointe a été enregistrée dans « {1} ».</value></data>
+  <data name="„{0}“ wurde gespeichert." xml:space="preserve"><value>« {0} » a été enregistré.</value></data>
+  <data name="Alle speichern…" xml:space="preserve"><value>Tout enregistrer…</value></data>
+  <data name="Ordner für die eingebetteten Dateien" xml:space="preserve"><value>Dossier pour les fichiers incorporés</value></data>
+  <data name="Seitenleiste einblenden (F10)" xml:space="preserve"><value>Afficher le volet latéral (F10)</value></data>
+  <data name="Seitenleiste ausblenden (F10)" xml:space="preserve"><value>Masquer le volet latéral (F10)</value></data>
+  <data name="Änderung rückgängig machen / wiederherstellen" xml:space="preserve"><value>annuler / rétablir la modification</value></data>
+  <data name="Wiederhergestellt:" xml:space="preserve"><value>Rétablir :</value></data>
+  <data name="Wiederherstellen" xml:space="preserve"><value>Rétablir</value></data>
+  <data name="Strg+Z / Strg+Y" xml:space="preserve"><value>Ctrl+Z / Ctrl+Y</value></data>
+  <data name="Wiederherstellen (Strg+Y)" xml:space="preserve"><value>Rétablir (Ctrl+Y)</value></data>
+  <data name="Wiederherstellen: {0} (Strg+Y)" xml:space="preserve"><value>Rétablir : {0} (Ctrl+Y)</value></data>
+  <data name="Miniaturen (Strg+F10)" xml:space="preserve"><value>Miniatures (Ctrl+F10)</value></data>
+  <data name="Dokumentstruktur (Umschalt+F10)" xml:space="preserve"><value>Plan du document (Maj+F10)</value></data>
+  <data name="Anmerkungen (Alt+F10)" xml:space="preserve"><value>Annotations (Alt+F10)</value></data>
+  <data name="F10 / Strg+F10" xml:space="preserve"><value>F10 / Ctrl+F10</value></data>
+  <data name="Seitenleiste ein/aus / mit Miniaturen" xml:space="preserve"><value>Volet latéral activé/désactivé / avec miniatures</value></data>
+  <data name="Umschalt+F10 / Alt+F10" xml:space="preserve"><value>Maj+F10 / Alt+F10</value></data>
+  <data name="Seitenleiste mit Lesezeichen / mit Anmerkungen" xml:space="preserve"><value>Volet latéral avec signets / avec annotations</value></data>
+  <data name="Lesezeichen" xml:space="preserve"><value>Signets</value></data>
+  <data name="1 Lesezeichen" xml:space="preserve"><value>1 signet</value></data>
+  <data name="{0} Lesezeichen" xml:space="preserve"><value>{0} signets</value></data>
+  <data name="Lesezeichen bearbeiten… (Strg+F2)" xml:space="preserve"><value>Modifier les signets… (Ctrl+F2)</value></data>
 </root>

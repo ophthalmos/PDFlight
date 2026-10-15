@@ -373,10 +373,10 @@ internal sealed class PdfiumDocument : IDisposable
             List<AnnotationEntry> list = new(Math.Clamp(count, 0, 10_000));
             for (var i = 0; i < count; i++)
             {
-                var (number, subtype, author, modified, contents) = (r.ReadInt32(), r.ReadInt32(), r.ReadString(), r.ReadString(), r.ReadString());
+                var (number, subtype, author, modified, contents, excerpt) = (r.ReadInt32(), r.ReadInt32(), r.ReadString(), r.ReadString(), r.ReadString(), r.ReadString());
                 var (color, hasColor) = (r.ReadUInt32(), r.ReadBoolean());
                 var bounds = RectangleF.FromLTRB(r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
-                list.Add(new AnnotationEntry(index, number, subtype, author, ParsePdfDate(modified), contents,
+                list.Add(new AnnotationEntry(index, number, subtype, author, ParsePdfDate(modified), contents, excerpt,
                     hasColor ? Color.FromArgb((int)(0xFF000000 | color)) : null, bounds));
             }
             return list;
