@@ -69,6 +69,9 @@ internal static class ToolbarIcons
     public const char Thumbnails = '\uEB9F';   // Photo2 (Bild mit Bergen): Seitenleiste mit Miniaturen (wie Chrome)
     public const char Outline = '\uE8FD';      // BulletedList: Seitenleiste mit der Dokumentstruktur
     public const char SelectAll = '\uE8B3';    // Kontextmenü der Anzeige: alles markieren
+    public const char Sort = '\uE8CB';         // Anmerkungsliste der Seitenleiste: sortieren
+    public const char Filter = '\uE71C';       // Anmerkungsliste: filtern
+    public const char More = '\uE712';         // Anmerkungsliste: weitere Befehle
 
     public const char Highlight = '';    // Textmarker: Kontextmenü „Hervorheben“ der Anzeige
 

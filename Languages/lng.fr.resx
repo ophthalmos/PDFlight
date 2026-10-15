@@ -257,6 +257,7 @@ Les deux fichiers doivent avoir le même nombre de pages.</value></data>
   <data name="nicht gefunden" xml:space="preserve"><value>introuvable</value></data>
   <data name="Über" xml:space="preserve"><value>À propos de</value></data>
   <data name="Quelltext auf GitHub" xml:space="preserve"><value>Code source sur GitHub</value></data>
+  <data name="Lizenz: GNU AGPL 3.0, ohne Gewährleistung" xml:space="preserve"><value>Licence : GNU AGPL 3.0, sans aucune garantie</value></data>
   <data name="About.Text" xml:space="preserve"><value>PDFlight est une visionneuse pour les opérations de
 fichiers courantes (déplacer, copier, supprimer, renommer,
 envoyer). Les dossiers cibles fréquents sont conservés
@@ -466,18 +467,13 @@ d'installation pour installer la dernière version.</value></data>
   <data name="Blau" xml:space="preserve"><value>Bleu</value></data>
   <!-- Anmerkungen verwalten -->
   <data name="Strg+Umschalt+T" xml:space="preserve"><value>Ctrl+Maj+T</value></data>
-  <data name="Enter" xml:space="preserve"><value>Entrée</value></data>
-  <data name="Anmerkungen verwalten (bearbeiten, löschen)" xml:space="preserve"><value>gérer les annotations (modifier, supprimer)</value></data>
   <data name="Anmerkungen" xml:space="preserve"><value>Annotations</value></data>
-  <data name="Seitennr." xml:space="preserve"><value>Page n°</value></data>
   <data name="Position" xml:space="preserve"><value>Position</value></data>
   <data name="Text" xml:space="preserve"><value>Texte</value></data>
-  <data name="&amp;Bearbeiten…" xml:space="preserve"><value>&amp;Modifier…</value></data>
   <data name="Schließen" xml:space="preserve"><value>Fermer</value></data>
   <data name="Textanmerkung bearbeiten" xml:space="preserve"><value>Modifier l'annotation de texte</value></data>
   <data name="(keine Anmerkungen)" xml:space="preserve"><value>(aucune annotation)</value></data>
   <data name="Anmerkung löschen" xml:space="preserve"><value>Supprimer l'annotation</value></data>
-  <data name="links {0:0.#} mm, oben {1:0.#} mm" xml:space="preserve"><value>gauche {0:0.#} mm, haut {1:0.#} mm</value></data>
   <data name="Aktuelle Seite verschieben…" xml:space="preserve"><value>Déplacer la page actuelle…</value></data>
   <data name="Seite verschieben" xml:space="preserve"><value>Déplacer la page</value></data>
   <data name="Seite {0} an &amp;Position (1–{1}):" xml:space="preserve"><value>Page {0} à la &amp;position (1–{1}) :</value></data>
@@ -520,7 +516,6 @@ d'installation pour installer la dernière version.</value></data>
   <data name="An dieser Stelle steht schon der Stempel „{0}“." xml:space="preserve"><value>Le tampon « {0} » se trouve déjà à cet endroit.</value></data>
   <data name="Bearbeiter&amp;kürzel:" xml:space="preserve"><value>&amp;Initiales :</value></data>
   <data name="max. 3 Zeichen" xml:space="preserve"><value>3 caractères max.</value></data>
-  <data name="Alle löschen" xml:space="preserve"><value>Tout supprimer</value></data>
   <data name="Alle {0} Anmerkungen löschen?" xml:space="preserve"><value>Supprimer les {0} annotations ?</value></data>
   <data name="Das gilt für alle Seiten und lässt sich mit Strg+Z rückgängig machen." xml:space="preserve"><value>Cela concerne toutes les pages et peut être annulé avec Ctrl+Z.</value></data>
   <data name="Anmerkungen löschen" xml:space="preserve"><value>Suppression des annotations</value></data>
@@ -787,7 +782,6 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Hervorhebungsfarbe" xml:space="preserve"><value>Couleur de surlignage</value></data>
   <data name="Umkehren (für hellen Text auf dunklem Grund)" xml:space="preserve"><value>Inverser (pour un texte clair sur fond sombre)</value></data>
   <data name="Anmerkung entfernen" xml:space="preserve"><value>Supprimer l’annotation</value></data>
-  <data name="Anmerkungen verwalten" xml:space="preserve"><value>Gérer les annotations</value></data>
   <data name="Anmerkung bearbeiten…" xml:space="preserve"><value>Modifier l’annotation…</value></data>
   <data name="Freitext bearbeiten…" xml:space="preserve"><value>Modifier le texte libre…</value></data>
   <data name="Stempel bearbeiten…" xml:space="preserve"><value>Modifier le tampon…</value></data>
@@ -798,8 +792,6 @@ dans la barre d’outils PDF ou appuie sur Ctrl+Maj+I.</value></data>
   <data name="Seitenleiste mit Miniaturen und Lesezeichen (F10)" xml:space="preserve"><value>Volet latéral avec miniatures et signets (F10)</value></data>
   <data name="Änderungen über die Viewer-Leiste (Hervorheben, Zeichnen, Freitext, Stempel, Seiten drehen) bleiben ungespeichert, bis du auf „Speichern“ klickst." xml:space="preserve"><value>Les modifications faites avec la barre de l’afficheur (surligner, dessiner, texte libre, tampon, rotation) restent non enregistrées jusqu’à ce que tu cliques sur « Enregistrer ».</value></data>
   <data name="Die Befehle im Menü „Bearbeiten“ und in der oberen Symbolleiste ändern die Datei sofort. Strg+Z macht einen Fehlgriff rückgängig." xml:space="preserve"><value>Les commandes du menu « Édition » et de la barre d’outils supérieure modifient le fichier immédiatement. Ctrl+Z annule une fausse manœuvre.</value></data>
-  <data name="Verwalten" xml:space="preserve"><value>Gérer</value></data>
-  <data name="Anmerkungen verwalten (Strg+Umschalt+T)" xml:space="preserve"><value>Gérer les annotations (Ctrl+Maj+T)</value></data>
   <data name="Angezeigte S&amp;eite" xml:space="preserve"><value>Pa&amp;ge affichée</value></data>
   <data name="Ungespeicherte Änderungen an den Lesezeichen verwerfen?" xml:space="preserve"><value>Abandonner les modifications non enregistrées des signets ?</value></data>
   <data name="Tipp: Strg drücken für gerade Linien" xml:space="preserve"><value>Astuce : Ctrl pour des lignes droites</value></data>
@@ -894,4 +886,45 @@ Sans lui, le fichier ne pourra plus être affiché.</value></data>
   <data name="Die Notiz wurde geändert." xml:space="preserve"><value>La note a été modifiée.</value></data>
   <data name="Die Notiz wurde gelöscht." xml:space="preserve"><value>La note a été supprimée.</value></data>
   <data name="Weitere Optionen" xml:space="preserve"><value>Plus d&apos;options</value></data>
+  <data name="1 Anmerkung" xml:space="preserve"><value>1 annotation</value></data>
+  <data name="{0} Anmerkungen" xml:space="preserve"><value>{0} annotations</value></data>
+  <data name="{0} von {1}" xml:space="preserve"><value>{0} sur {1}</value></data>
+  <data name="Alle Anmerkungen wurden gelöscht." xml:space="preserve"><value>Toutes les annotations ont été supprimées.</value></data>
+  <data name="Alle anzeigen" xml:space="preserve"><value>Tout afficher</value></data>
+  <data name="Alle löschen…" xml:space="preserve"><value>Tout supprimer…</value></data>
+  <data name="Anmerkung" xml:space="preserve"><value>Annotation</value></data>
+  <data name="Anmerkungen (Strg+Umschalt+T)" xml:space="preserve"><value>Annotations (Ctrl+Maj+T)</value></data>
+  <data name="Anmerkungen durchsuchen" xml:space="preserve"><value>Rechercher dans les annotations</value></data>
+  <data name="Anmerkungen in der Seitenleiste anzeigen" xml:space="preserve"><value>afficher les annotations dans le volet latéral</value></data>
+  <data name="Art" xml:space="preserve"><value>Type</value></data>
+  <data name="Autor" xml:space="preserve"><value>Auteur</value></data>
+  <data name="Bearbeiten…" xml:space="preserve"><value>Modifier…</value></data>
+  <data name="Dateianhang" xml:space="preserve"><value>Pièce jointe</value></data>
+  <data name="Die Anmerkung wurde gelöscht." xml:space="preserve"><value>L&apos;annotation a été supprimée.</value></data>
+  <data name="Durchstreichung" xml:space="preserve"><value>Texte barré</value></data>
+  <data name="Einfügemarke" xml:space="preserve"><value>Signe d&apos;insertion</value></data>
+  <data name="Ellipse" xml:space="preserve"><value>Ellipse</value></data>
+  <data name="Filter" xml:space="preserve"><value>Filtre</value></data>
+  <data name="Filtern" xml:space="preserve"><value>Filtrer</value></data>
+  <data name="Hervorhebung" xml:space="preserve"><value>Surlignage</value></data>
+  <data name="Keine passenden Anmerkungen" xml:space="preserve"><value>Aucune annotation correspondante</value></data>
+  <data name="Linie" xml:space="preserve"><value>Ligne</value></data>
+  <data name="Nach Art" xml:space="preserve"><value>Par type</value></data>
+  <data name="Nach Autor" xml:space="preserve"><value>Par auteur</value></data>
+  <data name="Nach Datum" xml:space="preserve"><value>Par date</value></data>
+  <data name="Nach Seite" xml:space="preserve"><value>Par page</value></data>
+  <data name="Ohne Autor" xml:space="preserve"><value>Sans auteur</value></data>
+  <data name="Ohne Datum" xml:space="preserve"><value>Sans date</value></data>
+  <data name="Ohne Farbe" xml:space="preserve"><value>Sans couleur</value></data>
+  <data name="Polygon" xml:space="preserve"><value>Polygone</value></data>
+  <data name="Polylinie" xml:space="preserve"><value>Polyligne</value></data>
+  <data name="Rechteck" xml:space="preserve"><value>Rectangle</value></data>
+  <data name="Schwärzung" xml:space="preserve"><value>Caviardage</value></data>
+  <data name="Sortieren" xml:space="preserve"><value>Trier</value></data>
+  <data name="Text oder Autor" xml:space="preserve"><value>Texte ou auteur</value></data>
+  <data name="Ton" xml:space="preserve"><value>Son</value></data>
+  <data name="Unterstreichung" xml:space="preserve"><value>Soulignement</value></data>
+  <data name="Weitere Befehle" xml:space="preserve"><value>Plus de commandes</value></data>
+  <data name="Wellenlinie" xml:space="preserve"><value>Ligne ondulée</value></data>
+  <data name="Wird gelesen…" xml:space="preserve"><value>Lecture…</value></data>
 </root>

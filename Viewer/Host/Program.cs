@@ -143,6 +143,20 @@ internal static class Program
                         w.Write(note?.Author ?? string.Empty);
                     };
                 }
+            case Protocol.Annotations:
+                {
+                    var (id, page) = (input.ReadInt32(), input.ReadInt32());
+                    var annotations = Document(id).Annotations(page);
+                    return w =>
+                    {
+                        w.Write(annotations.Count);
+                        foreach (var a in annotations)
+                        {
+                            w.Write(a.Number); w.Write(a.Subtype); w.Write(a.Author); w.Write(a.Modified); w.Write(a.Contents);
+                            w.Write(a.Color); w.Write(a.HasColor); w.Write(a.Left); w.Write(a.Top); w.Write(a.Right); w.Write(a.Bottom);
+                        }
+                    };
+                }
             case Protocol.SetNoteText:
                 {
                     var (id, page, number, text, modified) = (input.ReadInt32(), input.ReadInt32(), input.ReadInt32(), input.ReadString(), input.ReadString());

@@ -508,6 +508,7 @@ public partial class MainForm : Form
                 statusPath.Text = message; // die Meldung des Aufrufers („Die Seiten wurden gelöscht.“ …) bleibt – UpdateUiState setzte den Pfad
             }
             if (newFile) { ApplySidebarForDocument(hasOutline: outline.Count > 0); } // nicht beim Neuladen derselben Datei
+            RefreshAnnotations(); // Liste bzw. Symbol der Umschaltleiste für den neuen Stand
         }
         return opened;
     }
@@ -533,6 +534,14 @@ public partial class MainForm : Form
         thumbnailGrid.SetDocument(value, kept);
         thumbnailGrid.CurrentPage = pageView.CurrentPage; // SetDocument der Miniaturen setzt sie zurück
         if (!kept) { FillOutline([]); } // behalten: dieselbe Gliederung, OpenDocumentAsync füllt sie gleich wieder
+        annotationScan?.Cancel(); // die Anmerkungen liest OpenDocumentAsync für den neuen Stand neu
+        annotationListStale = true;
+        if (!kept)
+        {
+            annotationsFound = false;
+            annotationPanel.Clear(); // andere Datei: auch Filter und Suche zurück
+            UpdateAnnotationRail();
+        }
         previous?.Dispose(); // erst nach dem Umschalten der Ansichten – deren Aufträge für das alte Dokument verfallen damit
         if (SearchOpen && textSearch.Text.Length > 0) { StartSearch(); } // die Suche gilt auch für die nächste Datei
         UpdateViewerState();
@@ -1642,65 +1651,154 @@ public partial class MainForm : Form
         else { pageView.ClearAnnotationGhost(); }
     }
 
-    /// <summary>Doppelklick auf eine Textanmerkung oder einen Stempel: derselbe Bearbeiten-Dialog wie aus „Anmerkungen verwalten“.</summary>
-    private async void PageView_AnnotationDoubleClicked(object? sender, AnnotationEventArgs e)
+    /// <summary>Doppelklick auf eine Textanmerkung oder einen Stempel: derselbe Bearbeiten-Dialog wie aus der Anmerkungsliste.</summary>
+    private void PageView_AnnotationDoubleClicked(object? sender, AnnotationEventArgs e) => EditAnnotationAt(e.Page, e.Number);
+
+    /// <summary>Freitext oder Stempel bearbeiten (Seite 0-basiert, Nummer = Position in /Annots): Die Werte für den Dialog liest PDFsharp
+    /// aus dem angezeigten Stand, auch mit ungespeicherten Anmerkungen.</summary>
+    private async void EditAnnotationAt(int page, int number)
     {
         if (currentFile == null || EditLocked) { return; }
-        var view = await ViewStateFileAsync(); // der angezeigte Stand, auch mit ungespeicherten Anmerkungen
+        var view = await ViewStateFileAsync();
         if (view == null) { return; }
         AnnotationInfo? annotation;
-        try { annotation = PdfEditService.ListAnnotations(view).FirstOrDefault(a => a.Page == e.Page + 1 && a.Index == e.Number); }
+        try { annotation = PdfEditService.ListAnnotations(view).FirstOrDefault(a => a.Page == page + 1 && a.Index == number); }
         catch (Exception ex) when (PdfEditService.IsPdfReadError(ex)) { TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), Lng.T("Textanmerkung")), ex); return; }
         finally { DeleteViewCopy(view); }
         if (annotation != null) { EditAnnotation(annotation); }
     }
 
-    /// <summary>„Anmerkungen verwalten“ auf dem angezeigten Stand (Wunsch vom 04.10.2026 – vorher speicherte der Aufruf offene Änderungen
-    /// still in die Datei): Die Liste arbeitet auf einer Arbeitskopie, ihr Ergebnis wird wie jede Anmerkungsänderung ungespeichert
-    /// angezeigt; alle Löschungen eines Aufrufs sind ein Rückgängig-Schritt.</summary>
-    private async void ManageAnnotationsDialog()
+    // ------------------------------------------------------------------ Anmerkungsliste der Seitenleiste (seit 15.10.2026, ersetzt „Anmerkungen verwalten“)
+
+    // Wunsch Wilhelms nach dem Vorbild von Acrobats Kommentarliste: eine dritte Ansicht der Seitenleiste mit allen Anmerkungen des
+    // angezeigten Stands, auch der ungespeicherten. Gelesen wird im Hilfsprogramm Seite für Seite (PDFium muss dafür jede Seite laden) –
+    // vollständig nur, solange die Liste zu sehen ist; sonst nur bis zur ersten Anmerkung, die das Symbol der Umschaltleiste einblendet.
+    // Nach jeder Änderung (PdfiumDocument.Changed, neuer Stand) liest annotationRefreshTimer kurz darauf neu; bis dahin gelten die
+    // Nummern der Liste nicht mehr (annotationListStale) – Bearbeiten und Löschen warten dann auf die frische Liste.
+
+    private enum SidebarView { Thumbnails, Outline, Annotations }
+
+    private SidebarView sidebarView = SidebarView.Thumbnails;
+    private CancellationTokenSource? annotationScan;
+    private bool annotationsFound;       // das angezeigte Dokument hat Anmerkungen: Symbol in der Umschaltleiste
+    private bool annotationListStale;    // seit dem letzten Lesen geändert – die Nummern der Liste stimmen womöglich nicht mehr
+    private bool annotationKeepPosition; // nach dem Löschen rückt der folgende Eintrag an die Stelle des gelöschten
+
+    private bool AnnotationListShown => sidebarView == SidebarView.Annotations && !splitViewer.Panel1Collapsed;
+
+    private void ScheduleAnnotationRefresh()
     {
-        if (currentFile == null || ShownDocument is not { } doc) { return; }
-        if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
-        var actionName = Lng.T("Anmerkung löschen");
-        byte[] before;
-        string temp;
-        try
+        annotationListStale = true;
+        annotationRefreshTimer.Stop();
+        annotationRefreshTimer.Start();
+    }
+
+    private void AnnotationRefreshTimer_Tick(object? sender, EventArgs e) => RefreshAnnotations();
+
+    /// <summary>Liest die Anmerkungen des angezeigten Stands neu (ein laufendes Lesen wird abgebrochen): mit sichtbarer Liste alle Seiten
+    /// (die Liste füllt sich dabei schrittweise), sonst nur bis zur ersten Anmerkung – und gar nicht, wenn das Symbol schon steht.</summary>
+    private async void RefreshAnnotations()
+    {
+        annotationRefreshTimer.Stop();
+        annotationScan?.Cancel();
+        annotationScan = null;
+        if (document is not { } doc) { annotationPanel.SetEntries([], stillLoading: false); UpdateAnnotationRail(); return; }
+        var full = AnnotationListShown;
+        if (!full && annotationsFound) { return; } // das Symbol steht schon; die Liste liest erst, wenn sie zu sehen ist
+        CancellationTokenSource scan = new();
+        annotationScan = scan;
+        var keepPosition = annotationKeepPosition;
+        List<AnnotationEntry> found = [];
+        var shownAt = Environment.TickCount64;
+        for (var page = 0; page < doc.PageCount; page++)
         {
-            await pageView.EndFormInputAsync(); // ein gerade bearbeitetes Formularfeld gehört zum Stand
-            before = await doc.SaveAsync();
-            if (doc != document || currentFile == null) { return; }
-            temp = NewViewCopyPath();
-            await File.WriteAllBytesAsync(temp, before);
-        }
-        catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
-        {
-            TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), Lng.T("Anmerkungen verwalten")), ex);
-            return;
-        }
-        try
-        {
-            bool RunEdit(Action edit, string name)
+            var entries = await doc.AnnotationsAsync(page);
+            if (scan.IsCancellationRequested || doc != document) { return; }
+            found.AddRange(entries);
+            if (!full && found.Count > 0) { break; }
+            if (full && page < doc.PageCount - 1 && Environment.TickCount64 - shownAt > 250) // große Dateien: die Liste füllt sich sichtbar
             {
-                try { edit(); return true; }
-                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException || PdfEditService.IsPdfReadError(ex))
-                {
-                    TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), name), ex);
-                    return false;
-                }
+                annotationPanel.SetEntries(found, stillLoading: true);
+                shownAt = Environment.TickCount64;
             }
-            using AnnotationListForm dialog = new(temp, RunEdit, currentFile.Name);
-            dialog.ShowDialog(this);
-            if (dialog.Changed)
-            {
-                var wasDirty = documentDirty;
-                if (!await ShowBytesAsync(await File.ReadAllBytesAsync(temp), dirty: true)) { return; }
-                AddViewUndo(new ViewUndo(before, wasDirty, actionName));
-                if (dialog.LastPage - 1 != pageView.CurrentPage) { pageView.GoToPage(dialog.LastPage - 1); } // zur Seite der zuletzt gelöschten
-            }
-            if (dialog.EditRequested is { } annotation) { EditAnnotation(annotation); } // die Liste hat sich dafür geschlossen
         }
-        finally { DeleteViewCopy(temp); }
+        annotationScan = null;
+        annotationsFound = found.Count > 0;
+        if (full)
+        {
+            annotationPanel.SetEntries(found, stillLoading: false, keepPosition);
+            annotationListStale = false;
+            annotationKeepPosition = false;
+        }
+        UpdateAnnotationRail();
+    }
+
+    /// <summary>Symbol der Umschaltleiste (nur mit Anmerkungen oder solange ihre Ansicht gewählt ist) und Bearbeiten in der Liste.</summary>
+    private void UpdateAnnotationRail()
+    {
+        var visible = annotationsFound || sidebarView == SidebarView.Annotations;
+        if (btnSideAnnotations.Visible != visible) { btnSideAnnotations.Visible = visible; }
+        annotationPanel.Editable = document != null && currentFile != null && !EditLocked && currentPageCount > 0;
+    }
+
+    /// <summary>Strg+Umschalt+T (vorher „Anmerkungen verwalten“): Seitenleiste mit der Anmerkungsliste.</summary>
+    private void ShowAnnotationList()
+    {
+        ShowSidebarPanel(SidebarView.Annotations);
+        if (splitViewer.Panel1Collapsed)
+        {
+            SetSidebarVisible(true);
+            sidebarUserVisible = true;
+        }
+        annotationPanel.FocusList();
+    }
+
+    private void BtnSideAnnotations_Click(object? sender, EventArgs e)
+    {
+        ShowSidebarPanel(SidebarView.Annotations);
+    }
+
+    private void AnnotationPanel_EntryActivated(object? sender, AnnotationEntry e)
+    {
+        if (document == null || e.Page >= document.PageCount) { return; }
+        pageView.RevealAnnotation(e.Page, e.Bounds);
+    }
+
+    /// <summary>Doppelklick, Enter oder „Bearbeiten…“: Notizen öffnen ihre Karte zum Schreiben, Freitext und Stempel ihren Dialog.</summary>
+    private async void AnnotationPanel_EditRequested(object? sender, AnnotationEntry e)
+    {
+        if (EditLocked || document == null) { return; }
+        if (annotationListStale) { RefreshAnnotations(); return; } // die Nummer könnte inzwischen eine andere Anmerkung meinen
+        pageView.RevealAnnotation(e.Page, e.Bounds);
+        if (e.Subtype == Protocol.AnnotText) { await OpenNoteAsync(e.Page, e.Number, edit: true); }
+        else { EditAnnotationAt(e.Page, e.Number); }
+    }
+
+    /// <summary>Entf oder „Löschen“: im Hilfsprogramm entfernt (samt Popup), ungespeichert wie jede Anmerkungsänderung, ein Rückgängig-Schritt.</summary>
+    private async void AnnotationPanel_DeleteRequested(object? sender, AnnotationEntry e)
+    {
+        if (EditLocked || ShownDocument is not { } doc) { return; }
+        if (annotationListStale) { RefreshAnnotations(); return; }
+        CloseNoteCard(); // eine offene Karte gehört womöglich zu dieser Notiz
+        if (!await PushViewUndoAsync(Lng.T("Anmerkung löschen"))) { return; }
+        if (!await doc.RemoveMarkupAsync(e.Page, e.Number)) { viewUndo.RemoveAt(viewUndo.Count - 1); UpdateUndoMenu(); return; }
+        annotationKeepPosition = true;
+        ScheduleAnnotationRefresh();
+        statusPath.Text = Lng.T("Die Anmerkung wurde gelöscht.");
+    }
+
+    /// <summary>„Alle löschen…“ mit Rückfrage: über PDFsharp auf dem angezeigten Stand (Links, Formularfelder und Popups bleiben), ein
+    /// Rückgängig-Schritt.</summary>
+    private async void AnnotationPanel_DeleteAllRequested(object? sender, EventArgs e)
+    {
+        if (EditLocked || ShownDocument == null || annotationPanel.TotalCount == 0) { return; }
+        if (!TaskDlg.ConfirmTaskDlg(Handle, string.Format(Lng.T("Alle {0} Anmerkungen löschen?"), annotationPanel.TotalCount),
+            Lng.T("Das gilt für alle Seiten und lässt sich mit Strg+Z rückgängig machen."), TaskDialogIcon.Warning, defaultNo: true)) { return; }
+        CloseNoteCard();
+        if (await EditInViewAsync(path => PdfEditService.DeleteAllAnnotations(path), Lng.T("Anmerkungen löschen"), keepPage: true))
+        {
+            statusPath.Text = Lng.T("Alle Anmerkungen wurden gelöscht.");
+        }
     }
 
     /// <summary>Textanmerkung bearbeiten: derselbe Dialog wie beim Einfügen, mit den Werten der Anmerkung vorbelegt;
@@ -2890,7 +2988,14 @@ public partial class MainForm : Form
     private void Document_Changed(object? sender, EventArgs e)
     {
         // kommt auf dem Thread, der mit dem Hilfsprogramm spricht
-        if (IsHandleCreated && !IsDisposed) { BeginInvoke(() => MarkDirty(sender)); }
+        if (IsHandleCreated && !IsDisposed)
+        {
+            BeginInvoke(() =>
+            {
+                MarkDirty(sender);
+                if (sender == document) { ScheduleAnnotationRefresh(); } // Anmerkung angelegt, entfernt, geändert – oder ein Formularwert
+            });
+        }
     }
 
     private void MarkDirty(object? sender)
@@ -3048,8 +3153,9 @@ public partial class MainForm : Form
     private void UpdateAnnotationButtons()
     {
         var enabled = document != null && currentFile != null && !EditLocked && currentPageCount > 0;
-        btnHighlight.Enabled = ddbHighlight.Enabled = btnFreeText.Enabled = btnComment.Enabled = btnStamp.Enabled = btnDraw.Enabled = ddbInk.Enabled = btnErase.Enabled = btnManageAnnotations.Enabled = btnRotateLeft.Enabled = btnRotateRight.Enabled = ddbRotate.Enabled = enabled;
+        btnHighlight.Enabled = ddbHighlight.Enabled = btnFreeText.Enabled = btnComment.Enabled = btnStamp.Enabled = btnDraw.Enabled = ddbInk.Enabled = btnErase.Enabled = btnRotateLeft.Enabled = btnRotateRight.Enabled = ddbRotate.Enabled = enabled;
         if (!enabled && AnnotationModeActive) { EndAnnotationModes(); }
+        UpdateAnnotationRail(); // Bearbeiten und Löschen in der Anmerkungsliste wie die Knöpfe
     }
 
     /// <summary>Symbole für Freitext (T im Kasten), Hervorheben und Zeichnen (Marker bzw. Stift mit Farbbalken in der gewählten Farbe).</summary>
@@ -3600,6 +3706,9 @@ public partial class MainForm : Form
         outlineView.SelectionBackColor = dark ? Color.FromArgb(77, 77, 77) : Color.FromArgb(204, 228, 247); // wie die Auswahl im Explorer
         outlineView.HoverBackColor = dark ? Color.FromArgb(56, 56, 56) : Color.FromArgb(229, 243, 255);
         splitViewer.BackColor = dark ? Color.FromArgb(40, 40, 40) : SystemColors.Control; // die Trennlinie zur Seitenleiste
+        annotationPanel.ApplyTheme(outlineView.BackColor, outlineView.ForeColor, dark ? Color.FromArgb(165, 165, 165) : SystemColors.GrayText,
+            dark ? Color.FromArgb(52, 52, 52) : Color.FromArgb(240, 240, 240), outlineView.SelectionBackColor, outlineView.HoverBackColor,
+            ViewerIconColor, SidebarRailRenderer.Accent(dark), new SidebarRailRenderer(dark)); // wie die übrige Seitenleiste
         viewerStrip.Renderer = new ViewerStripRenderer(dark) { IsActiveMode = IsActiveModeItem }; // hell wie der Standard, aktive Modi wie Edge
         sidebarStrip.Renderer = new SidebarRailRenderer(dark); // senkrechte Umschaltleiste wie in Chrome, in beiden Modi
         sidebarHeader.Renderer = new SidebarRailRenderer(dark); // Kopfzeile „Inhaltsverzeichnis“ wie in Edge
@@ -3692,7 +3801,6 @@ public partial class MainForm : Form
         btnStamp.Image = ViewerIcon(ToolbarIcons.Stamp);
         btnComment.Image = ViewerIcon(ToolbarIcons.Comment);
         Set(btnErase, ToolbarIcons.Erase); // nur das Symbol wie der Rückgängig-Knopf (Wunsch vom 04.10.2026)
-        Set(btnManageAnnotations, ToolbarIcons.ManageAnnotations); // nur Symbol – „Anmerkungen verwalten“ (Wunsch vom 04.10.2026, vorher im Bearbeiten-Menü)
         if (ToolbarIcons.FontAvailable) { pageView.EraseCursor ??= CreateEraseCursor(); }
         foreach (var item in ViewerTextItems) { item.Font = toolStrip.Font; } // Beschriftung so groß wie in der Symbolleiste
         UpdateAnnotationIcons();
@@ -3996,7 +4104,7 @@ public partial class MainForm : Form
     {
         splitViewer.SplitterDistance = LogicalToDeviceUnits(settings.SidebarWidth > 0 ? Math.Clamp(settings.SidebarWidth, 100, 600) : 180);
         (sidebarUserVisible, sidebarUserBookmarks) = (settings.ShowSidebar, settings.SidebarBookmarks);
-        ShowSidebarPanel(sidebarUserBookmarks);
+        ShowSidebarPanel(sidebarUserBookmarks ? SidebarView.Outline : SidebarView.Thumbnails);
         SetSidebarVisible(sidebarUserVisible);
     }
 
@@ -4007,8 +4115,9 @@ public partial class MainForm : Form
 
     private void ApplySidebarForDocument(bool hasOutline)
     {
-        if (hasOutline) { ShowSidebarPanel(bookmarks: true); SetSidebarVisible(true); }
-        else { ShowSidebarPanel(bookmarks: false); SetSidebarVisible(sidebarUserVisible); } // ohne Lesezeichen wären es nur „(keine Lesezeichen)“
+        if (AnnotationListShown) { return; } // eine offene Anmerkungsliste bleibt offen und zeigt die Anmerkungen der neuen Datei
+        if (hasOutline) { ShowSidebarPanel(SidebarView.Outline); SetSidebarVisible(true); }
+        else { ShowSidebarPanel(SidebarView.Thumbnails); SetSidebarVisible(sidebarUserVisible); } // ohne Lesezeichen wären es nur „(keine Lesezeichen)“
     }
 
     /// <summary>Anzeigeeinstellungen vom letzten Beenden: Anpassung bzw. Zoomstufe (für die erste Datei, danach gilt die jeweils letzte),
@@ -4033,9 +4142,11 @@ public partial class MainForm : Form
 
     private void SetSidebarVisible(bool visible)
     {
+        var listWasShown = AnnotationListShown;
         splitViewer.Panel1Collapsed = !visible;
         btnSidebar.Checked = visible;
         UpdateViewerLayout(); // die Beschriftung „Inhaltsverzeichnis“ kommt bzw. geht
+        if (AnnotationListShown && !listWasShown) { RefreshAnnotations(); } // die Liste liest erst, wenn sie zu sehen ist
     }
 
     /// <summary>F10, Strg+Umschalt+I (wie Edge) und die Schaltfläche links in der Viewer-Leiste.</summary>
@@ -4051,19 +4162,25 @@ public partial class MainForm : Form
     {
         if (splitViewer.Panel1Collapsed)
         {
-            ShowSidebarPanel(bookmarks);
+            ShowSidebarPanel(bookmarks ? SidebarView.Outline : SidebarView.Thumbnails);
             sidebarUserBookmarks = bookmarks;
         }
         ToggleSidebar();
     }
 
-    private void ShowSidebarPanel(bool bookmarks)
+    private void ShowSidebarPanel(SidebarView view)
     {
-        outlineView.Visible = bookmarks;
-        thumbnailGrid.Visible = !bookmarks;
-        btnSideBookmarks.Checked = bookmarks;
-        btnSideThumbnails.Checked = !bookmarks;
+        var listWasShown = AnnotationListShown;
+        sidebarView = view;
+        outlineView.Visible = view == SidebarView.Outline;
+        thumbnailGrid.Visible = view == SidebarView.Thumbnails;
+        annotationPanel.Visible = view == SidebarView.Annotations;
+        btnSideBookmarks.Checked = view == SidebarView.Outline;
+        btnSideThumbnails.Checked = view == SidebarView.Thumbnails;
+        btnSideAnnotations.Checked = view == SidebarView.Annotations;
         UpdateSidebarIcons();
+        UpdateAnnotationRail();
+        if (AnnotationListShown && !listWasShown) { RefreshAnnotations(); }
     }
 
     /// <summary>Symbole der Umschaltleiste links in der Seitenleiste (wie Chrome): die gewählte Ansicht in der Akzentfarbe.</summary>
@@ -4071,7 +4188,7 @@ public partial class MainForm : Form
     {
         sidebarStrip.ImageScalingSize = toolStrip.ImageScalingSize;
         var dark = settings.DarkViewer;
-        foreach (var (button, glyph) in new[] { (btnSideThumbnails, ToolbarIcons.Thumbnails), (btnSideBookmarks, ToolbarIcons.Outline) })
+        foreach (var (button, glyph) in new[] { (btnSideThumbnails, ToolbarIcons.Thumbnails), (btnSideBookmarks, ToolbarIcons.Outline), (btnSideAnnotations, ToolbarIcons.ManageAnnotations) })
         {
             var color = button.Checked ? SidebarRailRenderer.Accent(dark) : ViewerIconColor;
             button.Image = ToolbarIcons.FontAvailable ? ToolbarIcons.Get(glyph, toolStrip.ImageScalingSize, color) : null;
@@ -4096,13 +4213,13 @@ public partial class MainForm : Form
 
     private void BtnSideThumbnails_Click(object? sender, EventArgs e)
     {
-        ShowSidebarPanel(bookmarks: false);
+        ShowSidebarPanel(SidebarView.Thumbnails);
         sidebarUserBookmarks = false;
     }
 
     private void BtnSideBookmarks_Click(object? sender, EventArgs e)
     {
-        ShowSidebarPanel(bookmarks: true);
+        ShowSidebarPanel(SidebarView.Outline);
         sidebarUserBookmarks = true;
     }
 
@@ -4479,7 +4596,8 @@ public partial class MainForm : Form
         or (Keys.D | Keys.Control) or (Keys.Enter | Keys.Alt) or (Keys.F | Keys.Control) or (Keys.G | Keys.Control)
         or (Keys.I | Keys.Control | Keys.Shift) or Keys.F10 or (Keys.F10 | Keys.Control) or (Keys.F10 | Keys.Shift) or (Keys.B | Keys.Control | Keys.Shift) or (Keys.R | Keys.Control | Keys.Shift) or (Keys.L | Keys.Control | Keys.Shift)
         or (Keys.Add | Keys.Control) or (Keys.Oemplus | Keys.Control) or (Keys.Subtract | Keys.Control) or (Keys.OemMinus | Keys.Control)
-        or (Keys.D0 | Keys.Control) or (Keys.NumPad0 | Keys.Control) or (Keys.Space | Keys.Control) or (Keys.S | Keys.Control);
+        or (Keys.D0 | Keys.Control) or (Keys.NumPad0 | Keys.Control) or (Keys.Space | Keys.Control) or (Keys.S | Keys.Control)
+        or (Keys.T | Keys.Control | Keys.Shift); // Anmerkungsliste der Seitenleiste – sie zeigt den angezeigten Stand, nichts muss gespeichert sein
 
     /// <summary>Kürzel, die die angezeigte Datei schließen oder durch eine andere ersetzen – sie speichern nicht still, sondern fragen selbst
     /// (<see cref="CloseDocument"/>, <see cref="LoadOtherFile"/>).</summary>
@@ -4490,7 +4608,7 @@ public partial class MainForm : Form
     /// <summary>Kürzel, die selbst in der Anzeige bearbeiten (Anmerkungen) oder deren Schritte zurücknehmen – davor wird nicht gespeichert.
     /// Ebenso die Dialoge des Bearbeiten-Menüs und die Eigenschaften: Erst wenn sie die Datei ändern, schreiben sie offene Änderungen der
     /// Anzeige im selben Schritt mit (<see cref="PendingViewChangesAsync"/>, <see cref="WritePropertiesAsync"/>; seit 10.10.2026).</summary>
-    private bool IsViewEdit(Keys keyData) => keyData is (Keys.T | Keys.Control) or (Keys.H | Keys.Control) or (Keys.T | Keys.Control | Keys.Shift)
+    private bool IsViewEdit(Keys keyData) => keyData is (Keys.T | Keys.Control) or (Keys.H | Keys.Control)
         or (Keys.I | Keys.Control) or (Keys.Delete | Keys.Control) or (Keys.Insert | Keys.Control) or (Keys.X | Keys.Control) or (Keys.Y | Keys.Control)
         or (Keys.N | Keys.Control) or (Keys.R | Keys.Control) or (Keys.F2 | Keys.Control) or (Keys.H | Keys.Control | Keys.Shift)
         || (keyData == (Keys.Z | Keys.Control) && viewUndo.Count > 0);
@@ -4517,7 +4635,7 @@ public partial class MainForm : Form
             case Keys.T | Keys.Control when !EditLocked: return AddAnnotationDialog;       // Textanmerkung
             case Keys.H | Keys.Control when !EditLocked: return AddStampDialog;            // Stempel
             case Keys.H | Keys.Control | Keys.Shift: return ManageStampsDialog;            // Stempelpalette pflegen
-            case Keys.T | Keys.Control | Keys.Shift when btnManageAnnotations.Enabled: return ManageAnnotationsDialog;
+            case Keys.T | Keys.Control | Keys.Shift when document != null: return ShowAnnotationList; // seit 15.10.2026 die Liste in der Seitenleiste
             case Keys.Delete | Keys.Control | Keys.Shift when currentFile != null: return DeleteCurrent;
             case Keys.R | Keys.Control when !EditLocked: return () => ShowRotationForm(); // Drehen-Fenster der Viewer-Leiste
             case Keys.P | Keys.Control when currentFile != null: return PrintWithDialog;
@@ -4732,10 +4850,6 @@ public partial class MainForm : Form
     private void MnuEditBookmarks_Click(object? sender, EventArgs e)
     {
         RunUnlessEditing(EditBookmarks);
-    }
-    private void BtnManageAnnotations_Click(object? sender, EventArgs e)
-    {
-        ManageAnnotationsDialog(); // arbeitet auf dem angezeigten Stand – vorher nichts speichern
     }
     private void MnuManageStamps_Click(object? sender, EventArgs e)
     {

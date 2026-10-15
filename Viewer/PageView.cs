@@ -225,6 +225,7 @@ internal sealed class PageView : ScrollableControl
         markupUnderMouse = inkUnderMouse = stampUnderMouse = freeTextUnderMouse = null;
         imageUnderMouse = null;
         selectedImage = null;
+        revealedAnnotation = null; // die Nummern gelten nur für den bisherigen Stand
         hoverAnnotation = null;
         if (keep && ghost != null) { ghostDragging = false; } // die verschobene Kopie bleibt stehen, bis die Seite neu gezeichnet ist (DrawAnnotationGhost)
         else { ClearAnnotationGhost(); }
@@ -510,6 +511,7 @@ internal sealed class PageView : ScrollableControl
             else { RequestPreview(page); }
             DrawTiles(g, page, rect, viewport);
             DrawImageSelection(g, page, rect);
+            DrawRevealedAnnotation(g, page, rect);
             DrawHits(g, page, rect);
             DrawSelection(g, page, rect);
             if (page == currentPage && ShowCurrentPageHighlight)
@@ -797,6 +799,67 @@ internal sealed class PageView : ScrollableControl
         ClearImageSelection();
         selectedImage = (page, number, new RectangleF((float)rect.X / pageSize.Width, (float)rect.Y / pageSize.Height, (float)rect.Width / pageSize.Width, (float)rect.Height / pageSize.Height));
         InvalidateImageSelection();
+    }
+
+    // ------------------------------------------------------------------ Anmerkung aus der Liste der Seitenleiste (seit 15.10.2026)
+
+    private (int Page, RectangleF Bounds)? revealedAnnotation; // Lage als Anteil der Seite – gilt auch nach dem Zoomen
+
+    /// <summary>Springt zu einer Anmerkung aus der Anmerkungsliste und rahmt sie, bis in die Seite geklickt wird (wie Acrobat).
+    /// Liegt sie schon ganz im Bild, bleibt der Ausschnitt; sonst rückt sie ins obere Drittel. Ohne Lage nur zur Seite.</summary>
+    public void RevealAnnotation(int page, RectangleF bounds)
+    {
+        if (page < 0 || page >= pageRects.Length) { return; }
+        InvalidateRevealedAnnotation();
+        if (bounds.Width <= 0 && bounds.Height <= 0) { revealedAnnotation = null; GoToPage(page); return; }
+        var rect = pageRects[page];
+        var target = Rectangle.FromLTRB(rect.X + (int)(bounds.Left * rect.Width), rect.Y + (int)(bounds.Top * rect.Height),
+            rect.X + (int)Math.Ceiling(bounds.Right * rect.Width), rect.Y + (int)Math.Ceiling(bounds.Bottom * rect.Height));
+        var view = Viewport;
+        if (!view.Contains(target))
+        {
+            var margin = LogicalToDeviceUnits(PageMargin);
+            var y = target.Height > view.Height * 2 / 3 ? target.Y - margin : target.Y - view.Height / 3;
+            var x = target.Left >= view.Left && target.Right <= view.Right ? view.X : target.X - Math.Max(margin, (view.Width - target.Width) / 2);
+            AutoScrollPosition = new Point(Math.Max(0, x), Math.Max(0, y));
+        }
+        SetCurrentPage(page);
+        revealedAnnotation = (page, bounds);
+        Invalidate();
+    }
+
+    private void ClearRevealedAnnotation()
+    {
+        if (revealedAnnotation == null) { return; }
+        InvalidateRevealedAnnotation();
+        revealedAnnotation = null;
+    }
+
+    private Rectangle RevealedClientRect()
+    {
+        if (revealedAnnotation is not { } revealed || revealed.Page >= pageRects.Length) { return Rectangle.Empty; }
+        var page = ToClient(pageRects[revealed.Page]);
+        var b = revealed.Bounds;
+        var box = Rectangle.FromLTRB(page.X + (int)Math.Floor(b.Left * page.Width), page.Y + (int)Math.Floor(b.Top * page.Height),
+            page.X + (int)Math.Ceiling(b.Right * page.Width), page.Y + (int)Math.Ceiling(b.Bottom * page.Height));
+        box.Inflate(LogicalToDeviceUnits(3), LogicalToDeviceUnits(3)); // etwas Luft – der Rahmen soll die Anmerkung nicht verdecken
+        return box;
+    }
+
+    private void InvalidateRevealedAnnotation()
+    {
+        var box = RevealedClientRect();
+        if (!box.IsEmpty) { box.Inflate(LogicalToDeviceUnits(2) + 1, LogicalToDeviceUnits(2) + 1); Invalidate(box); }
+    }
+
+    /// <summary>Rahmen in der Auswahlfarbe von Windows um die angesprungene Anmerkung.</summary>
+    private void DrawRevealedAnnotation(Graphics g, int page, Rectangle clientRect)
+    {
+        if (revealedAnnotation?.Page != page) { return; }
+        var box = RevealedClientRect();
+        if (box.IsEmpty) { return; }
+        using Pen pen = new(Color.FromArgb(0, 120, 212), LogicalToDeviceUnits(2)) { Alignment = PenAlignment.Inset };
+        g.DrawRectangle(pen, box);
     }
 
     private void ClearImageSelection()
@@ -1922,6 +1985,7 @@ internal sealed class PageView : ScrollableControl
     {
         base.OnMouseDown(e);
         Focus();
+        ClearRevealedAnnotation(); // der Rahmen der aus der Liste angesprungenen Anmerkung gilt bis zum nächsten Klick in die Seite
         // die angeklickte Seite wird die aktive (Rahmen, Seitenfeld) – zweiseitig etwa die rechte des Paars (Wunsch vom 04.10.2026)
         if (e.Button is MouseButtons.Left or MouseButtons.Right && PageAt(e.Location, clamp: false).Page is >= 0 and var clicked) { SetCurrentPage(clicked); }
         pickMouseUp = false; // kam das Loslassen nach dem Wahlklick nie hier an (Freitext: der Dialog war schon offen), gälte es sonst diesem Klick (Review 11.10.2026)
@@ -2200,7 +2264,7 @@ internal sealed class PageView : ScrollableControl
             case Keys.Control | Keys.OemMinus: e.Handled = true; ZoomOut(); break;
             case Keys.Control | Keys.D0:
             case Keys.Control | Keys.NumPad0: e.Handled = true; SetZoom(1f, null); break;
-            case Keys.Escape: ClearSelection(); ClearImageSelection(); break;
+            case Keys.Escape: ClearSelection(); ClearImageSelection(); ClearRevealedAnnotation(); break;
             case Keys.Down: ScrollBy(0, line); break;
             case Keys.Up: ScrollBy(0, -line); break;
             case Keys.Right: ScrollBy(line, 0); break;

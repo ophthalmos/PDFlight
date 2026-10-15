@@ -130,6 +130,7 @@ internal static unsafe partial class Pdfium
     [LibraryImport(Lib, EntryPoint = "FPDFPage_RemoveAnnot")] public static partial int PageRemoveAnnot(nint page, int index);
     [LibraryImport(Lib, EntryPoint = "FPDFAnnot_GetSubtype")] public static partial int AnnotGetSubtype(nint annot);
     [LibraryImport(Lib, EntryPoint = "FPDFAnnot_SetColor")] public static partial int AnnotSetColor(nint annot, int type, uint r, uint g, uint b, uint a);
+    [LibraryImport(Lib, EntryPoint = "FPDFAnnot_GetColor")] public static partial int AnnotGetColor(nint annot, int type, out uint r, out uint g, out uint b, out uint a);
     [LibraryImport(Lib, EntryPoint = "FPDFAnnot_SetFlags")] public static partial int AnnotSetFlags(nint annot, int flags);
     [LibraryImport(Lib, EntryPoint = "FPDFAnnot_GetFlags")] public static partial int AnnotGetFlags(nint annot);
     [LibraryImport(Lib, EntryPoint = "FPDFAnnot_AddInkStroke")] public static partial int AnnotAddInkStroke(nint annot, PointF* points, nuint count);

@@ -1,26 +1,11 @@
 PDFlight - Copyright (c) 2026 Wilhelm Happe
-https://github.com/ophthalmos/PDFlight
+Licensed under the GNU Affero General Public License version 3 (file LICENSE).
+Source code: https://github.com/ophthalmos/PDFlight
+PDFlight is provided WITHOUT ANY WARRANTY; see the license for details.
 
-LICENSES
+Third-party components included:
 
-PDFlight's own source code is licensed under the MIT License (file LICENSE).
-
-PDFlight uses PDFsharp 6.5, which is licensed under the GNU Affero General
-Public License version 3 (file LICENSE-AGPL-3.0.txt). The program as
-distributed - this setup and the installed binaries - is therefore subject
-to the GNU AGPL 3.0 as a whole. You may use, copy, modify and redistribute it
-under the terms of that license.
-
-The complete corresponding source code is available at
-https://github.com/ophthalmos/PDFlight
-
-PDFlight is provided WITHOUT ANY WARRANTY; without even the implied warranty
-of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the licenses for
-details.
-
-THIRD-PARTY COMPONENTS INCLUDED
-
-- PDFsharp 6.5 (PdfSharp*.dll), (c) empira, PDFsharp Team
+- PDFsharp (PdfSharp*.dll), (c) empira, PDFsharp Team
   GNU AGPL 3.0 - https://www.pdfsharp.com
 - PDFium (pdfium.dll), (c) The PDFium Authors
   BSD-3-Clause / Apache-2.0 - https://pdfium.googlesource.com/pdfium/

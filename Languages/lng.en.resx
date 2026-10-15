@@ -257,6 +257,7 @@ Both files must have the same number of pages.</value></data>
   <data name="nicht gefunden" xml:space="preserve"><value>not found</value></data>
   <data name="Über" xml:space="preserve"><value>About</value></data>
   <data name="Quelltext auf GitHub" xml:space="preserve"><value>Source code on GitHub</value></data>
+  <data name="Lizenz: GNU AGPL 3.0, ohne Gewährleistung" xml:space="preserve"><value>License: GNU AGPL 3.0, without any warranty</value></data>
   <data name="About.Text" xml:space="preserve"><value>PDFlight is a viewer for typical file operations
 (move, copy, delete, rename, mail).
 Frequently used target folders are kept in a list, so
@@ -466,18 +467,13 @@ the latest version.</value></data>
   <data name="Blau" xml:space="preserve"><value>Blue</value></data>
   <!-- Anmerkungen verwalten -->
   <data name="Strg+Umschalt+T" xml:space="preserve"><value>Ctrl+Shift+T</value></data>
-  <data name="Enter" xml:space="preserve"><value>Enter</value></data>
-  <data name="Anmerkungen verwalten (bearbeiten, löschen)" xml:space="preserve"><value>manage annotations (edit, delete)</value></data>
   <data name="Anmerkungen" xml:space="preserve"><value>Annotations</value></data>
-  <data name="Seitennr." xml:space="preserve"><value>Page no.</value></data>
   <data name="Position" xml:space="preserve"><value>Position</value></data>
   <data name="Text" xml:space="preserve"><value>Text</value></data>
-  <data name="&amp;Bearbeiten…" xml:space="preserve"><value>&amp;Edit…</value></data>
   <data name="Schließen" xml:space="preserve"><value>Close</value></data>
   <data name="Textanmerkung bearbeiten" xml:space="preserve"><value>Edit text annotation</value></data>
   <data name="(keine Anmerkungen)" xml:space="preserve"><value>(no annotations)</value></data>
   <data name="Anmerkung löschen" xml:space="preserve"><value>Delete annotation</value></data>
-  <data name="links {0:0.#} mm, oben {1:0.#} mm" xml:space="preserve"><value>left {0:0.#} mm, top {1:0.#} mm</value></data>
   <data name="Aktuelle Seite verschieben…" xml:space="preserve"><value>Move current page…</value></data>
   <data name="Seite verschieben" xml:space="preserve"><value>Move page</value></data>
   <data name="Seite {0} an &amp;Position (1–{1}):" xml:space="preserve"><value>Page {0} to &amp;position (1–{1}):</value></data>
@@ -520,7 +516,6 @@ the latest version.</value></data>
   <data name="An dieser Stelle steht schon der Stempel „{0}“." xml:space="preserve"><value>The stamp &quot;{0}&quot; is already at this spot.</value></data>
   <data name="Bearbeiter&amp;kürzel:" xml:space="preserve"><value>&amp;Initials:</value></data>
   <data name="max. 3 Zeichen" xml:space="preserve"><value>max. 3 characters</value></data>
-  <data name="Alle löschen" xml:space="preserve"><value>Delete all</value></data>
   <data name="Alle {0} Anmerkungen löschen?" xml:space="preserve"><value>Delete all {0} annotations?</value></data>
   <data name="Das gilt für alle Seiten und lässt sich mit Strg+Z rückgängig machen." xml:space="preserve"><value>This applies to all pages and can be undone with Ctrl+Z.</value></data>
   <data name="Anmerkungen löschen" xml:space="preserve"><value>Deleting annotations</value></data>
@@ -787,7 +782,6 @@ or press Ctrl+Shift+I.</value></data>
   <data name="Hervorhebungsfarbe" xml:space="preserve"><value>Highlight color</value></data>
   <data name="Umkehren (für hellen Text auf dunklem Grund)" xml:space="preserve"><value>Invert (for light text on a dark background)</value></data>
   <data name="Anmerkung entfernen" xml:space="preserve"><value>Remove annotation</value></data>
-  <data name="Anmerkungen verwalten" xml:space="preserve"><value>Manage annotations</value></data>
   <data name="Anmerkung bearbeiten…" xml:space="preserve"><value>Edit annotation…</value></data>
   <data name="Freitext bearbeiten…" xml:space="preserve"><value>Edit free text…</value></data>
   <data name="Stempel bearbeiten…" xml:space="preserve"><value>Edit stamp…</value></data>
@@ -798,8 +792,6 @@ or press Ctrl+Shift+I.</value></data>
   <data name="Seitenleiste mit Miniaturen und Lesezeichen (F10)" xml:space="preserve"><value>Sidebar with thumbnails and bookmarks (F10)</value></data>
   <data name="Änderungen über die Viewer-Leiste (Hervorheben, Zeichnen, Freitext, Stempel, Seiten drehen) bleiben ungespeichert, bis du auf „Speichern“ klickst." xml:space="preserve"><value>Changes made with the viewer bar (highlight, draw, free text, stamp, rotate pages) stay unsaved until you click “Save”.</value></data>
   <data name="Die Befehle im Menü „Bearbeiten“ und in der oberen Symbolleiste ändern die Datei sofort. Strg+Z macht einen Fehlgriff rückgängig." xml:space="preserve"><value>The commands in the “Edit” menu and in the top toolbar change the file immediately. Ctrl+Z undoes a slip.</value></data>
-  <data name="Verwalten" xml:space="preserve"><value>Manage</value></data>
-  <data name="Anmerkungen verwalten (Strg+Umschalt+T)" xml:space="preserve"><value>Manage annotations (Ctrl+Shift+T)</value></data>
   <data name="Angezeigte S&amp;eite" xml:space="preserve"><value>Dis&amp;played page</value></data>
   <data name="Ungespeicherte Änderungen an den Lesezeichen verwerfen?" xml:space="preserve"><value>Discard unsaved changes to the bookmarks?</value></data>
   <data name="Tipp: Strg drücken für gerade Linien" xml:space="preserve"><value>Tip: hold Ctrl to draw straight lines</value></data>
@@ -894,4 +886,45 @@ Without it, the file can no longer be displayed.</value></data>
   <data name="Die Notiz wurde geändert." xml:space="preserve"><value>The note was changed.</value></data>
   <data name="Die Notiz wurde gelöscht." xml:space="preserve"><value>The note was deleted.</value></data>
   <data name="Weitere Optionen" xml:space="preserve"><value>More options</value></data>
+  <data name="1 Anmerkung" xml:space="preserve"><value>1 annotation</value></data>
+  <data name="{0} Anmerkungen" xml:space="preserve"><value>{0} annotations</value></data>
+  <data name="{0} von {1}" xml:space="preserve"><value>{0} of {1}</value></data>
+  <data name="Alle Anmerkungen wurden gelöscht." xml:space="preserve"><value>All annotations have been deleted.</value></data>
+  <data name="Alle anzeigen" xml:space="preserve"><value>Show all</value></data>
+  <data name="Alle löschen…" xml:space="preserve"><value>Delete all…</value></data>
+  <data name="Anmerkung" xml:space="preserve"><value>Annotation</value></data>
+  <data name="Anmerkungen (Strg+Umschalt+T)" xml:space="preserve"><value>Annotations (Ctrl+Shift+T)</value></data>
+  <data name="Anmerkungen durchsuchen" xml:space="preserve"><value>Search annotations</value></data>
+  <data name="Anmerkungen in der Seitenleiste anzeigen" xml:space="preserve"><value>show annotations in the sidebar</value></data>
+  <data name="Art" xml:space="preserve"><value>Type</value></data>
+  <data name="Autor" xml:space="preserve"><value>Author</value></data>
+  <data name="Bearbeiten…" xml:space="preserve"><value>Edit…</value></data>
+  <data name="Dateianhang" xml:space="preserve"><value>File attachment</value></data>
+  <data name="Die Anmerkung wurde gelöscht." xml:space="preserve"><value>The annotation has been deleted.</value></data>
+  <data name="Durchstreichung" xml:space="preserve"><value>Strikethrough</value></data>
+  <data name="Einfügemarke" xml:space="preserve"><value>Caret</value></data>
+  <data name="Ellipse" xml:space="preserve"><value>Ellipse</value></data>
+  <data name="Filter" xml:space="preserve"><value>Filter</value></data>
+  <data name="Filtern" xml:space="preserve"><value>Filter</value></data>
+  <data name="Hervorhebung" xml:space="preserve"><value>Highlight</value></data>
+  <data name="Keine passenden Anmerkungen" xml:space="preserve"><value>No matching annotations</value></data>
+  <data name="Linie" xml:space="preserve"><value>Line</value></data>
+  <data name="Nach Art" xml:space="preserve"><value>By type</value></data>
+  <data name="Nach Autor" xml:space="preserve"><value>By author</value></data>
+  <data name="Nach Datum" xml:space="preserve"><value>By date</value></data>
+  <data name="Nach Seite" xml:space="preserve"><value>By page</value></data>
+  <data name="Ohne Autor" xml:space="preserve"><value>No author</value></data>
+  <data name="Ohne Datum" xml:space="preserve"><value>No date</value></data>
+  <data name="Ohne Farbe" xml:space="preserve"><value>No color</value></data>
+  <data name="Polygon" xml:space="preserve"><value>Polygon</value></data>
+  <data name="Polylinie" xml:space="preserve"><value>Polyline</value></data>
+  <data name="Rechteck" xml:space="preserve"><value>Rectangle</value></data>
+  <data name="Schwärzung" xml:space="preserve"><value>Redaction</value></data>
+  <data name="Sortieren" xml:space="preserve"><value>Sort</value></data>
+  <data name="Text oder Autor" xml:space="preserve"><value>Text or author</value></data>
+  <data name="Ton" xml:space="preserve"><value>Sound</value></data>
+  <data name="Unterstreichung" xml:space="preserve"><value>Underline</value></data>
+  <data name="Weitere Befehle" xml:space="preserve"><value>More commands</value></data>
+  <data name="Wellenlinie" xml:space="preserve"><value>Squiggly line</value></data>
+  <data name="Wird gelesen…" xml:space="preserve"><value>Reading…</value></data>
 </root>

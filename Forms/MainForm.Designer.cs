@@ -32,6 +32,7 @@
             var resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             splashTimer = new System.Windows.Forms.Timer(components);
             escHoldTimer = new System.Windows.Forms.Timer(components);
+            annotationRefreshTimer = new System.Windows.Forms.Timer(components);
             searchTimer = new System.Windows.Forms.Timer(components);
             toolStrip = new ToolStrip();
             btnOpen = new ToolStripSplitButton();
@@ -79,7 +80,6 @@
             toolStripSeparator11 = new ToolStripSeparator();
             mnuAbout = new ToolStripMenuItem();
             btnSettings = new ToolStripButton();
-            btnManageAnnotations = new ToolStripButton();
             statusStrip = new StatusStrip();
             statusIndex = new ToolStripStatusLabel();
             statusPath = new ToolStripStatusLabel();
@@ -149,14 +149,15 @@
             toolStripSeparatorO1 = new ToolStripSeparator();
             mnuOutlineLevel2 = new ToolStripMenuItem();
             mnuOutlineLevel3 = new ToolStripMenuItem();
+            annotationPanel = new PDFLight.Controls.AnnotationPanel();
             sidebarStrip = new ToolStrip();
             btnSideThumbnails = new ToolStripButton();
             btnSideBookmarks = new ToolStripButton();
+            btnSideAnnotations = new ToolStripButton();
             sidebarHeader = new ToolStrip();
             labelSidebarTitle = new ToolStripLabel();
             btnSidebarClose = new ToolStripButton();
             pageView = new PDFLight.Viewer.PageView();
-            noteCard = new PDFLight.Controls.NoteCard();
             contextMenuPage = new ContextMenuStrip(components);
             mnuViewCopy = new ToolStripMenuItem();
             mnuViewSelectAll = new ToolStripMenuItem();
@@ -169,6 +170,7 @@
             mnuAddComment = new ToolStripMenuItem();
             mnuEditAnnotation = new ToolStripMenuItem();
             mnuRemoveAnnotation = new ToolStripMenuItem();
+            noteCard = new PDFLight.Controls.NoteCard();
             printDocument = new System.Drawing.Printing.PrintDocument();
             printDialog = new PrintDialog();
             toolTipLink = new ToolTip(components);
@@ -198,6 +200,11 @@
             // escHoldTimer
             // 
             escHoldTimer.Tick += EscHoldTimer_Tick;
+            // 
+            // annotationRefreshTimer
+            // 
+            annotationRefreshTimer.Interval = 400;
+            annotationRefreshTimer.Tick += AnnotationRefreshTimer_Tick;
             // 
             // searchTimer
             // 
@@ -562,16 +569,6 @@
             btnSettings.ToolTipText = "Zielordner, Programme und Optionen verwalten (Strg+,)";
             btnSettings.Click += BtnSettings_Click;
             // 
-            // btnManageAnnotations
-            // 
-            btnManageAnnotations.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            btnManageAnnotations.Enabled = false;
-            btnManageAnnotations.Name = "btnManageAnnotations";
-            btnManageAnnotations.Size = new Size(62, 33);
-            btnManageAnnotations.Text = "Verwalten";
-            btnManageAnnotations.ToolTipText = "Anmerkungen verwalten (Strg+Umschalt+T)";
-            btnManageAnnotations.Click += BtnManageAnnotations_Click;
-            // 
             // statusStrip
             // 
             statusStrip.AllowDrop = true;
@@ -686,7 +683,7 @@
             // 
             viewerStrip.AutoSize = false;
             viewerStrip.GripStyle = ToolStripGripStyle.Hidden;
-            viewerStrip.Items.AddRange(new ToolStripItem[] { btnSidebar, toolStripSeparatorV1, btnUndo, btnHighlight, ddbHighlight, btnDraw, ddbInk, btnErase, toolStripSeparatorV5, btnFreeText, btnComment, btnStamp, btnManageAnnotations, labelViewerSpacer, textPage, labelPageCount, toolStripSeparatorV2, btnZoomOut, comboZoom, btnZoomIn, btnFitWidth, btnTwoPage, toolStripSeparatorV3, btnRotateLeft, btnRotateRight, ddbRotate, btnCloseDocument, toolStripSeparatorV6, btnFullScreen, toolStripSeparatorV4, btnSaveAs, btnSaveDocument, toolStripSeparatorV7, btnSearch, btnSearchClose, btnSearchNext, btnSearchPrev, labelMatches, btnWholeWord, btnMatchCase, textSearch });
+            viewerStrip.Items.AddRange(new ToolStripItem[] { btnSidebar, toolStripSeparatorV1, btnUndo, btnHighlight, ddbHighlight, btnDraw, ddbInk, btnErase, toolStripSeparatorV5, btnFreeText, btnComment, btnStamp, labelViewerSpacer, textPage, labelPageCount, toolStripSeparatorV2, btnZoomOut, comboZoom, btnZoomIn, btnFitWidth, btnTwoPage, toolStripSeparatorV3, btnRotateLeft, btnRotateRight, ddbRotate, btnCloseDocument, toolStripSeparatorV6, btnFullScreen, toolStripSeparatorV4, btnSaveAs, btnSaveDocument, toolStripSeparatorV7, btnSearch, btnSearchClose, btnSearchNext, btnSearchPrev, labelMatches, btnWholeWord, btnMatchCase, textSearch });
             viewerStrip.Location = new Point(0, 61);
             viewerStrip.Name = "viewerStrip";
             viewerStrip.Padding = new Padding(0, 4, 1, 0);
@@ -924,7 +921,7 @@
             btnCloseDocument.DisplayStyle = ToolStripItemDisplayStyle.Text;
             btnCloseDocument.Enabled = false;
             btnCloseDocument.Name = "btnCloseDocument";
-            btnCloseDocument.Size = new Size(23, 19);
+            btnCloseDocument.Size = new Size(23, 33);
             btnCloseDocument.Text = "×";
             btnCloseDocument.ToolTipText = "Dokument schließen (Strg+W)";
             btnCloseDocument.Click += BtnCloseDocument_Click;
@@ -940,7 +937,7 @@
             btnFullScreen.Alignment = ToolStripItemAlignment.Right;
             btnFullScreen.DisplayStyle = ToolStripItemDisplayStyle.Text;
             btnFullScreen.Name = "btnFullScreen";
-            btnFullScreen.Size = new Size(23, 19);
+            btnFullScreen.Size = new Size(23, 33);
             btnFullScreen.Text = "⛶";
             btnFullScreen.ToolTipText = "PDF im Vollbildmodus anzeigen (F11)";
             btnFullScreen.Click += BtnFullScreen_Click;
@@ -1090,6 +1087,7 @@
             // 
             panelSidebarContent.Controls.Add(thumbnailGrid);
             panelSidebarContent.Controls.Add(outlineView);
+            panelSidebarContent.Controls.Add(annotationPanel);
             panelSidebarContent.Dock = DockStyle.Fill;
             panelSidebarContent.Location = new Point(44, 40);
             panelSidebarContent.Name = "panelSidebarContent";
@@ -1216,12 +1214,25 @@
             mnuOutlineLevel3.Text = "Bis Ebene 3 aufklappen";
             mnuOutlineLevel3.Click += MnuOutlineLevel3_Click;
             // 
+            // annotationPanel
+            // 
+            annotationPanel.Dock = DockStyle.Fill;
+            annotationPanel.Location = new Point(0, 0);
+            annotationPanel.Name = "annotationPanel";
+            annotationPanel.Size = new Size(156, 60);
+            annotationPanel.TabIndex = 3;
+            annotationPanel.Visible = false;
+            annotationPanel.EntryActivated += AnnotationPanel_EntryActivated;
+            annotationPanel.EditRequested += AnnotationPanel_EditRequested;
+            annotationPanel.DeleteRequested += AnnotationPanel_DeleteRequested;
+            annotationPanel.DeleteAllRequested += AnnotationPanel_DeleteAllRequested;
+            // 
             // sidebarStrip
             // 
             sidebarStrip.AutoSize = false;
             sidebarStrip.Dock = DockStyle.Left;
             sidebarStrip.GripStyle = ToolStripGripStyle.Hidden;
-            sidebarStrip.Items.AddRange(new ToolStripItem[] { btnSideThumbnails, btnSideBookmarks });
+            sidebarStrip.Items.AddRange(new ToolStripItem[] { btnSideThumbnails, btnSideBookmarks, btnSideAnnotations });
             sidebarStrip.LayoutStyle = ToolStripLayoutStyle.VerticalStackWithOverflow;
             sidebarStrip.Location = new Point(0, 40);
             sidebarStrip.Name = "sidebarStrip";
@@ -1252,6 +1263,18 @@
             btnSideBookmarks.Text = "≡";
             btnSideBookmarks.ToolTipText = "Dokumentstruktur";
             btnSideBookmarks.Click += BtnSideBookmarks_Click;
+            // 
+            // btnSideAnnotations
+            // 
+            btnSideAnnotations.AutoSize = false;
+            btnSideAnnotations.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            btnSideAnnotations.Margin = new Padding(0, 0, 0, 4);
+            btnSideAnnotations.Name = "btnSideAnnotations";
+            btnSideAnnotations.Size = new Size(44, 40);
+            btnSideAnnotations.Text = "✎";
+            btnSideAnnotations.ToolTipText = "Anmerkungen (Strg+Umschalt+T)";
+            btnSideAnnotations.Visible = false;
+            btnSideAnnotations.Click += BtnSideAnnotations_Click;
             // 
             // sidebarHeader
             // 
@@ -1315,19 +1338,6 @@
             pageView.DragDrop += HandleDragDrop;
             pageView.DragEnter += HandleDragEnter;
             pageView.MouseUp += PageView_MouseUp;
-            // 
-            // noteCard
-            // 
-            noteCard.BackColor = Color.Transparent;
-            noteCard.Location = new Point(0, 0);
-            noteCard.Name = "noteCard";
-            noteCard.Size = new Size(231, 136);
-            noteCard.TabIndex = 0;
-            noteCard.Visible = false;
-            noteCard.Committed += NoteCard_Committed;
-            noteCard.EditCanceled += NoteCard_EditCanceled;
-            noteCard.DeleteRequested += NoteCard_DeleteRequested;
-            noteCard.CloseRequested += NoteCard_CloseRequested;
             // 
             // contextMenuPage
             // 
@@ -1410,6 +1420,19 @@
             mnuRemoveAnnotation.Size = new Size(205, 22);
             mnuRemoveAnnotation.Text = "Anmerkung entfernen";
             mnuRemoveAnnotation.Click += MnuRemoveAnnotation_Click;
+            // 
+            // noteCard
+            // 
+            noteCard.BackColor = Color.Transparent;
+            noteCard.Location = new Point(0, 0);
+            noteCard.Name = "noteCard";
+            noteCard.Size = new Size(231, 136);
+            noteCard.TabIndex = 0;
+            noteCard.Visible = false;
+            noteCard.Committed += NoteCard_Committed;
+            noteCard.EditCanceled += NoteCard_EditCanceled;
+            noteCard.DeleteRequested += NoteCard_DeleteRequested;
+            noteCard.CloseRequested += NoteCard_CloseRequested;
             // 
             // printDocument
             // 
@@ -1498,7 +1521,9 @@
         private System.Windows.Forms.ToolStripMenuItem mnuAppendPdf;
         private System.Windows.Forms.ToolStripMenuItem mnuDuplex;
         private System.Windows.Forms.ToolStripMenuItem mnuExtractPages;
-        private ToolStripButton btnManageAnnotations;
+        private ToolStripButton btnSideAnnotations;
+        private PDFLight.Controls.AnnotationPanel annotationPanel;
+        private System.Windows.Forms.Timer annotationRefreshTimer;
         private System.Windows.Forms.ToolStripMenuItem mnuRemoveBookmarks;
         private System.Windows.Forms.ToolStripMenuItem mnuEditBookmarks;
         private System.Windows.Forms.ToolStripMenuItem mnuManageStamps;

@@ -191,6 +191,11 @@ internal static class Protocol
 
     public const int AnnotText = 1; // FPDF_ANNOT_TEXT – für AnnotAt
 
+    /// <summary>→ int Dok, int Seite ← int Anzahl, dann je Anmerkung int Nummer, int Art (FPDF_ANNOT_*), Zeichenfolge Autor (/T),
+    /// Zeichenfolge PDF-Datum (/M), Zeichenfolge Text (/Contents), int Farbe (0xRRGGBB), bool Farbe vorhanden, float links, oben,
+    /// rechts, unten als Anteil der angezeigten Seite. Für die Anmerkungsliste der Seitenleiste (ohne Links, Popups, Formularfelder).</summary>
+    public const byte Annotations = 45;
+
     // ================================================================== Umrechnung
 
     /// <summary>→ int Dok, int Seite, int Seitenbreite, int Seitenhöhe, int x, int y ← double x, double y: die Stelle in PDF-Koordinaten

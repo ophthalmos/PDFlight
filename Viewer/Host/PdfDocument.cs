@@ -904,8 +904,9 @@ internal sealed unsafe class PdfDocument : IDisposable
         return Math.Sqrt(cx * cx + cy * cy);
     }
 
-    /// <summary>Entfernt eine Textmarkierung, Zeichnung, einen Stempel oder Freitext (Nummer aus <see cref="MarkupAt"/>, <see cref="InkAt"/> bzw.
-    /// <see cref="AnnotAt"/>) samt angehängtem Popup – das bliebe sonst verwaist auf der Seite; andere Anmerkungsarten bleiben unberührt.</summary>
+    /// <summary>Entfernt eine Anmerkung (Nummer aus <see cref="MarkupAt"/>, <see cref="InkAt"/>, <see cref="AnnotAt"/> oder der Liste
+    /// <see cref="Annotations"/>) samt angehängtem Popup – das bliebe sonst verwaist auf der Seite. Links, Formularfelder und Popups selbst
+    /// bleiben unberührt (seit 15.10.2026 alle Arten der Liste, vorher nur Markierungen, Zeichnungen, Stempel, Freitext und Notizen).</summary>
     public bool RemoveMarkup(int index, int number)
     {
         var page = GetPage(index).Page;
@@ -924,7 +925,7 @@ internal sealed unsafe class PdfDocument : IDisposable
             }
         }
         finally { Pdfium.PageCloseAnnot(annot); }
-        if (subtype is not ((>= Pdfium.AnnotHighlight and <= Pdfium.AnnotStrikeOut) or Pdfium.AnnotInk or Pdfium.AnnotStamp or Pdfium.AnnotFreeText or Pdfium.AnnotText)) { return false; }
+        if (!IsListedSubtype(subtype)) { return false; } // Links, Formularfelder und Popups nie – sie gehören nicht zu den Anmerkungen der Liste
         if (popup > number && Pdfium.PageRemoveAnnot(page, popup) == 0) { popup = -1; } // die höhere Nummer zuerst – sonst rückte die andere nach vorn
         if (Pdfium.PageRemoveAnnot(page, number) == 0) { return false; }
         if (popup >= 0 && popup < number) { _ = Pdfium.PageRemoveAnnot(page, popup); }
@@ -932,6 +933,49 @@ internal sealed unsafe class PdfDocument : IDisposable
         Events.Invalidate(Id, index, 0, 0, 1, 1);
         Events.Changed(Id);
         return true;
+    }
+
+    // ================================================================== Anmerkungsliste der Seitenleiste (seit 15.10.2026, ersetzt „Anmerkungen verwalten“)
+
+    /// <summary>Arten, die als Anmerkung gelten (FPDF_ANNOT_*): Notiz, Freitext, Linie, Rechteck, Ellipse, Polygon, Polylinie,
+    /// Textmarkierungen, Stempel, Einfügemarke, Zeichnung, Dateianhang, Ton, Schwärzung – nicht Links, Popups, Formularfelder,
+    /// Druckmarken, Wasserzeichen, 3D und Multimedia.</summary>
+    private static bool IsListedSubtype(int subtype) => subtype is (>= 1 and <= 15 and not 2) or 17 or 18 or 28;
+
+    private const int FractionScale = 1_000_000; // Lage als Anteil der Seite: PageToDevice auf eine gedachte Seite dieser Größe
+
+    /// <summary>Die Anmerkungen einer Seite für die Liste: Nummer (Position in /Annots), Art, Autor (/T), Änderungsdatum (/M, roh),
+    /// Text (/Contents), Farbe (/C, falls vorhanden) und Lage als Anteil der angezeigten Seite (0…1, Drehung berücksichtigt). Im
+    /// Original ausgeblendete fehlen – außer denen, die nur das Verschieben gerade ausblendet.</summary>
+    public List<(int Number, int Subtype, string Author, string Modified, string Contents, uint Color, bool HasColor, float Left, float Top, float Right, float Bottom)> Annotations(int index)
+    {
+        var page = GetPage(index).Page;
+        List<(int, int, string, string, string, uint, bool, float, float, float, float)> list = [];
+        var count = Pdfium.PageGetAnnotCount(page);
+        for (var i = 0; i < count; i++)
+        {
+            var annot = Pdfium.PageGetAnnot(page, i);
+            if (annot == 0) { continue; }
+            try
+            {
+                var subtype = Pdfium.AnnotGetSubtype(annot);
+                if (!IsListedSubtype(subtype)) { continue; }
+                if ((Pdfium.AnnotGetFlags(annot) & Pdfium.AnnotFlagHidden) != 0 && !hiddenAnnots.ContainsKey((index, i))) { continue; }
+                var hasColor = Pdfium.AnnotGetColor(annot, Pdfium.AnnotColor, out var r, out var g, out var b, out _) != 0;
+                var (left, top, right, bottom) = (0f, 0f, 0f, 0f);
+                if (Pdfium.AnnotGetRect(annot, out var rect) != 0)
+                {
+                    _ = Pdfium.PageToDevice(page, 0, 0, FractionScale, FractionScale, ViewRotation, rect.Left, rect.Top, out var x1, out var y1);
+                    _ = Pdfium.PageToDevice(page, 0, 0, FractionScale, FractionScale, ViewRotation, rect.Right, rect.Bottom, out var x2, out var y2);
+                    (left, right) = (Math.Min(x1, x2) / (float)FractionScale, Math.Max(x1, x2) / (float)FractionScale);
+                    (top, bottom) = (Math.Min(y1, y2) / (float)FractionScale, Math.Max(y1, y2) / (float)FractionScale);
+                }
+                list.Add((i, subtype, GetString(annot, "T"), GetString(annot, "M"), GetString(annot, "Contents"),
+                    hasColor ? (r & 0xFF) << 16 | (g & 0xFF) << 8 | (b & 0xFF) : 0, hasColor, left, top, right, bottom));
+            }
+            finally { Pdfium.PageCloseAnnot(annot); }
+        }
+        return list;
     }
 
     // ================================================================== Speichern und Druckkopie

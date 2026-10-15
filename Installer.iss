@@ -22,9 +22,8 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 AppPublisher=Wilhelm Happe
 AppCopyright=© 2026 W. Happe
-; seit PDFsharp 6.5 (AGPL-3.0) unterliegt das ausgelieferte Programm als Ganzes der AGPL – die Lizenzseite zeigt den Hinweis dazu,
-; MIT-Lizenz und AGPL-Text liegen daneben im Programmordner (14.10.2026)
-LicenseFile=NOTICE.txt
+; seit 15.10.2026 steht PDFlight unter der AGPL-3.0 (wie PDFsharp ab 6.5, vorher MIT); NOTICE.txt nennt die Fremdkomponenten
+LicenseFile=LICENSE
 UsePreviousAppDir=yes
 DefaultDirName={autopf}\{#appName}
 DefaultGroupName={#appName}
@@ -78,7 +77,6 @@ Name: desktopicon; Description: "{cm:DesktopIcon}"; Flags: unchecked
 ; Excludes: Altlasten aus Builds bis 1.0.3, falls der Release-Ordner nicht geleert wurde (WebView2, Adobe-Ansicht)
 Source: "{#releaseDir}\*"; Excludes: "*.pdb,Microsoft.Web.WebView2.*,\runtimes\*,\adobe\*,adobe-clientid*.txt"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
-Source: "LICENSE-AGPL-3.0.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "NOTICE.txt"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]

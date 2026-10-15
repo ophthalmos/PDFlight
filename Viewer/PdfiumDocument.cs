@@ -365,6 +365,23 @@ internal sealed class PdfiumDocument : IDisposable
             return found ? (text, author, rect) : null;
         });
 
+    /// <summary>Die Anmerkungen einer Seite für die Liste der Seitenleiste (ohne Links, Popups, Formularfelder); nach einem Absturz leer.</summary>
+    public Task<List<AnnotationEntry>> AnnotationsAsync(int index) =>
+        Query<List<AnnotationEntry>>([], Protocol.Annotations, w => w.Write(index), r =>
+        {
+            var count = r.ReadInt32();
+            List<AnnotationEntry> list = new(Math.Clamp(count, 0, 10_000));
+            for (var i = 0; i < count; i++)
+            {
+                var (number, subtype, author, modified, contents) = (r.ReadInt32(), r.ReadInt32(), r.ReadString(), r.ReadString(), r.ReadString());
+                var (color, hasColor) = (r.ReadUInt32(), r.ReadBoolean());
+                var bounds = RectangleF.FromLTRB(r.ReadSingle(), r.ReadSingle(), r.ReadSingle(), r.ReadSingle());
+                list.Add(new AnnotationEntry(index, number, subtype, author, ParsePdfDate(modified), contents,
+                    hasColor ? Color.FromArgb((int)(0xFF000000 | color)) : null, bounds));
+            }
+            return list;
+        });
+
     /// <summary>Ändert den Text eines Kommentars.</summary>
     public Task<bool> SetNoteTextAsync(int index, int number, string text) =>
         Command(Protocol.SetNoteText, w => { w.Write(index); w.Write(number); w.Write(text); w.Write(PdfDateNow()); }, r => r.ReadBoolean());

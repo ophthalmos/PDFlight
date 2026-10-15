@@ -148,9 +148,10 @@ internal static class TaskDlg
         using var icon32 = icon == null ? null : new Icon(icon, 32, 32); // sonst nimmt der TaskDialog die 16-px-Variante des Fenster-Icons
         var indent = new string(' ', 14);
         var foot = $"{indent}© {buildDate:yyyy} Wilhelm Happe · Version {threeVersion} ({buildDate:d.M.yyyy})" +
+            $"\n{indent}{Lng.T("Lizenz: GNU AGPL 3.0, ohne Gewährleistung")}" + // die AGPL verlangt diesen Hinweis in der Bedienoberfläche (§ 5d); seit 15.10.2026, vorher MIT
             $"\n{indent}PDFium {pdfium}" +
-            $"\n{indent}PDFsharp {typeof(PdfSharp.Pdf.PdfDocument).Assembly.GetName().Version?.ToString(3)} (AGPL-3.0)" + // seit 6.5 – das Programm als Ganzes unterliegt der AGPL (NOTICE.txt)
-            $"\n{indent}<a href=\"https://www.netradio.info/pdf/\">www.netradio.info</a> · <a href=\"https://github.com/ophthalmos/PDFlight\">{Lng.T("Quelltext auf GitHub")}</a>";
+            $"\n{indent}PDFsharp {typeof(PdfSharp.Pdf.PdfDocument).Assembly.GetName().Version?.ToString(3)}" +
+            $"\n{indent}<a href=\"https://www.netradio.info/pdf/\">www.netradio.info/pdf</a> • <a href=\"https://github.com/ophthalmos/PDFlight\">{Lng.T("Quelltext auf GitHub")}</a>";
         var initialPage = new TaskDialogPage()
         {
             Caption = Lng.T("Über") + " " + Application.ProductName,
@@ -302,7 +303,7 @@ internal static class TaskDlg
         ("Strg+Umschalt+P", "mit dem Druckdialog von Windows drucken", null),
         ("Strg+Umschalt+R / L", "aktuelle Seite rechts / links drehen", null),
         ("Strg+Umschalt+S", "unter neuem Namen speichern", null),
-        ("Strg+Umschalt+T", "Anmerkungen verwalten (bearbeiten, löschen)", null),
+        ("Strg+Umschalt+T", "Anmerkungen in der Seitenleiste anzeigen", null),
         // Strg + Umschalt + Sondertaste
         ("Strg+Umschalt+Entf", "Datei in den Papierkorb verschieben", null),
         ("Strg+Umschalt+← / →", "vorherige / nächste Datei des Ordners anzeigen", null),
