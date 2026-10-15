@@ -156,7 +156,7 @@ public partial class AnnotationPanel : UserControl
     {
         var shown = all.Where(Matches).ToList();
         var culture = CultureInfo.CurrentCulture;
-        IEnumerable<AnnotationGroup> groups = sort switch
+        var groups = sort switch
         {
             SortOrder.Date => shown
                 .GroupBy(e => e.Modified?.Date)

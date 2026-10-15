@@ -210,7 +210,7 @@ internal static partial class PdfEditService
         var y = Math.Clamp(Math.Min(rect.Y1, rect.Y2) + dy, box.Y1, Math.Max(box.Y1, box.Y2 - height));
         annotation.Elements.SetRectangle("/Rect", new PdfRectangle(new XRect(x, y, width, height)));
         // die Popup-Notiz eines Kommentars (Sumatra, Acrobat) wandert mit – um denselben Versatz, sie darf neben der Seite liegen
-        if ((annotation.Elements.GetObject("/Popup") as PdfDictionary)?.Elements is { } popup && popup.ContainsKey("/Rect"))
+        if (annotation.Elements.GetObject("/Popup") is PdfDictionary { Elements: { } popup } && popup.ContainsKey("/Rect"))
         {
             var (shiftX, shiftY) = (x - Math.Min(rect.X1, rect.X2), y - Math.Min(rect.Y1, rect.Y2));
             var old = popup.GetRectangle("/Rect");

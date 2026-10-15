@@ -78,7 +78,10 @@ internal partial class StaticHeaderListView : ListView
     /// selbst (weiß), OwnerDraw erreicht sie nicht.</summary>
     private sealed class HeaderWindow : NativeWindow
     {
-        public HeaderWindow(nint handle) => AssignHandle(handle);
+        public HeaderWindow(nint handle)
+        {
+            AssignHandle(handle);
+        }
 
         protected override void WndProc(ref Message m)
         {

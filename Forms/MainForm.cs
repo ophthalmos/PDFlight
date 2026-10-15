@@ -4200,10 +4200,7 @@ public partial class MainForm : Form
         btnSidebarClose.DisplayStyle = btnSidebarClose.Image != null ? ToolStripItemDisplayStyle.Image : ToolStripItemDisplayStyle.Text;
     }
 
-    private void BtnSidebar_Click(object? sender, EventArgs e)
-    {
-        ToggleSidebar();
-    }
+    private void BtnSidebar_Click(object? sender, EventArgs e) => ToggleSidebar();
 
     private void BtnSidebarClose_Click(object? sender, EventArgs e)
     {
@@ -4223,10 +4220,7 @@ public partial class MainForm : Form
         sidebarUserBookmarks = true;
     }
 
-    private void ThumbnailGrid_PageActivated(object? sender, int page)
-    {
-        pageView.GoToPage(page);
-    }
+    private void ThumbnailGrid_PageActivated(object? sender, int page) => pageView.GoToPage(page);
 
     /// <summary>Kontextmenü der Miniaturen (Wunsch vom 05.10.2026, wie Acrobat): die Seitenbefehle des Bearbeiten-Menüs. Der Rechtsklick
     /// hat die Seite schon angezeigt (<see cref="ThumbnailGrid"/>), die Befehle wirken wie im Menü auf die angezeigte Seite – gesperrt wie dort.</summary>

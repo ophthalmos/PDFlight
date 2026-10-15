@@ -138,8 +138,8 @@ internal static class Program
                     {
                         w.Write(note != null);
                         w.Write(note?.Text ?? string.Empty);
-                        var rect = note?.Rect ?? (0, 0, 0, 0);
-                        w.Write(rect.X); w.Write(rect.Y); w.Write(rect.Width); w.Write(rect.Height);
+                        var (X, Y, Width, Height) = note?.Rect ?? (0, 0, 0, 0);
+                        w.Write(X); w.Write(Y); w.Write(Width); w.Write(Height);
                         w.Write(note?.Author ?? string.Empty);
                     };
                 }
@@ -150,10 +150,10 @@ internal static class Program
                     return w =>
                     {
                         w.Write(annotations.Count);
-                        foreach (var a in annotations)
+                        foreach (var (Number, Subtype, Author, Modified, Contents, Color, HasColor, Left, Top, Right, Bottom) in annotations)
                         {
-                            w.Write(a.Number); w.Write(a.Subtype); w.Write(a.Author); w.Write(a.Modified); w.Write(a.Contents);
-                            w.Write(a.Color); w.Write(a.HasColor); w.Write(a.Left); w.Write(a.Top); w.Write(a.Right); w.Write(a.Bottom);
+                            w.Write(Number); w.Write(Subtype); w.Write(Author); w.Write(Modified); w.Write(Contents);
+                            w.Write(Color); w.Write(HasColor); w.Write(Left); w.Write(Top); w.Write(Right); w.Write(Bottom);
                         }
                     };
                 }

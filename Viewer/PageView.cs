@@ -511,7 +511,7 @@ internal sealed class PageView : ScrollableControl
             else { RequestPreview(page); }
             DrawTiles(g, page, rect, viewport);
             DrawImageSelection(g, page, rect);
-            DrawRevealedAnnotation(g, page, rect);
+            DrawRevealedAnnotation(g, page);
             DrawHits(g, page, rect);
             DrawSelection(g, page, rect);
             if (page == currentPage && ShowCurrentPageHighlight)
@@ -770,14 +770,14 @@ internal sealed class PageView : ScrollableControl
     private static ImageAttributes CreateImageSelectionTint()
     {
         var attributes = new ImageAttributes();
-        attributes.SetColorMatrix(new ColorMatrix(new[]
-        {
-            new[] { 153f / 255, 0, 0, 0, 0 },
-            new[] { 0, 193f / 255, 0, 0, 0 },
-            new[] { 0, 0, 219f / 255, 0, 0 },
-            new[] { 0f, 0, 0, 1, 0 },
-            new[] { 0f, 0, 0, 0, 1 },
-        }));
+        attributes.SetColorMatrix(new ColorMatrix(
+        [
+            [153f / 255, 0, 0, 0, 0],
+            [0, 193f / 255, 0, 0, 0],
+            [0, 0, 219f / 255, 0, 0],
+            [0f, 0, 0, 1, 0],
+            [0f, 0, 0, 0, 1],
+        ]));
         return attributes;
     }
 
@@ -853,7 +853,7 @@ internal sealed class PageView : ScrollableControl
     }
 
     /// <summary>Rahmen in der Auswahlfarbe von Windows um die angesprungene Anmerkung.</summary>
-    private void DrawRevealedAnnotation(Graphics g, int page, Rectangle clientRect)
+    private void DrawRevealedAnnotation(Graphics g, int page)
     {
         if (revealedAnnotation?.Page != page) { return; }
         var box = RevealedClientRect();

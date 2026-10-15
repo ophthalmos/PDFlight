@@ -345,7 +345,7 @@ internal sealed class AnnotationListView : ScrollableControl
     }
 
     /// <summary>Rundes Symbol in der Farbe der Anmerkung (ohne Farbe grau), die Glyphe hell oder dunkel – je nachdem, was sich abhebt.</summary>
-    private void PaintIcon(Graphics g, Rectangle icon, AnnotationEntry entry)
+    private static void PaintIcon(Graphics g, Rectangle icon, AnnotationEntry entry)
     {
         var fill = entry.Color ?? Color.FromArgb(110, 110, 110);
         var luminance = (0.299 * fill.R + 0.587 * fill.G + 0.114 * fill.B) / 255;
