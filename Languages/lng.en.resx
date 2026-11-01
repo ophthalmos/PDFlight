@@ -29,7 +29,9 @@
   <data name="Kleine Symbole und Icons, ohne Text" xml:space="preserve"><value>Small icons and program icons, no text</value></data>
   <data name="Nur Text" xml:space="preserve"><value>Text only</value></data>
   <data name="Vollständigen Dateipfad in der Titelleiste an&amp;zeigen" xml:space="preserve"><value>Show the full file path in the title &amp;bar</value></data>
-  <data name="Programm mit 2× &amp;Esc beenden (Umschalt+Esc: sofort)" xml:space="preserve"><value>Close program with double &amp;Esc (Shift+Esc: immediately)</value></data>
+  <data name="&amp;Esc schließt das Dokument, dann das Programm (Umschalt+Esc: sofort)" xml:space="preserve"><value>&amp;Esc closes the document, then the program (Shift+Esc: immediately)</value></data>
+  <data name="Esc / Umschalt+Esc" xml:space="preserve"><value>Esc / Shift+Esc</value></data>
+  <data name="Dokument schließen, dann Programm beenden / sofort beenden (Option)" xml:space="preserve"><value>close document, then program / quit immediately (option)</value></data>
   <data name="Zuletzt geöffnete &amp;Datei beim Start laden" xml:space="preserve"><value>Load most recently opened &amp;file at startup</value></data>
   <data name="Die Liste der zuletzt verwendeten Ordner leeren?" xml:space="preserve"><value>Clear the list of recently used folders?</value></data>
   <data name="Die Sprachänderung wird nach einem Neustart des Programms wirksam." xml:space="preserve"><value>The language change takes effect after restarting the program.</value></data>
@@ -158,7 +160,6 @@ extract pages, properties (shortcuts in the menu)</value></data>
   <data name="Gehe zu Seite (Zahl tippen + Enter)" xml:space="preserve"><value>Go to page (type number + Enter)</value></data>
   <data name="Strg+1 … 9" xml:space="preserve"><value>Ctrl+1 … 9</value></data>
   <data name="Bild ↑ / Bild ↓" xml:space="preserve"><value>PgUp / PgDn</value></data>
-  <data name="2× Esc / Umschalt+Esc" xml:space="preserve"><value>2× Esc / Shift+Esc</value></data>
   <data name="Strg+Eingabe" xml:space="preserve"><value>Ctrl+Enter</value></data>
   <data name="Eingabe" xml:space="preserve"><value>Enter</value></data>
   <data name="Entf" xml:space="preserve"><value>Del</value></data>
@@ -239,6 +240,7 @@ Both files must have the same number of pages.</value></data>
   <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Repeat:</value></data>
   <data name="&amp;Kennwort:" xml:space="preserve"><value>&amp;Password:</value></data>
   <data name="Das Kennwort ist falsch." xml:space="preserve"><value>The password is incorrect.</value></data>
+  <data name="Vergewissere dich, dass nicht versehentlich die Feststelltaste für Großschreibung aktiviert wurde und versuche es erneut." xml:space="preserve"><value>Make sure Caps Lock isn't turned on by accident and try again.</value></data>
   <data name="Datei mit den Rückseiten wählen" xml:space="preserve"><value>Select the file with the back pages</value></data>
   <data name="Bitte wähle eine andere Datei als die angezeigte." xml:space="preserve"><value>Please select a different file than the one displayed.</value></data>
   <data name="Die Seitenzahlen passen nicht zusammen." xml:space="preserve"><value>The page counts do not match.</value></data>
@@ -301,7 +303,6 @@ the latest version.</value></data>
   <data name="im Dokument suchen" xml:space="preserve"><value>search in the document</value></data>
   <data name="Dokument drucken" xml:space="preserve"><value>print document</value></data>
   <data name="Vollbild ein/aus" xml:space="preserve"><value>full screen on/off</value></data>
-  <data name="Programm beenden (Option)" xml:space="preserve"><value>close program (option)</value></data>
 
   <!-- Umbenennen-Dialog -->
   <data name="&amp;Neuer Dateiname:" xml:space="preserve"><value>&amp;New file name:</value></data>
@@ -421,6 +422,25 @@ the latest version.</value></data>
   <data name="»{0}« aus den Favoriten entfernen" xml:space="preserve"><value>Remove “{0}” from favorites</value></data>
   <data name="Nicht mehr vorhandene Favoriten entfernen" xml:space="preserve"><value>Remove favorites that no longer exist</value></data>
   <data name="(keine Favoriten)" xml:space="preserve"><value>(no favorites)</value></data>
+  <data name="&amp;Im Ordner anzeigen" xml:space="preserve"><value>Show &amp;in folder</value></data>
+  <data name="Aus den Favoriten &amp;entfernen" xml:space="preserve"><value>R&amp;emove from favorites</value></data>
+  <data name="Aus der &amp;Liste entfernen" xml:space="preserve"><value>Remove from the &amp;list</value></data>
+  <data name="Die Liste der zuletzt geöffneten Dateien leeren?" xml:space="preserve"><value>Clear the list of recently opened files?</value></data>
+  <data name="Dokument öffnen…" xml:space="preserve"><value>Open document…</value></data>
+  <data name="Liste leeren ({0})" xml:space="preserve"><value>Clear list ({0})</value></data>
+  <data name="Zu den Fa&amp;voriten hinzufügen…" xml:space="preserve"><value>Add to fa&amp;vorites…</value></data>
+  <data name="Zuletzt geöffnet" xml:space="preserve"><value>Recently opened</value></data>
+  <data name="Suche leeren" xml:space="preserve"><value>Clear search</value></data>
+  <data name="&amp;Zusammenführen" xml:space="preserve"><value>&amp;Merge</value></data>
+  <data name="Aus „Zuletzt geöffnet“ entfernen" xml:space="preserve"><value>Remove from “Recently opened”</value></data>
+  <data name="Auswahl aufheben" xml:space="preserve"><value>Clear selection</value></data>
+  <data name="Die Dateien zu einer neuen Sammelmappe zusammenführen" xml:space="preserve"><value>Merge the files into a new combined PDF</value></data>
+  <data name="Geöffnet" xml:space="preserve"><value>Opened</value></data>
+  <data name="Größe" xml:space="preserve"><value>Size</value></data>
+  <data name="Jede Datei in einem eigenen Fenster öffnen" xml:space="preserve"><value>Open each file in its own window</value></data>
+  <data name="Zusammenführen – Reihenfolge festlegen" xml:space="preserve"><value>Merge – set the order</value></data>
+  <data name="Zusammenführen…" xml:space="preserve"><value>Merge…</value></data>
+  <data name="{0} ausgewählt" xml:space="preserve"><value>{0} selected</value></data>
   <data name="Strg+D" xml:space="preserve"><value>Ctrl+D</value></data>
   <data name="Datei zu den Favoriten hinzufügen / entfernen (Option)" xml:space="preserve"><value>add the file to the favorites / remove it (option)</value></data>
   <data name="Die Datei wurde zu den Favoriten hinzugefügt." xml:space="preserve"><value>The file was added to the favorites.</value></data>
@@ -793,7 +813,8 @@ or press Shift+F10.</value></data>
   <data name="Seite verschieben…" xml:space="preserve"><value>Move page…</value></data>
   <data name="„{0}“ wird nicht geöffnet." xml:space="preserve"><value>“{0}” will not be opened.</value></data>
   <data name="„{0}“ öffnen?" xml:space="preserve"><value>Open “{0}”?</value></data>
-  <data name="Anhänge können Makros oder Schadcode enthalten. Öffne die Datei nur, wenn die PDF aus einer sicheren Quelle stammt." xml:space="preserve"><value>Attachments can contain macros or malware. Only open the file if the PDF comes from a trusted source.</value></data>
+  <data name="Anhänge können schädliche Programme, Makros oder Viren enthalten." xml:space="preserve"><value>Attachments can contain malicious programs, macros or viruses.</value></data>
+  <data name="Öffne die Datei nur, wenn du sie von einer sicheren Quelle erhalten hast." xml:space="preserve"><value>Only open the file if you received it from a trusted source.</value></data>
   <data name="Die eingebettete Datei konnte nicht geöffnet werden." xml:space="preserve"><value>The embedded file could not be opened.</value></data>
   <data name="Programme, Skripte und ähnliche Dateien öffnet PDFlight aus Sicherheitsgründen nicht. Möchtest du die Datei stattdessen speichern?" xml:space="preserve"><value>For security reasons, PDFlight does not open programs, scripts and similar files. Do you want to save the file instead?</value></data>
   <data name="Ö&amp;ffnen" xml:space="preserve"><value>&amp;Open</value></data>
@@ -943,4 +964,6 @@ Without it, the file can no longer be displayed.</value></data>
   <data name="1 Lesezeichen" xml:space="preserve"><value>1 bookmark</value></data>
   <data name="{0} Lesezeichen" xml:space="preserve"><value>{0} bookmarks</value></data>
   <data name="Lesezeichen bearbeiten… (Strg+F2)" xml:space="preserve"><value>Edit bookmarks… (Ctrl+F2)</value></data>
+  <data name="Bis Ebene {0}" xml:space="preserve"><value>To level {0}</value></data>
+  <data name="Bis Ebene aufklappen" xml:space="preserve"><value>Expand to level</value></data>
 </root>

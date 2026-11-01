@@ -149,8 +149,8 @@ internal static class TaskDlg
         var indent = new string(' ', 14);
         var foot = $"{indent}© {buildDate:yyyy} Wilhelm Happe · Version {threeVersion} ({buildDate:d.M.yyyy})" +
             $"\n{indent}{Lng.T("Lizenz: GNU AGPL 3.0, ohne Gewährleistung")}" + // die AGPL verlangt diesen Hinweis in der Bedienoberfläche (§ 5d); seit 15.10.2026, vorher MIT
-            $"\n{indent}PDFium {pdfium}" +
-            $"\n{indent}PDFsharp {typeof(PdfSharp.Pdf.PdfDocument).Assembly.GetName().Version?.ToString(3)}" +
+            $"\n{indent}<a href=\"https://pdfium.googlesource.com/pdfium/\">PDFium</a> {pdfium}" + // Namen als Links (Wunsch vom 17.10.2026)
+            $"\n{indent}<a href=\"https://www.pdfsharp.com/PDFsharp\">PDFsharp</a> {typeof(PdfSharp.Pdf.PdfDocument).Assembly.GetName().Version?.ToString(3)}" +
             $"\n{indent}<a href=\"https://www.netradio.info/pdf/\">www.netradio.info/pdf</a> • <a href=\"https://github.com/ophthalmos/PDFlight\">{Lng.T("Quelltext auf GitHub")}</a>";
         var initialPage = new TaskDialogPage()
         {
@@ -310,7 +310,7 @@ internal static class TaskDlg
         // Übrige
         ("Bild ↑ / Bild ↓", "im Dokument blättern", null),
         ("Alt+Enter", "Windows-Dateieigenschaften", null),
-        ("2× Esc / Umschalt+Esc", "Programm beenden (Option)", null),
+        ("Esc / Umschalt+Esc", "Dokument schließen, dann Programm beenden / sofort beenden (Option)", null),
     ];
 
     /// <summary>Hilfedatei (F1 und Hilfe-Menü): zeigt die PDF aus dem Downloads-Ordner in einer neuen

@@ -327,7 +327,8 @@ internal static class Program
             case Protocol.AddHighlight:
                 {
                     var (id, page, start, count, color) = (input.ReadInt32(), input.ReadInt32(), input.ReadInt32(), input.ReadInt32(), input.ReadInt32());
-                    var added = Document(id).AddHighlight(page, start, count, (uint)color);
+                    var (author, modified) = (input.ReadString(), input.ReadString());
+                    var added = Document(id).AddHighlight(page, start, count, (uint)color, author, modified);
                     return w => w.Write(added);
                 }
             case Protocol.PagePoint:
@@ -351,7 +352,8 @@ internal static class Program
                     if (count is < 1 or > 100_000) { throw new InvalidOperationException("Ungültige Punktzahl."); }
                     var points = new (int X, int Y)[count];
                     for (var i = 0; i < count; i++) { points[i] = (input.ReadInt32(), input.ReadInt32()); }
-                    var added = Document(id).AddInk(page, pageWidth, pageHeight, (uint)color, width, points);
+                    var (author, modified) = (input.ReadString(), input.ReadString());
+                    var added = Document(id).AddInk(page, pageWidth, pageHeight, (uint)color, width, points, author, modified);
                     return w => w.Write(added);
                 }
             case Protocol.SetAnnotHidden:
@@ -371,7 +373,8 @@ internal static class Program
                 {
                     var (id, page, pageWidth, pageHeight) = (input.ReadInt32(), input.ReadInt32(), input.ReadInt32(), input.ReadInt32());
                     var (x, y) = (input.ReadInt32(), input.ReadInt32());
-                    var number = Document(id).InkAt(page, pageWidth, pageHeight, x, y);
+                    var slack = input.ReadInt32();
+                    var number = Document(id).InkAt(page, pageWidth, pageHeight, x, y, slack);
                     return w => w.Write(number);
                 }
             case Protocol.RemoveMarkup:

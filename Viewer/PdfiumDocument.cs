@@ -333,7 +333,7 @@ internal sealed class PdfiumDocument : IDisposable
         });
 
     public Task<bool> AddHighlightAsync(int index, int start, int count, int color = AcrobatYellow) =>
-        Query(false, Protocol.AddHighlight, w => { w.Write(index); w.Write(start); w.Write(count); w.Write(color); }, r => r.ReadBoolean());
+        Query(false, Protocol.AddHighlight, w => { w.Write(index); w.Write(start); w.Write(count); w.Write(color); w.Write(Environment.UserName); w.Write(PdfDateNow()); }, r => r.ReadBoolean());
 
     /// <summary>Nummer der Textmarkierung an einer Stelle der Seite (Seitenpixel), -1 = keine.</summary>
     /// <summary>Eine Stelle der Seite (Seitenpixel) in PDF-Koordinaten der Seite (Punkt, Ursprung unten links); null nach einem Absturz.</summary>
@@ -426,6 +426,7 @@ internal sealed class PdfiumDocument : IDisposable
         {
             w.Write(index); w.Write(pageWidth); w.Write(pageHeight); w.Write(color); w.Write(width); w.Write(points.Count);
             foreach (var p in points) { w.Write(p.X); w.Write(p.Y); }
+            w.Write(Environment.UserName); w.Write(PdfDateNow()); // Autor und Datum wie Acrobat (seit 16.10.2026)
         }, r => r.ReadBoolean());
 
     /// <summary>Blendet eine Anmerkung nur in der Anzeige aus bzw. wieder ein – die Datei bleibt unberührt.</summary>
@@ -435,9 +436,9 @@ internal sealed class PdfiumDocument : IDisposable
     public Task<int> MarkupAtAsync(int index, int pageWidth, int pageHeight, Point point) =>
         Query(-1, Protocol.MarkupAt, w => { w.Write(index); w.Write(pageWidth); w.Write(pageHeight); w.Write(point.X); w.Write(point.Y); }, r => r.ReadInt32());
 
-    /// <summary>Oberste Zeichnung (Ink), deren Linie die Stelle (Seitenpixel) trifft; -1 = keine.</summary>
-    public Task<int> InkAtAsync(int index, int pageWidth, int pageHeight, Point point) =>
-        Query(-1, Protocol.InkAt, w => { w.Write(index); w.Write(pageWidth); w.Write(pageHeight); w.Write(point.X); w.Write(point.Y); }, r => r.ReadInt32());
+    /// <summary>Oberste Zeichnung (Ink), deren Linie die Stelle (Seitenpixel) trifft – halbe Strichstärke plus <paramref name="slackPixels"/>; -1 = keine.</summary>
+    public Task<int> InkAtAsync(int index, int pageWidth, int pageHeight, Point point, int slackPixels) =>
+        Query(-1, Protocol.InkAt, w => { w.Write(index); w.Write(pageWidth); w.Write(pageHeight); w.Write(point.X); w.Write(point.Y); w.Write(slackPixels); }, r => r.ReadInt32());
 
     /// <summary>Entfernt eine Textmarkierung oder Zeichnung (Nummer aus <see cref="MarkupAtAsync"/> bzw. <see cref="InkAtAsync"/>).</summary>
     public Task<bool> RemoveMarkupAsync(int index, int number) =>

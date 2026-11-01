@@ -29,7 +29,9 @@
   <data name="Kleine Symbole und Icons, ohne Text" xml:space="preserve"><value>Iconos pequeños y de programas, sin texto</value></data>
   <data name="Nur Text" xml:space="preserve"><value>Solo texto</value></data>
   <data name="Vollständigen Dateipfad in der Titelleiste an&amp;zeigen" xml:space="preserve"><value>Mostrar la ruta completa del archivo en la &amp;barra de título</value></data>
-  <data name="Programm mit 2× &amp;Esc beenden (Umschalt+Esc: sofort)" xml:space="preserve"><value>Cerrar el programa con 2× &amp;Esc (Mayús+Esc: inmediatamente)</value></data>
+  <data name="&amp;Esc schließt das Dokument, dann das Programm (Umschalt+Esc: sofort)" xml:space="preserve"><value>&amp;Esc cierra el documento y luego el programa (Mayús+Esc: al instante)</value></data>
+  <data name="Esc / Umschalt+Esc" xml:space="preserve"><value>Esc / Mayús+Esc</value></data>
+  <data name="Dokument schließen, dann Programm beenden / sofort beenden (Option)" xml:space="preserve"><value>cerrar el documento y luego el programa / al instante (opción)</value></data>
   <data name="Zuletzt geöffnete &amp;Datei beim Start laden" xml:space="preserve"><value>Cargar el último &amp;archivo abierto al iniciar</value></data>
   <data name="Die Liste der zuletzt verwendeten Ordner leeren?" xml:space="preserve"><value>¿Vaciar la lista de carpetas usadas recientemente?</value></data>
   <data name="Die Sprachänderung wird nach einem Neustart des Programms wirksam." xml:space="preserve"><value>El cambio de idioma tendrá efecto tras reiniciar el programa.</value></data>
@@ -158,7 +160,6 @@ extraer páginas, propiedades (atajos en el menú)</value></data>
   <data name="Gehe zu Seite (Zahl tippen + Enter)" xml:space="preserve"><value>Ir a la página (escribir el número + Entrar)</value></data>
   <data name="Strg+1 … 9" xml:space="preserve"><value>Ctrl+1 … 9</value></data>
   <data name="Bild ↑ / Bild ↓" xml:space="preserve"><value>RePág / AvPág</value></data>
-  <data name="2× Esc / Umschalt+Esc" xml:space="preserve"><value>2× Esc / Mayús+Esc</value></data>
   <data name="Strg+Eingabe" xml:space="preserve"><value>Ctrl+Entrar</value></data>
   <data name="Eingabe" xml:space="preserve"><value>Entrar</value></data>
   <data name="Entf" xml:space="preserve"><value>Supr</value></data>
@@ -239,6 +240,7 @@ Ambos archivos deben tener el mismo número de páginas.</value></data>
   <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Repetir:</value></data>
   <data name="&amp;Kennwort:" xml:space="preserve"><value>&amp;Contraseña:</value></data>
   <data name="Das Kennwort ist falsch." xml:space="preserve"><value>La contraseña es incorrecta.</value></data>
+  <data name="Vergewissere dich, dass nicht versehentlich die Feststelltaste für Großschreibung aktiviert wurde und versuche es erneut." xml:space="preserve"><value>Asegúrate de que el bloqueo de mayúsculas no esté activado por error y vuelve a intentarlo.</value></data>
   <data name="Datei mit den Rückseiten wählen" xml:space="preserve"><value>Elegir el archivo con las caras traseras</value></data>
   <data name="Bitte wähle eine andere Datei als die angezeigte." xml:space="preserve"><value>Elige un archivo distinto del mostrado.</value></data>
   <data name="Die Seitenzahlen passen nicht zusammen." xml:space="preserve"><value>Los números de páginas no coinciden.</value></data>
@@ -301,7 +303,6 @@ para instalar la última versión.</value></data>
   <data name="im Dokument suchen" xml:space="preserve"><value>buscar en el documento</value></data>
   <data name="Dokument drucken" xml:space="preserve"><value>imprimir el documento</value></data>
   <data name="Vollbild ein/aus" xml:space="preserve"><value>pantalla completa sí/no</value></data>
-  <data name="Programm beenden (Option)" xml:space="preserve"><value>cerrar el programa (opción)</value></data>
 
   <!-- Umbenennen-Dialog -->
   <data name="&amp;Neuer Dateiname:" xml:space="preserve"><value>&amp;Nuevo nombre de archivo:</value></data>
@@ -421,6 +422,25 @@ para instalar la última versión.</value></data>
   <data name="»{0}« aus den Favoriten entfernen" xml:space="preserve"><value>Quitar «{0}» de favoritos</value></data>
   <data name="Nicht mehr vorhandene Favoriten entfernen" xml:space="preserve"><value>Quitar los favoritos que ya no existen</value></data>
   <data name="(keine Favoriten)" xml:space="preserve"><value>(sin favoritos)</value></data>
+  <data name="&amp;Im Ordner anzeigen" xml:space="preserve"><value>Mostrar en la &amp;carpeta</value></data>
+  <data name="Aus den Favoriten &amp;entfernen" xml:space="preserve"><value>&amp;Quitar de favoritos</value></data>
+  <data name="Aus der &amp;Liste entfernen" xml:space="preserve"><value>Quitar de la &amp;lista</value></data>
+  <data name="Die Liste der zuletzt geöffneten Dateien leeren?" xml:space="preserve"><value>¿Vaciar la lista de archivos abiertos recientemente?</value></data>
+  <data name="Dokument öffnen…" xml:space="preserve"><value>Abrir documento…</value></data>
+  <data name="Liste leeren ({0})" xml:space="preserve"><value>Vaciar lista ({0})</value></data>
+  <data name="Zu den Fa&amp;voriten hinzufügen…" xml:space="preserve"><value>Añadir a fa&amp;voritos…</value></data>
+  <data name="Zuletzt geöffnet" xml:space="preserve"><value>Abiertos recientemente</value></data>
+  <data name="Suche leeren" xml:space="preserve"><value>Borrar la búsqueda</value></data>
+  <data name="&amp;Zusammenführen" xml:space="preserve"><value>&amp;Combinar</value></data>
+  <data name="Aus „Zuletzt geöffnet“ entfernen" xml:space="preserve"><value>Quitar de «Abiertos recientemente»</value></data>
+  <data name="Auswahl aufheben" xml:space="preserve"><value>Anular la selección</value></data>
+  <data name="Die Dateien zu einer neuen Sammelmappe zusammenführen" xml:space="preserve"><value>Combinar los archivos en un nuevo archivo combinado</value></data>
+  <data name="Geöffnet" xml:space="preserve"><value>Abierto</value></data>
+  <data name="Größe" xml:space="preserve"><value>Tamaño</value></data>
+  <data name="Jede Datei in einem eigenen Fenster öffnen" xml:space="preserve"><value>Abrir cada archivo en su propia ventana</value></data>
+  <data name="Zusammenführen – Reihenfolge festlegen" xml:space="preserve"><value>Combinar – establecer el orden</value></data>
+  <data name="Zusammenführen…" xml:space="preserve"><value>Combinar…</value></data>
+  <data name="{0} ausgewählt" xml:space="preserve"><value>{0} seleccionado(s)</value></data>
   <data name="Strg+D" xml:space="preserve"><value>Ctrl+D</value></data>
   <data name="Datei zu den Favoriten hinzufügen / entfernen (Option)" xml:space="preserve"><value>añadir el archivo a favoritos / quitarlo (opción)</value></data>
   <data name="Die Datei wurde zu den Favoriten hinzugefügt." xml:space="preserve"><value>El archivo se añadió a favoritos.</value></data>
@@ -793,7 +813,8 @@ barra de la izquierda o pulsa Mayús+F10.</value></data>
   <data name="Seite verschieben…" xml:space="preserve"><value>Mover la página…</value></data>
   <data name="„{0}“ wird nicht geöffnet." xml:space="preserve"><value>«{0}» no se abrirá.</value></data>
   <data name="„{0}“ öffnen?" xml:space="preserve"><value>¿Abrir «{0}»?</value></data>
-  <data name="Anhänge können Makros oder Schadcode enthalten. Öffne die Datei nur, wenn die PDF aus einer sicheren Quelle stammt." xml:space="preserve"><value>Los adjuntos pueden contener macros o software malicioso. Abre el archivo solo si el PDF procede de una fuente segura.</value></data>
+  <data name="Anhänge können schädliche Programme, Makros oder Viren enthalten." xml:space="preserve"><value>Los adjuntos pueden contener programas maliciosos, macros o virus.</value></data>
+  <data name="Öffne die Datei nur, wenn du sie von einer sicheren Quelle erhalten hast." xml:space="preserve"><value>Abre el archivo solo si lo has recibido de una fuente segura.</value></data>
   <data name="Die eingebettete Datei konnte nicht geöffnet werden." xml:space="preserve"><value>No se pudo abrir el archivo incrustado.</value></data>
   <data name="Programme, Skripte und ähnliche Dateien öffnet PDFlight aus Sicherheitsgründen nicht. Möchtest du die Datei stattdessen speichern?" xml:space="preserve"><value>Por motivos de seguridad, PDFlight no abre programas, scripts ni archivos similares. ¿Quieres guardar el archivo en su lugar?</value></data>
   <data name="Ö&amp;ffnen" xml:space="preserve"><value>&amp;Abrir</value></data>
@@ -943,4 +964,6 @@ Sin ella, el archivo ya no podrá mostrarse.</value></data>
   <data name="1 Lesezeichen" xml:space="preserve"><value>1 marcador</value></data>
   <data name="{0} Lesezeichen" xml:space="preserve"><value>{0} marcadores</value></data>
   <data name="Lesezeichen bearbeiten… (Strg+F2)" xml:space="preserve"><value>Editar marcadores… (Ctrl+F2)</value></data>
+  <data name="Bis Ebene {0}" xml:space="preserve"><value>Hasta el nivel {0}</value></data>
+  <data name="Bis Ebene aufklappen" xml:space="preserve"><value>Desplegar hasta el nivel</value></data>
 </root>

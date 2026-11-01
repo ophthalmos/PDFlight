@@ -39,7 +39,9 @@ public partial class AnnotationPanel : UserControl
         InitializeComponent();
         Lng.Apply(this);
         Lng.Apply(contextMenuEntry); // Kontextmenüs hängen nicht im Control-Baum
-        textSearch.PlaceholderText = Lng.T(textSearch.PlaceholderText);
+        textSearch.PlaceholderText = TextBoxMargins.Placeholder(Lng.T(textSearch.PlaceholderText));
+        TextBoxMargins.Keep(textSearch, 2); // Luft links und rechts, auch nach dem Rahmenwechsel in ApplyTheme (neues Handle)
+        SearchClear.Attach(textSearch); // „✕“ am rechten Rand, sobald etwas eingetippt ist (seit 23.10.2026)
         listView.TypeName = e => TypeName(e.Subtype);
         listView.EmptyText = Lng.T("(keine Anmerkungen)");
         // Haken in eigener Spalte vor den Symbolen – sonst überdeckte er das Symbol (dunkel) bzw. war kaum zu sehen (hell); das Menü des
@@ -59,6 +61,15 @@ public partial class AnnotationPanel : UserControl
 
     /// <summary>Die Liste bekommt den Fokus (Tastatur nach Strg+Umschalt+T).</summary>
     public void FocusList() => listView.Focus();
+
+    /// <summary>Wählt die Anmerkung (Seite, Nummer) in der Liste aus und rollt sie ins Bild, ohne in der Seite zu springen – für einen
+    /// Klick auf die Anmerkung in der Seite (seit 16.10.2026). Null, wenn sie nicht in der Liste steht (etwa weggefiltert).</summary>
+    public AnnotationEntry? SelectAnnotation(int page, int number)
+    {
+        if (listView.Entries.FirstOrDefault(e => e.Page == page && e.Number == number) is not { } entry) { return null; }
+        listView.SelectEntry(entry);
+        return entry;
+    }
 
     /// <summary>Gibt es einen eigenen Bearbeiten-Dialog? Freitext und Stempel (ihre Dialoge) und Notizen (ihre Karte).</summary>
     internal static bool CanEdit(AnnotationEntry entry) => entry.Subtype is 1 or 3 or 13;
@@ -111,6 +122,7 @@ public partial class AnnotationPanel : UserControl
         textSearch.BackColor = dark ? ViewerStripRenderer.FieldBackground : SystemColors.Window;
         textSearch.ForeColor = dark ? ViewerStripRenderer.Foreground : SystemColors.WindowText;
         textSearch.BorderStyle = dark ? BorderStyle.FixedSingle : BorderStyle.Fixed3D; // der helle 3D-Rand stach im Dunkeln heraus
+        SearchClear.Update(textSearch); // neues Handle und neue Farben: Knopf und rechten Abstand nachführen
         BackColor = listView.BackColor = panelSearch.BackColor = back;
         ForeColor = listView.ForeColor = fore;
         listView.SecondaryForeColor = secondary;
@@ -271,7 +283,11 @@ public partial class AnnotationPanel : UserControl
         else if (textSearch.Text.Length > 0) { textSearch.Text = string.Empty; } // TextChanged baut neu
     }
 
-    private void TextSearch_TextChanged(object? sender, EventArgs e) => Rebuild();
+    private void TextSearch_TextChanged(object? sender, EventArgs e)
+    {
+        SearchClear.Update(textSearch);
+        Rebuild();
+    }
 
     private void TextSearch_KeyDown(object? sender, KeyEventArgs e)
     {

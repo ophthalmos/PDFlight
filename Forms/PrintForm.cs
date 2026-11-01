@@ -40,6 +40,7 @@ public partial class PrintForm : Form
         this.currentPage = Math.Clamp(currentPage, 1, Math.Max(1, document.PageCount));
         rbCurrent.Text = string.Format(Lng.T("Aktuelle Seite ({0})"), this.currentPage);
         textRange.PlaceholderText = Lng.T("z. B. 1-5, 8, 11-13");
+        TextBoxMargins.Apply(this); // Innenabstand wie in den übrigen Dialogen, auch für den Platzhalter (seit 23.10.2026)
         comboDuplex.Items.AddRange([Lng.T("Einseitig"), Lng.T("Beidseitig, lange Kante"), Lng.T("Beidseitig, kurze Kante")]);
         comboScaling.Items.AddRange([Lng.T("An druckbaren Bereich anpassen"), Lng.T("Tatsächliche Größe"), Lng.T("Benutzerdefiniert (%)")]);
         comboColor.Items.AddRange([Lng.T("Farbe"), Lng.T("Schwarzweiß")]);

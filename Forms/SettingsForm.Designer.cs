@@ -172,9 +172,9 @@
             cbCloseOnEscape.AutoSize = true;
             cbCloseOnEscape.Location = new Point(19, 144);
             cbCloseOnEscape.Name = "cbCloseOnEscape";
-            cbCloseOnEscape.Size = new Size(313, 19);
+            cbCloseOnEscape.Size = new Size(404, 19);
             cbCloseOnEscape.TabIndex = 6;
-            cbCloseOnEscape.Text = "Programm mit 2× &Esc beenden (Umschalt+Esc: sofort)";
+            cbCloseOnEscape.Text = "&Esc schließt das Dokument, dann das Programm (Umschalt+Esc: sofort)";
             cbCloseOnEscape.UseVisualStyleBackColor = true;
             // 
             // cbReopenLast

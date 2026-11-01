@@ -2,7 +2,7 @@ namespace PDFLight;
 
 internal static class Program
 {
-    /// <summary>Einstiegspunkt: optional eine PDF-Datei und Schalter (/help, /max, /page:N, /print – s. StartOptions).</summary>
+    /// <summary>Einstiegspunkt: optional eine PDF-Datei und Schalter (/help, /max, /page:N, /print, /twopage, /zoom:N, /nosidebar – s. StartOptions).</summary>
     [STAThread]
     private static void Main(string[] args)
     {

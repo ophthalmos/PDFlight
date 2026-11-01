@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 
 namespace PDFLight.Viewer;
 
@@ -195,6 +196,18 @@ internal sealed class PageView : ScrollableControl
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
     public bool HasSelection => OrderedSelection != null;
 
+    /// <summary>Etwas, das Esc aufhebt: Textmarkierung, ausgewähltes Bild oder der Rahmen einer Anmerkung aus der Liste.</summary>
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
+    public bool HasEscapableSelection => HasSelection || selectedImage != null || revealedAnnotation != null;
+
+    /// <summary>Was Esc in der Seitenansicht aufhebt (<see cref="HasEscapableSelection"/>).</summary>
+    public void ClearEscapableSelection()
+    {
+        ClearSelection();
+        ClearImageSelection();
+        ClearRevealedAnnotation();
+    }
+
     /// <summary>Zeigt ein Dokument. <paramref name="keepView"/>: ein neuer Stand desselben Dokuments (Anmerkung über PDFsharp, Rückgängig)
     /// – haben alle Seiten dieselbe Größe, bleiben Zoom, Ausschnitt und die gezeichneten Kacheln stehen, bis die neuen da sind; sonst
     /// flackerte die Seite beim Loslassen einer verschobenen Notiz einmal leer auf (Fehlerbericht 11.10.2026). Liefert, ob behalten wurde.</summary>
@@ -334,10 +347,15 @@ internal sealed class PageView : ScrollableControl
             twoPage = value;
             if (document == null) { return; }
             var page = Math.Max(0, currentPage);
-            ClearTiles();
-            LayoutPages();
-            GoToPage(page);
-            CenterOnPage(page);
+            SuspendRedraw();
+            try
+            {
+                ClearTiles();
+                LayoutPages();
+                GoToPage(page);
+                CenterOnPage(page);
+            }
+            finally { ResumeRedraw(); }
             ZoomChanged?.Invoke(this, EventArgs.Empty);
         }
     }
@@ -346,13 +364,41 @@ internal sealed class PageView : ScrollableControl
     {
         base.OnSizeChanged(e);
         if (document == null) { return; }
-        var before = zoom;
-        var anchorPoint = new Point(ClientSize.Width / 2, 0);
-        var keep = CapturePosition(anchorPoint);
-        LayoutPages();
-        if (zoom != before) { ClearTiles(); ZoomChanged?.Invoke(this, EventArgs.Empty); }
-        RestorePosition(keep, anchorPoint);
-        if (fit != PageFit.None) { CenterOnPage(keep.Page); } // sonst stünde die Seite nach dem Ein-/Ausblenden der Lesezeichen-Leiste verschoben da
+        SuspendRedraw();
+        try
+        {
+            var before = zoom;
+            var anchorPoint = new Point(ClientSize.Width / 2, 0);
+            var keep = CapturePosition(anchorPoint);
+            LayoutPages();
+            if (zoom != before) { ClearTiles(); ZoomChanged?.Invoke(this, EventArgs.Empty); }
+            RestoreTop(keep, anchorPoint); // stand der Seitenanfang oben, bleibt er samt Rand oben (etwa beim Maximieren nach dem Öffnen)
+            if (fit != PageFit.None) { CenterOnPage(keep.Page); } // sonst stünde die Seite nach dem Ein-/Ausblenden der Lesezeichen-Leiste verschoben da
+        }
+        finally { ResumeRedraw(); }
+    }
+
+    // Neuer Zoom oder neue Anordnung: Jeder Bildlauf (AutoScrollPosition) verschiebt per ScrollWindowEx das alte Bild auf dem
+    // Bildschirm, bevor neu gezeichnet wird – bei mehreren Schritten (RestorePosition, GoToPage, CenterOnPage) sah man das alte Bild
+    // springen und den Rahmen stückweise erscheinen (Fehlerbericht 20.10.2026). Solange das Zeichnen ausgesetzt ist, verschiebt Windows
+    // nichts; danach wird alles in einem Zug gezeichnet.
+    private int redrawSuspended;
+    private bool redrawOff;
+
+    private void SuspendRedraw()
+    {
+        if (redrawSuspended++ > 0 || !IsHandleCreated || !Visible) { return; }
+        RedrawNative.SendMessage(Handle, RedrawNative.WM_SETREDRAW, 0, 0);
+        redrawOff = true;
+    }
+
+    private void ResumeRedraw()
+    {
+        if (--redrawSuspended > 0 || !redrawOff) { return; }
+        redrawOff = false;
+        if (!IsHandleCreated) { return; }
+        RedrawNative.SendMessage(Handle, RedrawNative.WM_SETREDRAW, 1, 0);
+        RedrawNative.RedrawWindow(Handle, 0, 0, RedrawNative.RDW_INVALIDATE | RedrawNative.RDW_ERASE | RedrawNative.RDW_FRAME | RedrawNative.RDW_ALLCHILDREN);
     }
 
     /// <summary>Waagerechter Bildlauf so, dass die Seite mittig steht (bei „Seitenbreite“ passt sie dann genau ins Fenster).</summary>
@@ -370,38 +416,54 @@ internal sealed class PageView : ScrollableControl
     public void ZoomOut() => SetZoom(ZoomSteps.LastOrDefault(s => s < zoom * 0.99f, ZoomSteps[0]), null);
 
     /// <summary>Zoomstufe passend zum Fenster: an Breite, Höhe oder ganze Seite (<see cref="PageFit"/>); sie wird bei jeder Größenänderung
-    /// neu gerechnet, bis eine feste Stufe gewählt wird. Bei Höhe und Seite steht die angezeigte Seite danach oben im Bild.</summary>
+    /// neu gerechnet, bis eine feste Stufe gewählt wird. Bei Höhe und Seite steht die angezeigte Seite danach oben im Bild, bei Breite bleibt die Stelle am oberen Fensterrand (der Seitenanfang, wenn er zu sehen war).</summary>
     public void SetFit(PageFit value)
     {
         if (value == PageFit.None) { return; }
         if (document == null) { fit = value; return; }
-        var anchorPoint = new Point(ClientSize.Width / 2, ClientSize.Height / 2);
+        // Bezugspunkt ist der obere Fensterrand, nicht die Mitte: War die ganze Seite zu sehen (etwa nach dem Öffnen mit „An Höhe“),
+        // stand nach „An Breite“ sonst die Seitenmitte im Bild, Ober- und Unterrand nicht (Fehlerbericht 19.10.2026)
+        var anchorPoint = new Point(ClientSize.Width / 2, 0);
         var keep = CapturePosition(anchorPoint);
-        fit = value;
-        ClearTiles();
-        LayoutPages();
-        if (value == PageFit.Width) { RestorePosition(keep, anchorPoint); } else { GoToPage(keep.Page); } // ganze Seite: von ihrem Anfang an
-        CenterOnPage(keep.Page);
-        Invalidate();
+        SuspendRedraw();
+        try
+        {
+            fit = value;
+            ClearTiles();
+            LayoutPages();
+            // an Breite: dieselbe Stelle bleibt oben – lag dort der Seitenanfang oder der Rand darüber, beginnt die Seite oben im Bild;
+            // ganze Seite und Höhe: immer von ihrem Anfang an
+            if (value == PageFit.Width) { RestoreTop(keep, anchorPoint); } else { GoToPage(keep.Page); }
+            CenterOnPage(keep.Page);
+            Invalidate();
+        }
+        finally { ResumeRedraw(); }
         ZoomChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void FitWidth() => SetFit(PageFit.Width);
 
-    /// <summary>Neue Zoomstufe; der Punkt unter <paramref name="anchorClient"/> (sonst die Mitte) bleibt an seinem Platz.</summary>
+    /// <summary>Neue Zoomstufe; der Punkt unter <paramref name="anchorClient"/> (Strg+Mausrad) bleibt an seinem Platz – ohne ihn (Startzoom,
+    /// −/+, Zoomfeld, Tastatur) die Stelle am oberen Fensterrand bzw. der Seitenanfang wie bei „An Breite“ (bis 19.10.2026 die Fenstermitte:
+    /// mit /zoom:100 begann die Anzeige einige Zentimeter unter dem Seitenanfang, Fehlerbericht Wilhelms).</summary>
     public void SetZoom(float value, Point? anchorClient)
     {
         if (document == null) { return; }
         value = Math.Clamp(value, ZoomSteps[0], ZoomSteps[^1]);
         if (fit == PageFit.None && Math.Abs(value - zoom) < 0.001f) { return; }
-        var anchorPoint = anchorClient ?? new Point(ClientSize.Width / 2, ClientSize.Height / 2);
+        var anchorPoint = anchorClient ?? new Point(ClientSize.Width / 2, 0);
         var keep = CapturePosition(anchorPoint);
-        fit = PageFit.None;
-        zoom = value;
-        ClearTiles();
-        LayoutPages();
-        RestorePosition(keep, anchorPoint);
-        Invalidate();
+        SuspendRedraw();
+        try
+        {
+            fit = PageFit.None;
+            zoom = value;
+            ClearTiles();
+            LayoutPages();
+            if (anchorClient == null) { RestoreTop(keep, anchorPoint); } else { RestorePosition(keep, anchorPoint); }
+            Invalidate();
+        }
+        finally { ResumeRedraw(); }
         ZoomChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -412,6 +474,14 @@ internal sealed class PageView : ScrollableControl
         var (page, point) = PageAt(client, clamp: true);
         var rect = pageRects[page];
         return (page, point.X / (float)rect.Width, point.Y / (float)rect.Height);
+    }
+
+    /// <summary>Wie <see cref="RestorePosition"/> für den oberen Fensterrand – lag dort der Seitenanfang oder der Rand darüber, beginnt die
+    /// Seite danach oben im Bild (samt Rand), statt dass ihr Anfang abgeschnitten wird.</summary>
+    private void RestoreTop((int Page, float X, float Y) keep, Point anchor)
+    {
+        RestorePosition(keep, anchor);
+        if (keep.Y <= 0) { GoToPage(keep.Page); } // der waagerechte Bildlauf bleibt
     }
 
     private void RestorePosition((int Page, float X, float Y) keep, Point client)
@@ -514,9 +584,9 @@ internal sealed class PageView : ScrollableControl
             DrawRevealedAnnotation(g, page);
             DrawHits(g, page, rect);
             DrawSelection(g, page, rect);
-            if (page == currentPage && ShowCurrentPageHighlight)
+            if (page == currentPage && ShowCurrentPageHighlight && pageRects.Length > 1)
             {
-                // Rahmen um die aktive Seite, außen um die Seite gelegt – er verdeckt nichts vom Inhalt
+                // Rahmen um die aktive Seite, außen um die Seite gelegt – er verdeckt nichts vom Inhalt; bei nur einer Seite gibt es nichts zu unterscheiden
                 var width = LogicalToDeviceUnits(CurrentPageHighlightWidth);
                 using var pen = new Pen(CurrentPageHighlightColor, width) { Alignment = PenAlignment.Inset };
                 g.DrawRectangle(pen, rect.X - width, rect.Y - width, rect.Width + 2 * width - 1, rect.Height + 2 * width - 1);
@@ -1057,7 +1127,7 @@ internal sealed class PageView : ScrollableControl
         var number = await document.MarkupAtAsync(page, width, height, point);
         markupUnderMouse = number >= 0 ? (page, number) : null;
         if (document == null) { return; }
-        var ink = await document.InkAtAsync(page, width, height, point);
+        var ink = await document.InkAtAsync(page, width, height, point, LogicalToDeviceUnits(InkHitSlack));
         inkUnderMouse = ink >= 0 ? (page, ink) : null;
         if (document == null) { return; }
         // Stempel und Freitext je für sich – so findet sich auch ein Freitext unter einem Stempel und umgekehrt
@@ -1234,33 +1304,41 @@ internal sealed class PageView : ScrollableControl
         hoverQueryRunning = true;
         try
         {
-            while (pendingHoverPoint is { } point && document != null)
+            while (pendingHoverPoint is { } point && document is { } queried)
             {
                 pendingHoverPoint = null;
                 var (page, pagePoint) = PageAt(point, clamp: false);
+                // Während einer Abfrage kann ein anderes Dokument (oder ein neuer Stand mit weniger Seiten) angezeigt werden – dann gelten
+                // Seite und Ergebnis nicht mehr, und pageRects[page] liefe über das Ende (Fehlerbericht 16.10.2026).
+                bool Stale() => document != queried || IsDisposed || page >= pageRects.Length;
                 var field = -1;
                 if (page >= 0 && document.HasForms)
                 {
-                    field = await document.FormMouseMoveAsync(page, pageRects[page].Width, pageRects[page].Height, pagePoint, FormModifiers(ModifierKeys, false));
-                    if (document == null) { break; }
+                    field = await queried.FormMouseMoveAsync(page, pageRects[page].Width, pageRects[page].Height, pagePoint, FormModifiers(ModifierKeys, false));
+                    if (Stale()) { continue; }
                 }
                 (int Number, int Subtype, Rectangle Rect)? annotation = null;
                 var movableQueried = page >= 0 && field < 0 && AllowAnnotationMove && ghost == null;
                 if (movableQueried)
                 {
-                    annotation = await document.AnnotationAtAsync(page, pageRects[page].Width, pageRects[page].Height, pagePoint, MovableAnnotations);
-                    if (document == null) { break; }
+                    annotation = await queried.AnnotationAtAsync(page, pageRects[page].Width, pageRects[page].Height, pagePoint, MovableAnnotations);
+                    if (Stale()) { continue; }
                 }
-                var link = page < 0 || field >= 0 || annotation != null ? null : await document.LinkAtAsync(page, pageRects[page].Width, pageRects[page].Height, pagePoint);
-                if (document == null) { break; }
+                var link = page < 0 || field >= 0 || annotation != null ? null : await queried.LinkAtAsync(page, pageRects[page].Width, pageRects[page].Height, pagePoint);
+                if (Stale()) { continue; }
                 var noteAt = annotation is { Subtype: Protocol.AnnotText } ? annotation // verschiebbar: schon gefunden
                     : page >= 0 && field < 0 && annotation == null && link == null && !movableQueried // die Verschiebe-Abfrage umfasst Notizen schon
-                    ? await document.AnnotationAtAsync(page, pageRects[page].Width, pageRects[page].Height, pagePoint, NoteMask) : null;
-                if (document == null) { break; }
+                    ? await queried.AnnotationAtAsync(page, pageRects[page].Width, pageRects[page].Height, pagePoint, NoteMask) : null;
+                if (Stale()) { continue; }
                 var note = noteAt != null;
+                // Zeichnung unter dem Zeiger: Hand (Wunsch vom 16.10.2026 – vorher sah man nicht, ob man den Strich trifft, für den Klick wie fürs
+                // Kontextmenü „Zeichnung entfernen“); Hervorhebungen bewusst nicht, sie liegen auf Text, der markierbar bleiben soll
+                var inkAt = page >= 0 && field < 0 && annotation == null && link == null && noteAt == null && !InkMode && !EraseMode
+                    && await queried.InkAtAsync(page, pageRects[page].Width, pageRects[page].Height, pagePoint, LogicalToDeviceUnits(InkHitSlack)) >= 0;
+                if (Stale()) { continue; }
                 if (dragging || formDragPage >= 0 || pick != null || ghost != null || InkMode || EraseMode || IsDisposed) { continue; } // beim Wählen einer Stelle und beim Zeichnen bleibt das Fadenkreuz
-                hoverAnnotation = annotation is { } a && page < pageRects.Length ? (page, a.Number, a.Subtype, a.Rect, pageRects[page].Size) : null;
-                Cursor = note ? Cursors.Hand // Kommentar: Klick zeigt die Karte, Ziehen verschiebt
+                hoverAnnotation = annotation is { } a ? (page, a.Number, a.Subtype, a.Rect, pageRects[page].Size) : null;
+                Cursor = note || inkAt ? Cursors.Hand // Kommentar: Klick zeigt die Karte, Ziehen verschiebt; Zeichnung: Klick wählt sie aus
                     : annotation != null ? Cursors.SizeAll
                     : field is PdfiumForms.FieldTextField or PdfiumForms.FieldComboBox ? Cursors.IBeam
                     : field >= 0 || link != null ? Cursors.Hand
@@ -1885,7 +1963,8 @@ internal sealed class PageView : ScrollableControl
         public int Removed { get; set; }
     }
 
-    private const int EraseStep = 4;  // logische px zwischen zwei abgetasteten Stellen eines Wischs (InkAt trifft mit halber Strichstärke + 4 px)
+    private const int EraseStep = 4;  // logische px zwischen zwei abgetasteten Stellen eines Wischs (InkAt trifft mit halber Strichstärke + EraseStep)
+    private const int InkHitSlack = 5; // logische px neben einem Strich, die Zeiger, Klick und Rechtsklick noch treffen (vorher 4 Gerätepixel, kurz 7 – seit die Hand den Treffer anzeigt, genügt wenig mehr; Fehlerbericht 16.10.2026)
     private EraseGesture? eraseGesture;
 
     /// <summary>Radiermodus: Klicken oder Wischen entfernt Zeichnungen und Hervorhebungen.</summary>
@@ -1953,7 +2032,7 @@ internal sealed class PageView : ScrollableControl
                 // an derselben Stelle so lange, bis nichts mehr getroffen wird – Striche können übereinanderliegen
                 for (var guard = 0; guard < 16; guard++)
                 {
-                    var number = await doc.InkAtAsync(spot.Page, spot.PageSize.Width, spot.PageSize.Height, spot.Point);
+                    var number = await doc.InkAtAsync(spot.Page, spot.PageSize.Width, spot.PageSize.Height, spot.Point, LogicalToDeviceUnits(EraseStep));
                     if (number < 0 && doc == document) { number = await doc.MarkupAtAsync(spot.Page, spot.PageSize.Width, spot.PageSize.Height, spot.Point); }
                     if (number < 0 || doc != document || !await doc.RemoveMarkupAsync(spot.Page, number)) { break; }
                     gesture.Removed++;
@@ -2174,7 +2253,9 @@ internal sealed class PageView : ScrollableControl
             if (e.Button == MouseButtons.Left)
             {
                 var noteClick = ghost is { Moved: false, Subtype: Protocol.AnnotText }; // nicht gezogen: wie bisher die Karte zeigen
+                var clicked = ghost is { Moved: false } g ? new AnnotationEventArgs(g.Page, g.Number, g.Subtype) : null;
                 await FinishAnnotationDragAsync();
+                if (clicked != null) { AnnotationClicked?.Invoke(this, clicked); }
                 if (noteClick) { await TryOpenNoteAsync(e.Location); }
             }
             return;
@@ -2212,8 +2293,30 @@ internal sealed class PageView : ScrollableControl
         if (e.Button == MouseButtons.Left && link != null && !selectionActive) { FollowLink(link); } // gezogen = markiert, nicht geklickt
         else if (e.Button == MouseButtons.Left && link == null && !selectionActive && pick == null && !await TryOpenNoteAsync(e.Location)) // Kommentar: Karte zeigen
         {
-            await SelectImageAtAsync(e.Location); // Klick auf ein Bild: auswählen wie Acrobat
+            if (!await ReportAnnotationClickAsync(e.Location)) { await SelectImageAtAsync(e.Location); } // Klick auf ein Bild: auswählen wie Acrobat
         }
+    }
+
+    /// <summary>Klick ohne Ziehen auf eine Anmerkung, die in der Anmerkungsliste steht – das Hauptfenster wählt sie dort aus (Wunsch vom
+    /// 16.10.2026). Verschiebbare (Notiz, Freitext, Stempel) meldet das Loslassen ohne Ziehen, die übrigen <see cref="ReportAnnotationClickAsync"/>.</summary>
+    public event EventHandler<AnnotationEventArgs>? AnnotationClicked;
+
+    // die übrigen Arten der Liste (PdfDocument.IsListedSubtype) ohne Textmarkierungen und Zeichnungen – die fragen MarkupAt und InkAt genauer
+    // (nur die Vierecke bzw. der Strich, nicht das umschließende Rechteck); Notiz, Freitext und Stempel kommen über das Verschieben
+    private const int OtherListedAnnotations = (1 << 4) | (1 << 5) | (1 << 6) | (1 << 7) | (1 << 8) | (1 << 14) | (1 << 17) | (1 << 18) | (1 << 28);
+
+    private async Task<bool> ReportAnnotationClickAsync(Point location)
+    {
+        if (AnnotationClicked == null || document is not { } doc) { return false; }
+        var (page, point) = PageAt(location, clamp: false);
+        if (page < 0 || page >= pageRects.Length) { return false; }
+        var size = pageRects[page].Size;
+        var (number, subtype) = (await doc.InkAtAsync(page, size.Width, size.Height, point, LogicalToDeviceUnits(InkHitSlack)), 15); // FPDF_ANNOT_INK
+        if (number < 0 && doc == document) { (number, subtype) = (await doc.MarkupAtAsync(page, size.Width, size.Height, point), 9); } // Textmarkierung (9–12)
+        if (number < 0 && doc == document && await doc.AnnotationAtAsync(page, size.Width, size.Height, point, OtherListedAnnotations) is { } hit) { (number, subtype) = (hit.Number, hit.Subtype); }
+        if (number < 0 || doc != document) { return false; }
+        AnnotationClicked.Invoke(this, new AnnotationEventArgs(page, number, subtype));
+        return true;
     }
 
     protected override void OnMouseWheel(MouseEventArgs e)
@@ -2264,7 +2367,7 @@ internal sealed class PageView : ScrollableControl
             case Keys.Control | Keys.OemMinus: e.Handled = true; ZoomOut(); break;
             case Keys.Control | Keys.D0:
             case Keys.Control | Keys.NumPad0: e.Handled = true; SetZoom(1f, null); break;
-            case Keys.Escape: ClearSelection(); ClearImageSelection(); ClearRevealedAnnotation(); break;
+            case Keys.Escape: ClearEscapableSelection(); break;
             case Keys.Down: ScrollBy(0, line); break;
             case Keys.Up: ScrollBy(0, -line); break;
             case Keys.Right: ScrollBy(line, 0); break;
@@ -2352,3 +2455,17 @@ internal sealed class ErasedEventArgs(int count, byte[] before) : EventArgs
 
 /// <summary>Art der entfernbaren Anmerkung unter dem Rechtsklick (Kontextmenü „… entfernen“).</summary>
 internal enum RemovableAnnotation { None, Markup, Ink, Stamp, FreeText }
+
+/// <summary>Zeichnen eines Fensters aussetzen (WM_SETREDRAW) und danach in einem Zug neu zeichnen.</summary>
+internal static partial class RedrawNative
+{
+    public const int WM_SETREDRAW = 0x000B;
+    public const uint RDW_INVALIDATE = 0x0001, RDW_ERASE = 0x0004, RDW_ALLCHILDREN = 0x0080, RDW_FRAME = 0x0400;
+
+    [LibraryImport("user32.dll", EntryPoint = "SendMessageW")]
+    public static partial nint SendMessage(nint hWnd, int msg, nint wParam, nint lParam);
+
+    [LibraryImport("user32.dll", EntryPoint = "RedrawWindow")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool RedrawWindow(nint hWnd, nint rect, nint region, uint flags);
+}

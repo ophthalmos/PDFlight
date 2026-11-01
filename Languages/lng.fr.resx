@@ -29,7 +29,9 @@
   <data name="Kleine Symbole und Icons, ohne Text" xml:space="preserve"><value>Petites icônes et programmes, sans texte</value></data>
   <data name="Nur Text" xml:space="preserve"><value>Texte seulement</value></data>
   <data name="Vollständigen Dateipfad in der Titelleiste an&amp;zeigen" xml:space="preserve"><value>Afficher le chemin complet du fichier dans la &amp;barre de titre</value></data>
-  <data name="Programm mit 2× &amp;Esc beenden (Umschalt+Esc: sofort)" xml:space="preserve"><value>Quitter le programme avec 2× &amp;Échap (Maj+Échap : immédiatement)</value></data>
+  <data name="&amp;Esc schließt das Dokument, dann das Programm (Umschalt+Esc: sofort)" xml:space="preserve"><value>&amp;Échap ferme le document, puis le programme (Maj+Échap : immédiatement)</value></data>
+  <data name="Esc / Umschalt+Esc" xml:space="preserve"><value>Échap / Maj+Échap</value></data>
+  <data name="Dokument schließen, dann Programm beenden / sofort beenden (Option)" xml:space="preserve"><value>fermer le document, puis quitter / quitter aussitôt (option)</value></data>
   <data name="Zuletzt geöffnete &amp;Datei beim Start laden" xml:space="preserve"><value>Charger le dernier &amp;fichier ouvert au démarrage</value></data>
   <data name="Die Liste der zuletzt verwendeten Ordner leeren?" xml:space="preserve"><value>Vider la liste des derniers dossiers utilisés ?</value></data>
   <data name="Die Sprachänderung wird nach einem Neustart des Programms wirksam." xml:space="preserve"><value>Le changement de langue prendra effet après un redémarrage du programme.</value></data>
@@ -158,7 +160,6 @@ extraire des pages, propriétés (raccourcis dans le menu)</value></data>
   <data name="Gehe zu Seite (Zahl tippen + Enter)" xml:space="preserve"><value>Aller à la page (saisir le numéro + Entrée)</value></data>
   <data name="Strg+1 … 9" xml:space="preserve"><value>Ctrl+1 … 9</value></data>
   <data name="Bild ↑ / Bild ↓" xml:space="preserve"><value>Pg.préc / Pg.suiv</value></data>
-  <data name="2× Esc / Umschalt+Esc" xml:space="preserve"><value>2× Échap / Maj+Échap</value></data>
   <data name="Strg+Eingabe" xml:space="preserve"><value>Ctrl+Entrée</value></data>
   <data name="Eingabe" xml:space="preserve"><value>Entrée</value></data>
   <data name="Entf" xml:space="preserve"><value>Suppr</value></data>
@@ -239,6 +240,7 @@ Les deux fichiers doivent avoir le même nombre de pages.</value></data>
   <data name="&amp;Wiederholen:" xml:space="preserve"><value>&amp;Répéter :</value></data>
   <data name="&amp;Kennwort:" xml:space="preserve"><value>&amp;Mot de passe :</value></data>
   <data name="Das Kennwort ist falsch." xml:space="preserve"><value>Le mot de passe est incorrect.</value></data>
+  <data name="Vergewissere dich, dass nicht versehentlich die Feststelltaste für Großschreibung aktiviert wurde und versuche es erneut." xml:space="preserve"><value>Vérifie que la touche Verr. Maj n'est pas activée par erreur et réessaie.</value></data>
   <data name="Datei mit den Rückseiten wählen" xml:space="preserve"><value>Choisir le fichier des versos</value></data>
   <data name="Bitte wähle eine andere Datei als die angezeigte." xml:space="preserve"><value>Choisis un fichier différent de celui affiché.</value></data>
   <data name="Die Seitenzahlen passen nicht zusammen." xml:space="preserve"><value>Les nombres de pages ne correspondent pas.</value></data>
@@ -301,7 +303,6 @@ d'installation pour installer la dernière version.</value></data>
   <data name="im Dokument suchen" xml:space="preserve"><value>rechercher dans le document</value></data>
   <data name="Dokument drucken" xml:space="preserve"><value>imprimer le document</value></data>
   <data name="Vollbild ein/aus" xml:space="preserve"><value>plein écran activé/désactivé</value></data>
-  <data name="Programm beenden (Option)" xml:space="preserve"><value>quitter le programme (option)</value></data>
 
   <!-- Umbenennen-Dialog -->
   <data name="&amp;Neuer Dateiname:" xml:space="preserve"><value>&amp;Nouveau nom de fichier :</value></data>
@@ -421,6 +422,25 @@ d'installation pour installer la dernière version.</value></data>
   <data name="»{0}« aus den Favoriten entfernen" xml:space="preserve"><value>Retirer « {0} » des favoris</value></data>
   <data name="Nicht mehr vorhandene Favoriten entfernen" xml:space="preserve"><value>Retirer les favoris qui n'existent plus</value></data>
   <data name="(keine Favoriten)" xml:space="preserve"><value>(aucun favori)</value></data>
+  <data name="&amp;Im Ordner anzeigen" xml:space="preserve"><value>Afficher dans le &amp;dossier</value></data>
+  <data name="Aus den Favoriten &amp;entfernen" xml:space="preserve"><value>R&amp;etirer des favoris</value></data>
+  <data name="Aus der &amp;Liste entfernen" xml:space="preserve"><value>Retirer de la &amp;liste</value></data>
+  <data name="Die Liste der zuletzt geöffneten Dateien leeren?" xml:space="preserve"><value>Vider la liste des fichiers récemment ouverts ?</value></data>
+  <data name="Dokument öffnen…" xml:space="preserve"><value>Ouvrir un document…</value></data>
+  <data name="Liste leeren ({0})" xml:space="preserve"><value>Vider la liste ({0})</value></data>
+  <data name="Zu den Fa&amp;voriten hinzufügen…" xml:space="preserve"><value>Ajouter aux fa&amp;voris…</value></data>
+  <data name="Zuletzt geöffnet" xml:space="preserve"><value>Ouverts récemment</value></data>
+  <data name="Suche leeren" xml:space="preserve"><value>Effacer la recherche</value></data>
+  <data name="&amp;Zusammenführen" xml:space="preserve"><value>&amp;Fusionner</value></data>
+  <data name="Aus „Zuletzt geöffnet“ entfernen" xml:space="preserve"><value>Retirer de « Ouverts récemment »</value></data>
+  <data name="Auswahl aufheben" xml:space="preserve"><value>Annuler la sélection</value></data>
+  <data name="Die Dateien zu einer neuen Sammelmappe zusammenführen" xml:space="preserve"><value>Fusionner les fichiers dans un nouveau fichier combiné</value></data>
+  <data name="Geöffnet" xml:space="preserve"><value>Ouvert</value></data>
+  <data name="Größe" xml:space="preserve"><value>Taille</value></data>
+  <data name="Jede Datei in einem eigenen Fenster öffnen" xml:space="preserve"><value>Ouvrir chaque fichier dans sa propre fenêtre</value></data>
+  <data name="Zusammenführen – Reihenfolge festlegen" xml:space="preserve"><value>Fusionner – définir l'ordre</value></data>
+  <data name="Zusammenführen…" xml:space="preserve"><value>Fusionner…</value></data>
+  <data name="{0} ausgewählt" xml:space="preserve"><value>{0} sélectionné(s)</value></data>
   <data name="Strg+D" xml:space="preserve"><value>Ctrl+D</value></data>
   <data name="Datei zu den Favoriten hinzufügen / entfernen (Option)" xml:space="preserve"><value>ajouter le fichier aux favoris / le retirer (option)</value></data>
   <data name="Die Datei wurde zu den Favoriten hinzugefügt." xml:space="preserve"><value>Le fichier a été ajouté aux favoris.</value></data>
@@ -793,7 +813,8 @@ la barre de gauche ou appuie sur Maj+F10.</value></data>
   <data name="Seite verschieben…" xml:space="preserve"><value>Déplacer la page…</value></data>
   <data name="„{0}“ wird nicht geöffnet." xml:space="preserve"><value>« {0} » ne sera pas ouvert.</value></data>
   <data name="„{0}“ öffnen?" xml:space="preserve"><value>Ouvrir « {0} » ?</value></data>
-  <data name="Anhänge können Makros oder Schadcode enthalten. Öffne die Datei nur, wenn die PDF aus einer sicheren Quelle stammt." xml:space="preserve"><value>Les pièces jointes peuvent contenir des macros ou des logiciels malveillants. N’ouvre le fichier que si le PDF provient d’une source sûre.</value></data>
+  <data name="Anhänge können schädliche Programme, Makros oder Viren enthalten." xml:space="preserve"><value>Les pièces jointes peuvent contenir des programmes malveillants, des macros ou des virus.</value></data>
+  <data name="Öffne die Datei nur, wenn du sie von einer sicheren Quelle erhalten hast." xml:space="preserve"><value>N’ouvre le fichier que si tu l’as reçu d’une source sûre.</value></data>
   <data name="Die eingebettete Datei konnte nicht geöffnet werden." xml:space="preserve"><value>Le fichier incorporé n’a pas pu être ouvert.</value></data>
   <data name="Programme, Skripte und ähnliche Dateien öffnet PDFlight aus Sicherheitsgründen nicht. Möchtest du die Datei stattdessen speichern?" xml:space="preserve"><value>Pour des raisons de sécurité, PDFlight n’ouvre pas les programmes, scripts et fichiers similaires. Veux-tu plutôt enregistrer le fichier ?</value></data>
   <data name="Ö&amp;ffnen" xml:space="preserve"><value>&amp;Ouvrir</value></data>
@@ -943,4 +964,6 @@ Sans lui, le fichier ne pourra plus être affiché.</value></data>
   <data name="1 Lesezeichen" xml:space="preserve"><value>1 signet</value></data>
   <data name="{0} Lesezeichen" xml:space="preserve"><value>{0} signets</value></data>
   <data name="Lesezeichen bearbeiten… (Strg+F2)" xml:space="preserve"><value>Modifier les signets… (Ctrl+F2)</value></data>
+  <data name="Bis Ebene {0}" xml:space="preserve"><value>Jusqu’au niveau {0}</value></data>
+  <data name="Bis Ebene aufklappen" xml:space="preserve"><value>Déplier jusqu’au niveau</value></data>
 </root>

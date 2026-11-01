@@ -22,8 +22,8 @@ internal static class AttachmentFiles
             return;
         }
         if (!Ask(owner, string.Format(Lng.T("„{0}“ öffnen?"), fileName),
-            Lng.T("Anhänge können Makros oder Schadcode enthalten. Öffne die Datei nur, wenn die PDF aus einer sicheren Quelle stammt."),
-            TaskDialogIcon.Warning, Lng.T("Öffnen"))) { return; }
+            Lng.T("Anhänge können schädliche Programme, Makros oder Viren enthalten.") + "\n" + Lng.T("Öffne die Datei nur, wenn du sie von einer sicheren Quelle erhalten hast."), // zwei Schlüssel: resx-Schlüssel ohne Zeilenumbruch
+            TaskDialogIcon.ShieldWarningYellowBar, Lng.T("Öffnen"))) { return; }
         try
         {
             var bytes = await load();

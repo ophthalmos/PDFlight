@@ -594,7 +594,7 @@ internal sealed unsafe class PdfDocument : IDisposable
     /// Viereck (<see cref="LineBoxes"/>), Farbe 0xRRGGBB mit 40 % Deckkraft wie Acrobat, druckbar. Die Darstellung (/AP, Multiplizieren
     /// statt Überdecken) erzeugt PDFium beim nächsten Rendern selbst und schreibt sie in die Anmerkung – gespeichert sehen andere
     /// Programme dieselbe Markierung.</summary>
-    public bool AddHighlight(int index, int start, int count, uint color)
+    public bool AddHighlight(int index, int start, int count, uint color, string author, string modified)
     {
         var lines = LineBoxes(index, start, count);
         if (lines.Count == 0) { return false; }
@@ -606,6 +606,7 @@ internal sealed unsafe class PdfDocument : IDisposable
             // Deckkraft 40 % (/CA 0,4) wie Acrobat; PDFium trägt die Farbe in seiner Darstellung multiplizierend auf, die Schrift bleibt lesbar
             _ = Pdfium.AnnotSetColor(annot, Pdfium.AnnotColor, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, HighlightOpacity);
             _ = Pdfium.AnnotSetFlags(annot, Pdfium.AnnotFlagPrint);
+            SetAuthorAndDate(annot, author, modified);
             var bounds = new Pdfium.RectF { Left = float.MaxValue, Bottom = float.MaxValue, Right = float.MinValue, Top = float.MinValue };
             foreach (var (left, top, right, bottom) in lines) // je Zeile ein Viereck
             {
@@ -718,6 +719,14 @@ internal sealed unsafe class PdfDocument : IDisposable
         return true;
     }
 
+    /// <summary>Autor (/T) und Änderungsdatum (/M) wie bei Acrobat auch für Hervorhebungen und Zeichnungen (seit 16.10.2026, Wunsch Wilhelms –
+    /// PDFium trägt sie nicht von selbst ein, die Anmerkungsliste zeigte dort nur die Art). Das Datum kommt aus dem Hauptprogramm.</summary>
+    private static void SetAuthorAndDate(nint annot, string author, string modified)
+    {
+        if (author.Length > 0) { SetString(annot, "T", author); }
+        if (modified.Length > 0) { SetString(annot, "M", modified); }
+    }
+
     private static void SetString(nint annot, string key, string value)
     {
         fixed (char* text = value + "\0") { _ = Pdfium.AnnotSetStringValue(annot, key, (ushort*)text); }
@@ -773,7 +782,7 @@ internal sealed unsafe class PdfDocument : IDisposable
 
     /// <summary>Freihand-Strich (Zeichnen) als Ink-Anmerkung: Punkte in Seitenpixeln (Ansichtsdrehung berücksichtigt), Farbe 0xRRGGBB,
     /// Strichstärke in Punkt (/Border). Die Darstellung erzeugt PDFium beim nächsten Rendern selbst, wie bei den Hervorhebungen.</summary>
-    public bool AddInk(int index, int pageWidth, int pageHeight, uint color, float width, (int X, int Y)[] points)
+    public bool AddInk(int index, int pageWidth, int pageHeight, uint color, float width, (int X, int Y)[] points, string author, string modified)
     {
         var page = GetPage(index).Page;
         var pdf = new Pdfium.PointF[points.Length == 1 ? 2 : points.Length]; // ein einzelner Punkt wird ein Tupfer: zweimal derselbe
@@ -792,6 +801,7 @@ internal sealed unsafe class PdfDocument : IDisposable
             _ = Pdfium.AnnotSetColor(annot, Pdfium.AnnotColor, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, 255);
             _ = Pdfium.AnnotSetFlags(annot, Pdfium.AnnotFlagPrint);
             _ = Pdfium.AnnotSetBorder(annot, 0, 0, width);
+            SetAuthorAndDate(annot, author, modified);
             fixed (Pdfium.PointF* first = pdf) { stroked = Pdfium.AnnotAddInkStroke(annot, first, (nuint)pdf.Length) >= 0; }
             if (!stroked) { return false; }
             var half = width / 2 + 1;
@@ -862,11 +872,11 @@ internal sealed unsafe class PdfDocument : IDisposable
 
     /// <summary>Oberste Zeichnung (Ink), deren Linie die Stelle (Seitenpixel) trifft: Abstand zum nächsten Streckenstück höchstens halbe
     /// Strichstärke plus 4 Pixel – ein Klick in das Rechteck neben die Linie zählt nicht. -1 = keine.</summary>
-    public int InkAt(int index, int pageWidth, int pageHeight, int x, int y)
+    public int InkAt(int index, int pageWidth, int pageHeight, int x, int y, int slackPixels)
     {
         var (page, px, py) = ToPagePoint(index, pageWidth, pageHeight, x, y);
         var pixelsPerPoint = Math.Max(pageWidth, pageHeight) / Math.Max(1f, Math.Max(Pdfium.GetPageWidthF(page), Pdfium.GetPageHeightF(page)));
-        var slack = 4 / Math.Max(0.01, pixelsPerPoint); // 4 Pixel Spielraum, in Punkt
+        var slack = Math.Clamp(slackPixels, 0, 50) / Math.Max(0.01, pixelsPerPoint); // Spielraum in Seitenpixeln (vom Hauptprogramm, DPI-gerecht), in Punkt
         for (var i = Pdfium.PageGetAnnotCount(page) - 1; i >= 0; i--) // zuletzt angelegte liegen oben
         {
             var annot = Pdfium.PageGetAnnot(page, i);
@@ -947,7 +957,8 @@ internal sealed unsafe class PdfDocument : IDisposable
     /// <summary>Die Anmerkungen einer Seite für die Liste: Nummer (Position in /Annots), Art, Autor (/T), Änderungsdatum (/M, roh),
     /// Text (/Contents), Farbe (/C, falls vorhanden) und Lage als Anteil der angezeigten Seite (0…1, Drehung berücksichtigt). Im
     /// Original ausgeblendete fehlen – außer denen, die nur das Verschieben gerade ausblendet. Textmarkierungen ohne eigenen Text
-    /// bekommen als Auszug den markierten Text (seit 15.10.2026, Wunsch Wilhelms – vorher stand dort nur „Hervorhebung“).</summary>
+    /// bekommen als Auszug den markierten Text (seit 15.10.2026, Wunsch Wilhelms – vorher stand dort nur „Hervorhebung“), Stempel ohne
+    /// Text ihren Betreff /Subj (seit 16.10.2026; Acrobat legt dort den Namen des Stempels ab).</summary>
     public List<(int Number, int Subtype, string Author, string Modified, string Contents, string Excerpt, uint Color, bool HasColor, float Left, float Top, float Right, float Bottom)> Annotations(int index)
     {
         var page = GetPage(index).Page;
@@ -972,7 +983,10 @@ internal sealed unsafe class PdfDocument : IDisposable
                     (top, bottom) = (Math.Min(y1, y2) / (float)FractionScale, Math.Max(y1, y2) / (float)FractionScale);
                 }
                 var contents = GetString(annot, "Contents");
-                var excerpt = contents.Length == 0 && subtype is >= Pdfium.AnnotHighlight and <= Pdfium.AnnotStrikeOut ? MarkedText(index, annot) : string.Empty;
+                var excerpt = contents.Length > 0 ? string.Empty
+                    : subtype is >= Pdfium.AnnotHighlight and <= Pdfium.AnnotStrikeOut ? MarkedText(index, annot)
+                    : subtype == Pdfium.AnnotStamp ? GetString(annot, "Subj") // Acrobat: der Name des Stempels („Genehmigt“, „Neuer Stempel“)
+                    : string.Empty;
                 list.Add((i, subtype, GetString(annot, "T"), GetString(annot, "M"), contents, excerpt,
                     hasColor ? (r & 0xFF) << 16 | (g & 0xFF) << 8 | (b & 0xFF) : 0, hasColor, left, top, right, bottom));
             }

@@ -123,7 +123,7 @@ internal static class Protocol
 
     // ================================================================== Hervorhebungen (Markup-Anmerkungen)
 
-    /// <summary>→ int Dok, int Seite, int erstes Zeichen, int Anzahl, int Farbe (0xRRGGBB) ← bool angelegt. Legt eine
+    /// <summary>→ int Dok, int Seite, int erstes Zeichen, int Anzahl, int Farbe (0xRRGGBB), string Autor, string Datum (PDF) ← bool angelegt. Legt eine
     /// Hervorhebung über den Zeichenbereich (eine Anmerkung je Seite, ein Viereck je Textzeile).</summary>
     public const byte AddHighlight = 25;
 
@@ -135,8 +135,8 @@ internal static class Protocol
     /// entfernt. Entfernt nur Textmarkierungen, Zeichnungen (Ink) und Stempel, jeweils samt angehängtem Popup.</summary>
     public const byte RemoveMarkup = 27;
 
-    /// <summary>→ int Dok, int Seite, int Seitenbreite, int Seitenhöhe, int x, int y ← int Nummer der obersten Zeichnung (Ink), deren
-    /// Linie die Stelle trifft (halbe Strichstärke plus ein paar Pixel Spielraum), -1 = keine.</summary>
+    /// <summary>→ int Dok, int Seite, int Seitenbreite, int Seitenhöhe, int x, int y, int Spielraum in Seitenpixeln ← int Nummer der obersten
+    /// Zeichnung (Ink), deren Linie die Stelle trifft (halbe Strichstärke plus Spielraum), -1 = keine.</summary>
     public const byte InkAt = 33;
 
     /// <summary>→ int Dok ← int PDF-Version (z. B. 17, 0 = unbekannt), int Revision des Sicherheits-Handlers (-1 = nicht verschlüsselt).
@@ -213,7 +213,7 @@ internal static class Protocol
     public const byte SetAnnotHidden = 31;
 
     /// <summary>→ int Dok, int Seite, int Seitenbreite, int Seitenhöhe, int Farbe (0xRRGGBB), float Strichstärke in Punkt, int Anzahl,
-    /// dann je Punkt int x, y in Seitenpixeln ← bool angelegt. Legt einen Freihand-Strich als Ink-Anmerkung an (Zeichnen).</summary>
+    /// dann je Punkt int x, y in Seitenpixeln, string Autor, string Datum (PDF) ← bool angelegt. Legt einen Freihand-Strich als Ink-Anmerkung an (Zeichnen).</summary>
     public const byte AddInk = 32;
 
     public const int AnnotFreeText = 3, AnnotStamp = 13; // FPDF_ANNOT_FREETEXT, FPDF_ANNOT_STAMP

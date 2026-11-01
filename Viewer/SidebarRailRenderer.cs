@@ -6,7 +6,7 @@ namespace PDFLight.Viewer;
 /// Fläche in der Farbe der Seitenleiste, beim Überfahren ein abgerundetes Feld, die gewählte Ansicht mit einem Balken in der
 /// Akzentfarbe am linken Rand (ihr Symbol färbt der Aufrufer, <see cref="Accent"/>), dünne Trennlinien wie bei Edge – unter der
 /// Kopfzeile (Dock oben) und rechts neben der Umschaltleiste (Dock links).</summary>
-internal sealed class SidebarRailRenderer(bool dark) : ToolStripRenderer
+internal sealed class SidebarRailRenderer(bool dark, Color? background = null) : ToolStripRenderer // background: eigene Fläche (Befehlsleiste der Startseite)
 {
     private const int BarWidth = 4, BarInset = 6, HoverInset = 4, HoverRadius = 6; // logische px
 
@@ -17,7 +17,7 @@ internal sealed class SidebarRailRenderer(bool dark) : ToolStripRenderer
 
     protected override void OnRenderToolStripBackground(ToolStripRenderEventArgs e)
     {
-        using var brush = new SolidBrush(Back(dark));
+        using var brush = new SolidBrush(background ?? Back(dark));
         e.Graphics.FillRectangle(brush, e.AffectedBounds);
     }
 

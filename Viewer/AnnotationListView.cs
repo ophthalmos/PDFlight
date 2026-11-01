@@ -8,7 +8,7 @@ namespace PDFLight.Viewer;
 /// <summary>Eine Anmerkung der Seite <see cref="Page"/> (0-basiert) für die Liste der Seitenleiste: <see cref="Number"/> ist die
 /// Position im /Annots-Array der Seite (dieselbe Nummer wie in PDFium und PDFsharp), <see cref="Subtype"/> die Art (FPDF_ANNOT_*),
 /// <see cref="Bounds"/> die Lage als Anteil der angezeigten Seite (0…1).</summary>
-/// <param name="Excerpt">Bei Textmarkierungen ohne eigenen Text der markierte Text (sonst leer).</param>
+/// <param name="Excerpt">Ohne eigenen Text: bei Textmarkierungen der markierte Text, bei Stempeln ihr Betreff /Subj (sonst leer).</param>
 public sealed record AnnotationEntry(int Page, int Number, int Subtype, string Author, DateTime? Modified, string Contents, string Excerpt, Color? Color, RectangleF Bounds);
 
 /// <summary>Eine Gruppe der Liste – je nach Sortierung eine Seite, ein Autor, ein Tag oder eine Art.</summary>
@@ -16,7 +16,8 @@ public sealed record AnnotationGroup(string Key, string Header, IReadOnlyList<An
 
 /// <summary>Selbst gezeichnete Anmerkungsliste der Seitenleiste nach dem Vorbild von Acrobats Kommentarliste (Wunsch vom 15.10.2026,
 /// ersetzt „Anmerkungen verwalten“): Gruppenköpfe mit Anzahl zum Auf- und Zuklappen, darunter je Anmerkung ein rundes Symbol in ihrer
-/// Farbe, Autor, Datum und Text (umbrochen, höchstens <see cref="MaxTextLines"/> Zeilen) bzw. kursiv die Art, wenn sie keinen Text hat.
+/// Farbe, daneben Autor, Art und Datum, darunter der Text (umbrochen, höchstens <see cref="MaxTextLines"/> Zeilen). Die Art steht seit
+/// 16.10.2026 immer daneben (Wunsch Wilhelms – am Symbol allein erkennt man sie nicht; vorher nur kursiv, wenn der Text fehlte).
 /// Klick oder Pfeiltasten wählen (<see cref="EntryActivated"/>), Doppelklick oder Enter bearbeiten, Entf löscht – was daraus folgt,
 /// entscheidet das Hauptfenster. Aufbau wie <see cref="OutlineView"/>.</summary>
 internal sealed class AnnotationListView : ScrollableControl
@@ -33,7 +34,7 @@ internal sealed class AnnotationListView : ScrollableControl
     private const TextFormatFlags TextFlags = TextFormatFlags.NoPrefix | TextFormatFlags.Left | TextFormatFlags.Top | TextFormatFlags.NoPadding | TextFormatFlags.SingleLine;
 
     /// <summary>Eine sichtbare Zeile: Gruppenkopf (Entry null) oder Anmerkung samt umbrochener Textzeilen.</summary>
-    private sealed record Row(AnnotationGroup Group, AnnotationEntry? Entry, int Top, int Height, List<string> Lines, bool Placeholder);
+    private sealed record Row(AnnotationGroup Group, AnnotationEntry? Entry, int Top, int Height, List<string> Lines);
 
     private readonly List<AnnotationGroup> groups = [];
     private readonly HashSet<string> collapsed = [];
@@ -41,7 +42,7 @@ internal sealed class AnnotationListView : ScrollableControl
     private AnnotationEntry? selected;
     private int hover = -1;
     private int layoutWidth = -1;
-    private Font? boldFont, smallFont, italicFont;
+    private Font? boldFont, smallFont;
 
     /// <summary>Auswahl per Klick oder Tastatur.</summary>
     public event EventHandler<AnnotationEntry>? EntryActivated;
@@ -68,13 +69,13 @@ internal sealed class AnnotationListView : ScrollableControl
     [Category("Darstellung"), DefaultValue(typeof(Color), "240, 240, 240"), Description("Hintergrund der Gruppenköpfe.")]
     public Color HeaderBackColor { get; set { field = value; Invalidate(); } } = Color.FromArgb(240, 240, 240);
 
-    [Category("Darstellung"), DefaultValue(typeof(Color), "GrayText"), Description("Farbe für Datum, Anzahl und die Art ohne Text.")]
+    [Category("Darstellung"), DefaultValue(typeof(Color), "GrayText"), Description("Farbe für Art, Datum und Anzahl.")]
     public Color SecondaryForeColor { get; set { field = value; Invalidate(); } } = SystemColors.GrayText;
 
     [Category("Darstellung"), DefaultValue(""), Description("Text, der ohne Einträge erscheint.")]
     public string EmptyText { get; set { field = value; Invalidate(); } } = string.Empty;
 
-    /// <summary>Wie eine Anmerkung ohne Text heißt (ihre Art, übersetzt) – setzt das Bedienfeld.</summary>
+    /// <summary>Die Art einer Anmerkung, übersetzt – setzt das Bedienfeld.</summary>
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public Func<AnnotationEntry, string> TypeName { get; set; } = e => e.Subtype.ToString();
 
@@ -154,17 +155,16 @@ internal sealed class AnnotationListView : ScrollableControl
         var width = Math.Max(Scale(40), right - left);
         foreach (var group in groups)
         {
-            rows.Add(new Row(group, null, top, Scale(HeaderHeight), [], false));
+            rows.Add(new Row(group, null, top, Scale(HeaderHeight), []));
             top += Scale(HeaderHeight);
             if (collapsed.Contains(group.Key)) { continue; }
             foreach (var entry in group.Entries)
             {
-                var hasText = !string.IsNullOrWhiteSpace(entry.Contents);
-                var placeholder = !hasText && entry.Excerpt.Length == 0;
-                // markierter Text einer Hervorhebung: nur eine Zeile, notfalls gekürzt (Wunsch vom 15.10.2026)
-                var lines = hasText ? Wrap(entry.Contents, width, Font) : placeholder ? [TypeName(entry)] : [FitLine(entry.Excerpt, Font, width)];
-                var height = 2 * Scale(EntryPadding) + Scale(IconSize) + Scale(4) + lines.Count * Scale(LineHeight);
-                rows.Add(new Row(group, entry, top, height, lines, placeholder));
+                // markierter Text einer Hervorhebung bzw. Name eines Stempels: nur eine Zeile, notfalls gekürzt (Wunsch vom 15.10.2026)
+                var lines = !string.IsNullOrWhiteSpace(entry.Contents) ? Wrap(entry.Contents, width, Font)
+                    : entry.Excerpt.Length > 0 ? [FitLine(entry.Excerpt, Font, width)] : [];
+                var height = 2 * Scale(EntryPadding) + Scale(IconSize) + (lines.Count > 0 ? Scale(4) + lines.Count * Scale(LineHeight) : 0);
+                rows.Add(new Row(group, entry, top, height, lines));
                 top += height;
             }
         }
@@ -224,10 +224,8 @@ internal sealed class AnnotationListView : ScrollableControl
     {
         boldFont?.Dispose();
         smallFont?.Dispose();
-        italicFont?.Dispose();
         boldFont = new Font(Font, FontStyle.Bold);
         smallFont = new Font(Font.FontFamily, Font.SizeInPoints * 0.9f);
-        italicFont = new Font(Font, FontStyle.Italic);
     }
 
     protected override void OnCreateControl()
@@ -257,7 +255,7 @@ internal sealed class AnnotationListView : ScrollableControl
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing) { boldFont?.Dispose(); smallFont?.Dispose(); italicFont?.Dispose(); }
+        if (disposing) { boldFont?.Dispose(); smallFont?.Dispose(); }
         base.Dispose(disposing);
     }
 
@@ -316,7 +314,7 @@ internal sealed class AnnotationListView : ScrollableControl
         var top = bounds.Y + Scale(EntryPadding);
         var icon = new Rectangle(left, top, Scale(IconSize), Scale(IconSize));
         PaintIcon(g, icon, entry);
-        // Kopfzeile neben dem Symbol: Autor fett, Datum grau
+        // Kopfzeile neben dem Symbol: Autor fett, dann grau Art und Datum
         var x = icon.Right + Scale(IconGap);
         if (entry.Author.Length > 0)
         {
@@ -324,18 +322,13 @@ internal sealed class AnnotationListView : ScrollableControl
             TextRenderer.DrawText(g, author, boldFont, new Point(x, icon.Y + (icon.Height - boldFont!.Height) / 2), ForeColor, TextFlags);
             x += TextWidth(author, boldFont) + Scale(8);
         }
-        if (entry.Modified is { } modified)
-        {
-            var date = modified.ToString("g", System.Globalization.CultureInfo.CurrentCulture);
-            TextRenderer.DrawText(g, Ellipsize(date, smallFont!, Math.Max(0, bounds.Width - x - Scale(RightMargin))), smallFont, new Point(x, icon.Y + (icon.Height - smallFont!.Height) / 2), SecondaryForeColor, TextFlags);
-        }
+        var info = entry.Modified is { } modified ? TypeName(entry) + " · " + modified.ToString("g", System.Globalization.CultureInfo.CurrentCulture) : TypeName(entry);
+        TextRenderer.DrawText(g, Ellipsize(info, smallFont!, Math.Max(0, bounds.Width - x - Scale(RightMargin))), smallFont, new Point(x, icon.Y + (icon.Height - smallFont!.Height) / 2), SecondaryForeColor, TextFlags);
         // Text unter dem Symbol, jede Zeile mittig in ihrer festen Zeilenhöhe
-        var font = row.Placeholder ? italicFont! : Font;
-        var color = row.Placeholder ? SecondaryForeColor : ForeColor;
-        var y = icon.Bottom + Scale(4) + (Scale(LineHeight) - font.Height) / 2;
+        var y = icon.Bottom + Scale(4) + (Scale(LineHeight) - Font.Height) / 2;
         foreach (var line in row.Lines)
         {
-            TextRenderer.DrawText(g, line, font, new Point(left, y), color, TextFlags);
+            TextRenderer.DrawText(g, line, Font, new Point(left, y), ForeColor, TextFlags);
             y += Scale(LineHeight);
         }
     }

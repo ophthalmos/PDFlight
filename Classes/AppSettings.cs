@@ -31,6 +31,7 @@ public class AppSettings
     {
         Trim(RecentFolders, MaxRecentFolders);
         Trim(RecentFiles, MaxRecentFiles);
+        PruneRecentOpened();
     }
 
     private static void Trim(List<string> list, int max)
@@ -40,7 +41,10 @@ public class AppSettings
 
     public List<string> TargetFolders { get; set; } = [];
     public List<string> RecentFolders { get; set; } = [];
-    public List<string> RecentFiles { get; set; } = [];      // zuletzt geöffnete PDF-Dateien (Öffnen-Dropdown)
+    public List<string> RecentFiles { get; set; } = [];      // zuletzt geöffnete PDF-Dateien (Öffnen-Dropdown, Startseite)
+    public Dictionary<string, DateTime> RecentOpened { get; set; } = []; // wann die Dateien der Zuletzt-Liste geöffnet wurden (Startseite, seit 23.10.2026)
+    public bool StartFavoritesCollapsed { get; set; }  // Startseite: Gruppe „Favoriten“ zugeklappt
+    public bool StartRecentCollapsed { get; set; }     // Startseite: Gruppe „Zuletzt geöffnet“ zugeklappt
     public List<string> ExternalPrograms { get; set; } = []; // wird beim ersten Start automatisch gefüllt (ProgramFinder)
     public List<Favorite> Favorites { get; set; } = [];        // gemerkte Dateien (Favoriten-Menü, Option ShowFavorites)
     public List<Stamp> Stamps { get; set; } = [];              // Stempelpalette (Bearbeiten → Stempel einfügen / verwalten)
@@ -53,7 +57,7 @@ public class AppSettings
     public bool ShowToolbarIcons { get; set; } = true;    // Symbole auf den Schaltflächen der Symbolleiste
     public bool LargeToolbarIcons { get; set; } = true;   // 24 statt 16 Pixel (vor DPI-Skalierung)
     public bool ShowToolbarText { get; set; } = true;     // Beschriftung der Schaltflächen; aus = nur Symbole (Layout „ohne Text“)
-    public bool CloseOnEscape { get; set; }               // Programm mit 2× Esc beenden (Shift+Esc sofort)
+    public bool CloseOnEscape { get; set; }               // Esc schließt das Dokument, auf der Startseite das Programm (Shift+Esc sofort; bis 24.10.2026 2× Esc)
     public bool ReopenLastFile { get; set; }              // zuletzt geöffnete Datei beim Start laden
     public bool ShowFullPathInTitle { get; set; }         // vollständigen Dateipfad statt nur des Dateinamens in der Titelleiste
     public bool ShowFavorites { get; set; }               // Favoriten-Menü in der Symbolleiste (Strg+D merkt die Datei); Standard aus
@@ -223,6 +227,45 @@ public class AppSettings
         RecentFiles.RemoveAll(x => string.Equals(x, path, StringComparison.OrdinalIgnoreCase));
         RecentFiles.Insert(0, path);
         Trim(RecentFiles, MaxRecentFiles);
+        if (RecentOpenedKey(path) is { } old) { RecentOpened.Remove(old); }
+        RecentOpened[path] = DateTime.Now;
+        PruneRecentOpened();
+    }
+
+    /// <summary>Wann die Datei zuletzt geöffnet wurde; null bei Einträgen von vor dem 23.10.2026.</summary>
+    public DateTime? GetRecentOpened(string path) => RecentOpenedKey(path) is { } key ? RecentOpened[key] : null;
+
+    /// <summary>Nimmt eine Datei aus der Zuletzt-Liste (Kontextmenü der Startseite, verschwundene Dateien).</summary>
+    public void RemoveRecentFile(string path)
+    {
+        RecentFiles.RemoveAll(x => string.Equals(x, path, StringComparison.OrdinalIgnoreCase));
+        PruneRecentOpened();
+    }
+
+    /// <summary>„Liste leeren“: die Zuletzt-Liste samt Zeitpunkten.</summary>
+    public void ClearRecentFiles()
+    {
+        RecentFiles.Clear();
+        RecentOpened.Clear();
+    }
+
+    /// <summary>Nach Umbenennen/Verschieben: der Eintrag der Zuletzt-Liste samt Zeitpunkt folgt der Datei.</summary>
+    public void MoveRecentFile(string oldFile, string newFile)
+    {
+        var index = RecentFiles.FindIndex(x => string.Equals(x, oldFile, StringComparison.OrdinalIgnoreCase));
+        if (index < 0) { return; }
+        RecentFiles.RemoveAll(x => string.Equals(x, newFile, StringComparison.OrdinalIgnoreCase)); // war das Ziel schon in der Liste: einmal genügt
+        index = RecentFiles.FindIndex(x => string.Equals(x, oldFile, StringComparison.OrdinalIgnoreCase));
+        RecentFiles[index] = newFile;
+        if (RecentOpenedKey(oldFile) is { } key && RecentOpened.Remove(key, out var opened)) { RecentOpened[newFile] = opened; }
+    }
+
+    private string? RecentOpenedKey(string path) => RecentOpened.Keys.FirstOrDefault(k => string.Equals(k, path, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>Zeitpunkte nur für Dateien, die noch in der Zuletzt-Liste stehen.</summary>
+    private void PruneRecentOpened()
+    {
+        foreach (var stale in RecentOpened.Keys.Where(k => !RecentFiles.Any(f => string.Equals(f, k, StringComparison.OrdinalIgnoreCase))).ToList()) { RecentOpened.Remove(stale); }
     }
 
     // ------------------------------------------------------------------ zuletzt angezeigte Seiten
@@ -282,6 +325,7 @@ public class AppSettings
         RecentFolders = fresh.RecentFolders;
         LastPages = fresh.LastPages;
         RecentFiles = fresh.RecentFiles;
+        RecentOpened = fresh.RecentOpened;
         ExternalPrograms = fresh.ExternalPrograms;
         Favorites = fresh.Favorites;
         Stamps = fresh.Stamps;

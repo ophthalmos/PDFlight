@@ -150,6 +150,26 @@ internal static class ToolbarIcons
         return result;
     }
 
+    /// <summary>Durchgestrichenes Auge („Kennwort verbergen“, Gegenstück zu <see cref="Eye"/>, Wunsch vom 23.10.2026 wie in anderen
+    /// Programmen): Segoe MDL2 Assets hat nur ein Auge mit Verbotszeichen (ED1A), deshalb das eigene Auge mit einem Schrägstrich von links
+    /// oben nach rechts unten in Strichstärke der Glyphe. Ohne die Lücke neben dem Strich wie bei Fluent – bei 16 px schnitt sie zu viel
+    /// vom kleinen Auge weg (ausprobiert). Im Zwischenspeicher wie <see cref="Get(char, Size, Color)"/>.</summary>
+    public static Image EyeHidden(Size size, Color color)
+    {
+        if (cache.TryGetValue(('\u0001', size.Width, color.ToArgb()), out var cached)) { return cached; }
+        Bitmap bitmap = new(size.Width, size.Height);
+        using (var g = Graphics.FromImage(bitmap))
+        {
+            g.DrawImage(Get(Eye, size, color), 0, 0, size.Width, size.Height);
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            var line = Math.Max(1f, size.Height / 16f);
+            using var pen = new Pen(color, line) { StartCap = System.Drawing.Drawing2D.LineCap.Round, EndCap = System.Drawing.Drawing2D.LineCap.Round };
+            g.DrawLine(pen, size.Width * 0.16f, size.Height * 0.16f, size.Width * 0.84f, size.Height * 0.84f);
+        }
+        cache[('\u0001', size.Width, color.ToArgb())] = bitmap;
+        return bitmap;
+    }
+
     /// <summary>„T im Kasten“ wie Edges Schaltfläche „Text hinzufügen“ – die Symbolschrift hat dafür keine Glyphe.</summary>
     public static Image TextBox(Size size, Color color)
     {

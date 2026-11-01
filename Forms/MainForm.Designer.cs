@@ -146,11 +146,8 @@
             outlineStrip = new ToolStrip();
             labelOutlineCount = new ToolStripLabel();
             btnOutlineMore = new ToolStripDropDownButton();
-            mnuOutlineBarExpandAll = new ToolStripMenuItem();
-            mnuOutlineBarCollapseAll = new ToolStripMenuItem();
-            toolStripSeparatorO2 = new ToolStripSeparator();
-            mnuOutlineBarLevel2 = new ToolStripMenuItem();
-            mnuOutlineBarLevel3 = new ToolStripMenuItem();
+            btnOutlineCollapseAll = new ToolStripButton();
+            btnOutlineExpandAll = new ToolStripButton();
             btnOutlineEdit = new ToolStripButton();
             outlineView = new PDFLight.Viewer.OutlineView();
             contextMenuOutline = new ContextMenuStrip(components);
@@ -171,6 +168,7 @@
             btnSidebarClose = new ToolStripButton();
             pageView = new PDFLight.Viewer.PageView();
             sidebarToggle = new PDFLight.Controls.SidebarToggle();
+            startPage = new PDFLight.Controls.StartPage();
             contextMenuPage = new ContextMenuStrip(components);
             mnuViewCopy = new ToolStripMenuItem();
             mnuViewSelectAll = new ToolStripMenuItem();
@@ -868,6 +866,7 @@
             comboZoom.Size = new Size(80, 23);
             comboZoom.ToolTipText = "Zoomstufe (Strg+Mausrad)";
             comboZoom.SelectedIndexChanged += ComboZoom_SelectedIndexChanged;
+            comboZoom.DropDownClosed += ComboZoom_DropDownClosed;
             comboZoom.KeyDown += ComboZoom_KeyDown;
             // 
             // btnZoomIn
@@ -1097,6 +1096,7 @@
             // 
             // splitViewer.Panel2
             // 
+            splitViewer.Panel2.Controls.Add(startPage);
             splitViewer.Panel2.Controls.Add(pageView);
             splitViewer.Panel2.Controls.Add(sidebarToggle);
             splitViewer.Size = new Size(984, 624);
@@ -1195,7 +1195,7 @@
             // 
             outlineStrip.AutoSize = false;
             outlineStrip.GripStyle = ToolStripGripStyle.Hidden;
-            outlineStrip.Items.AddRange(new ToolStripItem[] { labelOutlineCount, btnOutlineMore, btnOutlineEdit });
+            outlineStrip.Items.AddRange(new ToolStripItem[] { labelOutlineCount, btnOutlineMore, btnOutlineCollapseAll, btnOutlineExpandAll, btnOutlineEdit });
             outlineStrip.Location = new Point(0, 0);
             outlineStrip.Name = "outlineStrip";
             outlineStrip.Padding = new Padding(8, 0, 4, 0);
@@ -1213,47 +1213,35 @@
             // 
             btnOutlineMore.Alignment = ToolStripItemAlignment.Right;
             btnOutlineMore.DisplayStyle = ToolStripItemDisplayStyle.Text;
-            btnOutlineMore.DropDownItems.AddRange(new ToolStripItem[] { mnuOutlineBarExpandAll, mnuOutlineBarCollapseAll, toolStripSeparatorO2, mnuOutlineBarLevel2, mnuOutlineBarLevel3 });
             btnOutlineMore.Enabled = false;
             btnOutlineMore.Name = "btnOutlineMore";
             btnOutlineMore.ShowDropDownArrow = false;
             btnOutlineMore.Size = new Size(20, 33);
             btnOutlineMore.Text = "…";
-            btnOutlineMore.ToolTipText = "Weitere Befehle";
+            btnOutlineMore.ToolTipText = "Bis Ebene aufklappen";
             btnOutlineMore.DropDownOpening += BtnOutlineMore_DropDownOpening;
             // 
-            // mnuOutlineBarExpandAll
+            // btnOutlineCollapseAll
             // 
-            mnuOutlineBarExpandAll.Name = "mnuOutlineBarExpandAll";
-            mnuOutlineBarExpandAll.Size = new Size(195, 22);
-            mnuOutlineBarExpandAll.Text = "Alles aufklappen";
-            mnuOutlineBarExpandAll.Click += MnuOutlineExpandAll_Click;
+            btnOutlineCollapseAll.Alignment = ToolStripItemAlignment.Right;
+            btnOutlineCollapseAll.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            btnOutlineCollapseAll.Enabled = false;
+            btnOutlineCollapseAll.Name = "btnOutlineCollapseAll";
+            btnOutlineCollapseAll.Size = new Size(23, 33);
+            btnOutlineCollapseAll.Text = "Alles zuklappen";
+            btnOutlineCollapseAll.ToolTipText = "Alles zuklappen";
+            btnOutlineCollapseAll.Click += MnuOutlineCollapseAll_Click;
             // 
-            // mnuOutlineBarCollapseAll
+            // btnOutlineExpandAll
             // 
-            mnuOutlineBarCollapseAll.Name = "mnuOutlineBarCollapseAll";
-            mnuOutlineBarCollapseAll.Size = new Size(195, 22);
-            mnuOutlineBarCollapseAll.Text = "Alles zuklappen";
-            mnuOutlineBarCollapseAll.Click += MnuOutlineCollapseAll_Click;
-            // 
-            // toolStripSeparatorO2
-            // 
-            toolStripSeparatorO2.Name = "toolStripSeparatorO2";
-            toolStripSeparatorO2.Size = new Size(192, 6);
-            // 
-            // mnuOutlineBarLevel2
-            // 
-            mnuOutlineBarLevel2.Name = "mnuOutlineBarLevel2";
-            mnuOutlineBarLevel2.Size = new Size(195, 22);
-            mnuOutlineBarLevel2.Text = "Bis Ebene 2 aufklappen";
-            mnuOutlineBarLevel2.Click += MnuOutlineLevel2_Click;
-            // 
-            // mnuOutlineBarLevel3
-            // 
-            mnuOutlineBarLevel3.Name = "mnuOutlineBarLevel3";
-            mnuOutlineBarLevel3.Size = new Size(195, 22);
-            mnuOutlineBarLevel3.Text = "Bis Ebene 3 aufklappen";
-            mnuOutlineBarLevel3.Click += MnuOutlineLevel3_Click;
+            btnOutlineExpandAll.Alignment = ToolStripItemAlignment.Right;
+            btnOutlineExpandAll.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            btnOutlineExpandAll.Enabled = false;
+            btnOutlineExpandAll.Name = "btnOutlineExpandAll";
+            btnOutlineExpandAll.Size = new Size(23, 33);
+            btnOutlineExpandAll.Text = "Alles aufklappen";
+            btnOutlineExpandAll.ToolTipText = "Alles aufklappen";
+            btnOutlineExpandAll.Click += MnuOutlineExpandAll_Click;
             // 
             // btnOutlineEdit
             // 
@@ -1280,6 +1268,7 @@
             outlineView.Size = new Size(156, 60);
             outlineView.TabIndex = 1;
             outlineView.ItemActivated += OutlineView_ItemActivated;
+            outlineView.ExpansionChanged += OutlineView_ExpansionChanged;
             // 
             // contextMenuOutline
             // 
@@ -1466,6 +1455,7 @@
             pageView.SelectionFinished += PageView_SelectionFinished;
             pageView.ImageCopyRequested += PageView_ImageCopyRequested;
             pageView.NoteClicked += PageView_NoteClicked;
+            pageView.AnnotationClicked += PageView_AnnotationClicked;
             pageView.NoteHover += PageView_NoteHover;
             pageView.SearchChanged += PageView_SearchChanged;
             pageView.LinkHover += PageView_LinkHover;
@@ -1480,7 +1470,31 @@
             pageView.DragDrop += HandleDragDrop;
             pageView.DragEnter += HandleDragEnter;
             pageView.MouseUp += PageView_MouseUp;
-            // 
+            //
+            // startPage
+            //
+            startPage.AllowDrop = true;
+            startPage.BackColor = Color.FromArgb(232, 232, 232);
+            startPage.Dock = DockStyle.Fill;
+            startPage.Location = new Point(15, 0);
+            startPage.Name = "startPage";
+            startPage.Size = new Size(969, 624);
+            startPage.TabIndex = 2;
+            startPage.Visible = false;
+            startPage.OpenRequested += StartPage_OpenRequested;
+            startPage.OpenDialogRequested += StartPage_OpenDialogRequested;
+            startPage.ShowInFolderRequested += StartPage_ShowInFolderRequested;
+            startPage.AddFavoriteRequested += StartPage_AddFavoriteRequested;
+            startPage.RemoveFavoriteRequested += StartPage_RemoveFavoriteRequested;
+            startPage.RemoveRecentRequested += StartPage_RemoveRecentRequested;
+            startPage.ClearRequested += StartPage_ClearRequested;
+            startPage.OpenCheckedRequested += StartPage_OpenCheckedRequested;
+            startPage.MergeRequested += StartPage_MergeRequested;
+            startPage.RemoveCheckedRequested += StartPage_RemoveCheckedRequested;
+            startPage.CollapsedChanged += StartPage_CollapsedChanged;
+            startPage.DragDrop += HandleDragDrop;
+            startPage.DragEnter += HandleDragEnter;
+            //
             // contextMenuPage
             // 
             contextMenuPage.Items.AddRange(new ToolStripItem[] { mnuViewCopy, mnuViewSelectAll, toolStripSeparatorC2, mnuSaveImage, mnuCopyImage, toolStripSeparatorC1, mnuAddFreeTextHere, mnuHighlight, mnuAddComment, mnuEditAnnotation, mnuRemoveAnnotation });
@@ -1671,6 +1685,7 @@
         private PDFLight.Controls.AnnotationPanel annotationPanel;
         private PDFLight.Controls.AttachmentPanel attachmentPanel;
         private PDFLight.Controls.SidebarToggle sidebarToggle;
+        private PDFLight.Controls.StartPage startPage;
         private ToolStripButton btnSideAttachments;
         private System.Windows.Forms.Timer annotationRefreshTimer;
         private System.Windows.Forms.ToolStripMenuItem mnuRemoveBookmarks;
@@ -1779,11 +1794,8 @@
         private ToolStrip outlineStrip;
         private ToolStripLabel labelOutlineCount;
         private ToolStripDropDownButton btnOutlineMore;
-        private ToolStripMenuItem mnuOutlineBarExpandAll;
-        private ToolStripMenuItem mnuOutlineBarCollapseAll;
-        private ToolStripSeparator toolStripSeparatorO2;
-        private ToolStripMenuItem mnuOutlineBarLevel2;
-        private ToolStripMenuItem mnuOutlineBarLevel3;
+        private ToolStripButton btnOutlineCollapseAll;
+        private ToolStripButton btnOutlineExpandAll;
         private ToolStripButton btnOutlineEdit;
         private ToolStripMenuItem mnuOutlineExpandAll;
         private ToolStripMenuItem mnuOutlineCollapseAll;

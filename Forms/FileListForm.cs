@@ -19,18 +19,21 @@ public partial class FileListForm : Form
     /// <summary>Die angehakten Dateien in Listenreihenfolge (nach OK).</summary>
     public List<string> SelectedFiles { get; private set; } = [];
 
-    public FileListForm(string title, IReadOnlyList<string> files)
+    /// <param name="checkAll">Alle Dateien vorab angehakt (Zusammenführen von der Startseite: nur die Reihenfolge festlegen).</param>
+    /// <param name="okText">Beschriftung des OK-Knopfs statt „Dateien hinzufügen“.</param>
+    public FileListForm(string title, IReadOnlyList<string> files, bool checkAll = false, string? okText = null)
     {
         InitializeComponent();
         Lng.Apply(this); // der Hinweis über der Liste (Strg+Leertaste, Reihenfolge) kommt aus dem Designer
         Text = title;
+        if (okText != null) { btnOK.Text = okText; }
         listView.BeginUpdate();
         foreach (var file in files)
         {
             DateTime? modified = null;
             try { modified = File.GetLastWriteTime(file); }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // dann ohne Datum
-            ListViewItem item = new(Path.GetFileName(file)) { Tag = new FileEntry(file, modified), ToolTipText = file };
+            ListViewItem item = new(Path.GetFileName(file)) { Tag = new FileEntry(file, modified), ToolTipText = file, Checked = checkAll };
             item.SubItems.Add(modified?.ToString("g") ?? string.Empty);
             listView.Items.Add(item);
         }

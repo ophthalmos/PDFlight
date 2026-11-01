@@ -22,6 +22,7 @@ internal sealed class ThumbnailGrid : ScrollableControl
     private int generation;                 // jede neue Datei oder Größe macht laufende Aufträge ungültig
     private int thumbnailSize = 160;
     private int currentPage = -1;
+    private int hoverPage = -1;             // Miniatur unter der Maus: dünner Rahmen mit Schatten wie Edge (Wunsch vom 17.10.2026)
     private bool singleColumn = true;
     private Size lastBox;
     private double tallest = 1.414;         // größtes Verhältnis Höhe/Breite der Seiten: Feldhöhe in der Spalte
@@ -107,7 +108,7 @@ internal sealed class ThumbnailGrid : ScrollableControl
             return;
         }
         document = value;
-        currentPage = -1;
+        currentPage = hoverPage = -1;
         tallest = value is { PageCount: > 0 } ? Math.Clamp(value.PageSizes.Max(p => p.Height / Math.Max(1, p.Width)), 0.25, 4) : 1.414;
         lastBox = Box;
         ClearCache();
@@ -215,10 +216,13 @@ internal sealed class ThumbnailGrid : ScrollableControl
         base.OnPaint(e);
         if (document == null) { return; }
         using var numberFont = new Font(Font.FontFamily, 9f);
+        var current = document.PageCount > 1 ? currentPage : -1; // bei nur einer Seite gibt es nichts zu unterscheiden – kein Rahmen (wie in der Seitenansicht)
         foreach (var index in VisiblePages())
         {
             var cell = CellBounds(index);
             var thumb = ThumbBounds(index);
+            var hovered = index == hoverPage && index != current;
+            if (hovered) { DrawShadow(e.Graphics, thumb); }
             if (cache.TryGetValue(index, out var bitmap))
             {
                 e.Graphics.DrawImage(bitmap, thumb);
@@ -229,15 +233,35 @@ internal sealed class ThumbnailGrid : ScrollableControl
                 e.Graphics.FillRectangle(Brushes.White, thumb); // Platzhalter, bis die Miniatur fertig ist
                 Request(index, thumb.Size);
             }
-            if (index == currentPage)
+            if (index == current)
             {
                 var width = LogicalToDeviceUnits(CurrentPageBorderWidth);
+                using var pen = new Pen(currentPageColor, width) { Alignment = System.Drawing.Drawing2D.PenAlignment.Inset };
+                e.Graphics.DrawRectangle(pen, thumb.X - width, thumb.Y - width, thumb.Width + 2 * width - 1, thumb.Height + 2 * width - 1);
+            }
+            else if (hovered)
+            {
+                var width = LogicalToDeviceUnits(HoverBorderWidth);
                 using var pen = new Pen(currentPageColor, width) { Alignment = System.Drawing.Drawing2D.PenAlignment.Inset };
                 e.Graphics.DrawRectangle(pen, thumb.X - width, thumb.Y - width, thumb.Width + 2 * width - 1, thumb.Height + 2 * width - 1);
             }
             else { e.Graphics.DrawRectangle(Pens.Gray, thumb.X - 1, thumb.Y - 1, thumb.Width + 1, thumb.Height + 1); }
             var label = new Rectangle(cell.X, cell.Bottom, cell.Width, LogicalToDeviceUnits(LabelHeight));
             TextRenderer.DrawText(e.Graphics, (index + 1).ToString(), numberFont, label, ForeColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+        }
+    }
+
+    private const int HoverBorderWidth = 2; // logische px – der dicke Rahmen (CurrentPageBorderWidth) bleibt der angezeigten Seite
+
+    /// <summary>Weicher Schatten um eine Miniatur: Ringe mit abnehmender Deckkraft, leicht nach unten versetzt.</summary>
+    private void DrawShadow(Graphics g, Rectangle thumb)
+    {
+        var rings = LogicalToDeviceUnits(6);
+        var offset = LogicalToDeviceUnits(2);
+        for (var i = rings; i >= 1; i--)
+        {
+            using var pen = new Pen(Color.FromArgb(Math.Max(4, 48 * (rings - i + 1) / rings / 2), Color.Black));
+            g.DrawRectangle(pen, thumb.X - i, thumb.Y - i + offset, thumb.Width + 2 * i - 1, thumb.Height + 2 * i - 1);
         }
     }
 
@@ -289,6 +313,29 @@ internal sealed class ThumbnailGrid : ScrollableControl
     protected override void OnScroll(ScrollEventArgs se)
     {
         base.OnScroll(se);
+        UpdateHover(PointToClient(Cursor.Position)); // die Miniaturen wandern unter der Maus durch
+        Invalidate();
+    }
+
+    protected override void OnMouseMove(MouseEventArgs e)
+    {
+        base.OnMouseMove(e);
+        UpdateHover(e.Location);
+    }
+
+    protected override void OnMouseLeave(EventArgs e)
+    {
+        base.OnMouseLeave(e);
+        SetHover(-1);
+    }
+
+    private void UpdateHover(Point location) =>
+        SetHover(document == null || !ClientRectangle.Contains(location) ? -1 : VisiblePages().FirstOrDefault(i => CellBounds(i).Contains(location), -1));
+
+    private void SetHover(int index)
+    {
+        if (index == hoverPage) { return; }
+        hoverPage = index;
         Invalidate();
     }
 
@@ -300,6 +347,7 @@ internal sealed class ThumbnailGrid : ScrollableControl
             return;
         }
         base.OnMouseWheel(e);
+        UpdateHover(e.Location);
         Invalidate();
     }
 
@@ -320,7 +368,7 @@ internal sealed class ThumbnailGrid : ScrollableControl
     }
 
     protected override bool IsInputKey(Keys keyData) =>
-        keyData is Keys.Up or Keys.Down or Keys.Left or Keys.Right or Keys.Home or Keys.End or Keys.PageUp or Keys.PageDown || base.IsInputKey(keyData);
+        (keyData & ~Keys.Control) is Keys.Up or Keys.Down or Keys.Left or Keys.Right or Keys.Home or Keys.End or Keys.PageUp or Keys.PageDown || base.IsInputKey(keyData);
 
     protected override void OnKeyDown(KeyEventArgs e)
     {
@@ -336,8 +384,8 @@ internal sealed class ThumbnailGrid : ScrollableControl
             Keys.Right => page + 1,
             Keys.PageUp => page - rows * Columns,
             Keys.PageDown => page + rows * Columns,
-            Keys.Home => 0,
-            Keys.End => document.PageCount - 1,
+            Keys.Home or (Keys.Control | Keys.Home) => 0, // Strg+Pos1/Ende wie in der Seitenansicht
+            Keys.End or (Keys.Control | Keys.End) => document.PageCount - 1,
             _ => null,
         };
         if (target is not { } next) { return; }

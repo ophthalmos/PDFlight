@@ -10,7 +10,7 @@ namespace PDFLight.Forms;
 public partial class MainForm : Form
 {
     private readonly AppSettings settings;
-    private readonly StartOptions options;  // Kommandozeile: Datei und Schalter (/help, /max, /page:N, /print)
+    private readonly StartOptions options;  // Kommandozeile: Datei und Schalter (/help, /max, /page:N, /print, /twopage, /zoom:N, /nosidebar)
     private PdfiumDocument? document;       // das angezeigte Dokument im Hilfsprogramm (s. Viewer\SandboxClient)
     private int loadVersion;                // jedes Laden zählt hoch – ein überholtes Öffnen verwirft sein Ergebnis
     private bool documentDirty;             // ungespeicherte Formulareingaben („*“ im Titel)
@@ -77,6 +77,7 @@ public partial class MainForm : Form
         ApplyFavoritesOption();
         toolStrip.Resize += (s, args) => UpdateProgramIconVisibility();
         RestoreWindowBounds();
+        if (preload == null && !options.Help) { UpdateStartPage(); } // ohne Startdatei gleich die Startseite – sonst blitzten Viewer-Leiste und Seitenleiste beim ersten Zeichnen auf
     }
 
     private async void MainForm_Shown(object? sender, EventArgs e)
@@ -139,15 +140,15 @@ public partial class MainForm : Form
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { } // sonst räumt sie der nächste Start ab
         InstanceRegistry.Clear(); // diese Instanz zeigt nichts mehr an
         SetFullScreen(false); // sonst würden randlose Vollbild-Maße gespeichert
-        settings.ShowSidebar = sidebarUserVisible; // die eigene Einstellung, nicht das automatische Öffnen für Lesezeichen
+        settings.ShowSidebar = sidebarUserVisible; // die eigene Einstellung, nicht das automatische Öffnen für Lesezeichen (und nicht /nosidebar)
         settings.SidebarWidth = (int)Math.Round(splitViewer.SplitterDistance * 96.0 / DeviceDpi); // logische Pixel
         settings.SidebarBookmarks = sidebarUserBookmarks;
-        if ((document != null ? new ViewState(pageView.Fit, pageView.Zoom) : startView) is { } view) // Anzeigeeinstellungen für den nächsten Start
+        if (options.ZoomPercent == 0 && (document != null ? new ViewState(pageView.Fit, pageView.Zoom) : startView) is { } view) // Anzeigeeinstellungen für den nächsten Start (/zoom ist einmalig)
         {
             settings.ViewFit = view.Fit.ToString();
             settings.ViewZoomPercent = (int)Math.Round(view.Zoom * 100);
         }
-        settings.TwoPageLayout = pageView.TwoPageLayout;
+        if (!options.TwoPage) { settings.TwoPageLayout = pageView.TwoPageLayout; } // /twopage ist einmalig wie /max
         settings.SearchMatchCase = btnMatchCase.Checked;
         settings.SearchWholeWord = btnWholeWord.Checked;
         settings.InkColor = AnnotationStyle.ToHex(pageView.InkColor);
@@ -167,6 +168,8 @@ public partial class MainForm : Form
 
     private void MainForm_Activated(object? sender, EventArgs e)
     {
+        BeginInvoke(RestorePageFocus); // nach dem Schließen eines Dialogs stellt Windows den Fokus erst danach wieder her
+        if (startPageShown) { FillStartPage(); } // andere Instanzen können inzwischen Dateien geöffnet, Dateien sich geändert haben
         if (currentFile == null) { return; }
         try
         {
@@ -290,10 +293,7 @@ public partial class MainForm : Form
         splashTimer.Start();
     }
 
-    private void SplashTimer_Tick(object? sender, EventArgs e)
-    {
-        HideSplash();
-    }
+    private void SplashTimer_Tick(object? sender, EventArgs e) => HideSplash();
 
     private void HideSplash()
     {
@@ -460,7 +460,7 @@ public partial class MainForm : Form
                 if (version != loadVersion || IsDisposed) { return null; }
                 // die bisherige Datei nicht hinter der Abfrage stehen lassen – nach dem Löschen sah man sonst die gelöschte (Fehlerbericht 12.10.2026)
                 if (document != null && !string.Equals(document.Path, path, StringComparison.OrdinalIgnoreCase)) { ShowDocument(null); }
-                if (ex.WrongPassword) { TaskDlg.MsgTaskDlg(Handle, Lng.T("Das Kennwort ist falsch."), null, TaskDialogIcon.Warning); }
+                if (ex.WrongPassword) { TaskDlg.MsgTaskDlg(Handle, Lng.T("Das Kennwort ist falsch."), Lng.T("Vergewissere dich, dass nicht versehentlich die Feststelltaste für Großschreibung aktiviert wurde und versuche es erneut."), TaskDialogIcon.Warning); }
                 using PasswordForm dialog = new(Path.GetFileName(path));
                 if (dialog.ShowDialog(this) != DialogResult.OK || version != loadVersion)
                 {
@@ -504,7 +504,11 @@ public partial class MainForm : Form
                 UpdateUiState();
                 statusPath.Text = message; // die Meldung des Aufrufers („Die Seiten wurden gelöscht.“ …) bleibt – UpdateUiState setzte den Pfad
             }
-            if (newFile) { ApplySidebarForDocument(hasOutline: outline.Count > 0); } // nicht beim Neuladen derselben Datei
+            if (newFile)
+            {
+                ApplySidebarForDocument(hasOutline: outline.Count > 0); // nicht beim Neuladen derselben Datei
+                FocusPageView(); // Bild↑/↓, Strg+Pos1/Ende wirken gleich in der neuen Datei
+            }
             RefreshAnnotations(); // Liste bzw. Symbol der Umschaltleiste für den neuen Stand
             _ = RefreshAttachmentsAsync();
         }
@@ -569,12 +573,12 @@ public partial class MainForm : Form
         // PDF/A-Schutz: verändernde Operationen bleiben gesperrt, bis „Bearbeitung aktivieren“ gedrückt wurde;
         // Extrahieren (neue Datei), Rückgängig (stellt alte Bytes wieder her) und Eigenschaften (dann nur lesend) bleiben frei
         pnlPdfA.Visible = hasFile && PdfALocked; // bei Kennwortschutz keine eigene Leiste (Wunsch vom 20.09.2026), dafür das Schloss in der Statusleiste (statusSecurity)
-        mnuDeletePages.Enabled = mnuAppendPdf.Enabled = mnuDuplex.Enabled = !EditLocked;
-        mnuMovePage.Enabled = !EditLocked && currentPageCount > 1; // mit einer Seite gibt es nichts zu verschieben
-        mnuInsertPage.Enabled = !EditLocked;
-        mnuRemoveBookmarks.Enabled = !EditLocked && (currentPdfStatus?.OutlineCount ?? 0) > 0;
-        mnuEditBookmarks.Enabled = !EditLocked; // auch ohne Lesezeichen: dann legt der Editor welche an
-        btnOutlineEdit.Enabled = hasFile && (!EditLocked || bookmarkEditor != null); // Kopfzeile der Dokumentstruktur; ein offener Editor kommt nach vorn
+        mnuDeletePages.Enabled = mnuAppendPdf.Enabled = mnuDuplex.Enabled = !PageEditLocked;
+        mnuMovePage.Enabled = !PageEditLocked && currentPageCount > 1; // mit einer Seite gibt es nichts zu verschieben
+        mnuInsertPage.Enabled = !PageEditLocked;
+        mnuRemoveBookmarks.Enabled = !PageEditLocked && (currentPdfStatus?.OutlineCount ?? 0) > 0;
+        mnuEditBookmarks.Enabled = !PageEditLocked; // auch ohne Lesezeichen: dann legt der Editor welche an
+        btnOutlineEdit.Enabled = hasFile && (!PageEditLocked || bookmarkEditor != null); // Kopfzeile der Dokumentstruktur; ein offener Editor kommt nach vorn
         foreach (var button in programIconButtons) { button.Enabled = hasFile; }
         mnuHighlight.Visible = mnuRemoveAnnotation.Visible = mnuAddFreeTextHere.Visible = toolStripSeparatorC1.Visible = hasFile && !EditLocked; // ändern das Dokument
         pageView.AllowAnnotationMove = hasFile && !EditLocked && currentPageCount > 0; // Textanmerkungen und Stempel verschieben (Ziehen) und bearbeiten (Doppelklick)
@@ -584,7 +588,7 @@ public partial class MainForm : Form
             var files = FileUtil.GetPdfFilesInFolder(currentFile!.DirectoryName!);
             var index = files.FindIndex(f => string.Equals(f, currentFile.FullName, StringComparison.OrdinalIgnoreCase));
             statusIndex.Text = Lng.T("Datei") + " " + (index >= 0 ? (index + 1).ToString() : "–") + "/" + files.Count;
-            statusPath.Text = currentFile.FullName;
+            statusPath.Text = currentFile.DirectoryName; // nur der Ordner – der Dateiname steht schon im Fenstertitel (Wunsch vom 17.10.2026)
             if (AnnotationModeActive) { statusBeforeMode = statusPath.Text; ShowModeHint(); } // nach dem Speichern bleibt der Hinweis stehen
             UpdateStatusInfo();
             UpdateFormatLabel();
@@ -602,6 +606,7 @@ public partial class MainForm : Form
         }
         UpdateOneClickLabel();
         UpdateViewerState();
+        UpdateStartPage();
         if (bookmarkEditor != null) { LockForBookmarkEditor(); } // die Freigaben oben gelten nicht, solange der Editor offen ist
     }
 
@@ -646,9 +651,21 @@ public partial class MainForm : Form
     /// (Einschränkungen): PDFsharp öffnet solche Dateien nicht zum Bearbeiten.</summary>
     private bool Encrypted => currentPdfStatus?.Encrypted ?? false;
 
+    /// <summary>Kennwort, mit dem die angezeigte verschlüsselte Datei geöffnet wurde – damit sind die Seitenbefehle frei (seit 24.10.2026,
+    /// Wunsch Wilhelms): <see cref="RunPdfEdit"/> bearbeitet dann die von PDFium entschlüsselte Fassung im Speicher und verschlüsselt mit
+    /// demselben Kennwort neu (<see cref="PdfEditService.RunUnlocked"/>). Null bei unverschlüsselten Dateien und bei solchen, die sich ohne
+    /// Kennwort öffnen lassen und nur Einschränkungen haben – deren Besitzerkennwort ist unbekannt, das Aufheben bleibt ein bewusster
+    /// Schritt in den Eigenschaften (Reiter „Sicherheit“).</summary>
+    private string? EditPassword => Encrypted && currentFile != null && passwords.TryGetValue(currentFile.FullName, out var password) ? password : null;
+
     /// <summary>Bearbeiten gesperrt – wegen PDF/A (bis „Bearbeitung aktivieren“) oder wegen Kennwortschutz (bis er in den Eigenschaften, Reiter
     /// „Sicherheit“, aufgehoben ist).</summary>
     private bool EditLocked => PdfALocked || Encrypted || currentPageCount < 0 || bookmarkEditor != null; // < 0: noch nicht geladen – Verschlüsselung erst danach bekannt (Review 04.10.2026); Lesezeichen-Editor offen: nur ansehen
+
+    /// <summary>Seitenbefehle und Lesezeichen (Bearbeiten-Menü, Miniaturen-Kontextmenü) gesperrt – wie <see cref="EditLocked"/>, bei
+    /// Kennwortschutz aber frei, wenn die Datei mit ihrem Kennwort geöffnet wurde (<see cref="EditPassword"/>). Anmerkungen und Drehen
+    /// arbeiten über Temp-Kopien des angezeigten Stands (EditInViewAsync) und bleiben bei Verschlüsselung gesperrt.</summary>
+    private bool PageEditLocked => PdfALocked || (Encrypted && EditPassword == null) || currentPageCount < 0 || bookmarkEditor != null;
 
     /// <summary>„Bearbeitung aktivieren“ im PDF/A-Banner: hebt nach einer Warnung den Schreibschutz
     /// für diese Datei auf. Die Datei selbst bleibt dabei unverändert — die PDF/A-Kennzeichnung geht
@@ -680,10 +697,7 @@ public partial class MainForm : Form
         statusSecurity.Visible = currentPdfStatus?.Encrypted == true;
     }
 
-    private void StatusSecurity_Click(object? sender, EventArgs e)
-    {
-        RunUnlessEditing(() => ShowProperties(showSecurity: true));
-    }
+    private void StatusSecurity_Click(object? sender, EventArgs e) => RunUnlessEditing(() => ShowProperties(showSecurity: true));
 
     private void OpenFile()
     {
@@ -718,16 +732,13 @@ public partial class MainForm : Form
         {
             btnOpen.DropDownItems.Add(new ToolStripSeparator());
             ToolStripMenuItem clear = new(Lng.T("Liste leeren")) { Image = MenuIcon(ToolbarIcons.Clear) };
-            clear.Click += (s, args) => { settings.RecentFiles.Clear(); settings.Save(); };
+            clear.Click += (s, args) => { settings.ClearRecentFiles(); settings.Save(); };
             btnOpen.DropDownItems.Add(clear);
         }
     }
 
     // Drag & Drop: Formular, Tool- und Statusleiste und die Seitenansicht nehmen PDF-Dateien an (verdrahtet im Designer)
-    private void HandleDragEnter(object? sender, DragEventArgs e)
-    {
-        e.Effect = GetDroppedPdfs(e).Count > 0 ? DragDropEffects.Copy : DragDropEffects.None;
-    }
+    private void HandleDragEnter(object? sender, DragEventArgs e) => e.Effect = GetDroppedPdfs(e).Count > 0 ? DragDropEffects.Copy : DragDropEffects.None;
 
     private void HandleDragDrop(object? sender, DragEventArgs e)
     {
@@ -1085,7 +1096,7 @@ public partial class MainForm : Form
     }
 
     /// <summary>Passt die Statusleiste an den verfügbaren Platz an — auch bei jeder Größenänderung
-    /// des Fensters (s. OnResize). Stufenweise: erst entfällt die Pfadangabe der Datei (sie steht
+    /// des Fensters (s. OnResize). Stufenweise: erst entfällt der Ordner der Datei (ihr Pfad steht
     /// schon in der Titelleiste), danach beim 1-Klick-Ordner die Bezeichnung und zuletzt der Pfad
     /// (nur noch der Ordnername). Zeigt statusPath gerade eine Meldung statt des Pfads, bleibt sie
     /// unangetastet.</summary>
@@ -1095,8 +1106,8 @@ public partial class MainForm : Form
         int Width(string? s) => TextRenderer.MeasureText(s, statusStrip.Font).Width;
         var available = statusStrip.Width - Width(statusIndex.Text) - Width(statusInfo.Text)
             - (statusFormat.Visible ? Width(statusFormat.Text) : 0) - 60; // Puffer für Ränder und Trennlinien
-        var pathShown = currentFile != null && (statusPath.Text == currentFile.FullName || string.IsNullOrEmpty(statusPath.Text));
-        var filePath = pathShown ? currentFile!.FullName : statusPath.Text;
+        var pathShown = currentFile != null && (statusPath.Text == currentFile.DirectoryName || string.IsNullOrEmpty(statusPath.Text));
+        var filePath = pathShown ? currentFile!.DirectoryName : statusPath.Text;
         var pathHidden = pathShown ? string.Empty : statusPath.Text; // Meldungstexte bleiben stehen
         var prefix = Lng.T("1-Klick-Ordner:") + " ";
         var folderName = oneClickFolderShown == null ? null : new DirectoryInfo(oneClickFolderShown).Name;
@@ -1191,6 +1202,7 @@ public partial class MainForm : Form
             ApplyToolbarIcons();
             ApplyFavoritesOption();
             UpdateUiState(); // übernimmt z.B. die Titelleisten-Option sofort
+            if (startPageShown) { FillStartPage(); } // Favoriten ein/aus, Länge der Zuletzt-Liste
         }
     }
 
@@ -1256,6 +1268,7 @@ public partial class MainForm : Form
         noteCard.SetMenuIcons(MenuIcon(ToolbarIcons.Delete), MenuIcon(ToolbarIcons.Edit)); // „…“-Menü der Kommentarkarte
         annotationPanel.UpdateMenuIcons(); // Menüs der Anmerkungs- und der Anhangliste in der Seitenleiste
         attachmentPanel.UpdateMenuIcons();
+        startPage.UpdateMenuIcons();
         UpdateOutlineStripIcons();
         mnuOutlineExpandAll.Image = MenuIcon(ToolbarIcons.ChevronDown); // Kontextmenü der Dokumentstruktur
         mnuOutlineCollapseAll.Image = MenuIcon(ToolbarIcons.ChevronUp);
@@ -1375,7 +1388,7 @@ public partial class MainForm : Form
         finally
         {
             emailInProgress = false;
-            if (currentFile != null) { statusPath.Text = currentFile.FullName; }
+            if (currentFile != null) { statusPath.Text = currentFile.DirectoryName; }
         }
     }
 
@@ -1442,12 +1455,19 @@ public partial class MainForm : Form
     }
 
     /// <summary>Führt eine Dokumentänderung mit vorheriger Undo-Sicherung aus; false bei Fehler.</summary>
-    /// <param name="allowEncrypted">Nur für „Kennwort entfernen“: Die Bearbeitung läuft trotz Verschlüsselung (mit dem eingegebenen Kennwort).</param>
+    /// <param name="allowEncrypted">Eigenschaften und Speichern aus PDFium: Die Bearbeitung schreibt selbst fertige Bytes, auch verschlüsselte.</param>
     /// <param name="viewChanges">Angezeigter Stand mit offenen Änderungen (<see cref="PendingViewChangesAsync"/>): kommt nach der Sicherung
-    /// und vor der Bearbeitung in die Datei – beides ist ein Rückgängig-Schritt.</param>
+    /// und vor der Bearbeitung in die Datei – beides ist ein Rückgängig-Schritt. Bei einer verschlüsselten Datei mit bekanntem Kennwort
+    /// ist es der entschlüsselte Stand: Er bleibt im Speicher, die Bearbeitung liest ihn und verschlüsselt beim Speichern neu.</param>
     private bool RunPdfEdit(Action edit, string actionName, bool allowEncrypted = false, byte[]? viewChanges = null)
     {
-        if (!allowEncrypted && Encrypted) { ShowEncryptedMessage(); return false; } // Sicherheitsnetz – die Menüpunkte sind bei Kennwortschutz gesperrt, die Eigenschaften nicht
+        if (!allowEncrypted && Encrypted)
+        {
+            if (EditPassword is not { } password || viewChanges == null) { ShowEncryptedMessage(); return false; } // Sicherheitsnetz – die Menüpunkte sind dann gesperrt
+            var (path, plain, inner) = (currentFile!.FullName, viewChanges, edit); // Encrypted setzt eine angezeigte Datei voraus
+            edit = () => PdfEditService.RunUnlocked(path, plain, password, inner);
+            viewChanges = null; // nie unverschlüsselt in die Datei
+        }
         if (!EnsureWritable(actionName)) { return false; }
         Cursor.Current = Cursors.WaitCursor;
         try
@@ -1477,6 +1497,7 @@ public partial class MainForm : Form
     private async Task<(bool Ok, byte[]? Bytes)> PendingViewChangesAsync(string actionName)
     {
         await FinishNoteEditAsync();
+        if (EditPassword != null) { return await DecryptedViewAsync(actionName); } // verschlüsselt: immer der entschlüsselte Stand, s. RunPdfEdit
         if (!documentDirty || ShownDocument is not { } doc) { return (true, null); }
         await pageView.EndFormInputAsync(); // übernimmt den Wert des Felds, in dem gerade getippt wurde
         try
@@ -1485,6 +1506,30 @@ public partial class MainForm : Form
             return (doc == document, bytes);
         }
         catch (InvalidOperationException ex)
+        {
+            TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), actionName), ex);
+            return (false, null);
+        }
+    }
+
+    /// <summary>Der angezeigte Stand einer verschlüsselten Datei mit bekanntem Kennwort (<see cref="EditPassword"/>), von PDFium entschlüsselt
+    /// und samt offenen Änderungen – nur im Speicher, für <see cref="PdfEditService.RunUnlocked"/>. PDFsharp verschlüsselt danach mit dem
+    /// Kennwort neu und kann dabei keine Einschränkungen setzen: Hat die Datei welche, vorher fragen wie im Eigenschaften-Dialog.
+    /// Ok = false: abgebrochen, Fehler gemeldet oder inzwischen eine andere Datei.</summary>
+    private async Task<(bool Ok, byte[]? Bytes)> DecryptedViewAsync(string actionName)
+    {
+        if (ShownDocument is not { } doc) { ShowNotEditableMessage(); return (false, null); }
+        try
+        {
+            if (HasRestrictions(await doc.SecurityAsync()) && (doc != document || !TaskDlg.ConfirmTaskDlg(Handle,
+                Lng.T("Die Einschränkungen der Datei entfallen."),
+                Lng.T("Die Datei wird mit dem Kennwort, mit dem du sie geöffnet hast, neu verschlüsselt (AES 256 Bit); Einschränkungen wie beim Drucken oder Kopieren gelten danach nicht mehr. Hast du sie mit dem Besitzerkennwort geöffnet, öffnet künftig dieses die Datei. Trotzdem speichern?"),
+                TaskDialogIcon.Warning))) { return (false, null); }
+            await pageView.EndFormInputAsync(); // übernimmt den Wert des Felds, in dem gerade getippt wurde
+            var bytes = await doc.SaveAsync(removeSecurity: true);
+            return (doc == document, bytes);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or IOException)
         {
             TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), actionName), ex);
             return (false, null);
@@ -1612,10 +1657,7 @@ public partial class MainForm : Form
     }
 
     /// <summary>Kontextmenü „Freitext hier einfügen…“: an der Stelle des Rechtsklicks.</summary>
-    private void MnuAddFreeTextHere_Click(object? sender, EventArgs e)
-    {
-        _ = AddAnnotationAtAsync(pageView.ContextMenuPoint); // bearbeitet nur die Anzeige – vorher nichts speichern
-    }
+    private void MnuAddFreeTextHere_Click(object? sender, EventArgs e) => _ = AddAnnotationAtAsync(pageView.ContextMenuPoint); // bearbeitet nur die Anzeige – vorher nichts speichern
 
     /// <summary>Freitext an einer Stelle der Seitenansicht: Die Stelle (PDF-Koordinaten der Seite aus PDFium, /Rotate und Ansichtsdrehung
     /// berücksichtigt) kommt als mm von links/oben in den Dialog – dieselbe Rechnung wie beim Einfügen (Seitenhöhe aus PDFsharp).</summary>
@@ -1778,6 +1820,26 @@ public partial class MainForm : Form
     {
         if (document == null || e.Page >= document.PageCount) { return; }
         pageView.RevealAnnotation(e.Page, e.Bounds);
+    }
+
+    /// <summary>Klick auf eine Anmerkung in der Seite: in der sichtbaren Liste auswählen (Wunsch vom 16.10.2026 – umgekehrt zum Klick in
+    /// die Liste). Eine veraltete Liste wird erst neu gelesen, ihre Nummern könnten eine andere Anmerkung meinen.</summary>
+    private void PageView_AnnotationClicked(object? sender, AnnotationEventArgs e) => SelectInAnnotationList(e.Page, e.Number);
+
+    private async void SelectInAnnotationList(int page, int number)
+    {
+        if (!AnnotationListShown) { return; }
+        if (annotationListStale)
+        {
+            RefreshAnnotations();
+            for (var i = 0; i < 50 && annotationListStale; i++) { await Task.Delay(20); } // höchstens eine Sekunde
+            if (annotationListStale || !AnnotationListShown) { return; }
+        }
+        // dazu der blaue Rahmen wie beim Klick in die Liste – sonst sah man in der Seite nicht, was getroffen wurde (Fehlerbericht 16.10.2026)
+        if (annotationPanel.SelectAnnotation(page, number) is { } entry && document != null && entry.Page < document.PageCount)
+        {
+            pageView.RevealAnnotation(entry.Page, entry.Bounds);
+        }
     }
 
     /// <summary>Doppelklick, Enter oder „Bearbeiten…“: Notizen öffnen ihre Karte zum Schreiben, Freitext und Stempel ihren Dialog.</summary>
@@ -1987,16 +2049,26 @@ public partial class MainForm : Form
         }
         await FinishNoteEditAsync();
         await pageView.EndFormInputAsync();
-        var source = await ViewStateFileAsync(); // ohne offene Änderungen die Datei selbst
+        // verschlüsselt mit bekanntem Kennwort: der entschlüsselte Stand nur im Speicher, die Sammelmappe bekommt dasselbe Kennwort
+        var password = EditPassword;
+        byte[]? plain = null;
+        if (password != null)
+        {
+            var (ok, bytes) = await DecryptedViewAsync(Lng.T("Sammelmappe speichern"));
+            if (!ok) { return; }
+            plain = bytes;
+        }
+        var source = password != null ? currentFile?.FullName : await ViewStateFileAsync(); // ohne offene Änderungen die Datei selbst
         if (source == null) { TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Sammelmappe konnte nicht angelegt werden."), null, TaskDialogIcon.Warning); return; }
         string? temp = null;
-        int totalPages;
+        var totalPages = 0;
         try
         {
             Cursor.Current = Cursors.WaitCursor;
             temp = NewViewCopyPath();
             File.Copy(source, temp, overwrite: true);
-            totalPages = PdfEditService.AppendPdfs(temp, files);
+            if (password != null && plain != null) { PdfEditService.RunUnlocked(temp, plain, password, () => totalPages = PdfEditService.AppendPdfs(temp, files)); }
+            else { totalPages = PdfEditService.AppendPdfs(temp, files); }
             File.Copy(temp, target, overwrite: true);
         }
         catch (Exception ex) when (PdfEditService.IsPdfReadError(ex))
@@ -2012,6 +2084,7 @@ public partial class MainForm : Form
         }
         var created = string.Format(Lng.T("„{0}“ wurde als Sammelmappe angelegt."), Path.GetFileName(target));
         if (!await ConfirmSaveChangesAsync()) { statusPath.Text = created; return; } // abgebrochen: die bisherige Datei bleibt angezeigt
+        if (password != null) { passwords[target] = password; } // dasselbe Kennwort – nicht erneut fragen
         LoadPdf(target, addToRecent: true);
         statusPath.Text = created;
         ShowSplash(string.Format(Lng.T("{0} Seiten"), totalPages));
@@ -2058,10 +2131,7 @@ public partial class MainForm : Form
         statusPath.Text = string.Format(Lng.T("Gespeichert als „{0}“."), Path.GetFileName(target));
     }
 
-    private void BtnSaveAs_Click(object? sender, EventArgs e)
-    {
-        RunUnlessEditing(SaveAsDialog); // offene Änderungen nicht still in die bisherige Datei – sie gehen in die neue
-    }
+    private void BtnSaveAs_Click(object? sender, EventArgs e) => RunUnlessEditing(SaveAsDialog); // offene Änderungen nicht still in die bisherige Datei – sie gehen in die neue
 
     /// <summary>Seiten in eine neue Datei extrahieren – aus dem angezeigten Stand samt ungespeicherten Anmerkungen; die Datei selbst bleibt
     /// unverändert, offene Änderungen bleiben offen (bis 10.10.2026 wurden sie vorher still gespeichert).</summary>
@@ -2091,7 +2161,16 @@ public partial class MainForm : Form
             TaskDlg.MsgTaskDlg(Handle, Lng.T("Der Auszug kann die geöffnete Datei nicht überschreiben."), null, TaskDialogIcon.Warning);
             return;
         }
-        var source = await ViewStateFileAsync(); // ohne offene Änderungen die Datei selbst
+        // verschlüsselt mit bekanntem Kennwort: aus dem entschlüsselten Stand im Speicher, der Auszug bekommt dasselbe Kennwort
+        var password = EditPassword;
+        byte[]? plain = null;
+        if (password != null)
+        {
+            var (ok, bytes) = await DecryptedViewAsync(Lng.T("Seiten extrahieren"));
+            if (!ok) { return; }
+            plain = bytes;
+        }
+        var source = password != null ? currentFile?.FullName : await ViewStateFileAsync(); // ohne offene Änderungen die Datei selbst
         if (source == null)
         {
             TaskDlg.MsgTaskDlg(Handle, Lng.T("Extrahieren fehlgeschlagen."), null, TaskDialogIcon.Warning);
@@ -2100,7 +2179,9 @@ public partial class MainForm : Form
         try
         {
             Cursor.Current = Cursors.WaitCursor;
-            PdfEditService.ExtractPages(source, saveDialog.FileName, rangeDialog.SelectedPages);
+            var (destination, pages) = (saveDialog.FileName, rangeDialog.SelectedPages);
+            if (password != null && plain != null) { PdfEditService.RunUnlocked(source, plain, password, () => PdfEditService.ExtractPages(source, destination, pages)); }
+            else { PdfEditService.ExtractPages(source, destination, pages); }
             statusPath.Text = Lng.T("Auszug gespeichert:") + " " + saveDialog.FileName;
             OpenInNewInstance(saveDialog.FileName); // den Auszug gleich zeigen – in einer eigenen Instanz, das Original bleibt hier offen
         }
@@ -2327,7 +2408,7 @@ public partial class MainForm : Form
         var file = currentFile.FullName;
         var stamp = FileStamp.Of(file); // vor dem Lesen, damit jede spätere Änderung auffällt
         List<Bookmark> bookmarks;
-        try { bookmarks = PdfEditService.ReadOutlines(file); }
+        try { bookmarks = PdfEditService.ReadOutlines(file, EditPassword); }
         catch (Exception ex) when (PdfEditService.IsPdfReadError(ex))
         {
             TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), Lng.T("Lesezeichen lesen")), ex);
@@ -2447,7 +2528,7 @@ public partial class MainForm : Form
         if (currentFile == null) { return; }
         if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
         var page = Math.Max(1, ClampedCurrentPage());
-        var (width, height) = PdfEditService.PageSizePt(currentFile.FullName, page); // für die Formatangabe „Wie Seite N: DIN A4, Hochformat“
+        var (width, height) = PdfEditService.PageSizePt(currentFile.FullName, page, EditPassword); // für die Formatangabe „Wie Seite N: DIN A4, Hochformat“
         using InsertPageForm dialog = new(page, width, height);
         if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
         var newPage = 0;
@@ -2518,10 +2599,7 @@ public partial class MainForm : Form
     }
 
     /// <summary>Merkt ein Verschieben/Umbenennen als rückgängig machbar (die Datei wandert dann zurück).</summary>
-    private void RememberMoveForUndo(string actionName, string previousPath, string newPath)
-    {
-        SetUndoAction(new UndoAction(UndoKind.Move, actionName, newPath, previousPath));
-    }
+    private void RememberMoveForUndo(string actionName, string previousPath, string newPath) => SetUndoAction(new UndoAction(UndoKind.Move, actionName, newPath, previousPath));
 
     private void SetUndoAction(UndoAction? action)
     {
@@ -2756,10 +2834,7 @@ public partial class MainForm : Form
     // ------------------------------------------------------------------ Favoriten
 
     /// <summary>Blendet das Favoriten-Menü gemäß der Einstellung ein oder aus (Standard: aus).</summary>
-    private void ApplyFavoritesOption()
-    {
-        ddbFavorites.Visible = toolStripSeparator12.Visible = settings.ShowFavorites;
-    }
+    private void ApplyFavoritesOption() => ddbFavorites.Visible = toolStripSeparator12.Visible = settings.ShowFavorites;
 
     /// <summary>Baut das Favoriten-Menü beim Öffnen: Hinzufügen bzw. Entfernen für die angezeigte Datei, darunter
     /// alle Favoriten alphabetisch als „Name (Pfad)“, die angezeigte Datei mit Haken. Favoriten fehlender Dateien – etwa auf einem
@@ -2805,9 +2880,9 @@ public partial class MainForm : Form
         RunUnlessEditing(() => LoadOtherFile(favorite.File, addToRecent: true));
     }
 
-    private void MnuFavoriteAdd_Click(object? sender, EventArgs e) { AddFavorite(); }
+    private void MnuFavoriteAdd_Click(object? sender, EventArgs e) => AddFavorite();
 
-    private void MnuFavoriteRemove_Click(object? sender, EventArgs e) { RemoveFavorite(); }
+    private void MnuFavoriteRemove_Click(object? sender, EventArgs e) => RemoveFavorite();
 
     /// <summary>Strg+D: die angezeigte Datei als Favorit merken – oder, wenn sie schon einer ist, wieder austragen.</summary>
     private void ToggleFavorite()
@@ -2819,17 +2894,23 @@ public partial class MainForm : Form
 
     private void AddFavorite()
     {
-        if (currentFile == null) { return; }
-        using FavoriteForm dialog = new(currentFile.Name);
-        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
+        if (currentFile != null) { AddFavorite(currentFile.FullName); }
+    }
+
+    /// <summary>Datei als Favorit merken (Name im Dialog) – die angezeigte oder eine der Startseite; true, wenn eingetragen.</summary>
+    private bool AddFavorite(string file)
+    {
+        using FavoriteForm dialog = new(Path.GetFileName(file));
+        if (dialog.ShowDialog(this) != DialogResult.OK) { return false; }
         settings.ReloadSharedLists(); // parallel laufende Instanzen nicht überschreiben
-        if (!settings.AddFavorite(currentFile.FullName, dialog.FavoriteName))
+        if (!settings.AddFavorite(file, dialog.FavoriteName))
         {
             TaskDlg.MsgTaskDlg(Handle, string.Format(Lng.T("Die Höchstzahl von {0} Favoriten ist erreicht."), AppSettings.FavoritesLimit), null, TaskDialogIcon.Warning);
-            return;
+            return false;
         }
         settings.Save();
         statusPath.Text = Lng.T("Die Datei wurde zu den Favoriten hinzugefügt.");
+        return true;
     }
 
     private void RemoveFavorite()
@@ -2851,6 +2932,193 @@ public partial class MainForm : Form
         statusPath.Text = removed == 1 ? Lng.T("Ein Favorit wurde entfernt.") : string.Format(Lng.T("{0} Favoriten wurden entfernt."), removed);
     }
 
+    // ------------------------------------------------------------------ Startseite
+
+    /// <summary>Ohne angezeigte Datei die Startseite statt der leeren Seitenansicht (Wunsch vom 23.10.2026 nach dem Vorbild von Acrobat,
+    /// SumatraPDF und PDFMover): Favoriten und zuletzt geöffnete Dateien mit Miniatur. Neu gefüllt bei jedem Erscheinen.</summary>
+    private void UpdateStartPage()
+    {
+        var show = currentFile == null && !options.Print;
+        if (show == startPageShown) { return; } // eigener Merker: Visible meldet vor dem ersten Anzeigen des Fensters immer false
+        startPageShown = show;
+        // ohne Dokument auch keine Viewer-Leiste, keine Umschaltleiste und kein Streifen der Seitenleiste – dort war fast alles gesperrt
+        // bzw. leer (Wunsch vom 23.10.2026); mit dem nächsten Dokument kommen sie wieder, die Seitenleiste nach ApplySidebarForDocument
+        viewerStrip.Visible = sidebarStrip.Visible = sidebarToggle.Visible = !show;
+        if (!show)
+        {
+            startPage.Visible = false;
+            startPage.Deactivate();
+            return;
+        }
+        FillStartPage();
+        startPage.Visible = true;
+        startPage.BringToFront();
+        SetSidebarVisible(false); // die eigene Einstellung bleibt
+        FocusStartPage();
+    }
+
+    private bool startPageShown;
+
+    /// <summary>Die Tastatur in die Liste der Startseite – lag der Fokus auf der nun verdeckten Seitenansicht, in der ohne Dokument leeren
+    /// Seitenleiste oder nirgends (nicht aus Eingabefeldern holen).</summary>
+    private void FocusStartPage()
+    {
+        if (!startPageShown || startPage.ContainsFocus) { return; }
+        if (!ContainsFocus || ActiveControl is null or ToolStrip || pageView.ContainsFocus || splitViewer.Panel1.ContainsFocus || ActiveControl == splitViewer) { startPage.FocusList(); }
+    }
+
+    private void FillStartPage()
+    {
+        settings.ReloadSharedLists(); // auch was andere Instanzen zuletzt geöffnet haben
+        var missing = settings.RecentFiles.Where(f => !File.Exists(f)).ToList(); // wie im Öffnen-Dropdown austragen statt ausgrauen
+        foreach (var file in missing) { settings.RemoveRecentFile(file); }
+        if (missing.Count > 0) { settings.Save(); }
+        List<RecentEntry> entries = [];
+        if (settings.ShowFavorites) // Favoriten nur mit der Einstellung, wie ihr Menü; fehlende bleiben ausgegraut stehen wie dort
+        {
+            foreach (var favorite in settings.Favorites.OrderBy(f => f.Label, StringComparer.CurrentCultureIgnoreCase))
+            {
+                var named = !string.IsNullOrWhiteSpace(favorite.Name);
+                entries.Add(CreateStartEntry(favorite.File, favorite.Label, named ? favorite.File : Path.GetDirectoryName(favorite.File) ?? favorite.File, settings.GetRecentOpened(favorite.File), favorite: true));
+            }
+        }
+        foreach (var file in settings.RecentFiles)
+        {
+            entries.Add(CreateStartEntry(file, Path.GetFileName(file), Path.GetDirectoryName(file) ?? file, settings.GetRecentOpened(file), favorite: false));
+        }
+        startPage.FavoritesCollapsed = settings.StartFavoritesCollapsed;
+        startPage.RecentCollapsed = settings.StartRecentCollapsed;
+        startPage.SetEntries(entries, settings.ShowFavorites, settings.MaxRecentFiles > 0);
+        RecentThumbnails.Prune(entries.Where(e => e.Exists).Select(e => new FileInfo(e.Path)));
+    }
+
+    private static RecentEntry CreateStartEntry(string path, string title, string location, DateTime? opened, bool favorite)
+    {
+        try
+        {
+            var info = new FileInfo(path);
+            if (info.Exists) { return new RecentEntry(path, title, location, opened, info.Length, info.LastWriteTimeUtc, true, favorite); }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException) { }
+        return new RecentEntry(path, title, location, opened, -1, default, false, favorite);
+    }
+
+    private void StartPage_OpenRequested(object? sender, RecentEntry e)
+    {
+        if (!File.Exists(e.Path))
+        {
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Datei existiert nicht mehr."), e.Path, TaskDialogIcon.Warning);
+            FillStartPage();
+            return;
+        }
+        RunUnlessEditing(() => LoadOtherFile(e.Path, addToRecent: true));
+    }
+
+    private void StartPage_OpenDialogRequested(object? sender, EventArgs e) => RunUnlessEditing(OpenFile);
+
+    private static void StartPage_ShowInFolderRequested(object? sender, RecentEntry e)
+    {
+        if (File.Exists(e.Path)) { ShellUtil.ShowInFileManager(e.Path); }
+    }
+
+    private void StartPage_AddFavoriteRequested(object? sender, RecentEntry e)
+    {
+        if (AddFavorite(e.Path)) { FillStartPage(); }
+    }
+
+    private void StartPage_RemoveFavoriteRequested(object? sender, RecentEntry e)
+    {
+        settings.ReloadSharedLists();
+        if (settings.Favorites.RemoveAll(f => f.IsFor(e.Path)) == 0) { return; }
+        settings.Save();
+        FillStartPage();
+    }
+
+    private void StartPage_RemoveRecentRequested(object? sender, RecentEntry e)
+    {
+        settings.ReloadSharedLists();
+        settings.RemoveRecentFile(e.Path);
+        settings.Save();
+        FillStartPage();
+    }
+
+    private void StartPage_CollapsedChanged(object? sender, EventArgs e)
+    {
+        settings.StartFavoritesCollapsed = startPage.FavoritesCollapsed;
+        settings.StartRecentCollapsed = startPage.RecentCollapsed;
+        settings.Save();
+    }
+
+    /// <summary>Befehlsleiste „Öffnen“: die erste Datei hier, jede weitere in einem eigenen Fenster – wie beim Ablegen mehrerer Dateien.</summary>
+    private void StartPage_OpenCheckedRequested(object? sender, IReadOnlyList<RecentEntry> e)
+    {
+        var files = StartPage.ExistingPaths(e);
+        if (files.Count == 0) { return; }
+        startPage.ClearChecked();
+        RunUnlessEditing(() => OpenDroppedFiles(files));
+    }
+
+    /// <summary>Befehlsleiste „Zusammenführen…“: Reihenfolge in der Dateiliste festlegen, Ziel wählen, dann wie „PDF-Datei anhängen“ in
+    /// eine neue Sammelmappe – die Ausgangsdateien bleiben unverändert – und diese anzeigen.</summary>
+    private void StartPage_MergeRequested(object? sender, IReadOnlyList<RecentEntry> e)
+    {
+        var candidates = StartPage.ExistingPaths(e);
+        if (candidates.Count < 2) { return; }
+        using FileListForm order = new(Lng.T("Zusammenführen – Reihenfolge festlegen"), candidates, checkAll: true, okText: Lng.T("&Zusammenführen"));
+        if (order.ShowDialog(this) != DialogResult.OK || order.SelectedFiles.Count < 2) { return; }
+        var files = order.SelectedFiles;
+        using SaveFileDialog dialog = new()
+        {
+            Filter = Lng.T("PDF-Dateien (*.pdf)|*.pdf"),
+            Title = Lng.T("Sammelmappe speichern"),
+            InitialDirectory = Path.GetDirectoryName(files[0]),
+            FileName = Lng.T("Sammelmappe") + ".pdf",
+        };
+        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
+        var target = dialog.FileName;
+        string? temp = null;
+        try
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            temp = NewViewCopyPath(); // erst fertig bauen, dann ans Ziel – so darf das Ziel eine der Ausgangsdateien sein
+            File.Copy(files[0], temp, overwrite: true);
+            PdfEditService.AppendPdfs(temp, [.. files.Skip(1)]);
+            File.Copy(temp, target, overwrite: true);
+        }
+        catch (Exception ex) when (PdfEditService.IsPdfReadError(ex))
+        {
+            TaskDlg.ErrTaskDlg(Handle, Lng.T("Die Sammelmappe konnte nicht angelegt werden."), ex);
+            return;
+        }
+        finally
+        {
+            Cursor.Current = Cursors.Default;
+            DeleteViewCopy(temp);
+        }
+        startPage.ClearChecked();
+        LoadPdf(target, addToRecent: true);
+        statusPath.Text = string.Format(Lng.T("„{0}“ wurde als Sammelmappe angelegt."), Path.GetFileName(target));
+    }
+
+    /// <summary>Befehlsleiste „Aus ‚Zuletzt geöffnet‘ entfernen“: nur Einträge der Zuletzt-Liste – angehakte Favoriten bleiben Favoriten.</summary>
+    private void StartPage_RemoveCheckedRequested(object? sender, IReadOnlyList<RecentEntry> e)
+    {
+        settings.ReloadSharedLists();
+        foreach (var entry in e.Where(x => !x.Favorite)) { settings.RemoveRecentFile(entry.Path); }
+        settings.Save();
+        startPage.ClearChecked();
+        FillStartPage();
+    }
+
+    private void StartPage_ClearRequested(object? sender, EventArgs e)
+    {
+        if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Die Liste der zuletzt geöffneten Dateien leeren?"), null)) { return; }
+        settings.ReloadSharedLists();
+        settings.ClearRecentFiles();
+        settings.Save();
+        FillStartPage();
+    }
+
     /// <summary>Nach Umbenennen oder Verschieben (auch per Rückgängig) folgen Favorit, gemerkte Seite und gemerktes Kennwort der Datei
     /// auf den neuen Pfad – Favorit und Seite nur, wenn es sie gibt, und auf dem frischen Stand der Platte.</summary>
     private void UpdateFilePaths(string oldPath, string newPath)
@@ -2861,6 +3129,7 @@ public partial class MainForm : Form
         settings.ReloadSharedLists(); // parallel laufende Instanzen nicht überschreiben
         settings.MoveFavorites(oldPath, newPath);
         settings.MoveLastPage(oldPath, newPath);
+        settings.MoveRecentFile(oldPath, newPath); // auf der Startseite stünde sonst ein verschwundener Eintrag
         settings.Save();
     }
 
@@ -3099,11 +3368,9 @@ public partial class MainForm : Form
     /// <summary>Keine PDF (etwa ein Foto über „Öffnen mit“, Ablegen oder einen getippten Namen im Öffnen-Dialog): eigene Meldung statt
     /// PDFiums Fehlertext, nur mit OK (Wortlaut Wilhelms vom 10.10.2026; „PDFlight beenden“ war kurz dabei). Eine angezeigte Datei bleibt
     /// unverändert.</summary>
-    private void ShowNotPdfMessage(string path)
-    {
+    private void ShowNotPdfMessage(string path) =>
         // über TaskDlg wie alle Meldungen (Review 11.10.2026); ohne Überschrift – der Satz steht als Text wie bisher
         TaskDlg.MsgTaskDlg(Handle, string.Empty, string.Format(Lng.T("PDFlight konnte „{0}“ nicht öffnen, da entweder der Dateityp nicht unterstützt wird oder die Datei beschädigt ist."), Path.GetFileName(path)), TaskDialogIcon.Warning);
-    }
 
     /// <summary>Eine andere Datei anzeigen; bei offenen Änderungen der bisherigen vorher Speichern / Nicht speichern / Abbrechen fragen
     /// wie beim Schließen (Wunsch vom 05.10.2026 – vorher wurde still gespeichert).</summary>
@@ -3220,10 +3487,7 @@ public partial class MainForm : Form
     }
 
     /// <summary>Kontextmenü „Hervorheben“: den markierten Text gelb hervorheben (wie Acrobat) und die Datei gleich speichern.</summary>
-    private void MnuHighlight_Click(object? sender, EventArgs e)
-    {
-        HighlightSelection();
-    }
+    private void MnuHighlight_Click(object? sender, EventArgs e) => HighlightSelection();
 
     /// <summary>Markierten Text hervorheben und die Datei speichern (Kontextmenü, Viewer-Leiste, Hervorheben-Modus).</summary>
     private async void HighlightSelection()
@@ -3435,10 +3699,7 @@ public partial class MainForm : Form
         return new Cursor(bitmap.GetHicon());
     }
 
-    private void BtnStamp_Click(object? sender, EventArgs e)
-    {
-        AddStampDialog();
-    }
+    private void BtnStamp_Click(object? sender, EventArgs e) => AddStampDialog();
 
     private void BtnDraw_Click(object? sender, EventArgs e)
     {
@@ -3456,16 +3717,10 @@ public partial class MainForm : Form
 
     private bool inkWasDirty; // Änderungsstand beim Beginn des Strichs – so steht er nach Rückgängig wieder da
 
-    private void PageView_InkStarted(object? sender, EventArgs e)
-    {
-        inkWasDirty = documentDirty;
-    }
+    private void PageView_InkStarted(object? sender, EventArgs e) => inkWasDirty = documentDirty;
 
     /// <summary>Ein Strich ist im Dokument (das meldet sich selbst als geändert): den Stand davor für Rückgängig merken.</summary>
-    private void PageView_InkAdded(object? sender, InkAddedEventArgs e)
-    {
-        AddViewUndo(new ViewUndo(e.Before, inkWasDirty, Lng.T("Zeichnen")));
-    }
+    private void PageView_InkAdded(object? sender, InkAddedEventArgs e) => AddViewUndo(new ViewUndo(e.Before, inkWasDirty, Lng.T("Zeichnen")));
 
     /// <summary>Radierer (Wunsch vom 04.10.2026, nach Chromes Vorbild): Klicken oder Wischen entfernt Zeichnungen und Hervorhebungen;
     /// Freitext und Stempel bleiben verschont (Kontextmenü bzw. „Anmerkungen verwalten“). Ungespeichert wie alle Anmerkungen.</summary>
@@ -3477,16 +3732,10 @@ public partial class MainForm : Form
 
     private bool eraseWasDirty; // Änderungsstand beim Beginn des Wischs – so steht er nach Rückgängig wieder da
 
-    private void PageView_EraseStarted(object? sender, EventArgs e)
-    {
-        eraseWasDirty = documentDirty;
-    }
+    private void PageView_EraseStarted(object? sender, EventArgs e) => eraseWasDirty = documentDirty;
 
     /// <summary>Ein Wisch hat etwas entfernt (das Dokument meldet sich selbst als geändert): ein Rückgängig-Schritt für den ganzen Wisch.</summary>
-    private void PageView_Erased(object? sender, ErasedEventArgs e)
-    {
-        AddViewUndo(new ViewUndo(e.Before, eraseWasDirty, Lng.T("Radieren")));
-    }
+    private void PageView_Erased(object? sender, ErasedEventArgs e) => AddViewUndo(new ViewUndo(e.Before, eraseWasDirty, Lng.T("Radieren")));
 
     private void ContextMenuPage_Opening(object? sender, System.ComponentModel.CancelEventArgs e)
     {
@@ -3523,10 +3772,7 @@ public partial class MainForm : Form
         catch (System.Runtime.InteropServices.ExternalException ex) { TaskDlg.ErrTaskDlg(Handle, Lng.T("Kopieren in die Zwischenablage fehlgeschlagen."), ex); } // von anderem Programm gesperrt
     }
 
-    private void MnuViewSelectAll_Click(object? sender, EventArgs e)
-    {
-        pageView.SelectAll();
-    }
+    private void MnuViewSelectAll_Click(object? sender, EventArgs e) => pageView.SelectAll();
 
     // Bilder der Seite (Kontextmenü, seit 10.10.2026, Wunsch Wilhelms): „Bild speichern…“ und „Bild kopieren“ erscheinen nur, wenn der
     // Rechtsklick ein Bild getroffen hat (PageView.ImageUnderMouse). Das Hauptprogramm dekodiert dabei nie Bilddaten aus der PDF: JPEG-Bytes
@@ -3576,10 +3822,7 @@ public partial class MainForm : Form
     }
 
     /// <summary>Strg+C bei ausgewähltem Bild (wie Acrobat, seit 10.10.2026): dasselbe wie „Bild kopieren“.</summary>
-    private void PageView_ImageCopyRequested(object? sender, EventArgs e)
-    {
-        CopyImage(pageView.SelectedImageDataAsync);
-    }
+    private void PageView_ImageCopyRequested(object? sender, EventArgs e) => CopyImage(pageView.SelectedImageDataAsync);
 
     private async void CopyImage(Func<bool, Task<(byte[]? Jpeg, Bitmap? Pixels)>> loadImage)
     {
@@ -3628,6 +3871,7 @@ public partial class MainForm : Form
     private async void PageView_NoteClicked(object? sender, AnnotationEventArgs e)
     {
         await FinishNoteEditAsync();
+        SelectInAnnotationList(e.Page, e.Number); // ein schneller Klick kommt nicht über das Verschieben (AnnotationClicked)
         await OpenNoteAsync(e.Page, e.Number, edit: e.Control); // Strg+Klick: gleich bearbeiten (Wunsch vom 10.10.2026)
     }
 
@@ -3744,7 +3988,9 @@ public partial class MainForm : Form
     {
         noteShown = null;
         noteHighlight = [];
+        var hadFocus = noteCard.ContainsFocus;
         if (noteCard.Visible) { noteCard.Visible = false; }
+        if (hadFocus) { pageView.Focus(); } // sonst wanderte der Fokus zum nächsten Steuerelement, etwa ins Zoomfeld
     }
 
     /// <summary>Läuft ein Bearbeiten in der Karte, übernehmen und abwarten – vor dem Speichern, dem Schließen und anderen Kommentaren.</summary>
@@ -3754,10 +4000,7 @@ public partial class MainForm : Form
         if (noteTask != null) { await noteTask; }
     }
 
-    private void NoteCard_Committed(object? sender, string text)
-    {
-        noteTask = ApplyNoteTextGuardedAsync(text);
-    }
+    private void NoteCard_Committed(object? sender, string text) => noteTask = ApplyNoteTextGuardedAsync(text);
 
     /// <summary>Fehler melden statt sie in der nie abgewarteten Aufgabe verschwinden zu lassen.</summary>
     private async Task ApplyNoteTextGuardedAsync(string text)
@@ -3813,10 +4056,7 @@ public partial class MainForm : Form
         if (await doc.RemoveMarkupAsync(shown.Page, shown.Number)) { statusPath.Text = Lng.T("Die Notiz wurde gelöscht."); }
     }
 
-    private void NoteCard_CloseRequested(object? sender, EventArgs e)
-    {
-        CloseNoteCard();
-    }
+    private void NoteCard_CloseRequested(object? sender, EventArgs e) => CloseNoteCard();
 
     /// <summary>Klick in die Seitenansicht neben die Karte: übernehmen und schließen wie bei Edge.</summary>
     private void PageView_MouseUp(object? sender, MouseEventArgs e)
@@ -3841,13 +4081,15 @@ public partial class MainForm : Form
         outlineView.SelectionBackColor = dark ? Color.FromArgb(77, 77, 77) : Color.FromArgb(204, 228, 247); // wie die Auswahl im Explorer
         outlineView.HoverBackColor = dark ? Color.FromArgb(56, 56, 56) : Color.FromArgb(229, 243, 255);
         splitViewer.BackColor = dark ? Color.FromArgb(40, 40, 40) : SystemColors.Control; // die Trennlinie zur Seitenleiste
+        // Rahmen um die aktive Seite: hell das Blau von Edge, dunkel Orange – das helle Blau hob sich kaum vom weißen Papier ab (beides Wunsch vom 17.10.2026)
+        pageView.CurrentPageHighlightColor = thumbnailGrid.CurrentPageColor = dark ? Color.FromArgb(241, 134, 0) : Color.FromArgb(0, 120, 212);
         annotationPanel.ApplyTheme(dark, outlineView.BackColor, outlineView.ForeColor, dark ? Color.FromArgb(165, 165, 165) : SystemColors.GrayText,
             dark ? Color.FromArgb(52, 52, 52) : Color.FromArgb(240, 240, 240), outlineView.SelectionBackColor, outlineView.HoverBackColor,
             ViewerIconColor, SidebarRailRenderer.Accent(dark), new SidebarRailRenderer(dark)); // wie die übrige Seitenleiste
         outlineStrip.Renderer = new SidebarRailRenderer(dark); // Kopfzeile der Dokumentstruktur wie die der Anmerkungs- und Anhangliste
         outlineStrip.BackColor = outlineView.BackColor;
         labelOutlineCount.ForeColor = outlineView.ForeColor;
-        btnOutlineMore.DropDown.Renderer = new ViewerStripRenderer(dark);
+        btnOutlineMore.DropDown.Renderer = new ViewerStripRenderer(dark); // im Dunkelmodus dunkel wie die Menüs der anderen Listen
         UpdateOutlineStripIcons();
         attachmentPanel.ApplyTheme(outlineView.BackColor, outlineView.ForeColor, dark ? Color.FromArgb(165, 165, 165) : SystemColors.GrayText,
             outlineView.SelectionBackColor, outlineView.HoverBackColor, ViewerIconColor, new SidebarRailRenderer(dark));
@@ -3858,6 +4100,12 @@ public partial class MainForm : Form
         sidebarToggle.HoverBackColor = dark ? Color.FromArgb(84, 84, 84) : Color.FromArgb(196, 196, 196);
         sidebarToggle.ArrowColor = dark ? Color.FromArgb(215, 215, 215) : Color.FromArgb(70, 70, 70);
         sidebarHeader.Renderer = new SidebarRailRenderer(dark); // Kopfzeile „Inhaltsverzeichnis“ wie in Edge
+        // Startseite auf der Fläche der Seitenansicht, Auswahl und Hover wie in den Listen der Seitenleiste
+        startPage.ApplyTheme(dark, pageView.BackColor, dark ? Color.FromArgb(230, 230, 230) : SystemColors.WindowText, dark ? Color.FromArgb(165, 165, 165) : Color.FromArgb(96, 96, 96),
+            dark ? Color.FromArgb(77, 77, 77) : Color.FromArgb(204, 228, 247), dark ? Color.FromArgb(64, 64, 64) : Color.FromArgb(218, 233, 247),
+            dark ? ViewerStripRenderer.FieldBackground : SystemColors.Window, dark ? ViewerStripRenderer.Foreground : SystemColors.WindowText,
+            dark ? Color.FromArgb(138, 180, 248) : Color.FromArgb(0, 102, 204),
+            dark ? Color.FromArgb(138, 180, 248) : Color.FromArgb(0, 120, 212), new SidebarRailRenderer(dark, pageView.BackColor), ViewerIconColor); // Häkchen in der Akzentfarbe, Befehlsleiste wie die Kopfzeilen der Seitenleiste
         foreach (var field in new Control[] { textPage.TextBox, comboZoom.ComboBox, textSearch.TextBox })
         {
             field.BackColor = dark ? ViewerStripRenderer.FieldBackground : SystemColors.Window;
@@ -3875,6 +4123,7 @@ public partial class MainForm : Form
     private void ApplyFieldMargins()
     {
         TextBoxMargins.Set(textPage.TextBox.Handle, textPage.TextBox, left: null, right: 3);
+        TextBoxMargins.Set(textSearch.TextBox.Handle, textSearch.TextBox, left: 2, right: 2); // Suchfeld der Viewer-Leiste (seit 23.10.2026)
         var info = new NativeMethods.COMBOBOXINFO { cbSize = Marshal.SizeOf<NativeMethods.COMBOBOXINFO>() };
         if (NativeMethods.GetComboBoxInfo(comboZoom.ComboBox.Handle, ref info)) { TextBoxMargins.Set(info.hwndItem, comboZoom.ComboBox, left: 3, right: null); }
     }
@@ -3971,14 +4220,11 @@ public partial class MainForm : Form
     }
 
     /// <summary>Symbol mit oder ohne Text; ohne Symbolschrift nur der Text.</summary>
-    private ToolStripItemDisplayStyle TextStyle(ToolStripItem item, bool text) =>
+    private static ToolStripItemDisplayStyle TextStyle(ToolStripItem item, bool text) =>
         item.Image == null ? ToolStripItemDisplayStyle.Text
         : text ? ToolStripItemDisplayStyle.ImageAndText : ToolStripItemDisplayStyle.Image;
 
-    private void ViewerStrip_Resize(object? sender, EventArgs e)
-    {
-        UpdateViewerLayout();
-    }
+    private void ViewerStrip_Resize(object? sender, EventArgs e) => UpdateViewerLayout();
 
     /// <summary>Seitenfeld, Zoom, Anpassen und Drehen stehen wie bei Edge mittig in der Viewer-Leiste: Ein Platzhalter hinter der
     /// Anmerkungs-Schaltflächen schiebt sie dorthin – nur so weit, dass rechts Suche und Vollbild Platz behalten.</summary>
@@ -4080,26 +4326,14 @@ public partial class MainForm : Form
         btnFitWidth.DisplayStyle = image != null ? ToolStripItemDisplayStyle.Image : ToolStripItemDisplayStyle.Text;
     }
 
-    private void BtnZoomOut_Click(object? sender, EventArgs e)
-    {
-        pageView.ZoomOut();
-    }
+    private void BtnZoomOut_Click(object? sender, EventArgs e) => pageView.ZoomOut();
 
-    private void BtnZoomIn_Click(object? sender, EventArgs e)
-    {
-        pageView.ZoomIn();
-    }
+    private void BtnZoomIn_Click(object? sender, EventArgs e) => pageView.ZoomIn();
 
-    private void BtnFitWidth_Click(object? sender, EventArgs e)
-    {
-        ToggleFit();
-    }
+    private void BtnFitWidth_Click(object? sender, EventArgs e) => ToggleFit();
 
     /// <summary>Strg+Umschalt+B und die Anpassen-Schaltfläche: an Breite anpassen, bei schon angepasster Breite an Seite.</summary>
-    private void ToggleFit()
-    {
-        pageView.SetFit(pageView.Fit == PageFit.Width ? PageFit.Page : PageFit.Width);
-    }
+    private void ToggleFit() => pageView.SetFit(pageView.Fit == PageFit.Width ? PageFit.Page : PageFit.Width);
 
     // Die ersten vier Einträge des Zoomfelds sind benannte Stufen (Reihenfolge wie im Designer), danach folgen Prozentwerte
     private static readonly PageFit[] NamedFits = [PageFit.Page, PageFit.Height, PageFit.Width];
@@ -4114,6 +4348,9 @@ public partial class MainForm : Form
         else { ApplyZoomText(comboZoom.Text); }
         BeginInvoke(() => UpdateZoomDisplay()); // die Auswahl schreibt ihren Listentext erst nach dem Ereignis ins Feld – danach wieder die Prozentzahl
     }
+
+    /// <summary>Nach der Wahl aus der Liste zurück in die Seitenansicht – sonst blätterte Bild↓ durch die Zoomstufen (Fehler gefunden 18.10.2026).</summary>
+    private void ComboZoom_DropDownClosed(object? sender, EventArgs e) => BeginInvoke(pageView.Focus);
 
     private void ComboZoom_KeyDown(object? sender, KeyEventArgs e)
     {
@@ -4132,10 +4369,7 @@ public partial class MainForm : Form
         UpdateZoomDisplay(); // auch bei ungültiger Eingabe: wieder die aktuelle Stufe anzeigen
     }
 
-    private void BtnSaveDocument_Click(object? sender, EventArgs e)
-    {
-        SaveFormInput();
-    }
+    private void BtnSaveDocument_Click(object? sender, EventArgs e) => SaveFormInput();
 
     /// <summary>„Speichern“ in der Viewer-Leiste und Strg+S: offene Formulareingaben jetzt in die Datei schreiben (sonst geschieht das still
     /// vor der nächsten Programmfunktion oder nach Rückfrage beim Schließen).</summary>
@@ -4145,10 +4379,7 @@ public partial class MainForm : Form
         if (await CommitFormAsync() && !documentDirty) { statusPath.Text = Lng.T("Die Änderungen wurden gespeichert."); }
     }
 
-    private void BtnCloseDocument_Click(object? sender, EventArgs e)
-    {
-        CloseDocument();
-    }
+    private void BtnCloseDocument_Click(object? sender, EventArgs e) => CloseDocument();
 
     /// <summary>Strg+W und die Schaltfläche ganz rechts in der Viewer-Leiste: das Dokument schließen – PDFlight zeigt danach keine Datei
     /// mehr an (die Seite wird wie beim Wechsel gemerkt). Offene Änderungen nicht still speichern, sondern wie beim Beenden nachfragen
@@ -4162,15 +4393,9 @@ public partial class MainForm : Form
         ClearDisplay(Lng.T("Das Dokument wurde geschlossen."));
     }
 
-    private void BtnFullScreen_Click(object? sender, EventArgs e)
-    {
-        SetFullScreen(!isFullScreen);
-    }
+    private void BtnFullScreen_Click(object? sender, EventArgs e) => SetFullScreen(!isFullScreen);
 
-    private void BtnTwoPage_Click(object? sender, EventArgs e)
-    {
-        ToggleTwoPage();
-    }
+    private void BtnTwoPage_Click(object? sender, EventArgs e) => ToggleTwoPage();
 
     /// <summary>Strg+Leertaste: ein- oder zweiseitige Ansicht (Seitenpaare 1–2, 3–4 …); gilt auch für die nächsten Dateien.</summary>
     private void ToggleTwoPage()
@@ -4179,15 +4404,9 @@ public partial class MainForm : Form
         btnTwoPage.Checked = pageView.TwoPageLayout;
     }
 
-    private void BtnRotateLeft_Click(object? sender, EventArgs e)
-    {
-        RotateCurrentPage(clockwise: false);
-    }
+    private void BtnRotateLeft_Click(object? sender, EventArgs e) => RotateCurrentPage(clockwise: false);
 
-    private void BtnRotateRight_Click(object? sender, EventArgs e)
-    {
-        RotateCurrentPage(clockwise: true);
-    }
+    private void BtnRotateRight_Click(object? sender, EventArgs e) => RotateCurrentPage(clockwise: true);
 
     private void DdbRotate_Click(object? sender, EventArgs e)
     {
@@ -4201,15 +4420,9 @@ public partial class MainForm : Form
         thumbnailGrid.CurrentPage = pageView.CurrentPage;
     }
 
-    private void PageView_PageContentChanged(object? sender, int page)
-    {
-        thumbnailGrid.InvalidatePage(page); // Formularwert oder Hervorhebung geändert
-    }
+    private void PageView_PageContentChanged(object? sender, int page) => thumbnailGrid.InvalidatePage(page); // Formularwert oder Hervorhebung geändert
 
-    private void ShowCurrentPage()
-    {
-        textPage.Text = document == null || pageView.CurrentPage < 0 ? string.Empty : (pageView.CurrentPage + 1).ToString(CultureInfo.CurrentCulture);
-    }
+    private void ShowCurrentPage() => textPage.Text = document == null || pageView.CurrentPage < 0 ? string.Empty : (pageView.CurrentPage + 1).ToString(CultureInfo.CurrentCulture);
 
     /// <summary>Strg+G: ins Seitenfeld, Zahl markiert – Tippen ersetzt sie, Enter springt.</summary>
     private void FocusPageBox()
@@ -4238,10 +4451,7 @@ public partial class MainForm : Form
         }
     }
 
-    private void TextPage_Leave(object? sender, EventArgs e)
-    {
-        ShowCurrentPage(); // ungültige oder abgebrochene Eingabe: wieder die angezeigte Seite
-    }
+    private void TextPage_Leave(object? sender, EventArgs e) => ShowCurrentPage(); // ungültige oder abgebrochene Eingabe: wieder die angezeigte Seite
 
     // ------------------------------------------------------------------ Seitenleiste (Miniaturen und Lesezeichen)
 
@@ -4250,7 +4460,7 @@ public partial class MainForm : Form
         splitViewer.SplitterDistance = LogicalToDeviceUnits(settings.SidebarWidth > 0 ? Math.Clamp(settings.SidebarWidth, 100, 600) : 180);
         (sidebarUserVisible, sidebarUserBookmarks) = (settings.ShowSidebar, settings.SidebarBookmarks);
         ShowSidebarPanel(sidebarUserBookmarks ? SidebarView.Outline : SidebarView.Thumbnails);
-        SetSidebarVisible(sidebarUserVisible);
+        SetSidebarVisible(sidebarUserVisible && !options.NoSidebar);
     }
 
     // Seitenleiste beim Öffnen (Wunsch vom 04.10.2026): Hat die Datei Lesezeichen, geht sie immer mit der Dokumentstruktur auf; sonst gilt
@@ -4263,8 +4473,11 @@ public partial class MainForm : Form
     // eine schon offene Anmerkungsliste bleibt bis zum Ergebnis stehen und weicht ihr nur, wenn die neue Datei keine Anmerkungen hat.
     private bool? annotationSidebarPending; // neue Datei, Anmerkungen noch nicht gelesen: hat sie Lesezeichen?
 
+    private bool sidebarSuppressed; // /nosidebar: für die Startdatei geht die Seitenleiste nicht von selbst auf
+
     private void ApplySidebarForDocument(bool hasOutline)
     {
+        if (options.NoSidebar && !sidebarSuppressed) { sidebarSuppressed = true; annotationSidebarPending = null; SetSidebarVisible(false); return; }
         annotationSidebarPending = hasOutline;
         if (!AnnotationListShown) { ApplyOutlineSidebar(hasOutline); }
     }
@@ -4293,6 +4506,8 @@ public partial class MainForm : Form
         startView = new ViewState(fit, Math.Clamp(settings.ViewZoomPercent, 10, 500) / 100f);
         pageView.TwoPageLayout = settings.TwoPageLayout;
         btnTwoPage.Checked = settings.TwoPageLayout;
+        if (options.ZoomPercent > 0) { startView = new ViewState(PageFit.None, options.ZoomPercent / 100f); } // /zoom:N – feste Stufe statt der gemerkten
+        if (options.TwoPage) { pageView.TwoPageLayout = btnTwoPage.Checked = true; }
         btnMatchCase.Checked = settings.SearchMatchCase;
         btnWholeWord.Checked = settings.SearchWholeWord;
         pageView.InkColor = AnnotationStyle.ParseHex(settings.InkColor) ?? pageView.InkColor;
@@ -4308,7 +4523,9 @@ public partial class MainForm : Form
     private void SetSidebarVisible(bool visible)
     {
         var (listWasShown, attachmentsWereShown) = (AnnotationListShown, AttachmentListShown);
+        var hadFocus = splitViewer.Panel1.ContainsFocus;
         splitViewer.Panel1Collapsed = !visible;
+        if (hadFocus && !visible) { pageView.Focus(); } // der Fokus lag in der nun verborgenen Seitenleiste
         sidebarToggle.Collapsed = !visible;
         sidebarToggle.ToolTipText = Lng.T(visible ? "Seitenleiste ausblenden (F10)" : "Seitenleiste einblenden (F10)");
         UpdateSidebarIcons(); // die gewählte Ansicht ist nur bei offener Seitenleiste markiert (wie Acrobat)
@@ -4319,6 +4536,7 @@ public partial class MainForm : Form
     /// <summary>F10, Strg+Umschalt+I (wie Edge) und der Streifen am Rand der Seitenleiste (bis 15.10.2026 ein Knopf in der Viewer-Leiste).</summary>
     private void ToggleSidebar()
     {
+        if (startPageShown) { return; } // ohne Dokument gibt es keine Seitenleiste (Startseite)
         SetSidebarVisible(splitViewer.Panel1Collapsed);
         sidebarUserVisible = !splitViewer.Panel1Collapsed;
     }
@@ -4327,6 +4545,7 @@ public partial class MainForm : Form
     /// Einblenden mit den Miniaturen, der Dokumentstruktur (Lesezeichen) bzw. den Anmerkungen.</summary>
     private void ToggleSidebar(SidebarView view)
     {
+        if (startPageShown) { return; }
         if (splitViewer.Panel1Collapsed)
         {
             ShowSidebarPanel(view);
@@ -4338,11 +4557,14 @@ public partial class MainForm : Form
     private void ShowSidebarPanel(SidebarView view)
     {
         var (listWasShown, attachmentsWereShown) = (AnnotationListShown, AttachmentListShown);
+        var hadFocus = panelSidebarContent.ContainsFocus;
         sidebarView = view;
         panelOutline.Visible = view == SidebarView.Outline; // Kopfzeile und Baum
         thumbnailGrid.Visible = view == SidebarView.Thumbnails;
         annotationPanel.Visible = view == SidebarView.Annotations;
         attachmentPanel.Visible = view == SidebarView.Attachments;
+        Control shown = view switch { SidebarView.Outline => panelOutline, SidebarView.Annotations => annotationPanel, SidebarView.Attachments => attachmentPanel, _ => thumbnailGrid };
+        if (hadFocus && !shown.ContainsFocus) { pageView.Focus(); } // die Ansicht mit dem Fokus ist verschwunden – ein verborgenes Fenster behielte ihn
         UpdateSidebarIcons();
         UpdateAnnotationRail();
         if (AnnotationListShown && !listWasShown) { RefreshAnnotations(); }
@@ -4443,13 +4665,6 @@ public partial class MainForm : Form
         if (!PrepareOutlineMenu(mnuOutlineExpandAll, mnuOutlineCollapseAll, toolStripSeparatorO1, mnuOutlineLevel2, mnuOutlineLevel3)) { e.Cancel = true; } // nichts zum Aufklappen
     }
 
-    /// <summary>„…“ der Kopfzeile (seit 15.10.2026): dieselben Einträge wie das Kontextmenü, eigene Menüpunkte – im Dunkelmodus ist dieses Menü
-    /// dunkel, das Kontextmenü hell wie alle Kontextmenüs.</summary>
-    private void BtnOutlineMore_DropDownOpening(object? sender, EventArgs e)
-    {
-        PrepareOutlineMenu(mnuOutlineBarExpandAll, mnuOutlineBarCollapseAll, toolStripSeparatorO2, mnuOutlineBarLevel2, mnuOutlineBarLevel3);
-    }
-
     /// <summary>Ebenen-Einträge nur, wenn die Gliederung tiefer ist; was nichts ändern würde, ausgegraut (Wunsch vom 05.10.2026). False ohne
     /// Unterpunkte – dann gibt es nichts aufzuklappen.</summary>
     private bool PrepareOutlineMenu(ToolStripItem expandAll, ToolStripItem collapseAll, ToolStripItem separator, ToolStripItem level2, ToolStripItem level3)
@@ -4466,25 +4681,13 @@ public partial class MainForm : Form
         return true;
     }
 
-    private void MnuOutlineExpandAll_Click(object? sender, EventArgs e)
-    {
-        outlineView.ExpandToLevel(int.MaxValue);
-    }
+    private void MnuOutlineExpandAll_Click(object? sender, EventArgs e) => outlineView.ExpandToLevel(int.MaxValue);
 
-    private void MnuOutlineCollapseAll_Click(object? sender, EventArgs e)
-    {
-        outlineView.ExpandToLevel(1);
-    }
+    private void MnuOutlineCollapseAll_Click(object? sender, EventArgs e) => outlineView.ExpandToLevel(1);
 
-    private void MnuOutlineLevel2_Click(object? sender, EventArgs e)
-    {
-        outlineView.ExpandToLevel(2);
-    }
+    private void MnuOutlineLevel2_Click(object? sender, EventArgs e) => outlineView.ExpandToLevel(2);
 
-    private void MnuOutlineLevel3_Click(object? sender, EventArgs e)
-    {
-        outlineView.ExpandToLevel(3);
-    }
+    private void MnuOutlineLevel3_Click(object? sender, EventArgs e) => outlineView.ExpandToLevel(3);
 
     /// <summary>Dokumentstruktur der Seitenleiste füllen (selbst gezeichnet wie bei Chrome: Pfeile, Zeilenumbruch – <see cref="OutlineView"/>);
     /// ein einziger Oberpunkt klappt gleich auf.</summary>
@@ -4495,10 +4698,11 @@ public partial class MainForm : Form
         static int Count(IEnumerable<OutlineItem> items) => items.Sum(i => 1 + Count(i.Children));
         var count = Count(outline);
         labelOutlineCount.Text = count == 1 ? Lng.T("1 Lesezeichen") : string.Format(Lng.T("{0} Lesezeichen"), count); // Kopfzeile wie bei Anmerkungen und Anhängen
-        btnOutlineMore.Enabled = outlineView.Depth >= 2; // Auf-/Zuklappen nur mit Unterpunkten
+        RebuildOutlineLevelItems();
+        UpdateOutlineButtons();
     }
 
-    /// <summary>Symbole der Kopfzeile in der Größe der Viewer-Leiste, die des „…“-Menüs im Dunkelmodus hell.</summary>
+    /// <summary>Symbole der Kopfzeile in der Größe der Viewer-Leiste.</summary>
     private void UpdateOutlineStripIcons()
     {
         if (ToolbarIcons.FontAvailable)
@@ -4506,14 +4710,50 @@ public partial class MainForm : Form
             var size = new Size(LogicalToDeviceUnits(16), LogicalToDeviceUnits(16));
             outlineStrip.ImageScalingSize = size;
             btnOutlineEdit.Image = ToolbarIcons.Get(ToolbarIcons.Edit, size, ViewerIconColor);
+            btnOutlineExpandAll.Image = ToolbarIcons.Get(ToolbarIcons.ChevronDown, size, ViewerIconColor);
+            btnOutlineCollapseAll.Image = ToolbarIcons.Get(ToolbarIcons.ChevronUp, size, ViewerIconColor);
             btnOutlineMore.Image = ToolbarIcons.Get(ToolbarIcons.More, size, ViewerIconColor);
-            btnOutlineEdit.DisplayStyle = btnOutlineMore.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            btnOutlineEdit.DisplayStyle = btnOutlineExpandAll.DisplayStyle = btnOutlineCollapseAll.DisplayStyle = btnOutlineMore.DisplayStyle = ToolStripItemDisplayStyle.Image;
         }
-        Image? Icon(char glyph) => settings.DarkViewer && ToolbarIcons.MenuIconsEnabled
-            ? ToolbarIcons.Get(glyph, LogicalToDeviceUnits(new Size(16, 16)), ViewerStripRenderer.Foreground) : MenuIcon(glyph);
-        mnuOutlineBarExpandAll.Image = Icon(ToolbarIcons.ChevronDown);
-        mnuOutlineBarCollapseAll.Image = Icon(ToolbarIcons.ChevronUp);
     }
+
+    /// <summary>„Alles aufklappen“/„Alles zuklappen“ der Kopfzeile (seit 15.10.2026 als Knöpfe, vorher hinter „…“ – Wunsch Wilhelms): nur mit
+    /// Unterpunkten frei und nur, wenn sie etwas ändern würden. „Bis Ebene 2/3“ bleibt im Kontextmenü.</summary>
+    private void UpdateOutlineButtons()
+    {
+        var nested = outlineView.Depth >= 2;
+        btnOutlineExpandAll.Enabled = nested && !outlineView.IsAtLevel(int.MaxValue);
+        btnOutlineCollapseAll.Enabled = nested && !outlineView.IsAtLevel(1);
+        btnOutlineMore.Enabled = nested; // auch bei zwei Ebenen, obwohl dann gleich den beiden Knöpfen – sonst wirkt es kaputt (16.10.2026)
+    }
+
+    /// <summary>„…“ der Kopfzeile (Wunsch vom 15.10.2026): „Bis Ebene 1“ … „Bis Ebene n“ bis zur tiefsten Ebene der Datei. Ein Eintrag stellt
+    /// den Baum genau auf diese Tiefe ein – klappt auf, was darüber zu ist, und zu, was tiefer offen ist –, eine eigene Zuklappen-Liste
+    /// erübrigt sich. Laufzeitdaten: die Einträge hängen an der Gliederung, neu gebaut in <see cref="FillOutline"/>.</summary>
+    private void RebuildOutlineLevelItems()
+    {
+        foreach (var old in btnOutlineMore.DropDownItems.Cast<ToolStripItem>().ToList()) { old.Dispose(); }
+        btnOutlineMore.DropDownItems.Clear();
+        for (var level = 1; level <= outlineView.Depth; level++)
+        {
+            ToolStripMenuItem item = new(string.Format(Lng.T("Bis Ebene {0}"), level)) { Tag = level };
+            item.Click += OutlineLevelItem_Click;
+            btnOutlineMore.DropDownItems.Add(item);
+        }
+    }
+
+    /// <summary>Häkchen an der eingestellten Ebene (falls der Baum gerade genau so steht).</summary>
+    private void BtnOutlineMore_DropDownOpening(object? sender, EventArgs e)
+    {
+        foreach (var item in btnOutlineMore.DropDownItems.OfType<ToolStripMenuItem>()) { item.Checked = item.Tag is int level && outlineView.IsAtLevel(level); }
+    }
+
+    private void OutlineLevelItem_Click(object? sender, EventArgs e)
+    {
+        if (sender is ToolStripItem { Tag: int level }) { outlineView.ExpandToLevel(level); }
+    }
+
+    private void OutlineView_ExpansionChanged(object? sender, EventArgs e) => UpdateOutlineButtons();
 
     private void OutlineView_ItemActivated(object? sender, OutlineItem item)
     {
@@ -4528,10 +4768,7 @@ public partial class MainForm : Form
         pageView.GoToTarget(target);
     }
 
-    private void PageView_LinkHover(object? sender, LinkTarget? link)
-    {
-        toolTipLink.SetToolTip(pageView, link == null ? null : link.Uri ?? string.Format(Lng.T("Gehe zu Seite {0}"), link.Page + 1));
-    }
+    private void PageView_LinkHover(object? sender, LinkTarget? link) => toolTipLink.SetToolTip(pageView, link == null ? null : link.Uri ?? string.Format(Lng.T("Gehe zu Seite {0}"), link.Page + 1));
 
     private void PageView_ExternalLinkClicked(object? sender, LinkTarget link)
     {
@@ -4592,10 +4829,7 @@ public partial class MainForm : Form
         searchTimer.Start();
     }
 
-    private void SearchTimer_Tick(object? sender, EventArgs e)
-    {
-        StartSearch();
-    }
+    private void SearchTimer_Tick(object? sender, EventArgs e) => StartSearch();
 
     private void StartSearch()
     {
@@ -4624,20 +4858,11 @@ public partial class MainForm : Form
         }
     }
 
-    private void BtnSearchPrev_Click(object? sender, EventArgs e)
-    {
-        pageView.NextHit(backwards: true);
-    }
+    private void BtnSearchPrev_Click(object? sender, EventArgs e) => pageView.NextHit(backwards: true);
 
-    private void BtnSearchNext_Click(object? sender, EventArgs e)
-    {
-        pageView.NextHit(backwards: false);
-    }
+    private void BtnSearchNext_Click(object? sender, EventArgs e) => pageView.NextHit(backwards: false);
 
-    private void BtnSearchClose_Click(object? sender, EventArgs e)
-    {
-        CloseSearch();
-    }
+    private void BtnSearchClose_Click(object? sender, EventArgs e) => CloseSearch();
 
     private void PageView_SearchChanged(object? sender, EventArgs e)
     {
@@ -4746,10 +4971,7 @@ public partial class MainForm : Form
         }
     }
 
-    private void PrintDocument_BeginPrint(object? sender, System.Drawing.Printing.PrintEventArgs e)
-    {
-        printNext = 0;
-    }
+    private void PrintDocument_BeginPrint(object? sender, System.Drawing.Printing.PrintEventArgs e) => printNext = 0;
 
     /// <summary>Hoch- oder Querformat je Bogen (läuft auf dem Druck-Thread).</summary>
     private void PrintDocument_QueryPageSettings(object? sender, System.Drawing.Printing.QueryPageSettingsEventArgs e)
@@ -4812,10 +5034,7 @@ public partial class MainForm : Form
         finally { crashNoticeShown = false; }
     }
 
-    private void MainForm_FormClosed(object? sender, FormClosedEventArgs e)
-    {
-        SandboxClient.Crashed -= SandboxClient_Crashed;
-    }
+    private void MainForm_FormClosed(object? sender, FormClosedEventArgs e) => SandboxClient.Crashed -= SandboxClient_Crashed;
 
     // ------------------------------------------------------------------ Tastenkürzel
 
@@ -4857,10 +5076,10 @@ public partial class MainForm : Form
             case Keys.K | Keys.Control | Keys.Shift: return () => { if (!OneClickAction(copy: true)) { MoveCopyDialog(copy: true); } };
             case Keys.F2:
             case Keys.U | Keys.Control: return RenameCurrent;
-            case Keys.Delete | Keys.Control when !EditLocked: return DeletePagesDialog;
-            case Keys.Insert | Keys.Control when !EditLocked: return InsertPageDialog;     // Gegenstück zu Strg+Entf
+            case Keys.Delete | Keys.Control when !PageEditLocked: return DeletePagesDialog;
+            case Keys.Insert | Keys.Control when !PageEditLocked: return InsertPageDialog; // Gegenstück zu Strg+Entf
             case Keys.X | Keys.Control: return ExtractPagesDialog;                         // eXtrahieren
-            case Keys.N | Keys.Control when !EditLocked: return AppendPdfDialog;           // PDF-Datei anhängen
+            case Keys.N | Keys.Control when !PageEditLocked: return AppendPdfDialog;       // PDF-Datei anhängen
             case Keys.T | Keys.Control when !EditLocked: return AddAnnotationDialog;       // Textanmerkung
             case Keys.H | Keys.Control when !EditLocked: return AddStampDialog;            // Stempel
             case Keys.H | Keys.Control | Keys.Shift: return ManageStampsDialog;            // Stempelpalette pflegen
@@ -4884,6 +5103,7 @@ public partial class MainForm : Form
             case Keys.F10 | Keys.Alt: return () => ToggleSidebar(SidebarView.Annotations);  // … beim Einblenden mit den Anmerkungen (seit 15.10.2026)
             case Keys.B | Keys.Control | Keys.Shift: return ToggleFit;                     // an Breite / an Seite anpassen
             case Keys.Space | Keys.Control: return ToggleTwoPage;                         // ein-/zweiseitig
+            case Keys.F | Keys.Control when startPageShown: return startPage.FocusSearch; // ohne Dokument: die Suche der Startseite
             case Keys.F | Keys.Control: return ShowSearch;
             case Keys.F3: return () => pageView.NextHit(backwards: false);
             case Keys.F3 | Keys.Shift: return () => pageView.NextHit(backwards: true);
@@ -4917,7 +5137,7 @@ public partial class MainForm : Form
             case Keys.Escape when escHoldTimer.Enabled: return () => { };              // Tastenwiederholung nach dem Beenden des Vollbilds
             case Keys.Escape when SearchOpen: return CloseSearch;                        // zuerst die Suche
             case Keys.Escape when isFullScreen: return ExitFullScreenByEscape;
-            case Keys.Escape when settings.CloseOnEscape: return ResolveEscapeToClose();
+            case Keys.Escape when settings.CloseOnEscape: return ResolveEscape();
         }
         if ((keyData & (Keys.Control | Keys.Alt | Keys.Shift)) == Keys.Control)
         {
@@ -4943,21 +5163,34 @@ public partial class MainForm : Form
         }
     }
 
-    private DateTime lastEscape = DateTime.MinValue;
-
-    /// <summary>Beenden erst beim zweiten Esc kurz hintereinander: Das erste Esc wird nicht verschluckt – es hebt in der Anzeige die
-    /// Markierung auf bzw. beendet die Eingabe in einem Formularfeld. Shift+Esc beendet sofort (s. ResolveShortcut).</summary>
-    private Action? ResolveEscapeToClose()
+    /// <summary>Esc mit der Einstellung „Esc schließt das Dokument, dann das Programm“ (seit 24.10.2026, Wunsch Wilhelms; bis dahin beendete
+    /// 2× Esc innerhalb von 1,5 s): Jedes Esc erledigt nur den ersten zutreffenden Schritt – offene Notizkarte schließen, Markierung, Bild
+    /// oder Anmerkungsrahmen aufheben, Suchtext der Startseite leeren, dann das Dokument schließen (mit der üblichen Rückfrage) und erst
+    /// auf der Startseite das Programm beenden. Vorrang haben schon in ResolveShortcut Stelle wählen, Verschieben, Anmerkungsmodi, Suche
+    /// und Vollbild; Text- und Formularfelder bekommen Esc selbst (außer dem Suchfeld der Startseite, s. ProcessCmdKey). Die
+    /// Tastenwiederholung eines gehaltenen Esc schluckt ProcessCmdKey – sonst liefe es alle Schritte bis zum Beenden durch. Shift+Esc
+    /// beendet sofort (s. ResolveShortcut).</summary>
+    private Action? ResolveEscape()
     {
-        var now = DateTime.UtcNow;
-        if ((now - lastEscape).TotalMilliseconds <= 1500) { return Close; }
-        lastEscape = now;
-        return null; // das erste Esc geht an die Anzeige
+        if (ActiveControl is TextBoxBase || annotationPanel.ContainsFocus && annotationPanel.ActiveControl is TextBoxBase) { return null; } // z. B. die Suche der Anmerkungsliste
+        return (noteCard.Visible, pageView.HasEscapableSelection, startPageShown) switch
+        {
+            (true, _, _) => CloseNoteCard,
+            (_, true, _) => pageView.ClearEscapableSelection,
+            (_, _, true) when startPage.HasSearchText => startPage.ClearSearch,
+            (_, _, true) => Close,
+            _ => CloseDocument,
+        };
     }
 
 
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
+        if (keyData == Keys.Escape && settings.CloseOnEscape)
+        {
+            if ((msg.LParam & 0x40000000) != 0) { return true; } // gehaltenes Esc (Bit 30: Taste war schon unten) – jeder Schritt bis zum Beenden braucht einen eigenen Druck
+            if (startPage.SearchFocused && ResolveEscape() is { } step) { step(); return true; } // leert die Suche, leer beendet es – sonst bekäme das Feld Esc
+        }
         if (TextInputFocused && IsTextEditingKey(keyData)) { return base.ProcessCmdKey(ref msg, keyData); } // das Textfeld braucht die Taste selbst
         if (ResolveShortcut(keyData) is { } action)
         {
@@ -4969,8 +5202,26 @@ public partial class MainForm : Form
         return base.ProcessCmdKey(ref msg, keyData);
     }
 
+    /// <summary>Tastaturfokus in die Seitenansicht (Wunsch vom 18.10.2026: Bild↑/↓, Strg+Pos1/Ende sollen nach dem Anzeigen einer Datei und nach
+    /// Dialogen gleich wirken) – nicht, während in ein Textfeld getippt wird (Seiten-, Such-, Notizfeld, Suche der Anmerkungsliste).</summary>
+    private void FocusPageView()
+    {
+        if (startPageShown) { FocusStartPage(); return; } // ohne Dokument: die Liste der Startseite (Pfeiltasten, Enter)
+        if (IsDisposed || !pageView.CanFocus || pageView.Focused || textPage.Focused || textSearch.Focused || noteCard.ContainsFocus) { return; }
+        if (ActiveControl is TextBoxBase || annotationPanel.ContainsFocus && annotationPanel.ActiveControl is TextBoxBase) { return; }
+        pageView.Focus();
+    }
+
+    /// <summary>Beim Aktivieren (nach einem Dialog, nach dem Wechsel aus einem anderen Programm): Liegt der Fokus nirgends oder auf einer
+    /// Leiste, die mit Tasten nichts anfangen kann, bekommt ihn die Seitenansicht. Seitenleiste und Eingabefelder behalten ihn.</summary>
+    private void RestorePageFocus()
+    {
+        if (startPageShown) { FocusStartPage(); }
+        else if (!ContainsFocus || ActiveControl is null or ToolStrip || ActiveControl is { Visible: false }) { FocusPageView(); }
+    }
+
     /// <summary>Getippt wird gerade in ein Textfeld: Seitenfeld, Zoomfeld, Suchfeld oder ein Formularfeld der angezeigten Seite.</summary>
-    private bool TextInputFocused => textPage.Focused || textSearch.Focused || comboZoom.Focused || noteCard.ContainsFocus || (pageView.Focused && pageView.FormFocused);
+    private bool TextInputFocused => textPage.Focused || textSearch.Focused || comboZoom.Focused || noteCard.ContainsFocus || startPage.SearchFocused || (pageView.Focused && pageView.FormFocused);
 
     /// <summary>Tasten, die ein Textfeld selbst braucht (Bearbeiten, Markieren, Zwischenablage, Esc) – dort haben sie Vorrang vor den
     /// Kürzeln. Strg+Umschalt+Entf (Datei löschen) bleibt ein Kürzel.</summary>
@@ -4990,115 +5241,43 @@ public partial class MainForm : Form
     // Datei- und Dokumentfunktionen laufen über RunAfterCommit: offene Formulareingaben kommen vorher in die Datei
     // (Wunsch vom 26.09.2026); Einstellungen, Hilfe, Ordner öffnen und die Favoriten-Pflege berühren die Datei nicht.
     // Öffnen und Blättern wechseln die Datei – sie fragen nach (RunUnlessEditing, LoadOtherFile; seit 05.10.2026).
-    private void BtnOpen_Click(object? sender, EventArgs e)
-    {
-        RunUnlessEditing(OpenFile);
-    }
-    private void BtnPrev_Click(object? sender, EventArgs e)
-    {
-        RunUnlessEditing(() => StepFile(-1));
-    }
-    private void BtnNext_Click(object? sender, EventArgs e)
-    {
-        RunUnlessEditing(() => StepFile(1));
-    }
+    private void BtnOpen_Click(object? sender, EventArgs e) => RunUnlessEditing(OpenFile);
+    private void BtnPrev_Click(object? sender, EventArgs e) => RunUnlessEditing(() => StepFile(-1));
+    private void BtnNext_Click(object? sender, EventArgs e) => RunUnlessEditing(() => StepFile(1));
     private void BtnCopy_Click(object? sender, EventArgs e)
     {
         var oneClick = (ModifierKeys & Keys.Control) == Keys.Control; // vor dem Wechsel/Speichern lesen – danach kann die Taste los sein
         // Strg+Klick: direkt in den 1-Klick-Ordner kopieren (Schnell-Kopieren, analog zum Verschieben)
         RunAfterCommit(() => { if (oneClick && OneClickAction(copy: true)) { return; } MoveCopyDialog(copy: true); });
     }
-    private void BtnRename_Click(object? sender, EventArgs e)
-    {
-        RunAfterCommit(RenameCurrent);
-    }
-    private void BtnDelete_Click(object? sender, EventArgs e)
-    {
-        RunAfterCommit(DeleteCurrent);
-    }
-    private void BtnShowInFolder_Click(object? sender, EventArgs e)
-    {
-        ShowInFolder();
-    }
-    private void BtnSettings_Click(object? sender, EventArgs e)
-    {
-        OpenSettings(SettingsForm.TabGeneral);
-    }
-    private void MnuShortcuts_Click(object? sender, EventArgs e)
-    {
-        ShowHelp();
-    }
+    private void BtnRename_Click(object? sender, EventArgs e) => RunAfterCommit(RenameCurrent);
+    private void BtnDelete_Click(object? sender, EventArgs e) => RunAfterCommit(DeleteCurrent);
+    private void BtnShowInFolder_Click(object? sender, EventArgs e) => ShowInFolder();
+    private void BtnSettings_Click(object? sender, EventArgs e) => OpenSettings(SettingsForm.TabGeneral);
+    private void MnuShortcuts_Click(object? sender, EventArgs e) => ShowHelp();
 
     /// <summary>F1 und Hilfe-Menü: ohne Dokument zeigt dieses Fenster die Hilfedatei selbst, sonst eine neue Instanz
     /// (das angezeigte Dokument bleibt ungestört).</summary>
-    private void ShowHelp()
-    {
-        TaskDlg.ShowShortcutsPdf(Handle, currentFile == null ? path => LoadPdf(path) : null);
-    }
-    private async void MnuCheckUpdate_Click(object? sender, EventArgs e)
-    {
-        await TaskDlg.UpdateTaskDlg(Handle, Icon);
-    }
-    private void MnuAbout_Click(object? sender, EventArgs e)
-    {
-        TaskDlg.AboutTaskDlg(Handle, Icon);
-    }
-    private void BtnPrint_Click(object? sender, EventArgs e)
-    {
-        RunAfterCommit(PrintWithDialog);
-    }
-    private void BtnEmail_Click(object? sender, EventArgs e)
-    {
-        RunAfterCommit(EmailCurrent);
-    }
-    private void MnuDeletePages_Click(object? sender, EventArgs e)
-    {
-        RunUnlessEditing(DeletePagesDialog);
-    }
-    private void MnuThumbRotatePages_Click(object? sender, EventArgs e)
-    {
-        ShowRotationForm(Cursor.Position); // dasselbe Fenster wie der Pfeil der Viewer-Leiste, an der Stelle des Kontextmenüs
-    }
-    private void MnuMovePage_Click(object? sender, EventArgs e)
-    {
-        RunUnlessEditing(MovePageDialog);
-    }
-    private void MnuInsertPage_Click(object? sender, EventArgs e)
-    {
-        RunUnlessEditing(InsertPageDialog);
-    }
-    private void MnuAppendPdf_Click(object? sender, EventArgs e)
-    {
-        RunUnlessEditing(AppendPdfDialog);
-    }
-    private void MnuExtractPages_Click(object? sender, EventArgs e)
-    {
-        RunUnlessEditing(ExtractPagesDialog);
-    }
-    private void MnuRemoveBookmarks_Click(object? sender, EventArgs e)
-    {
-        RunUnlessEditing(RemoveBookmarks);
-    }
-    private void MnuEditBookmarks_Click(object? sender, EventArgs e)
-    {
-        RunUnlessEditing(EditBookmarks);
-    }
-    private void MnuManageStamps_Click(object? sender, EventArgs e)
-    {
-        RunUnlessEditing(ManageStampsDialog);
-    }
-    private void MnuDuplex_Click(object? sender, EventArgs e)
-    {
-        RunUnlessEditing(MergeDuplexDialog);
-    }
+    private void ShowHelp() => TaskDlg.ShowShortcutsPdf(Handle, currentFile == null ? path => LoadPdf(path) : null);
+    private async void MnuCheckUpdate_Click(object? sender, EventArgs e) => await TaskDlg.UpdateTaskDlg(Handle, Icon);
+    private void MnuAbout_Click(object? sender, EventArgs e) => TaskDlg.AboutTaskDlg(Handle, Icon);
+    private void BtnPrint_Click(object? sender, EventArgs e) => RunAfterCommit(PrintWithDialog);
+    private void BtnEmail_Click(object? sender, EventArgs e) => RunAfterCommit(EmailCurrent);
+    private void MnuDeletePages_Click(object? sender, EventArgs e) => RunUnlessEditing(DeletePagesDialog);
+    private void MnuThumbRotatePages_Click(object? sender, EventArgs e) => ShowRotationForm(Cursor.Position); // dasselbe Fenster wie der Pfeil der Viewer-Leiste, an der Stelle des Kontextmenüs
+    private void MnuMovePage_Click(object? sender, EventArgs e) => RunUnlessEditing(MovePageDialog);
+    private void MnuInsertPage_Click(object? sender, EventArgs e) => RunUnlessEditing(InsertPageDialog);
+    private void MnuAppendPdf_Click(object? sender, EventArgs e) => RunUnlessEditing(AppendPdfDialog);
+    private void MnuExtractPages_Click(object? sender, EventArgs e) => RunUnlessEditing(ExtractPagesDialog);
+    private void MnuRemoveBookmarks_Click(object? sender, EventArgs e) => RunUnlessEditing(RemoveBookmarks);
+    private void MnuEditBookmarks_Click(object? sender, EventArgs e) => RunUnlessEditing(EditBookmarks);
+    private void MnuManageStamps_Click(object? sender, EventArgs e) => RunUnlessEditing(ManageStampsDialog);
+    private void MnuDuplex_Click(object? sender, EventArgs e) => RunUnlessEditing(MergeDuplexDialog);
     private void BtnUndo_Click(object? sender, EventArgs e)
     {
         if (viewUndo.Count > 0) { UndoViewChange(); return; } // ungespeicherte Schritte in der Anzeige zuerst
         RunAfterCommit(UndoLastChange);
     }
     private void BtnRedo_Click(object? sender, EventArgs e) => RedoViewChange();
-    private void MnuProperties_Click(object? sender, EventArgs e)
-    {
-        RunUnlessEditing(ShowProperties); // offene Änderungen schreibt erst „OK“ mit (WritePropertiesAsync)
-    }
+    private void MnuProperties_Click(object? sender, EventArgs e) => RunUnlessEditing(ShowProperties); // offene Änderungen schreibt erst „OK“ mit (WritePropertiesAsync)
 }

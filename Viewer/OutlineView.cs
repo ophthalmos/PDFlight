@@ -44,6 +44,9 @@ internal sealed class OutlineView : ScrollableControl
     /// <summary>Klick auf einen Titel, Enter oder Wahl mit den Pfeiltasten.</summary>
     public event EventHandler<OutlineItem>? ItemActivated;
 
+    /// <summary>Ein Zweig wurde auf- oder zugeklappt oder die Gliederung neu gesetzt (Knöpfe „Alles auf-/zuklappen“ nachführen).</summary>
+    public event EventHandler? ExpansionChanged;
+
     public OutlineView()
     {
         DoubleBuffered = true;
@@ -73,6 +76,7 @@ internal sealed class OutlineView : ScrollableControl
         hover = -1;
         AutoScrollPosition = Point.Empty;
         Relayout();
+        ExpansionChanged?.Invoke(this, EventArgs.Empty);
 
         static Node Build(OutlineItem item, Node? parent, int depth)
         {
@@ -115,6 +119,7 @@ internal sealed class OutlineView : ScrollableControl
         }
         Relayout();
         if (selected != null) { EnsureVisible(selected); }
+        ExpansionChanged?.Invoke(this, EventArgs.Empty);
     }
 
     // ================================================================== Anordnung
@@ -348,6 +353,7 @@ internal sealed class OutlineView : ScrollableControl
         if (!node.Expanded && selected != null && IsDescendant(selected, node)) { selected = node; } // die Auswahl verschwände sonst im zugeklappten Zweig
         Relayout();
         EnsureVisible(node);
+        ExpansionChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private static bool IsDescendant(Node node, Node ancestor)

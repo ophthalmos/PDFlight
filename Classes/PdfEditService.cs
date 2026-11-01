@@ -76,7 +76,7 @@ internal static partial class PdfEditService
     {
         try
         {
-            using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
+            using var document = Open(path, PdfDocumentOpenMode.Import);
             return document.PageCount;
         }
         catch (Exception ex) when (IsPdfReadError(ex)) { return -1; }
@@ -85,7 +85,7 @@ internal static partial class PdfEditService
     /// <summary>Löscht die angegebenen Seiten (1-basiert); mindestens eine Seite muss übrig bleiben.</summary>
     public static void DeletePages(string path, IReadOnlyList<int> pages)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        using var document = Open(path, PdfDocumentOpenMode.Modify);
         var removedPages = pages.Select(p => document.Pages[p - 1].Reference?.ObjectID).OfType<PdfObjectID>().ToHashSet();
         foreach (var page in pages.OrderByDescending(p => p)) { document.Pages.RemoveAt(page - 1); }
         PruneOutlines(document, removedPages);
@@ -164,7 +164,7 @@ internal static partial class PdfEditService
     /// <summary>Dreht die angegebenen Seiten (1-basiert) um delta Grad (±90 oder 180).</summary>
     public static void RotatePages(string path, IReadOnlyList<int> pages, int delta)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        using var document = Open(path, PdfDocumentOpenMode.Modify);
         foreach (var page in pages)
         {
             var p = document.Pages[page - 1];
@@ -179,7 +179,7 @@ internal static partial class PdfEditService
     /// (Standardschrift, nichts einzubetten), Text in WinAnsi; die Anmerkung bleibt als solche entfernbar.</summary>
     public static void AddFreeTextAnnotation(string path, int page, string text, double leftMm, double topMm, double fontSize, AnnotationStyle style)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        using var document = Open(path, PdfDocumentOpenMode.Modify);
         AppendFreeText(document, document.Pages[page - 1], text, leftMm, topMm, fontSize, style);
         SaveCompact(document, path);
     }
@@ -188,7 +188,7 @@ internal static partial class PdfEditService
     /// auch fremde FreeText-Anmerkungen bekommen dabei PDFlights Kasten.</summary>
     public static void UpdateFreeTextAnnotation(string path, int page, int index, int objectNumber, string text, double leftMm, double topMm, double fontSize, AnnotationStyle style)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        using var document = Open(path, PdfDocumentOpenMode.Modify);
         var pdfPage = document.Pages[page - 1];
         pdfPage.Annotations.Elements.RemoveAt(ResolveIndex(pdfPage.Annotations, objectNumber, index));
         AppendFreeText(document, pdfPage, text, leftMm, topMm, fontSize, style);
@@ -199,7 +199,7 @@ internal static partial class PdfEditService
     /// der Darstellungsstrom wird auf /Rect abgebildet und wandert damit mit. Der Kasten bleibt ganz auf der Seite (MediaBox).</summary>
     public static void MoveAnnotation(string path, int page, int index, double dx, double dy)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        using var document = Open(path, PdfDocumentOpenMode.Modify);
         var pdfPage = document.Pages[page - 1];
         var annotation = AnnotationAt(pdfPage.Annotations, index);
         if (annotation.Elements.GetName("/Subtype") is not ("/FreeText" or "/Stamp" or "/Text")) { throw new InvalidOperationException("An dieser Stelle steht keine Textanmerkung, kein Stempel und keine Notiz mehr."); }
@@ -222,7 +222,7 @@ internal static partial class PdfEditService
     /// <summary>Entfernt eine Anmerkung (Index im Annots-Array der Seite) samt zugehörigem Popup.</summary>
     public static void DeleteAnnotation(string path, int page, int index, int objectNumber)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        using var document = Open(path, PdfDocumentOpenMode.Modify);
         var annotations = document.Pages[page - 1].Annotations;
         index = ResolveIndex(annotations, objectNumber, index);
         var removed = AnnotationAt(annotations, index); // VOR dem Entfernen greifen – danach zeigt der Index ins Leere (IDE-Umformungen haben das schon einmal vertauscht)
@@ -241,7 +241,7 @@ internal static partial class PdfEditService
     /// Popups verschwinden nur mit ihrer Anmerkung. Ein Speichervorgang, also ein Rückgängig. Liefert die Anzahl.</summary>
     public static int DeleteAllAnnotations(string path)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        using var document = Open(path, PdfDocumentOpenMode.Modify);
         var count = 0;
         for (var p = 0; p < document.PageCount; p++)
         {
@@ -289,7 +289,7 @@ internal static partial class PdfEditService
     /// sonst zeigt der Viewer weiter eine leere Lesezeichenleiste. Die Seiten bleiben unberührt.</summary>
     public static void RemoveOutlines(string path)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        using var document = Open(path, PdfDocumentOpenMode.Modify);
         RemoveOutlines(document);
         SaveCompact(document, path);
     }
@@ -315,9 +315,10 @@ internal static partial class PdfEditService
     /// <summary>Liest die Gliederung (Lesezeichen) für den Editor: Titel, Zielseite (1-basiert; 0 = nicht auflösbar), Aufklappzustand
     /// und Unterpunkte; ohne /Outlines eine leere Liste. <see cref="Bookmark.Id"/> zählt den Vorordnungs-Durchlauf mit – denselben
     /// nimmt <see cref="WriteOutlines"/>, um Ziele, Farben und Schriftstile unveränderter Einträge zu übernehmen.</summary>
-    public static List<Bookmark> ReadOutlines(string path)
+    /// <param name="password">Kennwort einer verschlüsselten Datei (mit dem sie geöffnet wurde); null bei unverschlüsselten.</param>
+    public static List<Bookmark> ReadOutlines(string path, string? password = null)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
+        using var document = OpenRead(path, password);
         List<Bookmark> result = [];
         if (document.Internals.Catalog.Elements.GetDictionary("/Outlines") is not { } root) { return result; }
         var pageNumbers = new Dictionary<PdfObjectID, int>();
@@ -365,7 +366,7 @@ internal static partial class PdfEditService
     /// verwaiste Objekte mit, leer kosten sie nur wenige Byte und verraten nichts mehr (Review 20.09.2026).</summary>
     public static void WriteOutlines(string path, IReadOnlyList<Bookmark> bookmarks)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        using var document = Open(path, PdfDocumentOpenMode.Modify);
         if (bookmarks.Count == 0)
         {
             RemoveOutlines(document);
@@ -434,7 +435,7 @@ internal static partial class PdfEditService
     /// Annots-Array der Seite (die übersprungenen Einträge zählen mit), Position in Millimetern von links/oben.</summary>
     public static List<AnnotationInfo> ListAnnotations(string path)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
+        using var document = Open(path, PdfDocumentOpenMode.Import);
         List<AnnotationInfo> result = [];
         for (var p = 0; p < document.PageCount; p++)
         {
@@ -499,7 +500,7 @@ internal static partial class PdfEditService
     /// <param name="top">Oberkante des Kastens in PDF-Koordinaten (Stapelplatz, s. FindStampStack); null = die feste Position des Stempels.</param>
     public static void AddStamp(string path, int page, Stamp stamp, int replaceIndex = -1, int replaceObjectNumber = 0, double? top = null)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        using var document = Open(path, PdfDocumentOpenMode.Modify);
         var pdfPage = document.Pages[page - 1];
         if (replaceIndex >= 0) { pdfPage.Annotations.Elements.RemoveAt(ResolveIndex(pdfPage.Annotations, replaceObjectNumber, replaceIndex)); }
         AppendStamp(document, pdfPage, stamp, stamp.SecondLine(DateTime.Now), top); // Datum, Uhrzeit und Kürzel klein unter dem Text
@@ -520,7 +521,7 @@ internal static partial class PdfEditService
     /// Stempel; bei der Seitenmitte kommt der zweite darüber und der dritte darunter.</summary>
     public static (List<StampSlot> Stack, double? FreeTop) FindStampStack(string path, int page, Stamp stamp)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
+        using var document = Open(path, PdfDocumentOpenMode.Import);
         var pdfPage = document.Pages[page - 1];
         var planned = StampRect(pdfPage, stamp, stamp.SecondLine(DateTime.Now));
         var annotations = pdfPage.Annotations;
@@ -572,7 +573,7 @@ internal static partial class PdfEditService
     /// früheren Fassung) entsteht ein Stempel aus Text und Farbe der Anmerkung.</summary>
     public static Stamp ReadStamp(string path, int page, int index, int objectNumber)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
+        using var document = Open(path, PdfDocumentOpenMode.Import);
         var annotations = document.Pages[page - 1].Annotations;
         var annotation = AnnotationAt(annotations, ResolveIndex(annotations, objectNumber, index));
         var json = annotation.Elements.GetString(StampDataKey);
@@ -594,7 +595,7 @@ internal static partial class PdfEditService
     /// Eintrag neu gezeichnet. Die ursprüngliche Datumszeile bleibt erhalten, sofern der neue Stempel eine hat.</summary>
     public static void UpdateStamp(string path, int page, int index, int objectNumber, Stamp stamp)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        using var document = Open(path, PdfDocumentOpenMode.Modify);
         var pdfPage = document.Pages[page - 1];
         index = ResolveIndex(pdfPage.Annotations, objectNumber, index);
         var old = AnnotationAt(pdfPage.Annotations, index);
@@ -694,7 +695,7 @@ internal static partial class PdfEditService
     /// PDFium keinen anderen Mischmodus einträgt. Vierecke je Seite (0-basiert) in PDF-Koordinaten aus <c>PageView.SelectionBoxesAsync</c>.</summary>
     public static void AddInvertHighlights(string path, IEnumerable<(int Page, List<(double Left, double Top, double Right, double Bottom)> Boxes)> pages)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        using var document = Open(path, PdfDocumentOpenMode.Modify);
         foreach (var (page, boxes) in pages)
         {
             if (page < 0 || page >= document.PageCount || boxes.Count == 0) { continue; }
@@ -741,6 +742,7 @@ internal static partial class PdfEditService
             annotation.Elements.SetReal("/CA", 1);
             annotation.Elements.SetInteger("/F", 4); // drucken
             annotation.Elements.SetObject("/AP", appearances);
+            annotation.Elements.SetString("/T", Environment.UserName); // Autor wie bei den übrigen Hervorhebungen (seit 16.10.2026)
             annotation.Elements.SetDateTime("/M", DateTime.Now);
             document.Internals.AddObject(annotation);
             pdfPage.Annotations.Elements.Add(annotation.Reference!); // nach AddObject hat das Objekt eine Referenz
@@ -890,7 +892,7 @@ internal static partial class PdfEditService
     /// <summary>Breite und Höhe einer Seite in Punkt (1-basiert).</summary>
     public static (double Width, double Height) GetPageSize(string path, int page)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
+        using var document = Open(path, PdfDocumentOpenMode.Import);
         var p = document.Pages[page - 1];
         return (p.Width.Point, p.Height.Point);
     }
@@ -918,7 +920,7 @@ internal static partial class PdfEditService
     /// Rückgängig-Sicherung; liefert die neue Gesamtseitenzahl.</summary>
     public static int AppendPdfs(string path, IReadOnlyList<string> otherPdfs)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        using var document = Open(path, PdfDocumentOpenMode.Modify);
         foreach (var otherPdf in otherPdfs)
         {
             using var other = PdfReader.Open(otherPdf, PdfDocumentOpenMode.Import);
@@ -932,7 +934,7 @@ internal static partial class PdfEditService
     /// <summary>Speichert die angegebenen Seiten (1-basiert) als neue Datei.</summary>
     public static void ExtractPages(string sourcePath, string destinationPath, IReadOnlyList<int> pages)
     {
-        using var source = PdfReader.Open(sourcePath, PdfDocumentOpenMode.Import);
+        using var source = Open(sourcePath, PdfDocumentOpenMode.Import);
         using PdfDocument destination = new();
         foreach (var page in pages) { destination.AddPage(source.Pages[page - 1]); }
         SaveCompact(destination, destinationPath);
@@ -943,8 +945,7 @@ internal static partial class PdfEditService
     /// gewendet wurde). Beide Dateien müssen gleich viele Seiten haben (prüft der Aufrufer).</summary>
     public static void MergeDuplex(string path, string backPath, bool backsReversed)
     {
-        var bytes = File.ReadAllBytes(path);
-        using MemoryStream stream = new(bytes);
+        using MemoryStream stream = new(ReadBytes(path));
         using var fronts = PdfReader.Open(stream, PdfDocumentOpenMode.Import);
         using var backs = PdfReader.Open(backPath, PdfDocumentOpenMode.Import);
         using PdfDocument target = new();
@@ -968,9 +969,7 @@ internal static partial class PdfEditService
     public static PdfInfo ReadInfo(string path, string? password = null)
     {
         // Import = lesender Zugriff (ReadOnly ist in PDFsharp 6 nicht implementiert); das Kennwort für Dateien mit Kennwort zum Öffnen
-        using var document = string.IsNullOrEmpty(password)
-            ? PdfReader.Open(path, PdfDocumentOpenMode.Import)
-            : PdfReader.Open(path, password, PdfDocumentOpenMode.Import);
+        using var document = OpenRead(path, password);
         var v = document.Version; // z.B. 14 → "1.4"
         static DateTime? Date(DateTime value) => value == DateTime.MinValue ? null : value; // PDFsharp: MinValue = nicht angegeben
         var catalog = document.Internals.Catalog;
@@ -1071,8 +1070,47 @@ internal static partial class PdfEditService
     private static void SaveCompact(PdfDocument document, string path)
     {
         document.Internals.Catalog.Elements.Remove("/Metadata");
+        if (unlocked is { } file) // während RunUnlocked: alles, was entsteht, mit dem Kennwort der Ausgangsdatei – auch Auszüge
+        {
+            document.SecuritySettings.UserPassword = file.Password;
+            document.SecurityHandler.SetEncryptionToV5(); // AES-256 wie im Eigenschaften-Dialog, ohne eigenes Berechtigungskennwort
+        }
         document.Save(path);
     }
+
+    // ------------------------------------------------------------------ Verschlüsselte Dateien
+
+    /// <summary>Die verschlüsselte Datei, die gerade bearbeitet wird (<see cref="RunUnlocked"/>): ihr Inhalt, von PDFium entschlüsselt,
+    /// und das Kennwort, mit dem sie geöffnet wurde.</summary>
+    private sealed record UnlockedFile(string Path, byte[] Plain, string Password);
+
+    [ThreadStatic] private static UnlockedFile? unlocked;
+
+    /// <summary>Bearbeitung einer verschlüsselten Datei, deren Kennwort bekannt ist (seit 24.10.2026, Wunsch Wilhelms – vorher waren die
+    /// Seitenbefehle gesperrt, bis der Schutz in den Eigenschaften aufgehoben war). PDFsharp ändert verschlüsselte Dateien nur mit dem
+    /// Besitzerkennwort und übernimmt die Verschlüsselung nicht. Deshalb lesen die Methoden innerhalb von <paramref name="edit"/> die Datei
+    /// <paramref name="path"/> aus <paramref name="plain"/> (von PDFium entschlüsselt, nur im Speicher), und jedes Speichern verschlüsselt mit
+    /// <paramref name="password"/> neu (<see cref="SaveCompact"/>). Unverschlüsselt kommt nichts auf die Platte. Einschränkungen der
+    /// Datei entfallen dabei – danach fragt der Aufrufer vorher.</summary>
+    public static void RunUnlocked(string path, byte[] plain, string password, Action edit)
+    {
+        unlocked = new(path, plain, password);
+        try { edit(); }
+        finally { unlocked = null; }
+    }
+
+    /// <summary>Entschlüsselter Inhalt, wenn <paramref name="path"/> die Datei von <see cref="RunUnlocked"/> ist.</summary>
+    private static byte[]? UnlockedBytes(string path) =>
+        unlocked is { } file && string.Equals(file.Path, path, StringComparison.OrdinalIgnoreCase) ? file.Plain : null;
+
+    private static PdfDocument Open(string path, PdfDocumentOpenMode mode) =>
+        UnlockedBytes(path) is { } plain ? PdfReader.Open(new MemoryStream(plain, writable: false), mode) : PdfReader.Open(path, mode);
+
+    /// <summary>Lesend öffnen, bei verschlüsselten Dateien mit dem Kennwort zum Öffnen (Import verlangt nicht das Besitzerkennwort).</summary>
+    private static PdfDocument OpenRead(string path, string? password) =>
+        string.IsNullOrEmpty(password) ? Open(path, PdfDocumentOpenMode.Import) : PdfReader.Open(path, password, PdfDocumentOpenMode.Import);
+
+    private static byte[] ReadBytes(string path) => UnlockedBytes(path) ?? File.ReadAllBytes(path);
 
     /// <summary>„OK“ im Eigenschaften-Dialog: Metadaten und Kennwortschutz in einem Durchgang schreiben (ein Rückgängig-Schritt).
     /// <paramref name="shown"/> ist der angezeigte Stand aus PDFium – bei verschlüsselten Dateien entschlüsselt (PDFsharp kann verschlüsselte
@@ -1136,7 +1174,7 @@ internal static partial class PdfEditService
     public static int InsertBlankPage(string path, int page, NewPageOptions options)
     {
         using var image = options.ImagePath == null ? null : LoadImage(options.ImagePath); // vor dem Öffnen: ein unlesbares Bild bricht ab, bevor etwas geändert ist
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        using var document = Open(path, PdfDocumentOpenMode.Modify);
         var reference = document.Pages[page - 1];
         var (referenceWidth, referenceHeight) = reference.Rotate % 180 != 0 ? (reference.Height.Point, reference.Width.Point) : (reference.Width.Point, reference.Height.Point);
         var layout = LayoutNewPage(options, referenceWidth, referenceHeight, image?.PixelWidth ?? 0, image?.PixelHeight ?? 0);
@@ -1199,11 +1237,11 @@ internal static partial class PdfEditService
     private const double MaxPageSizePt = 14400;
 
     /// <summary>Sichtbare Maße einer Seite (1-basiert) in Punkt – bei gedrehter Seite vertauscht; (0, 0), wenn sie sich nicht lesen lässt.</summary>
-    public static (double Width, double Height) PageSizePt(string path, int page)
+    public static (double Width, double Height) PageSizePt(string path, int page, string? password = null)
     {
         try
         {
-            using var document = PdfReader.Open(path, PdfDocumentOpenMode.Import);
+            using var document = OpenRead(path, password);
             var p = document.Pages[Math.Clamp(page, 1, document.PageCount) - 1];
             return p.Rotate % 180 != 0 ? (p.Height.Point, p.Width.Point) : (p.Width.Point, p.Height.Point);
         }
@@ -1274,7 +1312,7 @@ internal static partial class PdfEditService
     /// <summary>Verschiebt eine Seite an eine andere Position (beide 1-basiert); die übrigen Seiten rücken auf.</summary>
     public static void MovePage(string path, int page, int targetPage)
     {
-        using var document = PdfReader.Open(path, PdfDocumentOpenMode.Modify);
+        using var document = Open(path, PdfDocumentOpenMode.Modify);
         document.Pages.MovePage(page - 1, targetPage - 1);
         SaveCompact(document, path);
     }

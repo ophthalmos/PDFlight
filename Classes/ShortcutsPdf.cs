@@ -40,17 +40,16 @@ internal static partial class ShortcutsPdf
         DrawPageBackground(gfx, page);
         var width = page.Width.Point - 2 * Margin;
         var y = Margin;
-        var iconHeight = DrawAppIcon(gfx, page.Width.Point - Margin); // Programm-Icon rechts oben, 128 px unskaliert
+        DrawAppIcon(gfx, page.Width.Point - Margin); // Programm-Icon rechts oben, 128 px unskaliert
         gfx.DrawString(Application.ProductName + " – " + Lng.T("Hilfe"), titleFont, XBrushes.Black, Margin, y + 17);
         y += 26;
         var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3);
         gfx.DrawString("Version " + version + " – " + DateTime.Now.ToString("d", System.Globalization.CultureInfo.GetCultureInfo(Lng.CultureCode)), subFont, detailBrush, Margin, y + 9);
         y += 22;
-        // Abschnittsüberschrift links neben dem Icon, etwa auf Höhe seines unteren Randes; die Tabelle beginnt darunter
-        var iconBottom = Margin - 4 + iconHeight;
-        var headingY = Math.Max(y, iconBottom - 20);
-        gfx.DrawString(Lng.T("Tastenkürzel"), sectionFont, new XSolidBrush(Accent), Margin, headingY + 12);
-        y = Math.Max(headingY + 22, iconBottom + 8);
+        // Abschnittsüberschrift direkt unter der Versionszeile, die Tabelle gleich darunter – links neben dem Icon (seit 19.10.2026, Wunsch
+        // Wilhelms: Platz für die längere Kommandozeile; vorher begann die Tabelle erst unter dem Icon). Die ersten Zeilen sind kurz genug.
+        gfx.DrawString(Lng.T("Tastenkürzel"), sectionFont, new XSolidBrush(Accent), Margin, y + 12);
+        y += 22;
 
         // Zeilenhöhe so wählen, dass Tabelle und Hinweiskasten auf die Seite passen (12–17 Punkt); die
         // Erklärungszeilen (nur wo hinterlegt, z.B. F7) und der Kasten haben feste Höhe
@@ -59,8 +58,11 @@ internal static partial class ShortcutsPdf
         var detailHeight = detailLines.Sum(l => l == null ? 0 : l.Count * 12);
         var noteLines = NoteBoxLines(gfx, width);
         var noteHeight = NoteBoxHeight(noteLines);
+        var commandLines = Wrap(gfx, Lng.T("Kommandozeile:") + " PDFlight.exe [" + Lng.T("Datei") + "] /max  /page:12  /zoom:100  /twopage  /nosidebar  /print  /help   " +
+            Lng.T("(auch mit „--“)"), detailFont, width);
+        var commandLineHeight = 8 + commandLines.Count * 12; // Zeile(n) mit den Startschaltern unter dem Hinweiskasten
         var footerTop = page.Height.Point - FooterHeight - 6;
-        var rowHeight = Math.Clamp((footerTop - 2 - y - detailHeight - NoteGap - noteHeight - CommandLineHeight) / rows.Length, 12, 17); // 2 pt Reserve gegen Rundungsreste
+        var rowHeight = Math.Clamp((footerTop - 2 - y - detailHeight - NoteGap - noteHeight - commandLineHeight) / rows.Length, 12, 17); // 2 pt Reserve gegen Rundungsreste
         var fontSize = rowHeight >= 15 ? 10 : rowHeight >= 13.5 ? 9.5 : 9;
         XFont keyFont = new("Segoe UI", fontSize, XFontStyleEx.Bold);
         XFont textFont = new("Segoe UI", fontSize);
@@ -95,7 +97,7 @@ internal static partial class ShortcutsPdf
             }
         }
         y += NoteGap;
-        if (y + noteHeight + CommandLineHeight > footerTop) // zur Sicherheit — planmäßig eine Seite; die Kommandozeilen-Zeile darf nicht in die Fußzeile rutschen
+        if (y + noteHeight + commandLineHeight > footerTop) // zur Sicherheit — planmäßig eine Seite; die Kommandozeilen-Zeile darf nicht in die Fußzeile rutschen
         {
             DrawFooter(gfx, page);
             gfx.Dispose();
@@ -106,7 +108,11 @@ internal static partial class ShortcutsPdf
         }
         DrawNoteBox(gfx, Margin - NotePad, y, width + 2 * NotePad, noteLines, noteHeight); // Kasten um die Polsterung breiter, damit sein Text bündig mit der Tabelle steht
         y += noteHeight + 8;
-        gfx.DrawString(Lng.T("Kommandozeile:") + " PDFlight.exe [" + Lng.T("Datei") + "] /max  /page:12  /print  /help   " + Lng.T("(auch mit „--“)"), detailFont, detailBrush, Margin, y + 9);
+        foreach (var line in commandLines)
+        {
+            gfx.DrawString(line, detailFont, detailBrush, Margin, y + 9);
+            y += 12;
+        }
         DrawFooter(gfx, page);
         gfx.Dispose();
         document.Save(path);
@@ -116,7 +122,6 @@ internal static partial class ShortcutsPdf
     // Hinweiskasten unter der Kürzeltabelle: Anzeige aus dem Speicher, Viewer-Werkzeuge ohne Wirkung auf die
     // Datei, Bearbeiten-Befehle mit sofortigem Speichern
     private const double NoteGap = 16;
-    private const double CommandLineHeight = 20; // Zeile mit den Startschaltern unter dem Hinweiskasten
     private const double NotePad = 7;
     private const double NoteLineHeight = 13.5;
     private const double NoteParagraphGap = 0; // die Absätze folgen als bloße Zeilenumbrüche
