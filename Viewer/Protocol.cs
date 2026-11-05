@@ -44,6 +44,10 @@ internal static class Protocol
     /// (/NeedAppearances, von anderen Programmen ausgefüllt). Das Feld mit dem Fokus zählt nicht.</summary>
     public const byte FormUnformatted = 52;
 
+    /// <summary>Dok, int Seite, int Nummer (aus <see cref="ImageAt"/>) → bool: Das Bild steckt in einem Formular-XObject. Das können andere Seiten mitbenutzen;
+    /// entfernt verschwindet es dann auch dort, und PDFiums Schnittstelle verrät nicht, ob das so ist.</summary>
+    public const byte ImageInForm = 53;
+
     /// <summary>Nur an pdfscript.exe: int Anzahl Dokumentskripte, je Zeichenfolge; int Anzahl Felder, je Zustand wie bei <see cref="FormValues"/>; Zielfeld,
     /// Skript, event.value, bool event.willCommit, Sprache → bool event.rc, event.value, int Anzahl geänderter Werte, je Name und Wert; int Anzahl
     /// geänderter Eigenschaften, je Name, int /Ff, int Anzeige; int Anzahl Meldungen (app.alert), je Zeichenfolge.</summary>

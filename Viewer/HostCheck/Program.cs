@@ -246,6 +246,10 @@ internal static class Program
         }
         Console.WriteLine($"Bilder auf Seite 1 (Raster 19 × 19): {found.Count} in {watch.Elapsed.TotalMilliseconds:0} ms" +
             (found.Count > 0 ? " – " + string.Join(", ", found.Select(f => $"Nr. {f.Key}: {f.Value.Width} × {f.Value.Height}{(f.Value.Jpeg ? " JPEG" : string.Empty)}")) : string.Empty));
+        if (sandbox.Call(Protocol.ImageInForm, w => { w.Write(document); w.Write(0); w.Write(-1); }, r => r.ReadBoolean()))
+        {
+            throw new InvalidOperationException("Ungültige Bildnummer galt als Bild in einem Formular.");
+        }
         foreach (var (number, info) in found.Take(5))
         {
             foreach (var original in info.Jpeg ? new[] { true, false } : [false])

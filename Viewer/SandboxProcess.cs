@@ -19,6 +19,10 @@ namespace PDFLight.Viewer;
 internal sealed class SandboxProcess : IDisposable
 {
     public const string ContainerName = "PDFlight.pdfhost";
+
+    /// <summary>Ein eigener Container für die Formularskripte: Prozesse desselben AppContainers dürfen einander öffnen. Säße pdfscript mit im
+    /// Container von pdfhost, käme ein aus Jint ausgebrochenes Skript an den Speicher von pdfhost und damit an die entschlüsselten Dokumente.</summary>
+    public const string ScriptContainerName = "PDFlight.pdfscript";
     private const long ProcessMemoryLimit = 2L << 30; // 2 GB
 
     private readonly AnonymousPipeServerStream toChild, fromChild, errorFromChild;
@@ -38,7 +42,7 @@ internal sealed class SandboxProcess : IDisposable
     /// <summary>Was das Hilfsprogramm auf die Standard-Fehlerausgabe geschrieben hat (Startfehler der .NET-Laufzeit u. ä.).</summary>
     public string ErrorOutput { get { lock (errorText) { return errorText.ToString(); } } }
 
-    private SandboxProcess(string exePath, bool lessPrivileged)
+    private SandboxProcess(string exePath, bool lessPrivileged, string containerName)
     {
         LessPrivileged = lessPrivileged && !Without("container") && !Without("lpac");
         InContainer = !Without("container");
@@ -48,7 +52,7 @@ internal sealed class SandboxProcess : IDisposable
         errorFromChild = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable);
         try
         {
-            var sid = ContainerSid();
+            var sid = ContainerSid(containerName);
             GrantFolderAccess(Path.GetDirectoryName(exePath)!, sid, LessPrivileged); // exePath ist ein voller Pfad
             (process, job, ProcessId) = Launch(exePath, sid, lessPrivileged, ProhibitsDynamicCode,
                 toChild.ClientSafePipeHandle.DangerousGetHandle(), fromChild.ClientSafePipeHandle.DangerousGetHandle(),
@@ -71,10 +75,10 @@ internal sealed class SandboxProcess : IDisposable
     /// <summary>Startet das Hilfsprogramm. Ohne Angabe: das Native-AOT-Hilfsprogramm im normalen AppContainer mit Arbitrary Code Guard,
     /// das JIT-Hilfsprogramm (Entwicklung) im strengeren LPAC – die AOT-Laufzeit startet in LPAC nicht (Exit-Code −1 noch vor Main,
     /// Ursache offen), und der Code Guard wiegt schwerer.</summary>
-    public static SandboxProcess Start(string exePath, bool? lessPrivileged = null)
+    public static SandboxProcess Start(string exePath, bool? lessPrivileged = null, string containerName = ContainerName)
     {
         exePath = Path.GetFullPath(exePath);
-        return new(exePath, lessPrivileged ?? File.Exists(Path.ChangeExtension(exePath, ".dll")));
+        return new(exePath, lessPrivileged ?? File.Exists(Path.ChangeExtension(exePath, ".dll")), containerName);
     }
 
     private void CollectErrorOutput()
@@ -150,10 +154,10 @@ internal sealed class SandboxProcess : IDisposable
 
     // ================================================================== AppContainer
 
-    private static SecurityIdentifier ContainerSid()
+    private static SecurityIdentifier ContainerSid(string containerName)
     {
-        var result = SandboxNative.CreateAppContainerProfile(ContainerName, "PDFlight – PDF-Darstellung", "Abgeschotteter PDF-Prozess von PDFlight", 0, 0, out var sid);
-        if (result == SandboxNative.HResultAlreadyExists) { result = SandboxNative.DeriveAppContainerSidFromAppContainerName(ContainerName, out sid); }
+        var result = SandboxNative.CreateAppContainerProfile(containerName, containerName == ScriptContainerName ? "PDFlight – Formular-Skripte" : "PDFlight – PDF-Darstellung", "Abgeschotteter Prozess von PDFlight", 0, 0, out var sid);
+        if (result == SandboxNative.HResultAlreadyExists) { result = SandboxNative.DeriveAppContainerSidFromAppContainerName(containerName, out sid); }
         Marshal.ThrowExceptionForHR(result);
         try { return new SecurityIdentifier(sid); }
         finally { _ = SandboxNative.FreeSid(sid); }

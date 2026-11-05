@@ -20,6 +20,11 @@ internal sealed partial record PdfStatus(int PageCount, string? Version, string?
     /// PDFlight meldet das selbst, statt PDFiums Fehlertext zu zeigen (seit 10.10.2026).</summary>
     public static bool HasPdfHeader(ReadOnlySpan<byte> bytes) => bytes[..Math.Min(bytes.Length, HeaderSearchLength)].IndexOf("%PDF-"u8) >= 0;
 
+    /// <summary>Kann die Datei Formularskripte enthalten? Der Name /JavaScript ist auch in verschlüsselten Dateien lesbar, nur in Objektströmen nicht – dann
+    /// im Zweifel ja. Die meisten Formulare ohne Skripte sparen so das Durchgehen aller Seiten beim Öffnen. Ein Name mit Escape-Zeichen (#) entgeht
+    /// der Suche; seine Skripte laufen dann nicht, mehr nicht.</summary>
+    public static bool MayHaveScripts(ReadOnlySpan<byte> bytes) => bytes.IndexOf("JavaScript"u8) >= 0 || bytes.IndexOf("/ObjStm"u8) >= 0;
+
     /// <summary>Wie <see cref="HasPdfHeader(ReadOnlySpan{byte})"/>, liest nur den Anfang der Datei; nicht lesbar = ja (den Fehler meldet dann das Laden).</summary>
     public static bool HasPdfHeader(string path) => ReadHead(path) is not { } head || HasPdfHeader(head);
 

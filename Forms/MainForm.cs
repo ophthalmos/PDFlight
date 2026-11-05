@@ -533,7 +533,7 @@ public partial class MainForm : Form
         document = value;
         document?.Changed += Document_Changed;
         document?.FieldCommitted += Document_FieldCommitted;
-        formScripts = value is { HasForms: true } ? new FormScriptRunner(value) : null;
+        formScripts = value is { HasForms: true } && PdfStatus.MayHaveScripts(value.Bytes) ? new FormScriptRunner(value) : null;
         var kept = pageView.SetDocument(value, keepView);
         if (!kept)
         {
@@ -3607,7 +3607,7 @@ public partial class MainForm : Form
     /// als geändert. Das Schreiben kommt in die Kette, damit Eingaben der Reihe nach bleiben; die Suche selbst hält sie nicht auf.</summary>
     private async Task FormatShownFieldsAsync(PdfiumDocument doc)
     {
-        for (var page = 0; page < doc.PageCount && doc == document; page++)
+        for (var page = 0; page < doc.PageCount && doc == document && formScripts != null; page++)
         {
             var found = await doc.FormUnformattedAsync(page);
             if (found.Count == 0 || doc != document || formScripts is not { } runner) { continue; }
@@ -3645,6 +3645,11 @@ public partial class MainForm : Form
         }
         if (IsDisposed) { return; }
         if (commit.Name.Length == 0 && document is { } doc) { formatWalk = FormatShownFieldsAsync(doc); } // /ResetForm: Vorgabewerte stehen roh da
+        if (outcome.Stopped)
+        {
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Skripte dieser Datei brauchen zu lange und wurden angehalten."), Lng.T("Berechnete Felder sind vielleicht nicht mehr aktuell. Du kannst weiter eingeben und speichern."), TaskDialogIcon.Warning);
+            return;
+        }
         // Meldet ein Skript selbst etwas, erklärt das meist auch die Ablehnung – dann keine zweite Meldung. Die Überschrift sagt, von wem der Text stammt.
         if (outcome.Alert is { } alert)
         {
@@ -4133,7 +4138,10 @@ public partial class MainForm : Form
     /// <summary>Kontextmenü „Bild entfernen“ (Wunsch vom 03.11.2026): ungespeichert wie die Anmerkungen, ein Rückgängig-Schritt.</summary>
     private async void MnuRemoveImage_Click(object? sender, EventArgs e)
     {
-        if (EditLocked || ShownDocument == null || pageView.ImageUnderMouse == null) { return; }
+        if (EditLocked || ShownDocument is not { } doc || pageView.ImageUnderMouse == null) { return; }
+        // Briefköpfe und Logos stecken oft in einer gemeinsamen Vorlage: Ob andere Seiten sie benutzen, verrät PDFium nicht
+        if (doc.PageCount > 1 && await pageView.ImageUnderMouseInFormAsync()
+            && !TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Dieses Bild gehört zu einer Vorlage."), Lng.T("Benutzen auch andere Seiten diese Vorlage, verschwindet es dort ebenfalls. Trotzdem entfernen?"), TaskDialogIcon.Warning, defaultNo: true)) { return; }
         if (!await PushViewUndoAsync(Lng.T("Bild entfernen"))) { return; }
         if (!await pageView.RemoveImageUnderMouseAsync()) { viewUndo.RemoveAt(viewUndo.Count - 1); UpdateUndoMenu(); return; }
         statusPath.Text = Lng.T("Das Bild wurde entfernt.");

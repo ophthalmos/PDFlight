@@ -115,6 +115,7 @@ internal static unsafe partial class Pdfium
     // Formularfelder und ihre Skripte
     public const int FieldPushButton = 1, FieldCheckBox = 2, FieldRadio = 3, FieldCombo = 4, FieldList = 5, FieldText = 6; // FPDF_FORMFIELD_*
     public const int FieldFlagReadOnly = 1;                         // FPDF_FORMFLAG_READONLY
+    public const int FieldFlagChoiceEdit = 1 << 18;                 // FPDF_FORMFLAG_CHOICE_EDIT: Kombinationsfeld mit freier Eingabe
     public const int AnnotWidgetSubtype = 20;                       // FPDF_ANNOT_WIDGET
     public const int AnnotFlagNoView = 32;                          // FPDF_ANNOT_FLAG_NOVIEW
     public const int ActionKeystroke = 12, ActionFormat = 13, ActionValidate = 14, ActionCalculate = 15; // FPDF_ANNOT_AACTION_*

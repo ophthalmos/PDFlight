@@ -14,8 +14,9 @@ internal sealed record ScriptResult(bool Rc, string Value, IReadOnlyList<(string
 }
 
 /// <summary>Die Verbindung zu pdfscript.exe, dem Hilfsprogramm für Formularskripte. Es läuft getrennt von pdfhost und startet erst, wenn
-/// eine Datei Skripte hat: Stürzt es ab, ist nur diese eine Berechnung verloren, der nächste Lauf startet ein neues. Immer der normale
-/// AppContainer, auch im Debug-Build – in LPAC scheitert Jint schon beim Start an der Zeitzone (die Registry ist dort gesperrt).</summary>
+/// eine Datei Skripte hat: Stürzt es ab, ist nur diese eine Berechnung verloren, der nächste Lauf startet ein neues. Immer ein normaler
+/// AppContainer, auch im Debug-Build – in LPAC scheitert Jint schon beim Start an der Zeitzone (die Registry ist dort gesperrt) –, und ein
+/// eigener, nicht der von pdfhost (<see cref="SandboxProcess.ScriptContainerName"/>).</summary>
 internal static class ScriptClient
 {
     private const int MaxCount = 100_000; // Anzahl in einer Antwort: pdfscript rechnet mit fremden Skripten, seine Antworten gelten nicht als sicher
@@ -43,7 +44,7 @@ internal static class ScriptClient
         {
             process ??= new Func<SandboxProcess>(() =>
             {
-                var started = SandboxProcess.Start(HelperPath, lessPrivileged: false);
+                var started = SandboxProcess.Start(HelperPath, lessPrivileged: false, SandboxProcess.ScriptContainerName);
                 started.Timeout = TimeSpan.FromSeconds(5); // Jint bricht selbst nach 2 s ab, dies ist die Reserve für einen Hänger im Interpreter
                 return started;
             })();

@@ -11,7 +11,7 @@ namespace PDFLight.Host;
 internal sealed unsafe class PdfDocument : IDisposable
 {
     private const int LoadedPageLimit = 16;
-    private const int KeptPageLimit = 200; // s. keptPages
+    private const int KeptPageLimit = 24;  // s. keptPages; eine Seite kann mit Bildern 35 MB belegen, das Hilfsprogramm darf insgesamt 2 GB
     private const int MaxPixels = 100_000_000;     // Obergrenze je Bild (BGRA ≈ 400 MB), schützt vor unsinnigen Aufträgen
     private const uint HighlightColor = 0xFFE4DD;  // Feldhervorhebung wie in Chromium, halb deckend
     private const byte HighlightAlpha = 100;
@@ -95,7 +95,7 @@ internal sealed unsafe class PdfDocument : IDisposable
             if (loadedPages.Count >= LoadedPageLimit) // die am längsten unbenutzte Seite schließen – nicht die mit dem Eingabefokus
             {
                 var closable = loadedPages.Where(p => p.Key != formPage && !keptPages.Contains(p.Key)).ToList();
-                if (closable.Count > 0)
+                if (closable.Count >= LoadedPageLimit - 1) // behaltene Seiten zählen nicht mit, sonst bliebe für die übrigen kein Platz
                 {
                     var oldest = closable.MinBy(p => p.Value.LastUse);
                     ClosePage(oldest.Value);
@@ -520,8 +520,9 @@ internal sealed unsafe class PdfDocument : IDisposable
                 AfterFormCommand();
                 return field;
             default:
-                // Eine Schaltfläche kann Felder ändern (/ResetForm), ohne dass PDFium FFI_OnChange ruft – nur der Vergleich zeigt es
-                var before = Pdfium.HasFormFieldAtPoint(form, page, px, py) == Pdfium.FieldPushButton ? FormValues() : null;
+                // Eine Schaltfläche kann Felder ändern (/ResetForm), ohne dass PDFium FFI_OnChange ruft – nur der Vergleich zeigt es. Der geht durch
+                // alle Seiten, deshalb nur, wenn die Datei das Wort enthalten kann.
+                var before = MayResetForm && Pdfium.HasFormFieldAtPoint(form, page, px, py) == Pdfium.FieldPushButton ? FormValues() : null;
                 var handled = Pdfium.FormOnLButtonUp(form, page, modifiers, px, py) != 0;
                 if (handled) { InvalidateFocusedField(); }
                 if (before != null && !before.Select(v => (v.Name, v.Value)).SequenceEqual(FormValues().Select(v => (v.Name, v.Value))))
@@ -599,14 +600,22 @@ internal sealed unsafe class PdfDocument : IDisposable
     private bool interruptedCommit; // das Schreiben von Skriptergebnissen hat das Feld mit dem Fokus still übernommen: beim Verlassen nachholen, s. FormSetValues
 
     // Seiten mit Feldern, deren Anzeige vom Wert abweicht („12,50 €“ bei 12.5), bleiben geladen: Bei /NeedAppearances entsteht die Darstellung beim
-    // Neuladen wieder aus /V, und die Seite zeigte danach den Rohwert (nachgestellt 05.11.2026 mit 20 Seiten). Ob die Datei /NeedAppearances
-    // setzt, verrät PDFiums Schnittstelle nicht, deshalb gilt das für alle; die Grenze hält den Speicher im Rahmen, darüber bleibt nur die Anzeige roh.
+    // Neuladen wieder aus /V, und die Seite zeigte danach den Rohwert (nachgestellt 05.11.2026 mit 20 Seiten). Nur bei solchen Dateien; die Grenze hält
+    // den Speicher im Rahmen, weitere Seiten zeigen nach dem Neuladen wieder den Rohwert – die Anzeige, der Wert stimmt.
     private readonly HashSet<int> keptPages = [];
 
     private void KeepPageLoaded(int index)
     {
-        if (keptPages.Count < KeptPageLimit) { _ = keptPages.Add(index); }
+        if (RebuildsAppearances && keptPages.Count < KeptPageLimit) { _ = keptPages.Add(index); }
     }
+
+    // Die Schnittstelle verrät beides nicht, in den Bytes steht es aber: Namen sind nie verschlüsselt. In Objektströmen ist es nicht zu sehen,
+    // dann im Zweifel ja. Ein Name mit Escape-Zeichen (#) entgeht der Suche; das kostet nur Anzeige und Neuberechnung, keine Sicherheit.
+    private bool? rebuildsAppearances, mayResetForm;
+    private bool RebuildsAppearances => rebuildsAppearances ??= BytesContain("/NeedAppearances"u8) || BytesContain("/ObjStm"u8);
+    private bool MayResetForm => mayResetForm ??= BytesContain("/ResetForm"u8) || BytesContain("/ObjStm"u8);
+
+    private bool BytesContain(ReadOnlySpan<byte> text) => pin.Target is byte[] bytes && bytes.AsSpan().IndexOf(text) >= 0;
 
     /// <summary>Rückruf FFI_OnChange: PDFium hat einen Feldwert übernommen. Welches Feld, zeigt sich nach dem Befehl (<see cref="AfterFormCommand"/>) –
     /// mitten im Rückruf soll PDFium nicht erneut gefragt werden. Das Schreiben der Skriptergebnisse selbst zählt nicht, sonst liefen die Skripte im Kreis.</summary>
@@ -799,7 +808,7 @@ internal sealed unsafe class PdfDocument : IDisposable
         return values;
     }
 
-    /// <summary>Text- und Auswahlfelder einer Seite mit Formatier-Skript, die ihren Rohwert zeigen: Bei /NeedAppearances baut PDFium die Darstellung
+    /// <summary>Textfelder einer Seite mit Formatier-Skript, die ihren Rohwert zeigen (Auswahlfelder nicht, s. <see cref="WriteField"/>): Bei /NeedAppearances baut PDFium die Darstellung
     /// beim Laden aus /V, und auch andere Programme schreiben sie so. Ob ein Feld betroffen ist, verrät nur sein Darstellungsstrom – steht dort
     /// der Rohwert als Text, fehlt die Formatierung. Dateien mit richtiger Darstellung ergeben nichts, das Skript-Hilfsprogramm startet dann gar nicht.</summary>
     public List<(string Name, string Value, string Format)> FormUnformatted(int index)
@@ -811,7 +820,7 @@ internal sealed unsafe class PdfDocument : IDisposable
         _ = VisitWidgets(index, (_, annot) =>
         {
             var name = FieldName(annot);
-            if (name == focusField || !seen.Add(name) || Pdfium.FieldType(form, annot) is not (Pdfium.FieldText or Pdfium.FieldCombo)) { return false; }
+            if (name == focusField || !seen.Add(name) || Pdfium.FieldType(form, annot) != Pdfium.FieldText) { return false; }
             var format = FieldScript(annot, Pdfium.ActionFormat);
             var value = format.Length > 0 ? FieldValue(annot) : string.Empty;
             if (value.Length == 0) { return false; }
@@ -912,40 +921,92 @@ internal sealed unsafe class PdfDocument : IDisposable
         if (!wanted && Pdfium.FieldType(form, annot) == Pdfium.FieldRadio) { return; }
         var flags = Pdfium.FieldFlags(form, annot);
         var readOnly = (flags & Pdfium.FieldFlagReadOnly) != 0;
-        var annotFlags = Pdfium.AnnotGetFlags(annot);
-        var hidden = (annotFlags & (Pdfium.AnnotFlagHidden | Pdfium.AnnotFlagNoView)) != 0;
         if (readOnly) { _ = Pdfium.SetFieldFlags(form, annot, flags & ~Pdfium.FieldFlagReadOnly); }
-        if (hidden) { _ = Pdfium.AnnotSetFlags(annot, annotFlags & ~(Pdfium.AnnotFlagHidden | Pdfium.AnnotFlagNoView)); }
-        _ = Pdfium.FormSetFocusedAnnot(form, annot);
-        _ = Pdfium.FormOnChar(form, page, ' ', 0);
-        _ = Pdfium.FormForceToKillFocus(form);
-        if (hidden) { _ = Pdfium.AnnotSetFlags(annot, annotFlags); }
+        WithFocus(annot, () =>
+        {
+            _ = Pdfium.FormOnChar(form, page, ' ', 0);
+            _ = Pdfium.FormForceToKillFocus(form);
+        });
         if (readOnly) { _ = Pdfium.SetFieldFlags(form, annot, flags); }
     }
 
+    /// <summary>Gibt einem Feld den Fokus für <paramref name="action"/>, auch einem verborgenen: Das nimmt sonst keinen, und was danach ans Formularmodul
+    /// geht, träfe nichts oder ein anderes Feld. Berechnete Hilfsfelder sind oft verborgen. Ohne Fokus unterbleibt die Aktion.</summary>
+    private void WithFocus(nint annot, Action action)
+    {
+        var annotFlags = Pdfium.AnnotGetFlags(annot);
+        var hidden = (annotFlags & (Pdfium.AnnotFlagHidden | Pdfium.AnnotFlagNoView)) != 0;
+        if (hidden) { _ = Pdfium.AnnotSetFlags(annot, annotFlags & ~(Pdfium.AnnotFlagHidden | Pdfium.AnnotFlagNoView)); }
+        try
+        {
+            if (Pdfium.FormSetFocusedAnnot(form, annot) != 0) { action(); }
+        }
+        finally
+        {
+            if (hidden) { _ = Pdfium.AnnotSetFlags(annot, annotFlags); }
+        }
+    }
+
+    /// <summary>Schreibt einen Wert über das Formularmodul. Wert und Anzeige lassen sich nur beim Textfeld trennen (die Anzeige über das Modul, danach /V):
+    /// Ein Auswahlfeld bekommt immer den Wert, sonst stünde der Anzeigetext in der Datei.</summary>
     private void WriteField(nint page, nint annot, string value, string display)
     {
         var type = Pdfium.FieldType(form, annot);
         if (type is not (Pdfium.FieldText or Pdfium.FieldCombo or Pdfium.FieldList)) { return; } // Schaltflächen und Unterschriften haben keinen Text
-        _ = Pdfium.FormSetFocusedAnnot(form, annot);
-        var option = -1;
-        if (type != Pdfium.FieldText)
+        WithFocus(annot, () =>
         {
-            var count = Pdfium.FieldOptionCount(form, annot);
-            for (var i = 0; i < count && option < 0; i++)
+            if (type == Pdfium.FieldText) { ReplaceText(page, display); }
+            else
             {
-                var index = i;
-                if (ReadWide((b, l) => Pdfium.FieldOptionLabel(form, annot, index, b, l)) == value) { option = i; }
+                var option = FindOption(page, annot, value);
+                if (option >= 0) { _ = Pdfium.FormSetIndexSelected(form, page, option, 1); }
+                else if (type == Pdfium.FieldCombo) { ReplaceText(page, value); }
+                else if (value.Length == 0) // Liste leeren (eine Ablehnung stellt „nichts gewählt“ wieder her)
+                {
+                    var count = Math.Min(Pdfium.FieldOptionCount(form, annot), MaxOptions);
+                    for (var i = 0; i < count; i++) { _ = Pdfium.FormSetIndexSelected(form, page, i, 0); }
+                }
             }
-        }
-        if (option >= 0) { _ = Pdfium.FormSetIndexSelected(form, page, option, 1); }
-        else if (type != Pdfium.FieldList)
+            _ = Pdfium.FormForceToKillFocus(form);
+            if (type == Pdfium.FieldText && display != value) { SetString(annot, "V", value); }
+        });
+    }
+
+    private void ReplaceText(nint page, string text)
+    {
+        _ = Pdfium.FormSelectAllText(form, page);
+        fixed (char* chars = text) { Pdfium.FormReplaceSelection(form, page, (ushort*)chars); } // nullterminiert; leer = Feld leeren
+    }
+
+    private const int MaxOptions = 2000;
+
+    /// <summary>Der Eintrag eines Auswahlfelds zum Wert, -1 ohne. Meist ist der Wert die Beschriftung; bei /Opt [Ausfuhrwert Beschriftung] nicht, und die
+    /// Schnittstelle nennt nur die Beschriftung: Dann der Reihe nach wählen und nachsehen, welcher Wert dabei herauskommt (übernommen wird er erst
+    /// beim Fokusverlust). Ohne Treffer kommt die alte Wahl zurück. Nicht bei freier Eingabe: Dort darf der Wert in keinem Eintrag stehen, und das Wählen
+    /// nähme dem anschließenden Schreiben des Texts die Wirkung.</summary>
+    private int FindOption(nint page, nint annot, string value)
+    {
+        var count = Math.Min(Pdfium.FieldOptionCount(form, annot), MaxOptions);
+        for (var i = 0; i < count; i++)
         {
-            _ = Pdfium.FormSelectAllText(form, page);
-            fixed (char* chars = display) { Pdfium.FormReplaceSelection(form, page, (ushort*)chars); } // nullterminiert; leer = Feld leeren
+            var index = i;
+            if (ReadWide((b, l) => Pdfium.FieldOptionLabel(form, annot, index, b, l)) == value) { return i; }
         }
-        _ = Pdfium.FormForceToKillFocus(form);
-        if (type == Pdfium.FieldText && display != value) { SetString(annot, "V", value); }
+        if (value.Length == 0 || (Pdfium.FieldFlags(form, annot) & Pdfium.FieldFlagChoiceEdit) != 0) { return -1; }
+        var previous = FieldValue(annot);
+        var restore = -1;
+        for (var i = 0; i < count; i++)
+        {
+            _ = Pdfium.FormSetIndexSelected(form, page, i, 1);
+            _ = Pdfium.FormForceToKillFocus(form);
+            var now = FieldValue(annot);
+            _ = Pdfium.FormSetFocusedAnnot(form, annot);
+            if (now == value) { return i; }
+            if (now == previous) { restore = i; }
+        }
+        if (restore >= 0) { _ = Pdfium.FormSetIndexSelected(form, page, restore, 1); }
+        else if (count > 0) { _ = Pdfium.FormSetIndexSelected(form, page, count - 1, 0); } // vorher war nichts gewählt
+        return -1;
     }
 
     /// <summary>Meldet das Feld mit dem Fokus als neu zu zeichnen. PDFium ruft FFI_Invalidate nicht bei jeder Eingabe auf (bei Entf
@@ -1617,6 +1678,12 @@ internal sealed unsafe class PdfDocument : IDisposable
     /// <summary>„Bild entfernen“ (Kontextmenü, seit 03.11.2026): nimmt das Bild (Nummer aus <see cref="ImageAt"/>) aus der Seite bzw. aus
     /// seinem Formular-XObject und lässt PDFium den Inhaltsstrom neu schreiben (FPDFPage_GenerateContent – sonst bliebe es beim Speichern
     /// in der Datei). Das Bild-XObject selbst schreibt PDFium unreferenziert weiter mit, wie bei entfernten Anmerkungen.</summary>
+    public bool ImageInForm(int index, int number)
+    {
+        var images = ImageObjects(GetPage(index).Page);
+        return number >= 0 && number < images.Count && images[number].Parent != 0;
+    }
+
     public bool RemoveImage(int index, int number)
     {
         var page = GetPage(index).Page;

@@ -1024,4 +1024,16 @@ signatures.dat can only be read with the current Windows user account on this PC
   <data name="Die Datei wird vielleicht gerade von einem anderen Programm benutzt. An der Liste wurde nichts geändert – versuche es gleich noch einmal." xml:space="preserve">
     <value>Another program may be using the file right now. The list was not changed – please try again in a moment.</value>
   </data>
+  <data name="Dieses Bild gehört zu einer Vorlage." xml:space="preserve">
+    <value>This image is part of a template.</value>
+  </data>
+  <data name="Benutzen auch andere Seiten diese Vorlage, verschwindet es dort ebenfalls. Trotzdem entfernen?" xml:space="preserve">
+    <value>If other pages use this template, it will disappear from them too. Remove it anyway?</value>
+  </data>
+  <data name="Die Skripte dieser Datei brauchen zu lange und wurden angehalten." xml:space="preserve">
+    <value>The scripts in this file are taking too long and have been stopped.</value>
+  </data>
+  <data name="Berechnete Felder sind vielleicht nicht mehr aktuell. Du kannst weiter eingeben und speichern." xml:space="preserve">
+    <value>Calculated fields may no longer be up to date. You can keep entering data and save.</value>
+  </data>
 </root>

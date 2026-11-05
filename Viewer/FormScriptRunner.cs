@@ -15,8 +15,9 @@ internal sealed record FormField(string Name, string Label, string Keystroke, st
 internal sealed record FormFieldState(string Name, string Value, int Type, int Flags, int Display, bool Shared, IReadOnlyList<string> Options);
 
 /// <summary>Eine Eingabe wurde abgelehnt (<see cref="RejectedLabel"/>, das Feld hat wieder seinen alten Wert), ein Skript scheiterte
-/// (<see cref="FailedLabel"/>), oder ein Skript hat etwas zu sagen (<see cref="Alert"/>, app.alert).</summary>
-internal readonly record struct FormScriptOutcome(string? RejectedLabel = null, string? RejectedValue = null, string? FailedLabel = null, string? Alert = null);
+/// (<see cref="FailedLabel"/>), ein Skript hat etwas zu sagen (<see cref="Alert"/>, app.alert), oder die Skripte wurden gerade angehalten
+/// (<see cref="Stopped"/>, s. FormScriptRunner.Budget).</summary>
+internal readonly record struct FormScriptOutcome(string? RejectedLabel = null, string? RejectedValue = null, string? FailedLabel = null, string? Alert = null, bool Stopped = false);
 
 /// <summary>Führt die Skripte eines Dokuments aus, wenn PDFium einen Feldwert übernommen hat, in Acrobats Reihenfolge: das geänderte Feld
 /// prüfen (Tastenanschlag mit willCommit, Prüfen), dann alle Berechnungen, zuletzt das Formatieren. Die Skripte laufen in pdfscript.exe
@@ -28,35 +29,36 @@ internal sealed class FormScriptRunner(PdfiumDocument document)
     private const int CalculatePasses = 3, AlertLength = 1000;
     private const int FlagsScriptsMayChange = 1 | 2; // /Ff: schreibgeschützt, Pflichtfeld – andere Bits ändern die Art des Felds
 
-    /// <summary>Gesamtzeit je Eingabe bzw. fürs Formatieren eines Stands: Die Grenze je Skript (2 s) allein ließe eine Datei mit vielen
-    /// Endlosschleifen das Speichern minutenlang aufhalten – es wartet auf die Skripte. Normale Formulare brauchen Millisekunden je Skript.</summary>
+    /// <summary>Gesamtzeit je Eingabe bzw. für die Formatier-Skripte eines Stands: Die Grenze je Skript (2 s) allein ließe eine Datei mit vielen
+    /// Endlosschleifen das Speichern minutenlang aufhalten – es wartet auf die Skripte. Normale Formulare brauchen Millisekunden je Skript. Reißt eine
+    /// Eingabe die Grenze, laufen für diesen Stand keine Eingabe-Skripte mehr (<see cref="stopped"/>): Sonst warteten mehrere Eingaben hintereinander
+    /// je 10 s, und Speichern hinter ihnen allen.</summary>
     private static readonly TimeSpan Budget = TimeSpan.FromSeconds(10);
 
     private List<FormField>? fields;
     private List<string> documentScripts = [];
     private readonly Dictionary<(string Name, string Shown), string> rawValues = [];
     private readonly Stopwatch formatTime = new();
+    private Dictionary<string, FormFieldState>? formatStates; // einmal je Suche: das Lesen geht durch alle Seiten; eine Eingabe verwirft sie
+    private bool stopped;
 
     /// <summary>Formatiert Felder, die ihren Rohwert zeigen, ohne die Datei als geändert zu markieren. Das Hilfsprogramm lässt Felder aus, die
     /// inzwischen einen anderen Wert oder den Fokus haben. Was ein Formatier-Skript dabei an anderen Feldern ändert, gilt hier nicht: Es hat
     /// niemand etwas eingegeben. Ein leeres Ergebnis auch nicht – die Anzeige soll einen Wert nicht verschwinden lassen.</summary>
     public async Task FormatAsync(IReadOnlyList<(string Name, string Value, string Format)> found)
     {
-        if (formatTime.Elapsed > Budget) { return; }
-        formatTime.Start();
+        if (stopped || formatTime.Elapsed > Budget) { return; }
+        if (fields == null) { (documentScripts, fields) = await document.FormScriptsAsync(); }
+        var states = formatStates ??= await document.FormValuesAsync();
         List<(string Name, string Value, string Display)> output = [];
-        try
+        foreach (var (name, value, format) in found)
         {
-            if (fields == null) { (documentScripts, fields) = await document.FormScriptsAsync(); }
-            var states = await document.FormValuesAsync();
-            foreach (var (name, value, format) in found)
-            {
-                if (formatTime.Elapsed > Budget) { break; }
-                var result = await ScriptClient.RunAsync(new(documentScripts, states.Values, name, format, value, false, Lng.CultureCode));
-                if (!result.Failed && result.Value.Length > 0 && result.Value != value) { output.Add((name, value, result.Value)); }
-            }
+            if (formatTime.Elapsed > Budget) { break; }
+            formatTime.Start(); // nur die Skripte zählen, nicht das Warten auf Seiten und Darstellung
+            var result = await ScriptClient.RunAsync(new(documentScripts, states.Values, name, format, value, false, Lng.CultureCode));
+            formatTime.Stop();
+            if (!result.Failed && result.Value.Length > 0 && result.Value != value) { output.Add((name, value, result.Value)); }
         }
-        finally { formatTime.Stop(); }
         if (output.Count > 0) { await document.FormSetValuesAsync(output, displayOnly: true); }
     }
 
@@ -82,8 +84,9 @@ internal sealed class FormScriptRunner(PdfiumDocument document)
     {
         if (fields == null) { (documentScripts, fields) = await document.FormScriptsAsync(); }
         if (!fields.Exists(f => f.HasScript)) { return default; } // der Normalfall: Danach kostet eine Eingabe keinen weiteren Auftrag
-        if (commit.Name.Length > 0 && commit.OldValue == commit.NewValue) { return default; }
+        if (stopped || (commit.Name.Length > 0 && commit.OldValue == commit.NewValue)) { return default; }
 
+        formatStates = null;
         var states = await document.FormValuesAsync();
         var writes = new Dictionary<string, string>();
         var properties = new Dictionary<string, (int Flags, int Display)>();
@@ -100,7 +103,7 @@ internal sealed class FormScriptRunner(PdfiumDocument document)
         }
         async Task<ScriptResult> RunAsync(FormField field, string script, string value, bool willCommit)
         {
-            if (elapsed.Elapsed > Budget) { failed ??= field.Label; return ScriptResult.Failure; }
+            if (elapsed.Elapsed > Budget) { failed ??= field.Label; stopped = true; return ScriptResult.Failure; }
             var result = await ScriptClient.RunAsync(new(documentScripts, states.Values, field.Name, script, value, willCommit, Lng.CultureCode));
             if (result.Failed) { failed ??= field.Label; return result; }
             foreach (var (name, written) in result.Writes) { Apply(name, written); }
@@ -135,7 +138,7 @@ internal sealed class FormScriptRunner(PdfiumDocument document)
                     if (committed.Format.Length > 0 && await RunAsync(committed, committed.Format, old, false) is { Failed: false } formatted) { shown = formatted.Value; }
                     await document.FormSetValuesAsync([(committed.Name, old, shown)]);
                     await SetPropertiesAsync();
-                    return new(committed.Label, commit.NewValue, Alert: alert);
+                    return new(committed.Label, commit.NewValue, Alert: alert, Stopped: stopped);
                 }
                 Apply(committed.Name, result.Value);
             }
@@ -178,6 +181,6 @@ internal sealed class FormScriptRunner(PdfiumDocument document)
         }
         if (output.Count > 0) { await document.FormSetValuesAsync(output); }
         await SetPropertiesAsync();
-        return new(FailedLabel: failed, Alert: alert);
+        return new(FailedLabel: failed, Alert: alert, Stopped: stopped);
     }
 }

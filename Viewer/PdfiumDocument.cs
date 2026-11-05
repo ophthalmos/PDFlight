@@ -507,6 +507,10 @@ internal sealed class PdfiumDocument : IDisposable
     public Task<double> AnnotScaleAsync(int index, int number) =>
         Query(0.0, Protocol.AnnotScale, w => { w.Write(index); w.Write(number); }, r => r.ReadDouble());
 
+    /// <summary>Steckt das Bild in einem Formular-XObject, das andere Seiten mitbenutzen können (s. Protocol.ImageInForm)?</summary>
+    public Task<bool> ImageInFormAsync(int index, int number) =>
+        Query(false, Protocol.ImageInForm, w => { w.Write(index); w.Write(number); }, r => r.ReadBoolean());
+
     /// <summary>Entfernt ein Bild aus der Seite (Nummer aus <see cref="ImageAtAsync"/>).</summary>
     public Task<bool> RemoveImageAsync(int index, int number) =>
         Query(false, Protocol.RemoveImage, w => { w.Write(index); w.Write(number); }, r => r.ReadBoolean());

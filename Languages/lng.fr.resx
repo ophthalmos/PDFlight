@@ -1024,4 +1024,16 @@ signatures.dat n’est lisible qu’avec le compte utilisateur Windows actuel su
   <data name="Die Datei wird vielleicht gerade von einem anderen Programm benutzt. An der Liste wurde nichts geändert – versuche es gleich noch einmal." xml:space="preserve">
     <value>Le fichier est peut-être utilisé par un autre programme. La liste n’a pas été modifiée – réessaie dans un instant.</value>
   </data>
+  <data name="Dieses Bild gehört zu einer Vorlage." xml:space="preserve">
+    <value>Cette image fait partie d’un modèle.</value>
+  </data>
+  <data name="Benutzen auch andere Seiten diese Vorlage, verschwindet es dort ebenfalls. Trotzdem entfernen?" xml:space="preserve">
+    <value>Si d’autres pages utilisent ce modèle, elle y disparaîtra aussi. La supprimer quand même ?</value>
+  </data>
+  <data name="Die Skripte dieser Datei brauchen zu lange und wurden angehalten." xml:space="preserve">
+    <value>Les scripts de ce fichier sont trop lents et ont été arrêtés.</value>
+  </data>
+  <data name="Berechnete Felder sind vielleicht nicht mehr aktuell. Du kannst weiter eingeben und speichern." xml:space="preserve">
+    <value>Les champs calculés ne sont peut-être plus à jour. Tu peux continuer à saisir et enregistrer.</value>
+  </data>
 </root>

@@ -163,4 +163,9 @@ begin
     DeleteAppContainerProfile('PDFlight.pdfhost');
   except
   end;
+  if CurUninstallStep = usPostUninstall then
+  try
+    DeleteAppContainerProfile('PDFlight.pdfscript');
+  except
+  end;
 end;

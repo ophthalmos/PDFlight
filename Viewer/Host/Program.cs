@@ -389,6 +389,12 @@ internal static class Program
                     var removed = Document(id).RemoveImage(page, number);
                     return w => w.Write(removed);
                 }
+            case Protocol.ImageInForm:
+                {
+                    var (id, page, number) = (input.ReadInt32(), input.ReadInt32(), input.ReadInt32());
+                    var inForm = Document(id).ImageInForm(page, number);
+                    return w => w.Write(inForm);
+                }
             case Protocol.AnnotScale:
                 {
                     var (id, page, number) = (input.ReadInt32(), input.ReadInt32(), input.ReadInt32());

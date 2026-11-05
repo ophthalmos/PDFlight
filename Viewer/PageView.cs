@@ -999,6 +999,10 @@ internal sealed class PageView : ScrollableControl
         return await document.ImageDataAsync(image.Page, image.Number, original);
     }
 
+    /// <summary>Steckt das Bild unter dem letzten Rechtsklick in einer Vorlage (Formular-XObject), die andere Seiten mitbenutzen können?</summary>
+    public async Task<bool> ImageUnderMouseInFormAsync() =>
+        document != null && imageUnderMouse is { } image && await document.ImageInFormAsync(image.Page, image.Number);
+
     /// <summary>Entfernt das Bild unter dem letzten Rechtsklick („Bild entfernen“, seit 03.11.2026); eine Bildauswahl verschwindet mit.</summary>
     public async Task<bool> RemoveImageUnderMouseAsync()
     {
