@@ -18,6 +18,15 @@ internal static class Events
         w.Write(bottom);
     });
 
+    public static void FieldCommitted(int document, string name, string oldValue, string newValue) => Pending.Add(w =>
+    {
+        w.Write(Protocol.EventFieldCommitted);
+        w.Write(document);
+        w.Write(name);
+        w.Write(oldValue);
+        w.Write(newValue);
+    });
+
     public static void Changed(int document)
     {
         if (!ChangedDocuments.Add(document)) { return; } // je Befehl einmal genügt

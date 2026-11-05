@@ -118,6 +118,11 @@ internal static class SandboxClient
                 var area = RectangleF.FromLTRB(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
                 if (Documents.TryGetValue(id, out var document)) { document.RaiseFormInvalidated(page, area); }
                 break;
+            case Protocol.EventFieldCommitted:
+                var committedId = reader.ReadInt32();
+                var commit = new FieldCommittedEventArgs(reader.ReadString(), reader.ReadString(), reader.ReadString());
+                if (Documents.TryGetValue(committedId, out var committed)) { committed.RaiseFieldCommitted(commit); }
+                break;
             case Protocol.EventChanged:
                 if (Documents.TryGetValue(reader.ReadInt32(), out var changed)) { changed.RaiseChanged(); }
                 break;

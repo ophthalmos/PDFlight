@@ -10,6 +10,10 @@ Third-party components included:
 - PDFium (pdfium.dll), (c) The PDFium Authors
   BSD-3-Clause / Apache-2.0 - https://pdfium.googlesource.com/pdfium/
   binaries from https://github.com/bblanchon/pdfium-binaries (Apache-2.0)
+- Jint (in pdfscript.exe), (c) Sebastien Ros
+  BSD-2-Clause - https://github.com/sebastienros/jint
+- Acornima (in pdfscript.exe), (c) Adam Simon
+  BSD-3-Clause - https://github.com/adams85/acornima
 - Microsoft.Extensions.Logging.Abstractions and
   Microsoft.Extensions.DependencyInjection.Abstractions, (c) Microsoft
   MIT - https://github.com/dotnet/runtime

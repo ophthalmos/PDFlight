@@ -121,7 +121,7 @@ The display comes from memory and remains available.</value></data>
   <data name="Die Datei konnte nicht gespeichert werden." xml:space="preserve"><value>The file could not be saved.</value></data>
   <data name="Die Datei wurde verschoben oder gelöscht; die Anzeige stammt aus dem Speicher." xml:space="preserve"><value>The file was moved or deleted; the display comes from memory.</value></data>
   <data name="Das Bearbeiten führt dazu, dass die PDF-Datei nicht mehr dem PDF/A-Standard entspricht." xml:space="preserve"><value>Editing will cause the PDF file to no longer conform to the PDF/A standard.</value></data>
-  <data name="Das Aktivieren selbst ändert die Datei noch nicht. Erst wenn du eine Bearbeitung ausführst (Seiten löschen oder drehen, Metadaten ändern usw.), wird die Datei sofort und ohne Nachfrage gespeichert und verliert dabei die PDF/A-Kennzeichnung – einen gesonderten Speichern-Schritt gibt es in PDFlight nicht." xml:space="preserve"><value>Enabling editing does not change the file yet. Only when you perform an edit (deleting or rotating pages, changing metadata, etc.) is the file saved immediately and without prompting, losing its PDF/A marking – there is no separate save step in PDFlight.</value></data>
+  <data name="Das Aktivieren selbst ändert die Datei noch nicht. Befehle des Bearbeiten-Menüs speichern die Datei sofort und entfernen dabei die PDF/A-Kennzeichnung. Anmerkungen und Formulareingaben kommen erst mit „Speichern“ in die Datei." xml:space="preserve"><value>Enabling editing does not change the file yet. Commands from the Edit menu save the file immediately and remove its PDF/A marking. Annotations and form entries are only written with “Save”.</value></data>
   <data name="Tooltip.Open" xml:space="preserve"><value>Open PDF file (Ctrl+O)
 Arrow: recently opened files</value></data>
   <data name="Tooltip.Move" xml:space="preserve"><value>Move to a folder (Ctrl+M)
@@ -627,9 +627,12 @@ or press Shift+F10.</value></data>
   <data name="{0} Seiten angehängt" xml:space="preserve"><value>{0} pages appended</value></data>
   <data name="„{0}“ ist schreibgeschützt." xml:space="preserve"><value>„{0}“ is read-only.</value></data>
   <data name="Soll der Schreibschutz aufgehoben werden, damit „{0}“ gespeichert werden kann?" xml:space="preserve"><value>Remove the write protection so that „{0}“ can be saved?</value></data>
+  <data name="Wie sollen die Änderungen gespeichert werden?" xml:space="preserve"><value>How do you want to save the changes?</value></data>
+  <data name="Schreibschutz aufheben" xml:space="preserve"><value>Remove write protection</value></data>
+  <data name="Die Änderungen werden in dieser Datei gespeichert." xml:space="preserve"><value>The changes are saved in this file.</value></data>
+  <data name="Die Änderungen kommen in eine neue Datei." xml:space="preserve"><value>The changes go into a new file.</value></data>
   <data name="„{0}“ ist mit einem Kennwort geschützt." xml:space="preserve"><value>„{0}“ is protected by a password.</value></data>
   <data name="Nicht speichern" xml:space="preserve"><value>Don't save</value></data>
-  <data name="Die Datei ist als PDF/A gekennzeichnet – nach dem Speichern entspricht sie dem Standard nicht mehr." xml:space="preserve"><value>The file is marked as PDF/A – after saving it no longer conforms to the standard.</value></data>
   <data name="(keine Lesezeichen)" xml:space="preserve"><value>(no bookmarks)</value></data>
   <data name="{0} Seiten an „{1}“ gesendet." xml:space="preserve"><value>{0} pages sent to “{1}”.</value></data>
   <data name="{0} Treffer – durchsucht {1} von {2} Seiten" xml:space="preserve"><value>{0} matches – searched {1} of {2} pages</value></data>
@@ -848,8 +851,8 @@ Without it, the file can no longer be displayed.</value></data>
   <data name="aktuelle Seite rechts / links drehen" xml:space="preserve"><value>rotate the current page right / left</value></data>
   <data name="Von" xml:space="preserve"><value>From</value></data>
   <data name="bis" xml:space="preserve"><value>to</value></data>
-  <data name="Möchtest du die Änderungen an „{0}“ speichern?" xml:space="preserve"><value>Do you want to save the changes you made to {0}?</value></data>
-  <data name="Deine Änderungen gehen verloren, wenn du sie nicht speicherst." xml:space="preserve"><value>Your changes will be lost if you don&apos;t save them.</value></data>
+  <data name="„{0}“ speichern?" xml:space="preserve"><value>Save {0}?</value></data>
+  <data name="Änderungen gehen verloren, wenn du nicht speicherst." xml:space="preserve"><value>Changes will be lost if you don&apos;t save.</value></data>
   <data name="Alle Seiten" xml:space="preserve"><value>All pages</value></data>
   <data name="Bild speichern…" xml:space="preserve"><value>Save image…</value></data>
   <data name="Bild kopieren" xml:space="preserve"><value>Copy image</value></data>
@@ -966,4 +969,59 @@ Without it, the file can no longer be displayed.</value></data>
   <data name="Lesezeichen bearbeiten… (Strg+F2)" xml:space="preserve"><value>Edit bookmarks… (Ctrl+F2)</value></data>
   <data name="Bis Ebene {0}" xml:space="preserve"><value>To level {0}</value></data>
   <data name="Bis Ebene aufklappen" xml:space="preserve"><value>Expand to level</value></data>
+  <data name="&amp;Bild laden…" xml:space="preserve"><value>&amp;Load image…</value></data>
+  <data name="&amp;Leeren" xml:space="preserve"><value>&amp;Clear</value></data>
+  <data name="Als Anmerkung lassen" xml:space="preserve"><value>Keep as annotation</value></data>
+  <data name="Auf dem Bild ist keine Unterschrift zu erkennen." xml:space="preserve"><value>No signature can be seen in the image.</value></data>
+  <data name="Bild der Unterschrift laden" xml:space="preserve"><value>Load signature image</value></data>
+  <data name="Bilder (*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tif;*.tiff)|*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tif;*.tiff" xml:space="preserve"><value>Images (*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tif;*.tiff)|*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tif;*.tiff</value></data>
+  <data name="Bleibt verschiebbar und lässt sich später entfernen." xml:space="preserve"><value>Stays movable and can be removed later.</value></data>
+  <data name="Das Bild konnte nicht geladen werden." xml:space="preserve"><value>The image could not be loaded.</value></data>
+  <data name="Die Größe wurde auf Seite {0} geändert." xml:space="preserve"><value>The size was changed on page {0}.</value></data>
+  <data name="Die Unterschrift fest in die Seite übernehmen?" xml:space="preserve"><value>Make the signature a permanent part of the page?</value></data>
+  <data name="Die Unterschrift konnte nicht entfernt werden." xml:space="preserve"><value>The signature could not be removed.</value></data>
+  <data name="Die Unterschrift konnte nicht gespeichert werden." xml:space="preserve"><value>The signature could not be saved.</value></data>
+  <data name="Die Unterschrift wurde auf Seite {0} eingefügt – ziehen zum Verschieben, an der rechten unteren Ecke für die Größe." xml:space="preserve"><value>The signature was inserted on page {0} – drag to move it, drag the bottom-right corner to resize it.</value></data>
+  <data name="Die {0} Unterschriften fest in die Seiten übernehmen?" xml:space="preserve"><value>Make the {0} signatures a permanent part of the pages?</value></data>
+  <data name="Diese Unterschrift entfernen?" xml:space="preserve"><value>Remove this signature?</value></data>
+  <data name="Es scheint nur hellen Hintergrund zu enthalten." xml:space="preserve"><value>It seems to contain only a light background.</value></data>
+  <data name="Fest übernehmen" xml:space="preserve"><value>Make permanent</value></data>
+  <data name="Größe ändern" xml:space="preserve"><value>Resize</value></data>
+  <data name="Hier unterschreiben" xml:space="preserve"><value>Sign here</value></data>
+  <data name="Höchstens {0} Unterschriften" xml:space="preserve"><value>At most {0} signatures</value></data>
+  <data name="Klicke auf die Stelle für die Unterschrift – Esc bricht ab." xml:space="preserve"><value>Click where the signature should go – Esc cancels.</value></data>
+  <data name="Klicke danach auf die Stelle im Dokument" xml:space="preserve"><value>Then click the spot in the document</value></data>
+  <data name="Sie steht danach nicht mehr zur Auswahl. Bereits eingefügte Unterschriften bleiben in ihren Dokumenten." xml:space="preserve"><value>It will no longer be offered. Signatures already inserted stay in their documents.</value></data>
+  <data name="Hier kannst du die Unterschrift direkt zeichnen oder eine Bilddatei deiner Unterschrift importieren" xml:space="preserve"><value>Here you can draw your signature directly or import an image file of your signature</value></data>
+  <data name="Unterschreiben" xml:space="preserve"><value>Sign</value></data>
+  <data name="Unterschrift einfügen" xml:space="preserve"><value>Insert signature</value></data>
+  <data name="Unterschrift entfernen" xml:space="preserve"><value>Remove signature</value></data>
+  <data name="Unterschrift hinzufügen" xml:space="preserve"><value>Add signature</value></data>
+  <data name="Unterschrift hinzufügen…" xml:space="preserve"><value>Add signature…</value></data>
+  <data name="Unterschrift übernehmen" xml:space="preserve"><value>Make signature permanent</value></data>
+  <data name="Unterschrift" xml:space="preserve"><value>Signature</value></data>
+  <data name="Unterschriften lassen sich verschieben und an der rechten unteren Ecke in der Größe ändern." xml:space="preserve"><value>Signatures can be moved, and resized at the bottom-right corner.</value></data>
+  <data name="Wird nicht mehr verschiebbar in die Seite eingebettet." xml:space="preserve"><value>Embedded in the page and can no longer be moved.</value></data>
+  <data name="Bild entfernen" xml:space="preserve"><value>Remove image</value></data>
+  <data name="Das Bild wurde entfernt." xml:space="preserve"><value>The image was removed.</value></data>
+  <data name="Unterschrift.Speicherort" xml:space="preserve"><value>Location: {0} (encrypted with the Windows DPAPI)
+signatures.dat can only be read with the current Windows user account on this PC.</value></data>
+  <data name="Ziehen ändert die Größe – mit Strg in Stufen (25 %, 50 %, 100 % …)." xml:space="preserve"><value>Drag to resize – hold Ctrl for steps (25%, 50%, 100% …).</value></data>
+  <data name="„{0}“ ist als PDF/A-{1} gekennzeichnet." xml:space="preserve"><value>{0} is marked as PDF/A-{1}.</value></data>
+  <data name="PDFlight prüft nicht, ob deine Änderungen dem Standard entsprechen." xml:space="preserve"><value>PDFlight does not check whether your changes meet the standard.</value></data>
+  <data name="Das Original bleibt unverändert als PDF/A erhalten." xml:space="preserve"><value>The original stays unchanged as PDF/A.</value></data>
+  <data name="In dieser Datei speichern" xml:space="preserve"><value>Save in this file</value></data>
+  <data name="Die Datei verliert ihre PDF/A-Kennzeichnung." xml:space="preserve"><value>The file loses its PDF/A marking.</value></data>
+  <data name="Die Eingabe wurde nicht übernommen." xml:space="preserve"><value>Your entry was not accepted.</value></data>
+  <data name="„{0}“ ist im Feld „{1}“ nicht gültig." xml:space="preserve"><value>“{0}” is not valid in the field “{1}”.</value></data>
+  <data name="Ein Skript der Datei konnte nicht ausgeführt werden (Feld „{0}“)." xml:space="preserve"><value>A script in the file could not be run (field “{0}”).</value></data>
+  <data name="Hinweis aus der PDF-Datei" xml:space="preserve">
+    <value>Message from the PDF file</value>
+  </data>
+  <data name="Die gespeicherten Unterschriften konnten nicht gelesen werden." xml:space="preserve">
+    <value>The saved signatures could not be read.</value>
+  </data>
+  <data name="Die Datei wird vielleicht gerade von einem anderen Programm benutzt. An der Liste wurde nichts geändert – versuche es gleich noch einmal." xml:space="preserve">
+    <value>Another program may be using the file right now. The list was not changed – please try again in a moment.</value>
+  </data>
 </root>

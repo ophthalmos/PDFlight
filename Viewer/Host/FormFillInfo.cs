@@ -44,7 +44,7 @@ internal static unsafe class FormFillInfo
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static void OnChange(nint info)
     {
-        if (Owners.TryGetValue(info, out var owner)) { Events.Changed(owner.Id); }
+        if (Owners.TryGetValue(info, out var owner)) { owner.OnFormChange(); }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]

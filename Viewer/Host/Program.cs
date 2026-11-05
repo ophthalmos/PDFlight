@@ -383,6 +383,85 @@ internal static class Program
                     var removed = Document(id).RemoveMarkup(page, number);
                     return w => w.Write(removed);
                 }
+            case Protocol.RemoveImage:
+                {
+                    var (id, page, number) = (input.ReadInt32(), input.ReadInt32(), input.ReadInt32());
+                    var removed = Document(id).RemoveImage(page, number);
+                    return w => w.Write(removed);
+                }
+            case Protocol.AnnotScale:
+                {
+                    var (id, page, number) = (input.ReadInt32(), input.ReadInt32(), input.ReadInt32());
+                    var scale = Document(id).AnnotScale(page, number);
+                    return w => w.Write(scale);
+                }
+            case Protocol.FormScripts:
+                {
+                    var (scripts, fields) = Document(input.ReadInt32()).FormScripts();
+                    return w =>
+                    {
+                        w.Write(scripts.Count);
+                        foreach (var script in scripts) { w.Write(script); }
+                        w.Write(fields.Count);
+                        foreach (var field in fields)
+                        {
+                            w.Write(field.Name);
+                            w.Write(field.Label);
+                            w.Write(field.Keystroke);
+                            w.Write(field.Format);
+                            w.Write(field.Validate);
+                            w.Write(field.Calculate);
+                        }
+                    };
+                }
+            case Protocol.FormValues:
+                {
+                    var values = Document(input.ReadInt32()).FormValues();
+                    return w =>
+                    {
+                        w.Write(values.Count);
+                        foreach (var (name, value, type, flags, display, shared, options) in values)
+                        {
+                            w.Write(name);
+                            w.Write(value);
+                            w.Write(type);
+                            w.Write(flags);
+                            w.Write(display);
+                            w.Write(shared);
+                            w.Write(options.Count);
+                            foreach (var option in options) { w.Write(option); }
+                        }
+                    };
+                }
+            case Protocol.FormSetProperties:
+                {
+                    var id = input.ReadInt32();
+                    var count = input.ReadInt32();
+                    List<(string, int, int)> properties = [];
+                    for (var i = 0; i < count; i++) { properties.Add((input.ReadString(), input.ReadInt32(), input.ReadInt32())); }
+                    var done = Document(id).FormSetProperties(properties);
+                    return w => w.Write(done);
+                }
+            case Protocol.FormSetValues:
+                {
+                    var id = input.ReadInt32();
+                    var displayOnly = input.ReadBoolean();
+                    var count = input.ReadInt32();
+                    List<(string, string, string)> values = [];
+                    for (var i = 0; i < count; i++) { values.Add((input.ReadString(), input.ReadString(), input.ReadString())); }
+                    var done = Document(id).FormSetValues(values, displayOnly);
+                    return w => w.Write(done);
+                }
+            case Protocol.FormUnformatted:
+                {
+                    var id = input.ReadInt32();
+                    var found = Document(id).FormUnformatted(input.ReadInt32());
+                    return w =>
+                    {
+                        w.Write(found.Count);
+                        foreach (var (name, value, format) in found) { w.Write(name); w.Write(value); w.Write(format); }
+                    };
+                }
             default:
                 throw new InvalidOperationException($"Unbekannter Befehl {command}.");
         }

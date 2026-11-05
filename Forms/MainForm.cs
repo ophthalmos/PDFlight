@@ -51,6 +51,9 @@ public partial class MainForm : Form
         inkPalette.InkChanged += InkPalette_InkChanged; // kein Designer-Element des Formulars
         Lng.Apply(highlightPalette); // ebenso die Farbauswahl fürs Hervorheben
         highlightPalette.ColorChanged += HighlightPalette_ColorChanged;
+        signaturePalette.SignatureChosen += SignaturePalette_SignatureChosen; // ebenso die Unterschriften („Unterschreiben“)
+        signaturePalette.AddRequested += SignaturePalette_AddRequested;
+        signaturePalette.RemoveRequested += SignaturePalette_RemoveRequested;
         ApplyViewerColors();
         RestoreSidebar();
         RestoreViewSettings();
@@ -511,6 +514,7 @@ public partial class MainForm : Form
             }
             RefreshAnnotations(); // Liste bzw. Symbol der Umschaltleiste für den neuen Stand
             _ = RefreshAttachmentsAsync();
+            formatWalk = FormatShownFieldsAsync(opened);
         }
         return opened;
     }
@@ -525,8 +529,11 @@ public partial class MainForm : Form
         CloseNoteCard(); // die Karte gehört zum bisherigen Stand (auch nach Rückgängig oder einem Schritt über PDFsharp)
         var previous = document;
         previous?.Changed -= Document_Changed;
+        previous?.FieldCommitted -= Document_FieldCommitted;
         document = value;
         document?.Changed += Document_Changed;
+        document?.FieldCommitted += Document_FieldCommitted;
+        formScripts = value is { HasForms: true } ? new FormScriptRunner(value) : null;
         var kept = pageView.SetDocument(value, keepView);
         if (!kept)
         {
@@ -668,14 +675,14 @@ public partial class MainForm : Form
     private bool PageEditLocked => PdfALocked || (Encrypted && EditPassword == null) || currentPageCount < 0 || bookmarkEditor != null;
 
     /// <summary>„Bearbeitung aktivieren“ im PDF/A-Banner: hebt nach einer Warnung den Schreibschutz
-    /// für diese Datei auf. Die Datei selbst bleibt dabei unverändert — die PDF/A-Kennzeichnung geht
-    /// erst verloren, wenn tatsächlich eine Bearbeitung ausgeführt und die Datei neu gespeichert wird.</summary>
+    /// für diese Datei auf. Die Datei selbst bleibt dabei unverändert — die PDF/A-Kennzeichnung geht erst verloren, wenn ein Befehl des
+    /// Bearbeiten-Menüs die Datei neu schreibt oder Anmerkungen gespeichert werden (dann mit Auswahl „Speichern unter…“, s. AskPdfASave).</summary>
     private void BtnPdfAEnable_Click(object? sender, EventArgs e)
     {
         if (!TaskDlg.ConfirmTaskDlg(Handle,
             Lng.T("Möchtest du den Vorgang fortsetzen?"),
             Lng.T("Das Bearbeiten führt dazu, dass die PDF-Datei nicht mehr dem PDF/A-Standard entspricht.") + "\n\n" +
-            Lng.T("Das Aktivieren selbst ändert die Datei noch nicht. Erst wenn du eine Bearbeitung ausführst (Seiten löschen oder drehen, Metadaten ändern usw.), wird die Datei sofort und ohne Nachfrage gespeichert und verliert dabei die PDF/A-Kennzeichnung – einen gesonderten Speichern-Schritt gibt es in PDFlight nicht."),
+            Lng.T("Das Aktivieren selbst ändert die Datei noch nicht. Befehle des Bearbeiten-Menüs speichern die Datei sofort und entfernen dabei die PDF/A-Kennzeichnung. Anmerkungen und Formulareingaben kommen erst mit „Speichern“ in die Datei."),
             TaskDialogIcon.Warning)) { return; }
         pdfAEditingEnabled = true;
         UpdateUiState();
@@ -1276,6 +1283,7 @@ public partial class MainForm : Form
         mnuAddFreeTextHere.Image = MenuIcon(ToolbarIcons.Comment);
         mnuSaveImage.Image = MenuIcon(ToolbarIcons.Save);
         mnuCopyImage.Image = MenuIcon(ToolbarIcons.Copy); // wie „Kopieren“ (Edge zeigt bei „Bild kopieren“ ebenfalls das Kopier-Symbol)
+        mnuRemoveImage.Image = MenuIcon(ToolbarIcons.Delete);
         ApplyViewerIcons(); // die Viewer-Leiste folgt der Symbolgröße der Symbolleiste
         UpdateProgramIconVisibility(); // die Buttonbreiten haben sich geändert
     }
@@ -1499,7 +1507,7 @@ public partial class MainForm : Form
         await FinishNoteEditAsync();
         if (EditPassword != null) { return await DecryptedViewAsync(actionName); } // verschlüsselt: immer der entschlüsselte Stand, s. RunPdfEdit
         if (!documentDirty || ShownDocument is not { } doc) { return (true, null); }
-        await pageView.EndFormInputAsync(); // übernimmt den Wert des Felds, in dem gerade getippt wurde
+        await EndFormInputAsync(); // übernimmt den Wert des Felds, in dem gerade getippt wurde
         try
         {
             var bytes = await doc.SaveAsync();
@@ -1525,7 +1533,7 @@ public partial class MainForm : Form
                 Lng.T("Die Einschränkungen der Datei entfallen."),
                 Lng.T("Die Datei wird mit dem Kennwort, mit dem du sie geöffnet hast, neu verschlüsselt (AES 256 Bit); Einschränkungen wie beim Drucken oder Kopieren gelten danach nicht mehr. Hast du sie mit dem Besitzerkennwort geöffnet, öffnet künftig dieses die Datei. Trotzdem speichern?"),
                 TaskDialogIcon.Warning))) { return (false, null); }
-            await pageView.EndFormInputAsync(); // übernimmt den Wert des Felds, in dem gerade getippt wurde
+            await EndFormInputAsync(); // übernimmt den Wert des Felds, in dem gerade getippt wurde
             var bytes = await doc.SaveAsync(removeSecurity: true);
             return (doc == document, bytes);
         }
@@ -1703,6 +1711,144 @@ public partial class MainForm : Form
                 : e.IsStamp ? Lng.T("Der Stempel wurde auf Seite {0} verschoben.") : Lng.T("Die Textanmerkung wurde auf Seite {0} verschoben."), page);
         }
         else { pageView.ClearAnnotationGhost(); }
+    }
+
+    /// <summary>Stempel oder Unterschrift an der Ecke in der Größe geändert: /Rect am angezeigten Stand setzen; gespeichert wird später.</summary>
+    private async void PageView_AnnotationResized(object? sender, AnnotationResizedEventArgs e)
+    {
+        if (currentFile == null || EditLocked) { pageView.ClearAnnotationGhost(); return; }
+        await pageView.RestoreHiddenAnnotationAsync(); // wie beim Verschieben: das Original nicht ausgeblendet mitspeichern
+        var page = e.Page + 1;
+        if (await EditInViewAsync(path => PdfEditService.ResizeAnnotation(path, page, e.Number, e.A.X, e.A.Y, e.B.X, e.B.Y, e.SnappedScale), Lng.T("Größe ändern")))
+        {
+            statusPath.Text = string.Format(Lng.T("Die Größe wurde auf Seite {0} geändert."), page);
+        }
+        else { pageView.ClearAnnotationGhost(); }
+    }
+
+    private string? statusBeforeCorner; // Statuszeile, bevor der Hinweis zum Größe-Ändern erschien
+
+    /// <summary>Zeiger an der Ecke eines Stempels oder einer Unterschrift: Hinweis in der Statusleiste, wie das Ziehen wirkt (Wunsch vom
+    /// 03.11.2026); er bleibt beim Ziehen stehen und weicht beim Verlassen der Ecke wieder der vorigen Anzeige.</summary>
+    private void PageView_ResizeCornerHover(object? sender, bool atCorner)
+    {
+        var hint = Lng.T("Ziehen ändert die Größe – mit Strg in Stufen (25 %, 50 %, 100 % …).");
+        if (atCorner)
+        {
+            if (statusPath.Text != hint) { statusBeforeCorner = statusPath.Text; }
+            statusPath.Text = hint;
+        }
+        else if (statusPath.Text == hint) { statusPath.Text = statusBeforeCorner ?? string.Empty; }
+    }
+
+    // ------------------------------------------------------------------ Unterschriften (seit 03.11.2026)
+
+    // „Unterschreiben“ in der Viewer-Leiste wie bei Acrobat und GNOME Papers (Wunsch Wilhelms): Das Dropdown zeigt die gespeicherten
+    // Unterschriften (SignatureStore, verschlüsselt für das Windows-Konto); eine wählen, dann auf die Stelle klicken – sie erscheint dort
+    // als Stempel-Anmerkung, lässt sich verschieben und an der Ecke in der Größe ändern, ungespeichert wie alle Anmerkungen. Beim
+    // Speichern fragt PDFlight, ob die in dieser Sitzung eingefügten Unterschriften fest in die Seite übernommen werden sollen
+    // (pendingSignatures = ihre /NM). Eine sichtbare Unterschrift, keine digitale Signatur.
+
+    private readonly SignaturePalette signaturePalette = new();
+    private readonly HashSet<string> pendingSignatures = [];
+
+    private void DdbSign_DropDownOpening(object? sender, EventArgs e)
+    {
+        signaturePalette.SetSignatures(SignatureStore.Load());
+        if (ddbSign.DropDown is { Items: [ToolStripControlHost host] }) { host.Size = signaturePalette.Size; } // die Höhe richtet sich nach der Zahl
+    }
+
+    private void SignaturePalette_SignatureChosen(object? sender, Signature signature)
+    {
+        ddbSign.DropDown.Close();
+        _ = PlaceSignatureAsync(signature);
+    }
+
+    private void SignaturePalette_AddRequested(object? sender, EventArgs e)
+    {
+        ddbSign.DropDown.Close();
+        using SignatureForm dialog = new();
+        if (dialog.ShowDialog(this) != DialogResult.OK || dialog.Signature is not { } signature) { return; }
+        if (SignatureStore.TryLoadForChange(out var signatures))
+        {
+            signatures.Add(signature);
+            try { SignatureStore.Save(signatures); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                TaskDlg.ErrTaskDlg(Handle, Lng.T("Die Unterschrift konnte nicht gespeichert werden."), ex);
+            }
+        }
+        else { ShowSignaturesBusyMessage(); }
+        if (ShownDocument != null && !EditLocked) { _ = PlaceSignatureAsync(signature); } // wie Acrobat: gleich einsetzen, auch wenn das Merken scheiterte
+    }
+
+    private void SignaturePalette_RemoveRequested(object? sender, Signature signature)
+    {
+        ddbSign.DropDown.Close();
+        if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Diese Unterschrift entfernen?"), Lng.T("Sie steht danach nicht mehr zur Auswahl. Bereits eingefügte Unterschriften bleiben in ihren Dokumenten."), TaskDialogIcon.Warning, defaultNo: true)) { return; }
+        if (!SignatureStore.TryLoadForChange(out var signatures)) { ShowSignaturesBusyMessage(); return; }
+        if (signatures.RemoveAll(s => s.Id == signature.Id) == 0) { return; }
+        try { SignatureStore.Save(signatures); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { TaskDlg.ErrTaskDlg(Handle, Lng.T("Die Unterschrift konnte nicht entfernt werden."), ex); }
+    }
+
+    private void ShowSignaturesBusyMessage() => TaskDlg.MsgTaskDlg(Handle, Lng.T("Die gespeicherten Unterschriften konnten nicht gelesen werden."),
+        Lng.T("Die Datei wird vielleicht gerade von einem anderen Programm benutzt. An der Liste wurde nichts geändert – versuche es gleich noch einmal."), TaskDialogIcon.Warning);
+
+    /// <summary>Stelle wählen (Fadenkreuz wie beim Freitext, Esc oder ein Klick neben die Seiten bricht ab) und die Unterschrift dort mittig
+    /// einsetzen.</summary>
+    private async Task PlaceSignatureAsync(Signature signature)
+    {
+        if (currentFile == null || ShownDocument == null || EditLocked) { return; }
+        if (currentPageCount <= 0) { ShowNotEditableMessage(); return; }
+        EndAnnotationModes();
+        var status = statusPath.Text;
+        var hint = Lng.T("Klicke auf die Stelle für die Unterschrift – Esc bricht ab.");
+        statusPath.Text = hint;
+        var picking = pageView.PickPointAsync();
+        pickingItem = ddbSign;
+        viewerStrip.Invalidate();
+        var point = await picking;
+        if (pickingItem == ddbSign && !pageView.IsPicking) { pickingItem = null; }
+        viewerStrip.Invalidate();
+        if (statusPath.Text == hint) { statusPath.Text = status; }
+        if (point is not { } client || currentFile == null) { return; }
+        var file = currentFile.FullName;
+        if (await pageView.PagePointAsync(client) is not { } hit || currentFile?.FullName != file) { return; }
+        var page = hit.Page + 1;
+        string? name = null;
+        if (await EditInViewAsync(path => name = PdfEditService.AddSignature(path, page, hit.X, hit.Y, signature, Lng.T("Unterschrift"), Environment.UserName), Lng.T("Unterschrift einfügen")))
+        {
+            if (name != null) { pendingSignatures.Add(name); }
+            statusPath.Text = string.Format(Lng.T("Die Unterschrift wurde auf Seite {0} eingefügt – ziehen zum Verschieben, an der rechten unteren Ecke für die Größe."), page);
+        }
+    }
+
+    /// <summary>Vor dem Speichern: Sollen die in dieser Sitzung eingefügten Unterschriften fest in die Seite übernommen werden? Fest = ihr
+    /// Erscheinungsbild wird Teil des Seiteninhalts (ein Rückgängig-Schritt); sonst bleiben sie Anmerkungen. False = abgebrochen.</summary>
+    private async Task<bool> OfferFlattenSignaturesAsync()
+    {
+        if (pendingSignatures.Count == 0 || ShownDocument == null) { return true; }
+        var view = await ViewStateFileAsync();
+        var count = 0;
+        try { if (view != null) { count = PdfEditService.CountSignatures(view, pendingSignatures); } }
+        catch (Exception ex) when (PdfEditService.IsPdfReadError(ex)) { }
+        finally { DeleteViewCopy(view); }
+        if (count == 0) { pendingSignatures.Clear(); return true; } // inzwischen entfernt oder rückgängig gemacht
+        var choice = TaskDlg.ChoiceTaskDlg(Handle,
+            count == 1 ? Lng.T("Die Unterschrift fest in die Seite übernehmen?") : string.Format(Lng.T("Die {0} Unterschriften fest in die Seiten übernehmen?"), count),
+            null,
+            [(Lng.T("Fest übernehmen"), Lng.T("Wird nicht mehr verschiebbar in die Seite eingebettet.")),
+             (Lng.T("Als Anmerkung lassen"), Lng.T("Bleibt verschiebbar und lässt sich später entfernen."))],
+            TaskDialogIcon.None);
+        if (choice < 0) { return false; }
+        if (choice == 0)
+        {
+            List<string> names = [.. pendingSignatures];
+            if (!await EditInViewAsync(path => PdfEditService.FlattenSignatures(path, names), Lng.T("Unterschrift übernehmen"))) { return false; }
+        }
+        pendingSignatures.Clear();
+        return true;
     }
 
     /// <summary>Doppelklick auf eine Textanmerkung oder einen Stempel: derselbe Bearbeiten-Dialog wie aus der Anmerkungsliste.</summary>
@@ -1950,6 +2096,11 @@ public partial class MainForm : Form
     {
         if (currentFile == null) { return; }
         if (annotation.Subtype == "Stamp") { EditStamp(annotation); return; } // Stempel: Eigenschaften im Verwalten-Dialog ändern
+        if (annotation.Subtype == "Signature") // Unterschrift: nichts zu bearbeiten außer Lage und Größe
+        {
+            statusPath.Text = Lng.T("Unterschriften lassen sich verschieben und an der rechten unteren Ecke in der Größe ändern.");
+            return;
+        }
         if (annotation.Subtype == "Text") // Kommentar: seine Karte zum Bearbeiten öffnen
         {
             pageView.GoToPage(annotation.Page - 1);
@@ -2048,7 +2199,7 @@ public partial class MainForm : Form
             return;
         }
         await FinishNoteEditAsync();
-        await pageView.EndFormInputAsync();
+        await EndFormInputAsync();
         // verschlüsselt mit bekanntem Kennwort: der entschlüsselte Stand nur im Speicher, die Sammelmappe bekommt dasselbe Kennwort
         var password = EditPassword;
         byte[]? plain = null;
@@ -2093,9 +2244,12 @@ public partial class MainForm : Form
     /// <summary>„Speichern unter…“ (Symbol in der Viewer-Leiste, Strg+Umschalt+S; seit 11.10.2026, Wunsch Wilhelms): der angezeigte Stand
     /// samt ungespeicherten Änderungen unter neuem Namen, auch im selben Ordner („Kopieren“ kann das nicht); danach wird die neue Datei
     /// angezeigt. Wie in Office bleibt die bisherige Datei so, wie sie zuletzt gespeichert war. Dasselbe Ziel = normales Speichern.</summary>
-    private async void SaveAsDialog()
+    private async void SaveAsDialog() => await SaveAsAsync();
+
+    /// <summary><see cref="SaveAsDialog"/> zum Abwarten: true, wenn die Änderungen jetzt in einer Datei stehen (neue Datei oder dieselbe).</summary>
+    private async Task<bool> SaveAsAsync()
     {
-        if (currentFile == null || ShownDocument is not { } doc) { return; }
+        if (currentFile == null || ShownDocument is not { } doc) { return false; }
         using SaveFileDialog dialog = new()
         {
             Filter = Lng.T("PDF-Dateien (*.pdf)|*.pdf"),
@@ -2103,32 +2257,36 @@ public partial class MainForm : Form
             InitialDirectory = currentFile.DirectoryName,
             FileName = string.Format(Lng.T("{0} – Kopie"), Path.GetFileNameWithoutExtension(currentFile.Name)) + ".pdf",
         };
-        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
+        if (dialog.ShowDialog(this) != DialogResult.OK) { return false; }
         var source = currentFile.FullName;
         var target = dialog.FileName;
         if (string.Equals(target, source, StringComparison.OrdinalIgnoreCase))
         {
-            if (documentDirty) { await SaveDocumentAsync(Lng.T("Speichern")); }
-            return;
+            return !documentDirty || await SaveDocumentAsync(Lng.T("Speichern"));
         }
         await FinishNoteEditAsync();
-        await pageView.EndFormInputAsync();
+        if (documentDirty && !await OfferFlattenSignaturesAsync()) { return false; }
+        if (ShownDocument is not { } shown || currentFile?.FullName != source) { return false; } // nach dem Übernehmen ein neuer Stand
+        await EndFormInputAsync();
+        var withoutPdfA = documentDirty && ShownPdfALevel != null; // geänderte PDF/A-Datei: die Kopie ohne ungeprüfte Kennzeichnung (s. AskPdfASave)
         try
         {
             // offene Änderungen aus PDFium (eine Verschlüsselung bleibt erhalten), sonst die Datei unverändert
-            var bytes = documentDirty && doc == ShownDocument ? await doc.SaveAsync() : await File.ReadAllBytesAsync(source);
-            await File.WriteAllBytesAsync(target, bytes);
+            var bytes = documentDirty ? await shown.SaveAsync() : await File.ReadAllBytesAsync(source);
+            if (withoutPdfA) { PdfEditService.WriteWithoutPdfA(target, bytes); }
+            else { await File.WriteAllBytesAsync(target, bytes); }
         }
-        catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException)
+        catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException || PdfEditService.IsPdfReadError(ex))
         {
             TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), Lng.T("Speichern unter")), ex);
-            return;
+            return false;
         }
         if (passwords.TryGetValue(source, out var password)) { passwords[target] = password; } // die Kopie hat dasselbe Kennwort – nicht erneut fragen
         var page = ClampedCurrentPage();
         documentDirty = false; // die Änderungen stehen jetzt in der neuen Datei
         LoadPdf(target, page, addToRecent: true);
         statusPath.Text = string.Format(Lng.T("Gespeichert als „{0}“."), Path.GetFileName(target));
+        return true;
     }
 
     private void BtnSaveAs_Click(object? sender, EventArgs e) => RunUnlessEditing(SaveAsDialog); // offene Änderungen nicht still in die bisherige Datei – sie gehen in die neue
@@ -2272,7 +2430,7 @@ public partial class MainForm : Form
         if (Encrypted || documentDirty)
         {
             if (shown == null) { ShowNotEditableMessage(); return; }
-            await pageView.EndFormInputAsync(); // übernimmt den Wert des Felds, in dem gerade getippt wurde
+            await EndFormInputAsync(); // übernimmt den Wert des Felds, in dem gerade getippt wurde
             try { source = await shown.SaveAsync(removeSecurity: Encrypted); }
             catch (InvalidOperationException ex)
             {
@@ -2586,6 +2744,34 @@ public partial class MainForm : Form
         {
             TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), actionName), ex);
             return false;
+        }
+    }
+
+    /// <summary>Speichern der Anzeige (Strg+S, „Speichern“, Rückfrage beim Schließen oder Dateiwechsel) bei schreibgeschützter Datei: Schreibschutz
+    /// aufheben oder „Speichern unter…“ (seit 02.11.2026, Wunsch Wilhelms – eine schreibgeschützte Datei dient oft als Vorlage, etwa ein
+    /// Formular für jeden Monat; vorher bot die Rückfrage nur das Aufheben an). Vorgabe ist „Speichern unter…“, damit Eingabe die Vorlage nicht
+    /// überschreibt. Null: nicht schreibgeschützt oder Schutz aufgehoben – normal speichern; true: „Speichern unter…“; false: abgebrochen.</summary>
+    private bool? AskReadOnlySave()
+    {
+        if (currentFile == null) { return null; }
+        FileInfo info = new(currentFile.FullName);
+        if (!info.Exists || !info.IsReadOnly) { return null; }
+        var choice = TaskDlg.ChoiceTaskDlg(Handle, string.Format(Lng.T("„{0}“ ist schreibgeschützt."), currentFile.Name),
+            Lng.T("Wie sollen die Änderungen gespeichert werden?"),
+            [(Lng.T("Schreibschutz aufheben"), Lng.T("Die Änderungen werden in dieser Datei gespeichert.")),
+             (Lng.T("Speichern unter…"), Lng.T("Die Änderungen kommen in eine neue Datei."))],
+            TaskDialogIcon.Information, defaultChoice: 1);
+        switch (choice)
+        {
+            case 0:
+                try { info.IsReadOnly = false; return null; }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    TaskDlg.ErrTaskDlg(Handle, string.Format(Lng.T("{0} fehlgeschlagen."), Lng.T("Speichern")), ex);
+                    return false;
+                }
+            case 1: return true;
+            default: return false;
         }
     }
 
@@ -3016,7 +3202,7 @@ public partial class MainForm : Form
 
     private void StartPage_OpenDialogRequested(object? sender, EventArgs e) => RunUnlessEditing(OpenFile);
 
-    private static void StartPage_ShowInFolderRequested(object? sender, RecentEntry e)
+    private void StartPage_ShowInFolderRequested(object? sender, RecentEntry e)
     {
         if (File.Exists(e.Path)) { ShellUtil.ShowInFileManager(e.Path); }
     }
@@ -3178,6 +3364,7 @@ public partial class MainForm : Form
     {
         viewUndo.Clear();
         viewRedo.Clear();
+        pendingSignatures.Clear(); // gespeichert oder ein anderer Stand: die Frage nach dem Übernehmen ist beantwortet bzw. hinfällig
     }
 
     /// <summary>Den angezeigten Stand vor einem Schritt im Hilfsprogramm merken (Hervorheben, Hervorhebung entfernen).</summary>
@@ -3400,6 +3587,79 @@ public partial class MainForm : Form
         }
     }
 
+    // ================================================================== Formularskripte
+
+    private FormScriptRunner? formScripts;
+    private Task formScriptChain = Task.CompletedTask; // die Eingaben der Reihe nach, s. EndFormInputAsync; ihre Schritte werfen nie
+    private Task formatWalk = Task.CompletedTask;      // die Suche nach unformatierten Feldern, s. FormatShownFieldsAsync
+
+    /// <summary>Nimmt den Fokus aus dem Formularfeld und wartet auf die Skripte, die das auslöst: Speichern und Drucken sollen die
+    /// berechneten Werte und die Formatierung sehen. Das Ereignis kommt vor der Antwort auf den Befehl, die Kette steht also schon;
+    /// ein Schritt der Kette kann die Suche neu starten (/ResetForm), deshalb sie danach.</summary>
+    private async Task EndFormInputAsync()
+    {
+        await pageView.EndFormInputAsync();
+        await formScriptChain;
+        await formatWalk;
+    }
+
+    /// <summary>Felder, die ihren Rohwert zeigen, formatieren, Seite für Seite (dazwischen darf die Anzeige rendern); die Datei gilt dadurch nicht
+    /// als geändert. Das Schreiben kommt in die Kette, damit Eingaben der Reihe nach bleiben; die Suche selbst hält sie nicht auf.</summary>
+    private async Task FormatShownFieldsAsync(PdfiumDocument doc)
+    {
+        for (var page = 0; page < doc.PageCount && doc == document; page++)
+        {
+            var found = await doc.FormUnformattedAsync(page);
+            if (found.Count == 0 || doc != document || formScripts is not { } runner) { continue; }
+            formScriptChain = FormatInChainAsync(formScriptChain, runner, found);
+            await formScriptChain;
+        }
+    }
+
+    private static async Task FormatInChainAsync(Task previous, FormScriptRunner runner, List<(string Name, string Value, string Format)> found)
+    {
+        await previous;
+        try { await runner.FormatAsync(found); }
+        catch (Exception ex) { Debug.WriteLine(ex); } // die Kette darf nie scheitern: Speichern und alle späteren Eingaben warten auf sie
+    }
+
+    private void Document_FieldCommitted(object? sender, FieldCommittedEventArgs e)
+    {
+        // kommt auf dem Thread, der mit dem Hilfsprogramm spricht
+        if (!IsHandleCreated || IsDisposed) { return; }
+        BeginInvoke(() =>
+        {
+            if (sender == document && formScripts is { } runner) { formScriptChain = RunFormScriptsAsync(formScriptChain, runner, e); }
+        });
+    }
+
+    private async Task RunFormScriptsAsync(Task previous, FormScriptRunner runner, FieldCommittedEventArgs commit)
+    {
+        await previous;
+        FormScriptOutcome outcome;
+        try { outcome = await runner.HandleCommitAsync(commit); }
+        catch (Exception ex) // die Kette darf nie scheitern: Speichern und alle späteren Eingaben warten auf sie
+        {
+            Debug.WriteLine(ex);
+            outcome = new(FailedLabel: commit.Name);
+        }
+        if (IsDisposed) { return; }
+        if (commit.Name.Length == 0 && document is { } doc) { formatWalk = FormatShownFieldsAsync(doc); } // /ResetForm: Vorgabewerte stehen roh da
+        // Meldet ein Skript selbst etwas, erklärt das meist auch die Ablehnung – dann keine zweite Meldung. Die Überschrift sagt, von wem der Text stammt.
+        if (outcome.Alert is { } alert)
+        {
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Hinweis aus der PDF-Datei"), alert, TaskDialogIcon.Information);
+        }
+        else if (outcome.RejectedLabel is { } rejected)
+        {
+            TaskDlg.MsgTaskDlg(Handle, Lng.T("Die Eingabe wurde nicht übernommen."), string.Format(Lng.T("„{0}“ ist im Feld „{1}“ nicht gültig."), outcome.RejectedValue, rejected), TaskDialogIcon.Warning);
+        }
+        if (outcome.FailedLabel is { } failed)
+        {
+            statusPath.Text = string.Format(Lng.T("Ein Skript der Datei konnte nicht ausgeführt werden (Feld „{0}“)."), failed);
+        }
+    }
+
     private void MarkDirty(object? sender)
     {
         if (sender != document || documentDirty) { return; }
@@ -3415,12 +3675,23 @@ public partial class MainForm : Form
     }
 
     /// <summary>Schreibt das angezeigte Dokument samt Formularwerten und Hervorhebungen in seine Datei; die Anzeige bleibt, nur die
-    /// Dateidaten werden nachgezogen. Ohne PDFsharp – deshalb auch bei Kennwortschutz.</summary>
+    /// Dateidaten werden nachgezogen. Ohne PDFsharp – deshalb auch bei Kennwortschutz; nur eine PDF/A-Datei schreibt PDFsharp ohne ihre
+    /// Kennzeichnung neu (<see cref="AskPdfASave"/>), danach wird der gespeicherte Stand angezeigt.</summary>
     private async Task<bool> SaveDocumentAsync(string actionName)
     {
         await FinishNoteEditAsync(); // ein Kommentar, an dem gerade getippt wird, gehört zum Stand
-        if (ShownDocument is not { } doc || currentFile == null) { return false; }
-        await pageView.EndFormInputAsync(); // übernimmt den Wert des Felds, in dem gerade getippt wird
+        if (ShownDocument == null || currentFile == null) { return false; }
+        if (AskReadOnlySave() is { } readOnlyChoice) { return readOnlyChoice && await SaveAsAsync(); }
+        var withoutPdfA = false;
+        switch (AskPdfASave())
+        {
+            case PdfASaveChoice.SaveAs: return await SaveAsAsync();
+            case PdfASaveChoice.Cancel: return false;
+            case PdfASaveChoice.WithoutPdfA: withoutPdfA = true; break;
+        }
+        if (!await OfferFlattenSignaturesAsync()) { return false; }
+        if (ShownDocument is not { } doc || currentFile == null) { return false; } // nach dem Übernehmen der Unterschriften ein neuer Stand
+        await EndFormInputAsync(); // übernimmt den Wert des Felds, in dem gerade getippt wird
         byte[] bytes;
         try { bytes = await doc.SaveAsync(); }
         catch (InvalidOperationException ex)
@@ -3430,13 +3701,49 @@ public partial class MainForm : Form
         }
         if (doc != document || currentFile == null) { return false; } // inzwischen wird eine andere Datei angezeigt
         var path = currentFile.FullName;
-        if (!RunPdfEdit(() => File.WriteAllBytes(path, bytes), actionName, allowEncrypted: true)) { return false; }
-        doc.Bytes = bytes; // für das Wiederherstellen einer extern gelöschten Datei
+        if (withoutPdfA)
+        {
+            if (!RunPdfEdit(() => PdfEditService.WriteWithoutPdfA(path, bytes), actionName)) { return false; }
+            // PDFium hält den Stand mit den alten XMP-Daten – ohne Neuanzeige käme die Kennzeichnung beim nächsten Speichern zurück
+            currentPdfStatus = currentPdfStatus! with { PdfALevel = null }; // AskPdfASave setzt einen Status voraus
+            byte[] saved;
+            try { saved = await File.ReadAllBytesAsync(path); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { saved = bytes; Debug.WriteLine(ex); }
+            await ShowBytesAsync(saved, dirty: false);
+        }
+        else
+        {
+            if (!RunPdfEdit(() => File.WriteAllBytes(path, bytes), actionName, allowEncrypted: true)) { return false; }
+            doc.Bytes = bytes; // für das Wiederherstellen einer extern gelöschten Datei
+        }
         documentDirty = false;
         ClearViewHistory(); // gespeichert: ab jetzt nimmt Rückgängig die ganze Speicherung zurück (Sicherung von RunPdfEdit)
         UpdateUndoMenu();
         RefreshCurrentFile();
         return true;
+    }
+
+    private enum PdfASaveChoice { Normal, SaveAs, WithoutPdfA, Cancel }
+
+    /// <summary>Die PDF/A-Stufe, die der angezeigte Stand erklärt – nach Freitext oder Stempel (PDFsharp ersetzt die XMP-Daten) keine mehr,
+    /// auch wenn die Datei selbst noch eine hat. Verschlüsselte Dateien nie (PDF/A verbietet Verschlüsselung; PDFsharp könnte sie ohne
+    /// Besitzerkennwort nicht neu schreiben).</summary>
+    private string? ShownPdfALevel => !Encrypted && ShownDocument is { } doc ? PdfStatus.DetectPdfALevel(doc.Bytes) : null;
+
+    /// <summary>Speichern der Anzeige bei einer als PDF/A gekennzeichneten Datei (seit 03.11.2026, Wunsch Wilhelms): PDFium schrieb die
+    /// Kennzeichnung bisher unverändert mit – auch wenn die Datei danach nicht mehr dem Standard entsprach (Freitext und Stempel mit nicht
+    /// eingebetteter Helvetica, Halbtransparenz in PDF/A-1). PDFlight prüft das nicht, deshalb entfällt sie beim Speichern von Änderungen
+    /// immer. Vorgabe ist „Speichern unter…“, damit das Archiv-Original bleibt; „In dieser Datei speichern“ schreibt über PDFsharp ohne
+    /// Kennzeichnung wie jeder Befehl des Bearbeiten-Menüs.</summary>
+    private PdfASaveChoice AskPdfASave()
+    {
+        if (!documentDirty || currentFile == null || ShownPdfALevel is not { } level) { return PdfASaveChoice.Normal; }
+        var choice = TaskDlg.ChoiceTaskDlg(Handle, string.Format(Lng.T("„{0}“ ist als PDF/A-{1} gekennzeichnet."), currentFile.Name, level),
+            Lng.T("PDFlight prüft nicht, ob deine Änderungen dem Standard entsprechen."),
+            [(Lng.T("Speichern unter…"), Lng.T("Das Original bleibt unverändert als PDF/A erhalten.")),
+             (Lng.T("In dieser Datei speichern"), Lng.T("Die Datei verliert ihre PDF/A-Kennzeichnung."))],
+            TaskDialogIcon.Information, defaultChoice: 0);
+        return choice switch { 0 => PdfASaveChoice.SaveAs, 1 => PdfASaveChoice.WithoutPdfA, _ => PdfASaveChoice.Cancel };
     }
 
     /// <summary>Schließen mit offenen Formulareingaben: Speichern / Nicht speichern / Abbrechen (Wunsch vom 26.09.2026); danach erneut schließen.</summary>
@@ -3455,12 +3762,11 @@ public partial class MainForm : Form
         if (!documentDirty) { return true; }
         var save = new TaskDialogButton(Lng.T("Speichern"));
         var discard = new TaskDialogButton(Lng.T("Nicht speichern"));
-        var text = Lng.T("Deine Änderungen gehen verloren, wenn du sie nicht speicherst."); // Texte wie Office (Wunsch vom 10.10.2026)
-        if (PdfALocked) { text += Environment.NewLine + Environment.NewLine + Lng.T("Die Datei ist als PDF/A gekennzeichnet – nach dem Speichern entspricht sie dem Standard nicht mehr."); }
+        var text = Lng.T("Änderungen gehen verloren, wenn du nicht speicherst."); // Texte wie Office (Wunsch vom 10.10.2026)
         var page = new TaskDialogPage
         {
             Caption = Application.ProductName,
-            Heading = string.Format(Lng.T("Möchtest du die Änderungen an „{0}“ speichern?"), currentFile?.Name),
+            Heading = string.Format(Lng.T("„{0}“ speichern?"), currentFile?.Name),
             Text = text,
             Icon = TaskDialogIcon.Warning,
             AllowCancel = true,
@@ -3552,7 +3858,7 @@ public partial class MainForm : Form
     private void UpdateAnnotationButtons()
     {
         var enabled = document != null && currentFile != null && !EditLocked && currentPageCount > 0;
-        btnHighlight.Enabled = ddbHighlight.Enabled = btnFreeText.Enabled = btnComment.Enabled = btnStamp.Enabled = btnDraw.Enabled = ddbInk.Enabled = btnErase.Enabled = btnRotateLeft.Enabled = btnRotateRight.Enabled = ddbRotate.Enabled = enabled;
+        btnHighlight.Enabled = ddbHighlight.Enabled = btnFreeText.Enabled = btnComment.Enabled = btnStamp.Enabled = ddbSign.Enabled = btnDraw.Enabled = ddbInk.Enabled = btnErase.Enabled = btnRotateLeft.Enabled = btnRotateRight.Enabled = ddbRotate.Enabled = enabled;
         if (!enabled && AnnotationModeActive) { EndAnnotationModes(); }
         UpdateAnnotationRail(); // Bearbeiten und Löschen in der Anmerkungsliste wie die Knöpfe
     }
@@ -3576,6 +3882,8 @@ public partial class MainForm : Form
         if (ddbInk.DropDown is { } dropDown) { dropDown.BackColor = inkPalette.BackColor; }
         highlightPalette.ApplyTheme(settings.DarkViewer);
         if (ddbHighlight.DropDown is { } highlightDropDown) { highlightDropDown.BackColor = highlightPalette.BackColor; }
+        signaturePalette.ApplyTheme(settings.DarkViewer);
+        if (ddbSign.DropDown is { } signDropDown) { signDropDown.BackColor = signaturePalette.BackColor; }
     }
 
     private readonly HighlightPalette highlightPalette = new();
@@ -3749,6 +4057,7 @@ public partial class MainForm : Form
         mnuViewSelectAll.Enabled = shown;
         // „Bild speichern…“ / „Bild kopieren“ nur, wenn der Rechtsklick ein Bild getroffen hat – auch bei gesperrter Bearbeitung (nur lesen)
         mnuSaveImage.Available = mnuCopyImage.Available = toolStripSeparatorC2.Available = shown && pageView.ImageUnderMouse != null;
+        mnuRemoveImage.Available = mnuSaveImage.Available && !EditLocked; // „Bild entfernen“ – nur, wenn die Datei bearbeitet werden darf
         var removable = shown ? pageView.RemovableUnderMouse : RemovableAnnotation.None;
         mnuRemoveAnnotation.Enabled = removable != RemovableAnnotation.None;
         mnuRemoveAnnotation.Text = removable switch // nennt, was entfernt wird; ohne Treffer gesperrt und allgemein
@@ -3819,6 +4128,15 @@ public partial class MainForm : Form
     private void MnuCopyImage_Click(object? sender, EventArgs e)
     {
         if (pageView.ImageUnderMouse != null) { CopyImage(pageView.ImageUnderMouseDataAsync); }
+    }
+
+    /// <summary>Kontextmenü „Bild entfernen“ (Wunsch vom 03.11.2026): ungespeichert wie die Anmerkungen, ein Rückgängig-Schritt.</summary>
+    private async void MnuRemoveImage_Click(object? sender, EventArgs e)
+    {
+        if (EditLocked || ShownDocument == null || pageView.ImageUnderMouse == null) { return; }
+        if (!await PushViewUndoAsync(Lng.T("Bild entfernen"))) { return; }
+        if (!await pageView.RemoveImageUnderMouseAsync()) { viewUndo.RemoveAt(viewUndo.Count - 1); UpdateUndoMenu(); return; }
+        statusPath.Text = Lng.T("Das Bild wurde entfernt.");
     }
 
     /// <summary>Strg+C bei ausgewähltem Bild (wie Acrobat, seit 10.10.2026): dasselbe wie „Bild kopieren“.</summary>
@@ -4193,6 +4511,7 @@ public partial class MainForm : Form
         }
         // Hervorheben: Symbol mit Farbbalken aus UpdateAnnotationIcons; Anzeige mit oder ohne Beschriftung entscheidet UpdateViewerLayout
         btnStamp.Image = ViewerIcon(ToolbarIcons.Stamp);
+        ddbSign.Image = ViewerIcon(ToolbarIcons.Sign);
         btnComment.Image = ViewerIcon(ToolbarIcons.Comment);
         Set(btnErase, ToolbarIcons.Erase); // nur das Symbol wie der Rückgängig-Knopf (Wunsch vom 04.10.2026)
         if (ToolbarIcons.FontAvailable) { pageView.EraseCursor ??= CreateEraseCursor(); }
@@ -4229,7 +4548,7 @@ public partial class MainForm : Form
     /// <summary>Seitenfeld, Zoom, Anpassen und Drehen stehen wie bei Edge mittig in der Viewer-Leiste: Ein Platzhalter hinter der
     /// Anmerkungs-Schaltflächen schiebt sie dorthin – nur so weit, dass rechts Suche und Vollbild Platz behalten.</summary>
     /// <summary>Schaltflächen der Viewer-Leiste, die wie die Symbolleiste Symbol und Text zeigen (Wunsch vom 03.10.2026).</summary>
-    private ToolStripItem[] ViewerTextItems => [btnHighlight, btnFreeText, btnComment, btnStamp, btnDraw];
+    private ToolStripItem[] ViewerTextItems => [btnHighlight, btnFreeText, btnComment, btnStamp, ddbSign, btnDraw];
 
     private bool updatingViewerLayout;
 
@@ -4517,6 +4836,8 @@ public partial class MainForm : Form
         ddbInk.DropDown = new ToolStripDropDown { Padding = Padding.Empty, Items = { new ToolStripControlHost(inkPalette) { Margin = Padding.Empty, Padding = Padding.Empty } } };
         highlightPalette.SelectedColor = AnnotationStyle.ParseHex(settings.HighlightColor) ?? HighlightPalette.DefaultColor;
         ddbHighlight.DropDown = new ToolStripDropDown { Padding = Padding.Empty, Items = { new ToolStripControlHost(highlightPalette) { Margin = Padding.Empty, Padding = Padding.Empty } } };
+        // die Palette hat ihr Zeichenfeld angedockt – ihre bevorzugte Größe wäre 0; die Größe setzt DdbSign_DropDownOpening nach der Zahl der Unterschriften
+        ddbSign.DropDown = new ToolStripDropDown { Padding = Padding.Empty, Items = { new ToolStripControlHost(signaturePalette) { AutoSize = false, Margin = Padding.Empty, Padding = Padding.Empty } } };
         UpdateAnnotationIcons();
     }
 
@@ -4933,7 +5254,7 @@ public partial class MainForm : Form
     /// <summary>Druckkopie des angezeigten Dokuments (die Eingabe im Formularfeld vorher übernommen); null nach einer Fehlermeldung.</summary>
     private async Task<PdfiumDocument?> CreatePrintCopyAsync(PdfiumDocument doc)
     {
-        await pageView.EndFormInputAsync();
+        await EndFormInputAsync();
         try { return await doc.CreatePrintCopyAsync(0, doc.PageCount - 1); }
         catch (InvalidOperationException ex)
         {

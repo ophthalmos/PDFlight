@@ -29,9 +29,9 @@
        Ausgaben (Viewer\bin) gehören nicht in dieses Projekt. Protocol.cs, SandboxProcess.cs und SandboxNative.cs in Viewer\ teilen
        sie sich mit ihm. -->
   <ItemGroup>
-    <Compile Remove="Viewer\Host\**;Viewer\HostCheck\**;Viewer\bin\**" />
-    <EmbeddedResource Remove="Viewer\Host\**;Viewer\HostCheck\**;Viewer\bin\**" />
-    <None Remove="Viewer\Host\**;Viewer\HostCheck\**;Viewer\bin\**" />
+    <Compile Remove="Viewer\Host\**;Viewer\HostCheck\**;Viewer\Script\**;Viewer\bin\**" />
+    <EmbeddedResource Remove="Viewer\Host\**;Viewer\HostCheck\**;Viewer\Script\**;Viewer\bin\**" />
+    <None Remove="Viewer\Host\**;Viewer\HostCheck\**;Viewer\Script\**;Viewer\bin\**" />
   </ItemGroup>
 
   <!-- Übersetzungs-Konsistenz (deutscher Text = resx-Schlüssel): meldet nach jedem Build fehlende und verwaiste
@@ -51,11 +51,14 @@
     <!-- erst wiederherstellen (eigene Auswertung, sonst sähe der Build die frischen NuGet-Angaben nicht), dann bauen -->
     <MSBuild Projects="Viewer\Host\pdfhost.csproj" Targets="Restore" Properties="Configuration=$(Configuration);MSBuildRestoreSessionId=$([System.Guid]::NewGuid())" />
     <MSBuild Projects="Viewer\Host\pdfhost.csproj" Targets="Build" Properties="Configuration=$(Configuration);Version=$(Version)" />
+    <!-- Formularskripte: eigenes Hilfsprogramm pdfscript.exe (Viewer\Script), auf dieselbe Weise -->
+    <MSBuild Projects="Viewer\Script\pdfscript.csproj" Targets="Restore" Properties="Configuration=$(Configuration);MSBuildRestoreSessionId=$([System.Guid]::NewGuid())" />
+    <MSBuild Projects="Viewer\Script\pdfscript.csproj" Targets="Build" Properties="Configuration=$(Configuration);Version=$(Version)" />
   </Target>
 
   <Target Name="CopyPdfHost" AfterTargets="Build" Condition="'$(Configuration)' != 'Release'">
     <ItemGroup>
-      <PdfHostFiles Include="Viewer\bin\$(Configuration)\pdfhost.*;Viewer\bin\$(Configuration)\pdfium.dll" />
+      <PdfHostFiles Include="Viewer\bin\$(Configuration)\pdfhost.*;Viewer\bin\$(Configuration)\pdfium.dll;Viewer\bin\$(Configuration)\pdfscript.*;Viewer\bin\$(Configuration)\Jint.dll;Viewer\bin\$(Configuration)\Acornima.dll" />
     </ItemGroup>
     <Copy SourceFiles="@(PdfHostFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>
@@ -70,6 +73,17 @@
   <Target Name="CollectPdfHostSources">
     <ItemGroup>
       <PdfHostSources Include="Viewer\Host\*.cs;Viewer\Host\pdfhost.csproj;Viewer\Protocol.cs;$(MSBuildProjectFullPath)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Release: das Hilfsprogramm für Formularskripte, ebenso mit Native AOT -->
+  <Target Name="PublishPdfScript" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'" Inputs="@(PdfScriptSources)" Outputs="$(OutDir)pdfscript.exe" DependsOnTargets="CollectPdfScriptSources">
+    <Exec Command="dotnet publish &quot;$(MSBuildProjectDirectory)\Viewer\Script\pdfscript.csproj&quot; -c Release -o &quot;$(OutDir.TrimEnd('\'))&quot; -p:SelfContained=true -p:OutputPath=obj/aot/ -p:Version=$(Version) -nologo -v q" EnvironmentVariables="PATH=$(MSBuildProgramFiles32)\Microsoft Visual Studio\Installer%3B$(PATH.Replace(';', '%3B'))" />
+  </Target>
+
+  <Target Name="CollectPdfScriptSources">
+    <ItemGroup>
+      <PdfScriptSources Include="Viewer\Script\*.cs;Viewer\Script\pdfscript.csproj;Viewer\Protocol.cs;Viewer\Host\CrashGuard.cs;Viewer\Host\Native.cs;$(MSBuildProjectFullPath)" />
     </ItemGroup>
   </Target>
 

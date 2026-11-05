@@ -5,7 +5,7 @@
 ;   - .NET Desktop Runtime 10 (x64) — fehlt sie, zeigt Windows beim ersten
 ;     Start selbst einen Dialog mit Download-Link, daher keine Prüfung hier.
 ; Die PDF-Anzeige (PDFium) bringt PDFlight selbst mit: pdfhost.exe (Native AOT)
-; und pdfium.dll liegen neben PDFlight.exe.
+; und pdfium.dll liegen neben PDFlight.exe, ebenso pdfscript.exe (Formularskripte).
 ; ============================================================================
 
 #define appName "PDFlight"

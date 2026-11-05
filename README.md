@@ -15,8 +15,9 @@ PDFs are rendered with [PDFium](https://pdfium.googlesource.com/pdfium/) – not
 itself, but in a separate helper process (`pdfhost.exe`) that runs in a Windows AppContainer
 sandbox: it can't read your files, reach the network or start programs, and it is compiled
 ahead of time so it may not generate executable code at run time. PDFlight hands it the
-document as bytes; if a malformed PDF crashes it, PDFlight simply offers to reload. PDF
-JavaScript is never executed.
+document as bytes; if a malformed PDF crashes it, PDFlight simply offers to reload. Scripts in
+PDF forms (calculations, date checks) run in a second, equally locked-down helper
+(`pdfscript.exe`) that sees only the script and the field values, never the document.
 
 PDFlight is open source (AGPL 3.0), runs on Windows 10 and 11 and speaks German, English,
 French and Spanish.

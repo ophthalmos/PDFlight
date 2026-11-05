@@ -92,15 +92,16 @@ internal static class TaskDlg
     }
 
     /// <summary>Auswahl aus Befehlsknöpfen (Text und Erläuterung) plus Abbrechen; liefert den Index des gewählten Knopfs, -1 bei Abbruch.</summary>
-    public static int ChoiceTaskDlg(nint hwnd, string heading, string? message, IReadOnlyList<(string Text, string? Detail)> choices, TaskDialogIcon? icon = null)
+    public static int ChoiceTaskDlg(nint hwnd, string heading, string? message, IReadOnlyList<(string Text, string? Detail)> choices, TaskDialogIcon? icon = null, int defaultChoice = 0)
     {
         var unused = false;
-        return ChoiceTaskDlg(hwnd, heading, message, choices, null, ref unused, icon);
+        return ChoiceTaskDlg(hwnd, heading, message, choices, null, ref unused, icon, defaultChoice);
     }
 
     /// <summary>Wie oben, dazu ein Kontrollkästchen unten im Dialog (<paramref name="checkBoxText"/>, null = keins); sein Zustand steht danach
     /// in <paramref name="isChecked"/> (z. B. „Als neue Sammelmappe speichern“ beim Anhängen, seit 11.10.2026).</summary>
-    public static int ChoiceTaskDlg(nint hwnd, string heading, string? message, IReadOnlyList<(string Text, string? Detail)> choices, string? checkBoxText, ref bool isChecked, TaskDialogIcon? icon = null)
+    /// <param name="defaultChoice">Befehlsknopf, den Eingabe auslöst (Index in <paramref name="choices"/>).</param>
+    public static int ChoiceTaskDlg(nint hwnd, string heading, string? message, IReadOnlyList<(string Text, string? Detail)> choices, string? checkBoxText, ref bool isChecked, TaskDialogIcon? icon = null, int defaultChoice = 0)
     {
         var page = new TaskDialogPage() { Caption = Application.ProductName, Heading = heading, Text = message, Icon = icon ?? TaskDialogIcon.None, AllowCancel = true, SizeToContent = true };
         if (checkBoxText != null) { page.Verification = new TaskDialogVerificationCheckBox(checkBoxText, isChecked); }
@@ -112,7 +113,7 @@ internal static class TaskDlg
             page.Buttons.Add(button);
         }
         page.Buttons.Add(TaskDialogButton.Cancel);
-        if (buttons.Count > 0) { page.DefaultButton = buttons[0]; }
+        if (buttons.Count > 0) { page.DefaultButton = buttons[Math.Clamp(defaultChoice, 0, buttons.Count - 1)]; }
         var result = TaskDialog.ShowDialog(hwnd, page);
         if (page.Verification != null) { isChecked = page.Verification.Checked; }
         return buttons.IndexOf(result);

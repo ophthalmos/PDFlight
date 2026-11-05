@@ -17,6 +17,38 @@ internal static class Protocol
     /// <summary>Ereignis vor der Antwort: int Dok – ein Formularwert hat sich geändert.</summary>
     public const byte EventChanged = 3;
 
+    /// <summary>Ereignis vor der Antwort: int Dok, Feldname (leer = unbekannt), alter Wert, neuer Wert – PDFium hat einen Feldwert übernommen
+    /// (Fokuswechsel, Auswahl, Klick). Anders als <see cref="EventChanged"/> nicht bei jedem Tastendruck; daran hängen die Formularskripte.</summary>
+    public const byte EventFieldCommitted = 4;
+
+    // ================================================================== Formularskripte
+
+    /// <summary>Dok → int Anzahl Dokumentskripte, je Zeichenfolge; int Anzahl Felder, je Name, Bezeichnung (/TU), Tastenanschlag, Formatieren,
+    /// Prüfen, Berechnen (Skripttexte, leer = keins). Durchsucht alle Seiten.</summary>
+    public const byte FormScripts = 48;
+
+    /// <summary>Dok → int Anzahl, je Feldname, Wert, int Art, int /Ff, int Anzeige (0 sichtbar, 1 verborgen, 2 nicht drucken, 3 nicht anzeigen), bool mehrere
+    /// Widgets, int Anzahl Einträge (Liste) bzw. Ausfuhrwerte (Kontrollkästchen, Optionsfelder), je Zeichenfolge. Die Zeichenfolgen sendet das Hauptprogramm
+    /// an pdfscript ohne die Angabe zu den Widgets.</summary>
+    public const byte FormValues = 49;
+
+    /// <summary>Dok, bool nur Anzeige, int Anzahl, je Feldname, Wert und Anzeige → bool. Schreibt über das Formularmodul (Darstellung neu), der Fokus kommt
+    /// zurück; in einem Befehl, damit keine Tastatureingabe dazwischen gerät. Löst kein <see cref="EventFieldCommitted"/> aus. Nur Anzeige (Formatieren beim
+    /// Öffnen): auch kein <see cref="EventChanged"/>, und Felder mit Fokus oder inzwischen anderem Wert bleiben unberührt.</summary>
+    public const byte FormSetValues = 50;
+
+    /// <summary>Dok, int Anzahl, je Feldname, int /Ff, int Anzeige → bool. Gilt für alle Widgets des Felds.</summary>
+    public const byte FormSetProperties = 51;
+
+    /// <summary>Dok, int Seite → int Anzahl, je Feldname, Wert, Formatier-Skript: Felder, die formatiert werden wollen, aber ihren Rohwert zeigen
+    /// (/NeedAppearances, von anderen Programmen ausgefüllt). Das Feld mit dem Fokus zählt nicht.</summary>
+    public const byte FormUnformatted = 52;
+
+    /// <summary>Nur an pdfscript.exe: int Anzahl Dokumentskripte, je Zeichenfolge; int Anzahl Felder, je Zustand wie bei <see cref="FormValues"/>; Zielfeld,
+    /// Skript, event.value, bool event.willCommit, Sprache → bool event.rc, event.value, int Anzahl geänderter Werte, je Name und Wert; int Anzahl
+    /// geänderter Eigenschaften, je Name, int /Ff, int Anzeige; int Anzahl Meldungen (app.alert), je Zeichenfolge.</summary>
+    public const byte RunScript = 200;
+
     // ================================================================== Allgemein
 
     /// <summary>→ (keine Argumente) ← Zeichenfolge mit Prozess- und Token-Angaben.</summary>
@@ -174,6 +206,14 @@ internal static class Protocol
     /// (Transparenzmaske eingerechnet, höchstens 64 Megapixel). Das Hauptprogramm dekodiert nie Bilddaten aus der PDF: JPEG-Bytes gehen
     /// ungeprüft in die Datei, PNG und Zwischenablage entstehen aus den Pixeln.</summary>
     public const byte ImageData = 41;
+
+    /// <summary>→ int Dok, int Seite, int Nummer (aus <see cref="ImageAt"/>) ← bool entfernt. Schreibt den Inhaltsstrom der Seite neu
+    /// (bzw. den des Formular-XObjects, in dem das Bild steckt) und meldet eine Änderung.</summary>
+    public const byte RemoveImage = 46;
+
+    /// <summary>→ int Dok, int Seite, int Nummer der Anmerkung ← double jetzige Größe / Originalgröße (/PDFlightWidth; 0 = unbekannt).
+    /// Für die Prozentanzeige beim Größe-Ändern von Stempeln und Unterschriften.</summary>
+    public const byte AnnotScale = 47;
 
     // ================================================================== Kommentare (Notizen wie in Edge, seit 10.10.2026)
 

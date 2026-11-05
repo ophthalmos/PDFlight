@@ -267,6 +267,12 @@ internal static class Program
             failures++;
         }
         catch (SandboxErrorException) { Console.WriteLine("Bild mit ungültiger Nummer: abgewiesen (ok)"); }
+        // „Bild entfernen“ und die Originalgröße beim Größe-Ändern: ungültige Nummern ergeben nichts, keinen Absturz
+        var removed = sandbox.Call(Protocol.RemoveImage, w => { w.Write(document); w.Write(0); w.Write(1_000_000); }, r => r.ReadBoolean())
+            | sandbox.Call(Protocol.RemoveImage, w => { w.Write(document); w.Write(0); w.Write(-1); }, r => r.ReadBoolean());
+        var scale = sandbox.Call(Protocol.AnnotScale, w => { w.Write(document); w.Write(0); w.Write(1_000_000); }, r => r.ReadDouble());
+        if (removed || scale != 0) { Console.WriteLine("FEHLER: Bild entfernen bzw. Originalgröße mit ungültiger Nummer lieferte etwas"); failures++; }
+        else { Console.WriteLine("Bild entfernen/Originalgröße mit ungültiger Nummer: nichts geändert (ok)"); }
     }
 
     private static Bitmap RenderBitmap(SandboxProcess sandbox, int document, int page, int width, int height) =>

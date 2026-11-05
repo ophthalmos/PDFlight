@@ -112,6 +112,30 @@ internal static unsafe partial class Pdfium
     [LibraryImport(Lib, EntryPoint = "FPDFAnnot_GetRect")] public static partial int AnnotGetRect(nint annot, out RectF rect);
     [LibraryImport(Lib, EntryPoint = "FPDFPage_CloseAnnot")] public static partial void PageCloseAnnot(nint annot);
 
+    // Formularfelder und ihre Skripte
+    public const int FieldPushButton = 1, FieldCheckBox = 2, FieldRadio = 3, FieldCombo = 4, FieldList = 5, FieldText = 6; // FPDF_FORMFIELD_*
+    public const int FieldFlagReadOnly = 1;                         // FPDF_FORMFLAG_READONLY
+    public const int AnnotWidgetSubtype = 20;                       // FPDF_ANNOT_WIDGET
+    public const int AnnotFlagNoView = 32;                          // FPDF_ANNOT_FLAG_NOVIEW
+    public const int ActionKeystroke = 12, ActionFormat = 13, ActionValidate = 14, ActionCalculate = 15; // FPDF_ANNOT_AACTION_*
+    [LibraryImport(Lib, EntryPoint = "FPDFAnnot_GetFormFieldType")] public static partial int FieldType(nint form, nint annot);
+    [LibraryImport(Lib, EntryPoint = "FPDFAnnot_GetFormFieldName")] public static partial uint FieldName(nint form, nint annot, ushort* buffer, uint length);
+    [LibraryImport(Lib, EntryPoint = "FPDFAnnot_GetFormFieldValue")] public static partial uint FieldValue(nint form, nint annot, ushort* buffer, uint length);
+    [LibraryImport(Lib, EntryPoint = "FPDFAnnot_GetFormAdditionalActionJavaScript")] public static partial uint FieldActionScript(nint form, nint annot, int kind, ushort* buffer, uint length);
+    [LibraryImport(Lib, EntryPoint = "FPDFAnnot_GetOptionCount")] public static partial int FieldOptionCount(nint form, nint annot);
+    [LibraryImport(Lib, EntryPoint = "FPDFAnnot_GetOptionLabel")] public static partial uint FieldOptionLabel(nint form, nint annot, int index, ushort* buffer, uint length);
+    [LibraryImport(Lib, EntryPoint = "FPDFAnnot_GetAP")] public static partial uint AnnotGetAP(nint annot, int mode, ushort* buffer, uint length); // mode 0 = normal
+    [LibraryImport(Lib, EntryPoint = "FPDFAnnot_GetFormFieldFlags")] public static partial int FieldFlags(nint form, nint annot);
+    [LibraryImport(Lib, EntryPoint = "FPDFAnnot_SetFormFieldFlags")] public static partial int SetFieldFlags(nint form, nint annot, int flags);
+    [LibraryImport(Lib, EntryPoint = "FPDFAnnot_GetFormFieldExportValue")] public static partial uint FieldExportValue(nint form, nint annot, ushort* buffer, uint length);
+    [LibraryImport(Lib, EntryPoint = "FPDFAnnot_IsChecked")] public static partial int FieldIsChecked(nint form, nint annot);
+    [LibraryImport(Lib, EntryPoint = "FORM_SetFocusedAnnot")] public static partial int FormSetFocusedAnnot(nint form, nint annot);
+    [LibraryImport(Lib, EntryPoint = "FORM_SetIndexSelected")] public static partial int FormSetIndexSelected(nint form, nint page, int index, int selected);
+    [LibraryImport(Lib, EntryPoint = "FPDFDoc_GetJavaScriptActionCount")] public static partial int DocJavaScriptCount(nint document);
+    [LibraryImport(Lib, EntryPoint = "FPDFDoc_GetJavaScriptAction")] public static partial nint DocJavaScriptAction(nint document, int index);
+    [LibraryImport(Lib, EntryPoint = "FPDFDoc_CloseJavaScriptAction")] public static partial void DocCloseJavaScriptAction(nint action);
+    [LibraryImport(Lib, EntryPoint = "FPDFJavaScriptAction_GetScript")] public static partial uint JavaScriptActionScript(nint action, ushort* buffer, uint length);
+
     [StructLayout(LayoutKind.Sequential)]
     public struct RectF
     {
@@ -144,6 +168,7 @@ internal static unsafe partial class Pdfium
     public const int AnnotFlagNoZoom = 8, AnnotFlagNoRotate = 16; // FPDF_ANNOT_FLAG_NOZOOM/NOROTATE – Notizsymbole setzt Edge mit Print | NoZoom | NoRotate
     [LibraryImport(Lib, EntryPoint = "FPDFAnnot_SetStringValue", StringMarshalling = StringMarshalling.Utf8)] public static partial int AnnotSetStringValue(nint annot, string key, ushort* value);
     [LibraryImport(Lib, EntryPoint = "FPDFAnnot_GetStringValue", StringMarshalling = StringMarshalling.Utf8)] public static partial uint AnnotGetStringValue(nint annot, string key, ushort* buffer, uint length);
+    [LibraryImport(Lib, EntryPoint = "FPDFAnnot_GetNumberValue", StringMarshalling = StringMarshalling.Utf8)] public static partial int AnnotGetNumberValue(nint annot, string key, float* value);
     public const int AnnotInk = 15;        // FPDF_ANNOT_INK
     public const int AnnotFreeText = 3;    // FPDF_ANNOT_FREETEXT
     public const int AnnotStamp = 13;      // FPDF_ANNOT_STAMP
@@ -190,6 +215,10 @@ internal static unsafe partial class Pdfium
     [LibraryImport(Lib, EntryPoint = "FPDFPageObj_SetMatrix")] public static partial int PageObjSetMatrix(nint pageObject, Matrix* matrix);
     [LibraryImport(Lib, EntryPoint = "FPDFFormObj_CountObjects")] public static partial int FormObjCountObjects(nint formObject);
     [LibraryImport(Lib, EntryPoint = "FPDFFormObj_GetObject")] public static partial nint FormObjGetObject(nint formObject, uint index);
+    [LibraryImport(Lib, EntryPoint = "FPDFPage_RemoveObject")] public static partial int PageRemoveObject(nint page, nint pageObject);
+    [LibraryImport(Lib, EntryPoint = "FPDFFormObj_RemoveObject")] public static partial int FormObjRemoveObject(nint formObject, nint pageObject);
+    [LibraryImport(Lib, EntryPoint = "FPDFPageObj_Destroy")] public static partial void PageObjDestroy(nint pageObject);
+    [LibraryImport(Lib, EntryPoint = "FPDFPage_GenerateContent")] public static partial int PageGenerateContent(nint page);
     [LibraryImport(Lib, EntryPoint = "FPDFImageObj_GetImagePixelSize")] public static partial int ImageObjGetImagePixelSize(nint imageObject, out uint width, out uint height);
     [LibraryImport(Lib, EntryPoint = "FPDFImageObj_GetRenderedBitmap")] public static partial nint ImageObjGetRenderedBitmap(nint document, nint page, nint imageObject);
     [LibraryImport(Lib, EntryPoint = "FPDFImageObj_GetImageFilterCount")] public static partial int ImageObjGetImageFilterCount(nint imageObject);

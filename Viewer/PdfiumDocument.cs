@@ -41,6 +41,9 @@ internal sealed class PdfiumDocument : IDisposable
     /// <summary>Das Dokument wurde geändert – Formularwert, Hervorhebung (Sandbox-Thread).</summary>
     public event EventHandler? Changed;
 
+    /// <summary>PDFium hat einen Feldwert übernommen (Sandbox-Thread) – der Anlass für die Formularskripte.</summary>
+    public event EventHandler<FieldCommittedEventArgs>? FieldCommitted;
+
     private PdfiumDocument(string path, int id, int generation, bool hasForms, SizeF[] pageSizes)
     {
         Path = path;
@@ -317,6 +320,62 @@ internal sealed class PdfiumDocument : IDisposable
     public Task<bool> FormReplaceSelectionAsync(string text) => !HasForms ? Task.FromResult(false) :
         Query(false, Protocol.FormReplaceSelection, w => { w.Write(CurrentPageIndex); w.Write(text); }, r => r.ReadBoolean());
 
+    // ================================================================== Formularskripte
+
+    /// <summary>Dokumentskripte und alle Felder samt Skripten (durchsucht alle Seiten).</summary>
+    public Task<(List<string> DocumentScripts, List<FormField> Fields)> FormScriptsAsync()
+    {
+        (List<string>, List<FormField>) none = ([], []);
+        return !HasForms ? Task.FromResult(none) : Query(none, Protocol.FormScripts, _ => { }, r =>
+        {
+            List<string> scripts = [];
+            for (var count = r.ReadInt32(); count > 0; count--) { scripts.Add(r.ReadString()); }
+            List<FormField> fields = [];
+            for (var count = r.ReadInt32(); count > 0; count--)
+            {
+                fields.Add(new FormField(r.ReadString(), r.ReadString(), r.ReadString(), r.ReadString(), r.ReadString(), r.ReadString()));
+            }
+            return (scripts, fields);
+        });
+    }
+
+    public Task<Dictionary<string, FormFieldState>> FormValuesAsync() => Query([], Protocol.FormValues, _ => { }, r =>
+    {
+        Dictionary<string, FormFieldState> states = [];
+        for (var count = r.ReadInt32(); count > 0; count--)
+        {
+            var (name, value, type, flags, display, shared) = (r.ReadString(), r.ReadString(), r.ReadInt32(), r.ReadInt32(), r.ReadInt32(), r.ReadBoolean());
+            var options = new string[r.ReadInt32()];
+            for (var i = 0; i < options.Length; i++) { options[i] = r.ReadString(); }
+            states[name] = new FormFieldState(name, value, type, flags, display, shared, options);
+        }
+        return states;
+    });
+
+    /// <summary>Felder einer Seite, die formatiert werden wollen, aber ihren Rohwert zeigen (s. Protocol.FormUnformatted).</summary>
+    public Task<List<(string Name, string Value, string Format)>> FormUnformattedAsync(int index) => !HasForms ? Task.FromResult<List<(string Name, string Value, string Format)>>([]) :
+        Query<List<(string Name, string Value, string Format)>>([], Protocol.FormUnformatted, w => w.Write(index), r =>
+        {
+            List<(string, string, string)> found = [];
+            for (var count = r.ReadInt32(); count > 0; count--) { found.Add((r.ReadString(), r.ReadString(), r.ReadString())); }
+            return found;
+        });
+
+    /// <summary>Setzt Schreibschutz, Pflichtfeld und Anzeige (s. Protocol.FormSetProperties).</summary>
+    public Task FormSetPropertiesAsync(IReadOnlyCollection<(string Name, int Flags, int Display)> properties) => Query(false, Protocol.FormSetProperties, w =>
+    {
+        w.Write(properties.Count);
+        foreach (var (name, flags, display) in properties) { w.Write(name); w.Write(flags); w.Write(display); }
+    }, r => r.ReadBoolean());
+
+    /// <summary>Schreibt Werte ins Formular (s. Protocol.FormSetValues).</summary>
+    public Task FormSetValuesAsync(IReadOnlyCollection<(string Name, string Value, string Display)> values, bool displayOnly = false) => Query(false, Protocol.FormSetValues, w =>
+    {
+        w.Write(displayOnly);
+        w.Write(values.Count);
+        foreach (var (name, value, display) in values) { w.Write(name); w.Write(value); w.Write(display); }
+    }, r => r.ReadBoolean());
+
     // ================================================================== Hervorhebungen
 
     /// <summary>Gelb der Hervorhebungen in Acrobat (/C [1 0,757 0]); aufgetragen wird es mit 40 % Deckkraft.</summary>
@@ -444,6 +503,14 @@ internal sealed class PdfiumDocument : IDisposable
     public Task<bool> RemoveMarkupAsync(int index, int number) =>
         Query(false, Protocol.RemoveMarkup, w => { w.Write(index); w.Write(number); }, r => r.ReadBoolean());
 
+    /// <summary>Jetzige Größe einer Anmerkung im Verhältnis zur Originalgröße (0 = unbekannt).</summary>
+    public Task<double> AnnotScaleAsync(int index, int number) =>
+        Query(0.0, Protocol.AnnotScale, w => { w.Write(index); w.Write(number); }, r => r.ReadDouble());
+
+    /// <summary>Entfernt ein Bild aus der Seite (Nummer aus <see cref="ImageAtAsync"/>).</summary>
+    public Task<bool> RemoveImageAsync(int index, int number) =>
+        Query(false, Protocol.RemoveImage, w => { w.Write(index); w.Write(number); }, r => r.ReadBoolean());
+
     /// <summary>Vom Sandbox-Thread: PDFium meldet einen neu zu zeichnenden Bereich.</summary>
     internal void RaiseFormInvalidated(int page, RectangleF area)
     {
@@ -455,6 +522,13 @@ internal sealed class PdfiumDocument : IDisposable
     internal void RaiseChanged()
     {
         try { Changed?.Invoke(this, EventArgs.Empty); }
+        catch (Exception ex) { Debug.WriteLine(ex); }
+    }
+
+    /// <summary>Vom Sandbox-Thread: Ein Feldwert wurde übernommen.</summary>
+    internal void RaiseFieldCommitted(FieldCommittedEventArgs commit)
+    {
+        try { FieldCommitted?.Invoke(this, commit); }
         catch (Exception ex) { Debug.WriteLine(ex); }
     }
 
@@ -475,6 +549,14 @@ internal sealed class FormInvalidatedEventArgs(int page, RectangleF area) : Even
 {
     public int Page { get; } = page;
     public RectangleF Area { get; } = area;
+}
+
+/// <summary>Ein Feldwert wurde übernommen; <see cref="Name"/> leer = das Feld ist nicht bekannt.</summary>
+internal sealed class FieldCommittedEventArgs(string name, string oldValue, string newValue) : EventArgs
+{
+    public string Name { get; } = name;
+    public string OldValue { get; } = oldValue;
+    public string NewValue { get; } = newValue;
 }
 
 /// <summary>Die Datei ist kennwortgeschützt: Es fehlte ein Kennwort, oder (<see cref="WrongPassword"/>) das angegebene war falsch.</summary>

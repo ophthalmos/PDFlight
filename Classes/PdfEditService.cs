@@ -219,6 +219,248 @@ internal static partial class PdfEditService
         SaveCompact(document, path);
     }
 
+    /// <summary>Ändert die Größe eines Stempels oder einer Unterschrift (Ziehen an der Ecke, seit 03.11.2026): nur /Rect – der Darstellungsstrom
+    /// wird auf /Rect abgebildet und wächst mit. Auf die Seite (MediaBox) begrenzt, mindestens 4 mm.</summary>
+    public static void ResizeAnnotation(string path, int page, int index, double x1, double y1, double x2, double y2, double snappedScale = 0)
+    {
+        using var document = Open(path, PdfDocumentOpenMode.Modify);
+        var pdfPage = document.Pages[page - 1];
+        var annotation = AnnotationAt(pdfPage.Annotations, index);
+        if (annotation.Elements.GetName("/Subtype") != "/Stamp") { throw new InvalidOperationException("An dieser Stelle steht kein Stempel und keine Unterschrift mehr."); }
+        var original = annotation.Elements.GetReal(OriginalWidthKey);
+        var old = annotation.Elements.GetRectangle("/Rect");
+        if (snappedScale > 0 && original > 0 && old.Width > 0)
+        {
+            // mit Strg eingerastet: genau die Stufe der Originalgröße, Seitenverhältnis wie bisher; die feste Ecke (x1/y1) bleibt
+            var (width, height) = (original * snappedScale, original * snappedScale * old.Height / old.Width);
+            x2 = x2 >= x1 ? x1 + width : x1 - width;
+            y2 = y2 >= y1 ? y1 + height : y1 - height;
+        }
+        var box = pdfPage.MediaBox;
+        const double minimum = 4 * 72 / 25.4;
+        var (left, right) = (Math.Max(box.X1, Math.Min(x1, x2)), Math.Min(box.X2, Math.Max(x1, x2)));
+        var (bottom, top) = (Math.Max(box.Y1, Math.Min(y1, y2)), Math.Min(box.Y2, Math.Max(y1, y2)));
+        if (right - left < minimum || top - bottom < minimum) { return; }
+        annotation.Elements.SetRectangle("/Rect", new PdfRectangle(new XRect(left, bottom, right - left, top - bottom)));
+        SaveCompact(document, path);
+    }
+
+    // ------------------------------------------------------------------ Unterschriften (seit 03.11.2026)
+
+    // Sichtbare Unterschrift wie Acrobats „Unterschreiben“ (Wunsch Wilhelms): eine Stamp-Anmerkung /Name /PDFlightSignature mit eigenem
+    // Erscheinungsbild – gezeichnete Striche als Vektorpfade (scharf in jeder Größe), ein geladenes Bild als Bild-XObject mit
+    // Transparenzmaske. Keine digitale Signatur. Verschieben und Größe ändern wie bei den Stempeln; „fest übernehmen“ zeichnet das
+    // Erscheinungsbild in den Seiteninhalt und entfernt die Anmerkung (FlattenSignatures).
+
+    private const string SignatureName = "/PDFlightSignature";
+
+    /// <summary>Breite von /Rect beim Anlegen (Unterschriften, PDFlight-Stempel) – die Prozentanzeige beim Größe-Ändern rechnet damit
+    /// (seit 03.11.2026); ResizeAnnotation lässt sie stehen.</summary>
+    internal const string OriginalWidthKey = "/PDFlightWidth";
+    private const double SignatureWidthPt = 50 * 72 / 25.4, SignatureMaxHeightPt = 30 * 72 / 25.4;
+
+    /// <summary>Setzt eine Unterschrift mittig an die Stelle <paramref name="centerX"/>/<paramref name="centerY"/> (PDF-Punkte der Seite,
+    /// 1-basiert) – in Originalgröße (seit 03.11.2026, Wunsch Wilhelms: ein Scan so groß wie auf dem Papier, eine gezeichnete so groß wie im
+    /// Feld), ohne bekannte Größe 5 cm breit und höchstens 3 cm hoch; nie größer als die Seite (90 % der Breite, die halbe Höhe), ganz auf
+    /// der Seite und auf gedrehten Seiten aufrecht. Liefert /NM der Anmerkung.</summary>
+    public static string AddSignature(string path, int page, double centerX, double centerY, Signature signature, string subject, string author)
+    {
+        using var document = Open(path, PdfDocumentOpenMode.Modify);
+        var pdfPage = document.Pages[page - 1];
+        var rotation = (pdfPage.Rotate % 360 + 360) % 360;
+        var box = pdfPage.MediaBox;
+        double width, height;
+        if (signature.WidthPt is { } original) { (width, height) = (original, original * signature.Aspect); }
+        else
+        {
+            (width, height) = (SignatureWidthPt, SignatureWidthPt * signature.Aspect);
+            if (height > SignatureMaxHeightPt) { (width, height) = (width * SignatureMaxHeightPt / height, SignatureMaxHeightPt); }
+        }
+        var (visibleWidth, visibleHeight) = rotation is 90 or 270 ? (box.Height, box.Width) : (box.Width, box.Height); // die Seite, wie sie zu sehen ist
+        var fit = Math.Min(1, Math.Min(visibleWidth * 0.9 / width, visibleHeight * 0.5 / height));
+        (width, height) = (width * fit, height * fit);
+        var (rectWidth, rectHeight) = rotation is 90 or 270 ? (height, width) : (width, height);
+        var x = Math.Clamp(centerX - rectWidth / 2, box.X1, Math.Max(box.X1, box.X2 - rectWidth));
+        var y = Math.Clamp(centerY - rectHeight / 2, box.Y1, Math.Max(box.Y1, box.Y2 - rectHeight));
+
+        var appearances = new PdfDictionary(document);
+        appearances.Elements.SetReference("/N", SignatureAppearance(document, signature, width, height, rotation));
+        var name = Guid.NewGuid().ToString("N");
+        var annotation = new PdfDictionary(document);
+        annotation.Elements.SetName("/Type", "/Annot");
+        annotation.Elements.SetName("/Subtype", "/Stamp");
+        annotation.Elements.SetName("/Name", SignatureName);
+        annotation.Elements.SetString("/NM", name);
+        annotation.Elements.SetRectangle("/Rect", new PdfRectangle(new XRect(x, y, rectWidth, rectHeight)));
+        annotation.Elements.SetReal(OriginalWidthKey, rectWidth / fit); // Originalgröße = 100 % beim Größe-Ändern, auch wenn sie für die Seite verkleinert wurde
+        annotation.Elements.SetString("/Subj", subject); // die Anmerkungsliste zeigt ihn, wenn /Contents fehlt
+        annotation.Elements.SetString("/T", author);
+        annotation.Elements.SetInteger("/F", 4); // drucken
+        annotation.Elements.SetObject("/AP", appearances);
+        annotation.Elements.SetDateTime("/M", DateTime.Now);
+        document.Internals.AddObject(annotation);
+        pdfPage.Annotations.Elements.Add(annotation.Reference!); // nach AddObject hat das Objekt eine Referenz
+        SaveCompact(document, path);
+        return name;
+    }
+
+    /// <summary>Erscheinungsbild in der Größe <paramref name="width"/> × <paramref name="height"/>; auf einer gedrehten Seite dreht /Matrix es
+    /// gegen die Seitendrehung, damit es aufrecht erscheint (der Betrachter bildet die gedrehte /BBox auf /Rect ab).</summary>
+    private static PdfDictionary SignatureAppearance(PdfDocument document, Signature signature, double width, double height, int rotation)
+    {
+        static string F(double v) => v.ToString("0.###", CultureInfo.InvariantCulture);
+        var resources = new PdfDictionary(document);
+        StringBuilder content = new();
+        if (signature.IsImage)
+        {
+            var xobjects = new PdfDictionary(document);
+            xobjects.Elements.SetReference("/Im0", SignatureImage(document, signature));
+            resources.Elements.SetObject("/XObject", xobjects);
+            content.Append($"q {F(width)} 0 0 {F(height)} 0 0 cm /Im0 Do Q");
+        }
+        else
+        {
+            content.Append($"0 G {F(Math.Max(0.011, signature.LineWidth) * width)} w 1 J 1 j\n"); // mindestens 1,1 % der Breite, sonst wirkt sie dünn
+            foreach (var stroke in signature.Strokes)
+            {
+                var points = Enumerable.Range(0, stroke.Length / 2).Select(i => (X: stroke[2 * i] * width, Y: height - stroke[2 * i + 1] * width)).ToList();
+                if (points.Count == 0) { continue; }
+                content.Append($"{F(points[0].X)} {F(points[0].Y)} m ");
+                if (points.Count == 1) { content.Append($"{F(points[0].X + 0.01)} {F(points[0].Y)} l S\n"); continue; } // Punkt: runde Kappe
+                // Kardinal-Spline wie GDI+-DrawCurve mit Spannung 0,5 (das Zeichenfeld) als Bézierkurven
+                const double tension = 0.5 / 3;
+                for (var i = 0; i < points.Count - 1; i++)
+                {
+                    var (p0, p1, p2, p3) = (points[Math.Max(0, i - 1)], points[i], points[i + 1], points[Math.Min(points.Count - 1, i + 2)]);
+                    content.Append($"{F(p1.X + (p2.X - p0.X) * tension)} {F(p1.Y + (p2.Y - p0.Y) * tension)} {F(p2.X - (p3.X - p1.X) * tension)} {F(p2.Y - (p3.Y - p1.Y) * tension)} {F(p2.X)} {F(p2.Y)} c ");
+                }
+                content.Append("S\n");
+            }
+        }
+        var appearance = new PdfDictionary(document);
+        appearance.Elements.SetName("/Type", "/XObject");
+        appearance.Elements.SetName("/Subtype", "/Form");
+        appearance.Elements.SetRectangle("/BBox", new PdfRectangle(new XRect(0, 0, width, height)));
+        appearance.Elements.SetObject("/Resources", resources);
+        if (rotation != 0) // gegen die Seitendrehung (im Uhrzeigersinn) um denselben Winkel gegen den Uhrzeigersinn
+        {
+            var (cos, sin) = rotation switch { 90 => (0, 1), 180 => (-1, 0), _ => (0, -1) };
+            var matrix = new PdfArray(document);
+            foreach (var v in new double[] { cos, sin, -sin, cos, 0, 0 }) { matrix.Elements.Add(new PdfReal(v)); }
+            appearance.Elements.SetObject("/Matrix", matrix);
+        }
+        appearance.CreateStream(Encoding.ASCII.GetBytes(content.ToString()));
+        document.Internals.AddObject(appearance);
+        return appearance;
+    }
+
+    /// <summary>Das Bild einer importierten Unterschrift als RGB-Bild mit Graustufen-Transparenzmaske (/SMask), beides Flate-komprimiert.
+    /// Die Pixel stammen aus der eigenen, gespeicherten PNG – keine Bilddaten aus einer PDF.</summary>
+    private static PdfDictionary SignatureImage(PdfDocument document, Signature signature)
+    {
+        using var bitmap = signature.LoadImage() ?? throw new InvalidOperationException("Die Unterschrift enthält kein Bild.");
+        var (width, height) = (bitmap.Width, bitmap.Height);
+        var data = bitmap.LockBits(new Rectangle(0, 0, width, height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+        var pixels = new byte[data.Stride * height];
+        System.Runtime.InteropServices.Marshal.Copy(data.Scan0, pixels, 0, pixels.Length);
+        bitmap.UnlockBits(data);
+        var (rgb, alpha) = (new byte[width * height * 3], new byte[width * height]);
+        for (var y = 0; y < height; y++)
+        {
+            for (var x = 0; x < width; x++)
+            {
+                var (source, target) = (y * data.Stride + x * 4, y * width + x);
+                (rgb[target * 3], rgb[target * 3 + 1], rgb[target * 3 + 2], alpha[target]) = (pixels[source + 2], pixels[source + 1], pixels[source], pixels[source + 3]);
+            }
+        }
+        PdfDictionary Image(byte[] samples, string colorSpace)
+        {
+            var image = new PdfDictionary(document);
+            image.Elements.SetName("/Type", "/XObject");
+            image.Elements.SetName("/Subtype", "/Image");
+            image.Elements.SetInteger("/Width", width);
+            image.Elements.SetInteger("/Height", height);
+            image.Elements.SetName("/ColorSpace", colorSpace);
+            image.Elements.SetInteger("/BitsPerComponent", 8);
+            image.Elements.SetName("/Filter", "/FlateDecode");
+            using MemoryStream compressed = new();
+            using (System.IO.Compression.ZLibStream zlib = new(compressed, System.IO.Compression.CompressionLevel.Optimal, leaveOpen: true)) { zlib.Write(samples); }
+            image.CreateStream(compressed.ToArray());
+            document.Internals.AddObject(image);
+            return image;
+        }
+        var mask = Image(alpha, "/DeviceGray");
+        var color = Image(rgb, "/DeviceRGB");
+        color.Elements.SetReference("/SMask", mask);
+        return color;
+    }
+
+    /// <summary>Zeichnet die Unterschriften mit den angegebenen /NM fest in ihre Seiten (Erscheinungsbild als Formular-XObject im Seiteninhalt,
+    /// an der Stelle und in der Größe der Anmerkung) und entfernt die Anmerkungen. Liefert ihre Zahl.</summary>
+    public static int FlattenSignatures(string path, IReadOnlyCollection<string> names)
+    {
+        static string F(double v) => v.ToString("0.#####", CultureInfo.InvariantCulture);
+        using var document = Open(path, PdfDocumentOpenMode.Modify);
+        var count = 0;
+        foreach (var pdfPage in document.Pages)
+        {
+            var annotations = pdfPage.Annotations;
+            var found = AnnotationDictionaries(annotations)
+                .Where(e => e.Dictionary.Elements.GetName("/Subtype") == "/Stamp" && e.Dictionary.Elements.GetName("/Name") == SignatureName && names.Contains(e.Dictionary.Elements.GetString("/NM")))
+                .ToList();
+            if (found.Count == 0) { continue; }
+            var resources = pdfPage.Resources;
+            if (resources.Elements.GetDictionary("/XObject") is not { } xobjects)
+            {
+                xobjects = new PdfDictionary(document);
+                resources.Elements.SetObject("/XObject", xobjects);
+            }
+            StringBuilder content = new("Q\n"); // schließt das „q“ vor dem bisherigen Inhalt – dessen Grafikzustand gilt danach nicht mehr
+            List<int> drawn = []; // nur was in der Seite steht, verliert seine Anmerkung
+            foreach (var (index, annotation) in found)
+            {
+                if (annotation.Elements.GetDictionary("/AP")?.Elements["/N"] is not PdfReference { Value: PdfDictionary form } reference) { continue; }
+                var bbox = form.Elements.GetRectangle("/BBox");
+                var m = form.Elements.GetArray("/Matrix") is { Elements.Count: 6 } array ? Enumerable.Range(0, 6).Select(i => array.Elements.GetReal(i)).ToArray() : [1.0, 0, 0, 1, 0, 0];
+                (double X, double Y) Transform(double x, double y) => (m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]);
+                var corners = new[] { Transform(bbox.X1, bbox.Y1), Transform(bbox.X2, bbox.Y1), Transform(bbox.X1, bbox.Y2), Transform(bbox.X2, bbox.Y2) };
+                var (tx1, ty1, tx2, ty2) = (corners.Min(c => c.X), corners.Min(c => c.Y), corners.Max(c => c.X), corners.Max(c => c.Y));
+                if (tx2 - tx1 <= 0 || ty2 - ty1 <= 0) { continue; }
+                // wie ein Betrachter das Erscheinungsbild abbildet: /Matrix, dann die gedrehte /BBox auf /Rect strecken (PDF 1.7, 12.5.5)
+                var rect = annotation.Elements.GetRectangle("/Rect");
+                var (sx, sy) = (rect.Width / (tx2 - tx1), rect.Height / (ty2 - ty1));
+                var (ex, ey) = (rect.X1 - tx1 * sx, rect.Y1 - ty1 * sy);
+                var key = "/PLSig" + count + "x" + Guid.NewGuid().ToString("N")[..6];
+                xobjects.Elements.SetReference(key, reference.Value);
+                // nur die Abbildung auf /Rect – /Matrix des Formulars wendet „Do“ selbst an (einmal zusätzlich multipliziert, stand die
+                // Unterschrift auf gedrehten Seiten quer; gesehen im Test 03.11.2026)
+                content.Append($"q {F(sx)} 0 0 {F(sy)} {F(ex)} {F(ey)} cm {key} Do Q\n");
+                drawn.Add(index);
+                count++;
+            }
+            if (drawn.Count == 0) { continue; }
+            SetStream(pdfPage.Contents.PrependContent(), "q\n");
+            SetStream(pdfPage.Contents.AppendContent(), content.ToString());
+            foreach (var index in drawn.OrderDescending()) { annotations.Elements.RemoveAt(index); }
+        }
+        if (count > 0) { SaveCompact(document, path); }
+        return count;
+    }
+
+    private static void SetStream(PdfDictionary dictionary, string content)
+    {
+        var bytes = Encoding.ASCII.GetBytes(content);
+        if (dictionary.Stream == null) { dictionary.CreateStream(bytes); }
+        else { dictionary.Stream.Value = bytes; }
+    }
+
+    /// <summary>Wie viele der Unterschriften mit diesen /NM stehen noch als Anmerkung in der Datei?</summary>
+    public static int CountSignatures(string path, IReadOnlyCollection<string> names)
+    {
+        using var document = Open(path, PdfDocumentOpenMode.Import);
+        return document.Pages.Cast<PdfPage>().Sum(p => AnnotationDictionaries(p.Annotations).Count(e => e.Dictionary.Elements.GetName("/Name") == SignatureName && names.Contains(e.Dictionary.Elements.GetString("/NM"))));
+    }
+
     /// <summary>Entfernt eine Anmerkung (Index im Annots-Array der Seite) samt zugehörigem Popup.</summary>
     public static void DeleteAnnotation(string path, int page, int index, int objectNumber)
     {
@@ -445,6 +687,7 @@ internal static partial class PdfEditService
             {
                 var subtype = a.Elements.GetName("/Subtype").TrimStart('/');
                 if (!IsManageable(subtype)) { continue; }
+                if (subtype == "Stamp" && a.Elements.GetName("/Name") == SignatureName) { subtype = "Signature"; } // kein Stempel-Dialog
                 var rect = a.Elements.GetRectangle("/Rect");
                 var fontSize = 12.0;
                 var match = FontSizeInDa().Match(a.Elements.GetString("/DA"));
@@ -674,6 +917,7 @@ internal static partial class PdfEditService
         annotation.Elements.SetName("/Subtype", "/Stamp");
         annotation.Elements.SetName("/Name", "/PDFlightStamp"); // kein Standardsymbol – Betrachter nehmen das Erscheinungsbild
         annotation.Elements.SetRectangle("/Rect", new PdfRectangle(rect));
+        annotation.Elements.SetReal(OriginalWidthKey, rect.Width); // 100 % der Prozentanzeige beim Größe-Ändern
         annotation.Elements.SetString("/Contents", dateLine.Length > 0 ? stamp.Text + "\n" + dateLine : stamp.Text);
         annotation.Elements.SetString(StampDataKey, JsonSerializer.Serialize(stamp)); // damit „Bearbeiten“ in der Anmerkungsliste alle Eigenschaften wiederfindet
         annotation.Elements.SetInteger("/F", 4); // drucken
@@ -1076,6 +1320,16 @@ internal static partial class PdfEditService
             document.SecurityHandler.SetEncryptionToV5(); // AES-256 wie im Eigenschaften-Dialog, ohne eigenes Berechtigungskennwort
         }
         document.Save(path);
+    }
+
+    /// <summary>Schreibt <paramref name="bytes"/> (den angezeigten Stand aus PDFium) ohne PDF/A-Kennzeichnung nach <paramref name="path"/>
+    /// (seit 03.11.2026): <see cref="SaveCompact"/> entfernt die XMP-Daten mit den pdfaid-Angaben, PDFsharp schreibt eigene ohne sie –
+    /// wie bei jeder Bearbeitung über PDFsharp. Scheitert das Lesen, bleibt die Datei unberührt.</summary>
+    public static void WriteWithoutPdfA(string path, byte[] bytes)
+    {
+        using MemoryStream stream = new(bytes, writable: false);
+        using var document = PdfReader.Open(stream, PdfDocumentOpenMode.Modify);
+        SaveCompact(document, path);
     }
 
     // ------------------------------------------------------------------ Verschlüsselte Dateien

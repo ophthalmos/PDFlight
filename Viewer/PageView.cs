@@ -593,6 +593,7 @@ internal sealed class PageView : ScrollableControl
             }
             else { g.DrawRectangle(Pens.DarkGray, rect.X - 1, rect.Y - 1, rect.Width + 1, rect.Height + 1); }
         }
+        DrawResizeHandle(g);
         DrawAnnotationGhost(g);
         DrawInk(g);
     }
@@ -998,6 +999,15 @@ internal sealed class PageView : ScrollableControl
         return await document.ImageDataAsync(image.Page, image.Number, original);
     }
 
+    /// <summary>Entfernt das Bild unter dem letzten Rechtsklick („Bild entfernen“, seit 03.11.2026); eine Bildauswahl verschwindet mit.</summary>
+    public async Task<bool> RemoveImageUnderMouseAsync()
+    {
+        if (document == null || imageUnderMouse is not { } image) { return false; }
+        imageUnderMouse = null;
+        if (selectedImage != null) { selectedImage = null; Invalidate(); } // die Nummern dahinter rücken nach
+        return await document.RemoveImageAsync(image.Page, image.Number);
+    }
+
     /// <summary>Daten des ausgewählten Bilds (Klick wie in Acrobat) – für Strg+C; beides null ohne Auswahl.</summary>
     public async Task<(byte[]? Jpeg, Bitmap? Pixels)> SelectedImageDataAsync(bool original)
     {
@@ -1323,6 +1333,11 @@ internal sealed class PageView : ScrollableControl
                 {
                     annotation = await queried.AnnotationAtAsync(page, pageRects[page].Width, pageRects[page].Height, pagePoint, MovableAnnotations);
                     if (Stale()) { continue; }
+                    // knapp außerhalb der rechten unteren Ecke eines Stempels: der Anfasser gilt weiter (er ragt über das Rechteck hinaus)
+                    if (annotation == null && hoverAnnotation is { Subtype: Protocol.AnnotStamp } held && held.Page == page && held.PageSize == pageRects[page].Size && NearCorner(held.Rect, pagePoint))
+                    {
+                        annotation = (held.Number, held.Subtype, held.Rect);
+                    }
                 }
                 var link = page < 0 || field >= 0 || annotation != null ? null : await queried.LinkAtAsync(page, pageRects[page].Width, pageRects[page].Height, pagePoint);
                 if (Stale()) { continue; }
@@ -1337,8 +1352,12 @@ internal sealed class PageView : ScrollableControl
                     && await queried.InkAtAsync(page, pageRects[page].Width, pageRects[page].Height, pagePoint, LogicalToDeviceUnits(InkHitSlack)) >= 0;
                 if (Stale()) { continue; }
                 if (dragging || formDragPage >= 0 || pick != null || ghost != null || InkMode || EraseMode || IsDisposed) { continue; } // beim Wählen einer Stelle und beim Zeichnen bleibt das Fadenkreuz
+                var previous = hoverAnnotation;
                 hoverAnnotation = annotation is { } a ? (page, a.Number, a.Subtype, a.Rect, pageRects[page].Size) : null;
+                SetHoverCorner(annotation is { Subtype: Protocol.AnnotStamp } s && NearCorner(s.Rect, pagePoint));
+                if (previous != hoverAnnotation && (previous is { Subtype: Protocol.AnnotStamp } || annotation is { Subtype: Protocol.AnnotStamp })) { Invalidate(); } // Anfasser ein/aus
                 Cursor = note || inkAt ? Cursors.Hand // Kommentar: Klick zeigt die Karte, Ziehen verschiebt; Zeichnung: Klick wählt sie aus
+                    : hoverCorner ? Cursors.SizeNWSE // Stempel, Unterschrift: an der Ecke die Größe ändern
                     : annotation != null ? Cursors.SizeAll
                     : field is PdfiumForms.FieldTextField or PdfiumForms.FieldComboBox ? Cursors.IBeam
                     : field >= 0 || link != null ? Cursors.Hand
@@ -1358,7 +1377,12 @@ internal sealed class PageView : ScrollableControl
     {
         base.OnMouseLeave(e);
         pendingHoverPoint = null;
-        if (!ghostDragging) { hoverAnnotation = null; }
+        if (!ghostDragging && hoverAnnotation != null)
+        {
+            if (hoverAnnotation is { Subtype: Protocol.AnnotStamp }) { Invalidate(); } // den Anfasser wegnehmen
+            hoverAnnotation = null;
+            SetHoverCorner(false);
+        }
         if (hoverLink != null) { hoverLink = null; LinkHover?.Invoke(this, null); }
         SetHoverNote(null);
     }
@@ -1500,6 +1524,7 @@ internal sealed class PageView : ScrollableControl
     protected override void OnKeyUp(KeyEventArgs e)
     {
         base.OnKeyUp(e);
+        if (ghostDragging && ghost is { Resize: true } resizing && e.KeyCode == Keys.ControlKey) { DragAnnotation(resizing.Last); }
         if (formFocused && document != null) { _ = document.FormKeyUpAsync((int)e.KeyCode, FormModifiers(e.Modifiers, false)); }
     }
 
@@ -1594,6 +1619,54 @@ internal sealed class PageView : ScrollableControl
         public Size Offset { get; set; }           // Seitenpixel
         public bool Moved { get; set; }            // über die Ziehschwelle hinaus bewegt
         public bool Hidden { get; set; }           // Original in der Anzeige ausgeblendet
+        public bool Resize { get; init; }          // an der Ecke gezogen: Größe ändern statt verschieben
+        public Size NewSize { get; set; }          // Seitenpixel, beim Größe-Ändern (die linke obere Ecke bleibt)
+        public double BaseScale { get; set; } = 1; // Größe beim Anfassen im Verhältnis zur Originalgröße (1 = unbekannt: Bezug ist der Anfang)
+        public int Percent { get; set; } = 100;    // beim Größe-Ändern angezeigt
+        public double Snapped { get; set; }        // mit Strg eingerastete Stufe im Verhältnis zur Originalgröße (0 = frei oder Bezug unbekannt)
+        public bool BaseKnown { get; set; }        // BaseScale stammt aus /PDFlightWidth
+        public Point Last { get; set; }            // letzte Mausstelle beim Ziehen (Fensterpixel) – für Strg ohne Mausbewegung
+    }
+
+    // Größe ändern (seit 03.11.2026, für Unterschriften – Wunsch Wilhelms; gilt für alle Stempel): An der rechten unteren Ecke eines Stempels
+    // erscheint ein Anfasser und der Zeiger ↘; Ziehen dort ändert die Größe bei gleichem Seitenverhältnis, die linke obere Ecke bleibt.
+    // Beim Loslassen meldet AnnotationResized das neue Rechteck in PDF-Punkten; wie beim Verschieben bleibt die Kopie bis zum Neuladen.
+    private bool hoverCorner;
+
+    /// <summary>Ein Stempel oder eine Unterschrift wurde an der Ecke in der Größe geändert.</summary>
+    public event EventHandler<AnnotationResizedEventArgs>? AnnotationResized;
+
+    /// <summary>Der Zeiger kam an die Ecke eines Stempels (true) oder hat sie verlassen – für den Hinweis in der Statusleiste.</summary>
+    public event EventHandler<bool>? ResizeCornerHover;
+
+    private void SetHoverCorner(bool value)
+    {
+        if (hoverCorner == value) { return; }
+        hoverCorner = value;
+        ResizeCornerHover?.Invoke(this, value);
+    }
+
+    private int CornerSize => LogicalToDeviceUnits(10);
+
+    private bool NearCorner(Rectangle rect, Point pagePoint)
+    {
+        var size = CornerSize;
+        return rect.Width >= 2 * size && rect.Height >= size && Math.Abs(pagePoint.X - rect.Right) <= size && Math.Abs(pagePoint.Y - rect.Bottom) <= size;
+    }
+
+    /// <summary>Anfasser an der rechten unteren Ecke des Stempels unter der Maus, dazu ein dünner gestrichelter Rahmen.</summary>
+    private void DrawResizeHandle(Graphics g)
+    {
+        if (ghost != null || hoverAnnotation is not { Subtype: Protocol.AnnotStamp } hover || hover.Page >= pageRects.Length || hover.PageSize != pageRects[hover.Page].Size) { return; }
+        var page = ToClient(pageRects[hover.Page]);
+        var rect = hover.Rect;
+        rect.Offset(page.X, page.Y);
+        using (Pen frame = new(Color.FromArgb(0, 120, 215)) { DashStyle = DashStyle.Dash }) { g.DrawRectangle(frame, rect); }
+        var size = LogicalToDeviceUnits(7);
+        Rectangle handle = new(rect.Right - size / 2, rect.Bottom - size / 2, size, size);
+        g.FillRectangle(Brushes.White, handle);
+        using Pen border = new(Color.FromArgb(0, 120, 215), LogicalToDeviceUnits(1));
+        g.DrawRectangle(border, handle);
     }
 
     private (int Page, int Number, int Subtype, Rectangle Rect, Size PageSize)? hoverAnnotation;
@@ -1648,15 +1721,23 @@ internal sealed class PageView : ScrollableControl
     {
         if (!AllowAnnotationMove || hoverAnnotation is not { } hover || hover.Page >= pageRects.Length || hover.PageSize != pageRects[hover.Page].Size) { return null; }
         var (page, point) = PageAt(client, clamp: false);
-        return page == hover.Page && hover.Rect.Contains(point) ? (hover.Page, hover.Number, hover.Subtype, hover.Rect, hover.PageSize, point) : null;
+        var inside = hover.Rect.Contains(point) || hover.Subtype == Protocol.AnnotStamp && NearCorner(hover.Rect, point); // der Anfasser ragt über die Ecke
+        return page == hover.Page && inside ? (hover.Page, hover.Number, hover.Subtype, hover.Rect, hover.PageSize, point) : null;
     }
 
     private bool TryStartAnnotationDrag(Point client)
     {
         if (ghost != null || document == null || AnnotationUnder(client) is not { } hit) { return false; }
-        ghost = new AnnotationGhost(document, hit.Page, hit.Number, hit.Subtype, hit.Rect, hit.PageSize, hit.Point, CopyPageArea(hit.Page, hit.Rect));
+        var resize = hit.Subtype == Protocol.AnnotStamp && NearCorner(hit.Rect, hit.Point);
+        ghost = new AnnotationGhost(document, hit.Page, hit.Number, hit.Subtype, hit.Rect, hit.PageSize, hit.Point, CopyPageArea(hit.Page, hit.Rect))
+        {
+            Resize = resize,
+            NewSize = hit.Rect.Size,
+            Last = client,
+        };
         ghostDragging = true;
-        if (hit.Subtype != Protocol.AnnotText) { Cursor = Cursors.SizeAll; } // beim Kommentar erst beim Ziehen – ein Klick zeigt die Karte
+        if (hit.Subtype != Protocol.AnnotText) { Cursor = resize ? Cursors.SizeNWSE : Cursors.SizeAll; } // beim Kommentar erst beim Ziehen – ein Klick zeigt die Karte
+        if (resize) { QueryBaseScale(ghost); }
         return true;
     }
 
@@ -1687,9 +1768,49 @@ internal sealed class PageView : ScrollableControl
         RefreshPageArea(gh.Page, area);
     }
 
+    // Prozent beim Größe-Ändern (seit 03.11.2026, Wunsch Wilhelms): neben der gezogenen Ecke steht die Größe im Verhältnis zur
+    // Originalgröße (/PDFlightWidth, s. PdfEditService.OriginalWidthKey; ohne den Eintrag im Verhältnis zur Größe beim Anfassen). Mit
+    // gedrückter Strg-Taste rastet sie auf ganze Brüche und Vielfache ein (ResizeSteps), soweit sie auf die Seite passen.
+    private static readonly double[] ResizeSteps = [0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4];
+
+    private async void QueryBaseScale(AnnotationGhost gh)
+    {
+        var scale = await gh.Document.AnnotScaleAsync(gh.Page, gh.Number);
+        if (ghost != gh || !(scale > 0)) { return; }
+        (gh.BaseScale, gh.BaseKnown) = (scale, true);
+        if (ghostDragging) { DragAnnotation(gh.Last); } // Prozentzahl (und Raster) gleich auf den neuen Bezug
+    }
+
+    /// <summary>Die zum Maßstab nächste Stufe aus <see cref="ResizeSteps"/> zwischen low und high; passt keine, bleibt er.</summary>
+    private static double SnapScale(double scale, double low, double high)
+    {
+        var (best, distance) = (scale, double.MaxValue);
+        foreach (var step in ResizeSteps)
+        {
+            var d = Math.Abs(Math.Log(step / scale)); // logarithmisch: zwischen 100 und 200 % liegt die Mitte bei 141 %
+            if (step >= low - 1e-9 && step <= high + 1e-9 && d < distance) { (best, distance) = (step, d); }
+        }
+        return best;
+    }
+
+    /// <summary>Prozentzahl beim Größe-Ändern wie ein Tooltip rechts unter der gezogenen Ecke.</summary>
+    private void DrawResizePercent(Graphics g, Rectangle target, AnnotationGhost gh)
+    {
+        var text = $"{gh.Percent} %";
+        var size = TextRenderer.MeasureText(g, text, Font);
+        var (padX, padY) = (LogicalToDeviceUnits(6), LogicalToDeviceUnits(3));
+        Rectangle box = new(target.Right + LogicalToDeviceUnits(14), target.Bottom + LogicalToDeviceUnits(14), size.Width + 2 * padX, size.Height + 2 * padY);
+        if (box.Right > ClientSize.Width) { box.X = Math.Max(0, target.Right - box.Width); }
+        if (box.Bottom > ClientSize.Height) { box.Y = Math.Max(0, target.Bottom - box.Height - LogicalToDeviceUnits(4)); }
+        g.FillRectangle(SystemBrushes.Info, box);
+        g.DrawRectangle(SystemPens.ControlDark, box.X, box.Y, box.Width - 1, box.Height - 1);
+        TextRenderer.DrawText(g, text, Font, box, SystemColors.InfoText, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+    }
+
     private void DragAnnotation(Point client)
     {
         if (ghost is not { } gh || gh.Page >= pageRects.Length) { return; }
+        gh.Last = client;
         static int Keep(int value, int min, int max) => max < min ? min : Math.Clamp(value, min, max);
         var point = ToPagePoint(gh.Page, client);
         var (dx, dy) = (point.X - gh.Start.X, point.Y - gh.Start.Y);
@@ -1699,6 +1820,26 @@ internal sealed class PageView : ScrollableControl
             if (gh.Subtype == Protocol.AnnotText) { Cursor = Cursors.SizeAll; } // wie Acrobat (beim Überfahren Hand)
             SetOriginalHidden(gh, true); // erst jetzt: ein bloßer Klick soll nichts flackern lassen
         }
+        if (gh.Resize)
+        {
+            // gleiches Seitenverhältnis: die stärkere der beiden Richtungen bestimmt den Maßstab; nicht kleiner als 16 px, nicht über die Seite
+            var scale = Math.Max((double)(gh.Rect.Width + dx) / gh.Rect.Width, (double)(gh.Rect.Height + dy) / gh.Rect.Height);
+            var minimum = (double)LogicalToDeviceUnits(16) / Math.Min(gh.Rect.Width, gh.Rect.Height);
+            var maximum = Math.Min((double)(gh.PageSize.Width - gh.Rect.X) / gh.Rect.Width, (double)(gh.PageSize.Height - gh.Rect.Y) / gh.Rect.Height);
+            var (low, high) = (Math.Min(minimum, maximum), Math.Max(minimum, maximum));
+            scale = Math.Clamp(scale, low, high);
+            gh.Snapped = 0;
+            if ((ModifierKeys & Keys.Control) != 0)
+            {
+                var step = SnapScale(scale * gh.BaseScale, low * gh.BaseScale, high * gh.BaseScale);
+                scale = step / gh.BaseScale;
+                if (gh.BaseKnown && Array.IndexOf(ResizeSteps, step) >= 0) { gh.Snapped = step; } // die Datei bekommt die Stufe genau, nicht über gerundete Pixel
+            }
+            gh.NewSize = new Size((int)Math.Round(gh.Rect.Width * scale), (int)Math.Round(gh.Rect.Height * scale));
+            gh.Percent = (int)Math.Round(scale * gh.BaseScale * 100);
+            Invalidate();
+            return;
+        }
         gh.Offset = new Size(Keep(dx, -gh.Rect.X, gh.PageSize.Width - gh.Rect.Right), Keep(dy, -gh.Rect.Y, gh.PageSize.Height - gh.Rect.Bottom));
         Invalidate();
     }
@@ -1707,6 +1848,16 @@ internal sealed class PageView : ScrollableControl
     {
         ghostDragging = false;
         if (ghost is not { } gh || document is not { } doc) { return; }
+        if (gh.Resize)
+        {
+            if (!gh.Moved || gh.NewSize == gh.Rect.Size || gh.Page >= pageRects.Length || gh.PageSize != pageRects[gh.Page].Size) { ClearAnnotationGhost(); return; }
+            var topLeft = await doc.PagePointAsync(gh.Page, gh.PageSize.Width, gh.PageSize.Height, gh.Rect.Location);
+            var bottomRight = await doc.PagePointAsync(gh.Page, gh.PageSize.Width, gh.PageSize.Height, new Point(gh.Rect.X + gh.NewSize.Width, gh.Rect.Y + gh.NewSize.Height));
+            if (ghost != gh) { return; }
+            if (doc != document || topLeft is not { } a1 || bottomRight is not { } b1) { ClearAnnotationGhost(); return; }
+            AnnotationResized?.Invoke(this, new AnnotationResizedEventArgs(gh.Page, gh.Number, gh.Subtype, new PointF((float)a1.X, (float)a1.Y), new PointF((float)b1.X, (float)b1.Y), gh.Snapped));
+            return;
+        }
         if (!gh.Moved || gh.Offset == Size.Empty || gh.Page >= pageRects.Length || gh.PageSize != pageRects[gh.Page].Size) { ClearAnnotationGhost(); return; }
         // Versatz über PDFium in PDF-Punkte umrechnen – so stimmen auch gedrehte Seiten und Ansichten
         var from = await doc.PagePointAsync(gh.Page, gh.PageSize.Width, gh.PageSize.Height, gh.Start);
@@ -1740,7 +1891,7 @@ internal sealed class PageView : ScrollableControl
         }
         var page = ToClient(pageRects[gh.Page]);
         var (sx, sy) = ((float)page.Width / gh.PageSize.Width, (float)page.Height / gh.PageSize.Height); // Zoom inzwischen geändert
-        var rect = gh.Rect;
+        var rect = gh.Resize ? new Rectangle(gh.Rect.Location, gh.NewSize) : gh.Rect;
         rect.Offset(gh.Offset.Width, gh.Offset.Height);
         var target = Rectangle.Round(new RectangleF(page.X + rect.X * sx, page.Y + rect.Y * sy, rect.Width * sx, rect.Height * sy));
         if (gh.Subtype == Protocol.AnnotText) { DrawNoteGhost(g, target); return; }
@@ -1749,6 +1900,7 @@ internal sealed class PageView : ScrollableControl
         g.DrawImage(gh.Image, target, 0, 0, gh.Image.Width, gh.Image.Height, GraphicsUnit.Pixel, attributes);
         using var pen = new Pen(Color.FromArgb(0, 120, 215)) { DashStyle = DashStyle.Dash };
         g.DrawRectangle(pen, target);
+        if (gh.Resize && ghostDragging) { DrawResizePercent(g, target, gh); }
     }
 
     /// <summary>Warten im Bereich der Kopie (alte und neue Stelle) noch Kacheln auf den neuen Stand?</summary>
@@ -1756,7 +1908,7 @@ internal sealed class PageView : ScrollableControl
     {
         var size = pageRects[gh.Page].Size;
         var (sx, sy) = ((float)size.Width / gh.PageSize.Width, (float)size.Height / gh.PageSize.Height);
-        var moved = gh.Rect;
+        var moved = gh.Resize ? new Rectangle(gh.Rect.Location, gh.NewSize) : gh.Rect;
         moved.Offset(gh.Offset.Width, gh.Offset.Height);
         var area = Rectangle.Union(gh.Rect, moved);
         area = Rectangle.Round(new RectangleF(area.X * sx, area.Y * sy, area.Width * sx, area.Height * sy));
@@ -2349,6 +2501,7 @@ internal sealed class PageView : ScrollableControl
         base.OnKeyDown(e);
         if (pick != null && e.KeyCode == Keys.Escape) { e.Handled = true; CancelPick(); return; }
         if (ghostDragging && e.KeyCode == Keys.Escape) { e.Handled = true; ClearAnnotationGhost(); return; }
+        if (ghostDragging && ghost is { Resize: true } resizing && e.KeyCode == Keys.ControlKey) { DragAnnotation(resizing.Last); return; } // Raster sofort, ohne Mausbewegung
         if (inkStroke != null && e.KeyCode == Keys.Escape) { e.Handled = true; inkStroke = null; Invalidate(); return; } // nur den angefangenen Strich verwerfen
         if (formFocused && !e.Handled)
         {
@@ -2437,6 +2590,15 @@ internal sealed class AnnotationMovedEventArgs(int page, int number, int subtype
 {
     public double Dx { get; } = dx;
     public double Dy { get; } = dy;
+}
+
+/// <summary>Ein Stempel oder eine Unterschrift wurde an der Ecke in der Größe geändert: zwei gegenüberliegende Ecken des neuen Rechtecks in
+/// PDF-Punkten der Seite (Reihenfolge beliebig – die Seite kann gedreht sein).</summary>
+internal sealed class AnnotationResizedEventArgs(int page, int number, int subtype, PointF a, PointF b, double snappedScale) : AnnotationEventArgs(page, number, subtype)
+{
+    public PointF A { get; } = a; // die feste Ecke (links oben in der Ansicht), PDF-Punkte
+    public PointF B { get; } = b; // die gezogene Ecke
+    public double SnappedScale { get; } = snappedScale; // mit Strg eingerastet: Größe im Verhältnis zur Originalgröße (0 = frei)
 }
 
 /// <summary>Ein Freihand-Strich ist im Dokument: Seite (0-basiert) und der vollständige Stand davor (PDF-Bytes, für Rückgängig).</summary>
