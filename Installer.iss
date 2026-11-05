@@ -9,7 +9,7 @@
 ; ============================================================================
 
 #define appName "PDFlight"
-#define appVersion "1.1.1"
+#define appVersion "1.2.0"
 #define releaseDir "bin\x64\Release\net10.0-windows"
 
 [Setup]

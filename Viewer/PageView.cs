@@ -1407,7 +1407,9 @@ internal sealed class PageView : ScrollableControl
         else { GoToTarget(link); }
     }
 
-    /// <summary>Springt zu einem Seitenziel – mit Höhenangabe an diese Stelle der Seite, sonst an den Seitenanfang.</summary>
+    /// <summary>Springt zu einem Seitenziel – mit Höhenangabe an diese Stelle der Seite, sonst an den Seitenanfang. Ein Ziel im oberen Fünftel der
+    /// Seite gilt als Seitenanfang, solange es von dort aus im Fenster liegt: Word setzt Sprungziele auf die erste Textzeile, und bei „An Breite
+    /// anpassen“ schnitte der Sprung sonst den Seitenkopf ab (Fehlerbericht 05.11.2026, NetRadio.pdf: Ziel 119 pt unter dem Anfang).</summary>
     public void GoToTarget(LinkTarget target)
     {
         if (document == null || target.Page < 0 || target.Page >= pageRects.Length) { return; }
@@ -1418,8 +1420,9 @@ internal sealed class PageView : ScrollableControl
             var heightPt = document.PageSizes[target.Page].Height;
             offset = Math.Clamp((int)((heightPt - top) * PixelsPerPoint), 0, rect.Height); // PDF-Höhen zählen von unten
         }
+        if (offset <= rect.Height / 5 && offset < ClientSize.Height) { GoToPage(target.Page); return; }
         AutoScrollPosition = new Point(-AutoScrollPosition.X, rect.Y + offset - LogicalToDeviceUnits(PageMargin));
-        UpdateCurrentPage();
+        SetCurrentPage(target.Page);
         Invalidate();
     }
 
