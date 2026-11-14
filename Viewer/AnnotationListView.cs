@@ -17,7 +17,7 @@ public sealed record AnnotationGroup(string Key, string Header, IReadOnlyList<An
 /// <summary>Selbst gezeichnete Anmerkungsliste der Seitenleiste nach dem Vorbild von Acrobats Kommentarliste (Wunsch vom 15.10.2026,
 /// ersetzt „Anmerkungen verwalten“): Gruppenköpfe mit Anzahl zum Auf- und Zuklappen, darunter je Anmerkung ein rundes Symbol in ihrer
 /// Farbe, daneben Autor, Art und Datum, darunter der Text (umbrochen, höchstens <see cref="MaxTextLines"/> Zeilen). Die Art steht seit
-/// 16.10.2026 immer daneben (Wunsch Wilhelms – am Symbol allein erkennt man sie nicht; vorher nur kursiv, wenn der Text fehlte).
+/// 16.10.2026 immer daneben (Wunsch des Autors – am Symbol allein erkennt man sie nicht; vorher nur kursiv, wenn der Text fehlte).
 /// Klick oder Pfeiltasten wählen (<see cref="EntryActivated"/>), Doppelklick oder Enter bearbeiten, Entf löscht – was daraus folgt,
 /// entscheidet das Hauptfenster. Aufbau wie <see cref="OutlineView"/>.</summary>
 internal sealed class AnnotationListView : ScrollableControl

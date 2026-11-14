@@ -47,7 +47,7 @@ internal static partial class ShortcutsPdf
         gfx.DrawString("Version " + version + " – " + DateTime.Now.ToString("d", System.Globalization.CultureInfo.GetCultureInfo(Lng.CultureCode)), subFont, detailBrush, Margin, y + 9);
         y += 22;
         // Abschnittsüberschrift direkt unter der Versionszeile, die Tabelle gleich darunter – links neben dem Icon (seit 19.10.2026, Wunsch
-        // Wilhelms: Platz für die längere Kommandozeile; vorher begann die Tabelle erst unter dem Icon). Die ersten Zeilen sind kurz genug.
+        // des Autors: Platz für die längere Kommandozeile; vorher begann die Tabelle erst unter dem Icon). Die ersten Zeilen sind kurz genug.
         gfx.DrawString(Lng.T("Tastenkürzel"), sectionFont, new XSolidBrush(Accent), Margin, y + 12);
         y += 22;
 

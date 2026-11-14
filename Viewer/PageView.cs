@@ -445,7 +445,7 @@ internal sealed class PageView : ScrollableControl
 
     /// <summary>Neue Zoomstufe; der Punkt unter <paramref name="anchorClient"/> (Strg+Mausrad) bleibt an seinem Platz – ohne ihn (Startzoom,
     /// −/+, Zoomfeld, Tastatur) die Stelle am oberen Fensterrand bzw. der Seitenanfang wie bei „An Breite“ (bis 19.10.2026 die Fenstermitte:
-    /// mit /zoom:100 begann die Anzeige einige Zentimeter unter dem Seitenanfang, Fehlerbericht Wilhelms).</summary>
+    /// mit /zoom:100 begann die Anzeige einige Zentimeter unter dem Seitenanfang, Fehlerbericht).</summary>
     public void SetZoom(float value, Point? anchorClient)
     {
         if (document == null) { return; }
@@ -829,7 +829,7 @@ internal sealed class PageView : ScrollableControl
     private (int Page, int Number, int Width, int Height, bool Jpeg)? imageUnderMouse; // ebenso ein Bild („Bild speichern/kopieren“)
     private Task? markupQuery;
 
-    // Ausgewähltes Bild wie in Acrobat (seit 10.10.2026, Wunsch Wilhelms): ein Klick oder Rechtsklick auf ein Bild färbt es ein und rahmt
+    // Ausgewähltes Bild wie in Acrobat (seit 10.10.2026, Wunsch des Autors): ein Klick oder Rechtsklick auf ein Bild färbt es ein und rahmt
     // es; ein Klick daneben, Esc, eine Textmarkierung oder eine andere Datei heben die Auswahl auf. Das Rechteck steht als Anteil der
     // Seitengröße – so passt es auch nach dem Zoomen. Farben bei Acrobat gemessen: Einfärben multipliziert die Farben mit RGB(153, 193, 219)
     // (Weiß wird hellblau, Schwarz bleibt schwarz – keine halbdurchsichtige Fläche), der Rahmen hat die halbe Farbe, 2 logische px, außen.
@@ -1609,7 +1609,7 @@ internal sealed class PageView : ScrollableControl
     // AnnotationMoved den Versatz in PDF-Punkten – in die Datei schreiben und neu laden muss der Aufrufer; bis dahin bleibt die Kopie an
     // der neuen Stelle stehen (ClearAnnotationGhost, wenn es scheitert – das blendet das Original wieder ein). Ein Doppelklick meldet
     // AnnotationDoubleClicked (Bearbeiten).
-    // Kommentare (Notizen) seit 10.10.2026 ebenfalls (Wunsch Wilhelms, wie Acrobat): ein Klick ohne Ziehen zeigt weiter ihre Karte, die
+    // Kommentare (Notizen) seit 10.10.2026 ebenfalls (Wunsch des Autors, wie Acrobat): ein Klick ohne Ziehen zeigt weiter ihre Karte, die
     // Kopie beim Ziehen ist bläulich und halbdurchsichtig, der Zeiger das Verschiebekreuz
     private const int MovableAnnotations = (1 << Protocol.AnnotFreeText) | (1 << Protocol.AnnotStamp) | (1 << Protocol.AnnotText);
 
@@ -1635,7 +1635,7 @@ internal sealed class PageView : ScrollableControl
         public Point Last { get; set; }            // letzte Mausstelle beim Ziehen (Fensterpixel) – für Strg ohne Mausbewegung
     }
 
-    // Größe ändern (seit 03.11.2026, für Unterschriften – Wunsch Wilhelms; gilt für alle Stempel): An der rechten unteren Ecke eines Stempels
+    // Größe ändern (seit 03.11.2026, für Unterschriften – Wunsch des Autors; gilt für alle Stempel): An der rechten unteren Ecke eines Stempels
     // erscheint ein Anfasser und der Zeiger ↘; Ziehen dort ändert die Größe bei gleichem Seitenverhältnis, die linke obere Ecke bleibt.
     // Beim Loslassen meldet AnnotationResized das neue Rechteck in PDF-Punkten; wie beim Verschieben bleibt die Kopie bis zum Neuladen.
     private bool hoverCorner;
@@ -1775,7 +1775,7 @@ internal sealed class PageView : ScrollableControl
         RefreshPageArea(gh.Page, area);
     }
 
-    // Prozent beim Größe-Ändern (seit 03.11.2026, Wunsch Wilhelms): neben der gezogenen Ecke steht die Größe im Verhältnis zur
+    // Prozent beim Größe-Ändern (seit 03.11.2026, Wunsch des Autors): neben der gezogenen Ecke steht die Größe im Verhältnis zur
     // Originalgröße (/PDFlightWidth, s. PdfEditService.OriginalWidthKey; ohne den Eintrag im Verhältnis zur Größe beim Anfassen). Mit
     // gedrückter Strg-Taste rastet sie auf ganze Brüche und Vielfache ein (ResizeSteps), soweit sie auf die Seite passen.
     private static readonly double[] ResizeSteps = [0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4];

@@ -82,52 +82,302 @@ internal static partial class PdfEditService
         catch (Exception ex) when (IsPdfReadError(ex)) { return -1; }
     }
 
-    /// <summary>Löscht die angegebenen Seiten (1-basiert); mindestens eine Seite muss übrig bleiben.</summary>
+    /// <summary>Löscht die angegebenen Seiten (1-basiert); mindestens eine Seite muss übrig bleiben. PDFsharp schreibt beim Speichern
+    /// alles mit, worauf noch etwas verweist – eine gelöschte Seite blieb so samt Inhalt unsichtbar in der Datei, sobald ein Lesezeichen,
+    /// ein benanntes Ziel, ein Link, die Öffnungsaktion, ein Formularfeld oder der Strukturbaum (Tags) auf sie zeigte (geprüft 14.11.2026,
+    /// auch Lesezeichen trotz der früheren Bereinigung über PDFsharps Gliederungsobjekte). Deshalb fallen Lesezeichen, benannte Ziele und
+    /// Links auf gelöschte Seiten weg, und jeder übrige Verweis auf eine gelöschte Seite oder eine ihrer Anmerkungen wird gekappt.</summary>
     public static void DeletePages(string path, IReadOnlyList<int> pages)
     {
         using var document = Open(path, PdfDocumentOpenMode.Modify);
-        var removedPages = pages.Select(p => document.Pages[p - 1].Reference?.ObjectID).OfType<PdfObjectID>().ToHashSet();
-        foreach (var page in pages.OrderByDescending(p => p)) { document.Pages.RemoveAt(page - 1); }
-        PruneOutlines(document, removedPages);
+        var removed = pages.Distinct().Select(p => document.Pages[p - 1]).ToList();
+        var removedPages = removed.Select(p => p.Reference?.ObjectID).OfType<PdfObjectID>().ToHashSet();
+        HashSet<PdfObjectID> doomed = [.. removedPages];
+        foreach (var page in removed)
+        {
+            if (page.Elements.GetArray("/Annots") is not { } annotations) { continue; }
+            foreach (var item in annotations.Elements) { if (item is PdfReference reference) { doomed.Add(reference.ObjectID); } }
+        }
+        PruneOutlines(document, removedPages); // Lesezeichen und Links vor den benannten Zielen – sie lösen deren Namen noch auf
+        PruneLinks(document, removedPages);
+        PruneNamedDestinations(document, removedPages);
+        PruneOpenAction(document, removedPages);
+        foreach (var page in pages.Distinct().OrderByDescending(p => p)) { document.Pages.RemoveAt(page - 1); }
+        CutReferences(document.Internals.Catalog, d => d.Reference is { } reference && doomed.Contains(reference.ObjectID), skipParentOf: null);
+        PruneEmptyFields(document);
         SaveCompact(document, path);
     }
 
-    /// <summary>Nach dem Löschen von Seiten: Lesezeichen, die auf eine gelöschte Seite zeigen, werden entfernt – ihre Unterpunkte
-    /// rücken eine Ebene hoch. Sonst blieben Einträge ins Leere zurück (PDFsharp schreibt die verwaiste Seite sogar mit).
-    /// Ziele als /Dest oder GoTo-Aktion, jeweils als Array oder als benannte Zielmarke (Katalog /Dests bzw. /Names-Baum).</summary>
+    /// <summary>Lesezeichen, die auf eine gelöschte Seite zeigen, werden entfernt – ihre Unterpunkte rücken eine Ebene hoch. Über die rohen
+    /// Wörterbücher wie <see cref="WriteOutlines"/>, nicht über PDFsharps Gliederungsobjekte: Mit denen blieb die Seite trotzdem in der
+    /// Datei, und der Katalog verwies danach auf ein Gliederungsobjekt, das es nicht mehr gab.</summary>
     private static void PruneOutlines(PdfDocument document, HashSet<PdfObjectID> removedPages)
     {
-        if (removedPages.Count == 0 || document.Internals.Catalog.Elements["/Outlines"] == null) { return; }
-        try { Prune(document.Outlines); }
-        catch (Exception ex) when (IsPdfReadError(ex)) { } // kaputte Gliederung: lieber unverändert lassen als den Vorgang abbrechen
+        if (document.Internals.Catalog.Elements.GetDictionary("/Outlines") is not { } root) { return; }
+        HashSet<PdfDictionary> visited = [];
+        Prune(root, open: true);
+        if (root.Elements.GetDictionary("/First") == null) { RemoveOutlines(document); }
 
-        void Prune(PdfOutlineCollection outlines)
+        void Prune(PdfDictionary parent, bool open)
         {
-            var i = 0;
-            while (i < outlines.Count)
+            List<PdfDictionary> kept = [];
+            foreach (var item in OutlineChildren(parent, visited))
             {
-                var outline = outlines[i];
-                Prune(outline.Outlines); // Unterpunkte zuerst – die hochgezogenen sind damit schon geprüft
-                if (DestinationPageId(document, outline) is { } id && removedPages.Contains(id))
+                Prune(item, item.Elements.GetInteger("/Count") > 0); // Unterpunkte zuerst – die hochgezogenen sind damit schon geprüft
+                if (DestinationPageId(document, item) is { } id && removedPages.Contains(id))
                 {
-                    var children = outline.Outlines.ToList();
-                    outlines.RemoveAt(i);
-                    foreach (var child in children) { outline.Outlines.Remove(child); outlines.Insert(i++, child); } // i steht danach hinter den Kindern
+                    kept.AddRange(OutlineChildren(item, []));
+                    item.Elements.Clear(); // Titel und Ziel nicht als Waise mitschreiben
                 }
-                else { i++; }
+                else { kept.Add(item); }
+            }
+            LinkOutlineItems(parent, kept, open);
+        }
+    }
+
+    /// <summary>Verkettet die Einträge einer Gliederungsebene neu (/Parent, /First, /Last, /Prev, /Next, /Count mit Vorzeichen).</summary>
+    private static void LinkOutlineItems(PdfDictionary parent, List<PdfDictionary> items, bool open)
+    {
+        PdfDictionary? previous = null;
+        var visible = 0;
+        foreach (var item in items)
+        {
+            item.Elements.SetReference("/Parent", parent);
+            item.Elements.Remove("/Prev");
+            item.Elements.Remove("/Next");
+            if (previous != null) { item.Elements.SetReference("/Prev", previous); previous.Elements.SetReference("/Next", item); }
+            visible += 1 + Math.Max(item.Elements.GetInteger("/Count"), 0);
+            previous = item;
+        }
+        if (previous == null)
+        {
+            parent.Elements.Remove("/First");
+            parent.Elements.Remove("/Last");
+            parent.Elements.Remove("/Count");
+            return;
+        }
+        parent.Elements.SetReference("/First", items[0]);
+        parent.Elements.SetReference("/Last", previous);
+        parent.Elements.SetInteger("/Count", open ? visible : -visible);
+    }
+
+    /// <summary>Links auf den übrigen Seiten, die auf eine gelöschte Seite zeigen, werden entfernt – sie führten ins Leere.</summary>
+    private static void PruneLinks(PdfDocument document, HashSet<PdfObjectID> removedPages)
+    {
+        foreach (var page in document.Pages)
+        {
+            if (page.Reference is { } own && removedPages.Contains(own.ObjectID) || page.Elements.GetArray("/Annots") is not { } annotations) { continue; }
+            for (var i = annotations.Elements.Count - 1; i >= 0; i--)
+            {
+                if (Resolve(annotations.Elements[i]) is PdfDictionary annotation && annotation.Elements.GetName("/Subtype") == "/Link"
+                    && DestinationPageId(document, annotation) is { } id && removedPages.Contains(id)) { annotations.Elements.RemoveAt(i); }
             }
         }
     }
 
-    /// <summary>Die Seite, auf die ein Lesezeichen zeigt (Objektkennung); null, wenn das Ziel nicht auflösbar ist.</summary>
-    private static PdfObjectID? DestinationPageId(PdfDocument document, PdfDictionary outline)
+    /// <summary>Benannte Ziele auf gelöschte Seiten fallen weg – im alten /Dests-Wörterbuch des Katalogs und im /Names-Baum.</summary>
+    private static void PruneNamedDestinations(PdfDocument document, HashSet<PdfObjectID> removedPages)
     {
-        var destination = outline.Elements["/Dest"];
-        if (destination == null && outline.Elements.GetDictionary("/A") is { } action && action.Elements.GetName("/S") == "/GoTo") { destination = action.Elements["/D"]; }
-        if (destination is PdfReference reference) { destination = reference.Value; }
-        if (destination is PdfString or PdfName) { destination = ResolveNamedDestination(document, destination is PdfName name ? name.Value.TrimStart('/') : ((PdfString)destination).Value); }
-        if (destination is PdfDictionary dictionary) { destination = dictionary.Elements["/D"]; } // benannte Ziele stehen oft als << /D [...] >>
-        return destination is PdfArray array && array.Elements.Count > 0 && array.Elements[0] is PdfReference page ? page.ObjectID : null;
+        var catalog = document.Internals.Catalog;
+        bool Doomed(PdfItem? destination) => PageIdOf(DestinationArray(document, destination)) is { } id && removedPages.Contains(id);
+        if (catalog.Elements.GetDictionary("/Dests") is { } dests)
+        {
+            foreach (var key in dests.Elements.Keys.ToArray()) { if (Doomed(dests.Elements[key])) { dests.Elements.Remove(key); } }
+        }
+        if (catalog.Elements.GetDictionary("/Names")?.Elements.GetDictionary("/Dests") is { } tree) { PruneNameTree(document, tree, Doomed, []); }
+    }
+
+    /// <summary>Entfernt aus einem Namensbaum alle Paare, deren Wert <paramref name="remove"/> trifft, leere Knoten samt ihrem Platz in
+    /// /Kids und rechnet /Limits neu. Gibt zurück, ob der Knoten noch Einträge hat.</summary>
+    private static bool PruneNameTree(PdfDocument document, PdfDictionary node, Func<PdfItem?, bool> remove, HashSet<PdfDictionary> visited)
+    {
+        if (!visited.Add(node)) { return true; }
+        PdfItem? first = null, last = null;
+        if (node.Elements.GetArray("/Names") is { } names)
+        {
+            for (var i = (names.Elements.Count & ~1) - 2; i >= 0; i -= 2)
+            {
+                if (remove(names.Elements[i + 1])) { names.Elements.RemoveAt(i + 1); names.Elements.RemoveAt(i); }
+            }
+            if (names.Elements.Count >= 2) { first = names.Elements[0]; last = names.Elements[(names.Elements.Count & ~1) - 2]; }
+        }
+        if (node.Elements.GetArray("/Kids") is { } kids)
+        {
+            for (var i = kids.Elements.Count - 1; i >= 0; i--)
+            {
+                if (Resolve(kids.Elements[i]) is not PdfDictionary kid) { continue; }
+                if (!PruneNameTree(document, kid, remove, visited)) { kids.Elements.RemoveAt(i); continue; }
+                if (kid.Elements.GetArray("/Limits") is { Elements.Count: 2 } limits) { first = limits.Elements[0]; last ??= limits.Elements[1]; }
+            }
+        }
+        if (first == null || last == null) { return false; }
+        if (node.Elements.ContainsKey("/Limits")) { node.Elements["/Limits"] = new PdfArray(document, first, last); } // Schlüssel sind Zeichenketten (direkte Objekte)
+        return true;
+    }
+
+    /// <summary>Eine Öffnungsaktion auf eine gelöschte Seite fällt weg – geöffnet wird dann auf Seite 1.</summary>
+    private static void PruneOpenAction(PdfDocument document, HashSet<PdfObjectID> removedPages)
+    {
+        var catalog = document.Internals.Catalog;
+        var destination = Resolve(catalog.Elements["/OpenAction"]) is PdfDictionary action ? action.Elements.GetName("/S") == "/GoTo" ? action.Elements["/D"] : null : catalog.Elements["/OpenAction"];
+        if (PageIdOf(DestinationArray(document, destination)) is { } id && removedPages.Contains(id)) { catalog.Elements.Remove("/OpenAction"); }
+    }
+
+    /// <summary>Kappt im Objektgraph ab <paramref name="start"/> jeden Verweis auf ein Objekt aus <paramref name="doomed"/>: in Wörterbüchern
+    /// fällt der Schlüssel weg (gleichbedeutend mit null), in /Annots, /Fields und /Kids der Eintrag, in anderen Arrays steht null an seiner
+    /// Stelle. So erreicht PDFsharp das Objekt beim Speichern nicht mehr und lässt es weg. <paramref name="skipParentOf"/>: dessen /Parent wird
+    /// nicht verfolgt (beim Importieren einer Seite – sonst ginge der Weg über den Seitenbaum zu allen Seiten). Ohne Rekursion, weil
+    /// Gliederungen und Namensbäume lange Ketten bilden.</summary>
+    private static void CutReferences(PdfDictionary start, Func<PdfDictionary, bool> doomed, PdfDictionary? skipParentOf)
+    {
+        HashSet<PdfObject> visited = new(ReferenceEqualityComparer.Instance);
+        Stack<(PdfItem Item, string Key)> pending = [];
+        pending.Push((start, string.Empty));
+        visited.Add(start);
+        while (pending.TryPop(out var current))
+        {
+            if (current.Item is PdfDictionary dictionary)
+            {
+                foreach (var key in dictionary.Elements.Keys.ToArray())
+                {
+                    if (key == "/Parent" && ReferenceEquals(dictionary, skipParentOf)) { continue; }
+                    var value = dictionary.Elements[key];
+                    if (value is PdfReference { Value: PdfDictionary target } && doomed(target)) { dictionary.Elements.Remove(key); continue; }
+                    Follow(value, key);
+                }
+            }
+            else if (current.Item is PdfArray array)
+            {
+                var list = current.Key is "/Annots" or "/Fields" or "/Kids";
+                for (var i = array.Elements.Count - 1; i >= 0; i--)
+                {
+                    var value = array.Elements[i];
+                    if (value is PdfReference { Value: PdfDictionary target } && doomed(target))
+                    {
+                        if (list) { array.Elements.RemoveAt(i); } else { array.Elements[i] = PdfNull.Value; }
+                        continue;
+                    }
+                    Follow(value, current.Key);
+                }
+            }
+        }
+
+        void Follow(PdfItem? value, string key)
+        {
+            var next = value is PdfReference reference ? reference.Value : value;
+            if (next is (PdfDictionary or PdfArray) and PdfObject obj && visited.Add(obj)) { pending.Push((obj, key)); }
+        }
+    }
+
+    /// <summary>Formularfelder, deren Widgets alle auf gelöschten Seiten lagen, haben nach <see cref="CutReferences"/>
+    /// leere /Kids – sie fallen aus /Fields bzw. ihrem Elternfeld weg, sonst blieben ihre Werte in der Datei.</summary>
+    private static void PruneEmptyFields(PdfDocument document)
+    {
+        if (document.Internals.Catalog.Elements.GetDictionary("/AcroForm")?.Elements.GetArray("/Fields") is not { } fields) { return; }
+        HashSet<PdfDictionary> visited = [];
+        Prune(fields);
+
+        void Prune(PdfArray list)
+        {
+            for (var i = list.Elements.Count - 1; i >= 0; i--)
+            {
+                if (Resolve(list.Elements[i]) is not PdfDictionary field || !visited.Add(field)) { continue; }
+                if (field.Elements.GetArray("/Kids") is not { } kids) { continue; } // Feld mit eigenem Widget
+                Prune(kids);
+                if (kids.Elements.Count == 0) { list.Elements.RemoveAt(i); }
+            }
+        }
+    }
+
+    /// <summary>Die Seite, auf die ein Lesezeichen oder Link zeigt (Objektkennung); null, wenn das Ziel nicht auflösbar ist.</summary>
+    private static PdfObjectID? DestinationPageId(PdfDocument document, PdfDictionary item) => PageIdOf(DestinationArray(document, LinkDestination(item)));
+
+    /// <summary>Das Ziel eines Lesezeichens oder Links: /Dest oder das /D einer GoTo-Aktion (Array, Name oder Verweis).</summary>
+    private static PdfItem? LinkDestination(PdfDictionary item) =>
+        item.Elements["/Dest"] ?? (item.Elements.GetDictionary("/A") is { } action && action.Elements.GetName("/S") == "/GoTo" ? action.Elements["/D"] : null);
+
+    /// <summary>Das Ziel-Array [Seite /Art …] eines Ziels – benannte Ziele über den Katalog aufgelöst, auch in der Form &lt;&lt; /D [...] &gt;&gt;.</summary>
+    private static PdfArray? DestinationArray(PdfDocument document, PdfItem? destination)
+    {
+        destination = Resolve(destination);
+        if (destination is PdfString or PdfName) { destination = Resolve(ResolveNamedDestination(document, destination is PdfName name ? name.Value.TrimStart('/') : ((PdfString)destination).Value)); }
+        if (destination is PdfDictionary dictionary) { destination = Resolve(dictionary.Elements["/D"]); } // benannte Ziele stehen oft als << /D [...] >>
+        return destination as PdfArray;
+    }
+
+    private static PdfObjectID? PageIdOf(PdfArray? destination) =>
+        destination is { Elements.Count: > 0 } && destination.Elements[0] is PdfReference page ? page.ObjectID : null;
+
+    /// <summary>Importiert Seiten aus anderen Dokumenten (Extrahieren, Anhängen, Rückseiten-Scan). PDFsharp kopiert beim Import alles mit,
+    /// was von der Seite aus erreichbar ist: Ein Link auf eine andere Seite brachte deren Seitenobjekt samt Verweis auf den Seitenbaum mit –
+    /// ein Auszug aus einer Seite mit Inhaltsverzeichnis enthielt so unsichtbar das ganze Dokument (geprüft 14.11.2026). Deshalb werden vor
+    /// dem Import Link-Ziele abgenommen und alle übrigen Verweise auf Seiten gekappt (nur im Speicher, die Quelldatei bleibt unverändert);
+    /// <see cref="Finish"/> setzt die Links danach auf die mitimportierten Zielseiten, Links auf nicht übernommene Seiten fallen weg.</summary>
+    private sealed class PageImport(PdfDocument target)
+    {
+        private sealed record LinkTarget(PdfObjectID Page, PdfItem[] View);
+        private sealed record PendingLink(PdfDocument Source, LinkTarget Target, PdfArray Annotations, PdfDictionary Link);
+
+        private readonly Dictionary<(PdfDocument, PdfObjectID), PdfPage> imported = [];
+        private readonly Dictionary<PdfDictionary, LinkTarget?> linkTargets = new(ReferenceEqualityComparer.Instance);
+        private readonly List<PendingLink> links = [];
+
+        public PdfPage Add(PdfPage page)
+        {
+            var source = page.Owner;
+            List<(int Index, LinkTarget Target)> pending = [];
+            if (page.Elements.GetArray("/Annots") is { } annotations)
+            {
+                for (var i = 0; i < annotations.Elements.Count; i++)
+                {
+                    if (Resolve(annotations.Elements[i]) is not PdfDictionary annotation) { continue; }
+                    if (!linkTargets.TryGetValue(annotation, out var link)) // dieselbe Seite kann mehrfach importiert werden
+                    {
+                        var destination = DestinationArray(source, LinkDestination(annotation));
+                        link = PageIdOf(destination) is { } id && destination != null
+                            ? new LinkTarget(id, [.. destination.Elements.Skip(1).Select(e => e is PdfReference ? PdfNull.Value : e)])
+                            : null;
+                        linkTargets[annotation] = link;
+                        if (link != null)
+                        {
+                            if (annotation.Elements["/Dest"] != null) { annotation.Elements.Remove("/Dest"); } else { annotation.Elements.Remove("/A"); }
+                        }
+                    }
+                    if (link != null) { pending.Add((i, link)); }
+                }
+            }
+            CutReferences(page, IsPageNode, skipParentOf: page); // auch /P der Anmerkungen auf die eigene Seite – der Schlüssel ist freiwillig
+            var result = target.AddPage(page);
+            if (page.Reference is { } own) { imported[(source, own.ObjectID)] = result; }
+            if (pending.Count > 0 && result.Elements.GetArray("/Annots") is { } copies)
+            {
+                foreach (var (index, link) in pending)
+                {
+                    if (index < copies.Elements.Count && Resolve(copies.Elements[index]) is PdfDictionary copy) { links.Add(new(source, link, copies, copy)); }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>Setzt die abgenommenen Links auf die importierten Zielseiten; Links auf Seiten, die nicht dabei sind, fallen weg.</summary>
+        public void Finish()
+        {
+            foreach (var link in links)
+            {
+                if (imported.TryGetValue((link.Source, link.Target.Page), out var page) && page.Reference is { } reference)
+                {
+                    link.Link.Elements["/Dest"] = new PdfArray(target, [reference, .. link.Target.View]);
+                    continue;
+                }
+                for (var i = link.Annotations.Elements.Count - 1; i >= 0; i--)
+                {
+                    if (ReferenceEquals(Resolve(link.Annotations.Elements[i]), link.Link)) { link.Annotations.Elements.RemoveAt(i); }
+                }
+            }
+            links.Clear();
+        }
+
+        private static bool IsPageNode(PdfDictionary dictionary) => dictionary.Elements.GetName("/Type") is "/Page" or "/Pages";
     }
 
     /// <summary>Benannte Zielmarke auflösen: erst das alte /Dests-Wörterbuch des Katalogs, dann der /Names-Baum (/Dests, Kids/Names).</summary>
@@ -247,7 +497,7 @@ internal static partial class PdfEditService
 
     // ------------------------------------------------------------------ Unterschriften (seit 03.11.2026)
 
-    // Sichtbare Unterschrift wie Acrobats „Unterschreiben“ (Wunsch Wilhelms): eine Stamp-Anmerkung /Name /PDFlightSignature mit eigenem
+    // Sichtbare Unterschrift wie Acrobats „Unterschreiben“ (Wunsch des Autors): eine Stamp-Anmerkung /Name /PDFlightSignature mit eigenem
     // Erscheinungsbild – gezeichnete Striche als Vektorpfade (scharf in jeder Größe), ein geladenes Bild als Bild-XObject mit
     // Transparenzmaske. Keine digitale Signatur. Verschieben und Größe ändern wie bei den Stempeln; „fest übernehmen“ zeichnet das
     // Erscheinungsbild in den Seiteninhalt und entfernt die Anmerkung (FlattenSignatures).
@@ -260,7 +510,7 @@ internal static partial class PdfEditService
     private const double SignatureWidthPt = 50 * 72 / 25.4, SignatureMaxHeightPt = 30 * 72 / 25.4;
 
     /// <summary>Setzt eine Unterschrift mittig an die Stelle <paramref name="centerX"/>/<paramref name="centerY"/> (PDF-Punkte der Seite,
-    /// 1-basiert) – in Originalgröße (seit 03.11.2026, Wunsch Wilhelms: ein Scan so groß wie auf dem Papier, eine gezeichnete so groß wie im
+    /// 1-basiert) – in Originalgröße (seit 03.11.2026, Wunsch des Autors: ein Scan so groß wie auf dem Papier, eine gezeichnete so groß wie im
     /// Feld), ohne bekannte Größe 5 cm breit und höchstens 3 cm hoch; nie größer als die Seite (90 % der Breite, die halbe Höhe), ganz auf
     /// der Seite und auf gedrehten Seiten aufrecht. Liefert /NM der Anmerkung.</summary>
     public static string AddSignature(string path, int page, double centerX, double centerY, Signature signature, string subject, string author)
@@ -1060,7 +1310,7 @@ internal static partial class PdfEditService
         var textColor = style.TextColor;
         // Grundlinien so, dass der Text optisch mittig im Kasten steht: von der Oberkante der ersten Zeile (Versalien/Oberlängen oder nur
         // x-Höhe) bis zur Unterkante der letzten (mit oder ohne Unterlängen). Vorher pauschal 0,8 em unter dem Innenrand – unten blieb
-        // sichtbar mehr Platz (Hinweis Wilhelms vom 04.10.2026); der Kasten selbst bleibt so groß wie bisher.
+        // sichtbar mehr Platz (Hinweis des Autors vom 04.10.2026); der Kasten selbst bleibt so groß wie bisher.
         var block = fontSize * (TopExtent(lines[0]) + (lines.Length - 1) * LeadingFactor + BottomExtent(lines[^1]));
         var lastBaseline = (height - block) / 2 + fontSize * BottomExtent(lines[^1]);
         var firstBaseline = lastBaseline + (lines.Length - 1) * leading;
@@ -1168,7 +1418,9 @@ internal static partial class PdfEditService
         foreach (var otherPdf in otherPdfs)
         {
             using var other = PdfReader.Open(otherPdf, PdfDocumentOpenMode.Import);
-            foreach (var page in other.Pages) { document.AddPage(page); }
+            PageImport import = new(document);
+            foreach (var page in other.Pages.Cast<PdfPage>().ToList()) { import.Add(page); }
+            import.Finish();
         }
         var pageCount = document.PageCount; // muss vor Save() gelesen werden — danach ist das Dokument gesperrt
         SaveCompact(document, path);
@@ -1180,7 +1432,9 @@ internal static partial class PdfEditService
     {
         using var source = Open(sourcePath, PdfDocumentOpenMode.Import);
         using PdfDocument destination = new();
-        foreach (var page in pages) { destination.AddPage(source.Pages[page - 1]); }
+        PageImport import = new(destination);
+        foreach (var page in pages) { import.Add(source.Pages[page - 1]); }
+        import.Finish();
         SaveCompact(destination, destinationPath);
     }
 
@@ -1193,11 +1447,13 @@ internal static partial class PdfEditService
         using var fronts = PdfReader.Open(stream, PdfDocumentOpenMode.Import);
         using var backs = PdfReader.Open(backPath, PdfDocumentOpenMode.Import);
         using PdfDocument target = new();
+        PageImport import = new(target);
         for (var i = 0; i < fronts.PageCount; i++)
         {
-            target.AddPage(fronts.Pages[i]);
-            target.AddPage(backs.Pages[backsReversed ? backs.PageCount - 1 - i : i]);
+            import.Add(fronts.Pages[i]);
+            import.Add(backs.Pages[backsReversed ? backs.PageCount - 1 - i : i]);
         }
+        import.Finish();
         CopyInfo(fronts, target);
         SaveCompact(target, path);
     }
@@ -1340,7 +1596,7 @@ internal static partial class PdfEditService
 
     [ThreadStatic] private static UnlockedFile? unlocked;
 
-    /// <summary>Bearbeitung einer verschlüsselten Datei, deren Kennwort bekannt ist (seit 24.10.2026, Wunsch Wilhelms – vorher waren die
+    /// <summary>Bearbeitung einer verschlüsselten Datei, deren Kennwort bekannt ist (seit 24.10.2026, Wunsch des Autors – vorher waren die
     /// Seitenbefehle gesperrt, bis der Schutz in den Eigenschaften aufgehoben war). PDFsharp ändert verschlüsselte Dateien nur mit dem
     /// Besitzerkennwort und übernimmt die Verschlüsselung nicht. Deshalb lesen die Methoden innerhalb von <paramref name="edit"/> die Datei
     /// <paramref name="path"/> aus <paramref name="plain"/> (von PDFium entschlüsselt, nur im Speicher), und jedes Speichern verschlüsselt mit

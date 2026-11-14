@@ -3,7 +3,7 @@
 /// <summary>Die Kommandozeile von PDFlight: optional eine PDF-Datei und Schalter, wahlweise mit „/“ oder „--“:
 /// help (Hilfedatei erzeugen und anzeigen – so ruft der Installer nach „PDFlight starten“ auf), max (maximiert),
 /// page:N (auf Seite N öffnen) und print bzw. print:Druckername (ohne Dialog drucken und beenden – dahinter
-/// steckt auch das Explorer-Kontextmenü „Drucken“, s. ShellUtil.RegisterFileType). Seit 19.10.2026 (Wunsch Wilhelms, für den
+/// steckt auch das Explorer-Kontextmenü „Drucken“, s. ShellUtil.RegisterFileType). Seit 19.10.2026 (Wunsch des Autors, für den
 /// automatischen Zeitungsabruf in KNEpaper) außerdem twopage (zweiseitige Ansicht), zoom:N (Zoomstufe in Prozent, 100 = Originalgröße)
 /// und nosidebar (Seitenleiste zu, auch bei Lesezeichen oder Anmerkungen) – wie max nur für diesen Start, die gemerkten Einstellungen
 /// bleiben. Unbekannte Schalter werden übergangen.</summary>

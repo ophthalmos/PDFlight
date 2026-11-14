@@ -247,7 +247,7 @@ public partial class AnnotationPanel : UserControl
         Rebuild();
     }
 
-    /// <summary>Filter-Fenster (seit 15.10.2026 statt des Menüs mit Untermenüs und Haken – Wunsch Wilhelms): je Autor, Art und bekannter
+    /// <summary>Filter-Fenster (seit 15.10.2026 statt des Menüs mit Untermenüs und Haken – Wunsch des Autors): je Autor, Art und bekannter
     /// Farbe eine Schaltfläche, darunter „Alle anzeigen“ und „Anwenden“. Ein zweiter Klick auf den Knopf, der das offene Fenster gerade
     /// geschlossen hat, öffnet es nicht gleich wieder.</summary>
     private void BtnFilter_Click(object? sender, EventArgs e)

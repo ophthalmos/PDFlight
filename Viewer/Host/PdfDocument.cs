@@ -1157,7 +1157,7 @@ internal sealed unsafe class PdfDocument : IDisposable
         return true;
     }
 
-    /// <summary>Autor (/T) und Änderungsdatum (/M) wie bei Acrobat auch für Hervorhebungen und Zeichnungen (seit 16.10.2026, Wunsch Wilhelms –
+    /// <summary>Autor (/T) und Änderungsdatum (/M) wie bei Acrobat auch für Hervorhebungen und Zeichnungen (seit 16.10.2026, Wunsch des Autors –
     /// PDFium trägt sie nicht von selbst ein, die Anmerkungsliste zeigte dort nur die Art). Das Datum kommt aus dem Hauptprogramm.</summary>
     private static void SetAuthorAndDate(nint annot, string author, string modified)
     {
@@ -1413,7 +1413,7 @@ internal sealed unsafe class PdfDocument : IDisposable
     /// <summary>Die Anmerkungen einer Seite für die Liste: Nummer (Position in /Annots), Art, Autor (/T), Änderungsdatum (/M, roh),
     /// Text (/Contents), Farbe (/C, falls vorhanden) und Lage als Anteil der angezeigten Seite (0…1, Drehung berücksichtigt). Im
     /// Original ausgeblendete fehlen – außer denen, die nur das Verschieben gerade ausblendet. Textmarkierungen ohne eigenen Text
-    /// bekommen als Auszug den markierten Text (seit 15.10.2026, Wunsch Wilhelms – vorher stand dort nur „Hervorhebung“), Stempel ohne
+    /// bekommen als Auszug den markierten Text (seit 15.10.2026, Wunsch des Autors – vorher stand dort nur „Hervorhebung“), Stempel ohne
     /// Text ihren Betreff /Subj (seit 16.10.2026; Acrobat legt dort den Namen des Stempels ab).</summary>
     public List<(int Number, int Subtype, string Author, string Modified, string Contents, string Excerpt, uint Color, bool HasColor, float Left, float Top, float Right, float Bottom)> Annotations(int index)
     {

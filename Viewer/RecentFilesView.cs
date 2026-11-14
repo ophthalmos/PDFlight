@@ -22,7 +22,7 @@ public sealed record RecentEntry(string Path, string Title, string Location, Dat
 /// Spaltenköpfe Name · Geöffnet · Größe mit einem Kästchen für alle, darunter die Gruppen „Favoriten“ und „Zuletzt geöffnet“ (per Klick auf-
 /// und zuzuklappen, <see cref="CollapsedChanged"/>), je Datei ein Kästchen (beim Überfahren und sobald etwas angehakt ist), eine Miniatur der
 /// ersten Seite (<see cref="RecentThumbnails"/>, nachgeladen für die sichtbaren Zeilen), Name, darunter grau der Ordner, rechts Datum und
-/// Größe. Ein Klick wählt aus, ein Doppelklick öffnet (seit 23.10.2026, Wunsch Wilhelms – vorher öffnete schon ein Klick wie bei Acrobat und SumatraPDF), ein Klick ins Kästchen oder Strg+Klick hakt an; Pfeiltasten wählen, Leertaste
+/// Größe. Ein Klick wählt aus, ein Doppelklick öffnet (seit 23.10.2026, Wunsch des Autors – vorher öffnete schon ein Klick wie bei Acrobat und SumatraPDF), ein Klick ins Kästchen oder Strg+Klick hakt an; Pfeiltasten wählen, Leertaste
 /// hakt an, Enter öffnet, Entf meldet <see cref="RemoveRequested"/>. Der Inhalt steht als Spalte in der Mitte, die Liste selbst reicht bis
 /// zum Rand – ihre Bildlaufleiste steht dort. Aufbau wie <see cref="AttachmentListView"/>.</summary>
 internal sealed class RecentFilesView : ScrollableControl

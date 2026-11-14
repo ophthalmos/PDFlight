@@ -7,7 +7,7 @@ namespace PDFLight.Forms;
 /// Aufklappen bis zu einer Ebene. Der Baum zeichnet sich komplett selbst (OwnerDrawAll): Pfeil (Chevron) statt Plus/Minus, Titel links, Zielseite rechts in Grau,
 /// die Vorfahren des markierten Eintrags über die ganze Breite hellgrau hinterlegt. Gearbeitet wird am Modell in den Knoten-Tags;
 /// erst „Speichern“ liefert die neue Liste (<see cref="Bookmarks"/>), geschrieben wird sie vom Hauptfenster.
-/// Seit 04.10.2026 nicht-modal und an die Anzeige gekoppelt (Wunsch Wilhelms): Markieren eines Eintrags oder Ändern der Zielseite
+/// Seit 04.10.2026 nicht-modal und an die Anzeige gekoppelt (Wunsch des Autors): Markieren eines Eintrags oder Ändern der Zielseite
 /// blättert die Anzeige dorthin (<see cref="PageRequested"/>), „Angezeigte Seite“ und neue Einträge nehmen die gerade angezeigte Seite;
 /// „Speichern“ meldet <see cref="SaveRequested"/> – prüfen, schreiben und schließen (<see cref="CompleteSave"/>) übernimmt das Hauptfenster.</summary>
 public partial class BookmarkForm : Form
