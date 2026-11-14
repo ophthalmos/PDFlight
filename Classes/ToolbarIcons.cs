@@ -77,6 +77,9 @@ internal static class ToolbarIcons
     public const char Calendar = '\uE787';     // Anmerkungsliste: nach Datum sortieren
     public const char Person = '\uE77B';       // Contact: Anmerkungsliste nach Autor sortieren
     public const char Tag = '\uE8EC';          // Anmerkungsliste: nach Art sortieren
+    public const char DictionaryCloud = '\uEBC3'; // Buch mit Wolke: KI-Zusammenfassung in der Seitenleiste
+    public const char Send = '\uE724';         // KI-Zusammenfassung: Frage senden
+    public const char Refresh = '\uE72C';      // KI-Zusammenfassung: neu beginnen
 
     public const char Highlight = '';    // Textmarker: Kontextmenü „Hervorheben“ der Anzeige
 

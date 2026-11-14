@@ -79,6 +79,8 @@ public class AppSettings
     public string HighlightColor { get; set; } = "FFC100";       // Hervorheben: Farbe als RRGGBB (Vorgabe Acrobats Gelb)
     public float InkWidth { get; set; } = 2f;                       // Zeichnen: Strichstärke in Punkt (0,5–12)
     public string Language { get; set; } = "de";          // Kultur-Code; Sprachen liegen als Languages\lng.<code>.resx bereit
+    public string AiModel { get; set; } = string.Empty; // KI-Zusammenfassung: Gemini-Modell, leer = automatisch (der Schlüssel liegt verschlüsselt in gemini.dat)
+    public bool AiConfirmSend { get; set; } = true;       // KI-Zusammenfassung: vor dem Senden an Google nachfragen
     public string InstallerLanguage { get; set; } = string.Empty; // zuletzt übernommene Setup-Sprachwahl (s. ApplyInstallerDefaults)
     public int InstallerToolbarLevel { get; set; } = -1;          // zuletzt übernommene Symbolleisten-Abstufung des Setups (-1 = noch keine)
     public string LastFile { get; set; } = string.Empty;  // Datei, die beim Beenden geöffnet war
@@ -100,7 +102,12 @@ public class AppSettings
     public static AppSettings Load()
     {
         if (!File.Exists(SettingsPath)) { return ApplyInstallerDefaults(new AppSettings()); }
-        if (TryLoad(out var loaded)) { return ApplyInstallerDefaults(loaded); }
+        if (TryLoad(out var loaded))
+        {
+            // frühere Vorgabe der KI-Zusammenfassung, die Google neuen Projekten nicht mehr anbietet (14.11.2026) → Aliasname für das aktuelle Modell
+            if (GeminiClient.RetiredDefaults.Contains(loaded.AiModel)) { loaded.AiModel = string.Empty; } // automatisch
+            return ApplyInstallerDefaults(loaded);
+        }
         try { File.Copy(SettingsPath, Path.ChangeExtension(SettingsPath, ".unreadable.json"), overwrite: true); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
         return ApplyInstallerDefaults(new AppSettings());

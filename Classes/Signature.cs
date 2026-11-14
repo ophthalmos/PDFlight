@@ -144,8 +144,8 @@ internal sealed class Signature
 }
 
 /// <summary>Die gespeicherten Unterschriften: eine Datei im Einstellungsordner, mit Windows (DPAPI) für das Benutzerkonto verschlüsselt –
-/// andere Konten, ein anderer Rechner oder eine kopierte Datei können sie nicht lesen (Entscheidung Wilhelms vom 03.11.2026).</summary>
-internal static partial class SignatureStore
+/// andere Konten, ein anderer Rechner oder eine kopierte Datei können sie nicht lesen (Entscheidung des Autors vom 03.11.2026).</summary>
+internal static class SignatureStore
 {
     public const int Limit = 5; // wie Acrobat: wenige, gut unterscheidbare Unterschriften
 
@@ -203,49 +203,9 @@ internal static partial class SignatureStore
 
     // ------------------------------------------------------------------ DPAPI
 
-    [StructLayout(LayoutKind.Sequential)]
-    private struct DataBlob
-    {
-        public int Size;
-        public nint Data;
-    }
+    private static byte[] Protect(byte[] plain) => DataProtection.Protect(plain, Entropy) ?? throw new IOException("Die Unterschriften konnten nicht verschlüsselt werden.");
 
-    private const int CRYPTPROTECT_UI_FORBIDDEN = 0x1;
-
-    [LibraryImport("crypt32.dll", EntryPoint = "CryptProtectData", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool CryptProtectData(ref DataBlob dataIn, string? description, ref DataBlob entropy, nint reserved, nint prompt, int flags, out DataBlob dataOut);
-
-    [LibraryImport("crypt32.dll", EntryPoint = "CryptUnprotectData", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool CryptUnprotectData(ref DataBlob dataIn, nint description, ref DataBlob entropy, nint reserved, nint prompt, int flags, out DataBlob dataOut);
-
-    [LibraryImport("kernel32.dll", EntryPoint = "LocalFree")]
-    private static partial nint LocalFree(nint memory);
-
-    private static byte[] Protect(byte[] plain) => Transform(plain, protect: true) ?? throw new IOException("Die Unterschriften konnten nicht verschlüsselt werden.");
-
-    private static byte[]? Unprotect(byte[] encrypted) => Transform(encrypted, protect: false);
-
-    private static unsafe byte[]? Transform(byte[] input, bool protect)
-    {
-        fixed (byte* inputPointer = input, entropyPointer = Entropy)
-        {
-            DataBlob dataIn = new() { Size = input.Length, Data = (nint)inputPointer };
-            DataBlob entropy = new() { Size = Entropy.Length, Data = (nint)entropyPointer };
-            var ok = protect
-                ? CryptProtectData(ref dataIn, "PDFlight", ref entropy, 0, 0, CRYPTPROTECT_UI_FORBIDDEN, out var output)
-                : CryptUnprotectData(ref dataIn, 0, ref entropy, 0, 0, CRYPTPROTECT_UI_FORBIDDEN, out output);
-            if (!ok) { return null; }
-            try
-            {
-                var result = new byte[output.Size];
-                Marshal.Copy(output.Data, result, 0, output.Size);
-                return result;
-            }
-            finally { LocalFree(output.Data); }
-        }
-    }
+    private static byte[]? Unprotect(byte[] encrypted) => DataProtection.Unprotect(encrypted, Entropy);
 }
 
 [JsonSerializable(typeof(List<Signature>))]

@@ -9,6 +9,7 @@ public partial class SettingsForm : Form
     public const int TabGeneral = 0;
     public const int TabTargets = 1;
     public const int TabPrograms = 2;
+    public const int TabAi = 3;
 
     [System.ComponentModel.Browsable(false), System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
     public List<string> TargetFolders => [.. listTargets.Items.Cast<string>()];
@@ -72,6 +73,15 @@ public partial class SettingsForm : Form
     [System.ComponentModel.Browsable(false)]
     public string Language => Languages[Math.Max(0, comboLanguage.SelectedIndex)].Code;
 
+    /// <summary>KI-Zusammenfassung: der Gemini-API-Schlüssel (leer = keiner; speichert das Hauptfenster verschlüsselt).</summary>
+    [System.ComponentModel.Browsable(false)]
+    public string AiKey => textAiKey.Text.Trim();
+
+    [System.ComponentModel.Browsable(false)]
+    public bool AiConfirmSend => cbAiConfirm.Checked;
+
+    private CancellationTokenSource? keyCheck;
+
     public SettingsForm(AppSettings source, int initialTab)
     {
         InitializeComponent();
@@ -93,11 +103,90 @@ public partial class SettingsForm : Form
         rbBackgroundDark.Checked = source.DarkViewer;
         rbBackgroundLight.Checked = !source.DarkViewer;
         numMaxRecentFiles.Value = Math.Clamp(source.MaxRecentFiles, (int)numMaxRecentFiles.Minimum, (int)numMaxRecentFiles.Maximum);
+        // Speicherort als %APPDATA%\… (Länge unabhängig vom Benutzernamen)
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        labelAiStorage.Text = string.Format(labelAiStorage.Text, Path.Combine("%APPDATA%", Path.GetRelativePath(appData, GeminiKeyStore.FilePath)));
+        toolTipReveal.SetToolTip(btnAiRemove, Lng.T("Schlüssel entfernen")); // Lng.Apply übersetzt keine ToolTip-Texte
+        var iconSize = LogicalToDeviceUnits(16);
+        btnAiRemove.Image = ToolbarIcons.FontAvailable ? ToolbarIcons.Get(ToolbarIcons.Delete, new Size(iconSize, iconSize)) : null;
+        if (btnAiRemove.Image == null) { btnAiRemove.Text = "✕"; } // ohne Symbolschrift
+        textAiKey.Text = GeminiKeyStore.Load();
+        cbAiConfirm.Checked = source.AiConfirmSend;
+        TextBoxMargins.Apply(this); // vor dem Augensymbol, das den rechten Rand des Kennwortfelds selbst setzt
+        PasswordReveal.Attach(textAiKey, toolTipReveal);
         if (listTargets.Items.Count > 0) { listTargets.SelectedIndex = 0; }
         if (listPrograms.Items.Count > 0) { listPrograms.SelectedIndex = 0; }
         tabControl.SelectedIndex = Math.Clamp(initialTab, 0, tabControl.TabCount - 1);
         UpdateTargetButtons();
         UpdateProgramButtons();
+        UpdateAiButtons();
+    }
+
+    protected override void OnFormClosed(FormClosedEventArgs e)
+    {
+        keyCheck?.Cancel(); // eine laufende Prüfung schreibt sonst in ein geschlossenes Fenster
+        base.OnFormClosed(e);
+    }
+
+    // ------------------------------------------------------------------ KI
+
+    private void UpdateAiButtons()
+    {
+        var hasKey = textAiKey.Text.Trim().Length > 0;
+        btnAiCheck.Enabled = hasKey && keyCheck == null;
+        btnAiRemove.Enabled = hasKey;
+    }
+
+    /// <summary>Leert das Feld; gelöscht wird gemini.dat erst mit „OK“ (wie jede andere Einstellung, Abbrechen behält den Schlüssel).</summary>
+    private void BtnAiRemove_Click(object? sender, EventArgs e)
+    {
+        keyCheck?.Cancel();
+        textAiKey.Clear(); // setzt über TextChanged den Status zurück
+        labelAiStatus.ForeColor = SystemColors.GrayText;
+        labelAiStatus.Text = Lng.T("Der Schlüssel wird beim Klick auf „OK“ entfernt.");
+        textAiKey.Focus();
+    }
+
+    private void TextAiKey_TextChanged(object? sender, EventArgs e)
+    {
+        labelAiStatus.Text = string.Empty;
+        UpdateAiButtons();
+    }
+
+    /// <summary>Prüft den Schlüssel ohne Kosten (Liste der Modelle bei Google, verbraucht kein Kontingent).</summary>
+    private async void BtnAiCheck_Click(object? sender, EventArgs e)
+    {
+        var key = textAiKey.Text.Trim();
+        if (key.Length == 0 || keyCheck != null) { return; }
+        CancellationTokenSource check = new();
+        keyCheck = check;
+        UpdateAiButtons();
+        labelAiStatus.ForeColor = SystemColors.GrayText;
+        labelAiStatus.Text = Lng.T("Der Schlüssel wird geprüft…");
+        try
+        {
+            await GeminiClient.CheckKeyAsync(key, check.Token); // das Modell wählt PDFlight selbst (seit 14.11.2026 kein Auswahlfeld mehr)
+            labelAiStatus.ForeColor = Color.ForestGreen;
+            labelAiStatus.Text = Lng.T("Der Schlüssel ist gültig.");
+        }
+        catch (GeminiException ex)
+        {
+            labelAiStatus.ForeColor = Color.Firebrick;
+            labelAiStatus.Text = ex.Message;
+        }
+        catch (OperationCanceledException) { return; } // Fenster geschlossen
+        finally
+        {
+            if (keyCheck == check) { keyCheck = null; }
+            check.Dispose();
+        }
+        UpdateAiButtons();
+    }
+
+    private void LinkAiKey_LinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
+    {
+        try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(GeminiClient.KeyUrl) { UseShellExecute = true }); }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { TaskDlg.ErrTaskDlg(Handle, ex); }
     }
 
     // ------------------------------------------------------------------ gemeinsame Listenhelfer

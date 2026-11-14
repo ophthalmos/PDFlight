@@ -159,6 +159,7 @@
             btnOutlineEdit = new ToolStripButton();
             annotationPanel = new PDFLight.Controls.AnnotationPanel();
             attachmentPanel = new PDFLight.Controls.AttachmentPanel();
+            summaryPanel = new PDFLight.Controls.SummaryPanel();
             sidebarHeader = new ToolStrip();
             labelSidebarTitle = new ToolStripLabel();
             btnSidebarClose = new ToolStripButton();
@@ -184,6 +185,7 @@
             btnSideBookmarks = new ToolStripButton();
             btnSideAnnotations = new ToolStripButton();
             btnSideAttachments = new ToolStripButton();
+            btnSideSummary = new ToolStripButton();
             printDocument = new System.Drawing.Printing.PrintDocument();
             printDialog = new PrintDialog();
             toolTipLink = new ToolTip(components);
@@ -1123,6 +1125,7 @@
             panelSidebarContent.Controls.Add(panelOutline);
             panelSidebarContent.Controls.Add(annotationPanel);
             panelSidebarContent.Controls.Add(attachmentPanel);
+            panelSidebarContent.Controls.Add(summaryPanel);
             panelSidebarContent.Dock = DockStyle.Fill;
             panelSidebarContent.Location = new Point(0, 40);
             panelSidebarContent.Name = "panelSidebarContent";
@@ -1346,6 +1349,21 @@
             attachmentPanel.OpenRequested += AttachmentPanel_OpenRequested;
             attachmentPanel.SaveRequested += AttachmentPanel_SaveRequested;
             attachmentPanel.SaveAllRequested += AttachmentPanel_SaveAllRequested;
+            //
+            // summaryPanel
+            //
+            summaryPanel.Dock = DockStyle.Fill;
+            summaryPanel.Location = new Point(0, 0);
+            summaryPanel.Name = "summaryPanel";
+            summaryPanel.Size = new Size(200, 60);
+            summaryPanel.TabIndex = 5;
+            summaryPanel.Visible = false;
+            summaryPanel.RunRequested += SummaryPanel_RunRequested;
+            summaryPanel.CancelRequested += SummaryPanel_CancelRequested;
+            summaryPanel.QuestionAsked += SummaryPanel_QuestionAsked;
+            summaryPanel.PageRequested += SummaryPanel_PageRequested;
+            summaryPanel.SaveRequested += SummaryPanel_SaveRequested;
+            summaryPanel.ClearRequested += SummaryPanel_ClearRequested;
             // 
             // sidebarHeader
             // 
@@ -1557,7 +1575,7 @@
             sidebarStrip.AutoSize = false;
             sidebarStrip.Dock = DockStyle.Left;
             sidebarStrip.GripStyle = ToolStripGripStyle.Hidden;
-            sidebarStrip.Items.AddRange(new ToolStripItem[] { btnSideThumbnails, btnSideBookmarks, btnSideAnnotations, btnSideAttachments });
+            sidebarStrip.Items.AddRange(new ToolStripItem[] { btnSideThumbnails, btnSideBookmarks, btnSideAnnotations, btnSideAttachments, btnSideSummary });
             sidebarStrip.LayoutStyle = ToolStripLayoutStyle.VerticalStackWithOverflow;
             sidebarStrip.Location = new Point(0, 101);
             sidebarStrip.Name = "sidebarStrip";
@@ -1612,6 +1630,18 @@
             btnSideAttachments.ToolTipText = "Anhänge";
             btnSideAttachments.Visible = false;
             btnSideAttachments.Click += BtnSideAttachments_Click;
+            //
+            // btnSideSummary
+            //
+            btnSideSummary.AutoSize = false;
+            btnSideSummary.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            btnSideSummary.Margin = new Padding(0, 0, 0, 4);
+            btnSideSummary.Name = "btnSideSummary";
+            btnSideSummary.Size = new Size(44, 40);
+            btnSideSummary.Text = "KI";
+            btnSideSummary.ToolTipText = "KI-Zusammenfassung";
+            btnSideSummary.Visible = false;
+            btnSideSummary.Click += BtnSideSummary_Click;
             // 
             // printDocument
             // 
@@ -1710,6 +1740,8 @@
         private PDFLight.Controls.SidebarToggle sidebarToggle;
         private PDFLight.Controls.StartPage startPage;
         private ToolStripButton btnSideAttachments;
+        private PDFLight.Controls.SummaryPanel summaryPanel;
+        private ToolStripButton btnSideSummary;
         private System.Windows.Forms.Timer annotationRefreshTimer;
         private System.Windows.Forms.ToolStripMenuItem mnuRemoveBookmarks;
         private System.Windows.Forms.ToolStripMenuItem mnuEditBookmarks;

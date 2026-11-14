@@ -514,6 +514,7 @@ public partial class MainForm : Form
             }
             RefreshAnnotations(); // Liste bzw. Symbol der Umschaltleiste für den neuen Stand
             _ = RefreshAttachmentsAsync();
+            if (sidebarView == SidebarView.Summary) { UpdateSummaryView(); } // gemerkte Zusammenfassung dieser Datei oder der Hinweis
             formatWalk = FormatShownFieldsAsync(opened);
         }
         return opened;
@@ -551,6 +552,7 @@ public partial class MainForm : Form
             annotationPanel.Clear(); // andere Datei: auch Filter und Suche zurück
             attachmentCount = 0;
             attachmentPanel.Clear();
+            CancelSummary(); // die Zusammenfassung gehört zur bisherigen Datei
             UpdateAnnotationRail();
         }
         previous?.Dispose(); // erst nach dem Umschalten der Ansichten – deren Aufträge für das alte Dokument verfallen damit
@@ -624,7 +626,7 @@ public partial class MainForm : Form
         UpdateSaveButton();
     }
 
-    /// <summary>„Speichern“ in der Viewer-Leiste ist immer zu sehen – wie bei Edge (seit 11.10.2026, Wunsch Wilhelms; vorher erschien der
+    /// <summary>„Speichern“ in der Viewer-Leiste ist immer zu sehen – wie bei Edge (seit 11.10.2026, Wunsch des Autors; vorher erschien der
     /// Knopf erst bei offenen Änderungen). Ohne offene Formulareingaben oder Anmerkungen nur das ausgegraute Symbol, mit ihnen frei und mit
     /// Beschriftung, damit er auffällt; ohne Symbolschrift immer der Text.</summary>
     private void UpdateSaveButton()
@@ -659,7 +661,7 @@ public partial class MainForm : Form
     private bool Encrypted => currentPdfStatus?.Encrypted ?? false;
 
     /// <summary>Kennwort, mit dem die angezeigte verschlüsselte Datei geöffnet wurde – damit sind die Seitenbefehle frei (seit 24.10.2026,
-    /// Wunsch Wilhelms): <see cref="RunPdfEdit"/> bearbeitet dann die von PDFium entschlüsselte Fassung im Speicher und verschlüsselt mit
+    /// Wunsch des Autors): <see cref="RunPdfEdit"/> bearbeitet dann die von PDFium entschlüsselte Fassung im Speicher und verschlüsselt mit
     /// demselben Kennwort neu (<see cref="PdfEditService.RunUnlocked"/>). Null bei unverschlüsselten Dateien und bei solchen, die sich ohne
     /// Kennwort öffnen lassen und nur Einschränkungen haben – deren Besitzerkennwort ist unbekannt, das Aufheben bleibt ein bewusster
     /// Schritt in den Eigenschaften (Reiter „Sicherheit“).</summary>
@@ -1198,6 +1200,7 @@ public partial class MainForm : Form
             ApplyViewerColors(); // wirkt sofort auf das geladene Dokument
             settings.MaxRecentFiles = dialog.MaxRecentFiles;
             settings.TrimRecentLists(); // eine kleinere Höchstzahl (bis hin zu 0) wirft überzählige Einträge sofort weg
+            ApplyAiSettings(dialog);
             var languageChanged = dialog.Language != settings.Language;
             settings.Language = dialog.Language;
             settings.Save();
@@ -1500,7 +1503,7 @@ public partial class MainForm : Form
 
     /// <summary>Offene Änderungen der Anzeige (Anmerkungen, Formulareingaben) für eine Bearbeitung, die sie im selben Schritt mitschreibt
     /// (<see cref="RunPdfEdit"/>, Parameter viewChanges): Die Dialoge des Bearbeiten-Menüs speichern seit 10.10.2026 nicht mehr schon beim
-    /// Öffnen, sondern erst, wenn sie die Datei tatsächlich ändern (Wunsch Wilhelms; Abbrechen lässt alles ungespeichert). Bytes = null:
+    /// Öffnen, sondern erst, wenn sie die Datei tatsächlich ändern (Wunsch des Autors; Abbrechen lässt alles ungespeichert). Bytes = null:
     /// nichts offen. Ok = false: Fehler gemeldet oder inzwischen eine andere Datei – die Bearbeitung unterbleibt.</summary>
     private async Task<(bool Ok, byte[]? Bytes)> PendingViewChangesAsync(string actionName)
     {
@@ -1597,7 +1600,7 @@ public partial class MainForm : Form
 
     // ------------------------------------------------------------------ Seiten drehen (Viewer-Leiste)
 
-    // Drehen gibt es seit 10.10.2026 nur noch in der Viewer-Leiste (Wunsch Wilhelms – „Seiten drehen…“ im Bearbeiten-Menü schrieb sofort in
+    // Drehen gibt es seit 10.10.2026 nur noch in der Viewer-Leiste (Wunsch des Autors – „Seiten drehen…“ im Bearbeiten-Menü schrieb sofort in
     // die Datei, die Knöpfe drehten ungespeichert; zwei Stellen verwirrten): Die Knöpfe drehen die angezeigte Seite, der Pfeil daneben
     // (und Strg+R, Kontextmenü der Miniaturen) öffnet RotationForm für Bereiche und 180°. Alles ungespeichert bis „Speichern“.
     private RotationForm? rotationForm;
@@ -1743,7 +1746,7 @@ public partial class MainForm : Form
 
     // ------------------------------------------------------------------ Unterschriften (seit 03.11.2026)
 
-    // „Unterschreiben“ in der Viewer-Leiste wie bei Acrobat und GNOME Papers (Wunsch Wilhelms): Das Dropdown zeigt die gespeicherten
+    // „Unterschreiben“ in der Viewer-Leiste wie bei Acrobat und GNOME Papers (Wunsch des Autors): Das Dropdown zeigt die gespeicherten
     // Unterschriften (SignatureStore, verschlüsselt für das Windows-Konto); eine wählen, dann auf die Stelle klicken – sie erscheint dort
     // als Stempel-Anmerkung, lässt sich verschieben und an der Ecke in der Größe ändern, ungespeichert wie alle Anmerkungen. Beim
     // Speichern fragt PDFlight, ob die in dieser Sitzung eingefügten Unterschriften fest in die Seite übernommen werden sollen
@@ -1870,13 +1873,13 @@ public partial class MainForm : Form
 
     // ------------------------------------------------------------------ Anmerkungsliste der Seitenleiste (seit 15.10.2026, ersetzt „Anmerkungen verwalten“)
 
-    // Wunsch Wilhelms nach dem Vorbild von Acrobats Kommentarliste: eine dritte Ansicht der Seitenleiste mit allen Anmerkungen des
+    // Wunsch des Autors nach dem Vorbild von Acrobats Kommentarliste: eine dritte Ansicht der Seitenleiste mit allen Anmerkungen des
     // angezeigten Stands, auch der ungespeicherten. Gelesen wird im Hilfsprogramm Seite für Seite (PDFium muss dafür jede Seite laden) –
     // vollständig nur, solange die Liste zu sehen ist; sonst nur bis zur ersten Anmerkung, die das Symbol der Umschaltleiste einblendet.
     // Nach jeder Änderung (PdfiumDocument.Changed, neuer Stand) liest annotationRefreshTimer kurz darauf neu; bis dahin gelten die
     // Nummern der Liste nicht mehr (annotationListStale) – Bearbeiten und Löschen warten dann auf die frische Liste.
 
-    private enum SidebarView { Thumbnails, Outline, Annotations, Attachments }
+    private enum SidebarView { Thumbnails, Outline, Annotations, Attachments, Summary }
 
     private SidebarView sidebarView = SidebarView.Thumbnails;
     private CancellationTokenSource? annotationScan;
@@ -1945,6 +1948,8 @@ public partial class MainForm : Form
         if (btnSideAnnotations.Visible != visible) { btnSideAnnotations.Visible = visible; }
         var attachments = attachmentCount > 0 || sidebarView == SidebarView.Attachments;
         if (btnSideAttachments.Visible != attachments) { btnSideAttachments.Visible = attachments; }
+        var summary = aiAvailable || sidebarView == SidebarView.Summary;
+        if (btnSideSummary.Visible != summary) { btnSideSummary.Visible = summary; }
         annotationPanel.Editable = document != null && currentFile != null && !EditLocked && currentPageCount > 0;
     }
 
@@ -2027,7 +2032,7 @@ public partial class MainForm : Form
 
     // ------------------------------------------------------------------ Anhangliste der Seitenleiste (seit 15.10.2026)
 
-    // Wunsch Wilhelms nach dem Vorbild von Acrobats Anlagen: eine vierte Ansicht der Seitenleiste mit den eingebetteten Dateien – sie
+    // Wunsch des Autors nach dem Vorbild von Acrobats Anlagen: eine vierte Ansicht der Seitenleiste mit den eingebetteten Dateien – sie
     // ersetzt den Reiter „Anhänge“ des Eigenschaften-Dialogs und die Büroklammer in der Statusleiste. Das Symbol der Umschaltleiste steht
     // nur bei Dateien mit Anhängen; die Seitenleiste geht dafür nicht von selbst auf (jede E-Rechnung trägt ihre XML als Anhang). Die
     // Liste samt Größen liest PDFium nur, solange sie zu sehen ist – für die Größe muss es jeden Anhang entpacken; sonst nur die Anzahl.
@@ -2132,7 +2137,7 @@ public partial class MainForm : Form
         if (shown.Count > 0) { choices.Add((1, Lng.T("Geöffnete Dateien hinzufügen"), Lng.T("In anderen Instanzen angezeigte PDF-Dateien"))); }
         if (siblings.Count > 0) { choices.Add((2, Lng.T("Dateien desselben Ordners"), Lng.T("PDF-Dateien aus dem Ordner der angezeigten Datei"))); }
         // der Dialog erscheint seit 11.10.2026 immer – auch mit nur einer Quelle: sein Kästchen legt statt des Anhängens eine neue Sammelmappe
-        // an (Wunsch Wilhelms: aus PDFlight heraus ging das nur über eine Kopie im selben Ordner)
+        // an (Wunsch des Autors: aus PDFlight heraus ging das nur über eine Kopie im selben Ordner)
         var collection = false;
         var picked = TaskDlg.ChoiceTaskDlg(Handle, Lng.T("Was soll angehängt werden?"), null, [.. choices.Select(c => (c.Text, c.Detail))],
             Lng.T("Als neue Sammelmappe speichern"), ref collection);
@@ -2241,7 +2246,7 @@ public partial class MainForm : Form
         ShowSplash(string.Format(Lng.T("{0} Seiten"), totalPages));
     }
 
-    /// <summary>„Speichern unter…“ (Symbol in der Viewer-Leiste, Strg+Umschalt+S; seit 11.10.2026, Wunsch Wilhelms): der angezeigte Stand
+    /// <summary>„Speichern unter…“ (Symbol in der Viewer-Leiste, Strg+Umschalt+S; seit 11.10.2026, Wunsch des Autors): der angezeigte Stand
     /// samt ungespeicherten Änderungen unter neuem Namen, auch im selben Ordner („Kopieren“ kann das nicht); danach wird die neue Datei
     /// angezeigt. Wie in Office bleibt die bisherige Datei so, wie sie zuletzt gespeichert war. Dasselbe Ziel = normales Speichern.</summary>
     private async void SaveAsDialog() => await SaveAsAsync();
@@ -2588,6 +2593,318 @@ public partial class MainForm : Form
         dialog.Show(this);
     }
 
+    // ------------------------------------------------------------------ KI-Zusammenfassung der Seitenleiste (seit 14.11.2026)
+
+    // Nach dem Vorbild von Acrobats „Generative Zusammenfassung“: eine fünfte Ansicht der Seitenleiste. Jeder Benutzer trägt
+    // seinen eigenen Gemini-API-Schlüssel ein (Einstellungen, Reiter „KI“); ohne Schlüssel gibt es das Symbol in der Umschaltleiste nicht.
+    // Gesendet wird nur auf Klick und nur der Text, den PDFium im Hilfsprogramm herausliest – nie die Datei mit Metadaten, Anhängen und
+    // Formularwerten. Vor dem ersten Senden je Datei fragt PDFlight nach (abschaltbar). Fertige Zusammenfassungen bleiben für die Sitzung
+    // je Datei, Änderungsstand und Art gemerkt.
+
+    private const int SummaryMaxChars = 300_000; // gut 75 000 Token: bleibt im Minutenkontingent des kostenlosen Angebots; längere Dokumente werden gekürzt
+    private bool aiAvailable = File.Exists(GeminiKeyStore.FilePath); // ein Schlüssel ist eingetragen (gelesen wird er erst beim Senden)
+    private CancellationTokenSource? summaryRun;
+    private string? aiAutoModel; // das automatisch gewählte Modell (s. GeminiClient.PreferredModelAsync), neu bestimmt nach einem neuen Schlüssel
+    private readonly Dictionary<(string File, long Stamp), SummaryThread> summaries = [];
+    private readonly HashSet<string> summaryConfirmed = new(StringComparer.OrdinalIgnoreCase); // in dieser Sitzung schon bestätigt
+
+    /// <summary>Die Unterhaltung zu einer Datei (seit 14.11.2026 mit Fragen): ihr Text, einmal gelesen, die Abschnitte (Überschrift, Anweisung
+    /// an Gemini, Antwort) und die zuletzt vorgeschlagenen Folgefragen. Gemini merkt sich nichts – jede Anfrage schickt Text und Verlauf mit.</summary>
+    private sealed class SummaryThread
+    {
+        public string Text { get; set; } = string.Empty;
+        public int PagesRead { get; set; }
+        public int PageCount { get; set; }
+        public string Model { get; set; } = string.Empty;
+        public List<(string Heading, string Prompt, string Answer)> Turns { get; } = [];
+        public List<string> FollowUps { get; set; } = [];
+    }
+
+    private void BtnSideSummary_Click(object? sender, EventArgs e) => SelectSidebarView(SidebarView.Summary);
+
+    /// <summary>Schlüssel, Modell und Rückfrage aus den Einstellungen übernehmen; ohne Schlüssel verschwindet die Ansicht.</summary>
+    private void ApplyAiSettings(SettingsForm dialog)
+    {
+        settings.AiConfirmSend = dialog.AiConfirmSend;
+        if (dialog.AiKey != GeminiKeyStore.Load())
+        {
+            aiAutoModel = null; // ein anderer Schlüssel kann andere Modelle haben
+            try { GeminiKeyStore.Save(dialog.AiKey); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { TaskDlg.ErrTaskDlg(Handle, ex); }
+        }
+        aiAvailable = File.Exists(GeminiKeyStore.FilePath);
+        if (!aiAvailable && sidebarView == SidebarView.Summary) { CancelSummary(); ShowSidebarPanel(SidebarView.Thumbnails); }
+        UpdateAnnotationRail();
+        if (sidebarView == SidebarView.Summary) { UpdateSummaryView(); }
+    }
+
+    /// <summary>Schlüssel des Zwischenspeichers: Datei samt Änderungsstand (nach Seitenbefehlen ist der Text ein anderer).</summary>
+    private (string File, long Stamp)? SummaryKey()
+    {
+        if (currentFile is not { } file) { return null; }
+        try { return (file.FullName, File.GetLastWriteTimeUtc(file.FullName).Ticks); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return null; }
+    }
+
+    /// <summary>Umbenennen, Verschieben, Rückgängig: die KI-Unterhaltung zieht mit der Datei mit (Fehlerbericht 14.11.2026 – nach dem Umbenennen
+    /// war die Zusammenfassung weg, weil sie am alten Pfad hing). Der Inhalt bleibt derselbe, gemerkt wird unter dem neuen Pfad samt seiner
+    /// Änderungszeit; auch die Bestätigung zum Senden gilt weiter.</summary>
+    private void MoveSummaries(string oldPath, string newPath)
+    {
+        if (string.Equals(oldPath, newPath, StringComparison.Ordinal)) { return; }
+        if (summaryConfirmed.Remove(oldPath)) { summaryConfirmed.Add(newPath); }
+        long stamp;
+        try { stamp = File.GetLastWriteTimeUtc(newPath).Ticks; }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return; }
+        var old = summaries.Keys.Where(k => string.Equals(k.File, oldPath, StringComparison.OrdinalIgnoreCase)).OrderByDescending(k => k.Stamp).ToList();
+        if (old.Count == 0) { return; }
+        summaries[(newPath, stamp)] = summaries[old[0]]; // die jüngste – ältere gehörten zu früheren Ständen der Datei
+        foreach (var key in old) { summaries.Remove(key); }
+    }
+
+    /// <summary>Zeigt die Unterhaltung zur angezeigten Datei oder den Hinweis, was „Erstellen“ und das Fragefeld tun.</summary>
+    private void UpdateSummaryView()
+    {
+        if (summaryRun != null) { return; } // die laufende Anfrage zeigt ihren Fortschritt selbst
+        if (SummaryKey() is { } key && summaries.TryGetValue(key, out var thread) && thread.Turns.Count > 0)
+        {
+            ShowSummaryThread(thread);
+            return;
+        }
+        summaryPanel.ShowMessage(aiAvailable
+            ? Lng.T("Klicke auf „Erstellen“, um den Text dieser Datei von Google Gemini zusammenfassen zu lassen, oder stelle unten eine Frage dazu.")
+            : Lng.T("Trage zuerst in den Einstellungen (Reiter „Google AI“) deinen Gemini-API-Schlüssel ein."));
+    }
+
+    private void ShowSummaryThread(SummaryThread thread, int scrollTo = -1)
+    {
+        var footer = thread.PagesRead < thread.PageCount
+            ? string.Format(Lng.T("Erstellt mit {0} aus den Seiten 1–{1} von {2} – längere Dokumente werden gekürzt."), thread.Model, thread.PagesRead, thread.PageCount)
+            : string.Format(Lng.T("Erstellt mit {0}."), thread.Model);
+        summaryPanel.ShowThread([.. thread.Turns.Select(t => new SummaryTurnView(t.Heading, t.Answer))], thread.FollowUps, footer, scrollTo);
+    }
+
+    /// <summary>Bricht eine laufende Anfrage ab (andere Datei, Schlüssel entfernt) und zeigt den Stand der jetzigen Datei.</summary>
+    private void CancelSummary()
+    {
+        summaryRun?.Cancel();
+        summaryRun = null;
+        UpdateSummaryView();
+    }
+
+    private void SummaryPanel_CancelRequested(object? sender, EventArgs e)
+    {
+        summaryRun?.Cancel();
+        summaryRun = null;
+        if (SummaryKey() is { } key && summaries.TryGetValue(key, out var thread) && thread.Turns.Count > 0)
+        {
+            ShowSummaryThread(thread);
+            summaryPanel.ShowStatus(Lng.T("Abgebrochen."));
+        }
+        else { summaryPanel.ShowMessage(Lng.T("Abgebrochen.")); }
+    }
+
+    /// <summary>„Erstellen“: eine Zusammenfassung der gewählten Art als neuer Abschnitt.</summary>
+    private void SummaryPanel_RunRequested(object? sender, EventArgs e)
+    {
+        var preset = SummaryPresets.All[summaryPanel.PresetIndex];
+        _ = AskGeminiAsync(Lng.T(preset.Name), preset.Instruction);
+    }
+
+    /// <summary>Eine Frage aus dem Fragefeld oder eine angeklickte Folgefrage.</summary>
+    private void SummaryPanel_QuestionAsked(object? sender, string question) => _ = AskGeminiAsync(question, "Question from the reader: " + question);
+
+    /// <summary>Klick auf eine Seitenangabe der Antwort.</summary>
+    private void SummaryPanel_PageRequested(object? sender, int page)
+    {
+        if (document != null && page >= 1 && page <= document.PageCount) { pageView.GoToPage(page - 1); }
+    }
+
+    /// <summary>„Neu beginnen“: die Abschnitte vergessen, der gelesene Text bleibt für die nächste Anfrage.</summary>
+    private void SummaryPanel_ClearRequested(object? sender, EventArgs e)
+    {
+        if (summaryRun != null || SummaryKey() is not { } key || !summaries.TryGetValue(key, out var thread)) { return; }
+        thread.Turns.Clear();
+        thread.FollowUps = [];
+        UpdateSummaryView();
+    }
+
+    /// <summary>„Speichern…“: die Unterhaltung als Word-Datei (RTF) neben der PDF.</summary>
+    private void SummaryPanel_SaveRequested(object? sender, EventArgs e)
+    {
+        if (currentFile is not { } file) { return; }
+        using SaveFileDialog dialog = new()
+        {
+            Filter = Lng.T("Word-Datei (*.rtf)|*.rtf"),
+            DefaultExt = "rtf",
+            InitialDirectory = file.DirectoryName,
+            FileName = AttachmentFiles.SafeFileName(Path.GetFileNameWithoutExtension(file.Name) + " – " + Lng.T("Zusammenfassung") + ".rtf"),
+            OverwritePrompt = true,
+        };
+        if (dialog.ShowDialog(this) != DialogResult.OK) { return; }
+        try
+        {
+            summaryPanel.SaveRtf(dialog.FileName);
+            statusPath.Text = Lng.T("Die Zusammenfassung wurde gespeichert.");
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { TaskDlg.ErrTaskDlg(Handle, ex); }
+    }
+
+    /// <summary>Schickt eine Anweisung (Art der Zusammenfassung oder Frage) samt Dokumenttext und bisherigem Verlauf an Gemini; die Antwort wird
+    /// ein neuer Abschnitt der Unterhaltung. Vor dem ersten Senden je Datei fragt PDFlight nach.</summary>
+    private async Task AskGeminiAsync(string heading, string prompt)
+    {
+        if (summaryRun != null) { return; }
+        var key = GeminiKeyStore.Load();
+        if (key.Length == 0) { OpenSettings(SettingsForm.TabAi); return; }
+        if (document is not { } doc || currentFile is not { } file || SummaryKey() is not { } cacheKey) { return; }
+        if (settings.AiConfirmSend && !summaryConfirmed.Contains(file.FullName))
+        {
+            var dontAsk = false;
+            if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("Text an Google senden?"),
+                string.Format(Lng.T("Für die Zusammenfassung schickt PDFlight den Text von „{0}“ an Google Gemini. Schicke keine vertraulichen Daten oder Texte."), file.Name),
+                Lng.T("Nicht mehr fragen"), ref dontAsk)) { return; }
+            summaryConfirmed.Add(file.FullName);
+            if (dontAsk) { settings.AiConfirmSend = false; }
+        }
+        if (!summaries.TryGetValue(cacheKey, out var thread)) { thread = new SummaryThread(); }
+        CancellationTokenSource run = new();
+        summaryRun = run;
+        try
+        {
+            if (thread.Turns.Count > 0) { ShowSummaryThread(thread); } // die bisherigen Abschnitte bleiben stehen, die Anfrage kommt darunter
+            if (thread.Text.Length == 0)
+            {
+                summaryPanel.ShowStatus(Lng.T("Der Text wird gelesen…"), busy: true, heading: heading);
+                var (text, pagesRead) = await ReadDocumentTextAsync(doc, heading, run.Token);
+                if (summaryRun != run) { return; }
+                if (text.Count(c => !char.IsWhiteSpace(c)) < 40 + 10 * pagesRead) // fast nur Seitenmarken
+                {
+                    summaryRun = null;
+                    summaryPanel.ShowMessage(Lng.T("Die Datei enthält keine Textschicht, die sich zusammenfassen ließe."));
+                    return;
+                }
+                (thread.Text, thread.PagesRead, thread.PageCount) = (text, pagesRead, doc.PageCount);
+                summaries[cacheKey] = thread;
+            }
+            summaryPanel.ShowStatus(Lng.T("Gemini antwortet…"), busy: true, heading: heading);
+            var documentText = "Document text:\n\n" + thread.Text + "\n---\n\n";
+            List<(bool User, string Text)> contents = [];
+            foreach (var (turn, i) in thread.Turns.Select((t, i) => (t, i)))
+            {
+                contents.Add((true, (i == 0 ? documentText : string.Empty) + turn.Prompt));
+                contents.Add((false, turn.Answer));
+            }
+            contents.Add((true, (thread.Turns.Count == 0 ? documentText : string.Empty) + prompt));
+            // leer = automatisch: einmal je Sitzung und Schlüssel aus den Modellen des Schlüssels gewählt (Flash-Lite zuerst – schnell)
+            var model = settings.AiModel.Trim().Length > 0 ? settings.AiModel.Trim() : aiAutoModel ??= await GeminiClient.PreferredModelAsync(key, run.Token);
+            if (summaryRun != run) { return; }
+            var system = SummaryPresets.SystemInstruction(Lng.CultureCode);
+            // Bis der erste Text kommt, zählt die Anzeige die Sekunden mit; danach erscheint die Antwort, während sie entsteht (Fehlerbericht
+            // 14.11.2026: drei Minuten nur „Gemini antwortet…“ – das Modell denkt bei langen Dokumenten erst nach, und die ganze Antwort
+            // abzuwarten ließ nicht erkennen, ob noch etwas geschieht)
+            var waiting = Lng.T("Gemini antwortet…");
+            var watch = Stopwatch.StartNew();
+            var answering = false;
+            var shownAt = -1000L;
+            void Progress(string text)
+            {
+                if (summaryRun != run) { return; }
+                answering = true;
+                if (watch.ElapsedMilliseconds - shownAt < 400) { return; } // die ganze Ansicht neu zu setzen kostet – höchstens 2–3-mal je Sekunde
+                shownAt = watch.ElapsedMilliseconds;
+                summaryPanel.ShowPending(heading, SummaryPresets.Split(text).Answer);
+            }
+            async Task CountSecondsAsync()
+            {
+                while (summaryRun == run)
+                {
+                    await Task.Delay(1000);
+                    if (summaryRun != run || answering) { continue; }
+                    summaryPanel.ShowStatus($"{waiting} ({(int)watch.Elapsed.TotalSeconds} s)", busy: true, heading: heading);
+                }
+            }
+            _ = CountSecondsAsync();
+            string response;
+            try { response = await GeminiClient.GenerateAsync(key, model, system, contents, Progress, run.Token); }
+            catch (GeminiException first) when (first.OtherModelMayHelp && summaryRun == run)
+            {
+                // Modellwahl automatisch (seit 14.11.2026, kein Auswahlfeld mehr): ist das Modell überlastet, nicht verfügbar, hängt es oder
+                // ist sein Kontingent erschöpft, einmal ein Ausweichmodell aus der Liste des Schlüssels (Flash-Lite, eigenes Kontingent)
+                (answering, waiting) = (false, string.Format(Lng.T("{0} antwortet nicht – PDFlight versucht ein anderes Modell…"), model));
+                watch.Restart();
+                summaryPanel.ShowStatus(waiting, busy: true, heading: heading);
+                if (await GeminiClient.FallbackModelAsync(key, model, run.Token) is not { } fallback || summaryRun != run) { throw; }
+                model = fallback;
+                response = await GeminiClient.GenerateAsync(key, model, system, contents, Progress, run.Token);
+            }
+            if (summaryRun != run) { return; }
+            var (answer, followUps) = SummaryPresets.Split(response);
+            thread.Turns.Add((heading, prompt, answer));
+            thread.FollowUps = followUps;
+            thread.Model = model;
+            summaryRun = null; // vor dem Anzeigen – sonst hielte die Ansicht die Anfrage für laufend
+            ShowSummaryThread(thread, scrollTo: thread.Turns.Count - 1);
+        }
+        catch (GeminiException ex) { if (summaryRun == run) { summaryRun = null; summaryPanel.ShowStatus(ex.Message, error: true); } }
+        catch (OperationCanceledException) { } // Abbrechen, andere Datei: dort ist die Anzeige schon gesetzt
+        finally
+        {
+            if (summaryRun == run) { summaryRun = null; UpdateSummaryView(); }
+            run.Dispose();
+        }
+    }
+
+    /// <summary>Text einer Seite für Gemini: Steuerzeichen weg, Leerraum zusammengefasst, höchstens eine Leerzeile – PDFium liefert oft lange
+    /// Folgen von Leerzeichen (Tabellen, Blocksatz), die nur Token kosten und die Antwort verzögern.</summary>
+    private static string CleanPageText(string text)
+    {
+        text = ControlCharsRegex().Replace(text.Replace("\r\n", "\n").Replace('\r', '\n'), string.Empty);
+        text = SpacesRegex().Replace(text, " ");
+        text = LineEdgesRegex().Replace(text, "\n");
+        return BlankLinesRegex().Replace(text, "\n\n").Trim();
+    }
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"[\x00-\x08\x0B\x0C\x0E-\x1F￾￿]")]
+    private static partial System.Text.RegularExpressions.Regex ControlCharsRegex();
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"[ \t  -​]+")]
+    private static partial System.Text.RegularExpressions.Regex SpacesRegex();
+
+    [System.Text.RegularExpressions.GeneratedRegex(@" ?\n ?")]
+    private static partial System.Text.RegularExpressions.Regex LineEdgesRegex();
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"\n{3,}")]
+    private static partial System.Text.RegularExpressions.Regex BlankLinesRegex();
+
+    /// <summary>Der Text aller Seiten mit Seitenmarken – höchstens <see cref="SummaryMaxChars"/> Zeichen; zurück kommt auch, wie viele Seiten
+    /// hineinpassten. Bei großen Dateien zeigt die Seitenleiste den Fortschritt.</summary>
+    private async Task<(string Text, int Pages)> ReadDocumentTextAsync(PdfiumDocument doc, string heading, CancellationToken cancel)
+    {
+        System.Text.StringBuilder text = new();
+        var shownAt = Environment.TickCount64;
+        for (var page = 0; page < doc.PageCount; page++)
+        {
+            cancel.ThrowIfCancellationRequested();
+            var count = await doc.CharCountAsync(page);
+            var pageText = count > 0 ? CleanPageText(await doc.TextAsync(page, 0, count)) : string.Empty;
+            var entry = $"[Page {page + 1}]\n{pageText}\n\n";
+            if (text.Length + entry.Length > SummaryMaxChars)
+            {
+                if (page > 0) { return (text.ToString(), page); }
+                entry = entry[..SummaryMaxChars]; // eine einzige riesige Seite
+            }
+            text.Append(entry);
+            if (Environment.TickCount64 - shownAt > 250 && page < doc.PageCount - 1)
+            {
+                summaryPanel.ShowStatus(string.Format(Lng.T("Der Text wird gelesen… (Seite {0} von {1})"), page + 1, doc.PageCount), busy: true, heading: heading);
+                shownAt = Environment.TickCount64;
+            }
+        }
+        cancel.ThrowIfCancellationRequested();
+        return (text.ToString(), doc.PageCount);
+    }
+
     // ------------------------------------------------------------------ Lesezeichen-Editor (nicht-modal, an die Anzeige gekoppelt)
 
     // Der Editor bleibt offen, während man in der Anzeige blättert (Wunsch vom 04.10.2026): Markieren eines Eintrags blättert dorthin,
@@ -2748,7 +3065,7 @@ public partial class MainForm : Form
     }
 
     /// <summary>Speichern der Anzeige (Strg+S, „Speichern“, Rückfrage beim Schließen oder Dateiwechsel) bei schreibgeschützter Datei: Schreibschutz
-    /// aufheben oder „Speichern unter…“ (seit 02.11.2026, Wunsch Wilhelms – eine schreibgeschützte Datei dient oft als Vorlage, etwa ein
+    /// aufheben oder „Speichern unter…“ (seit 02.11.2026, Wunsch des Autors – eine schreibgeschützte Datei dient oft als Vorlage, etwa ein
     /// Formular für jeden Monat; vorher bot die Rückfrage nur das Aufheben an). Vorgabe ist „Speichern unter…“, damit Eingabe die Vorlage nicht
     /// überschreibt. Null: nicht schreibgeschützt oder Schutz aufgehoben – normal speichern; true: „Speichern unter…“; false: abgebrochen.</summary>
     private bool? AskReadOnlySave()
@@ -3312,6 +3629,7 @@ public partial class MainForm : Form
         // sonst fragte das Neuladen erneut nach dem Kennwort, und eine Datei mit Benutzerkennwort galt als „nur Besitzerkennwort“
         // – der Eigenschaften-Dialog hätte dann statt des Kennworts nur „Einschränkungen aufheben“ angeboten (Review 04.10.2026)
         if (passwords.Remove(oldPath, out var password)) { passwords[newPath] = password; }
+        MoveSummaries(oldPath, newPath);
         settings.ReloadSharedLists(); // parallel laufende Instanzen nicht überschreiben
         settings.MoveFavorites(oldPath, newPath);
         settings.MoveLastPage(oldPath, newPath);
@@ -3339,7 +3657,7 @@ public partial class MainForm : Form
     private const int ViewUndoLimit = 20;                       // so viele Stände höchstens im Speicher (je ein vollständiges PDF) …
     private const long ViewUndoBytesLimit = 256L * 1024 * 1024; // … und zusammen höchstens so groß – ein 80-MB-Handbuch hätte sonst 1,6 GB belegt (Review 04.10.2026)
 
-    // Wiederherstellen (seit 15.10.2026, Wunsch Wilhelms): Strg+Z merkt vor dem Zurücknehmen den Stand danach in viewRedo, Strg+Y (auch Strg+Umschalt+Z)
+    // Wiederherstellen (seit 15.10.2026, Wunsch des Autors): Strg+Z merkt vor dem Zurücknehmen den Stand danach in viewRedo, Strg+Y (auch Strg+Umschalt+Z)
     // bzw. der Knopf neben Rückgängig zeigt ihn wieder an. Nur für die ungespeicherten Schritte der Anzeige – Dateiaktionen (Löschen,
     // Verschieben, Umbenennen, Bearbeiten-Menü) haben keins. Jeder neue Schritt, jede andere Änderung im Dokument (auch eine Formulareingabe),
     // Speichern und jedes Laden leeren die Liste.
@@ -3518,7 +3836,7 @@ public partial class MainForm : Form
         action();
     }
 
-    /// <summary>Ein Bild öffnen (seit 10.10.2026, Wunsch Wilhelms nach Acrobats Vorbild, Variante „gleich als Datei“): aus „Foto.jpg“ wird
+    /// <summary>Ein Bild öffnen (seit 10.10.2026, Wunsch des Autors nach Acrobats Vorbild, Variante „gleich als Datei“): aus „Foto.jpg“ wird
     /// „Foto.pdf“ im selben Ordner, eine Seite in Bildgröße (<see cref="PdfEditService.CreatePdfFromImage"/>). Gibt es den Namen schon,
     /// wird gefragt: die vorhandene Datei öffnen oder als „Foto (2).pdf“ anlegen. Acrobat hält die neue PDF bis zum Speichern im Speicher –
     /// in PDFlight setzen Verschieben, Umbenennen, Blättern und Rückgängig eine Datei voraus. Null = abgebrochen oder gescheitert (gemeldet).</summary>
@@ -3553,7 +3871,7 @@ public partial class MainForm : Form
     }
 
     /// <summary>Keine PDF (etwa ein Foto über „Öffnen mit“, Ablegen oder einen getippten Namen im Öffnen-Dialog): eigene Meldung statt
-    /// PDFiums Fehlertext, nur mit OK (Wortlaut Wilhelms vom 10.10.2026; „PDFlight beenden“ war kurz dabei). Eine angezeigte Datei bleibt
+    /// PDFiums Fehlertext, nur mit OK (Wortlaut des Autors vom 10.10.2026; „PDFlight beenden“ war kurz dabei). Eine angezeigte Datei bleibt
     /// unverändert.</summary>
     private void ShowNotPdfMessage(string path) =>
         // über TaskDlg wie alle Meldungen (Review 11.10.2026); ohne Überschrift – der Satz steht als Text wie bisher
@@ -3735,7 +4053,7 @@ public partial class MainForm : Form
     /// Besitzerkennwort nicht neu schreiben).</summary>
     private string? ShownPdfALevel => !Encrypted && ShownDocument is { } doc ? PdfStatus.DetectPdfALevel(doc.Bytes) : null;
 
-    /// <summary>Speichern der Anzeige bei einer als PDF/A gekennzeichneten Datei (seit 03.11.2026, Wunsch Wilhelms): PDFium schrieb die
+    /// <summary>Speichern der Anzeige bei einer als PDF/A gekennzeichneten Datei (seit 03.11.2026, Wunsch des Autors): PDFium schrieb die
     /// Kennzeichnung bisher unverändert mit – auch wenn die Datei danach nicht mehr dem Standard entsprach (Freitext und Stempel mit nicht
     /// eingebetteter Helvetica, Halbtransparenz in PDF/A-1). PDFlight prüft das nicht, deshalb entfällt sie beim Speichern von Änderungen
     /// immer. Vorgabe ist „Speichern unter…“, damit das Archiv-Original bleibt; „In dieser Datei speichern“ schreibt über PDFsharp ohne
@@ -4088,7 +4406,7 @@ public partial class MainForm : Form
 
     private void MnuViewSelectAll_Click(object? sender, EventArgs e) => pageView.SelectAll();
 
-    // Bilder der Seite (Kontextmenü, seit 10.10.2026, Wunsch Wilhelms): „Bild speichern…“ und „Bild kopieren“ erscheinen nur, wenn der
+    // Bilder der Seite (Kontextmenü, seit 10.10.2026, Wunsch des Autors): „Bild speichern…“ und „Bild kopieren“ erscheinen nur, wenn der
     // Rechtsklick ein Bild getroffen hat (PageView.ImageUnderMouse). Das Hauptprogramm dekodiert dabei nie Bilddaten aus der PDF: JPEG-Bytes
     // gehen unverändert in die Datei, PNG und Zwischenablage entstehen aus den Pixeln, die das Hilfsprogramm liefert.
 
@@ -4183,11 +4501,11 @@ public partial class MainForm : Form
 
     // ------------------------------------------------------------------ Kommentare (Notizen wie in Edge)
 
-    // Kommentare (seit 10.10.2026, Wunsch Wilhelms nach Edges Vorbild, ohne Antworten): Notiz-Anmerkungen (/Text) mit einer gelben Karte
+    // Kommentare (seit 10.10.2026, Wunsch des Autors nach Edges Vorbild, ohne Antworten): Notiz-Anmerkungen (/Text) mit einer gelben Karte
     // (Controls\NoteCard, Kind der Seitenansicht). Ein Klick aufs Symbol zeigt die Karte, „Kommentar hinzufügen“ im Kontextmenü legt einen
     // an – mit markiertem Text wird dieser hervorgehoben und das Symbol über den Anfang gesetzt, sonst an die Stelle des Rechtsklicks.
     // Angelegt wird erst beim Übernehmen eines nicht leeren Texts; alles ungespeichert wie die anderen Anmerkungen, je ein Rückgängig-Schritt
-    // (Hervorhebung und Kommentar zusammen einer). „Löschen“ entfernt nur den Kommentar (Entscheidung Wilhelms).
+    // (Hervorhebung und Kommentar zusammen einer). „Löschen“ entfernt nur den Kommentar (Entscheidung des Autors).
     private (int Page, int Number, RectangleF Icon)? noteShown; // offene Karte: Seite, Nummer (-1 = noch nicht angelegt), Symbol als Anteil der Seite
     private string noteOriginalText = string.Empty;
     private List<(int Page, int Start, int Count)> noteHighlight = []; // neuer Kommentar an markiertem Text: diese Bereiche beim Übernehmen hervorheben
@@ -4419,6 +4737,9 @@ public partial class MainForm : Form
         UpdateOutlineStripIcons();
         attachmentPanel.ApplyTheme(outlineView.BackColor, outlineView.ForeColor, dark ? Color.FromArgb(165, 165, 165) : SystemColors.GrayText,
             outlineView.SelectionBackColor, outlineView.HoverBackColor, ViewerIconColor, new SidebarRailRenderer(dark));
+        summaryPanel.ApplyTheme(dark, outlineView.BackColor, outlineView.ForeColor, dark ? Color.FromArgb(165, 165, 165) : SystemColors.GrayText, ViewerIconColor,
+            dark ? SidebarRailRenderer.Accent(dark) : Color.FromArgb(0, 102, 204), dark ? Color.FromArgb(255, 140, 130) : Color.Firebrick,
+            new SidebarRailRenderer(dark), new ViewerStripRenderer(dark));
         viewerStrip.Renderer = new ViewerStripRenderer(dark) { IsActiveMode = IsActiveModeItem }; // hell wie der Standard, aktive Modi wie Edge
         sidebarStrip.Renderer = new SidebarRailRenderer(dark); // senkrechte Umschaltleiste wie in Chrome, in beiden Modi
         // Streifen zum Auf- und Zuklappen wie bei Acrobat: etwas dunkler als die Fläche neben den Seiten (hell 232, dunkel 51)
@@ -4795,7 +5116,7 @@ public partial class MainForm : Form
     // Öffnen nicht –, gespeichert wird sie beim Beenden.
     private bool sidebarUserVisible, sidebarUserBookmarks;
 
-    // Seit 15.10.2026 (Wunsch Wilhelms) haben Anmerkungen Vorrang, auch vor Lesezeichen: Findet das erste Lesen der Anmerkungen welche,
+    // Seit 15.10.2026 (Wunsch des Autors) haben Anmerkungen Vorrang, auch vor Lesezeichen: Findet das erste Lesen der Anmerkungen welche,
     // geht die Seitenleiste mit der Anmerkungsliste auf (RefreshAnnotations → DecideAnnotationSidebar). Bis dahin gilt die Regel oben;
     // eine schon offene Anmerkungsliste bleibt bis zum Ergebnis stehen und weicht ihr nur, wenn die neue Datei keine Anmerkungen hat.
     private bool? annotationSidebarPending; // neue Datei, Anmerkungen noch nicht gelesen: hat sie Lesezeichen?
@@ -4892,12 +5213,14 @@ public partial class MainForm : Form
         thumbnailGrid.Visible = view == SidebarView.Thumbnails;
         annotationPanel.Visible = view == SidebarView.Annotations;
         attachmentPanel.Visible = view == SidebarView.Attachments;
-        Control shown = view switch { SidebarView.Outline => panelOutline, SidebarView.Annotations => annotationPanel, SidebarView.Attachments => attachmentPanel, _ => thumbnailGrid };
+        summaryPanel.Visible = view == SidebarView.Summary;
+        Control shown = view switch { SidebarView.Outline => panelOutline, SidebarView.Annotations => annotationPanel, SidebarView.Attachments => attachmentPanel, SidebarView.Summary => summaryPanel, _ => thumbnailGrid };
         if (hadFocus && !shown.ContainsFocus) { pageView.Focus(); } // die Ansicht mit dem Fokus ist verschwunden – ein verborgenes Fenster behielte ihn
         UpdateSidebarIcons();
         UpdateAnnotationRail();
         if (AnnotationListShown && !listWasShown) { RefreshAnnotations(); }
         if (AttachmentListShown && !attachmentsWereShown) { _ = RefreshAttachmentsAsync(); }
+        if (view == SidebarView.Summary) { UpdateSummaryView(); }
     }
 
     /// <summary>Symbole der Umschaltleiste am linken Fensterrand (wie Chrome und Acrobat): die gewählte Ansicht in der Akzentfarbe – nur bei
@@ -4909,9 +5232,10 @@ public partial class MainForm : Form
         btnSideBookmarks.Checked = open && sidebarView == SidebarView.Outline;
         btnSideAnnotations.Checked = open && sidebarView == SidebarView.Annotations;
         btnSideAttachments.Checked = open && sidebarView == SidebarView.Attachments;
+        btnSideSummary.Checked = open && sidebarView == SidebarView.Summary;
         sidebarStrip.ImageScalingSize = toolStrip.ImageScalingSize;
         var dark = settings.DarkViewer;
-        foreach (var (button, glyph) in new[] { (btnSideThumbnails, ToolbarIcons.Thumbnails), (btnSideBookmarks, ToolbarIcons.Outline), (btnSideAnnotations, ToolbarIcons.ManageAnnotations), (btnSideAttachments, ToolbarIcons.Attach) })
+        foreach (var (button, glyph) in new[] { (btnSideThumbnails, ToolbarIcons.Thumbnails), (btnSideBookmarks, ToolbarIcons.Outline), (btnSideAnnotations, ToolbarIcons.ManageAnnotations), (btnSideAttachments, ToolbarIcons.Attach), (btnSideSummary, ToolbarIcons.DictionaryCloud) })
         {
             var color = button.Checked ? SidebarRailRenderer.Accent(dark) : ViewerIconColor;
             button.Image = ToolbarIcons.FontAvailable ? ToolbarIcons.Get(glyph, toolStrip.ImageScalingSize, color) : null;
@@ -5046,7 +5370,7 @@ public partial class MainForm : Form
         }
     }
 
-    /// <summary>„Alles aufklappen“/„Alles zuklappen“ der Kopfzeile (seit 15.10.2026 als Knöpfe, vorher hinter „…“ – Wunsch Wilhelms): nur mit
+    /// <summary>„Alles aufklappen“/„Alles zuklappen“ der Kopfzeile (seit 15.10.2026 als Knöpfe, vorher hinter „…“ – Wunsch des Autors): nur mit
     /// Unterpunkten frei und nur, wenn sie etwas ändern würden. „Bis Ebene 2/3“ bleibt im Kontextmenü.</summary>
     private void UpdateOutlineButtons()
     {
@@ -5492,7 +5816,7 @@ public partial class MainForm : Form
         }
     }
 
-    /// <summary>Esc mit der Einstellung „Esc schließt das Dokument, dann das Programm“ (seit 24.10.2026, Wunsch Wilhelms; bis dahin beendete
+    /// <summary>Esc mit der Einstellung „Esc schließt das Dokument, dann das Programm“ (seit 24.10.2026, Wunsch des Autors; bis dahin beendete
     /// 2× Esc innerhalb von 1,5 s): Jedes Esc erledigt nur den ersten zutreffenden Schritt – offene Notizkarte schließen, Markierung, Bild
     /// oder Anmerkungsrahmen aufheben, Suchtext der Startseite leeren, dann das Dokument schließen (mit der üblichen Rückfrage) und erst
     /// auf der Startseite das Programm beenden. Vorrang haben schon in ResolveShortcut Stelle wählen, Verschieben, Anmerkungsmodi, Suche
@@ -5536,7 +5860,7 @@ public partial class MainForm : Form
     private void FocusPageView()
     {
         if (startPageShown) { FocusStartPage(); return; } // ohne Dokument: die Liste der Startseite (Pfeiltasten, Enter)
-        if (IsDisposed || !pageView.CanFocus || pageView.Focused || textPage.Focused || textSearch.Focused || noteCard.ContainsFocus) { return; }
+        if (IsDisposed || !pageView.CanFocus || pageView.Focused || textPage.Focused || textSearch.Focused || noteCard.ContainsFocus || summaryPanel.TextFocused) { return; }
         if (ActiveControl is TextBoxBase || annotationPanel.ContainsFocus && annotationPanel.ActiveControl is TextBoxBase) { return; }
         pageView.Focus();
     }
@@ -5550,7 +5874,7 @@ public partial class MainForm : Form
     }
 
     /// <summary>Getippt wird gerade in ein Textfeld: Seitenfeld, Zoomfeld, Suchfeld oder ein Formularfeld der angezeigten Seite.</summary>
-    private bool TextInputFocused => textPage.Focused || textSearch.Focused || comboZoom.Focused || noteCard.ContainsFocus || startPage.SearchFocused || (pageView.Focused && pageView.FormFocused);
+    private bool TextInputFocused => textPage.Focused || textSearch.Focused || comboZoom.Focused || noteCard.ContainsFocus || startPage.SearchFocused || summaryPanel.TextFocused || (pageView.Focused && pageView.FormFocused);
 
     /// <summary>Tasten, die ein Textfeld selbst braucht (Bearbeiten, Markieren, Zwischenablage, Esc) – dort haben sie Vorrang vor den
     /// Kürzeln. Strg+Umschalt+Entf (Datei löschen) bleibt ein Kürzel.</summary>

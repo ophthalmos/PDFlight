@@ -1036,4 +1036,78 @@ signatures.dat can only be read with the current Windows user account on this PC
   <data name="Berechnete Felder sind vielleicht nicht mehr aktuell. Du kannst weiter eingeben und speichern." xml:space="preserve">
     <value>Calculated fields may no longer be up to date. You can keep entering data and save.</value>
   </data>
+  <data name="&amp;Prüfen" xml:space="preserve"><value>&amp;Check</value></data>
+  <data name="Abgebrochen." xml:space="preserve"><value>Cancelled.</value></data>
+  <data name="Anfrage abbrechen" xml:space="preserve"><value>Cancel request</value></data>
+  <data name="API-&amp;Schlüssel:" xml:space="preserve"><value>API &amp;key:</value></data>
+  <data name="Art der Zusammenfassung" xml:space="preserve"><value>Type of summary</value></data>
+  <data name="Das kostenlose Kontingent ist erschöpft." xml:space="preserve"><value>The free quota is used up.</value></data>
+  <data name="Das kostenlose Kontingent für {0} ist erschöpft (Grenze: {1})." xml:space="preserve"><value>The free quota for {0} is used up (limit: {1}).</value></data>
+  <data name="Google meldet:" xml:space="preserve"><value>Google reports:</value></data>
+  <data name="{0} antwortet nicht – PDFlight versucht ein anderes Modell…" xml:space="preserve"><value>{0} is not answering – PDFlight is trying another model…</value></data>
+  <data name="Für deinen Schlüssel steht gerade kein passendes Gemini-Modell zur Verfügung." xml:space="preserve"><value>No suitable Gemini model is currently available for your key.</value></data>
+  <data name="Trage zuerst in den Einstellungen (Reiter „Google AI“) deinen Gemini-API-Schlüssel ein." xml:space="preserve"><value>First enter your Gemini API key in the settings (“Google AI” tab).</value></data>
+  <data name="Das Guthaben des Google-Projekts ist aufgebraucht – das Projekt ist mit einem Rechnungskonto verbunden und nutzt nicht das kostenlose Kontingent." xml:space="preserve"><value>The Google project’s credit is used up – the project is linked to a billing account and does not use the free quota.</value></data>
+  <data name="Lade in AI Studio Guthaben auf, oder trenne das Projekt vom Rechnungskonto bzw. nimm einen Schlüssel aus einem Projekt ohne Rechnungskonto (ai.studio/projects)." xml:space="preserve"><value>Top up the credit in AI Studio, or unlink the project from the billing account or use a key from a project without a billing account (ai.studio/projects).</value></data>
+  <data name="Das kostenlose Minutenkontingent ({0} Token) reicht für diesen Text gerade nicht." xml:space="preserve"><value>The free per-minute quota ({0} tokens) is not enough for this text right now.</value></data>
+  <data name="Das kostenlose Minutenkontingent reicht für diesen Text gerade nicht." xml:space="preserve"><value>The free per-minute quota is not enough for this text right now.</value></data>
+  <data name="Das kostenlose Tageskontingent für {0} ist aufgebraucht ({1} Anfragen am Tag)." xml:space="preserve"><value>The free daily quota for {0} is used up ({1} requests per day).</value></data>
+  <data name="Das kostenlose Tageskontingent ist aufgebraucht." xml:space="preserve"><value>The free daily quota is used up.</value></data>
+  <data name="Für {0} gibt es kein kostenloses Kontingent." xml:space="preserve"><value>There is no free quota for {0}.</value></data>
+  <data name="Google gibt es heute um {0} Uhr wieder frei." xml:space="preserve"><value>Google releases it again today at {0}.</value></data>
+  <data name="Google gibt es morgen um {0} Uhr wieder frei." xml:space="preserve"><value>Google releases it again tomorrow at {0}.</value></data>
+  <data name="Versuche es in {0} Sekunden noch einmal." xml:space="preserve"><value>Try again in {0} seconds.</value></data>
+  <data name="Versuche es in einer Minute noch einmal." xml:space="preserve"><value>Try again in a minute.</value></data>
+  <data name="Versuche es später noch einmal." xml:space="preserve"><value>Try again later.</value></data>
+  <data name="Zu viele Anfragen in kurzer Zeit." xml:space="preserve"><value>Too many requests in a short time.</value></data>
+  <data name="Der API-Schlüssel ist ungültig." xml:space="preserve"><value>The API key is invalid.</value></data>
+  <data name="Der Schlüssel ist gültig." xml:space="preserve"><value>The key is valid.</value></data>
+  <data name="Der Schlüssel wird geprüft…" xml:space="preserve"><value>Checking the key…</value></data>
+  <data name="Der Text wird gelesen…" xml:space="preserve"><value>Reading the text…</value></data>
+  <data name="Der Text wird gelesen… (Seite {0} von {1})" xml:space="preserve"><value>Reading the text… (page {0} of {1})</value></data>
+  <data name="Die Anfrage ist fehlgeschlagen: {0}" xml:space="preserve"><value>The request failed: {0}</value></data>
+  <data name="Die Datei enthält keine Textschicht, die sich zusammenfassen ließe." xml:space="preserve"><value>The file has no text layer that could be summarized.</value></data>
+  <data name="Die Gemini API ist in deinem Land kostenlos nicht verfügbar." xml:space="preserve"><value>The Gemini API is not available free of charge in your country.</value></data>
+  <data name="Einfach erklärt" xml:space="preserve"><value>Explained simply</value></data>
+  <data name="Erstellen" xml:space="preserve"><value>Create</value></data>
+  <data name="Erstellt mit {0} aus den Seiten 1–{1} von {2} – längere Dokumente werden gekürzt." xml:space="preserve"><value>Created with {0} from pages 1–{1} of {2} – longer documents are shortened.</value></data>
+  <data name="Erstellt mit {0}." xml:space="preserve"><value>Created with {0}.</value></data>
+  <data name="Optional kann PDFlight in der Seitenleiste eine generative Zusammenfassung des PDF-Inhalts anbieten. Diese Funktionalität wird nur aktiviert und angezeigt, wenn ein gültiger API-Schlüssel eingetragen ist, den du selbst besorgen musst." xml:space="preserve"><value>Optionally, PDFlight can offer a generative summary of the PDF content in the sidebar. This feature is only enabled and shown once a valid API key has been entered, which you have to get yourself.</value></data>
+  <data name="Der Schlüssel wird verschlüsselt in {0} gespeichert und ist nur mit deinem Windows-Benutzerkonto auf diesem PC lesbar." xml:space="preserve"><value>The key is stored encrypted in {0} and can only be read with your Windows user account on this PC.</value></data>
+  <data name="Der Schlüssel wird beim Klick auf „OK“ entfernt." xml:space="preserve"><value>The key will be removed when you click “OK”.</value></data>
+  <data name="Ohne Rechnungskonto im Google-Projekt bleibt die Nutzung kostenlos: Ist das Kontingent erschöpft, lehnt Google weitere Anfragen ab." xml:space="preserve"><value>Without a billing account in the Google project, use stays free: once the quota is used up, Google rejects further requests.</value></data>
+  <data name="Schicke keine vertraulichen Daten oder Texte." xml:space="preserve"><value>Do not send confidential data or texts.</value></data>
+  <data name="Schlüssel entfernen" xml:space="preserve"><value>Remove key</value></data>
+  <data name="Für die Zusammenfassung schickt PDFlight den Text von „{0}“ an Google Gemini. Schicke keine vertraulichen Daten oder Texte." xml:space="preserve"><value>For the summary, PDFlight sends the text of “{0}” to Google Gemini. Do not send confidential data or texts.</value></data>
+  <data name="Gemini antwortet…" xml:space="preserve"><value>Gemini is answering…</value></data>
+  <data name="Als Word-Datei (RTF) speichern" xml:space="preserve"><value>Save as Word file (RTF)</value></data>
+  <data name="Die Zusammenfassung wurde gespeichert." xml:space="preserve"><value>The summary has been saved.</value></data>
+  <data name="Frage senden (Eingabe)" xml:space="preserve"><value>Send question (Enter)</value></data>
+  <data name="Frage zum Dokument…" xml:space="preserve"><value>Question about the document…</value></data>
+  <data name="S. {0}" xml:space="preserve"><value>p. {0}</value></data>
+  <data name="S. {0}–{1}" xml:space="preserve"><value>pp. {0}–{1}</value></data>
+  <data name="Speichern…" xml:space="preserve"><value>Save…</value></data>
+  <data name="Word-Datei (*.rtf)|*.rtf" xml:space="preserve"><value>Word file (*.rtf)|*.rtf</value></data>
+  <data name="Google hat die Anfrage abgelehnt ({0})." xml:space="preserve"><value>Google rejected the request ({0}).</value></data>
+  <data name="Google hat keine Antwort geliefert ({0})." xml:space="preserve"><value>Google did not return an answer ({0}).</value></data>
+  <data name="Google hat keine Antwort geliefert." xml:space="preserve"><value>Google did not return an answer.</value></data>
+  <data name="Google hat nicht rechtzeitig geantwortet." xml:space="preserve"><value>Google did not answer in time.</value></data>
+  <data name="Google ist gerade überlastet – versuche es später noch einmal." xml:space="preserve"><value>Google is currently overloaded – try again later.</value></data>
+  <data name="Google verweigert den Zugriff mit diesem Schlüssel." xml:space="preserve"><value>Google denies access with this key.</value></data>
+  <data name="Keine Verbindung zu Google – bist du mit dem Internet verbunden?" xml:space="preserve"><value>No connection to Google – are you connected to the internet?</value></data>
+  <data name="KI" xml:space="preserve"><value>AI</value></data>
+  <data name="KI-Antworten können unrichtig sein." xml:space="preserve"><value>AI answers may be inaccurate.</value></data>
+  <data name="KI-Zusammenfassung" xml:space="preserve"><value>AI summary</value></data>
+  <data name="Klicke auf „Erstellen“, um den Text dieser Datei von Google Gemini zusammenfassen zu lassen, oder stelle unten eine Frage dazu." xml:space="preserve"><value>Click “Create” to have Google Gemini summarize the text of this file, or ask a question about it below.</value></data>
+  <data name="Kurzfassung" xml:space="preserve"><value>Short version</value></data>
+  <data name="Neu beginnen" xml:space="preserve"><value>Start over</value></data>
+  <data name="Nicht mehr fragen" xml:space="preserve"><value>Don’t ask again</value></data>
+  <data name="Nutzungsbedingungen" xml:space="preserve"><value>Terms of use</value></data>
+  <data name="Schlüssel kostenlos bei Google AI Studio erstellen" xml:space="preserve"><value>Create a free key in Google AI Studio</value></data>
+  <data name="Text an Google senden?" xml:space="preserve"><value>Send the text to Google?</value></data>
+  <data name="Sicherheitsabfrage vor dem Senden an Google an&amp;zeigen" xml:space="preserve"><value>Show a confirmation &amp;before sending to Google</value></data>
+  <data name="Zahlen, Daten, Fristen" xml:space="preserve"><value>Figures, dates, deadlines</value></data>
+  <data name="Zusammenfassung" xml:space="preserve"><value>Summary</value></data>
+  <data name="Zusammenfassung erstellen" xml:space="preserve"><value>Create summary</value></data>
+  <data name="Zusammenfassung kopieren" xml:space="preserve"><value>Copy summary</value></data>
 </root>

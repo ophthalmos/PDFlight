@@ -1036,4 +1036,78 @@ signatures.dat n’est lisible qu’avec le compte utilisateur Windows actuel su
   <data name="Berechnete Felder sind vielleicht nicht mehr aktuell. Du kannst weiter eingeben und speichern." xml:space="preserve">
     <value>Les champs calculés ne sont peut-être plus à jour. Tu peux continuer à saisir et enregistrer.</value>
   </data>
+  <data name="&amp;Prüfen" xml:space="preserve"><value>&amp;Vérifier</value></data>
+  <data name="Abgebrochen." xml:space="preserve"><value>Annulé.</value></data>
+  <data name="Anfrage abbrechen" xml:space="preserve"><value>Annuler la requête</value></data>
+  <data name="API-&amp;Schlüssel:" xml:space="preserve"><value>&amp;Clé API :</value></data>
+  <data name="Art der Zusammenfassung" xml:space="preserve"><value>Type de résumé</value></data>
+  <data name="Das kostenlose Kontingent ist erschöpft." xml:space="preserve"><value>Le quota gratuit est épuisé.</value></data>
+  <data name="Das kostenlose Kontingent für {0} ist erschöpft (Grenze: {1})." xml:space="preserve"><value>Le quota gratuit pour {0} est épuisé (limite : {1}).</value></data>
+  <data name="Google meldet:" xml:space="preserve"><value>Message de Google :</value></data>
+  <data name="{0} antwortet nicht – PDFlight versucht ein anderes Modell…" xml:space="preserve"><value>{0} ne répond pas – PDFlight essaie un autre modèle…</value></data>
+  <data name="Für deinen Schlüssel steht gerade kein passendes Gemini-Modell zur Verfügung." xml:space="preserve"><value>Aucun modèle Gemini adapté n’est disponible pour ta clé en ce moment.</value></data>
+  <data name="Trage zuerst in den Einstellungen (Reiter „Google AI“) deinen Gemini-API-Schlüssel ein." xml:space="preserve"><value>Saisis d’abord ta clé API Gemini dans les paramètres (onglet « Google AI »).</value></data>
+  <data name="Das Guthaben des Google-Projekts ist aufgebraucht – das Projekt ist mit einem Rechnungskonto verbunden und nutzt nicht das kostenlose Kontingent." xml:space="preserve"><value>Le crédit du projet Google est épuisé – le projet est associé à un compte de facturation et n’utilise pas le quota gratuit.</value></data>
+  <data name="Lade in AI Studio Guthaben auf, oder trenne das Projekt vom Rechnungskonto bzw. nimm einen Schlüssel aus einem Projekt ohne Rechnungskonto (ai.studio/projects)." xml:space="preserve"><value>Recharge le crédit dans AI Studio, ou dissocie le projet du compte de facturation, ou utilise une clé d’un projet sans compte de facturation (ai.studio/projects).</value></data>
+  <data name="Das kostenlose Minutenkontingent ({0} Token) reicht für diesen Text gerade nicht." xml:space="preserve"><value>Le quota gratuit par minute ({0} jetons) ne suffit pas pour ce texte en ce moment.</value></data>
+  <data name="Das kostenlose Minutenkontingent reicht für diesen Text gerade nicht." xml:space="preserve"><value>Le quota gratuit par minute ne suffit pas pour ce texte en ce moment.</value></data>
+  <data name="Das kostenlose Tageskontingent für {0} ist aufgebraucht ({1} Anfragen am Tag)." xml:space="preserve"><value>Le quota gratuit journalier pour {0} est épuisé ({1} requêtes par jour).</value></data>
+  <data name="Das kostenlose Tageskontingent ist aufgebraucht." xml:space="preserve"><value>Le quota gratuit journalier est épuisé.</value></data>
+  <data name="Für {0} gibt es kein kostenloses Kontingent." xml:space="preserve"><value>Il n’y a pas de quota gratuit pour {0}.</value></data>
+  <data name="Google gibt es heute um {0} Uhr wieder frei." xml:space="preserve"><value>Google le rétablit aujourd’hui à {0}.</value></data>
+  <data name="Google gibt es morgen um {0} Uhr wieder frei." xml:space="preserve"><value>Google le rétablit demain à {0}.</value></data>
+  <data name="Versuche es in {0} Sekunden noch einmal." xml:space="preserve"><value>Réessaie dans {0} secondes.</value></data>
+  <data name="Versuche es in einer Minute noch einmal." xml:space="preserve"><value>Réessaie dans une minute.</value></data>
+  <data name="Versuche es später noch einmal." xml:space="preserve"><value>Réessaie plus tard.</value></data>
+  <data name="Zu viele Anfragen in kurzer Zeit." xml:space="preserve"><value>Trop de requêtes en peu de temps.</value></data>
+  <data name="Der API-Schlüssel ist ungültig." xml:space="preserve"><value>La clé API n’est pas valide.</value></data>
+  <data name="Der Schlüssel ist gültig." xml:space="preserve"><value>La clé est valide.</value></data>
+  <data name="Der Schlüssel wird geprüft…" xml:space="preserve"><value>Vérification de la clé…</value></data>
+  <data name="Der Text wird gelesen…" xml:space="preserve"><value>Lecture du texte…</value></data>
+  <data name="Der Text wird gelesen… (Seite {0} von {1})" xml:space="preserve"><value>Lecture du texte… (page {0} sur {1})</value></data>
+  <data name="Die Anfrage ist fehlgeschlagen: {0}" xml:space="preserve"><value>La requête a échoué : {0}</value></data>
+  <data name="Die Datei enthält keine Textschicht, die sich zusammenfassen ließe." xml:space="preserve"><value>Le fichier ne contient pas de couche de texte à résumer.</value></data>
+  <data name="Die Gemini API ist in deinem Land kostenlos nicht verfügbar." xml:space="preserve"><value>L’API Gemini n’est pas disponible gratuitement dans ton pays.</value></data>
+  <data name="Einfach erklärt" xml:space="preserve"><value>Expliqué simplement</value></data>
+  <data name="Erstellen" xml:space="preserve"><value>Créer</value></data>
+  <data name="Erstellt mit {0} aus den Seiten 1–{1} von {2} – längere Dokumente werden gekürzt." xml:space="preserve"><value>Créé avec {0} à partir des pages 1–{1} sur {2} – les documents plus longs sont raccourcis.</value></data>
+  <data name="Erstellt mit {0}." xml:space="preserve"><value>Créé avec {0}.</value></data>
+  <data name="Optional kann PDFlight in der Seitenleiste eine generative Zusammenfassung des PDF-Inhalts anbieten. Diese Funktionalität wird nur aktiviert und angezeigt, wenn ein gültiger API-Schlüssel eingetragen ist, den du selbst besorgen musst." xml:space="preserve"><value>En option, PDFlight peut proposer dans la barre latérale un résumé génératif du contenu PDF. Cette fonction n’est activée et affichée que si une clé API valide est saisie, que tu dois obtenir toi-même.</value></data>
+  <data name="Der Schlüssel wird verschlüsselt in {0} gespeichert und ist nur mit deinem Windows-Benutzerkonto auf diesem PC lesbar." xml:space="preserve"><value>La clé est enregistrée chiffrée dans {0} et ne peut être lue qu’avec ton compte utilisateur Windows sur ce PC.</value></data>
+  <data name="Der Schlüssel wird beim Klick auf „OK“ entfernt." xml:space="preserve"><value>La clé sera supprimée quand tu cliqueras sur « OK ».</value></data>
+  <data name="Ohne Rechnungskonto im Google-Projekt bleibt die Nutzung kostenlos: Ist das Kontingent erschöpft, lehnt Google weitere Anfragen ab." xml:space="preserve"><value>Sans compte de facturation dans le projet Google, l’utilisation reste gratuite : une fois le quota épuisé, Google refuse les requêtes suivantes.</value></data>
+  <data name="Schicke keine vertraulichen Daten oder Texte." xml:space="preserve"><value>N’envoie pas de données ou de textes confidentiels.</value></data>
+  <data name="Schlüssel entfernen" xml:space="preserve"><value>Supprimer la clé</value></data>
+  <data name="Für die Zusammenfassung schickt PDFlight den Text von „{0}“ an Google Gemini. Schicke keine vertraulichen Daten oder Texte." xml:space="preserve"><value>Pour le résumé, PDFlight envoie le texte de « {0} » à Google Gemini. N’envoie pas de données ou de textes confidentiels.</value></data>
+  <data name="Gemini antwortet…" xml:space="preserve"><value>Gemini répond…</value></data>
+  <data name="Als Word-Datei (RTF) speichern" xml:space="preserve"><value>Enregistrer en fichier Word (RTF)</value></data>
+  <data name="Die Zusammenfassung wurde gespeichert." xml:space="preserve"><value>Le résumé a été enregistré.</value></data>
+  <data name="Frage senden (Eingabe)" xml:space="preserve"><value>Envoyer la question (Entrée)</value></data>
+  <data name="Frage zum Dokument…" xml:space="preserve"><value>Question sur le document…</value></data>
+  <data name="S. {0}" xml:space="preserve"><value>p. {0}</value></data>
+  <data name="S. {0}–{1}" xml:space="preserve"><value>p. {0}–{1}</value></data>
+  <data name="Speichern…" xml:space="preserve"><value>Enregistrer…</value></data>
+  <data name="Word-Datei (*.rtf)|*.rtf" xml:space="preserve"><value>Fichier Word (*.rtf)|*.rtf</value></data>
+  <data name="Google hat die Anfrage abgelehnt ({0})." xml:space="preserve"><value>Google a refusé la requête ({0}).</value></data>
+  <data name="Google hat keine Antwort geliefert ({0})." xml:space="preserve"><value>Google n’a pas fourni de réponse ({0}).</value></data>
+  <data name="Google hat keine Antwort geliefert." xml:space="preserve"><value>Google n’a pas fourni de réponse.</value></data>
+  <data name="Google hat nicht rechtzeitig geantwortet." xml:space="preserve"><value>Google n’a pas répondu à temps.</value></data>
+  <data name="Google ist gerade überlastet – versuche es später noch einmal." xml:space="preserve"><value>Google est actuellement surchargé – réessaie plus tard.</value></data>
+  <data name="Google verweigert den Zugriff mit diesem Schlüssel." xml:space="preserve"><value>Google refuse l’accès avec cette clé.</value></data>
+  <data name="Keine Verbindung zu Google – bist du mit dem Internet verbunden?" xml:space="preserve"><value>Pas de connexion à Google – es-tu connecté à Internet ?</value></data>
+  <data name="KI" xml:space="preserve"><value>IA</value></data>
+  <data name="KI-Antworten können unrichtig sein." xml:space="preserve"><value>Les réponses de l’IA peuvent être inexactes.</value></data>
+  <data name="KI-Zusammenfassung" xml:space="preserve"><value>Résumé IA</value></data>
+  <data name="Klicke auf „Erstellen“, um den Text dieser Datei von Google Gemini zusammenfassen zu lassen, oder stelle unten eine Frage dazu." xml:space="preserve"><value>Clique sur « Créer » pour faire résumer le texte de ce fichier par Google Gemini, ou pose une question à son sujet ci-dessous.</value></data>
+  <data name="Kurzfassung" xml:space="preserve"><value>Version courte</value></data>
+  <data name="Neu beginnen" xml:space="preserve"><value>Recommencer</value></data>
+  <data name="Nicht mehr fragen" xml:space="preserve"><value>Ne plus demander</value></data>
+  <data name="Nutzungsbedingungen" xml:space="preserve"><value>Conditions d’utilisation</value></data>
+  <data name="Schlüssel kostenlos bei Google AI Studio erstellen" xml:space="preserve"><value>Créer une clé gratuite dans Google AI Studio</value></data>
+  <data name="Text an Google senden?" xml:space="preserve"><value>Envoyer le texte à Google ?</value></data>
+  <data name="Sicherheitsabfrage vor dem Senden an Google an&amp;zeigen" xml:space="preserve"><value>&amp;Afficher une confirmation avant l’envoi à Google</value></data>
+  <data name="Zahlen, Daten, Fristen" xml:space="preserve"><value>Chiffres, dates, délais</value></data>
+  <data name="Zusammenfassung" xml:space="preserve"><value>Résumé</value></data>
+  <data name="Zusammenfassung erstellen" xml:space="preserve"><value>Créer le résumé</value></data>
+  <data name="Zusammenfassung kopieren" xml:space="preserve"><value>Copier le résumé</value></data>
 </root>
