@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -34,14 +35,14 @@ internal static class GeminiKeyStore
         key = key.Trim();
         Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
         if (key.Length == 0) { File.Delete(FilePath); return; }
-        var protectedBytes = DataProtection.Protect(Encoding.UTF8.GetBytes(key), Entropy) ?? throw new IOException("Der Schlüssel konnte nicht verschlüsselt werden.");
+        var protectedBytes = DataProtection.Protect(Encoding.UTF8.GetBytes(key), Entropy) ?? throw new IOException("Der API-Schlüssel konnte nicht verschlüsselt werden.");
         var temp = FilePath + ".tmp";
         File.WriteAllBytes(temp, protectedBytes);
         File.Move(temp, FilePath, overwrite: true);
     }
 }
 
-/// <summary>Wovon ein Fehler handelt – entscheidet, ob ein anderes Modell helfen kann.</summary>
+/// <summary>Wovon ein Fehler handelt – entscheidet, ob ein anderes Modell helfen kann. InvalidRequest: das Modell lehnt die Denkstufe ab.</summary>
 internal enum GeminiFailure { Other, ModelUnavailable, Overloaded, Quota, Timeout, InvalidRequest }
 
 /// <summary>Fehler einer Gemini-Anfrage mit einer Meldung für den Benutzer.</summary>
@@ -99,7 +100,7 @@ internal static partial class GeminiClient
         {
             var url = BaseUrl + "models?pageSize=1000" + (pageToken != null ? "&pageToken=" + Uri.EscapeDataString(pageToken) : string.Empty);
             using HttpRequestMessage request = new(HttpMethod.Get, url);
-            request.Headers.Add("x-goog-api-key", key.Trim());
+            AddKey(request, key);
             using var answer = await SendAsync(request, cancel);
             var root = answer.RootElement;
             if (root.TryGetProperty("models", out var list) && list.ValueKind == JsonValueKind.Array)
@@ -134,26 +135,39 @@ internal static partial class GeminiClient
             ?? models.FirstOrDefault(m => m.Contains("flash", StringComparison.OrdinalIgnoreCase) && !IsPreview(m));
     }
 
+    /// <summary>Der Schlüssel in den Kopf der Anfrage. Googles Schlüssel bestehen aus sichtbaren ASCII-Zeichen; ein anderes Zeichen (etwa ein
+    /// mitkopiertes Leer- oder Anführungszeichen) ließe HttpClient mit einer Ausnahme scheitern, die nicht nach dem Schlüssel klingt.</summary>
+    private static void AddKey(HttpRequestMessage request, string key)
+    {
+        key = key.Trim();
+        if (key.Length == 0 || key.Any(c => c is < '!' or > '~')) { throw new GeminiException(Lng.T("Der API-Schlüssel ist ungültig.")); }
+        request.Headers.Add("x-goog-api-key", key);
+    }
+
     /// <summary>Für Zusammenfassungen taugen nur Gemini-Textmodelle – nicht Sprache, Bilder, Video, Live-Audio oder Einbettungen.</summary>
     private static bool IsTextModel(string name) =>
         name.StartsWith("gemini", StringComparison.OrdinalIgnoreCase)
-        && !new[] { "tts", "image", "live", "embedding", "audio", "transcribe", "omni", "banana", "robotics", "computer-use", "aqa" }
-            .Any(part => name.Contains(part, StringComparison.OrdinalIgnoreCase));
+        && !sourceArray.Any(part => name.Contains(part, StringComparison.OrdinalIgnoreCase));
 
     /// <summary>Bis die erste Antwort kommt (das Modell denkt bei langen Dokumenten erst nach) bzw. zwischen zwei Stücken der Antwort – danach
     /// gilt die Anfrage als hängengeblieben (Fehlerbericht 14.11.2026: nach drei Minuten „Gemini antwortet…“ ohne jede Reaktion).</summary>
     internal static TimeSpan FirstChunkTimeout { get; set; } = TimeSpan.FromMinutes(2); // änderbar nur für Tests
     internal static TimeSpan NextChunkTimeout { get; set; } = TimeSpan.FromMinutes(1);
 
+    /// <summary>So oft höchstens bekommt der Aufrufer die entstehende Antwort (s. <see cref="GenerateAsync"/>).</summary>
+    private static readonly TimeSpan ProgressInterval = TimeSpan.FromMilliseconds(400);
+
     /// <summary>Nur für Tests: ersetzt die Verbindung zu Google durch einen nachgestellten Server (muss vor der ersten Anfrage gesetzt sein).</summary>
     internal static HttpMessageHandler? TestHandler { get; set; }
 
     /// <summary>Für die gestreamte Antwort: ohne Gesamtfrist, die Fristen setzt <see cref="StreamAsync"/> je Stück.</summary>
     private static readonly Lazy<HttpClient> streamHttp = new(() => new HttpClient(TestHandler ?? new HttpClientHandler()) { Timeout = Timeout.InfiniteTimeSpan });
+    internal static readonly string[] sourceArray = ["tts", "image", "live", "embedding", "audio", "transcribe", "omni", "banana", "robotics", "computer-use", "aqa"];
 
     /// <summary>Eine Anfrage mit Systemanweisung und dem bisherigen Gespräch (abwechselnd Benutzer und Modell, zuletzt Benutzer – die
     /// Schnittstelle merkt sich nichts, jede Frage schickt alles mit); liefert den Antworttext (Markdown). Die Antwort kommt gestreamt
-    /// (streamGenerateContent mit Server-Sent Events): <paramref name="progress"/> bekommt den bisherigen Text, sobald neuer da ist – so
+    /// (streamGenerateContent mit Server-Sent Events): <paramref name="progress"/> bekommt den bisherigen Text, sobald neuer da ist (höchstens
+    /// alle <see cref="ProgressInterval"/>) – so
     /// sieht man sie entstehen, statt minutenlang auf die ganze zu warten. Wirft <see cref="GeminiException"/>.</summary>
     public static async Task<string> GenerateAsync(string key, string model, string systemInstruction, IReadOnlyList<(bool User, string Text)> contents, Action<string>? progress, CancellationToken cancel)
     {
@@ -198,7 +212,7 @@ internal static partial class GeminiClient
         for (var attempt = 0; ; attempt++)
         {
             using HttpRequestMessage request = new(HttpMethod.Post, BaseUrl + "models/" + Uri.EscapeDataString(name) + ":streamGenerateContent?alt=sse");
-            request.Headers.Add("x-goog-api-key", key.Trim());
+            AddKey(request, key);
             request.Content = new ByteArrayContent(bytes);
             request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             try { return await StreamAsync(request, progress, cancel); }
@@ -229,7 +243,7 @@ internal static partial class GeminiClient
     {
         using var idle = CancellationTokenSource.CreateLinkedTokenSource(cancel);
         idle.CancelAfter(FirstChunkTimeout);
-        GeminiException TimedOut(Exception? inner) => new(Lng.T("Google hat nicht rechtzeitig geantwortet."), inner, GeminiFailure.Timeout);
+        static GeminiException TimedOut(Exception? inner) => new(Lng.T("Google hat nicht rechtzeitig geantwortet."), inner, GeminiFailure.Timeout);
         HttpResponseMessage response;
         try { response = await streamHttp.Value.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, idle.Token); }
         catch (OperationCanceledException) when (cancel.IsCancellationRequested) { throw; }
@@ -251,6 +265,8 @@ internal static partial class GeminiClient
             }
             StringBuilder result = new();
             string? finish = null;
+            var reported = Stopwatch.StartNew();
+            var reportedOnce = false;
             try
             {
                 await using var stream = await response.Content.ReadAsStreamAsync(idle.Token);
@@ -276,7 +292,14 @@ internal static partial class GeminiClient
                         }
                         var before = result.Length;
                         finish = AppendText(root, result) ?? finish;
-                        if (result.Length > before) { progress?.Invoke(result.ToString()); }
+                        // den bisherigen Text höchstens alle ProgressInterval weitergeben (das erste Stück sofort) – sonst entstünde er bei
+                        // vielen kleinen Stücken jedes Mal neu; den Rest zeigt der Aufrufer ohnehin mit der fertigen Antwort
+                        if (result.Length > before && progress != null && (!reportedOnce || reported.Elapsed >= ProgressInterval))
+                        {
+                            progress(result.ToString());
+                            reportedOnce = true;
+                            reported.Restart();
+                        }
                     }
                     idle.CancelAfter(result.Length > 0 ? NextChunkTimeout : FirstChunkTimeout); // jedes Stück verlängert die Frist
                 }
@@ -341,7 +364,7 @@ internal static partial class GeminiClient
         {
             return new(null, null, null, null, null, null, null, null);
         }
-        string? Text(JsonElement element, string name) => element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
+        static string? Text(JsonElement element, string name) => element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
         string? reason = null, quotaId = null, quotaMetric = null, quotaValue = null, model = null;
         double? retry = null;
         if (error.TryGetProperty("details", out var details) && details.ValueKind == JsonValueKind.Array)
@@ -403,7 +426,7 @@ internal static partial class GeminiClient
         var id = (error.QuotaId ?? string.Empty) + " " + (error.QuotaMetric ?? string.Empty);
         var model = error.Model ?? string.Empty;
         var limit = long.TryParse(error.QuotaValue, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var value) ? value : (long?)null;
-        string? retry = error.RetrySeconds is { } seconds ? string.Format(Lng.T("Versuche es in {0} Sekunden noch einmal."), Math.Max(1, (int)Math.Ceiling(seconds))) : null;
+        var retry = error.RetrySeconds is { } seconds ? string.Format(Lng.T("Versuche es in {0} Sekunden noch einmal."), Math.Max(1, (int)Math.Ceiling(seconds))) : null;
         if (limit == 0 && model.Length > 0) { return string.Format(Lng.T("Für {0} gibt es kein kostenloses Kontingent."), model); }
         if (id.Contains("PerDay", StringComparison.OrdinalIgnoreCase))
         {
@@ -450,7 +473,9 @@ internal static partial class GeminiClient
         if (code == HttpStatusCode.PaymentRequired || IsBillingProblem(error)) { return GeminiFailure.Other; }
         if (code == HttpStatusCode.TooManyRequests || error.Status == "RESOURCE_EXHAUSTED") { return GeminiFailure.Quota; }
         if (code == HttpStatusCode.NotFound) { return GeminiFailure.ModelUnavailable; }
-        if (code == HttpStatusCode.BadRequest && error.Reason is not ("API_KEY_INVALID" or "API_KEY_SERVICE_BLOCKED")) { return GeminiFailure.InvalidRequest; }
+        // nur eine abgelehnte Denkstufe – jeder andere Fehler 400 (etwa ein zu langer Text) käme beim erneuten Senden genauso
+        if (code == HttpStatusCode.BadRequest && error.Reason is not ("API_KEY_INVALID" or "API_KEY_SERVICE_BLOCKED")
+            && error.Message?.Contains("thinking", StringComparison.OrdinalIgnoreCase) == true) { return GeminiFailure.InvalidRequest; }
         return (int)code >= 500 ? GeminiFailure.Overloaded : GeminiFailure.Other;
     }
 

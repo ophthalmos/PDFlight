@@ -10,9 +10,9 @@ namespace PDFLight.Controls;
 public sealed record SummaryTurnView(string Heading, string Markdown);
 
 /// <summary>KI-Zusammenfassung in der Seitenleiste (seit 14.11.2026, Wunsch des Autors nach Acrobats „Generative Zusammenfassung“): oben die
-/// Art der Zusammenfassung und „Erstellen“ (während einer Anfrage „Abbrechen“), darunter die Antworten untereinander – jede Zusammenfassung
-/// und jede Frage ist ein Abschnitt, unter dem letzten stehen die von Gemini vorgeschlagenen Folgefragen zum Anklicken. Seitenangaben der
-/// Antworten sind Links. Unten Kopieren, Speichern als Word-Datei (RTF), „Neu beginnen“, das Fragefeld und der Hinweis auf mögliche Fehler
+/// Art der Zusammenfassung und „Erstellen“ (während einer Anfrage „Abbrechen“), darunter Kopieren, Speichern als Word-Datei (RTF) und
+/// „Neu beginnen“, dann die Antworten untereinander – jede Zusammenfassung und jede Frage ist ein Abschnitt, unter dem letzten stehen die
+/// von Gemini vorgeschlagenen Folgefragen zum Anklicken. Seitenangaben der Antworten sind Links. Unten das Fragefeld und der Hinweis auf mögliche Fehler
 /// mit Link auf Googles Bedingungen. Was die Befehle tun, entscheidet das Hauptfenster – das Bedienfeld meldet sie nur und zeigt an, was
 /// es bekommt (<see cref="ShowThread"/>, <see cref="ShowStatus"/>). Die Antworten kommen als Markdown und werden hier in einfache
 /// Formatierung übersetzt (Überschriften, Aufzählungen, fett, kursiv).</summary>
@@ -83,6 +83,11 @@ public partial class SummaryPanel : UserControl
     [System.ComponentModel.Browsable(false), System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
     public int PresetIndex { get; private set; }
 
+    /// <summary>Seitenangaben der Antworten als Links „🗎3“ zeigen – bei einseitigen Dokumenten nicht (Wunsch vom 16.11.2026), dann entfallen
+    /// sie ganz. Gilt ab der nächsten Darstellung.</summary>
+    [System.ComponentModel.Browsable(false), System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+    public bool PageLinks { get; set; } = true;
+
     /// <summary>Eine Anfrage läuft (der Knopf heißt dann „Abbrechen“).</summary>
     [System.ComponentModel.Browsable(false)]
     public bool Busy => kind == Kind.Busy;
@@ -144,7 +149,13 @@ public partial class SummaryPanel : UserControl
     private void UpdateButtons()
     {
         var busy = kind == Kind.Busy;
-        btnRun.Text = busy ? Lng.T("Abbrechen") : Lng.T("Erstellen");
+        var runText = busy ? Lng.T("Abbrechen") : Lng.T("Erstellen");
+        if (btnRun.Text != runText)
+        {
+            btnRun.Text = runText;
+            btnRun.Image = RunIcon(busy);
+            FitLabels(); // „Abbrechen“ ist breiter als „Erstellen“
+        }
         btnRun.ToolTipText = busy ? Lng.T("Anfrage abbrechen") : Lng.T("Zusammenfassung erstellen");
         ddPreset.Enabled = !busy;
         btnCopy.Enabled = btnSave.Enabled = turns.Count > 0;
@@ -180,30 +191,64 @@ public partial class SummaryPanel : UserControl
         Render(); // die Farben stecken im Text
     }
 
-    /// <summary>Symbole in der Größe der Viewer-Leiste; „Kopieren“ behält seinen Text wie bei Acrobat.</summary>
+    private Size IconSize => new(LogicalToDeviceUnits(16), LogicalToDeviceUnits(16));
+
+    /// <summary>Symbole in der Größe der Viewer-Leiste, daneben der Text, solange er passt (<see cref="FitLabels"/>).</summary>
     private void UpdateIcons()
     {
         if (!ToolbarIcons.FontAvailable) { return; }
-        var size = new Size(LogicalToDeviceUnits(16), LogicalToDeviceUnits(16));
-        toolStripActions.ImageScalingSize = size;
-        foreach (var (item, glyph, style) in new (ToolStripItem, char, ToolStripItemDisplayStyle)[]
+        var size = IconSize;
+        toolStripTop.ImageScalingSize = toolStripActions.ImageScalingSize = size;
+        foreach (var (item, glyph) in new (ToolStripItem, char)[]
         {
-            (btnCopy, ToolbarIcons.Copy, ToolStripItemDisplayStyle.ImageAndText),
-            (btnSave, ToolbarIcons.SaveAs, ToolStripItemDisplayStyle.Image),
-            (btnClear, ToolbarIcons.Refresh, ToolStripItemDisplayStyle.Image), // kein ✕ – das läse sich wie „Schließen“
+            (btnCopy, ToolbarIcons.Copy),
+            (btnSave, ToolbarIcons.SaveAs),
+            (btnClear, ToolbarIcons.Refresh), // kein ✕ – das läse sich wie „Schließen“
         })
         {
             item.Image = ToolbarIcons.Get(glyph, size, iconColor);
-            item.DisplayStyle = style;
         }
+        btnRun.Image = RunIcon(kind == Kind.Busy);
         btnAsk.Image = ToolbarIcons.Get(ToolbarIcons.Send, size, iconColor);
         btnAsk.Text = string.Empty;
+        FitLabels();
     }
 
-    /// <summary>Der Hinweis unten bricht in schmalen Seitenleisten um – seine Höhe folgt dem Text.</summary>
+    private Image? RunIcon(bool busy) =>
+        ToolbarIcons.FontAvailable ? ToolbarIcons.Get(busy ? ToolbarIcons.Cancel : ToolbarIcons.Play, IconSize, iconColor) : null;
+
+    /// <summary>Symbol und Text, solange die Leiste breit genug ist, sonst nur das Symbol – die Tooltips nennen die Funktion (wie die
+    /// Viewer-Leiste; Wunsch vom 15.11.2026). Beim Einblenden des Texts 24 px Reserve, sonst spränge er an der Grenze hin und her.</summary>
+    private void FitLabels()
+    {
+        if (!ToolbarIcons.FontAvailable || btnCopy.Image == null) { return; } // ohne Symbolschrift bleibt der Text
+        FitLabels(toolStripTop, btnRun);
+        FitLabels(toolStripActions, btnCopy, btnSave, btnClear);
+    }
+
+    private void FitLabels(ToolStrip strip, params ToolStripItem[] items)
+    {
+        var shown = items.All(i => i.DisplayStyle == ToolStripItemDisplayStyle.ImageAndText);
+        strip.SuspendLayout();
+        try
+        {
+            foreach (var item in items) { item.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText; }
+            var need = strip.Padding.Horizontal + strip.Items.Cast<ToolStripItem>().Where(i => i.Available)
+                .Sum(i => i.GetPreferredSize(Size.Empty).Width + i.Margin.Horizontal);
+            var reserve = shown ? 0 : LogicalToDeviceUnits(24);
+            if (need + reserve > ClientSize.Width)
+            {
+                foreach (var item in items) { item.DisplayStyle = ToolStripItemDisplayStyle.Image; }
+            }
+        }
+        finally { strip.ResumeLayout(); }
+    }
+
+    /// <summary>Der Hinweis unten bricht in schmalen Seitenleisten um – seine Höhe folgt dem Text; die Knöpfe zeigen ihren Text, solange er passt.</summary>
     protected override void OnSizeChanged(EventArgs e)
     {
         base.OnSizeChanged(e);
+        FitLabels();
         var width = Math.Max(40, ClientSize.Width - linkDisclaimer.Padding.Horizontal);
         var text = TextRenderer.MeasureText(linkDisclaimer.Text, linkDisclaimer.Font, new Size(width, int.MaxValue), TextFormatFlags.WordBreak);
         var height = text.Height + linkDisclaimer.Padding.Vertical + LogicalToDeviceUnits(2);
@@ -275,7 +320,7 @@ public partial class SummaryPanel : UserControl
         {
             if (text.Length > 0) { text.AppendLine().AppendLine(); }
             text.AppendLine("## " + turn.Heading).AppendLine();
-            text.Append(CitationRegex().Replace(turn.Markdown.Trim(), m => "(" + PageLabel(m) + ")"));
+            text.Append(CitationRegex().Replace(WithoutCitations(turn.Markdown).Trim(), m => PageSymbol + PageNumbers(m)));
         }
         if (footer.Length > 0) { text.AppendLine().AppendLine().Append(footer); }
         return text.ToString();
@@ -407,15 +452,14 @@ public partial class SummaryPanel : UserControl
             writer.StartParagraph(0, 0, gapBefore: true);
             starts.Add(box.TextLength);
             writer.Insert(turn.Heading, fonts.Heading3, colors.Secondary);
-            writer.Write(turn.Markdown);
+            writer.Write(WithoutCitations(turn.Markdown));
             writer.RequestGap();
         }
         if (!export && followUps.Count > 0 && kind == Kind.Idle)
         {
             foreach (var (question, i) in followUps.Select((q, i) => (q, i)))
             {
-                writer.StartParagraph(LogicalToDeviceUnits(4), LogicalToDeviceUnits(16), gapBefore: i == 0);
-                writer.Insert("↳ ", baseFont, colors.Secondary);
+                writer.StartParagraph(0, LogicalToDeviceUnits(16), gapBefore: i == 0); // linksbündig, Folgezeilen eingerückt (Wunsch vom 14.11.2026, vorher „↳“ davor)
                 writer.InsertLink(question, fonts.Link, colors.Link, 0, question);
             }
         }
@@ -440,7 +484,7 @@ public partial class SummaryPanel : UserControl
             writer.StartParagraph(0, 0, gapBefore: true);
             pendingStart = box.TextLength;
             writer.Insert(pendingHeading, fonts.Heading3, colors.Secondary);
-            if (pendingMarkdown.Length > 0) { writer.Write(pendingMarkdown); }
+            if (pendingMarkdown.Length > 0) { writer.Write(WithoutCitations(pendingMarkdown)); }
         }
         if (status.Length > 0)
         {
@@ -449,10 +493,16 @@ public partial class SummaryPanel : UserControl
         }
     }
 
-    /// <summary>„S. 3“ bzw. „S. 3–5“ für eine Seitenangabe der Antwort.</summary>
-    private static string PageLabel(Match citation) => citation.Groups["to"].Success
-        ? string.Format(Lng.T("S. {0}–{1}"), citation.Groups["from"].Value, citation.Groups["to"].Value)
-        : string.Format(Lng.T("S. {0}"), citation.Groups["from"].Value);
+    /// <summary>Zeichen vor der Seitenzahl: U+1F5CE DOCUMENT (seit 16.11.2026 „🗎3“ statt „S. 3“, Wunsch des Autors).</summary>
+    private const string PageSymbol = "\U0001F5CE";
+
+    /// <summary>„3“ bzw. „3–5“ für eine Seitenangabe der Antwort (ohne Zeichen davor).</summary>
+    private static string PageNumbers(Match citation) => citation.Groups["to"].Success
+        ? citation.Groups["from"].Value + "–" + citation.Groups["to"].Value
+        : citation.Groups["from"].Value;
+
+    /// <summary>Ohne Seitenangaben (einseitige Dokumente): entfernt sie samt Leerraum davor und einer Klammer darum.</summary>
+    private string WithoutCitations(string markdown) => PageLinks ? markdown : CitationGroupRegex().Replace(markdown, string.Empty);
 
     /// <summary>Die Schriften einer Darstellung, abgeleitet von der Grundschrift.</summary>
     private sealed class Fonts(Font baseFont) : IDisposable
@@ -464,9 +514,20 @@ public partial class SummaryPanel : UserControl
         public readonly Font Link = new(baseFont, FontStyle.Underline);
         public readonly Font Base = baseFont;
 
+        /// <summary>Das Seitenzeichen aus Segoe UI Symbol (die Grundschrift hat es nicht; fehlt die Schrift, bleibt es bei der Linkschrift).</summary>
+        public readonly Font PageSymbol = SymbolFont(baseFont);
+
+        private static Font SymbolFont(Font baseFont)
+        {
+            Font font = new("Segoe UI Symbol", baseFont.Size, FontStyle.Underline);
+            if (font.Name == "Segoe UI Symbol") { return font; }
+            font.Dispose();
+            return new Font(baseFont, FontStyle.Underline);
+        }
+
         public void Dispose()
         {
-            foreach (var font in new[] { Bold, Italic, BoldItalic, Heading1, Heading2, Heading3, Gap, Small, Link }) { font.Dispose(); }
+            foreach (var font in new[] { Bold, Italic, BoldItalic, Heading1, Heading2, Heading3, Gap, Small, Link, PageSymbol }) { font.Dispose(); }
         }
     }
 
@@ -562,7 +623,10 @@ public partial class SummaryPanel : UserControl
                 if (match.Index > position) { Insert(text[position..match.Index], regular, colors.Fore); }
                 if (match.Groups["from"].Success)
                 {
-                    InsertLink(PageLabel(match), fonts.Link, colors.Link, int.Parse(match.Groups["from"].Value, System.Globalization.CultureInfo.InvariantCulture), null);
+                    var start = box.TextLength;
+                    Insert(PageSymbol, fonts.PageSymbol, colors.Link);
+                    Insert(PageNumbers(match), fonts.Link, colors.Link);
+                    links?.Add((start, box.TextLength - start, int.Parse(match.Groups["from"].Value, System.Globalization.CultureInfo.InvariantCulture), null));
                 }
                 else if (match.Groups["bi"].Success) { Insert(match.Groups["bi"].Value, both, colors.Fore); }
                 else if (match.Groups["b"].Success) { Insert(match.Groups["b"].Value, strong, colors.Fore); }
@@ -591,6 +655,13 @@ public partial class SummaryPanel : UserControl
     /// Klammern oder Leerzeichen).</summary>
     [GeneratedRegex(@"\[\[?\s*p\.?\s*(?<from>\d{1,5})(?:\s*[-–]\s*p?\.?\s*(?<to>\d{1,5}))?\s*\]\]?")]
     private static partial Regex CitationRegex();
+
+    /// <summary>Eine oder mehrere Seitenangaben hintereinander (auch durch Komma getrennt oder eingeklammert) samt Leerraum davor.</summary>
+    [GeneratedRegex(@"[ \t]*(?:\([ \t]*" + Citations + @"[ \t]*\)|" + Citations + ")")]
+    private static partial Regex CitationGroupRegex();
+
+    private const string Citation = @"\[\[?\s*p\.?\s*\d{1,5}(?:\s*[-–]\s*p?\.?\s*\d{1,5})?\s*\]\]?";
+    private const string Citations = Citation + @"(?:[ \t]*[,;]?[ \t]*" + Citation + ")*";
 
     [GeneratedRegex(@"\[\[?\s*p\.?\s*(?<from>\d{1,5})(?:\s*[-–]\s*p?\.?\s*(?<to>\d{1,5}))?\s*\]\]?|\*\*\*(?<bi>[^*]+)\*\*\*|\*\*(?<b>.+?)\*\*|__(?<b2>[^_]+)__|(?<![\w*])\*(?<i>[^*\s](?:[^*]*[^*\s])?)\*(?![\w*])|`(?<c>[^`]+)`")]
     private static partial Regex InlineRegex();

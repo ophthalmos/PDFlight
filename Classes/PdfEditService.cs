@@ -98,14 +98,25 @@ internal static partial class PdfEditService
             if (page.Elements.GetArray("/Annots") is not { } annotations) { continue; }
             foreach (var item in annotations.Elements) { if (item is PdfReference reference) { doomed.Add(reference.ObjectID); } }
         }
-        PruneOutlines(document, removedPages); // Lesezeichen und Links vor den benannten Zielen – sie lösen deren Namen noch auf
-        PruneLinks(document, removedPages);
-        PruneNamedDestinations(document, removedPages);
-        PruneOpenAction(document, removedPages);
+        // Jeder Bereinigungsschritt darf an einer beschädigten Struktur scheitern – das Löschen selbst geht dann trotzdem (wie früher bei
+        // kaputten Gliederungen), schlimmstenfalls bleiben Reste der Seite in der Datei. Lesezeichen und Links vor den benannten Zielen –
+        // sie lösen deren Namen noch auf.
+        Tolerant(() => PruneOutlines(document, removedPages));
+        Tolerant(() => PruneLinks(document, removedPages));
+        Tolerant(() => PruneNamedDestinations(document, removedPages));
+        Tolerant(() => PruneOpenAction(document, removedPages));
         foreach (var page in pages.Distinct().OrderByDescending(p => p)) { document.Pages.RemoveAt(page - 1); }
-        CutReferences(document.Internals.Catalog, d => d.Reference is { } reference && doomed.Contains(reference.ObjectID), skipParentOf: null);
-        PruneEmptyFields(document);
+        Tolerant(() => CutReferences(document.Internals.Catalog, d => d.Reference is { } reference && doomed.Contains(reference.ObjectID), skipParentOf: null));
+        Tolerant(() => PruneEmptyFields(document));
         SaveCompact(document, path);
+    }
+
+    /// <summary>Ein Bereinigungsschritt, der an einer beschädigten Struktur scheitern darf, ohne den ganzen Vorgang abzubrechen. Die Schritte
+    /// hinterlassen dabei einen gültigen Zwischenstand (s. <see cref="PruneOutlines"/>).</summary>
+    private static void Tolerant(Action step)
+    {
+        try { step(); }
+        catch (Exception ex) when (IsPdfReadError(ex)) { System.Diagnostics.Debug.WriteLine(ex); }
     }
 
     /// <summary>Lesezeichen, die auf eine gelöschte Seite zeigen, werden entfernt – ihre Unterpunkte rücken eine Ebene hoch. Über die rohen
@@ -115,7 +126,11 @@ internal static partial class PdfEditService
     {
         if (document.Internals.Catalog.Elements.GetDictionary("/Outlines") is not { } root) { return; }
         HashSet<PdfDictionary> visited = [];
+        List<PdfDictionary> removed = [];
         Prune(root, open: true);
+        // erst am Ende leeren: Scheitert ein Schritt an einer beschädigten Gliederung, hängen die entfernten Einträge noch mit /Next in einer
+        // nicht neu verketteten Ebene – geleert schnitten sie alle folgenden Geschwister ab
+        foreach (var item in removed) { item.Elements.Clear(); } // Titel und Ziel nicht als Waise mitschreiben
         if (root.Elements.GetDictionary("/First") == null) { RemoveOutlines(document); }
 
         void Prune(PdfDictionary parent, bool open)
@@ -127,7 +142,7 @@ internal static partial class PdfEditService
                 if (DestinationPageId(document, item) is { } id && removedPages.Contains(id))
                 {
                     kept.AddRange(OutlineChildren(item, []));
-                    item.Elements.Clear(); // Titel und Ziel nicht als Waise mitschreiben
+                    removed.Add(item);
                 }
                 else { kept.Add(item); }
             }
@@ -188,31 +203,38 @@ internal static partial class PdfEditService
     }
 
     /// <summary>Entfernt aus einem Namensbaum alle Paare, deren Wert <paramref name="remove"/> trifft, leere Knoten samt ihrem Platz in
-    /// /Kids und rechnet /Limits neu. Gibt zurück, ob der Knoten noch Einträge hat.</summary>
-    private static bool PruneNameTree(PdfDocument document, PdfDictionary node, Func<PdfItem?, bool> remove, HashSet<PdfDictionary> visited)
+    /// /Kids und rechnet /Limits neu. Liefert, ob der Knoten noch Einträge hat, und seinen kleinsten und größten Schlüssel – aus dem Inhalt
+    /// selbst, nicht aus den /Limits der Unterknoten: Fehlen die (manche Programme lassen sie weg), fiele sonst der ganze Zweig weg.</summary>
+    private static (bool Keep, PdfItem? First, PdfItem? Last) PruneNameTree(PdfDocument document, PdfDictionary node, Func<PdfItem?, bool> remove, HashSet<PdfDictionary> visited)
     {
-        if (!visited.Add(node)) { return true; }
+        if (!visited.Add(node)) { return (true, null, null); } // Zyklus: unverändert lassen
         PdfItem? first = null, last = null;
+        var keep = false;
         if (node.Elements.GetArray("/Names") is { } names)
         {
             for (var i = (names.Elements.Count & ~1) - 2; i >= 0; i -= 2)
             {
                 if (remove(names.Elements[i + 1])) { names.Elements.RemoveAt(i + 1); names.Elements.RemoveAt(i); }
             }
-            if (names.Elements.Count >= 2) { first = names.Elements[0]; last = names.Elements[(names.Elements.Count & ~1) - 2]; }
+            if (names.Elements.Count >= 2) { (keep, first, last) = (true, names.Elements[0], names.Elements[(names.Elements.Count & ~1) - 2]); }
         }
         if (node.Elements.GetArray("/Kids") is { } kids)
         {
-            for (var i = kids.Elements.Count - 1; i >= 0; i--)
+            for (var i = kids.Elements.Count - 1; i >= 0; i--) // rückwärts: der erste behaltene Unterknoten liefert den größten Schlüssel
             {
                 if (Resolve(kids.Elements[i]) is not PdfDictionary kid) { continue; }
-                if (!PruneNameTree(document, kid, remove, visited)) { kids.Elements.RemoveAt(i); continue; }
-                if (kid.Elements.GetArray("/Limits") is { Elements.Count: 2 } limits) { first = limits.Elements[0]; last ??= limits.Elements[1]; }
+                var (kidKeep, kidFirst, kidLast) = PruneNameTree(document, kid, remove, visited);
+                if (!kidKeep) { kids.Elements.RemoveAt(i); continue; }
+                keep = true;
+                if (kidFirst != null) { first = kidFirst; }
+                last ??= kidLast;
             }
         }
-        if (first == null || last == null) { return false; }
-        if (node.Elements.ContainsKey("/Limits")) { node.Elements["/Limits"] = new PdfArray(document, first, last); } // Schlüssel sind Zeichenketten (direkte Objekte)
-        return true;
+        if (keep && first != null && last != null && node.Elements.ContainsKey("/Limits"))
+        {
+            node.Elements["/Limits"] = new PdfArray(document, first, last); // Schlüssel sind Zeichenketten (direkte Objekte)
+        }
+        return (keep, first, last);
     }
 
     /// <summary>Eine Öffnungsaktion auf eine gelöschte Seite fällt weg – geöffnet wird dann auf Seite 1.</summary>
@@ -315,7 +337,7 @@ internal static partial class PdfEditService
     /// <see cref="Finish"/> setzt die Links danach auf die mitimportierten Zielseiten, Links auf nicht übernommene Seiten fallen weg.</summary>
     private sealed class PageImport(PdfDocument target)
     {
-        private sealed record LinkTarget(PdfObjectID Page, PdfItem[] View);
+        private sealed record LinkTarget(PdfObjectID Page, PdfItem[] View, bool InAction);
         private sealed record PendingLink(PdfDocument Source, LinkTarget Target, PdfArray Annotations, PdfDictionary Link);
 
         private readonly Dictionary<(PdfDocument, PdfObjectID), PdfPage> imported = [];
@@ -333,20 +355,13 @@ internal static partial class PdfEditService
                     if (Resolve(annotations.Elements[i]) is not PdfDictionary annotation) { continue; }
                     if (!linkTargets.TryGetValue(annotation, out var link)) // dieselbe Seite kann mehrfach importiert werden
                     {
-                        var destination = DestinationArray(source, LinkDestination(annotation));
-                        link = PageIdOf(destination) is { } id && destination != null
-                            ? new LinkTarget(id, [.. destination.Elements.Skip(1).Select(e => e is PdfReference ? PdfNull.Value : e)])
-                            : null;
+                        link = TakeTarget(source, annotation);
                         linkTargets[annotation] = link;
-                        if (link != null)
-                        {
-                            if (annotation.Elements["/Dest"] != null) { annotation.Elements.Remove("/Dest"); } else { annotation.Elements.Remove("/A"); }
-                        }
                     }
                     if (link != null) { pending.Add((i, link)); }
                 }
             }
-            CutReferences(page, IsPageNode, skipParentOf: page); // auch /P der Anmerkungen auf die eigene Seite – der Schlüssel ist freiwillig
+            Tolerant(() => CutReferences(page, IsPageNode, skipParentOf: page)); // auch /P der Anmerkungen auf die eigene Seite – der Schlüssel ist freiwillig
             var result = target.AddPage(page);
             if (page.Reference is { } own) { imported[(source, own.ObjectID)] = result; }
             if (pending.Count > 0 && result.Elements.GetArray("/Annots") is { } copies)
@@ -359,14 +374,39 @@ internal static partial class PdfEditService
             return result;
         }
 
-        /// <summary>Setzt die abgenommenen Links auf die importierten Zielseiten; Links auf Seiten, die nicht dabei sind, fallen weg.</summary>
+        /// <summary>Nimmt einer Anmerkung ihr Sprungziel auf eine Seite dieses Dokuments ab (Links mit /Dest, Links und Schaltflächen mit
+        /// GoTo-Aktion) – nur das Ziel, die Aktion selbst bleibt samt /Next. Null ohne solches Ziel oder bei einer beschädigten Struktur
+        /// (dann kappt <see cref="CutReferences"/> nur den Seitenverweis).</summary>
+        private static LinkTarget? TakeTarget(PdfDocument source, PdfDictionary annotation)
+        {
+            try
+            {
+                var destination = DestinationArray(source, LinkDestination(annotation));
+                if (PageIdOf(destination) is not { } id || destination == null) { return null; }
+                var inAction = annotation.Elements["/Dest"] == null;
+                if (inAction) { annotation.Elements.GetDictionary("/A")?.Elements.Remove("/D"); } else { annotation.Elements.Remove("/Dest"); }
+                return new LinkTarget(id, [.. destination.Elements.Skip(1).Select(e => e is PdfReference ? PdfNull.Value : e)], inAction);
+            }
+            catch (Exception ex) when (IsPdfReadError(ex)) { System.Diagnostics.Debug.WriteLine(ex); return null; }
+        }
+
+        /// <summary>Setzt die abgenommenen Ziele auf die importierten Zielseiten – zurück dorthin, wo sie standen (/Dest oder /D der Aktion).
+        /// Zeigen sie auf eine Seite, die nicht dabei ist, fallen Links weg; andere Anmerkungen (Schaltflächen eines Formulars) bleiben
+        /// sichtbar, nur ohne ihre Sprungaktion.</summary>
         public void Finish()
         {
             foreach (var link in links)
             {
+                var action = link.Target.InAction ? link.Link.Elements.GetDictionary("/A") : null;
                 if (imported.TryGetValue((link.Source, link.Target.Page), out var page) && page.Reference is { } reference)
                 {
-                    link.Link.Elements["/Dest"] = new PdfArray(target, [reference, .. link.Target.View]);
+                    PdfArray destination = new(target, [reference, .. link.Target.View]);
+                    if (action != null) { action.Elements["/D"] = destination; } else { link.Link.Elements["/Dest"] = destination; }
+                    continue;
+                }
+                if (link.Link.Elements.GetName("/Subtype") != "/Link")
+                {
+                    link.Link.Elements.Remove("/A");
                     continue;
                 }
                 for (var i = link.Annotations.Elements.Count - 1; i >= 0; i--)

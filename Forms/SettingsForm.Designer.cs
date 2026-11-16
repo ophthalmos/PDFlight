@@ -74,12 +74,12 @@
             textAiKey = new TextBox();
             btnAiCheck = new Button();
             btnAiRemove = new Button();
-            labelAiStorage = new Label();
-            labelAiConfidential = new Label();
             linkAiKey = new LinkLabel();
-            cbAiConfirm = new CheckBox();
+            labelAiStorage = new Label();
             labelAiStatus = new Label();
             labelAiHint = new Label();
+            cbAiConfirm = new CheckBox();
+            labelAiConfidential = new Label();
             toolTipReveal = new ToolTip(components);
             buttonOK = new Button();
             buttonCancel = new Button();
@@ -519,9 +519,9 @@
             labelProgramHint.Size = new Size(472, 19);
             labelProgramHint.TabIndex = 7;
             labelProgramHint.Text = "Die Reihenfolge bestimmt die Tastenkürzel Strg+1 bis Strg+9 im Programme-Menü.";
-            //
+            // 
             // tabAi
-            //
+            // 
             tabAi.Controls.Add(labelAiIntro);
             tabAi.Controls.Add(labelAiKey);
             tabAi.Controls.Add(textAiKey);
@@ -529,10 +529,10 @@
             tabAi.Controls.Add(btnAiRemove);
             tabAi.Controls.Add(linkAiKey);
             tabAi.Controls.Add(labelAiStorage);
-            tabAi.Controls.Add(cbAiConfirm);
-            tabAi.Controls.Add(labelAiConfidential);
             tabAi.Controls.Add(labelAiStatus);
             tabAi.Controls.Add(labelAiHint);
+            tabAi.Controls.Add(cbAiConfirm);
+            tabAi.Controls.Add(labelAiConfidential);
             tabAi.Location = new Point(4, 24);
             tabAi.Name = "tabAi";
             tabAi.Padding = new Padding(3);
@@ -540,27 +540,27 @@
             tabAi.TabIndex = 3;
             tabAi.Text = "Google AI";
             tabAi.UseVisualStyleBackColor = true;
-            //
+            // 
             // labelAiIntro
-            //
+            // 
             labelAiIntro.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             labelAiIntro.Location = new Point(17, 12);
             labelAiIntro.Name = "labelAiIntro";
             labelAiIntro.Size = new Size(455, 48);
             labelAiIntro.TabIndex = 0;
-            labelAiIntro.Text = "Optional kann PDFlight in der Seitenleiste eine generative Zusammenfassung des PDF-Inhalts anbieten. Diese Funktionalität wird nur aktiviert und angezeigt, wenn ein gültiger API-Schlüssel eingetragen ist, den du selbst besorgen musst.";
-            //
+            labelAiIntro.Text = resources.GetString("labelAiIntro.Text");
+            // 
             // labelAiKey
-            //
+            // 
             labelAiKey.AutoSize = true;
             labelAiKey.Location = new Point(17, 75);
             labelAiKey.Name = "labelAiKey";
-            labelAiKey.Size = new Size(83, 15);
+            labelAiKey.Size = new Size(81, 15);
             labelAiKey.TabIndex = 1;
             labelAiKey.Text = "API-&Schlüssel:";
-            //
+            // 
             // textAiKey
-            //
+            // 
             textAiKey.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             textAiKey.Location = new Point(130, 72);
             textAiKey.Name = "textAiKey";
@@ -568,9 +568,9 @@
             textAiKey.TabIndex = 2;
             textAiKey.UseSystemPasswordChar = true;
             textAiKey.TextChanged += TextAiKey_TextChanged;
-            //
+            // 
             // btnAiCheck
-            //
+            // 
             btnAiCheck.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnAiCheck.Location = new Point(359, 70);
             btnAiCheck.Name = "btnAiCheck";
@@ -579,9 +579,9 @@
             btnAiCheck.Text = "&Prüfen";
             btnAiCheck.UseVisualStyleBackColor = true;
             btnAiCheck.Click += BtnAiCheck_Click;
-            //
+            // 
             // btnAiRemove
-            //
+            // 
             btnAiRemove.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnAiRemove.Location = new Point(445, 70);
             btnAiRemove.Name = "btnAiRemove";
@@ -590,20 +590,20 @@
             toolTipReveal.SetToolTip(btnAiRemove, "Schlüssel entfernen");
             btnAiRemove.UseVisualStyleBackColor = true;
             btnAiRemove.Click += BtnAiRemove_Click;
-            //
+            // 
             // linkAiKey
-            //
+            // 
             linkAiKey.AutoSize = true;
             linkAiKey.Location = new Point(127, 100);
             linkAiKey.Name = "linkAiKey";
-            linkAiKey.Size = new Size(233, 15);
+            linkAiKey.Size = new Size(268, 15);
             linkAiKey.TabIndex = 5;
             linkAiKey.TabStop = true;
-            linkAiKey.Text = "Schlüssel kostenlos bei Google AI Studio erstellen";
+            linkAiKey.Text = "Schlüssel kostenlos mit Google AI Studio erstellen";
             linkAiKey.LinkClicked += LinkAiKey_LinkClicked;
-            //
+            // 
             // labelAiStorage
-            //
+            // 
             labelAiStorage.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             labelAiStorage.ForeColor = SystemColors.GrayText;
             labelAiStorage.Location = new Point(17, 122);
@@ -611,47 +611,47 @@
             labelAiStorage.Size = new Size(455, 34);
             labelAiStorage.TabIndex = 6;
             labelAiStorage.Text = "Der Schlüssel wird verschlüsselt in {0} gespeichert und ist nur mit deinem Windows-Benutzerkonto auf diesem PC lesbar.";
-            //
+            // 
+            // labelAiStatus
+            // 
+            labelAiStatus.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            labelAiStatus.Location = new Point(17, 160);
+            labelAiStatus.Name = "labelAiStatus";
+            labelAiStatus.Size = new Size(455, 34);
+            labelAiStatus.TabIndex = 7;
+            // 
+            // labelAiHint
+            // 
+            labelAiHint.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            labelAiHint.ForeColor = SystemColors.GrayText;
+            labelAiHint.Location = new Point(17, 200);
+            labelAiHint.Name = "labelAiHint";
+            labelAiHint.Size = new Size(455, 36);
+            labelAiHint.TabIndex = 8;
+            labelAiHint.Text = "Ohne Rechnungskonto im Google-Projekt bleibt die Nutzung kostenlos: Ist das Kontingent erschöpft, lehnt Google weitere Anfragen ab.";
+            // 
             // cbAiConfirm
-            //
+            // 
             cbAiConfirm.AutoSize = true;
             cbAiConfirm.Checked = true;
             cbAiConfirm.CheckState = CheckState.Checked;
-            cbAiConfirm.Location = new Point(19, 162);
+            cbAiConfirm.Location = new Point(19, 252);
             cbAiConfirm.Name = "cbAiConfirm";
-            cbAiConfirm.Size = new Size(317, 19);
-            cbAiConfirm.TabIndex = 7;
-            cbAiConfirm.Text = "Sicherheitsabfrage vor dem Senden an Google an&zeigen";
+            cbAiConfirm.Size = new Size(290, 19);
+            cbAiConfirm.TabIndex = 9;
+            cbAiConfirm.Text = "Warnhinweis vor dem Senden an Google an&zeigen";
             cbAiConfirm.UseVisualStyleBackColor = true;
-            //
-            // labelAiStatus
-            //
-            labelAiStatus.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            labelAiStatus.Location = new Point(17, 210);
-            labelAiStatus.Name = "labelAiStatus";
-            labelAiStatus.Size = new Size(455, 34);
-            labelAiStatus.TabIndex = 9;
-            //
+            // 
             // labelAiConfidential
-            //
+            // 
             labelAiConfidential.AutoSize = true;
             labelAiConfidential.ForeColor = SystemColors.GrayText;
-            labelAiConfidential.Location = new Point(36, 183);
+            labelAiConfidential.Location = new Point(36, 273);
             labelAiConfidential.Name = "labelAiConfidential";
-            labelAiConfidential.Size = new Size(254, 15);
-            labelAiConfidential.TabIndex = 8;
+            labelAiConfidential.Size = new Size(244, 15);
+            labelAiConfidential.TabIndex = 10;
             labelAiConfidential.Text = "Schicke keine vertraulichen Daten oder Texte.";
-            //
-            // labelAiHint
-            //
-            labelAiHint.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            labelAiHint.ForeColor = SystemColors.GrayText;
-            labelAiHint.Location = new Point(17, 256);
-            labelAiHint.Name = "labelAiHint";
-            labelAiHint.Size = new Size(455, 36);
-            labelAiHint.TabIndex = 10;
-            labelAiHint.Text = "Ohne Rechnungskonto im Google-Projekt bleibt die Nutzung kostenlos: Ist das Kontingent erschöpft, lehnt Google weitere Anfragen ab.";
-            //
+            // 
             // buttonOK
             // 
             buttonOK.Anchor = AnchorStyles.Top | AnchorStyles.Right;

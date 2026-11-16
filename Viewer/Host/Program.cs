@@ -409,14 +409,14 @@ internal static class Program
                         w.Write(scripts.Count);
                         foreach (var script in scripts) { w.Write(script); }
                         w.Write(fields.Count);
-                        foreach (var field in fields)
+                        foreach (var (Name, Label, Keystroke, Format, Validate, Calculate) in fields)
                         {
-                            w.Write(field.Name);
-                            w.Write(field.Label);
-                            w.Write(field.Keystroke);
-                            w.Write(field.Format);
-                            w.Write(field.Validate);
-                            w.Write(field.Calculate);
+                            w.Write(Name);
+                            w.Write(Label);
+                            w.Write(Keystroke);
+                            w.Write(Format);
+                            w.Write(Validate);
+                            w.Write(Calculate);
                         }
                     };
                 }

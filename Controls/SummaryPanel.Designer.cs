@@ -70,11 +70,11 @@
             //
             panelBody.Controls.Add(richText);
             panelBody.Dock = DockStyle.Fill;
-            panelBody.Location = new Point(0, 36);
+            panelBody.Location = new Point(0, 66);
             panelBody.Name = "panelBody";
             panelBody.Padding = new Padding(12, 6, 4, 4);
             panelBody.Size = new Size(240, 156);
-            panelBody.TabIndex = 1;
+            panelBody.TabIndex = 2;
             //
             // richText
             //
@@ -96,14 +96,14 @@
             // toolStripActions
             //
             toolStripActions.AutoSize = false;
-            toolStripActions.Dock = DockStyle.Bottom;
+            toolStripActions.Dock = DockStyle.Top;
             toolStripActions.GripStyle = ToolStripGripStyle.Hidden;
             toolStripActions.Items.AddRange(new ToolStripItem[] { btnCopy, btnSave, btnClear });
-            toolStripActions.Location = new Point(0, 192);
+            toolStripActions.Location = new Point(0, 36);
             toolStripActions.Name = "toolStripActions";
             toolStripActions.Padding = new Padding(8, 0, 4, 0);
             toolStripActions.Size = new Size(240, 30);
-            toolStripActions.TabIndex = 2;
+            toolStripActions.TabIndex = 1;
             //
             // btnCopy
             //
@@ -188,9 +188,9 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(panelBody);
-            Controls.Add(toolStripActions);
             Controls.Add(panelAsk);
             Controls.Add(linkDisclaimer);
+            Controls.Add(toolStripActions);
             Controls.Add(toolStripTop);
             Name = "SummaryPanel";
             Size = new Size(240, 300);

@@ -1084,8 +1084,6 @@ signatures.dat n’est lisible qu’avec le compte utilisateur Windows actuel su
   <data name="Die Zusammenfassung wurde gespeichert." xml:space="preserve"><value>Le résumé a été enregistré.</value></data>
   <data name="Frage senden (Eingabe)" xml:space="preserve"><value>Envoyer la question (Entrée)</value></data>
   <data name="Frage zum Dokument…" xml:space="preserve"><value>Question sur le document…</value></data>
-  <data name="S. {0}" xml:space="preserve"><value>p. {0}</value></data>
-  <data name="S. {0}–{1}" xml:space="preserve"><value>p. {0}–{1}</value></data>
   <data name="Speichern…" xml:space="preserve"><value>Enregistrer…</value></data>
   <data name="Word-Datei (*.rtf)|*.rtf" xml:space="preserve"><value>Fichier Word (*.rtf)|*.rtf</value></data>
   <data name="Google hat die Anfrage abgelehnt ({0})." xml:space="preserve"><value>Google a refusé la requête ({0}).</value></data>
@@ -1103,9 +1101,9 @@ signatures.dat n’est lisible qu’avec le compte utilisateur Windows actuel su
   <data name="Neu beginnen" xml:space="preserve"><value>Recommencer</value></data>
   <data name="Nicht mehr fragen" xml:space="preserve"><value>Ne plus demander</value></data>
   <data name="Nutzungsbedingungen" xml:space="preserve"><value>Conditions d’utilisation</value></data>
-  <data name="Schlüssel kostenlos bei Google AI Studio erstellen" xml:space="preserve"><value>Créer une clé gratuite dans Google AI Studio</value></data>
+  <data name="Schlüssel kostenlos mit Google AI Studio erstellen" xml:space="preserve"><value>Créer une clé gratuite avec Google AI Studio</value></data>
   <data name="Text an Google senden?" xml:space="preserve"><value>Envoyer le texte à Google ?</value></data>
-  <data name="Sicherheitsabfrage vor dem Senden an Google an&amp;zeigen" xml:space="preserve"><value>&amp;Afficher une confirmation avant l’envoi à Google</value></data>
+  <data name="Warnhinweis vor dem Senden an Google an&amp;zeigen" xml:space="preserve"><value>&amp;Afficher une confirmation avant l’envoi à Google</value></data>
   <data name="Zahlen, Daten, Fristen" xml:space="preserve"><value>Chiffres, dates, délais</value></data>
   <data name="Zusammenfassung" xml:space="preserve"><value>Résumé</value></data>
   <data name="Zusammenfassung erstellen" xml:space="preserve"><value>Créer le résumé</value></data>

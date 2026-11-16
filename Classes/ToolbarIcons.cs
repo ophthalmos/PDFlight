@@ -80,6 +80,7 @@ internal static class ToolbarIcons
     public const char DictionaryCloud = '\uEBC3'; // Buch mit Wolke: KI-Zusammenfassung in der Seitenleiste
     public const char Send = '\uE724';         // KI-Zusammenfassung: Frage senden
     public const char Refresh = '\uE72C';      // KI-Zusammenfassung: neu beginnen
+    public const char Play = '\uE768';         // KI-Zusammenfassung: erstellen (w\u00E4hrend der Anfrage Cancel)
 
     public const char Highlight = '';    // Textmarker: Kontextmenü „Hervorheben“ der Anzeige
 

@@ -173,7 +173,7 @@ public partial class MainForm : Form
     {
         BeginInvoke(RestorePageFocus); // nach dem Schließen eines Dialogs stellt Windows den Fokus erst danach wieder her
         if (startPageShown) { FillStartPage(); } // andere Instanzen können inzwischen Dateien geöffnet, Dateien sich geändert haben
-        if (currentFile == null) { return; }
+        if (currentFile == null || deleteInProgress) { return; } // beim Löschen verschwindet die Datei absichtlich
         try
         {
             // Datei wurde extern verschoben, umbenannt oder gelöscht → fragen, wie es weitergehen soll
@@ -1328,32 +1328,63 @@ public partial class MainForm : Form
         }
     }
 
+    private bool deleteInProgress;
+
+    /// <summary>Die angezeigte Datei in den Papierkorb. Fehlerbericht 16.11.2026 (NullReferenceException): Die Datei war in einer anderen
+    /// Instanz schon gelöscht. Beim Schließen der Rückfrage wurde das Fenster wieder aktiv, <see cref="MainForm_Activated"/> fand die Datei
+    /// nicht mehr, meldete sie als verschwunden und löste den Dateibezug – danach griff das Löschen ins Leere. Jetzt: Während des Löschens
+    /// meldet das Aktivieren nichts, eine schon fehlende Datei gilt als gelöscht (ohne Rückfrage, die Nachbardatei rückt nach), nur ein
+    /// Aufruf zur Zeit, und nach der Rückfrage muss noch dieselbe Datei angezeigt sein.</summary>
     private void DeleteCurrent()
     {
-        if (currentFile == null) { return; }
-        if (settings.ConfirmDelete)
+        if (currentFile is not { } file || deleteInProgress) { return; }
+        deleteInProgress = true;
+        try { DeleteFile(file); }
+        finally { deleteInProgress = false; }
+    }
+
+    private bool IsShown(FileInfo file) => currentFile != null && string.Equals(currentFile.FullName, file.FullName, StringComparison.OrdinalIgnoreCase);
+
+    private void DeleteFile(FileInfo file)
+    {
+        if (settings.ConfirmDelete && File.Exists(file.FullName)) // schon fort: nichts zu fragen
         {
             var alwaysAsk = true;
-            if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("In den Papierkorb verschieben?"), currentFile.Name, Lng.T("Immer fragen"), ref alwaysAsk)) { return; }
+            if (!TaskDlg.ConfirmTaskDlg(Handle, Lng.T("In den Papierkorb verschieben?"), file.Name, Lng.T("Immer fragen"), ref alwaysAsk)) { return; }
             if (!alwaysAsk)
             {
                 settings.ConfirmDelete = false; // wieder aktivierbar im Einstellungsdialog ("Vor dem Verschieben in den Papierkorb nachfragen")
                 settings.ReloadSharedLists();
                 settings.Save();
             }
+            if (!IsShown(file)) { return; } // während der Rückfrage wurde die Anzeige geschlossen oder gewechselt
         }
-        var files = FileUtil.GetPdfFilesInFolder(currentFile.DirectoryName!);
-        var index = files.FindIndex(f => string.Equals(f, currentFile.FullName, StringComparison.OrdinalIgnoreCase));
-        var deletedPath = currentFile.FullName;
-        try { ShellUtil.MoveToRecycleBin(deletedPath, Handle); }
-        catch (OperationCanceledException) { return; } // im Systemdialog abgebrochen
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        var deletedPath = file.FullName;
+        var files = FileUtil.GetPdfFilesInFolder(file.DirectoryName!);
+        var index = files.FindIndex(f => string.Equals(f, deletedPath, StringComparison.OrdinalIgnoreCase));
+        if (!File.Exists(deletedPath)) // anderswo gelöscht oder verschoben: gilt als gelöscht, kein Rückgängig (nicht von hier)
         {
-            TaskDlg.ErrTaskDlg(Handle, Lng.T("Löschen fehlgeschlagen."), ex);
-            return;
+            if (index < 0) // an ihrem Platz einreihen, damit wie beim Löschen die Nachbardatei nachrückt
+            {
+                index = files.FindIndex(f => ShellInfo.CompareNatural(Path.GetFileName(f), file.Name) > 0);
+                if (index < 0) { index = files.Count; }
+                files.Insert(index, deletedPath);
+            }
+            SetUndoAction(null);
         }
-        // Rückgängig nur anbieten, wenn das Laufwerk einen Papierkorb hat; die teure Suche nach dem Eintrag läuft erst bei Strg+Z
-        SetUndoAction(ShellUtil.HasRecycleBin(deletedPath) ? new UndoAction(UndoKind.Delete, Lng.T("In den Papierkorb verschieben"), deletedPath, string.Empty) : null);
+        else
+        {
+            try { ShellUtil.MoveToRecycleBin(deletedPath, Handle); }
+            catch (OperationCanceledException) { return; } // im Systemdialog abgebrochen
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                TaskDlg.ErrTaskDlg(Handle, Lng.T("Löschen fehlgeschlagen."), ex);
+                return;
+            }
+            // Rückgängig nur anbieten, wenn das Laufwerk einen Papierkorb hat; die teure Suche nach dem Eintrag läuft erst bei Strg+Z
+            SetUndoAction(ShellUtil.HasRecycleBin(deletedPath) ? new UndoAction(UndoKind.Delete, Lng.T("In den Papierkorb verschieben"), deletedPath, string.Empty) : null);
+        }
+        if (!IsShown(file)) { return; } // die Anzeige hat inzwischen gewechselt – nichts nachrücken lassen
         if (settings.OpenNextAfterDelete) { LoadNextAfterRemoval(files, index); }
         else
         {
@@ -2274,6 +2305,7 @@ public partial class MainForm : Form
         if (ShownDocument is not { } shown || currentFile?.FullName != source) { return false; } // nach dem Übernehmen ein neuer Stand
         await EndFormInputAsync();
         var withoutPdfA = documentDirty && ShownPdfALevel != null; // geänderte PDF/A-Datei: die Kopie ohne ungeprüfte Kennzeichnung (s. AskPdfASave)
+        var summaryBefore = SummaryKey();
         try
         {
             // offene Änderungen aus PDFium (eine Verschlüsselung bleibt erhalten), sonst die Datei unverändert
@@ -2287,6 +2319,7 @@ public partial class MainForm : Form
             return false;
         }
         if (passwords.TryGetValue(source, out var password)) { passwords[target] = password; } // die Kopie hat dasselbe Kennwort – nicht erneut fragen
+        CarrySummary(summaryBefore, target, keepOld: true); // dieselbe Unterhaltung auch für die Kopie
         var page = ClampedCurrentPage();
         documentDirty = false; // die Änderungen stehen jetzt in der neuen Datei
         LoadPdf(target, page, addToRecent: true);
@@ -2602,7 +2635,7 @@ public partial class MainForm : Form
     // je Datei, Änderungsstand und Art gemerkt.
 
     private const int SummaryMaxChars = 300_000; // gut 75 000 Token: bleibt im Minutenkontingent des kostenlosen Angebots; längere Dokumente werden gekürzt
-    private bool aiAvailable = File.Exists(GeminiKeyStore.FilePath); // ein Schlüssel ist eingetragen (gelesen wird er erst beim Senden)
+    private bool aiAvailable = GeminiKeyStore.HasKey; // ein lesbarer Schlüssel ist eingetragen (eine Datei von einem anderen Konto oder PC zählt nicht)
     private CancellationTokenSource? summaryRun;
     private string? aiAutoModel; // das automatisch gewählte Modell (s. GeminiClient.PreferredModelAsync), neu bestimmt nach einem neuen Schlüssel
     private readonly Dictionary<(string File, long Stamp), SummaryThread> summaries = [];
@@ -2626,13 +2659,14 @@ public partial class MainForm : Form
     private void ApplyAiSettings(SettingsForm dialog)
     {
         settings.AiConfirmSend = dialog.AiConfirmSend;
-        if (dialog.AiKey != GeminiKeyStore.Load())
+        // auch ein leeres Feld bei vorhandener, aber unlesbarer Datei (anderes Konto, anderer PC) – sonst bliebe sie für immer liegen
+        if (dialog.AiKey != GeminiKeyStore.Load() || dialog.AiKey.Length == 0 && File.Exists(GeminiKeyStore.FilePath))
         {
             aiAutoModel = null; // ein anderer Schlüssel kann andere Modelle haben
             try { GeminiKeyStore.Save(dialog.AiKey); }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { TaskDlg.ErrTaskDlg(Handle, ex); }
         }
-        aiAvailable = File.Exists(GeminiKeyStore.FilePath);
+        aiAvailable = GeminiKeyStore.HasKey;
         if (!aiAvailable && sidebarView == SidebarView.Summary) { CancelSummary(); ShowSidebarPanel(SidebarView.Thumbnails); }
         UpdateAnnotationRail();
         if (sidebarView == SidebarView.Summary) { UpdateSummaryView(); }
@@ -2662,6 +2696,29 @@ public partial class MainForm : Form
         foreach (var key in old) { summaries.Remove(key); }
     }
 
+    /// <summary>Speichern des angezeigten Stands (Strg+S, „Speichern unter…“): Anmerkungen, Formularwerte und Drehungen ändern den Text nicht,
+    /// die Unterhaltung gilt also weiter – sonst verschwand sie nach jedem Speichern, weil sich die Änderungszeit der Datei ändert.
+    /// <paramref name="before"/>: Schlüssel vor dem Speichern; nur genau diese Unterhaltung zieht mit (eine ältere gehörte zu einem
+    /// anderen Text). <paramref name="keepOld"/>: „Speichern unter…“ – die bisherige Datei behält ihre.</summary>
+    private void CarrySummary((string File, long Stamp)? before, string newPath, bool keepOld = false)
+    {
+        if (before is not { } key || !summaries.TryGetValue(key, out var thread)) { return; }
+        long stamp;
+        try { stamp = File.GetLastWriteTimeUtc(newPath).Ticks; }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return; }
+        if (!keepOld) { summaries.Remove(key); }
+        summaries[(newPath, stamp)] = thread;
+        if (summaryConfirmed.Contains(key.File)) { summaryConfirmed.Add(newPath); }
+    }
+
+    /// <summary>Merkt die Unterhaltung zu einer Datei; ältere Stände derselben Datei fallen dabei weg (sie hielten je bis zu
+    /// <see cref="SummaryMaxChars"/> Zeichen Text bis zum Programmende im Speicher).</summary>
+    private void StoreSummary((string File, long Stamp) key, SummaryThread thread)
+    {
+        foreach (var old in summaries.Keys.Where(k => k != key && string.Equals(k.File, key.File, StringComparison.OrdinalIgnoreCase)).ToList()) { summaries.Remove(old); }
+        summaries[key] = thread;
+    }
+
     /// <summary>Zeigt die Unterhaltung zur angezeigten Datei oder den Hinweis, was „Erstellen“ und das Fragefeld tun.</summary>
     private void UpdateSummaryView()
     {
@@ -2681,6 +2738,7 @@ public partial class MainForm : Form
         var footer = thread.PagesRead < thread.PageCount
             ? string.Format(Lng.T("Erstellt mit {0} aus den Seiten 1–{1} von {2} – längere Dokumente werden gekürzt."), thread.Model, thread.PagesRead, thread.PageCount)
             : string.Format(Lng.T("Erstellt mit {0}."), thread.Model);
+        summaryPanel.PageLinks = thread.PageCount != 1; // einseitig: keine Seitenangaben
         summaryPanel.ShowThread([.. thread.Turns.Select(t => new SummaryTurnView(t.Heading, t.Answer))], thread.FollowUps, footer, scrollTo);
     }
 
@@ -2785,8 +2843,9 @@ public partial class MainForm : Form
                     return;
                 }
                 (thread.Text, thread.PagesRead, thread.PageCount) = (text, pagesRead, doc.PageCount);
-                summaries[cacheKey] = thread;
+                StoreSummary(cacheKey, thread);
             }
+            summaryPanel.PageLinks = thread.PageCount != 1; // gilt für die entstehende Antwort
             summaryPanel.ShowStatus(Lng.T("Gemini antwortet…"), busy: true, heading: heading);
             var documentText = "Document text:\n\n" + thread.Text + "\n---\n\n";
             List<(bool User, string Text)> contents = [];
@@ -2806,13 +2865,10 @@ public partial class MainForm : Form
             var waiting = Lng.T("Gemini antwortet…");
             var watch = Stopwatch.StartNew();
             var answering = false;
-            var shownAt = -1000L;
-            void Progress(string text)
+            void Progress(string text) // GeminiClient meldet höchstens alle 0,4 s
             {
                 if (summaryRun != run) { return; }
                 answering = true;
-                if (watch.ElapsedMilliseconds - shownAt < 400) { return; } // die ganze Ansicht neu zu setzen kostet – höchstens 2–3-mal je Sekunde
-                shownAt = watch.ElapsedMilliseconds;
                 summaryPanel.ShowPending(heading, SummaryPresets.Split(text).Answer);
             }
             async Task CountSecondsAsync()
@@ -2837,6 +2893,9 @@ public partial class MainForm : Form
                 if (await GeminiClient.FallbackModelAsync(key, model, run.Token) is not { } fallback || summaryRun != run) { throw; }
                 model = fallback;
                 response = await GeminiClient.GenerateAsync(key, model, system, contents, Progress, run.Token);
+                // automatische Wahl: das Ausweichmodell hat geantwortet – die nächste Frage soll nicht erst wieder auf das alte warten
+                // (bei einem hängenden Modell bis zu zwei Minuten)
+                if (settings.AiModel.Trim().Length == 0) { aiAutoModel = model; }
             }
             if (summaryRun != run) { return; }
             var (answer, followUps) = SummaryPresets.Split(response);
@@ -2848,6 +2907,11 @@ public partial class MainForm : Form
         }
         catch (GeminiException ex) { if (summaryRun == run) { summaryRun = null; summaryPanel.ShowStatus(ex.Message, error: true); } }
         catch (OperationCanceledException) { } // Abbrechen, andere Datei: dort ist die Anzeige schon gesetzt
+        catch (Exception ex) // etwa ein Absturz des Hilfsprogramms beim Lesen des Texts – die Anfrage läuft ohne Beobachter, also hier melden
+        {
+            Debug.WriteLine(ex);
+            if (summaryRun == run) { summaryRun = null; summaryPanel.ShowStatus(string.Format(Lng.T("Die Anfrage ist fehlgeschlagen: {0}"), ex.Message), error: true); }
+        }
         finally
         {
             if (summaryRun == run) { summaryRun = null; UpdateSummaryView(); }
@@ -4024,9 +4088,11 @@ public partial class MainForm : Form
         }
         if (doc != document || currentFile == null) { return false; } // inzwischen wird eine andere Datei angezeigt
         var path = currentFile.FullName;
+        var summaryBefore = SummaryKey(); // die KI-Unterhaltung gilt nach dem Speichern weiter (s. CarrySummary)
         if (withoutPdfA)
         {
             if (!RunPdfEdit(() => PdfEditService.WriteWithoutPdfA(path, bytes), actionName)) { return false; }
+            CarrySummary(summaryBefore, path); // vor der Neuanzeige, die die Unterhaltung unter dem neuen Stand sucht
             // PDFium hält den Stand mit den alten XMP-Daten – ohne Neuanzeige käme die Kennzeichnung beim nächsten Speichern zurück
             currentPdfStatus = currentPdfStatus! with { PdfALevel = null }; // AskPdfASave setzt einen Status voraus
             byte[] saved;
@@ -4039,6 +4105,7 @@ public partial class MainForm : Form
             if (!RunPdfEdit(() => File.WriteAllBytes(path, bytes), actionName, allowEncrypted: true)) { return false; }
             doc.Bytes = bytes; // für das Wiederherstellen einer extern gelöschten Datei
         }
+        CarrySummary(summaryBefore, path);
         documentDirty = false;
         ClearViewHistory(); // gespeichert: ab jetzt nimmt Rückgängig die ganze Speicherung zurück (Sicherung von RunPdfEdit)
         UpdateUndoMenu();
