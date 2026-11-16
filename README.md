@@ -19,6 +19,10 @@ document as bytes; if a malformed PDF crashes it, PDFlight simply offers to relo
 PDF forms (calculations, date checks) run in a second, equally locked-down helper
 (`pdfscript.exe`) that sees only the script and the field values, never the document.
 
+Optionally, PDFlight can summarize a document and answer questions about it in the sidebar using
+Google Gemini. This needs your own API key; only the document's text is sent to Google, and only
+when you ask for it.
+
 PDFlight is open source (AGPL 3.0), runs on Windows 10 and 11 and speaks German, English,
 French and Spanish.
 
